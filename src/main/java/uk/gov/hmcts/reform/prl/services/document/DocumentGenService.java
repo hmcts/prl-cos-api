@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -80,11 +81,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -243,12 +242,8 @@ public class DocumentGenService {
     protected String solicitorC7FinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
-    @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
-    protected String citizenC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
     protected String solicitorC1ADraftFilename;
-    @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
-    protected String citizenC1ADraftFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_final_template}")
     protected String solicitorC1AFinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
@@ -277,16 +272,6 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
-
-    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_filename}")
-    protected String solicitorC1ADraftWelshFilename;
-    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_filename}")
-    protected String solicitorC1AFinalWelshFilename;
-
-    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_template}")
-    protected String solicitorC1ADraftWelshTemplate;
-    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_template}")
-    protected String solicitorC1AFinalWelshTemplate;
 
     private final Time dateTime;
 
@@ -781,9 +766,6 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 fileName = docC7DraftFilename;
                 break;
-            case DOCUMENT_C1A_DRAFT_HINT:
-                fileName = solicitorC1ADraftFilename;
-                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
                 break;
@@ -810,9 +792,6 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
-                break;
-            case CITIZEN_C1A_DRAFT_DOCUMENT:
-                fileName = citizenC1ADraftFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -896,9 +875,6 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 template = docC7DraftTemplate;
                 break;
-            case DOCUMENT_C1A_DRAFT_HINT:
-                template = solicitorC1ADraftTemplate;
-                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
                 break;
@@ -928,9 +904,6 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
-                break;
-            case CITIZEN_C1A_DRAFT_DOCUMENT:
-                template = citizenC1ADraftTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
@@ -1361,35 +1334,33 @@ public class DocumentGenService {
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
 
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
+            ServedParties servedParties = ServedParties.builder()
+                .partyId(documentRequest.getPartyId())
+                .partyName(documentRequest.getPartyName())
+                .build();
 
             //move all documents to citizen quarantine
-            List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
-                .map(document -> getCitizenQuarantineDocument(document,
-                                                              documentRequest,
-                                                              category,
-                                                              userDetails))
-                .toList();
+            for (Document document : documentRequest.getDocuments()) {
+                QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document,
+                                                                                     documentRequest,
+                                                                                     category,
+                                                                                     servedParties,
+                                                                                     userDetails);
+                //if marked as confidential/restricted
+                if (Yes.equals(documentRequest.getIsConfidential())
+                    || Yes.equals(documentRequest.getIsRestricted())) {
+                    //confidential/restricted - move documents to quarantine
+                    caseData = moveCitizenDocumentsToQuarantineTab(quarantineLegalDoc,
+                                                                   caseData,
+                                                                   caseDataUpdated);
 
-            //if marked as confidential/restricted
-            if (Yes.equals(documentRequest.getIsConfidential())
-                || Yes.equals(documentRequest.getIsRestricted())) {
-                //create WA task
-                manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
-                //confidential/restricted - move documents to quarantine
-                caseData = moveCitizenDocumentsToQuarantineTab(
-                    quarantineLegalDocs,
-                    caseData,
-                    caseDataUpdated
-                );
-
-            } else {
-                //non-confidential, move to respective category & case documents tab
-                caseData = moveCitizenDocumentsToCaseDocumentsTab(
-                    quarantineLegalDocs,
-                    caseData,
-                    caseDataUpdated,
-                    userDetails
-                );
+                } else {
+                    //non-confidential, move to respective category & case documents tab
+                    caseData = moveCitizenDocumentsToCaseDocumentsTab(quarantineLegalDoc,
+                                                                      caseData,
+                                                                      caseDataUpdated,
+                                                                      userDetails);
+                }
             }
 
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
@@ -1398,44 +1369,38 @@ public class DocumentGenService {
         return null;
     }
 
-    private CaseData moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+    private CaseData moveCitizenDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
                                                          CaseData caseData,
                                                          Map<String, Object> caseDataUpdated) {
-        for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
-            //invoke common manage docs
-            manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,
-                                                                caseData,
-                                                                caseDataUpdated,
-                                                                CITIZEN);
-            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        }
-        return caseData;
+        //invoke common manage docs
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, CITIZEN);
+
+        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
     }
 
-    private CaseData moveCitizenDocumentsToCaseDocumentsTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+    private CaseData moveCitizenDocumentsToCaseDocumentsTab(QuarantineLegalDoc quarantineLegalDoc,
                                                             CaseData caseData,
                                                             Map<String, Object> caseDataUpdated,
                                                             UserDetails userDetails) {
-        for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
-            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                .isConfidential(null)
-                .isRestricted(null)
-                .restrictedDetails(null)
-                .build();
-            //invoke common manage docs
-            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
-                                                                          userDetails,
-                                                                          caseData,
-                                                                          caseDataUpdated,
-                                                                          CITIZEN);
-            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        }
-        return caseData;
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .isConfidential(null)
+            .isRestricted(null)
+            .restrictedDetails(null)
+            .build();
+        //invoke common manage docs
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
+                                                                      userDetails,
+                                                                      caseData,
+                                                                      caseDataUpdated,
+                                                                      CITIZEN);
+
+        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
                                                                   DocumentRequest documentRequest,
                                                                   DocumentCategory category,
+                                                                  ServedParties servedParties,
                                                                   UserDetails userDetails) {
         return QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(document.toBuilder()
@@ -1448,6 +1413,7 @@ public class DocumentGenService {
             .isConfidential(documentRequest.getIsConfidential())
             .isRestricted(documentRequest.getIsRestricted())
             .restrictedDetails(documentRequest.getRestrictDocumentDetails())
+            .partyDetails(servedParties)
             .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
             .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
             .uploaderRole(CITIZEN)
