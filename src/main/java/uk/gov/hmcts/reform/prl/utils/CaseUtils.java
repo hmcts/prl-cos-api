@@ -374,6 +374,8 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
             return COURT_STAFF;
+        } else if (roles.contains(CAFCASS)) {
+            return CAFCASS;
         }
 
         return CAFCASS;

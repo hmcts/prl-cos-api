@@ -21,7 +21,11 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -31,6 +35,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -50,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -58,16 +65,19 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_CATEGORY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -86,6 +96,8 @@ public class ManageDocumentsService {
     private final CaseDocumentClient caseDocumentClient;
     private final SystemUserService systemUserService;
     private final CoreCaseDataService coreCaseDataService;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final RoleAssignmentApi roleAssignmentApi;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -161,10 +173,17 @@ public class ManageDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(userDetails.getSurname().get())
+            .forename(userDetails.getForename())
+            .roles(getLoggedInUserType(authorization))
+            .build();
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            userDetails
+            updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
@@ -501,7 +520,7 @@ public class ManageDocumentsService {
     }
 
     public boolean checkIfUserIsCourtStaff(UserDetails userDetails) {
-        return userDetails.getRoles().stream().anyMatch(ROLES::contains);
+        return userDetails.getRoles().stream().anyMatch(COURT_STAFF::contains);
     }
 
     public boolean isCourtSelectedInDocumentParty(CallbackRequest callbackRequest) {
@@ -691,5 +710,67 @@ public class ManageDocumentsService {
             "internal-update-all-tabs",
             caseDataUpdated
         );
+    }
+
+    public List<String> getLoggedInUserType(String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        List<String> loggedInUserType = new ArrayList<String>();
+        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+            //This would check for roles from AM for Judge/Legal advisor/Court admin
+            //if it doesn't find then it will check for idam roles for rest of the users
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorisation,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                .stream()
+                .map(role -> role.getRoleName()).collect(
+                    Collectors.toList());
+            if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(JUDGE_ROLE);
+            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(LEGAL_ADVISER_ROLE);
+            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(COURT_ADMIN_ROLE);
+            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
+                loggedInUserType.add(UserRoles.CAFCASS.name());
+            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType.add(LEGAL_PROFESSIONAL);
+                loggedInUserType.add(SOLICITOR_ROLE);
+            } else if (roles.contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType.add(UserRoles.CITIZEN.name());
+            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+                loggedInUserType.add(BULK_SCAN);
+            }
+        } else {
+
+            if (roles.contains(Roles.JUDGE.getValue())) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(JUDGE_ROLE);
+            } else if (roles.contains(Roles.LEGAL_ADVISER.getValue())) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(LEGAL_ADVISER_ROLE);
+            } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
+                loggedInUserType.add(COURT_STAFF);
+                loggedInUserType.add(COURT_ADMIN_ROLE);
+            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType.add(LEGAL_PROFESSIONAL);
+                loggedInUserType.add(SOLICITOR_ROLE);
+            } else if (roles.contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType.add(UserRoles.CITIZEN.name());
+            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+                loggedInUserType.add(BULK_SCAN);
+            } else {
+                loggedInUserType.add(UserRoles.CAFCASS.name());
+            }
+        }
+
+        return loggedInUserType;
     }
 }
