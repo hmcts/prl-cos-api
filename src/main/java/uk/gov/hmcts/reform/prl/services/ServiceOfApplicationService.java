@@ -1261,7 +1261,7 @@ public class ServiceOfApplicationService {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             log.info("inside sendEmailToCitizen  {}" + dynamicData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-            dynamicData.put(DASH_BOARD_LINK,citizenUrl);
+            dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 "anshika.nigam1@hmcts.net",
