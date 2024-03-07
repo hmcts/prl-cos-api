@@ -92,9 +92,6 @@ public class CaseApplicationResponseService {
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {
 
-                log.info("response is {}", currentRespondent.get().getValue().getResponse()
-                    .getCurrentOrPreviousProceedings().getProceedingsList());
-
                 responseDocs = checkPreviousProceedings(responseDocs, currentRespondent);
 
                 if (isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
@@ -149,21 +146,19 @@ public class CaseApplicationResponseService {
             && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList())) {
 
             List<Proceedings> proceedingsList = new ArrayList<>();
-            proceedingsList.add(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings()
-                .getProceedingsList().stream().iterator().next().getValue());
-
-            List<Element<OtherProceedingDetails>> proceedingsDetailsElementList = new ArrayList<>();
-            for (Proceedings proceedings : proceedingsList) {
-                if (null != proceedings.getProceedingDetails()) {
-                    proceedingsDetailsElementList = proceedings.getProceedingDetails();
-                }
+            for (Element<Proceedings> elementProceedings : currentRespondent.get()
+                .getValue().getResponse().getCurrentOrPreviousProceedings()
+                .getProceedingsList()) {
+                proceedingsList.add(elementProceedings.getValue());
             }
 
-            if (isNotEmpty(proceedingsDetailsElementList)) {
-                for (Element<OtherProceedingDetails> proceedingsDetailsList : proceedingsDetailsElementList) {
-                    if (isNotEmpty(proceedingsDetailsList.getValue())
-                        && null != proceedingsDetailsList.getValue().getOrderDocument()) {
-                        responseDocs.add(element(proceedingsDetailsList.getValue().getOrderDocument()));
+            for (Proceedings proceedings : proceedingsList) {
+                if (null != proceedings.getProceedingDetails()) {
+                    for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
+                        if (isNotEmpty(otherProceedingDetailsElement.getValue())
+                            && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
+                            responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
+                        }
                     }
                 }
             }
