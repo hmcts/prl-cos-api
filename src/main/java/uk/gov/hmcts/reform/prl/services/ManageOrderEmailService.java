@@ -449,7 +449,7 @@ public class ManageOrderEmailService {
         } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                 SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
+                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_ADMIN_BAILIFF
             );
         }
     }
