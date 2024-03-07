@@ -1262,7 +1262,7 @@ public class ServiceOfApplicationService {
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
-                caseData.getApplicants().get(0).getValue().getEmail(),
+                "anshika.nigam1@hmcts.net",
                 docs,
                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
