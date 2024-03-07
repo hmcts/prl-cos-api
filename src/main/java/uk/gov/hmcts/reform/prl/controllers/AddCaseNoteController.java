@@ -31,19 +31,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AddCaseNoteController {
-
-    @Autowired
     private final AddCaseNoteService addCaseNoteService;
-
-    @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final UserService userService;
-
-    @Autowired
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/submit-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

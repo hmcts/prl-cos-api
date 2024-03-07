@@ -16,4 +16,6 @@ public class CitizenFlags {
     private final YesOrNo isAllegationOfHarmViewed;
     private final YesOrNo isAllDocumentsViewed;
     private final YesOrNo isResponseInitiated;
+    private YesOrNo isApplicationToBeServed;
+    private YesOrNo isStatementOfServiceProvided;
 }

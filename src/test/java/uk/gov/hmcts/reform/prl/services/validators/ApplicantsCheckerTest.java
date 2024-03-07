@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -149,13 +150,82 @@ public class ApplicantsCheckerTest {
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .representativeFirstName("test")
             .representativeLastName("test")
-            .solicitorEmail("test@test.com").build();
+            .solicitorEmail("test@test.com")
+            .solicitorAddress(Address.builder()
+                                  .addressLine1("address lin1")
+                                  .postCode("ADVWE11").build()).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantWithOrgCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .solicitorEmail("test@test.com")
+            .solicitorOrg(Organisation.builder().organisationID("testId").build())
+            .solicitorAddress(Address.builder()
+                                  .addressLine1("address lin1")
+                                  .postCode("ADVWE11").build()).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenSolicitorAddressIsEmptyThenHasMandatoryReturnsFalseForSolicitorFields() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .solicitorEmail("test@test.com")
+            .solicitorOrg(Organisation.builder().build())
+            .solicitorAddress(Address.builder()
+                                  .addressLine1("")
+                                  .postCode("").build()).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantPresentAndSolicitorCreateCaseThenHasMandatoryReturnsFalseForSolicitorFields() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .solicitorEmail("test@test.com")
+            .solicitorAddress(Address.builder()
+                                  .addressLine1("address lin1")
+                                  .postCode("ADVWE11").build()).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicantList)
             .build();
 
