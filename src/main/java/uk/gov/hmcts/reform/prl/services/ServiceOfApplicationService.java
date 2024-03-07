@@ -179,6 +179,7 @@ public class ServiceOfApplicationService {
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
     public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
+    public static final String APPLICANT_PACK = "applicantPack";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -2516,7 +2517,7 @@ public class ServiceOfApplicationService {
                 if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
                 } else {
-                    failedPacksMap.put("applicantPack", "Yes");
+                    failedPacksMap.put(APPLICANT_PACK, "Yes");
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else {
@@ -2525,7 +2526,7 @@ public class ServiceOfApplicationService {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, applicantEmailList,
                                                              unServedApplicantPack, bulkPrintDetails);
                     if (applicantEmailList.isEmpty()) {
-                        failedPacksMap.put("applicantPack", "Yes");
+                        failedPacksMap.put(APPLICANT_PACK, "Yes");
                     } else {
                         emailNotificationDetails.addAll(applicantEmailList);
                     }
@@ -2784,7 +2785,7 @@ public class ServiceOfApplicationService {
         final ResponseEntity<SubmittedCallbackResponse> response;
         String confirmationHeader;
         String confirmationBody;
-        Map<String, String> failedPacksMap = new HashMap();
+        Map<String, String> failedPacksMap = new HashMap<>();
         caseData = sendNotificationsForUnServedPacks(
             caseData,
             authorisation,
@@ -2810,7 +2811,7 @@ public class ServiceOfApplicationService {
 
             );
         }
-        if (!Objects.equals(failedPacksMap.get("applicantPack"), "Yes")) {
+        if (!Objects.equals(failedPacksMap.get(APPLICANT_PACK), "Yes")) {
             caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
         }
         if (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
