@@ -1253,18 +1253,22 @@ public class ServiceOfApplicationService {
             && party.getValue().getUser().getIdamId() != null;
     }
 
-    private void sendEmailToCitizenApplicationServedConf(String authorization,
+    private void sendEmailToCitizenApplicationSendgrid(String authorization,
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
             log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             log.info("inside sendEmailToCitizen  {}" + dynamicData);
+            log.info("inside citizenUrl  {}" + citizenUrl);
+            log.info("inside caseData  {}" + caseData);
+            log.info("inside applicant  {}" + applicant);
+            log.info("inside caseData.getApplicants().get(0).getValue().getEmail()  {}" + caseData.getApplicants().get(0).getValue().getEmail());
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-            dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+            dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
-                "anshika.nigam1@hmcts.net",
+                caseData.getApplicants().get(0).getValue().getEmail(),
                 docs,
                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
@@ -2730,7 +2734,9 @@ public class ServiceOfApplicationService {
                     log.info("Access already enabled");
                     if (true) {
                         log.info("inside contact preference");
-                        sendEmailToCitizenApplicationServedConf(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
+                                           emailNotificationDetails, docs);
+                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
@@ -2746,6 +2752,8 @@ public class ServiceOfApplicationService {
                         combinedDocs.addAll(docs);
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                            emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
