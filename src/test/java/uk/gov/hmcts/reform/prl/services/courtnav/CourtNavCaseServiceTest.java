@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -45,6 +47,12 @@ import static org.mockito.Mockito.when;
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
+    private static final String systemUpdateUser = "system User";
+    private final String jurisdiction = "PRIVATELAW";
+    private final String caseType = "PRLAPPS";
+    private final String eventName = "system-update";
+    private final String systemUserId = "systemUserID";
+    private final String eventToken = "eventToken";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
     private static final String randomAlphaNumeric = "Abc123EFGH";
@@ -82,6 +90,10 @@ public class CourtNavCaseServiceTest {
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
+    @Mock
+    SystemUserService systemUserService;
+
+
     private Map<String, Object> caseDataMap = new HashMap<>();
     private CaseData caseData;
     public MultipartFile file;
@@ -107,8 +119,9 @@ public class CourtNavCaseServiceTest {
             "FL401 case".getBytes()
         );
         startEventResponse = StartEventResponse.builder().caseDetails(caseDetails).build();
-        when(ccdCoreCaseDataService.startUpdate("", null, "", true)).thenReturn(
-            startEventResponse);
+        when(ccdCoreCaseDataService.startUpdate(Mockito.anyString(),Mockito.any(),Mockito.anyString(),Mockito.anyBoolean()))
+            .thenReturn(
+                startEventResponse);
         when(ccdCoreCaseDataService.startSubmitCreate(authToken, s2sToken, null, true)).thenReturn(
             startEventResponse);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -135,7 +148,7 @@ public class CourtNavCaseServiceTest {
         Document document = testDocument();
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken("eventToken")
+            .eventToken(eventToken)
             .event(Event.builder()
                        .id("courtnav-document-upload")
                        .build())
@@ -145,7 +158,7 @@ public class CourtNavCaseServiceTest {
         when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                      Mockito.any(), Mockito.any(), Mockito.any())
-        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token("eventToken").build());
+        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token(eventToken).build());
         when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                 Mockito.any())).thenReturn(uploadResponse);
         when(coreCaseDataApi.submitEventForCaseWorker(
@@ -216,13 +229,26 @@ public class CourtNavCaseServiceTest {
         when(documentGenService.generateDocuments(authToken, caseData)).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
-
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        when(systemUserService.getUserId(authToken)).thenReturn(systemUpdateUser);
+        when(ccdCoreCaseDataService.eventRequest(Mockito.any(),Mockito.anyString())).thenReturn(
+            EventRequestData
+                .builder()
+                .userId(systemUserId)
+                .jurisdictionId(jurisdiction)
+                .caseTypeId(caseType)
+                .eventId(eventName)
+                .build());
         courtNavCaseService.refreshTabs(authToken,stringObjectMap, 1234567891234567L);
         verify(documentGenService, times(1))
-            .generateDocuments(authToken,
-                               caseData);
+            .generateDocuments(Mockito.anyString(),
+                               Mockito.any(CaseData.class));
         verify(allTabService, times(1))
-            .updateAllTabsIncludingConfTab(caseData);
+            .updateAllTabsIncludingConfTabRefactored(Mockito.anyString(),
+                                                     Mockito.anyString(),
+                                                     Mockito.any(),
+                                                     Mockito.any(),
+                                                     Mockito.any(CaseData.class));
 
     }
 
