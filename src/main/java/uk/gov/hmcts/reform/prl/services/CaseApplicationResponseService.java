@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
@@ -89,17 +91,16 @@ public class CaseApplicationResponseService {
             );
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {
-                log.info("response is {}", currentRespondent.get().getValue().getResponse());
-            }
 
+                responseDocs = checkPreviousProceedings(responseDocs, currentRespondent);
 
-            if (isNotEmpty(currentRespondent.get().getValue().getResponse())
-                && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
-                && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
-                log.info(" Generating C1A Final document for respondent ");
-                Document c1aFinalDocument = generateFinalC1A(caseData, authorisation, dataMap);
-                responseDocs.add(element(c1aFinalDocument));
-                log.info("C1A Final document generated successfully for respondent ");
+                if (isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
+                    && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
+                    log.info(" Generating C1A Final document for respondent ");
+                    Document c1aFinalDocument = generateFinalC1A(caseData, authorisation, dataMap);
+                    responseDocs.add(element(c1aFinalDocument));
+                    log.info("C1A Final document generated successfully for respondent ");
+                }
             }
 
             String partyName = caseData.getRespondents()
@@ -122,6 +123,8 @@ public class CaseApplicationResponseService {
             );
         }
 
+        log.info("responseDocs are {}", responseDocs);
+
         caseData = addCitizenDocumentsToTheQuarantineList(caseData, responseDocs, userDetails);
 
         CaseDetails caseDetailsReturn;
@@ -134,6 +137,29 @@ public class CaseApplicationResponseService {
             null
         );
         return caseDetailsReturn;
+    }
+
+    private List<Element<Document>> checkPreviousProceedings(List<Element<Document>> responseDocs,
+                                                             Optional<Element<PartyDetails>> currentRespondent) {
+        if (currentRespondent.isPresent()
+            && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings())
+            && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList())) {
+            List<Proceedings> proceedingsList = new ArrayList<>();
+            proceedingsList.add(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings()
+                .getProceedingsList().stream().iterator().next().getValue());
+            for (Proceedings proceedings : proceedingsList) {
+                if (isNotEmpty(proceedings.getProceedingDetails())) {
+                    List<Element<OtherProceedingDetails>> proceedingsDetailsElementList = proceedings.getProceedingDetails();
+                    if (isNotEmpty(proceedingsDetailsElementList)) {
+                        List<OtherProceedingDetails> proceedingsDetailsList = new ArrayList<>();
+                        proceedingsDetailsList.add(proceedingsDetailsElementList.stream().iterator().next().getValue());
+                        responseDocs.add(element(proceedingsDetailsList.stream().iterator().next().getOrderDocument()));
+                    }
+                }
+            }
+        }
+
+        return responseDocs;
     }
 
     private CaseData addCitizenDocumentsToTheQuarantineList(CaseData caseData, List<Element<Document>> responseDocs,
