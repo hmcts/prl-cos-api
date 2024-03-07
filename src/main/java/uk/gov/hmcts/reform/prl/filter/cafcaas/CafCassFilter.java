@@ -1,22 +1,20 @@
 package uk.gov.hmcts.reform.prl.filter.cafcaas;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
-import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafCassFilter {
-
-    @Autowired
-    private PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {
         setNonNullEmptyElementList(cafCassResponse);
@@ -59,10 +57,9 @@ public class CafCassFilter {
      */
     public <T> List<Element<T>>  filterNonValueList(List<Element<T>> object) {
         if (object != null && !object.isEmpty()) {
-            return object.stream().filter(element -> element.getValue() != null).collect(
-                Collectors.toList());
+            return object.stream().filter(element -> element.getValue() != null).toList();
         }
 
-        return null;
+        return Collections.emptyList();
     }
 }

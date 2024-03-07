@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -59,10 +61,11 @@ public class CourtNavCaseService {
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final SystemUserService systemUserService;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
+    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("****************Creating courtnav case***************");
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()
@@ -119,7 +122,6 @@ public class CourtNavCaseService {
             );
             log.info("Document uploaded successfully through caseDocumentClient");
             CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
-                caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
                 tempCaseData,
@@ -158,7 +160,7 @@ public class CourtNavCaseService {
         return null;
     }
 
-    private CaseData updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
+    private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
                                                 CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
             ? tempCaseData.getApplicantCaseName() : COURTNAV;
@@ -211,10 +213,37 @@ public class CourtNavCaseService {
     }
 
     public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
-        data.put("id", String.valueOf(id));
-        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
-        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("**********************Tab refresh started**************************");
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+
+        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
+
+        log.info("Following case event will be triggered {}", caseEvent.getValue());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        StartEventResponse startEventResponse = coreCaseDataService.startUpdate(systemAuthorisation,
+                                                                                eventRequestData,
+                                                                                String.valueOf(id),
+                                                                                true
+        );
+
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
+        caseDataMap.put("id", String.valueOf(id));
+        caseDataMap.putAll(documentGenService.generateDocuments(
+            authToken,
+            objectMapper.convertValue(data, CaseData.class)
+        ));
+        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        CaseData latestCaseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+
+        allTabService.updateAllTabsIncludingConfTabRefactored(systemAuthorisation,
+                                                              String.valueOf(id),
+                                                              startEventResponse,
+                                                              eventRequestData,
+                                                              latestCaseData
+        );
         log.info("**********************Tab refresh and Courtnav case creation complete**************************");
     }
 }

@@ -17,48 +17,26 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftAnOrderController {
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DraftAnOrderService draftAnOrderService;
-
-    @Autowired
-    private HearingDataService hearingDataService;
-
-    private final HearingService hearingService;
-
-    private final ManageOrderService manageOrderService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final ObjectMapper objectMapper;
+    private final DraftAnOrderService draftAnOrderService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -81,7 +59,7 @@ public class DraftAnOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse populateHeader(
+    public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -104,6 +82,17 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {
@@ -126,13 +115,16 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-                draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+                draftAnOrderService.populateStandardDirectionOrderDefaultFields(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated
+                );
             } else {
-                List<String> errorList = new ArrayList<>();
-                errorList.add(
-                    "Please select at least one options from below");
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -187,49 +179,19 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = null;
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    : caseData.getManageOrders().getOrdersHearingDetails();
-                if (null != existingOrderHearingDetails) {
-                    caseDataUpdated.put(
-                        "solicitorOrdersHearingDetails",
-                        hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                          hearingDataPrePopulatedDynamicLists, caseData
-                        )
-                    );
-                }
-            }
-            if (existingOrderHearingDetails != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-            }
-            caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
                 authorisation,
-                callbackRequest,
-                hearings
-            ));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                callbackRequest
+            );
+            if (caseDataUpdated.containsKey("errorList")) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors((List<String>) caseDataUpdated.get("errorList"))
+                    .build();
+            } else {
+                //Draft an order
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

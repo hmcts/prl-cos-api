@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -28,15 +29,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class Fl401ListOnNoticeController extends AbstractCallbackController {
+    private final Fl401ListOnNoticeService fl401ListOnNoticeService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private Fl401ListOnNoticeService fl401ListOnNoticeService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    public Fl401ListOnNoticeController(ObjectMapper objectMapper, EventService eventPublisher,
+                                       Fl401ListOnNoticeService fl401ListOnNoticeService,
+                                       AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.fl401ListOnNoticeService = fl401ListOnNoticeService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/pre-populate-screen-and-hearing-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")

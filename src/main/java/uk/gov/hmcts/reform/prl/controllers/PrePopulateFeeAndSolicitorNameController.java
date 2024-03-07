@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -48,38 +49,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PrePopulateFeeAndSolicitorNameController {
-
-    @Autowired
-    private FeeService feeService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    CourtFinderService courtLocatorService;
-
-    @Autowired
-    SubmitAndPayChecker submitAndPayChecker;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DgsService dgsService;
-
-    @Autowired
-    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
-
-    @Autowired
-    private OrganisationService organisationService;
-
-    @Autowired
-    private DocumentLanguageService documentLanguageService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final FeeService feeService;
+    private final UserService userService;
+    private final CourtFinderService courtLocatorService;
+    private final SubmitAndPayChecker submitAndPayChecker;
+    private final DgsService dgsService;
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final OrganisationService organisationService;
+    private final DocumentLanguageService documentLanguageService;
+    private final AuthorisationService authorisationService;
 
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
@@ -90,8 +70,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Value("${southampton.court.email-address}")
     protected String southamptonCourtEmailAddress;
 
-    public static final String CURRENCY_SIGN_POUND = "£";
-
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
@@ -101,7 +79,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
@@ -165,7 +143,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,false)
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -180,7 +158,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,true)
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())

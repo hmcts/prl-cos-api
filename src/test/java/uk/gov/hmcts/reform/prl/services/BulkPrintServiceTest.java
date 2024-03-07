@@ -13,16 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkPrintServiceTest {
@@ -50,7 +52,7 @@ public class BulkPrintServiceTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
-    private LaunchDarklyClient launchDarklyClient;
+    private DocumentGenService documentGenService;
 
     private UUID uuid;
 
@@ -71,7 +73,7 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void sendLetterServiceWithValidInput() {
+    public void sendLetterServiceWithValidInput() throws IOException {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
@@ -110,11 +112,11 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(documentGenService.convertToPdf(authToken,docInfo)).thenReturn(docInfo);
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "binaryUrl"))
             .thenReturn(expectedResponse);
@@ -168,6 +170,10 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
+
+        //when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
+
+
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         assertThrows(
@@ -178,6 +184,35 @@ public class BulkPrintServiceTest {
                                         null,
                                         "test"
             ));
+
+    }
+
+    @Test
+    public void sendLetterServiceBulkPrintFails() {
+        Document finalDoc = Document.builder()
+                .documentUrl("finalDoc")
+                .documentBinaryUrl("finalDoc")
+                .documentHash("finalDoc")
+                .build();
+
+        Document coverSheet = Document.builder()
+                .documentUrl("coverSheet")
+                .documentBinaryUrl("coverSheet")
+                .documentHash("coverSheet")
+                .build();
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        when(documentGenService.convertToPdf(authToken,finalDoc)).thenThrow(new RuntimeException());
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        assertThrows(
+                Exception.class,
+                () -> bulkPrintService.send("123",
+                        authToken,
+                        "abc",
+                        documentList,
+                        "test"
+                ));
 
     }
 

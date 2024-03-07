@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 
 import java.util.ArrayList;
@@ -40,15 +41,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/respondent-solicitor")
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
+    private final C100RespondentSolicitorService respondentSolicitorService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
-    C100RespondentSolicitorService respondentSolicitorService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
+                                             C100RespondentSolicitorService respondentSolicitorService,
+                                             AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.respondentSolicitorService = respondentSolicitorService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")

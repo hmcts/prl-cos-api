@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.time.LocalDateTime;
 
@@ -56,4 +57,8 @@ public class BaseCaseData {
      */
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private  String applicantCaseName;
+
+    //FPET-567 - Added for hiding fields for SDO
+    @JsonProperty("isSdoSelected")
+    private YesOrNo isSdoSelected;
 }
