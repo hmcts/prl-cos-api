@@ -90,6 +90,7 @@ public class BundlingControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
     private CaseData c100CaseData;
+    private CaseData c100CaseDataWithCaseBundle;
 
     @Before
     public void setUp() {
@@ -191,6 +192,41 @@ public class BundlingControllerTest {
                     .documentUrl("Url").build()).build())
             .applicantName("ApplicantFirstNameAndLastName")
             .build();
+
+        List<Bundle> caseBundleList = new ArrayList<>();
+        caseBundleList.add(Bundle.builder().value(BundleDetails.builder()
+                                                  .id("caseBundleId-1")
+                                                  .title("Case Bundle Title 1")
+                                                  .stitchStatus("New")
+                                                  .stitchedDocument(DocumentLink.builder().build())
+                                                  .build())
+                           .build());
+
+        c100CaseDataWithCaseBundle = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(No)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .orderCollection(ElementUtils.wrapElements(orders))
+            .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
+            .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
+            .bundleInformation(BundlingInformation.builder()
+                                   .caseBundles(caseBundleList)
+                                   .bundleConfiguration("sample.yaml")
+                                   .historicalBundles(bundleList).build())
+            .miamDetails(MiamDetails.builder().miamCertificationDocumentUpload(Document.builder()
+                                                                                   .documentFileName("maimCertDoc1").documentUrl("Url").build())
+                             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2")
+                                                                   .documentUrl("Url").build()).build())
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
@@ -252,6 +288,41 @@ public class BundlingControllerTest {
         Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().get(0)).getValue().getTitle());
         Assert.assertEquals(1, bundlingInformation.getHistoricalBundles().size());
         Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(0)).getValue().getTitle());
+    }
+
+    @Test
+    public void testCreateBundleWithCaseDataWithCaseBundleIsNotNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseDataWithCaseBundle);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(bundleCreateResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(1, response.getData().size());
+        Assert.assertNotNull(response.getData().get("bundleInformation"));
+        BundlingInformation bundlingInformation = (BundlingInformation)response.getData().get("bundleInformation");
+        Assert.assertEquals(1, bundlingInformation.getCaseBundles().size());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().get(0))
+            .getValue().getTitle());
+        Assert.assertEquals(2, bundlingInformation.getHistoricalBundles().size());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(0))
+            .getValue().getTitle());
+        Assert.assertEquals("Case Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(1))
+            .getValue().getTitle());
+
+    }
+
+
+
+    @Test
+    public void testCreateBundleWhenAuthorisationIsFalse() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(bundleCreateResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        Assert.assertThrows(RuntimeException.class, () ->
+            bundlingController.createBundle(authToken, "serviceAuth", callbackRequest));
     }
 
     @Test
