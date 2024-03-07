@@ -22,9 +22,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleData;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
@@ -116,9 +116,15 @@ public class BundlingControllerTest {
         bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().name("Applications and Orders")
             .folders(bundleSubfolders).build()).build());
         List<Bundle> bundleList = new ArrayList<>();
-         bundleList.add(Bundle.builder().value(BundleDetails.builder().id("bundleId-1").title("Bundle Title 1").stitchedDocument(DocumentLink.builder().build())
-            .stitchStatus("New").build()).build());
-        bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).data(BundlingData.builder()
+        bundleList.add(Bundle.builder().value(BundleDetails.builder()
+                                                   .id("bundleId-1")
+                                                   .title("Bundle Title 1")
+                                                   .stitchStatus("New")
+                                                   .stitchedDocument(DocumentLink.builder().build())
+                                                   .build())
+                            .build());
+        bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334")
+                                                                       .caseBundles(bundleList).data(BundlingData.builder()
             .hearingDetails(BundleHearingInfo.builder().build()).build()).build()).build();
         List<Bundle> bundleRefreshList = new ArrayList<>();
         /*bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
