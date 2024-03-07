@@ -1253,13 +1253,13 @@ public class ServiceOfApplicationService {
             && party.getValue().getUser().getIdamId() != null;
     }
 
-    private void sendEmailToCitizen(String authorization,
+    private void sendEmailToCitizenApplicationServedConf(String authorization,
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
             log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-            log.info(dynamicData);
+            log.info("inside sendEmailToCitizen  {}" + dynamicData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
@@ -1271,6 +1271,21 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT_SOLICITOR
             )));
 
+        } catch (Exception e) {
+            log.error("Failed to send notification to applicant {}", e.getMessage());
+        }
+    }
+
+    private void sendEmailToCitizen(String authorization,
+                                    CaseData caseData, Element<PartyDetails> applicant,
+                                    List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
+        try {
+            notificationList.add(element(serviceOfApplicationEmailService
+                                             .sendEmailNotificationToApplicant(
+                                                 authorization, caseData, applicant.getValue(),
+                                                 docs,
+                                                 SERVED_PARTY_APPLICANT
+                                             )));
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
@@ -2714,8 +2729,8 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                       log.info("inside contact preference");
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        log.info("inside contact preference");
+                        sendEmailToCitizenApplicationServedConf(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
