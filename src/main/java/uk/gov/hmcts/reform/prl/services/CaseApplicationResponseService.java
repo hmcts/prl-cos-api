@@ -153,6 +153,7 @@ public class CaseApplicationResponseService {
                         .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                             .toInstant()))
                         .build())
+                    .categoryId("")
                     .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                     .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
