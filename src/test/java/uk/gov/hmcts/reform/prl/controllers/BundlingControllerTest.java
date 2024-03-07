@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
@@ -115,8 +116,8 @@ public class BundlingControllerTest {
         bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().name("Applications and Orders")
             .folders(bundleSubfolders).build()).build());
         List<Bundle> bundleList = new ArrayList<>();
-        /* bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
-            .stitchStatus("New").folders(bundleFolders).build()).build());*/
+         bundleList.add(Bundle.builder().value(BundleDetails.builder().id("bundleId-1").title("Bundle Title 1").stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("New").build()).build());
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).data(BundlingData.builder()
             .hearingDetails(BundleHearingInfo.builder().build()).build()).build()).build();
         List<Bundle> bundleRefreshList = new ArrayList<>();
@@ -220,13 +221,43 @@ public class BundlingControllerTest {
     }
 
     @Test
-    public void testCreateBundleWhenCaseBundlesInResponseisNull() throws Exception {
+    public void testCreateBundleWhenCaseBundlesInResponseIsNull() throws Exception {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
         when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
             .thenReturn(BundleCreateResponse.builder().data(BundleData.builder()
             .build()).build());
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNull(response.getData().get("bundleInformation"));
+    }
+
+    @Test
+    public void testCreateBundleWhenCaseBundlesInResponseIsNotNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(bundleCreateResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(1, response.getData().size());
+        Assert.assertNotNull(response.getData().get("bundleInformation"));
+        BundlingInformation bundlingInformation = (BundlingInformation)response.getData().get("bundleInformation");
+        Assert.assertEquals(1, bundlingInformation.getCaseBundles().size());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getCaseBundles().get(0)).getValue().getTitle());
+        Assert.assertEquals(1, bundlingInformation.getHistoricalBundles().size());
+        Assert.assertEquals("Bundle Title 1",((Bundle)bundlingInformation.getHistoricalBundles().get(0)).getValue().getTitle());
+    }
+
+    @Test
+    public void testCreateBundleWhenCaseBundlesInCreateBundleServiceRequestIsNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(BundleCreateResponse.builder().data(BundleData.builder()
+                                                                .build()).build());
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(0, response.getData().size());
         Assert.assertNull(response.getData().get("bundleInformation"));
     }
 
