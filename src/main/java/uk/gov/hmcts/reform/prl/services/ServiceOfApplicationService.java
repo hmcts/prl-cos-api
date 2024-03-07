@@ -1260,7 +1260,7 @@ public class ServiceOfApplicationService {
             log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-            dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+            dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 "anshika.nigam1@hmcts.net",
@@ -2558,8 +2558,8 @@ public class ServiceOfApplicationService {
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
-        log.info(" CaseUtils.isCaseCreatedByCitizen(caseData) ******** " + CaseUtils.isCaseCreatedByCitizen(caseData));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            log.info("inside citizen case data ");
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                 authorization,
@@ -2569,12 +2569,12 @@ public class ServiceOfApplicationService {
                 packDocs
             ));
         } else {
-            emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
+            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
+                caseData,
                 authorization,
                 applicantList,
-                caseData,
-                bulkPrintDetails,
-                packDocs
+                packDocs,
+                SERVED_PARTY_APPLICANT_SOLICITOR
             ));
         }
     }
@@ -2710,9 +2710,10 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (true) {
+                if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (true) {
+                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                       log.info("inside contact preference");
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
@@ -2729,8 +2730,6 @@ public class ServiceOfApplicationService {
                         combinedDocs.addAll(docs);
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                            emailNotificationDetails, combinedDocs);
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
-
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
