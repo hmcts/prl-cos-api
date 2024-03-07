@@ -83,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -125,6 +126,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -271,6 +274,17 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
+
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_filename}")
+    protected String solicitorC1ADraftWelshFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_filename}")
+    protected String solicitorC1AFinalWelshFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_template}")
+    protected String solicitorC1ADraftWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_template}")
+    protected String solicitorC1AFinalWelshTemplate;
+
 
     private final Time dateTime;
 
@@ -765,6 +779,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 fileName = docC7DraftFilename;
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                fileName = solicitorC1ADraftFilename;
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
                 break;
@@ -791,6 +808,12 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                fileName = solicitorC1AFinalWelshFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftWelshFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -874,6 +897,9 @@ public class DocumentGenService {
             case DOCUMENT_C7_DRAFT_HINT:
                 template = docC7DraftTemplate;
                 break;
+            case DOCUMENT_C1A_DRAFT_HINT:
+                template = solicitorC1ADraftTemplate;
+                break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
                 break;
@@ -903,6 +929,12 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                template = solicitorC1AFinalWelshTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftWelshTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
