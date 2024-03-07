@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class ChildrenAndApplicantRelation {
 
     private final String applicantFullName;

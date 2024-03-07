@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,11 +24,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -53,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -83,20 +89,26 @@ public class TestingSupportService {
     @Autowired
     private final AllTabServiceImpl allTabsService;
     private final CaseService citizenCaseService;
-
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
-
+    private final FL401ApplicationMapper fl401ApplicationMapper;
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
+    private final CourtNavCaseService courtNavCaseService;
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final CaseInitiationService caseInitiationService;
+    private final TaskListService taskListService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
-    private static final String VALID_Respondent_TaskList_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
+    private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
+
+    private static final String VALID_FL401_COURTNAV_DRAFT_INPUT_JSON = "FL401_CourtNav_Draft_CaseDetails.json";
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
@@ -138,6 +150,17 @@ public class TestingSupportService {
         }
     }
 
+    public Map<String, Object> initiateCaseCreationForCourtNav(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        if (isAuthorized(authorisation)) {
+            CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
+            String requestBody = loadCaseDetailsInDraftStageForCourtNav();
+            CourtNavFl401 dummyCaseDetails = objectMapper.readValue(requestBody, CourtNavFl401.class);
+            return updateCaseDetailsForCourtNav(initialCaseDetails, dummyCaseDetails);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     public Map<String, Object> initiateRespondentResponseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
 
@@ -150,7 +173,7 @@ public class TestingSupportService {
                     .findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
             }
 
-            String requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
+            String requestBody = ResourceLoader.loadJson(VALID_RESPONDENT_TASKLIST_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
 
             String invokingSolicitor = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
@@ -174,10 +197,15 @@ public class TestingSupportService {
                     .build();
             }
 
-            PartyDetails amended = solicitorRepresentedRespondent.getValue()
-                .toBuilder().response(dummyResponse).build();
-            respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
-                                                                                             .getId(), amended));
+            if (solicitorRepresentedRespondent != null) {
+                PartyDetails amended = solicitorRepresentedRespondent.getValue()
+                    .toBuilder().response(dummyResponse).build();
+                respondents.set(
+                    respondents.indexOf(solicitorRepresentedRespondent),
+                    element(solicitorRepresentedRespondent
+                                .getId(), amended)
+                );
+            }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(C100_RESPONDENTS, respondents);
 
@@ -206,6 +234,7 @@ public class TestingSupportService {
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
+                caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
                 try {
                     caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
                         authorisation,
@@ -216,6 +245,24 @@ public class TestingSupportService {
                 }
             }
         }
+        return caseDataUpdated;
+    }
+
+    private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
+                                                             CourtNavFl401 dummyCaseDetails) throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (dummyCaseDetails != null) {
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            String systemAuthorisation = systemUserService.getSysUserToken();
+            CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
+                systemAuthorisation,
+                fl401CourtNav
+            );
+            caseDataUpdated = caseDetails.getData();
+            caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
+            caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
+        }
+
         return caseDataUpdated;
     }
 
@@ -251,6 +298,11 @@ public class TestingSupportService {
         return requestBody;
     }
 
+    private static String loadCaseDetailsInDraftStageForCourtNav() throws Exception {
+        return ResourceLoader.loadJson(VALID_FL401_COURTNAV_DRAFT_INPUT_JSON);
+    }
+
+
     private Map<String, Object> updateDateInCase(String caseTypeOfApplication, CaseData dummyCaseData) {
         Map<String, Object> objectMap = new HashMap<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -268,7 +320,7 @@ public class TestingSupportService {
                 CommonUtils.DATE_OF_SUBMISSION_FORMAT
             ).replace("-", " ")).build()
         );
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
             && null != dummyCaseData.getFl401StmtOfTruth()) {
             StatementOfTruth statementOfTruth = dummyCaseData.getFl401StmtOfTruth().toBuilder().date(LocalDate.now()).build();
             objectMap.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
@@ -279,7 +331,6 @@ public class TestingSupportService {
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseData = caseData.toBuilder()
                 .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
@@ -301,8 +352,22 @@ public class TestingSupportService {
             tabService.updateAllTabsIncludingConfTab(caseData);
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
+            AboutToStartOrSubmitCallbackResponse response
+                = solicitorSubmittedCaseCreation(callbackRequest, authorisation);
+            return response.getData();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
-            return caseDataUpdated;
+    public AboutToStartOrSubmitCallbackResponse solicitorSubmittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            try {
+                caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);
+            } catch (Exception e) {
+                log.error("Access grant failed", e);
+            }
+            return taskListService.updateTaskList(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -315,7 +380,28 @@ public class TestingSupportService {
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                                              .payment(PaymentDto.builder().build())
+                                                             .serviceRequestReference(caseData.getPaymentServiceRequestReferenceNumber())
                                                              .serviceRequestStatus("Paid")
+                                                             .build());
+            return coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                String.valueOf(caseData.getId())
+            ).getData();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public Map<String, Object> confirmDummyAwPPayment(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
+                                                             .builder()
+                                                             .serviceRequestReference(caseData.getTsPaymentServiceRequestReferenceNumber())
+                                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                                             .payment(PaymentDto.builder().build())
+                                                             .serviceRequestStatus(caseData.getTsPaymentStatus())
                                                              .build());
             return coreCaseDataApi.getCase(
                 authorisation,

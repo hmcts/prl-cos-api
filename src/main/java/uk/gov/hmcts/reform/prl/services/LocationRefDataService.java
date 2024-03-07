@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -15,7 +16,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
@@ -25,8 +25,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 @Service
 @RequiredArgsConstructor
 public class LocationRefDataService {
+    public static final String LOCATION_REFERENCE_DATA_LOOKUP_FAILED = "Location Reference Data Lookup Failed - ";
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
+
+    public static final String SCOTLAND = "Scotland";
 
     @Value("${courts.filter}")
     protected String courtsToFilter;
@@ -43,9 +46,9 @@ public class LocationRefDataService {
             );
             return onlyEnglandAndWalesLocations(courtDetails).stream()
                 .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                .collect(Collectors.toList());
+                .toList();
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -57,19 +60,47 @@ public class LocationRefDataService {
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
+            return daOnlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
 
-    private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData, String caseType) {
+    public List<DynamicListElement> getFilteredCourtLocations(String authToken) {
+        try {
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
+            return filterOnboardedCourtList(this.courtsToFilter,courtDetails);
+        } catch (Exception e) {
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
+        }
+        return List.of(DynamicListElement.builder().build());
+    }
+
+    public List<DynamicListElement> getDaFilteredCourtLocations(String authToken) {
+        try {
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
+            return filterOnboardedCourtList(this.daCourtsToFilter, courtDetails);
+        } catch (Exception e) {
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
+        }
+        return List.of(DynamicListElement.builder().build());
+    }
+
+    private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData) {
         String[] courtList = daCourtsToFilter.split(",");
 
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            : locationRefData.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
                 if (courtList.length == 1) {
@@ -77,10 +108,10 @@ public class LocationRefDataService {
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                     .toString())
-                    .collect(Collectors.toList());
+                    .toList();
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDaDisplayEntry).collect(Collectors.toList()));
+            .map(this::getDaDisplayEntry).toList());
     }
 
     private DynamicListElement getDaDisplayEntry(CourtVenue location) {
@@ -105,7 +136,7 @@ public class LocationRefDataService {
 
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            : locationRefData.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
                 if (courtList.length == 1) {
@@ -113,11 +144,29 @@ public class LocationRefDataService {
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                     .toString())
-                    .collect(Collectors.toList());
+                    .toList();
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDisplayEntry).collect(Collectors.toList()));
+            .map(this::getDisplayEntry).toList());
     }
+
+    private List<DynamicListElement> filterOnboardedCourtList(String courtList, CourtDetails locationRefData) {
+        String[] filteredCourtArray = Arrays.stream(courtList.split(",")).filter(
+            element -> StringUtils.isEmpty(Arrays.stream(element.split(":")).toArray().length > 1
+                                               ? element.split(":")[1] : "")
+        ).toArray(size -> new String[size]);
+        return (locationRefData == null
+            ? new ArrayList<>()
+            : locationRefData.getCourtVenues().stream()
+            .filter(location -> {
+                List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                        .toString()).toList();
+                return !SCOTLAND.equals(location.getRegion()) && ids.contains(location.getCourtEpimmsId())
+                    && FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId());
+            })
+            .map(this::getDisplayEntry).toList());
+    }
+
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(
@@ -144,7 +193,7 @@ public class LocationRefDataService {
         );
         return  (null == courtDetails || null == courtDetails.getCourtVenues())
             ? Optional.empty()
-            : courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
+            : courtDetails.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(
                 location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))

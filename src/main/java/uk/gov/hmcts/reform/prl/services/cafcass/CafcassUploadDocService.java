@@ -35,13 +35,13 @@ import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCas
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassUploadDocService {
 
-    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "docx"};
-    public static final String[] ALLOWED_TYPE_OF_DOCS = {"16_4_Report", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
+    public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
+    public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of("16_4_Report", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
         "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report", "Enquiry_from_Foreign_Court", "FAO_Report",
         "FAO_Workplan", "High_Court_Team_Template", "Letter_from_Child", "Other_Non_Section_7_Report", "Parental_Order_Report", "Position_Statement",
         "Positive_Parenting_Programme_Report", "Re_W_Report", "S_11H_Monitoring", "S_16A_Risk_Assessment", "Safeguarding_Letter",
         "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template", "Safeguarding_Letter_Update",
-        "Second_Gatekeeping_Safeguarding_Letter", "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report"};
+        "Second_Gatekeeping_Safeguarding_Letter", "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report");
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -103,7 +103,7 @@ public class CafcassUploadDocService {
                        .build())
             .data(caseData).build();
 
-        CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
+        coreCaseDataApi.submitEventForCaseWorker(
             authorisation,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authorisation).getUid(),
@@ -119,12 +119,11 @@ public class CafcassUploadDocService {
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
-            CaseDetails caseDetails = coreCaseDataApi.getCase(
+            return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            return caseDetails;
         } catch (Exception ex) {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }
@@ -134,8 +133,8 @@ public class CafcassUploadDocService {
 
     private boolean isValidDocument(MultipartFile document, String typeOfDocument) {
         if (null != document && null != document.getOriginalFilename()
-            && checkFileFormat(document.getOriginalFilename(), List.of(ALLOWED_FILE_TYPES))
-            && checkTypeOfDocument(typeOfDocument, List.of(ALLOWED_TYPE_OF_DOCS))) {
+            && checkFileFormat(document.getOriginalFilename(), ALLOWED_FILE_TYPES)
+            && checkTypeOfDocument(typeOfDocument, ALLOWED_TYPE_OF_DOCS)) {
             return true;
         }
         log.error("Un acceptable format/type of document {}", typeOfDocument);

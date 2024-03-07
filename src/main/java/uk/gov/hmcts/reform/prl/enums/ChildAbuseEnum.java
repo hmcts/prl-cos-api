@@ -2,12 +2,13 @@ package uk.gov.hmcts.reform.prl.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
+@Getter
 public enum ChildAbuseEnum {
 
     @JsonProperty("physicalAbuse")
@@ -27,15 +28,6 @@ public enum ChildAbuseEnum {
 
     private final String id;
     private final String displayedValue;
-    @JsonValue
-    public String getId() {
-        return id;
-    }
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
 
     @JsonCreator
     public static ChildAbuseEnum getValue(String key) {

@@ -4,6 +4,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -27,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -45,7 +45,7 @@ public class CaseDataApplicantElementsMapper {
     private static final String TELEPHONE_FIELD = "telephone";
     private static final String I_DONT_KNOW = "I dont know";
 
-    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                           C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
 
@@ -65,16 +65,16 @@ public class CaseDataApplicantElementsMapper {
 
         return applicantDtoList.stream()
                 .map(applicantDto -> Element.<PartyDetails>builder().value(buildPartyDetails(applicantDto)).build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static PartyDetails buildPartyDetails(ApplicantDto applicantDto) {
         List<String> contactDetailsPrivateList1 = Arrays.stream(applicantDto.getContactDetailsPrivate())
-                .collect(Collectors.toList());
+                .toList();
         List<String> contactDetailsPrivateList2 = Arrays.stream(applicantDto.getContactDetailsPrivateAlternative())
-                .collect(Collectors.toList());
+                .toList();
         List<String> contactDetailsPrivateList = Stream.concat(contactDetailsPrivateList1.stream(),
-                contactDetailsPrivateList2.stream()).collect(Collectors.toList());
+                contactDetailsPrivateList2.stream()).toList();
         return PartyDetails
                 .builder()
                 .firstName(applicantDto.getApplicantFirstName())
@@ -139,8 +139,8 @@ public class CaseDataApplicantElementsMapper {
         return KeepDetailsPrivate
             .builder()
             .otherPeopleKnowYourContactDetails(I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
-                                                   ? YesNoDontKnow.dontKnow :
-                                                   YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
+                                                   ? YesNoIDontKnow.dontKnow :
+                                                   YesNoIDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
             .confidentiality(isNotEmpty(applicantDto.getStart())
                                  ? YesOrNo.getValue(applicantDto.getStart())
                                  : YesOrNo.getValue(applicantDto.getStartAlternative()))
@@ -154,8 +154,7 @@ public class CaseDataApplicantElementsMapper {
         } else {
             return contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
                 ? ConfidentialityListEnum.phoneNumber
-                : ConfidentialityListEnum.getValue(c)).collect(
-                Collectors.toList());
+                : ConfidentialityListEnum.getValue(c)).toList();
         }
     }
 

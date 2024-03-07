@@ -14,7 +14,7 @@ public class CaseDataConsentOrderDetailsElementsMapper {
     private CaseDataConsentOrderDetailsElementsMapper() {
     }
 
-    public static void updateConsentOrderDetailsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateConsentOrderDetailsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails) {
         caseDataBuilder
                 .consentOrder(nonNull(c100RebuildConsentOrderDetails.getConsentOrderCertificate()) ? Yes : No)

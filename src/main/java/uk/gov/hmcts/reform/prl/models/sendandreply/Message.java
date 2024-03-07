@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -69,10 +69,8 @@ public class Message extends MessageMetaData {
         if (sendReplyJudgeName == null
             || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())
             || StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
-            System.out.println("getSendReplyJudgeName null check");
             return null;
         }
-        System.out.println("outside getSendReplyJudgeName null check");
         return sendReplyJudgeName;
     }
 

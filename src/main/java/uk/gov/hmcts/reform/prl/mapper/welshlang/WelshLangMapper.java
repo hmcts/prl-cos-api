@@ -76,7 +76,7 @@ public class WelshLangMapper {
         if (obj instanceof String) {
             obj = getValueFromMap(key, obj, isCA);
         } else if (obj instanceof List) {
-            List<Object> list = (List) obj;
+            List<Object> list = (List<Object>) obj;
             for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
                 list.set(i, applyWelshTranslation(null, eachObj, isCA));
@@ -720,6 +720,8 @@ public class WelshLangMapper {
         welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
         welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvidePhoneNumber_No", WELSH_NO_NA_ALLAF);
+        welshMap.put("doTheyHaveLegalRepresentation_Yes", WELSH_YES_OES);
+        welshMap.put("doTheyHaveLegalRepresentation_No", WELSH_NO_NAC_OES);
 
         /**
          * Relationship to respondent.
