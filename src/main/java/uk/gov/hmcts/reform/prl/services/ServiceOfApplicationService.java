@@ -104,6 +104,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
@@ -895,19 +896,13 @@ public class ServiceOfApplicationService {
         //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
-            getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs);
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 if (!YesNoDontKnow.yes.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())) {
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization, new ArrayList<>(), bulkPrintDetails,
-                                                        applicant, PRL_LET_ENG_AP7, SERVED_PARTY_APPLICANT);
-                }
-            }
-            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if (!YesNoDontKnow.yes.equals(respondent.getValue().getDoTheyHaveLegalRepresentation())) {
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization, new ArrayList<>(), bulkPrintDetails,
-                                                        respondent, PRL_LET_ENG_RE5, SERVED_PARTY_RESPONDENT);
+                    ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+                    String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
 
+                    generatePacksForApplicantLipC100Personal(authorization,
+                                                             caseData, dateCreated, c100StaticDocs);
                 }
             }
         } else {
@@ -1991,13 +1986,9 @@ public class ServiceOfApplicationService {
     }
 
     private static boolean isPartiesAddressPresent(PartyDetails partyDetails) {
-        boolean isAddressPresent = true;
-        if (No.equals(partyDetails.getIsCurrentAddressKnown())
-            || ObjectUtils.isEmpty(partyDetails.getAddress())
-            || StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1())) {
-            isAddressPresent = false;
-        }
-        return isAddressPresent;
+        return !No.equals(partyDetails.getIsCurrentAddressKnown())
+            && !ObjectUtils.isEmpty(partyDetails.getAddress())
+            && !StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1());
     }
 
     private boolean isRespondentDetailsConfidential(CaseData caseData) {
@@ -2080,6 +2071,10 @@ public class ServiceOfApplicationService {
                                       CaseInvite caseInvite, String template) {
 
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        return fetchCoverLetter(authorisation, template, dataMap);
+    }
+
+    private Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
@@ -2105,11 +2100,11 @@ public class ServiceOfApplicationService {
         dataMap.put("address", party.getValue().getAddress());
         dataMap.put("name", party.getValue().getFirstName() + " " + party.getValue().getLastName());
         dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
-
         dataMap.put("c1aExists", doesC1aExists(caseData));
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
+        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
         return dataMap;
     }
 
@@ -2272,7 +2267,34 @@ public class ServiceOfApplicationService {
                 .packCreatedDate(dateCreated)
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
+        } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+            caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
+                                                                                                  dateCreated, c100StaticDocs));
         }
+    }
+
+    private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
+                                                             List<Document> c100StaticDocs) {
+        List<Document> packLdocs = new ArrayList<>();
+        caseData.getApplicants().forEach(applicant -> {
+            if (!isAccessEnabled(applicant)) {
+                CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
+                Map<String, Object> dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
+                packLdocs.add(fetchCoverLetter(authorization, PRL_LET_ENG_AP7, dataMap));
+            } else {
+                Map<String, Object> dataMap = populateAccessCodeMap(caseData, applicant, null);
+                packLdocs.add(fetchCoverLetter(authorization, PRL_LET_ENG_AP7, dataMap));
+            }
+        });
+        packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
+        return SoaPack.builder()
+            .packDocument(wrapElements(packLdocs))
+            .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
+            .servedBy("Unrepresented applicant")
+            .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+            .packCreatedDate(dateCreated)
+            .build();
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
