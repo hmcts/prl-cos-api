@@ -1262,7 +1262,7 @@ public class ServiceOfApplicationService {
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
-                "anshika.nigam1@hmcts.net",
+                caseData.getApplicants().get(0).getValue().getEmail(),
                 docs,
                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
@@ -2723,9 +2723,9 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (true) {
+                if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (true) {
+                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
