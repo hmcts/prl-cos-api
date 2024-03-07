@@ -63,8 +63,7 @@ public enum Event {
     SOA("serviceOfApplication", "Service of application"),
     CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
     ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
-    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper");
-    EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
+    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
     TS_CA_URGENT_CASE("testingSupportCAUrgentCases", "TS-Urgent case");
 
     private final String id;

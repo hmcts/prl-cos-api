@@ -116,9 +116,6 @@ public class TestingSupportService {
 
     private static final String VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON = "FL401_Dummy_Draft_admin_CaseDetails.json";
 
-    @Autowired
-    CaseRepository caseRepository;
-
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
