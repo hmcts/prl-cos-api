@@ -50,6 +50,8 @@ public enum Event {
     FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
+
+    //Other events which are not relevant to task list
     TS_SOLICITOR_APPLICATION("testingSupportDummySolicitorCreate", "TS-Solicitor application"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyAdminCreateNoc", "TS-Admin application-Noc"),
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve an order"),
@@ -61,7 +63,8 @@ public enum Event {
     SOA("serviceOfApplication", "Service of application"),
     CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
     ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
-    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper");
+    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
+    TS_CA_URGENT_CASE("testingSupportCAUrgentCases", "TS-Urgent case");
 
     private final String id;
     private final String name;
