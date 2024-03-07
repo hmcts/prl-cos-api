@@ -346,6 +346,9 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
@@ -418,16 +421,9 @@ public class ManageOrderEmailService {
                                                     Map<String, Object> dynamicDataForEmail,
                                                     SoaSolicitorServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
-        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: english: {}",
-                         dynamicDataForEmail.get(ENGLISH_EMAIL));
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",
-                         dynamicDataForEmail.get(WELSH_EMAIL));
                 log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
                          dynamicDataForEmail);
                 sendPersonalServiceNotifications(
