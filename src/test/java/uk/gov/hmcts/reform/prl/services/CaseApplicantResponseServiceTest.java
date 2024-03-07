@@ -136,11 +136,20 @@ public class CaseApplicantResponseServiceTest {
     public void testGenerateC7finalDocumentForRespondent1() throws Exception {
         List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
         OtherProceedingDetails proceedingDetails = OtherProceedingDetails
-            .builder().orderDocument(Document.builder().build()).build();
+            .builder().orderDocument(Document.builder().documentFileName("C7_Document.pdf").build()).build();
+        OtherProceedingDetails proceedingDetails1 = OtherProceedingDetails
+            .builder().orderDocument(Document.builder().documentFileName("C1A_allegation_of_harm.pdf").build()).build();
+        OtherProceedingDetails proceedingDetails2 = OtherProceedingDetails
+            .builder().orderDocument(Document.builder().documentFileName("test").build()).build();
+
+
         proceedingsDetailsList.add(element(proceedingDetails));
+        proceedingsDetailsList.add(element(proceedingDetails1));
+        proceedingsDetailsList.add(element(proceedingDetails2));
+
+        Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
 
         List<Element<Proceedings>> proceedingsList = new ArrayList<>();
-        Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
         proceedingsList.add(element(proceedings));
         proceedingsList.add(element(proceedings));
 
