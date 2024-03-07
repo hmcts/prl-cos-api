@@ -44,12 +44,12 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -204,7 +204,7 @@ public class CaseApplicationResponseController {
                     c1aFinalDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
-                        SOLICITOR_C1A_FINAL_DOCUMENT,
+                        CITIZEN_C1A_FINAL_DOCUMENT,
                         false,
                         dataMap
                     );
@@ -214,7 +214,7 @@ public class CaseApplicationResponseController {
                     c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
-                        SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
+                        CITIZEN_C1A_WELSH_FINAL_DOCUMENT,
                         true,
                         dataMap
                     );
@@ -341,6 +341,15 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        Optional<Element<PartyDetails>> currentRespondent
+            = caseData.getRespondents()
+            .stream()
+            .filter(
+                respondent -> YesOrNo.Yes.equals(
+                    respondent.getValue().getCurrentRespondent()))
+            .findFirst();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         log.info(" Generating C1A draft document for respondenttttttt........");
 
         //        Document document = documentGenService.generateSingleDocument(
@@ -350,23 +359,34 @@ public class CaseApplicationResponseController {
         //            false
         //        );
 
+        Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
+            callbackRequest,
+            currentRespondent.get()
+        );
+
+        log.info(" dataMap........{}",dataMap);
+
         //English
         if (Boolean.FALSE.equals(isWelsh)) {
+            log.info(" isWelsh..ENG......{}",isWelsh);
             return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                SOLICITOR_C1A_DRAFT_DOCUMENT,
-                false
+                CITIZEN_C1A_DRAFT_DOCUMENT,
+                false,
+                dataMap
             );
         }
 
         //Welsh
         if (Boolean.TRUE.equals(isWelsh)) {
+            log.info(" isWelsh..WEL......{}",isWelsh);
             return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT,
-                true
+                CITIZEN_C1A_WELSH_DRAFT_DOCUMENT,
+                true,
+                dataMap
             );
         }
 

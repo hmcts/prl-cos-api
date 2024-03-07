@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -126,8 +127,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -244,8 +243,12 @@ public class DocumentGenService {
     protected String solicitorC7FinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
+    protected String citizenC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
     protected String solicitorC1ADraftFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
+    protected String citizenC1ADraftFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_final_template}")
     protected String solicitorC1AFinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
@@ -808,11 +811,8 @@ public class DocumentGenService {
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
                 break;
-            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
-                fileName = solicitorC1AFinalWelshFilename;
-                break;
-            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
-                fileName = solicitorC1ADraftWelshFilename;
+            case CITIZEN_C1A_DRAFT_DOCUMENT:
+                fileName = citizenC1ADraftFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -929,11 +929,8 @@ public class DocumentGenService {
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
                 break;
-            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
-                template = solicitorC1AFinalWelshTemplate;
-                break;
-            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
-                template = solicitorC1ADraftWelshTemplate;
+            case CITIZEN_C1A_DRAFT_DOCUMENT:
+                template = citizenC1ADraftTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
