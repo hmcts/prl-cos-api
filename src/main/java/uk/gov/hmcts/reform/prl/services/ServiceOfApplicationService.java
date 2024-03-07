@@ -1257,18 +1257,12 @@ public class ServiceOfApplicationService {
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
-            log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-            log.info("inside sendEmailToCitizen  {}" + dynamicData);
-            log.info("inside citizenUrl  {}" + citizenUrl);
-            log.info("inside caseData  {}" + caseData);
-            log.info("inside applicant  {}" + applicant);
-            log.info("inside caseData.getApplicants().get(0).getValue().getEmail()  {}" + caseData.getApplicants().get(0).getValue().getEmail());
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
-                caseData.getApplicants().get(0).getValue().getEmail(),
+                "anshika.nigam1@hmcts.net",
                 docs,
                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
