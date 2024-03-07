@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
