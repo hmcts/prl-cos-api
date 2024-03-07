@@ -80,13 +80,11 @@ public class WelshLangMapper {
             obj = getValueFromMap(key, obj, isCA);
         } else if (obj instanceof List) {
             List<Object> list = (List<Object>) obj;
-            log.info("object is instant of list");
             for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
                 list.set(i, applyWelshTranslation(null, eachObj, isCA));
             }
         } else if (obj instanceof Map) {
-            log.info("object is instant of map");
             Map<String, Object> innerMap = (Map<String, Object>) obj;
             innerMap.forEach((k, v) -> {
                 if (v != null) {
@@ -98,11 +96,15 @@ public class WelshLangMapper {
     }
 
     private static Object getValueFromMap(Object key, Object obj, boolean isCA) {
+        log.info("key is {}", key);
         if (validateConditionalKey(key, isCA)) {
+            log.info("key is contained with map");
             if (validateMappingKey(key, obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(key + "_" + obj);
+                log.info("obj is {}", obj);
             } else if (validateObject(obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(obj);
+                log.info("obj is {}", obj);
             }
         }
         return obj;
