@@ -2344,7 +2344,7 @@ public class ServiceOfApplicationService {
             caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-        return fetchCoverLetter( authorization, template, dataMap);
+        return fetchCoverLetter(authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
