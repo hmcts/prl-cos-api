@@ -722,9 +722,26 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testgenerateAccessCodeLetter() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(parties)
+            .applicants(otherParities)
             .build();
         Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
@@ -734,7 +751,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
+        //when(CaseUtils.isCaseCreatedByCitizen(any())).thenReturn(true);
         assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
                                                                            caseInvite, template));
     }
