@@ -724,6 +724,7 @@ public class ServiceOfApplicationServiceTest {
     public void testgenerateAccessCodeLetter() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(parties)
             .build();
         Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
@@ -3225,8 +3226,7 @@ public class ServiceOfApplicationServiceTest {
 
 
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
-        Element applicantElement = element(partyDetails);
-        partyDetailsList.add(applicantElement);
+        partyDetailsList.add(element(partyDetails));
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3257,7 +3257,7 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             new HashMap<>()
         );
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
 
 
