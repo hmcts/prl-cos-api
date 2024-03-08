@@ -99,6 +99,7 @@ public class ManageOrderEmailService {
     private final Time dateTime;
     private final CourtFinderService courtLocatorService;
     private final DocumentLanguageService documentLanguageService;
+
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
 
@@ -339,7 +340,7 @@ public class ManageOrderEmailService {
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
-        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
@@ -419,12 +420,12 @@ public class ManageOrderEmailService {
                                                     List<Document> orderDocuments,
                                                     Map<String, Object> dynamicDataForEmail,
                                                     SoaSolicitorServingRespondentsEnum respondentOption) {
-        log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
-                 dynamicDataForEmail);
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
+                         dynamicDataForEmail);
                 sendPersonalServiceNotifications(
                     party.getValue().getSolicitorEmail(),
                     respondentOption,
@@ -457,6 +458,7 @@ public class ManageOrderEmailService {
             );
         } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
+            log.info("CA personal service email notifications: sendPersonalServiceNotifications: {}",respondentOption);
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
             );
@@ -769,6 +771,7 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("CA non-personal service email notifications: sendEmailToApplicantOrSolicitor: dynamicDataForEmail: {}",dynamicDataForEmail);
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
@@ -813,6 +816,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("CA non-personal service email notifications: sendEmailToSolicitorOrPostToRespondent: dynamicDataForEmail: {}",dynamicDataForEmail);
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
                                          dynamicDataForEmail,
