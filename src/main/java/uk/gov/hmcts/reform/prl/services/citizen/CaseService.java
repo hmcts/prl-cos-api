@@ -106,6 +106,7 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
+        String systemAuthorisation = systemUserService.getSysUserToken();
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, caseId, accessCode);
             return caseRepository.getCase(authToken, caseId);
@@ -126,7 +127,7 @@ public class CaseService {
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .taskListVersion(TASK_LIST_VERSION_V2)
                                           .build());
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            return caseRepository.updateCase(systemAuthorisation, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
