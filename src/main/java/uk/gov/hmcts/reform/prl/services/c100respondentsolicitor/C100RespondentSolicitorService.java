@@ -1070,6 +1070,7 @@ public class C100RespondentSolicitorService {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
+        log.info("Datamap generated in method populateDataMap {}", dataMap);
         return dataMap;
     }
 
