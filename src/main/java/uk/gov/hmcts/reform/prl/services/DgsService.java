@@ -84,16 +84,6 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
         dataMap.forEach((k, v) -> {
-
-            if (v != null && k.equals("respChildFinancialAbuse")) {
-                log.info("AAAAAA {}",v);
-                Object updatedWelshObj1 = WelshLangMapper.applyWelshTranslation(k, v,
-                                                                               PrlAppsConstants.C100_CASE_TYPE
-                                                                                   .equalsIgnoreCase(
-                                                                                       caseTypeOfApplication)
-                );
-                log.info("AAAAA111 {}",updatedWelshObj1);
-            }
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
@@ -102,12 +92,9 @@ public class DgsService {
                 );
 
                 dataMap.put(k, updatedWelshObj);
-                if (v != null && k.equals("respChildFinancialAbuse")) {
-                    log.info("during finaincal dataMapppppp {}",dataMap);
-                }
             }
         });
-        log.info("dataMappppppedddd {}",dataMap);
+        log.info("MyMappppp {}", dataMap);
         return generateDocument(authorisation, caseId, templateName,
                                 dataMap
         );

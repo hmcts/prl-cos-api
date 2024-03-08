@@ -159,6 +159,7 @@ public class WelshLangMapper {
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
         welshMap.put(Gender.male.toString(), "gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
+        welshMap.put(Gender.other.toString(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
          *  Type of Application - What order(s) are you applying for?.
