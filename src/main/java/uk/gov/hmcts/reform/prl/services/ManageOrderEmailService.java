@@ -450,7 +450,7 @@ public class ManageOrderEmailService {
                     && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("Contact preference set as email" + party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    dynamicData.put("name",party.getValue().getFirstName());
+                    dynamicData.put("name",party.getValue().getFirstName() + " " + party.getValue().getLastName());
                     dynamicData.put("dashBoardLink",citizenDashboardUrl);
                     sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
