@@ -2490,8 +2490,12 @@ public class ServiceOfApplicationService {
             Collectors.toList());
         List<Document> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            generateCoverLetterBasedOnCaseAccess(authorization, caseData, packDocs,
-                                                 caseData.getApplicants().get(0), Templates.AP6_LETTER);
+            selectedPartyIds.forEach(partyId -> {
+            Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+            packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                 party.get(), Templates.AP6_LETTER));
+        });
+
             packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs));
         } else {
             packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs));
