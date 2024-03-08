@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.repositories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -55,7 +54,6 @@ public class CcdCaseRepositoryTest {
     }
 
     @Test
-    @Ignore
     public void testLinkDefendant() throws JsonProcessingException {
         Map<String, Object> map = new HashMap<>();
         EventRequestData eventRequestData = EventRequestData.builder().build();
