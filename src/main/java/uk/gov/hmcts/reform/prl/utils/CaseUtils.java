@@ -158,9 +158,6 @@ public class CaseUtils {
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
             return true;
         }
-        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            log.info("Applicant 1 {}", caseData.getApplicants().get(0));
-        }
         log.info("case created by {}", caseData.getCaseCreatedBy());
 
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
