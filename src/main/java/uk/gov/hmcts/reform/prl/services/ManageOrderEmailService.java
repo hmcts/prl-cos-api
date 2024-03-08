@@ -771,7 +771,9 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info("CA non-personal service email notifications: sendEmailToApplicantOrSolicitor: dynamicDataForEmail: {}",dynamicDataForEmail);
+                    log.info(
+                        "CA non-personal service email notifications: sendEmailToApplicantOrSolicitor: dynamicDataForEmail: {}",
+                        dynamicDataForEmail);
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
@@ -816,7 +818,9 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info("CA non-personal service email notifications: sendEmailToSolicitorOrPostToRespondent: dynamicDataForEmail: {}",dynamicDataForEmail);
+                    log.info(
+                        "CA non-personal service email notifications: sendEmailToSolicitorOrPostToRespondent: dynamicDataForEmail: {}",
+                        dynamicDataForEmail);
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
                                          dynamicDataForEmail,
