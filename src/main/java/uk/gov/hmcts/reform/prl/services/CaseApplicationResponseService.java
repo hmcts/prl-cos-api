@@ -62,6 +62,7 @@ public class CaseApplicationResponseService {
                 respondent.setCurrentRespondent(currentRespondent);
             }
         }
+
         return caseData;
     }
 
@@ -198,8 +199,6 @@ public class CaseApplicationResponseService {
                 .id(element.getId()).build())
             .toList());
 
-        log.info("QuarantineDocs are {}", quarantineDocs);
-
         if (null != caseData.getDocumentManagementDetails()) {
             caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
         } else {
@@ -208,6 +207,7 @@ public class CaseApplicationResponseService {
                 .citizenQuarantineDocsList(quarantineDocs)
                 .build());
         }
+
         return caseData;
     }
 
@@ -268,6 +268,7 @@ public class CaseApplicationResponseService {
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
+
         return caseData;
     }
 
