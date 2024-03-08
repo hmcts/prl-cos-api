@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -45,7 +46,10 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
@@ -96,6 +100,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -150,6 +155,7 @@ public class ServiceOfApplicationService {
     public static final String APPLICANTS = "applicants";
     public static final String CASE_INVITES = "caseInvites";
 
+    private final EmailService emailService;
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
     public static final String EMAIL = "email";
     public static final String POST = "post";
@@ -276,6 +282,7 @@ public class ServiceOfApplicationService {
     private String citizenUrl;
 
     private final CoreCaseDataService coreCaseDataService;
+
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -1183,16 +1190,17 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        List<Document> docs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
-                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
-                                               selectedApplicant.getValue().getEmail(), docs,
-                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                               dynamicData, SERVED_PARTY_APPLICANT);
+                        emailService.send(
+                            selectedApplicant.getValue().getEmail(),
+                            EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                            buildApplicantEmail(caseData,selectedApplicant.getValue()),
+                            LanguagePreference.english
+                        );
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
                                                             bulkPrintDetails, selectedApplicant, Templates.AP6_LETTER,
-                                                            SERVED_PARTY_APPLICANT);
+                                                            SERVED_PARTY_APPLICANT,false);
                     }
                 } else {
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
@@ -1217,6 +1225,19 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
+
+    private EmailTemplateVars buildApplicantEmail(CaseData caseData,PartyDetails selectedApplicant) {
+
+        return CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .applicantName(selectedApplicant.getFirstName() + " "
+                               + selectedApplicant.getLastName())
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .build();
+    }
+
+
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
                                                               List<DynamicMultiselectListElement> selectedRespondents,
                                                           CaseData caseData,  List<Element<BulkPrintDetails>> bulkPrintDetails,
@@ -1237,6 +1258,16 @@ public class ServiceOfApplicationService {
                             isStaticDocs ? getNotificationPack(caseData, PrlAppsConstants.S, docs) : docs,
                             SERVED_PARTY_RESPONDENT
                         )));
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
+                        dynamicData.put("caseName", caseData.getApplicantCaseName());
+                        dynamicData.put("caseNumber", caseData.getId());
+                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                 .sendEmailUsingTemplateWithAttachments(authorization,
+                                                selectedRespondent.getValue().getEmail(), docs,
+                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
                         log.error("Failed to send email to respondent solicitor {}", e.getMessage());
                     }
@@ -1393,8 +1424,20 @@ public class ServiceOfApplicationService {
                                                      Element<PartyDetails> party, String template,
                                                      String servedParty) {
 
+
+        sendPostWithAccessCodeLetterToParty(caseData,authorization,packDocs,bulkPrintDetails,party,template,servedParty,true);
+
+    }
+
+
+    private void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
+                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                     Element<PartyDetails> party, String template,
+                                                     String servedParty,Boolean isCaseInviteRequired) {
+
         List<Document> docs = new ArrayList<>();
-        CaseInvite caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+
+        CaseInvite caseInvite = isCaseInviteRequired ? getCaseInvite(party.getId(), caseData.getCaseInvites()) : null;
         try {
             docs.add(getCoverSheet(authorization, caseData,
                                    party.getValue().getAddress(),
