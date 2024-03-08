@@ -155,7 +155,9 @@ public class WelshLangMapper {
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
+        welshMap.put(Gender.female.getDisplayedValue().toLowerCase(), "benyw");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
+        welshMap.put(Gender.male.getDisplayedValue().toLowerCase(), "gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
