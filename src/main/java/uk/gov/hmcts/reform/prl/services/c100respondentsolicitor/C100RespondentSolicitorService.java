@@ -1081,12 +1081,12 @@ public class C100RespondentSolicitorService {
         populateAohDataMap(response, dataMap);
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication().getDisplayedValue());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
+        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt().getDisplayedValue());
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
-        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
+        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam().getDisplayedValue());
+        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam().getDisplayedValue());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
+        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren().getDisplayedValue());
         dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
         dataMap.put(
                 "reasonForChildDetails",
@@ -1120,7 +1120,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (null != response.getResponseToAllegationsOfHarm()) {
-            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
         }
     }
 
