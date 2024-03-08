@@ -391,7 +391,11 @@ public class CaseApplicationResponseController {
 
             Response response = currentRespondent.get().getValue().getResponse();
 
+            log.info(" responseee........{}", response);
+
             Abductions abductions = response.getSafetyConcerns().getAbductions();
+
+            log.info(" response.getSafetyConcerns()........{}", response.getSafetyConcerns());
 
             RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = response.getRespondentAllegationsOfHarmData();
 
@@ -401,10 +405,10 @@ public class CaseApplicationResponseController {
                                                                                               abductions.getC1AabductionReasonOutsideUk()
                                                                                           ).build()).build();
 
-            PartyDetails p = (PartyDetails)dataMap.get("respondent");
-            p.setResponse(response1);
+            PartyDetails partyDetails = (PartyDetails)dataMap.get("respondent");
+            partyDetails.setResponse(response1);
             //dataMap.put("respondent",p.toBuilder().response(response1).build());
-            dataMap.put("respondent",p);
+            dataMap.put("respondent",partyDetails);
 
             if (Boolean.FALSE.equals(isWelsh)) {
                 log.info(" isWelsh..ENG......{}", isWelsh);
