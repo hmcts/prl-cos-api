@@ -1079,7 +1079,7 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
-        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
+        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication().getDisplayedValue());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
