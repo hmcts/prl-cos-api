@@ -819,6 +819,7 @@ public class PrlAppsConstants {
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
+    public static final String SOA_C6A_OTHER_PARTIES_ORDER_WELSH = "Welsh_Notice_Of_Proceeding_Order_C6a.pdf";
 
     public static final String SOA_MEDIATION_VOUCHER_FILENAME = "Mediation-voucher.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";

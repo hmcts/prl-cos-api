@@ -53,7 +53,9 @@ public class RoleAssignmentService {
                                      boolean replaceExisting,
                                      String roleName) {
         log.info("Role Assignment called from event - {}", eventName);
-        String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
+        //done only for testing in preview
+        String actorId = null;
+        //populateActorIdFromDto(authorization, roleAssignmentDto);
         String roleCategory = RoleCategory.JUDICIAL.name();
         if (null != actorId) {
             if (null != roleAssignmentDto.getLegalAdviserList()) {
