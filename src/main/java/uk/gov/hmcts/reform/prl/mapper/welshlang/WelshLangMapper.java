@@ -155,11 +155,8 @@ public class WelshLangMapper {
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
-        welshMap.put(Gender.female.toString(), "benyw");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
-        welshMap.put(Gender.male.toString(), "gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
-        welshMap.put(Gender.other.toString(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
          *  Type of Application - What order(s) are you applying for?.
@@ -227,9 +224,7 @@ public class WelshLangMapper {
          * What is the respondent’s relationship to Child 1?.
          */
         welshMap.put(RelationshipsEnum.father.getDisplayedValue(), "Tad");
-        welshMap.put(RelationshipsEnum.father.toString(), "tad");
         welshMap.put(RelationshipsEnum.mother.getDisplayedValue(), "Mam");
-        welshMap.put(RelationshipsEnum.mother.toString(), "mam");
         welshMap.put(RelationshipsEnum.stepFather.getDisplayedValue(), "Llystad");
         welshMap.put(RelationshipsEnum.stepMother.getDisplayedValue(), "Llysfam");
         welshMap.put(RelationshipsEnum.grandParent.getDisplayedValue(), "Nain/Taid");
