@@ -2299,7 +2299,7 @@ public class ServiceOfApplicationService {
             caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-        return fetchCoverLetter( authorization, template, dataMap);
+        return fetchCoverLetter(authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
@@ -2491,11 +2491,10 @@ public class ServiceOfApplicationService {
         List<Document> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             selectedPartyIds.forEach(partyId -> {
-            Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
-            packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                 party.get(), Templates.AP6_LETTER));
-        });
-
+                Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+                packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                     party.get(), Templates.AP6_LETTER));
+            });
             packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs));
         } else {
             packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs));
