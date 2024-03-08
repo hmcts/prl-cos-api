@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -1311,6 +1312,11 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
+                ObjectMapper om = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+                String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+                log.info("CCCCCCC {}", result);
+
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
