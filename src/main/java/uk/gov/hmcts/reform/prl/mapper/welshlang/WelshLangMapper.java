@@ -946,8 +946,6 @@ public class WelshLangMapper {
         welshMap.put("welshLanguageRequirementApplicationNeedEnglish_No", WELSH_NO_NAC_OES);
         welshMap.put("languageRequirementApplicationNeedWelsh_Yes", WELSH_YES_OES);
         welshMap.put("languageRequirementApplicationNeedWelsh_No", WELSH_NO_NAC_OES);
-        welshMap.put("consentToTheApplication_Yes", "Ydw");
-        welshMap.put("consentToTheApplication_No", WELSH_NO_NAC_OES);
 
         return welshMap;
     }
