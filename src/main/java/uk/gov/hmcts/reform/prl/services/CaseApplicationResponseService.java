@@ -134,6 +134,7 @@ public class CaseApplicationResponseService {
             REVIEW_AND_SUBMIT,
             null
         );
+
         return caseDetailsReturn;
     }
 
@@ -150,13 +151,19 @@ public class CaseApplicationResponseService {
                 proceedingsList.add(elementProceedings.getValue());
             }
 
-            for (Proceedings proceedings : proceedingsList) {
-                if (null != proceedings.getProceedingDetails()) {
-                    for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
-                        if (isNotEmpty(otherProceedingDetailsElement.getValue())
-                            && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
-                            responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
-                        }
+            return getOrderDocumentsFromProceedings(responseDocs, proceedingsList);
+        }
+
+        return responseDocs;
+    }
+
+    private List<Element<Document>> getOrderDocumentsFromProceedings(List<Element<Document>> responseDocs, List<Proceedings> proceedingsList) {
+        for (Proceedings proceedings : proceedingsList) {
+            if (null != proceedings.getProceedingDetails()) {
+                for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
+                    if (isNotEmpty(otherProceedingDetailsElement.getValue())
+                        && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
+                        responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
                     }
                 }
             }
