@@ -1324,6 +1324,7 @@ public class C100RespondentSolicitorService {
                     true,
                     dataMap
                 );
+                log.info("REsulttttt --> {}",documentForC1AWelsh);
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
         }
