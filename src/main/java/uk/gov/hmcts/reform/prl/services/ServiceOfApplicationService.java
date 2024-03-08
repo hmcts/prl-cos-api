@@ -2395,18 +2395,46 @@ public class ServiceOfApplicationService {
                                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-        List<Element<Document>> packDocs = new ArrayList<>();
+        List<Document> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
+            if (isAccessEnabled(caseData.getApplicants().get(0))) {
+                CaseInvite caseInvite = getCaseInvite(caseData.getApplicants().get(0).getId(), caseData.getCaseInvites());
+                Map<String, Object> dataMap = populateAccessCodeMap(caseData, caseData.getApplicants().get(0), caseInvite);
+                packDocs.add(fetchCoverLetter(authorization, Templates.AP6_LETTER, dataMap));
+            } else {
+                Map<String, Object> dataMap = populateAccessCodeMap(caseData, caseData.getApplicants().get(0), null);
+                packDocs.add(fetchCoverLetter(authorization, Templates.AP6_LETTER, dataMap));
+            }
+
+            packDocs.addAll((getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
         } else {
-            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
+            packDocs.addAll((getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
         }
-        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
+        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(wrapElements(packDocs)).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
+    }
+
+    private Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
+        try {
+            log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
+            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(dataMap.get("id")),
+                template,
+                dataMap
+            );
+            return Document.builder().documentUrl(accessCodeLetter.getUrl())
+                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+        } catch (Exception e) {
+            log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
+        }
+        return null;
     }
 
     public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
