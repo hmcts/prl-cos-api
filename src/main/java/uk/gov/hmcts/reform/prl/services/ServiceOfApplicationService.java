@@ -2040,6 +2040,7 @@ public class ServiceOfApplicationService {
         dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
 
         dataMap.put("c1aExists", doesC1aExists(caseData));
+        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
