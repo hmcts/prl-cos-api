@@ -109,7 +109,7 @@ public class SendgridService {
         }
     }
 
-    public void sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
+    public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
@@ -131,9 +131,11 @@ public class SendgridService {
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
-            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                 log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
+                return true;
             }
+            return false;
         } catch (IOException ex) {
             log.info("error is {}", ex.getMessage());
             throw new IOException(ex.getMessage());

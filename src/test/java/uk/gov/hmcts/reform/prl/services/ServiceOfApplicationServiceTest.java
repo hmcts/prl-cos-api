@@ -47,16 +47,19 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -176,6 +179,9 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private DocumentLanguageService documentLanguageService;
+
     private final String authorization = "authToken";
     private final String testString = "test";
     private DynamicMultiSelectList dynamicMultiSelectList;
@@ -206,6 +212,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(dgsService.generateDocument(Mockito.anyString(),Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(GeneratedDocumentInfo.builder().build());
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
     }
 
     @Before
@@ -559,7 +567,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
     @Test
@@ -588,7 +596,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
     @Test
@@ -608,7 +616,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
     @Test
@@ -754,7 +762,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        //when(CaseUtils.isCaseCreatedByCitizen(any())).thenReturn(true);
+
         assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
                                                                            caseInvite, template));
     }
@@ -889,6 +897,8 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .caseInvites(caseInvites)
             .finalDocument(Document.builder().documentFileName("").build())
+            .finalWelshDocument(Document.builder().documentFileName("").build())
+            .c1AWelshDocument(Document.builder().documentFileName("").build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                                                .orderTypeId("Blank order or directions (C21)")
                                                                                .build())
@@ -1066,15 +1076,6 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> partyList = new ArrayList<>();
         Element applicantElement = element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails);
         partyList.add(applicantElement);
-
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
@@ -2546,7 +2547,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2623,7 +2624,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2693,8 +2694,12 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2769,8 +2774,12 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2873,10 +2882,18 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testGetNotificationPacks() {
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
-            .finalDocument(Document.builder().build())
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID), OrderDetails.builder().orderTypeId("Blank order or directions (C21)")
+                .orderDocument(Document.builder().documentFileName("Test").build())
+                .orderDocumentWelsh(Document.builder().documentFileName("Test").build())
+                .build())))
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .serviceOfApplication(ServiceOfApplication.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -3089,11 +3106,6 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_DETAILS,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             authorization,
@@ -3242,8 +3254,7 @@ public class ServiceOfApplicationServiceTest {
 
 
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
-        Element applicantElement = element(partyDetails);
-        partyDetailsList.add(applicantElement);
+        partyDetailsList.add(element(partyDetails));
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3274,7 +3285,7 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             new HashMap<>()
         );
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
 
 
@@ -3460,7 +3471,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
     @Test
@@ -3575,7 +3586,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
     @Test
@@ -3597,14 +3608,22 @@ public class ServiceOfApplicationServiceTest {
 
 
         List<Element<PartyDetails>> applicants = new ArrayList<>();
-        Element applicantElement = element(partyDetails);
-        applicants.add(applicantElement);
-
+        applicants.add(element(partyDetails));
+        List<Element<ResponseDocuments>> c8Docs = List.of(Element.<ResponseDocuments>builder()
+                                                              .value(ResponseDocuments.builder().build())
+            .build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
+            .respondentC8Document(RespondentC8Document.builder()
+                                      .respondentAc8Documents(c8Docs)
+                                      .respondentBc8Documents(c8Docs)
+                                      .respondentCc8Documents(c8Docs)
+                                      .respondentDc8Documents(c8Docs)
+                                      .respondentEc8Documents(c8Docs)
+                                      .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
@@ -3617,7 +3636,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
                                                                                                                    "fileName",
@@ -3631,7 +3650,10 @@ public class ServiceOfApplicationServiceTest {
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                    .forename("first")
                                                                    .surname("test").build());
-
+        when(serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             TEST_AUTH,

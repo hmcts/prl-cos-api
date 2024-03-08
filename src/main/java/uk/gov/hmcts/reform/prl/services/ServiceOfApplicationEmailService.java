@@ -121,7 +121,7 @@ public class ServiceOfApplicationEmailService {
                                                       Map<String, Object> dynamicData,
                                                                           String servedParty) {
         try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
+            boolean emailSentSuccessfully = sendgridService.sendEmailUsingTemplateWithAttachments(
                 template,
                 authorization,
                 SendgridEmailConfig.builder()
@@ -129,14 +129,16 @@ public class ServiceOfApplicationEmailService {
                     .dynamicTemplateData(dynamicData)
                     .listOfAttachments(docs).languagePreference(LanguagePreference.english).build()
             );
-            return EmailNotificationDetails.builder()
-                .emailAddress(email)
-                .servedParty(servedParty)
-                .docs(wrapElements(docs))
-                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                .timeStamp(DateTimeFormatter
-                               .ofPattern("dd MMM yyyy HH:mm:ss")
-                               .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+            if (emailSentSuccessfully) {
+                return EmailNotificationDetails.builder()
+                    .emailAddress(email)
+                    .servedParty(servedParty)
+                    .docs(wrapElements(docs))
+                    .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+                    .timeStamp(DateTimeFormatter
+                                   .ofPattern("dd MMM yyyy HH:mm:ss")
+                                   .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+            }
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
         }
@@ -153,7 +155,7 @@ public class ServiceOfApplicationEmailService {
         combinedMap.putAll(EmailUtils.getCommonEmailProps());
 
         try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
+            boolean emailSentSuccessfully = sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SOA_CA_LOCAL_AUTHORITY,
                 authorization,
                 SendgridEmailConfig.builder().toEmailAddress(
@@ -161,16 +163,16 @@ public class ServiceOfApplicationEmailService {
                     combinedMap).listOfAttachments(
                     docs).languagePreference(LanguagePreference.english).build()
             );
-
-            return EmailNotificationDetails.builder()
-                .emailAddress(email)
-                .servedParty(servedParty)
-                .docs(wrapElements(docs))
-                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                .timeStamp(DateTimeFormatter
-                               .ofPattern("dd MMM yyyy HH:mm:ss")
-                               .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
-
+            if (emailSentSuccessfully) {
+                return EmailNotificationDetails.builder()
+                    .emailAddress(email)
+                    .servedParty(servedParty)
+                    .docs(wrapElements(docs))
+                    .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+                    .timeStamp(DateTimeFormatter
+                                   .ofPattern("dd MMM yyyy HH:mm:ss")
+                                   .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+            }
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
                       email, e.getMessage()

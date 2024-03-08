@@ -238,8 +238,8 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Test
     public void testLocalAuthorityEmailNotification() throws Exception {
-        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(),Mockito.any(),Mockito.anyString(),Mockito.any(),
-                                                      Mockito.anyString())).thenReturn(EmailNotificationDetails.builder().build());
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
