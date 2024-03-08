@@ -22,11 +22,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.Abductions;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
@@ -388,27 +385,6 @@ public class CaseApplicationResponseController {
         if (isNotEmpty(currentRespondent.get().getValue().getResponse())
             && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
             && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
-
-            Response response = currentRespondent.get().getValue().getResponse();
-
-            log.info(" responseee........{}", response);
-
-            Abductions abductions = response.getSafetyConcerns().getAbductions();
-
-            log.info(" response.getSafetyConcerns()........{}", response.getSafetyConcerns());
-
-            RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = response.getRespondentAllegationsOfHarmData();
-
-            Response response1 = response.toBuilder().respondentAllegationsOfHarmData(respondentAllegationsOfHarmData
-                                                                                          .toBuilder()
-                                                                                          .respChildAbductionReasons(
-                                                                                              abductions.getC1AabductionReasonOutsideUk()
-                                                                                          ).build()).build();
-
-            PartyDetails partyDetails = (PartyDetails)dataMap.get("respondent");
-            partyDetails.setResponse(response1);
-            //dataMap.put("respondent",p.toBuilder().response(response1).build());
-            dataMap.put("respondent",partyDetails);
 
             if (Boolean.FALSE.equals(isWelsh)) {
                 log.info(" isWelsh..ENG......{}", isWelsh);
