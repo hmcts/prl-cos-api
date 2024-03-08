@@ -2279,8 +2279,8 @@ public class ServiceOfApplicationService {
     private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
-        caseData.getApplicants().forEach(applicant -> generateCoverLetterBasedOnCaseAccess(authorization, caseData, packLdocs,
-                                                                                           applicant, PRL_LET_ENG_AP7));
+        caseData.getApplicants().forEach(applicant -> packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                           applicant, PRL_LET_ENG_AP7)));
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
         return SoaPack.builder()
             .packDocument(wrapElements(packLdocs))
@@ -2291,16 +2291,15 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private void generateCoverLetterBasedOnCaseAccess(String authorization, CaseData caseData, List<Document> packLdocs,
+    private Document generateCoverLetterBasedOnCaseAccess(String authorization, CaseData caseData,
                                                       Element<PartyDetails> applicant, String template) {
+        Map<String, Object> dataMap;
+        CaseInvite caseInvite = null;
         if (!isAccessEnabled(applicant)) {
-            CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
-            Map<String, Object> dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-            packLdocs.add(fetchCoverLetter(authorization, template, dataMap));
-        } else {
-            Map<String, Object> dataMap = populateAccessCodeMap(caseData, applicant, null);
-            packLdocs.add(fetchCoverLetter(authorization, template, dataMap));
+            caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         }
+        dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
+        return fetchCoverLetter( authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
