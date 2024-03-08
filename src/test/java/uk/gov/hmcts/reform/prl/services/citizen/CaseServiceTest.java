@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -319,7 +318,6 @@ public class CaseServiceTest {
     }
 
     @Test
-    @Ignore
     public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException, NotFoundException {
         //Given
         CaseData caseData = CaseData.builder()
@@ -351,7 +349,6 @@ public class CaseServiceTest {
     }
 
     @Test
-    @Ignore
     public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException, NotFoundException {
         //Given
         CaseData caseData = CaseData.builder()
@@ -378,7 +375,8 @@ public class CaseServiceTest {
         CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
                                                                 CITIZEN_CASE_SUBMIT_WITH_HWF.getValue(), accessCode);
 
-        //ThenassertThat(actualCaseDetails).isEqualTo(caseDetails);
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
     @Test
