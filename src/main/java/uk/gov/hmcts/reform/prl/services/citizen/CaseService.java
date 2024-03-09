@@ -165,8 +165,11 @@ public class CaseService {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
+        log.info("1111101 updateCaseDetails" + caseData);
         if (null != partyDetails.getUser()) {
+            log.info(citizenUpdatedCaseData.getCaseTypeOfApplication() + " 1111102 partyDetails.getUser()" + partyDetails.getUser());
             if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
+                log.info("1111103 updatingPartyDetailsCa " + partyType);
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -178,6 +181,7 @@ public class CaseService {
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
+            caseDataMap.forEach((k,v) -> log.info(k + "--> " + v));
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
