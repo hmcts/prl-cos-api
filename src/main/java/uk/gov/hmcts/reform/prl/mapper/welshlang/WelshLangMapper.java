@@ -155,9 +155,9 @@ public class WelshLangMapper {
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
-        welshMap.put(Gender.female.name(), "benyw");
+        //welshMap.put(Gender.female.name(), "benyw");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
-        welshMap.put(Gender.male.name(), "gwryw");
+        //welshMap.put(Gender.male.name(), "gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
@@ -226,9 +226,9 @@ public class WelshLangMapper {
          * What is the respondent’s relationship to Child 1?.
          */
         welshMap.put(RelationshipsEnum.father.getDisplayedValue(), "Tad");
-        welshMap.put(RelationshipsEnum.father.name(), "tad");
+        //welshMap.put(RelationshipsEnum.father.name(), "tad");
         welshMap.put(RelationshipsEnum.mother.getDisplayedValue(), "Mam");
-        welshMap.put(RelationshipsEnum.mother.name(), "mam");
+        //welshMap.put(RelationshipsEnum.mother.name(), "mam");
         welshMap.put(RelationshipsEnum.stepFather.getDisplayedValue(), "Llystad");
         welshMap.put(RelationshipsEnum.stepMother.getDisplayedValue(), "Llysfam");
         welshMap.put(RelationshipsEnum.grandParent.getDisplayedValue(), "Nain/Taid");
