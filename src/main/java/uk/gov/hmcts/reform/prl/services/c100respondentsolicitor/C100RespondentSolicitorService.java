@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -1312,10 +1312,15 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
-                ObjectMapper om = new ObjectMapper();
-                objectMapper.registerModule(new JavaTimeModule());
-                String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-                log.info("CCCCCCC {}", result);
+                List<Element<RespChildAbuseBehaviour>> childAbuses = respondentAllegationOfHarmService
+                    .updateChildAbusesForDocmosis(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData());
+
+                List childAbusesList = new ArrayList();
+                for (Element el:childAbuses) {
+                    childAbusesList.add(objectMapper.convertValue(el, Map.class));
+                }
+
+                dataMap.put("respChildAbuseBehavioursDocmosis",childAbusesList);
 
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
@@ -1324,7 +1329,6 @@ public class C100RespondentSolicitorService {
                     true,
                     dataMap
                 );
-                log.info("REsulttttt --> {}",documentForC1AWelsh);
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
         }
