@@ -461,7 +461,9 @@ public class ApplicationsTabService implements TabService {
 
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
+            log.info(currentApplicant.getValue().getFirstName() + " 1111121 json:" + currentApplicant.getValue());
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
+            log.info("1111122 address:" + currentApplicant.getValue().getAddress());
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
                 .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue())
                            .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
@@ -524,8 +526,9 @@ public class ApplicationsTabService implements TabService {
         }
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> currentRespondent : currentRespondents) {
+            log.info(currentRespondent.getValue().getFirstName() + " 1111111 json:" + currentRespondent.getValue());
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
-
+            log.info("1111112 address:" + currentRespondent.getValue().getAddress());
             Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId())
                 .value(respondent.toBuilder()
                            .gender(
