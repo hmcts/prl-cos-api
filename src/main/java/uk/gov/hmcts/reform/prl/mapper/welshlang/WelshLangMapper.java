@@ -157,9 +157,9 @@ public class WelshLangMapper {
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
         //welshMap.put(Gender.female.name(), "Benyw");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
-        welshMap.put(Gender.male.name(), "Gwryw");
+        //welshMap.put(Gender.male.name(), "Gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
-        welshMap.put(Gender.other.name(), "Maent yn uniaethu mewn rhyw ffordd arall");
+        //welshMap.put(Gender.other.name(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
          *  Type of Application - What order(s) are you applying for?.
@@ -227,9 +227,9 @@ public class WelshLangMapper {
          * What is the respondent’s relationship to Child 1?.
          */
         welshMap.put(RelationshipsEnum.father.getDisplayedValue(), "Tad");
-        welshMap.put(RelationshipsEnum.father.name(), "Tad");
+        //welshMap.put(RelationshipsEnum.father.name(), "Tad");
         welshMap.put(RelationshipsEnum.mother.getDisplayedValue(), "Mam");
-        welshMap.put(RelationshipsEnum.mother.name(), "Mam");
+        //welshMap.put(RelationshipsEnum.mother.name(), "Mam");
         welshMap.put(RelationshipsEnum.stepFather.getDisplayedValue(), "Llystad");
         welshMap.put(RelationshipsEnum.stepMother.getDisplayedValue(), "Llysfam");
         welshMap.put(RelationshipsEnum.grandParent.getDisplayedValue(), "Nain/Taid");
