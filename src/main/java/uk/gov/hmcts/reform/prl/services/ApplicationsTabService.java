@@ -528,7 +528,8 @@ public class ApplicationsTabService implements TabService {
         for (Element<PartyDetails> currentRespondent : currentRespondents) {
             log.info(currentRespondent.getValue().getFirstName() + " 1111111 json:" + currentRespondent.getValue());
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
-            log.info("1111112 address:" + currentRespondent.getValue().getAddress());
+            log.info("1111112 currentRespondent.address:" + currentRespondent.getValue().getAddress());
+            log.info("1111112 respondent.address:" + respondent.getAddress());
             Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId())
                 .value(respondent.toBuilder()
                            .gender(
