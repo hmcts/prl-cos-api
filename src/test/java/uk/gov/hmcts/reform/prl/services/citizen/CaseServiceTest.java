@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -49,7 +51,9 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -166,7 +170,7 @@ public class CaseServiceTest {
     public void setup() {
         partyDetails = PartyDetails.builder()
             .firstName("")
-            .lastName("")
+            .lastName("test")
             .email("")
             .citizenSosObject(CitizenSos.builder().build())
             .user(User.builder().email("").idamId("").build())
@@ -680,6 +684,7 @@ public class CaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
+
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -759,6 +764,7 @@ public class CaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
+
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -816,6 +822,137 @@ public class CaseServiceTest {
         String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
 
         assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseName() throws IOException, NotFoundException {
+
+        C100RebuildData c100RebuildData = C100RebuildData.builder()
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .applicantCaseName("applicantLN1 V respLN1")
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException, NotFoundException {
+
+        C100RebuildData c100RebuildData = C100RebuildData.builder()
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException, NotFoundException {
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException, NotFoundException {
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
     @Test
@@ -999,8 +1136,14 @@ public class CaseServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .statementOfService(StatementOfService.builder()
-
+                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
                                     .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build())
+            .respondents(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                                                         .accessCode("123").build()).build()))
             .build();
 
         when(CaseUtils.getCaseData(
