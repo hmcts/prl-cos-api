@@ -1335,9 +1335,9 @@ public class C100RespondentSolicitorService {
         List<Element<RespChildAbuseBehaviour>> childAbuses = respondentAllegationOfHarmService
             .updateChildAbusesForDocmosis(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData());
 
-        List childAbusesList = new ArrayList<>();
-        for (Element el:childAbuses) {
-            childAbusesList.add(objectMapper.convertValue(el, Map.class));
+        List<Element<RespChildAbuseBehaviour>> childAbusesList = new ArrayList<>();
+        for (Element<RespChildAbuseBehaviour> el:childAbuses) {
+            childAbusesList.add((Element<RespChildAbuseBehaviour>) objectMapper.convertValue(el, Map.class));
         }
         return childAbusesList;
     }
