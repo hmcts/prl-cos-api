@@ -926,6 +926,7 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
+                dataMap.put("respChildAbuseBehavioursDocmosis",getChildAbuses(representedRespondent));
                 Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1312,15 +1313,8 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
-                List<Element<RespChildAbuseBehaviour>> childAbuses = respondentAllegationOfHarmService
-                    .updateChildAbusesForDocmosis(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData());
 
-                List childAbusesList = new ArrayList();
-                for (Element el:childAbuses) {
-                    childAbusesList.add(objectMapper.convertValue(el, Map.class));
-                }
-
-                dataMap.put("respChildAbuseBehavioursDocmosis",childAbusesList);
+                dataMap.put("respChildAbuseBehavioursDocmosis",getChildAbuses(solicitorRepresentedRespondent));
 
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
@@ -1334,6 +1328,18 @@ public class C100RespondentSolicitorService {
         }
         log.info("viewDraftDocs--->");
         return caseDataUpdated;
+    }
+
+    private List<Element<RespChildAbuseBehaviour>> getChildAbuses(Element<PartyDetails> solicitorRepresentedRespondent){
+
+        List<Element<RespChildAbuseBehaviour>> childAbuses = respondentAllegationOfHarmService
+            .updateChildAbusesForDocmosis(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData());
+
+        List<Element<RespChildAbuseBehaviour>> childAbusesList = new ArrayList<>();
+        for (Element<RespChildAbuseBehaviour> el:childAbuses) {
+            childAbusesList.add((Element<RespChildAbuseBehaviour>) objectMapper.convertValue(el, Map.class));
+        }
+        return childAbusesList;
     }
 
     private void getOrganisationAddress(Element<PartyDetails> respondingParty, Map<String, Object> dataMap) {
