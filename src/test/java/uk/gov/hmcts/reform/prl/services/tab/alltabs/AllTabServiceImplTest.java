@@ -28,10 +28,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,9 +42,6 @@ public class AllTabServiceImplTest {
 
     @Mock
     ApplicationsTabService applicationsTabService;
-
-    @Mock
-    CoreCaseDataService coreCaseDataService;
 
     @Mock
     ConfidentialityTabService confidentialityTabService;
@@ -78,10 +72,10 @@ public class AllTabServiceImplTest {
 
     @Before
     public void setUp() {
-        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1",
+        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "A1B2C3D4", "abc1",
                                                 UUID.randomUUID(), YesOrNo.Yes
         );
-        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2",
+        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "W5X6Y7Z8", "abc2",
                                                 UUID.randomUUID(), YesOrNo.No
         );
         caseInvites = List.of(element(caseInvite1), element(caseInvite2));
@@ -95,33 +89,22 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
         when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
         when(CASE_DATA.getApplicantsFL401()).thenReturn(PartyDetails.builder().build());
-
-        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
-    }
-
-    @Test
-    public void testAllTabsService() {
-
-        allTabService.updateAllTabs(CASE_DATA);
-
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
-        verify(applicationsTabService).updateTab(CASE_DATA);
-        verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
 
     @Test
     public void testAllTabsServiceIncConfTab() {
 
-        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
+        allTabService.updateAllTabsIncludingConfTab("1234567891011121");
 
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(coreCaseDataServiceCcdClient).startUpdate(anyString(), any(), anyString(),anyBoolean());
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
 
     @Test
     public void testUpdateAllTabsIncludingConfTabRefactored() {
-        allTabService.updateAllTabsIncludingConfTabRefactored("auth", "caseId", startEventResponse, EventRequestData
+        allTabService.mapAndSubmitAllTabsUpdate("auth", "caseId", startEventResponse, EventRequestData
             .builder()
             .build(), CASE_DATA);
 
@@ -137,9 +120,10 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getC1AWelshDocument()).thenReturn(Document.builder().build());
         when(CASE_DATA.getFinalDocument()).thenReturn(Document.builder().build());
         when(CASE_DATA.getFinalWelshDocument()).thenReturn(Document.builder().build());
-        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
+        allTabService.updateAllTabsIncludingConfTab("1234567891011121");
 
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(coreCaseDataServiceCcdClient).startUpdate(anyString(), any(), anyString(),anyBoolean());
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
@@ -153,20 +137,20 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getFinalDocument()).thenReturn(Document.builder().build());
         when(CASE_DATA.getFinalWelshDocument()).thenReturn(Document.builder().build());
         assertNotNull(allTabService.getAllTabsFields(CASE_DATA));
-
     }
 
     @Test
-    public void testAllTabsServiceIncConfidentailWithEmptyDocs() {
+    public void testAllTabsServiceIncConfidentialWithEmptyDocs() {
         when(CASE_DATA.getC8Document()).thenReturn(null);
         when(CASE_DATA.getC1ADocument()).thenReturn(null);
         when(CASE_DATA.getC8WelshDocument()).thenReturn(null);
         when(CASE_DATA.getC1AWelshDocument()).thenReturn(null);
         when(CASE_DATA.getFinalDocument()).thenReturn(null);
         when(CASE_DATA.getFinalWelshDocument()).thenReturn(null);
-        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
+        allTabService.updateAllTabsIncludingConfTab("1234567891011121");
 
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(coreCaseDataServiceCcdClient).startUpdate(anyString(), any(), anyString(),anyBoolean());
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
@@ -178,7 +162,8 @@ public class AllTabServiceImplTest {
                                                "caseId",
                                                startEventResponse,
                                                EventRequestData.builder().build(), CASE_DATA);
-        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
+
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
     }
 
     @Test

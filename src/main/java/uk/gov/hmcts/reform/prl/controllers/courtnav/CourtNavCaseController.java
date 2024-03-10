@@ -71,7 +71,7 @@ public class CourtNavCaseController {
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
+            courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {

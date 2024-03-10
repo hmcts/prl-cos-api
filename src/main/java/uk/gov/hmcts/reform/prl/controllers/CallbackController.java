@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -60,11 +61,9 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -151,13 +150,11 @@ public class CallbackController {
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final PaymentRequestService paymentRequestService;
-    private final CourtSealFinderService courtSealFinderService;
     private final ConfidentialityTabService confidentialityTabService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final AuthorisationService authorisationService;
-    private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
     private final EventService eventPublisher;
     private final ManageDocumentsService manageDocumentsService;
@@ -229,7 +226,7 @@ public class CallbackController {
 
             Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
-            // Generate draft documents and set to casedataupdated..
+            // Generate draft documents and set to casedataupdated.
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -432,8 +429,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            allTabsService.updateAllTabs(caseData);
+            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -687,63 +683,68 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
-        List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
-            ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
-            : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
-        if (furtherEvidencesList != null) {
-            quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
-                               .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
-                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
-                               .notes(caseData.getGiveDetails())
-                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
-                               .build())
-                    .id(element.getId()).build())
-                                      .toList());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
+            List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
+            List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
+                    ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                    : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
+            if (furtherEvidencesList != null) {
+                quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
+                                        .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
+                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                                        .notes(caseData.getGiveDetails())
+                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
+                                        .build())
+                                .id(element.getId()).build())
+                        .toList());
+            }
+            if (correspondenceList != null) {
+                quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
+                                        .documentName(element.getValue().getDocumentName())
+                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
+                                        .notes(element.getValue().getNotes())
+                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
+                                        .build())
+                                .id(element.getId()).build())
+                        .toList());
+            }
+            List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
+            if (otherDocumentsList != null) {
+                quarantineDocs.addAll(otherDocumentsList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentOther())
+                                        .documentType(element.getValue().getDocumentTypeOther().toString())
+                                        .notes(element.getValue().getNotes())
+                                        .documentName(element.getValue().getDocumentName())
+                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
+                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
+                                        .build())
+                                .id(element.getId()).build())
+                        .toList());
+            }
+            caseData.setDocumentManagementDetails(DocumentManagementDetails.builder()
+                    .legalProfQuarantineDocsList(quarantineDocs)
+                    .build());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(
+                    "legalProfQuarantineDocsList",
+                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+            );
+            caseDataUpdated.remove("furtherEvidences");
+            caseDataUpdated.remove("correspondence");
+            caseDataUpdated.remove("otherDocuments");
+            caseDataUpdated.remove("documentCategoryChecklist");
+            caseDataUpdated.remove("giveDetails");
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        if (correspondenceList != null) {
-            quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
-                               .documentName(element.getValue().getDocumentName())
-                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
-                               .notes(element.getValue().getNotes())
-                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
-                               .build())
-                    .id(element.getId()).build())
-                                      .toList());
-        }
-        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
-        if (otherDocumentsList != null) {
-            quarantineDocs.addAll(otherDocumentsList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentOther())
-                               .documentType(element.getValue().getDocumentTypeOther().toString())
-                               .notes(element.getValue().getNotes())
-                               .documentName(element.getValue().getDocumentName())
-                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
-                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
-                               .build())
-                    .id(element.getId()).build())
-                                      .toList());
-        }
-        caseData.setDocumentManagementDetails(DocumentManagementDetails.builder()
-                                                  .legalProfQuarantineDocsList(quarantineDocs)
-                                                  .build());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(
-            "legalProfQuarantineDocsList",
-            caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
-        );
-        caseDataUpdated.remove("furtherEvidences");
-        caseDataUpdated.remove("correspondence");
-        caseDataUpdated.remove("otherDocuments");
-        caseDataUpdated.remove("documentCategoryChecklist");
-        caseDataUpdated.remove("giveDetails");
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
@@ -795,9 +796,9 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabs(caseData);
-
+        CaseDetails caseDetails
+                = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
                                                Event.TRANSFER_TO_ANOTHER_COURT.getName()
