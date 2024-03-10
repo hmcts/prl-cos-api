@@ -337,11 +337,11 @@ public class CaseService {
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    updatedPartyDetails.getUser().getIdamId()
+                    partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party ->
-                               applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails))
+                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
@@ -349,11 +349,11 @@ public class CaseService {
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    updatedPartyDetails.getUser().getIdamId()
+                    partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party ->
-                               respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails))
+                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
