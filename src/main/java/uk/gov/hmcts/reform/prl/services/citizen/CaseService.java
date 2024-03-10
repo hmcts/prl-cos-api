@@ -180,7 +180,7 @@ public class CaseService {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
+            caseDataMap.putAll(applicationsTabService.updateTab(
                 caseData));
             caseDataMap.forEach((k,v) -> log.info(k + "--> " + v));
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
