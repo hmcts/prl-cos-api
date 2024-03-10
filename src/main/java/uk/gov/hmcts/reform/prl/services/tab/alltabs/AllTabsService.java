@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
 
 public interface AllTabsService {
-    public void updateAllTabs(CaseData caseData);
+    StartAllTabsUpdateDataContent getStartAllTabsUpdate(String caseId);
+    CaseDetails updateAllTabsIncludingConfTab(String caseId);
 
-    public Map<String, Object> getAllTabsFields(CaseData caseData);
+    Map<String, Object> getAllTabsFields(CaseData caseData);
 }
