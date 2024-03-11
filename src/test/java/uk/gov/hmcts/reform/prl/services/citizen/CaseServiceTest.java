@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -35,14 +34,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
@@ -82,8 +74,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -501,37 +491,6 @@ public class CaseServiceTest {
             .firstName("test1")
             .lastName("test22")
             .user(user1)
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
@@ -614,38 +573,7 @@ public class CaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
-            .citizenSosObject(CitizenSos.builder().build())
+            .address(Address.builder().addressLine1("teststreet").postCode("AP6 3EW").build())
             .build();
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -663,6 +591,7 @@ public class CaseServiceTest {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
                                                                            citizenUpdatedCaseData
         );
+
 
         assertNotNull(caseDetailsAfterUpdate);
     }
@@ -801,7 +730,6 @@ public class CaseServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(
             startEventResponse);
-        User user1 = User.builder().idamId("123").build();
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -1076,37 +1004,6 @@ public class CaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
             .citizenSosObject(CitizenSos.builder().build())
             .build();
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
@@ -1179,37 +1076,6 @@ public class CaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
             .citizenSosObject(CitizenSos.builder().build())
             .build();
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
@@ -1295,37 +1161,6 @@ public class CaseServiceTest {
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
             .user(User.builder()
                       .email("test@gmail.com")
                       .idamId("123")
@@ -1503,35 +1338,6 @@ public class CaseServiceTest {
             .firstName("test1")
             .lastName("test22")
             .user(user1)
-            .response(Response.builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
-                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
-                                              .address(Address.builder().addressLine1("test").build())
-                                              .build())
-                          .c7ResponseSubmitted(No)
-                          .consent(Consent.builder()
-                                       .consentToTheApplication(No)
-                                       .noConsentReason("test")
-                                       .build())
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
-                                    .reasonNotAttendingMiam("test").build())
-                          .citizenInternationalElements(CitizenInternationalElements
-                                                            .builder()
-                                                            .childrenLiveOutsideOfEnWl(Yes)
-                                                            .childrenLiveOutsideOfEnWlDetails("Test")
-                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
-                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                                            .anotherPersonOrderOutsideEnWl(Yes)
-                                                            .anotherPersonOrderOutsideEnWlDetails("test")
-                                                            .anotherCountryAskedInformation(Yes)
-                                                            .anotherCountryAskedInformationDetaails("test")
-                                                            .build())
-                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
-                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
