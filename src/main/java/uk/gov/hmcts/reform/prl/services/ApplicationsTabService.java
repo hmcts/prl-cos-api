@@ -465,7 +465,6 @@ public class ApplicationsTabService implements TabService {
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
                 .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue())
                            .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                           .isAtAddressLessThan5Years(applicant.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
                            .build())
                 .build();
             applicants.add(applicantElement);
