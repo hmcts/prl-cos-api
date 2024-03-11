@@ -2300,7 +2300,7 @@ public class ServiceOfApplicationService {
             caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-        return fetchCoverLetter( authorization, template, dataMap);
+        return fetchCoverLetter(authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
@@ -2549,12 +2549,12 @@ public class ServiceOfApplicationService {
 
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                        sendNotificationsToCitizenRespondentsC100conf(authorization,
+                        sendNotificationsAfterConfCheckToRespondentApplicantsC100(authorization,
                                                                   respondentList,
                                                                   caseData,
                                                                   bulkPrintDetails,
-                                                                  respondentDocs,
-                                                                  false
+                                                                  respondentDocs
+
                         );
                     } else {
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
@@ -2863,7 +2863,7 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
@@ -2877,7 +2877,7 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
@@ -2891,47 +2891,49 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-
-    private List<Element<EmailNotificationDetails>> sendNotificationsAfterConfCheckToRespondentApplicantsC100(String authorization,
-                                                                                                           List<DynamicMultiselectListElement> selectedApplicants,
-                                                                                                           CaseData caseData,
-                                                                                                           List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                                                           List<Document> docs) {
+    private List<Element<EmailNotificationDetails>> sendNotificationsAfterConfCheckToRespondentApplicantsC100(
+                                                                                                            String authorization,
+                                                                                                            List<DynamicMultiselectListElement>
+                                                                                                                selectedRespondents,
+                                                                                                            CaseData caseData,
+                                                                                                            List<Element<BulkPrintDetails>>
+                                                                                                                bulkPrintDetails,
+                                                                                                            List<Document> docs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
             : new ArrayList<>();
         removeCoverLettersFromThePacks(docs);
-        selectedApplicants.forEach(applicant -> {
-            Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getApplicants());
+        selectedRespondents.forEach(applicant -> {
+            Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getRespondents());
             if (selectedParty.isPresent()) {
-                Element<PartyDetails> selectedApplicant = selectedParty.get();
-                CaseInvite caseInvite = getCaseInvite(selectedApplicant.getId(),caseInvites);
+                Element<PartyDetails> selectedRespondent = selectedParty.get();
+                CaseInvite caseInvite = getCaseInvite(selectedRespondent.getId(),caseInvites);
                 if (caseInvite == null) {
-                    caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
+                    caseInvite = c100CaseInviteService.generateCaseInvite(selectedRespondent, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (isAccessEnabled(selectedApplicant)) {
+                if (isAccessEnabled(selectedRespondent)) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                    if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
-                                                            bulkPrintDetails, selectedApplicant, Templates.AP6_LETTER,
+                                                            bulkPrintDetails, selectedRespondent, PRL_LET_ENG_RE5,
                                                             SERVED_PARTY_APPLICANT);
                     }
                 } else {
                     log.info("Access to be granted");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
+                    if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
+                        Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedRespondent, caseInvite,
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, combinedDocs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
-                                                            bulkPrintDetails, selectedApplicant, Templates.AP6_LETTER,
+                                                            bulkPrintDetails, selectedRespondent, Templates.PRL_LET_ENG_RE5,
                                                             SERVED_PARTY_APPLICANT);
                     }
                 }
@@ -2940,7 +2942,6 @@ public class ServiceOfApplicationService {
         });
         return emailNotificationDetails;
     }
-
 
     public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -2998,7 +2999,7 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private void sendEmailToCitizenApplicationSendgrid(String authorization,
+    private void sendEmailToCitizenApplicant(String authorization,
                                                        CaseData caseData, Element<PartyDetails> applicant,
                                                        List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
