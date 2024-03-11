@@ -32,7 +32,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (response.isPresent()) {
             return ofNullable(response.get().getAttendToCourt())
                 .filter(attendToCourt -> anyNonEmpty(
-                    attendToCourt.getRespondentWelshNeeds().getDisplayedValue(),
+                    attendToCourt.getRespondentWelshNeeds(),
                     attendToCourt.getRespondentWelshNeedsList(),
                     attendToCourt.getIsRespondentNeededInterpreter(),
                     attendToCourt.getRespondentInterpreterNeeds(),
