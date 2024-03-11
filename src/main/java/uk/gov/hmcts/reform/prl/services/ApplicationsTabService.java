@@ -458,11 +458,6 @@ public class ApplicationsTabService implements TabService {
             applicants.add(Element.<Applicant>builder().value(Applicant.builder().build()).build());
             return applicants;
         }
-        try {
-            log.info("*** Displaying Applicants Data ****" + objectMapper.writeValueAsString(caseData.getApplicants()));
-        } catch (Exception e) {
-            log.info(e.getMessage());
-        }
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);

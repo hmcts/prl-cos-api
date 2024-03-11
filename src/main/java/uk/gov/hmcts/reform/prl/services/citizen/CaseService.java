@@ -318,12 +318,6 @@ public class CaseService {
 
     private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
         log.info("** PartyDetails ** {}", partyDetails);
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            log.info("before updatingPartyDetailsCa ****" + objectMapper.writeValueAsString(caseData.getApplicants()));
-        } catch (Exception e) {
-            log.info(e.getMessage());
-        }
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
@@ -337,11 +331,6 @@ public class CaseService {
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 }
                 );
-            try {
-                log.info("after updatingPartyDetailsCa ****" + objectMapper.writeValueAsString(caseData.getApplicants()));
-            } catch (Exception e) {
-                log.info(e.getMessage());
-            }
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
