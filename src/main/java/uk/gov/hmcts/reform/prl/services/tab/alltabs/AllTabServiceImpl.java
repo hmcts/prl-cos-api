@@ -111,15 +111,19 @@ public class AllTabServiceImpl implements AllTabsService {
                                                  CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
 
+        return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
+    }
+
+    public CaseDetails submitAllTabsUpdate(String systemAuthorisation, String caseId, StartEventResponse startEventResponse, EventRequestData eventRequestData, Map<String, Object> combinedFieldsMap) {
         return ccdCoreCaseDataService.submitUpdate(
-            systemAuthorisation,
-            eventRequestData,
-            ccdCoreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                combinedFieldsMap
-            ),
-            caseId,
-            true
+                systemAuthorisation,
+                eventRequestData,
+                ccdCoreCaseDataService.createCaseDataContent(
+                        startEventResponse,
+                        combinedFieldsMap
+                ),
+                caseId,
+                true
         );
     }
 

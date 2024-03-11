@@ -205,7 +205,6 @@ public class DraftAnOrderService {
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
-    private final CoreCaseDataService coreCaseDataService;
     private final RoleAssignmentService roleAssignmentService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
