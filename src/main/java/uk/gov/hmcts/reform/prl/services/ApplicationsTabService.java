@@ -459,9 +459,8 @@ public class ApplicationsTabService implements TabService {
             return applicants;
         }
         try {
-            log.info("*** Displaying Applicants Data **** " + objectMapper
-                .writeValueAsString(caseData.getApplicants())); }
-        catch (Exception e) {
+            log.info("*** Displaying Applicants Data ****" + objectMapper.writeValueAsString(caseData.getApplicants()));
+        } catch (Exception e) {
             log.info(e.getMessage());
         }
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
