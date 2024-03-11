@@ -323,10 +323,8 @@ public class ManageOrdersUtils {
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (isDaOrderSelectedForCaCase(selectedOrder.toString()) && isNotDaOrderSupportedCase(caseData)) {
-                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
-                }
+            if (isDaOrderSelectedForCaCase(selectedOrder.toString(), caseData) && isNotDaOrderSupportedCase(caseData)) {
+                errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                 .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
@@ -341,8 +339,9 @@ public class ManageOrdersUtils {
         return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
-    private static boolean isDaOrderSelectedForCaCase(String selectedOrder) {
-        return Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+    public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
+                VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 
