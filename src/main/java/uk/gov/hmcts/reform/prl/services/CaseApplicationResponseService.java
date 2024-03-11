@@ -234,13 +234,11 @@ public class CaseApplicationResponseService {
     private String getCategoryId(Element<Document> element) {
 
         if (null != element.getValue().getDocumentFileName()) {
-            if (element.getValue().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
-                return "respondentApplication";
-            } else if (element.getValue().getDocumentFileName().equalsIgnoreCase("C1A_allegation_of_harm.pdf")) {
-                return "respondentC1AApplication";
-            } else {
-                return "ordersFromOtherProceedings";
-            }
+            return switch (element.getValue().getDocumentFileName()) {
+                case "C7_Document.pdf" -> "respondentApplication";
+                case "C1A_allegation_of_harm.pdf" -> "respondentC1AApplication";
+                default -> "ordersFromOtherProceedings";
+            };
         }
 
         return "";
