@@ -302,7 +302,7 @@ dependencies {
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
   implementation group: 'junit', name: 'junit', version: versions.junit
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '3.0.2'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.5'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
