@@ -32,7 +32,9 @@ public enum ServeOrderFieldsEnum {
     deliveryByOptionsCaOnlyC47a("deliveryByOptionsCaOnlyC47a"),
     postalInformationCaOnlyC47a("postalInformationCaOnlyC47a"),
     emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
-    isOrderCompleteToServe("isOrderCompleteToServe");
+    isOrderCompleteToServe("isOrderCompleteToServe"),
+    closeCaseDoableActions("closeCaseDoableActions"),
+    doesOrderClosesCase("doesOrderClosesCase");
 
     private final String value;
 
