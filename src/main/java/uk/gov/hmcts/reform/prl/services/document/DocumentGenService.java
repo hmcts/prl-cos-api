@@ -1343,26 +1343,14 @@ public class DocumentGenService {
                 .toList();
 
             //if marked as confidential/restricted
-            if (Yes.equals(documentRequest.getIsConfidential())
-                || Yes.equals(documentRequest.getIsRestricted())) {
                 //create WA task
-                manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
+            manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
                 //confidential/restricted - move documents to quarantine
                 caseData = moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,
                     caseData,
                     caseDataUpdated
                 );
-
-            } else {
-                //non-confidential, move to respective category & case documents tab
-                caseData = moveCitizenDocumentsToCaseDocumentsTab(
-                    quarantineLegalDocs,
-                    caseData,
-                    caseDataUpdated,
-                    userDetails
-                );
-            }
 
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
 
