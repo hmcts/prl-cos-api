@@ -178,7 +178,6 @@ public class CaseService {
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
-            caseDataMap.forEach((k,v) -> log.info(k + "--> " + v));
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
