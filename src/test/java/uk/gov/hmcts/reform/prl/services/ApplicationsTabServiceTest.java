@@ -349,6 +349,7 @@ public class ApplicationsTabServiceTest {
             .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
@@ -373,6 +374,7 @@ public class ApplicationsTabServiceTest {
             .gender("Male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
         CaseData caseData = CaseData.builder()
@@ -413,6 +415,7 @@ public class ApplicationsTabServiceTest {
             .gender(Gender.male.getDisplayedValue())
             .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
             .isAddressConfidential(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .email(THIS_INFORMATION_IS_CONFIDENTIAL)
