@@ -1274,8 +1274,6 @@ public class ServiceOfApplicationService {
                     try {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
-                        dynamicData.put("caseName", caseData.getApplicantCaseName());
-                        dynamicData.put("caseNumber", caseData.getId());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                                  .sendEmailUsingTemplateWithAttachments(authorization,
@@ -2495,7 +2493,7 @@ public class ServiceOfApplicationService {
         List<Document> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             selectedPartyIds.forEach(partyId -> {
-                Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+                Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
                 log.info(" party.get()" + party.get());
                 packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                      party.get(), Templates.AP6_LETTER));
