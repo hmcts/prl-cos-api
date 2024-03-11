@@ -165,11 +165,8 @@ public class CaseService {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
-        log.info("1111101 updateCaseDetails" + caseData);
         if (null != partyDetails.getUser()) {
-            log.info(citizenUpdatedCaseData.getCaseTypeOfApplication() + " 1111102 partyDetails.getUser()" + partyDetails.getUser());
             if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
-                log.info("1111103 updatingPartyDetailsCa " + partyType);
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -187,7 +184,6 @@ public class CaseService {
                 startEventResponse,
                 caseDataMap
             );
-            //log.info("1111104 respondentTable " + ((Map<String, Object>)caseDataContent.getData()).get("respondentTable"));
             return coreCaseDataService.submitUpdate(
                 authToken,
                 eventRequestData,
@@ -323,12 +319,6 @@ public class CaseService {
 
     private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
         log.info("** PartyDetails ** {}", partyDetails);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            log.info("** before respondents ** {}", mapper.writeValueAsString(caseData.getRespondents()));
-        } catch (Exception e) {
-            log.info("** error ** {}", e.fillInStackTrace());
-        }
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
@@ -337,8 +327,10 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                               PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                               applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                           }
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
@@ -350,25 +342,23 @@ public class CaseService {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
-                        StringUtils.isNotEmpty(
-                            partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                        .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-                        .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
-                                                      YesOrNo.No).build();
-
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
                     respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
                         }
                 );
             caseData = caseData.toBuilder().respondents(respondents).build();
-
-            try {
-                log.info("** after respondents ** {}", mapper.writeValueAsString(respondents));
-            } catch (Exception e) {
-                log.info("** error ** {}", e.fillInStackTrace());
-            }
         }
         return caseData;
+    }
+
+    private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
+        PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
+            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
+                                          YesOrNo.No)
+            .build();
+        return updatedPartyDetails;
     }
 
 
