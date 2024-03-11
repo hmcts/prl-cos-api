@@ -3260,7 +3260,7 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             new HashMap<>()
         );
-        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }
 
 
