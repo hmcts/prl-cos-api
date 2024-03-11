@@ -65,6 +65,7 @@ public class CaseApplicationResponseService {
                 respondent.setCurrentRespondent(currentRespondent);
             }
         }
+
         return caseData;
     }
 
@@ -142,6 +143,7 @@ public class CaseApplicationResponseService {
             REVIEW_AND_SUBMIT,
             null
         );
+
         return caseDetailsReturn;
     }
 
@@ -158,13 +160,19 @@ public class CaseApplicationResponseService {
                 proceedingsList.add(elementProceedings.getValue());
             }
 
-            for (Proceedings proceedings : proceedingsList) {
-                if (null != proceedings.getProceedingDetails()) {
-                    for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
-                        if (isNotEmpty(otherProceedingDetailsElement.getValue())
-                            && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
-                            responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
-                        }
+            return getOrderDocumentsFromProceedings(responseDocs, proceedingsList);
+        }
+
+        return responseDocs;
+    }
+
+    private List<Element<Document>> getOrderDocumentsFromProceedings(List<Element<Document>> responseDocs, List<Proceedings> proceedingsList) {
+        for (Proceedings proceedings : proceedingsList) {
+            if (null != proceedings.getProceedingDetails()) {
+                for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
+                    if (isNotEmpty(otherProceedingDetailsElement.getValue())
+                        && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
+                        responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
                     }
                 }
             }
@@ -199,8 +207,6 @@ public class CaseApplicationResponseService {
                 .id(element.getId()).build())
             .toList());
 
-        log.info("QuarantineDocs are {}", quarantineDocs);
-
         if (null != caseData.getDocumentManagementDetails()) {
             caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
         } else {
@@ -209,6 +215,7 @@ public class CaseApplicationResponseService {
                 .citizenQuarantineDocsList(quarantineDocs)
                 .build());
         }
+
         return caseData;
     }
 
@@ -270,6 +277,7 @@ public class CaseApplicationResponseService {
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
+
         return caseData;
     }
 

@@ -196,16 +196,30 @@ public class CaseApplicantResponseServiceTest {
 
     @Test
     public void testGenerateC7finalDocumentForRespondent2() throws Exception {
+        List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
+        OtherProceedingDetails proceedingDetails = OtherProceedingDetails
+            .builder().orderDocument(Document.builder().build()).build();
+
+        proceedingsDetailsList.add(element(proceedingDetails));
+
+        Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
+
+        List<Element<Proceedings>> proceedingsList = new ArrayList<>();
+        proceedingsList.add(element(proceedings));
+
+        Element partyDetails2 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .currentRespondent(YesOrNo.Yes)
+                .response(Response.builder()
+                    .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                        .builder().proceedingsList(proceedingsList).build()).safetyConcerns(
+                        SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                .response(Response.builder().safetyConcerns(
-                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails2 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                .currentRespondent(YesOrNo.Yes)
                 .response(Response.builder().safetyConcerns(
                     SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
             .build();
@@ -256,6 +270,28 @@ public class CaseApplicantResponseServiceTest {
 
     @Test
     public void testGenerateC7finalDocumentForRespondent3() throws Exception {
+
+        List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
+        OtherProceedingDetails proceedingDetails = OtherProceedingDetails
+            .builder().build();
+
+        proceedingsDetailsList.add(element(proceedingDetails));
+
+        Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
+
+        List<Element<Proceedings>> proceedingsList = new ArrayList<>();
+        proceedingsList.add(element(proceedings));
+
+        Element partyDetails3 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .currentRespondent(YesOrNo.Yes)
+                .response(Response.builder()
+                    .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                        .builder().proceedingsList(proceedingsList).build()).safetyConcerns(
+                        SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
@@ -265,13 +301,6 @@ public class CaseApplicantResponseServiceTest {
         Element partyDetails2 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                .response(Response.builder().safetyConcerns(
-                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails3 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                .currentRespondent(YesOrNo.Yes)
                 .response(Response.builder().safetyConcerns(
                     SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
             .build();
@@ -316,6 +345,21 @@ public class CaseApplicantResponseServiceTest {
 
     @Test
     public void testGenerateC7finalDocumentForRespondent4() throws Exception {
+        Proceedings proceedings = Proceedings.builder().build();
+
+        List<Element<Proceedings>> proceedingsList = new ArrayList<>();
+        proceedingsList.add(element(proceedings));
+
+        Element partyDetails4 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .currentRespondent(YesOrNo.Yes)
+                .response(Response.builder()
+                    .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                        .builder().proceedingsList(proceedingsList).build()).safetyConcerns(
+                        SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
@@ -331,13 +375,6 @@ public class CaseApplicantResponseServiceTest {
         Element partyDetails3 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                .response(Response.builder().safetyConcerns(
-                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails4 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                .currentRespondent(YesOrNo.Yes)
                 .response(Response.builder().safetyConcerns(
                     SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
             .build();
