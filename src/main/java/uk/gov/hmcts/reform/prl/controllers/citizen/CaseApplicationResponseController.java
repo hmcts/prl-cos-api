@@ -55,7 +55,7 @@ public class CaseApplicationResponseController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData,isWelsh);
+        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData, isWelsh);
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
