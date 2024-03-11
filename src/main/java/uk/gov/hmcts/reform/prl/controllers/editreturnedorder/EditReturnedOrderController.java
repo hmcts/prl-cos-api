@@ -46,8 +46,6 @@ public class EditReturnedOrderController {
 
     private final AuthorisationService authorisationService;
 
-    private final CoreCaseDataService coreCaseDataService;
-
     private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n The judge will review the edits you have made to this order.
@@ -91,15 +89,16 @@ public class EditReturnedOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+                callbackRequest.getCaseDetails().getId()));
+            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                callbackRequest.getCaseDetails().getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.systemAuthorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated);
             return ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
