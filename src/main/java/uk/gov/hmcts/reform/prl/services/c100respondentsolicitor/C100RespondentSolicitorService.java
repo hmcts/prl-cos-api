@@ -1092,9 +1092,10 @@ public class C100RespondentSolicitorService {
                 "reasonForChildDetails",
                 response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails()
         );
-        dataMap.put("reasonForParent", null != response
-            .getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl() ? response
-            .getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue() : No);
+        dataMap.put(
+            "reasonForParent",
+            null != response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl() ? response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue() : null
+        );
         dataMap.put(
                 "reasonForParentDetails",
                 response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails()
