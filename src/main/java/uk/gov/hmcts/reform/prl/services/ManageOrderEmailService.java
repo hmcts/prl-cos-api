@@ -346,9 +346,6 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
-        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
@@ -575,6 +572,9 @@ public class ManageOrderEmailService {
 
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            dynamicData.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+            dynamicData.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         }
         return dynamicData;
     }
