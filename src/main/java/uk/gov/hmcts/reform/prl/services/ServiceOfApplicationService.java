@@ -2986,9 +2986,9 @@ public class ServiceOfApplicationService {
                 } else {
                     log.info("Access to be granted");
                     if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
-                        Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedRespondent, caseInvite,
-                                                                      Templates.AP6_LETTER);
-                        List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
+                        Document re5letter = generateAccessCodeLetter(authorization, caseData, selectedRespondent, caseInvite,
+                                                                      Templates.PRL_LET_ENG_RE5);
+                        List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(re5letter));
                         combinedDocs.addAll(docs);
                         sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, combinedDocs,
                                                     SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP);
