@@ -63,8 +63,6 @@ public class OrderDetails {
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
-    private final YesOrNo daOrderForCaCase;
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
 
