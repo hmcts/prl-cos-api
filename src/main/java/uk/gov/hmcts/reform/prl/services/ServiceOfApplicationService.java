@@ -3070,6 +3070,9 @@ public class ServiceOfApplicationService {
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getFirstName()
                 + " " + caseData.getApplicants().get(0).getValue().getLastName());
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            dynamicData.put("isEnglish", documentLanguage.isGenEng());
+            dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 caseData.getApplicants().get(0).getValue().getEmail(),
