@@ -328,9 +328,9 @@ public class CaseService {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                               PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
-                               applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
-                           }
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                }
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
