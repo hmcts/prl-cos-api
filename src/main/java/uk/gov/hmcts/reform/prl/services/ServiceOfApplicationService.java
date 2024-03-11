@@ -2496,6 +2496,7 @@ public class ServiceOfApplicationService {
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             selectedPartyIds.forEach(partyId -> {
                 Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+                log.info(" party.get()" + party.get());
                 packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                      party.get(), Templates.AP6_LETTER));
             });
