@@ -56,7 +56,7 @@ public class ManageOrdersUtils {
         {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
     private static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
         "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
-        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder", "nonMolestation", "generalForm"};
+        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder", "nonMolestation"};
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
@@ -342,7 +342,7 @@ public class ManageOrdersUtils {
     }
 
     private static boolean isDaOrderSelectedForCaCaseCase(String selectedOrder) {
-        return Arrays.stream(VALID_ORDER_IDS_FOR_C100)
+        return Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 
