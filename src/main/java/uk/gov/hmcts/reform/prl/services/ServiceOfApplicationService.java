@@ -2863,7 +2863,7 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, docs, SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
@@ -2877,7 +2877,7 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs, SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
@@ -2915,7 +2915,7 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedRespondent)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, docs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, docs, SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             docs,
@@ -2929,7 +2929,7 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, combinedDocs,SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
@@ -3001,7 +3001,7 @@ public class ServiceOfApplicationService {
 
     private void sendEmailToCitizenApplicant(String authorization,
                                                        CaseData caseData, Element<PartyDetails> applicant,
-                                                       List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
+                                                       List<Element<EmailNotificationDetails>> notificationList, List<Document> docs,  SendgridEmailTemplateNames template) {
         try {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getFirstName()
@@ -3011,7 +3011,7 @@ public class ServiceOfApplicationService {
                 authorization,
                 caseData.getApplicants().get(0).getValue().getEmail(),
                 docs,
-                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                template,
                 dynamicData,
                 SERVED_PARTY_APPLICANT
             )));
