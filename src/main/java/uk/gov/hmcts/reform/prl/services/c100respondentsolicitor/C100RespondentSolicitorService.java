@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESP_CHILD_ABUSES_DOCMOSIS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
@@ -926,7 +927,7 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
-                dataMap.put("respChildAbuseBehavioursDocmosis",getChildAbuses(representedRespondent));
+                dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,getChildAbuses(representedRespondent));
                 Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1237,7 +1238,7 @@ public class C100RespondentSolicitorService {
     private void populateAohDataMap(Response response, Map<String, Object> dataMap) {
         if (response.getRespondentAllegationsOfHarmData() != null) {
             RespondentAllegationsOfHarmData allegationsOfHarmData = response.getRespondentAllegationsOfHarmData();
-            dataMap.put("respChildAbuseBehavioursDocmosis",respondentAllegationOfHarmService
+            dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,respondentAllegationOfHarmService
                     .updateChildAbusesForDocmosis(allegationsOfHarmData));
             dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
 
@@ -1314,7 +1315,7 @@ public class C100RespondentSolicitorService {
 
             if (documentLanguage.isGenWelsh()) {
 
-                dataMap.put("respChildAbuseBehavioursDocmosis",getChildAbuses(solicitorRepresentedRespondent));
+                dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,getChildAbuses(solicitorRepresentedRespondent));
 
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
