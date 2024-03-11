@@ -56,7 +56,7 @@ public class ManageOrdersUtils {
         {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
     private static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
         "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
-        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder", "nonMolestation"};
+        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
@@ -327,7 +327,7 @@ public class ManageOrdersUtils {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
                     errorList.add("This order is not available to be created");
                 }
-                if (isDaOrderSelectedForCaCaseCase(selectedOrder.toString()) && isNotDaOrderSupportedCase(caseData)) {
+                if (isDaOrderSelectedForCaCase(selectedOrder.toString()) && isNotDaOrderSupportedCase(caseData)) {
                     errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -343,7 +343,7 @@ public class ManageOrdersUtils {
         return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
-    private static boolean isDaOrderSelectedForCaCaseCase(String selectedOrder) {
+    private static boolean isDaOrderSelectedForCaCase(String selectedOrder) {
         return Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
