@@ -1342,11 +1342,9 @@ public class DocumentGenService {
                                                               userDetails))
                 .toList();
 
-            //if marked as confidential/restricted
-                //create WA task
             manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
-                //confidential/restricted - move documents to quarantine
-                caseData = moveCitizenDocumentsToQuarantineTab(
+
+            caseData = moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,
                     caseData,
                     caseDataUpdated
