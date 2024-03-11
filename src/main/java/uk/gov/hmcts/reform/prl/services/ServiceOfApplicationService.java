@@ -1272,12 +1272,16 @@ public class ServiceOfApplicationService {
                 if (YesNoDontKnow.yes.equals(selectedRespondent.getValue().getDoTheyHaveLegalRepresentation())) {
                     log.info("Respondent is represented");
                     try {
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToSolicitor(
-                            authorization, caseData,
-                            selectedRespondent.getValue(),
-                            isStaticDocs ? getNotificationPack(caseData, PrlAppsConstants.S, docs) : docs,
-                            SERVED_PARTY_RESPONDENT
-                        )));
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
+                        dynamicData.put("caseName", caseData.getApplicantCaseName());
+                        dynamicData.put("caseNumber", caseData.getId());
+                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                 .sendEmailUsingTemplateWithAttachments(authorization,
+                                                                 selectedRespondent.getValue().getEmail(), docs,
+                                                                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
+                                                                 dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
                         log.error("Failed to send email to respondent solicitor {}", e.getMessage());
                     }
