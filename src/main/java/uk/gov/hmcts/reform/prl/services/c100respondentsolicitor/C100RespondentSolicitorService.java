@@ -1087,19 +1087,19 @@ public class C100RespondentSolicitorService {
         dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam().getDisplayedValue());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren().getDisplayedValue());
-        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
+        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl().getDisplayedValue());
         dataMap.put(
                 "reasonForChildDetails",
                 response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails()
         );
-        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
+        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue());
         dataMap.put(
                 "reasonForParentDetails",
                 response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails()
         );
         dataMap.put(
                 "reasonForJurisdiction",
-                response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl()
+                response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl().getDisplayedValue()
         );
         dataMap.put(
                 "reasonForJurisdictionDetails",
@@ -1107,7 +1107,7 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put(
                 "requestToAuthority",
-                response.getCitizenInternationalElements().getAnotherCountryAskedInformation()
+                response.getCitizenInternationalElements().getAnotherCountryAskedInformation().getDisplayedValue()
         );
         dataMap.put(
                 "requestToAuthorityDetails",
