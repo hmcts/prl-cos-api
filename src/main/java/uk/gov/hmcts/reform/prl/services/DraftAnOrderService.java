@@ -2455,14 +2455,4 @@ public class DraftAnOrderService {
             return false;
         }
     }
-
-    public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            callbackRequest.getCaseDetails().getId(),
-            "internal-update-all-tabs",
-            caseDataUpdated
-        );
-    }
 }
