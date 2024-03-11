@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -48,7 +49,7 @@ public class CaseApplicationResponseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader("isWelsh") boolean isWelsh,
+        @RequestParam("isWelsh") boolean isWelsh,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
