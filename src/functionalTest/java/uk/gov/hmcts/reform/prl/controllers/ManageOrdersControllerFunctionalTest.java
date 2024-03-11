@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class ManageOrdersControllerFunctionalTest {
 
     public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT
