@@ -1330,14 +1330,14 @@ public class C100RespondentSolicitorService {
         return caseDataUpdated;
     }
 
-    private List<Element<RespChildAbuseBehaviour>> getChildAbuses(Element<PartyDetails> solicitorRepresentedRespondent) {
+    private List<Map<String,Object>> getChildAbuses(Element<PartyDetails> solicitorRepresentedRespondent) {
 
         List<Element<RespChildAbuseBehaviour>> childAbuses = respondentAllegationOfHarmService
             .updateChildAbusesForDocmosis(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData());
 
-        List childAbusesList = new ArrayList<>();
-        for (Element el:childAbuses) {
-            childAbusesList.add(objectMapper.convertValue(el, Object.class));
+        List<Map<String,Object>> childAbusesList = new ArrayList<>();
+        for (Element<RespChildAbuseBehaviour> el:childAbuses) {
+            childAbusesList.add(objectMapper.convertValue(el, Map.class));
         }
         return childAbusesList;
     }
