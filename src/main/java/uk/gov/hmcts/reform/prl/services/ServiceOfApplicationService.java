@@ -939,7 +939,9 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void sendEmailToApplicantLipPersonalC100(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails, Element<PartyDetails> selectedApplicant, List<Document> docs) {
+    private void sendEmailToApplicantLipPersonalC100(CaseData caseData, String authorization,
+                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                     Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put("c1aExists", doesC1aExists(caseData));
@@ -2357,7 +2359,7 @@ public class ServiceOfApplicationService {
             caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-        return fetchCoverLetter( authorization, template, dataMap);
+        return fetchCoverLetter(authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
@@ -2582,6 +2584,19 @@ public class ServiceOfApplicationService {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
+            } else if (unServedApplicantPack != null
+                && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
+                unServedApplicantPack.getPersonalServiceBy())) {
+                List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>();
+                sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
+                                                               emailNotifications, bulkPrintDetails);
+
+                if (!emailNotifications.isEmpty()) {
+                    emailNotificationDetails.addAll(emailNotifications);
+                } else {
+                    failedPacksMap.put(APPLICANT_PACK, "Yes");
+                }
+                whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
                     List<Element<EmailNotificationDetails>> applicantEmailList = new ArrayList<>();
@@ -2678,7 +2693,7 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendNotificationForApplicantLegalRepPersonalService(CaseData caseData, String authorization,
                                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                      SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
-        EmailNotificationDetails emailNotification = null;
+        EmailNotificationDetails emailNotification;
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             emailNotification = sendEmailDaPersonalApplicantLegalRep(
                 caseData,
@@ -2695,6 +2710,33 @@ public class ServiceOfApplicationService {
             );
         }
         return emailNotification;
+    }
+
+    private void sendNotificationForApplicantLipPersonalService(CaseData caseData, String authorization,
+                                                                                         SoaPack unServedApplicantPack,
+                                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Document>> packDocs = unServedApplicantPack.getPackDocument();
+            List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
+            caseData.getApplicants().forEach(applicant -> {
+                if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                              applicant, PRL_LET_ENG_AP7);
+                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
+                    if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
+                        docs.addAll(documents);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, docs);
+                    } else {
+                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
+                                                            documents,
+                                                            bulkPrintDetails,
+                                                            applicant, ap7Letter,
+                                                            SERVED_PARTY_APPLICANT);
+                    }
+                }
+            });
+        }
     }
 
     private EmailNotificationDetails checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization) {
@@ -2751,7 +2793,6 @@ public class ServiceOfApplicationService {
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                 authorization,
                 applicantList,
