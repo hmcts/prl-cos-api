@@ -150,8 +150,8 @@ public class WelshLangMapper {
         /**
          * Common Utils - Yes,No,Information is to be kept confidential,Gender,Don't know.
          */
-        welshMap.put(YesOrNo.Yes.getDisplayedValue(), "Ydy");
-        welshMap.put(YesOrNo.No.getDisplayedValue(), WELSH_NO);
+        welshMap.put(YesOrNo.Yes.toString(), "Ydy");
+        welshMap.put(YesOrNo.No.toString(), WELSH_NO);
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
