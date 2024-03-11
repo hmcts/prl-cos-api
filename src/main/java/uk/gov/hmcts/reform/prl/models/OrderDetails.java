@@ -64,6 +64,7 @@ public class OrderDetails {
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
 
+    private final YesOrNo daOrderForCaCase;
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
 
