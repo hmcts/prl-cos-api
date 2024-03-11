@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -180,7 +179,7 @@ public class CaseService {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            caseDataMap.putAll(applicationsTabService.updateTab(
+            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
             caseDataMap.forEach((k,v) -> log.info(k + "--> " + v));
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
@@ -324,11 +323,9 @@ public class CaseService {
 
     private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
         log.info("** PartyDetails ** {}", partyDetails);
-        PartyDetails updatedPartyDetails = updatePartyDetails(partyDetails);
         ObjectMapper mapper = new ObjectMapper();
         try {
-            log.info("** beforeUpdatingPartyDetails ** {}", mapper.writeValueAsString(partyDetails));
-            log.info("** AfterUpdatingPartyDetails ** {}", mapper.writeValueAsString(updatedPartyDetails));
+            log.info("** before respondents ** {}", mapper.writeValueAsString(caseData.getRespondents()));
         } catch (Exception e) {
             log.info("** error ** {}", e.fillInStackTrace());
         }
@@ -352,23 +349,28 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                    PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
+                        StringUtils.isNotEmpty(
+                            partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+                        .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+                        .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
+                                                      YesOrNo.No).build();
+
+                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
+                        }
                 );
             caseData = caseData.toBuilder().respondents(respondents).build();
+
+            try {
+                log.info("** after respondents ** {}", mapper.writeValueAsString(respondents));
+            } catch (Exception e) {
+                log.info("** error ** {}", e.fillInStackTrace());
+            }
         }
         return caseData;
     }
 
-
-    private static PartyDetails updatePartyDetails(PartyDetails partyDetails) {
-        CitizenDetails citizenDetails = partyDetails.getResponse().getCitizenDetails();
-        partyDetails = partyDetails.toBuilder().firstName(citizenDetails.getFirstName())
-            .lastName(citizenDetails.getLastName())
-            .address(citizenDetails.getAddress())
-            .build();
-        return partyDetails;
-    }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
 

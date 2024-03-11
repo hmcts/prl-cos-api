@@ -549,11 +549,13 @@ public class ApplicationsTabService implements TabService {
                                    ? YesNoDontKnow.getDisplayedValueIgnoreCase(
                                    respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
                            .build()).build();
+
             log.info("1111112 respondent.isAddressKnown:" + respondentElement.getValue().getIsCurrentAddressKnown());
             log.info("1111112 respondent.isPhoneNumber:" + respondentElement.getValue().getCanYouProvidePhoneNumber());
             log.info("1111112 respondent.isAddressKnown:" + respondentElement.getValue().getAddress());
             respondents.add(respondentElement);
         }
+
         return respondents;
     }
 
