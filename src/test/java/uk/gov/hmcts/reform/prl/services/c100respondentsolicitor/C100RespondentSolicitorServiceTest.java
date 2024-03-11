@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -64,6 +65,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -2216,8 +2218,7 @@ public class C100RespondentSolicitorServiceTest {
                                  .build())
                 .build();
             callbackRequest.setEventId(event);
-            UserDetails userDetails = UserDetails.builder().forename("test")
-                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
 
             doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
             doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
@@ -2225,6 +2226,14 @@ public class C100RespondentSolicitorServiceTest {
             doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());
             doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(),any(),any(),any());
 
+            RespChildAbuseBehaviour respChildAbuseBehaviour = RespChildAbuseBehaviour.builder().typeOfAbuse(
+                ChildAbuseEnum.emotionalAbuse.getDisplayedValue()).build();
+            List<Element<RespChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+            childAbuseBehaviourList.add(element(respChildAbuseBehaviour));
+
+            when(respondentAllegationOfHarmService.updateChildAbusesForDocmosis(any())).thenReturn(childAbuseBehaviourList);
+            UserDetails userDetails = UserDetails.builder().forename("test")
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
