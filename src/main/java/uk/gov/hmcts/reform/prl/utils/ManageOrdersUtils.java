@@ -343,8 +343,9 @@ public class ManageOrdersUtils {
         return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
-    private static boolean isDaOrderSelectedForCaCase(String selectedOrder) {
-        return Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+    public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
+                VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 
