@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -56,7 +57,6 @@ import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -145,12 +145,9 @@ public class ServiceOfApplicationService {
     public static final String REJECTION_REASON = "rejectionReason";
     public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
     public static final String CONFIDENTIAL_CHECK_FAILED = "confidentialCheckFailed";
-    public static final String INTERNAL_UPDATE_ALL_TABS = "internal-update-all-tabs";
     public static final String APPLICANTS = "applicants";
     public static final String CASE_INVITES = "caseInvites";
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-    public static final String EMAIL = "email";
     public static final String POST = "post";
     public static final String COURT = "Court";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
@@ -267,15 +264,11 @@ public class ServiceOfApplicationService {
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
     private final AllTabServiceImpl allTabService;
-
     private final DgsService dgsService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
-
-    private final CoreCaseDataService coreCaseDataService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -1051,11 +1044,11 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-            updatedCaseDataContent.systemAuthorisation(),
-            caseId,
-            updatedCaseDataContent.startEventResponse(),
-            updatedCaseDataContent.eventRequestData(),
-            caseDataUpdated
+                updatedCaseDataContent.systemAuthorisation(),
+                caseId,
+                updatedCaseDataContent.startEventResponse(),
+                updatedCaseDataContent.eventRequestData(),
+                caseDataMap
         );
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationHeader)
@@ -1076,11 +1069,11 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-            updatedCaseDataContent.systemAuthorisation(),
-            String.valueOf(callbackRequest.getCaseDetails().getId()),
-            updatedCaseDataContent.startEventResponse(),
-            updatedCaseDataContent.eventRequestData(),
-            caseDataUpdated
+                updatedCaseDataContent.systemAuthorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                updatedCaseDataContent.startEventResponse(),
+                updatedCaseDataContent.eventRequestData(),
+                caseDataMap
         );
         String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
