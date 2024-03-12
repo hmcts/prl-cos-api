@@ -82,6 +82,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) throws Exception {
+
         dataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -89,7 +90,6 @@ public class DgsService {
                                                                                    .equalsIgnoreCase(
                                                                                        caseTypeOfApplication)
                 );
-
                 dataMap.put(k, updatedWelshObj);
             }
         });
