@@ -83,8 +83,6 @@ public class ReviewDocumentServiceTest {
     ReviewDocumentService reviewDocumentService;
 
     @Mock
-    CoreCaseDataService coreCaseDataService;
-    @Mock
     AuthTokenGenerator authTokenGenerator;
     @Mock
     SystemUserService systemUserService;
@@ -587,7 +585,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
@@ -615,7 +613,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NO, response.getBody().getConfirmationBody());
@@ -631,7 +629,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
@@ -648,7 +646,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());
@@ -663,7 +661,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
