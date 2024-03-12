@@ -53,7 +53,7 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
+        log.info("document generation request received for {} C7", documentRequest.isWelsh());
         caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData,
                                                                       documentRequest.isWelsh());
