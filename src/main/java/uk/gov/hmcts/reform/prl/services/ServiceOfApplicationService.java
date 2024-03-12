@@ -2590,6 +2590,19 @@ public class ServiceOfApplicationService {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
+            } else if (unServedApplicantPack != null
+                && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
+                unServedApplicantPack.getPersonalServiceBy())) {
+                List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>();
+                sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
+                                                               emailNotifications, bulkPrintDetails);
+
+                if (emailNotifications.isEmpty() && bulkPrintDetails.isEmpty()) {
+                    failedPacksMap.put(APPLICANT_PACK, "Yes");
+                } else {
+                    emailNotificationDetails.addAll(emailNotifications);
+                }
+                whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
                     List<Element<EmailNotificationDetails>> applicantEmailList = new ArrayList<>();
@@ -2686,7 +2699,7 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendNotificationForApplicantLegalRepPersonalService(CaseData caseData, String authorization,
                                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                      SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
-        EmailNotificationDetails emailNotification = null;
+        EmailNotificationDetails emailNotification;
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             emailNotification = sendEmailDaPersonalApplicantLegalRep(
                 caseData,
@@ -2703,6 +2716,33 @@ public class ServiceOfApplicationService {
             );
         }
         return emailNotification;
+    }
+
+    private void sendNotificationForApplicantLipPersonalService(CaseData caseData, String authorization,
+                                                                                         SoaPack unServedApplicantPack,
+                                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Document>> packDocs = unServedApplicantPack.getPackDocument();
+            List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
+            caseData.getApplicants().forEach(applicant -> {
+                if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                              applicant, PRL_LET_ENG_AP7);
+                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
+                    if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
+                        docs.addAll(documents);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, docs);
+                    } else {
+                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
+                                                            documents,
+                                                            bulkPrintDetails,
+                                                            applicant, ap7Letter,
+                                                            SERVED_PARTY_APPLICANT);
+                    }
+                }
+            });
+        }
     }
 
     private EmailNotificationDetails checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization) {
