@@ -524,8 +524,7 @@ public class ManageOrderEmailService {
                 party.getValue().getAddress(),
                 party.getValue().getLabelForDynamicList(),
                 authorisation,
-                orderDocuments,
-                true
+                orderDocuments
             );
             log.info("** bulk print id {}", bulkPrintId);
             bulkPrintOrderDetails.add(element(
@@ -736,7 +735,7 @@ public class ManageOrderEmailService {
                 && isNotEmpty(organisationPostalInfo.getPostalAddress().getAddressLine1())) {
                 try {
                     UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getPostalAddress(),
-                                                                organisationPostalInfo.getPostalName(), authorisation, orderDocuments, false);
+                                                                organisationPostalInfo.getPostalName(), authorisation, orderDocuments);
                     log.info("** bulk print id {}", bulkPrintId);
                     //PRL-4225 save bulk print details
                     bulkPrintOrderDetails.add(element(
@@ -762,7 +761,7 @@ public class ManageOrderEmailService {
             try {
                 UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
                                                             applicantElement.getValue().getLabelForDynamicList(),
-                                                            authorisation, orderDocuments, false
+                                                            authorisation, orderDocuments
                 );
                 //PRL-4225 save bulk print details
                 bulkPrintOrderDetails.add(element(
@@ -797,7 +796,7 @@ public class ManageOrderEmailService {
                     && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
                     try {
                         UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson.getAddress(),
-                                                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments, false);
+                                                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments);
                         //PRL-4225 save bulk print details
                         bulkPrintOrderDetails.add(element(
                             buildBulkPrintOrderDetail(bulkPrintId, id,
@@ -918,7 +917,7 @@ public class ManageOrderEmailService {
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData.getAddress(),
-                                                                        partyData.getLabelForDynamicList(), authorisation, orderDocuments, false);
+                                                                        partyData.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                 buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
@@ -940,16 +939,14 @@ public class ManageOrderEmailService {
                                           Address address,
                                           String name,
                                           String authorisation,
-                                          List<Document> orderDocuments,
-                                          boolean isForCitizen) throws Exception {
+                                          List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
+        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetterServeOrder(
             caseData,
             authorisation,
             address,
-            name,
-            isForCitizen
+            name
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
             documents.addAll(coverLetterDocs);

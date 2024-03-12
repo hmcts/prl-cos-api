@@ -502,8 +502,8 @@ document:
       prl_c6a_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6a.pdf
       prl_c6a_welsh_draft_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6a_draft.pdf
-      doc_cover_sheet_citizen_template: PRL-DOCUMENT-COVER-CITIZEN-SHEET.docx
-      doc_cover_sheet_welsh_citizen_template: PRL-DOCUMENT-COVER-CITIZEN-SHEET.docx
+      doc_cover_sheet_serve_order_template: PRL-DOCUMENT-COVER-CITIZEN-SHEET.docx
+      doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-CITIZEN-SHEET.docx
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf

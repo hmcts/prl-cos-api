@@ -557,8 +557,8 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
-                                                          AUTH, address, "test name", false));
+                          .getCoverLetterServeOrder(caseData,
+                                                    AUTH, address, "test name"));
 
     }
 
@@ -582,8 +582,8 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
-                                          AUTH, address, "test name", false));
+                          .getCoverLetterServeOrder(caseData,
+                                                    AUTH, address, "test name"));
 
     }
 
@@ -606,8 +606,8 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertTrue(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
-                                          AUTH, address, "test name", false).isEmpty());
+                          .getCoverLetterServeOrder(caseData,
+                                                    AUTH, address, "test name").isEmpty());
 
     }
 
@@ -886,7 +886,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
 
-        List<Document> coverLetters = serviceOfApplicationPostService.getCoverLetter(caseData, AUTH, address, "test name", true);
+        List<Document> coverLetters = serviceOfApplicationPostService.getCoverLetterServeOrder(caseData, AUTH, address, "test name");
         assertNotNull(coverLetters);
         assertFalse(coverLetters.isEmpty());
         assertEquals("coversheet.pdf", coverLetters.get(0).getDocumentFileName());
