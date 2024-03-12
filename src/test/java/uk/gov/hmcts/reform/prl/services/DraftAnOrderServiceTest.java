@@ -3217,6 +3217,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
             .children(children)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .manageOrders(ManageOrders.builder()
                               .isTheOrderAboutChildren(Yes)
                               .build())
