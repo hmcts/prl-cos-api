@@ -240,7 +240,7 @@ public class HearingManagementServiceTest {
         caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(c100CaseData);
 
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(caseDetails.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_DETAILS,
@@ -278,7 +278,7 @@ public class HearingManagementServiceTest {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(caseDetails.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_CHANGES,
@@ -319,7 +319,7 @@ public class HearingManagementServiceTest {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(caseDetails.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_CANCELLED,
@@ -426,7 +426,7 @@ public class HearingManagementServiceTest {
         respondentEmail = respondentFl401.getEmail();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(fl401CaseData.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_DETAILS,
@@ -500,7 +500,7 @@ public class HearingManagementServiceTest {
         respondentEmail = respondentFl401.getEmail();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(fl401CaseData.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_CHANGES,
@@ -578,7 +578,7 @@ public class HearingManagementServiceTest {
         applicantEmail = applicantFl401.getEmail();
         respondentEmail = respondentFl401.getEmail();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(String.valueOf(fl401CaseData.getId()));
 
         doNothing().when(emailService).send(applicantEmail,
                                             EmailTemplateNames.HEARING_CANCELLED,

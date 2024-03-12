@@ -71,9 +71,6 @@ public class ConfidentialityCheckControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
-    @MockBean
-    private CoreCaseDataService coreCaseDataService;
-
     @Test
     public void givenRequestWithCaseData_ResponseContains() throws Exception {
 
@@ -94,7 +91,6 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsNo() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -250,7 +246,6 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
-        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())

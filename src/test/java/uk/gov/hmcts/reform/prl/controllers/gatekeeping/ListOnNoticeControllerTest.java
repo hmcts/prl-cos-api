@@ -90,9 +90,6 @@ public class ListOnNoticeControllerTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
-    @Mock
-    CoreCaseDataService coreCaseDataService;
-
     private CaseData caseData;
 
     private Map<String, Object> stringObjectMap;
