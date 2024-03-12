@@ -2077,32 +2077,37 @@ public class ManageOrderService {
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
         if (orderData != null) {
+
+            PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
             orderData = orderData.toBuilder()
                 .fl404bCaseNumber(String.valueOf(caseData.getId()))
                 .fl404bCourtName(caseData.getCourtName())
                 .fl404bApplicantName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
+                    applicant1.getFirstName(),
+                    applicant1.getLastName()
                 ))
                 .fl404bRespondentName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getRespondentsFL401().getFirstName(),
-                    caseData.getRespondentsFL401().getLastName()
+                    respondent1.getFirstName(),
+                    respondent1.getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
-                                              ? caseData.getApplicantsFL401().getSolicitorReference() : "")
-                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
-                                               ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                .fl404bApplicantReference(applicant1.getSolicitorReference() != null
+                                              ? applicant1.getSolicitorReference() : "")
+                .fl404bRespondentReference(respondent1.getSolicitorReference() != null
+                                               ? respondent1.getSolicitorReference() : "")
                 .build();
 
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            if (ofNullable(respondent1.getAddress()).isPresent()) {
                 orderData = orderData.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                    .fl404bRespondentAddress(respondent1.getAddress()).build();
             }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
                 orderData = orderData.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                    .fl404bRespondentDob(respondent1.getDateOfBirth()).build();
             }
         }
         caseData = caseData.toBuilder()

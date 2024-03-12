@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
@@ -479,7 +480,9 @@ public class DraftAnOrderService {
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-            if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) || ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                caseData.getCreateSelectOrderOptions().toString(),
+                caseData)) {
                 FL404 fl404CustomFields = getFl404CustomFields(caseData);
                 caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().fl404CustomFields(
                     fl404CustomFields).build()).build();
@@ -1257,26 +1260,30 @@ public class DraftAnOrderService {
     private static FL404 getFl404CustomFields(CaseData caseData) {
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         if (fl404CustomFields != null) {
+            PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
             fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
+                    applicant1.getFirstName(),
+                    applicant1.getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
-                                              ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+                .fl404bApplicantReference(applicant1.getSolicitorReference() != null
+                                              ? applicant1.getSolicitorReference() : "")
                 .fl404bCourtName(caseData.getCourtName())
                 .fl404bRespondentName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getRespondentsFL401().getFirstName(),
-                    caseData.getRespondentsFL401().getLastName()
+                    respondent1.getFirstName(),
+                    respondent1.getLastName()
                 )).build();
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            if (ofNullable(respondent1.getAddress()).isPresent()) {
                 fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                    .fl404bRespondentAddress(respondent1.getAddress()).build();
             }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
                 fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                    .fl404bRespondentDob(respondent1.getDateOfBirth()).build();
             }
         }
         return fl404CustomFields;
