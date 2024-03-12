@@ -8,6 +8,7 @@ import java.util.Map;
 
 public interface AllTabsService {
     StartAllTabsUpdateDataContent getStartAllTabsUpdate(String caseId);
+    StartAllTabsUpdateDataContent getStartUpdateForSpecificEvent(String caseId, String eventId);
     CaseDetails updateAllTabsIncludingConfTab(String caseId);
 
     Map<String, Object> getAllTabsFields(CaseData caseData);

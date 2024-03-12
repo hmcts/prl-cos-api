@@ -104,6 +104,34 @@ public class AllTabServiceImpl implements AllTabsService {
         );
     }
 
+    @Override
+    public StartAllTabsUpdateDataContent getStartUpdateForSpecificEvent(String caseId, String eventId) {
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.valueOf(eventId),
+            systemUpdateUserId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                systemAuthorisation,
+                allTabsUpdateEventRequestData,
+                caseId,
+                true
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            systemAuthorisation,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData
+        );
+    }
+
     public CaseDetails mapAndSubmitAllTabsUpdate(String systemAuthorisation,
                                                  String caseId,
                                                  StartEventResponse startEventResponse,
