@@ -297,7 +297,7 @@ public class ManageOrderEmailService {
             otherEmails = manageOrders.getOtherEmailAddress()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
         }
 
         cafcassEmails.addAll(otherEmails);
@@ -446,7 +446,6 @@ public class ManageOrderEmailService {
             });
         } else {
             caseData.getApplicants().forEach(party -> {
-                log.info("party name ====> " + party.getValue().getFirstName());
                 if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("===== CA serving unrepresented applicant via email ====");
@@ -517,7 +516,6 @@ public class ManageOrderEmailService {
                                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                                            Element<PartyDetails> party) {
         log.info("inside  sendPersonalServiceNotificationsForUnrepresentedApplicant");
-        log.info("partyDeatils ===>" +  party.getValue().getLabelForDynamicList());
         try {
             UUID bulkPrintId = sendOrderDocumentViaPost(
                 caseData,
