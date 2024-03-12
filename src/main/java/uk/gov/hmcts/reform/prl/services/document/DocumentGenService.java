@@ -71,8 +71,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
@@ -221,12 +220,16 @@ public class DocumentGenService {
     protected String docCoverSheetWelshFilename;
     @Value("${document.templates.common.prl_c7_draft_template}")
     protected String docC7DraftTemplate;
+    @Value("${document.templates.common.prl_c7_draft_template_wel}")
+    protected String docC7DraftWelshTemplate;
     @Value("${document.templates.common.prl_c7_final_template_eng}")
     protected String docC7FinalEngTemplate;
     @Value("${document.templates.common.prl_c7_final_template_wel}")
     protected String docC7FinalWelshTemplate;
     @Value("${document.templates.common.prl_c7_draft_filename}")
     protected String docC7DraftFilename;
+    @Value("${document.templates.common.prl_c7_draft_filename_wel}")
+    protected String docC7DraftWelshFilename;
     @Value("${document.templates.common.prl_c7_final_filename_eng}")
     protected String docC7FinalEngFilename;
     @Value("${document.templates.common.prl_c7_final_filename_wel}")
@@ -763,7 +766,7 @@ public class DocumentGenService {
                 fileName = findDocCoversheetFileName(isWelsh);
                 break;
             case DOCUMENT_C7_DRAFT_HINT:
-                fileName = docC7DraftFilename;
+                fileName = getC7DraftFileName(isWelsh);
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
@@ -774,11 +777,8 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
-            case C7_FINAL_ENGLISH:
-                fileName = docC7FinalEngFilename;
-                break;
-            case C7_FINAL_WELSH:
-                fileName = docC7FinalWelshFilename;
+            case C7_FINAL_RESPONDENT:
+                fileName = getC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
                 fileName = solicitorC7DraftFilename;
@@ -799,6 +799,14 @@ public class DocumentGenService {
                 fileName = "";
         }
         return fileName;
+    }
+
+    private String getC7FinalFileName(boolean isWelsh) {
+        return !isWelsh ? docC7FinalEngFilename : docC7FinalWelshFilename;
+    }
+
+    private String getC7DraftFileName(boolean isWelsh) {
+        return !isWelsh ? docC7DraftFilename : docC7DraftWelshFilename;
     }
 
     private String findDraftFilename(boolean isWelsh, String caseTypeOfApp) {
@@ -872,7 +880,7 @@ public class DocumentGenService {
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
             case DOCUMENT_C7_DRAFT_HINT:
-                template = docC7DraftTemplate;
+                template = getC7CitizenDraftTemplate(isWelsh);
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
@@ -886,11 +894,8 @@ public class DocumentGenService {
             case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
                 break;
-            case C7_FINAL_ENGLISH:
-                template = docC7FinalEngTemplate;
-                break;
-            case C7_FINAL_WELSH:
-                template = docC7FinalWelshTemplate;
+            case C7_FINAL_RESPONDENT:
+                template = getC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
                 template = solicitorC7DraftTemplate;
@@ -911,6 +916,14 @@ public class DocumentGenService {
                 template = "";
         }
         return template;
+    }
+
+    private String getC7FinalTemplate(boolean isWelsh) {
+        return !isWelsh ? docC7FinalEngTemplate : docC7FinalWelshTemplate;
+    }
+
+    private String getC7CitizenDraftTemplate(boolean isWelsh) {
+        return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
     }
 
     private String findDraftTemplate(boolean isWelsh, CaseData caseData) {
