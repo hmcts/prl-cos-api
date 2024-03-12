@@ -17,22 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_FINAL_ORDERS_ISSUED_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DECISION_OUTCOME_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREPARE_FOR_HEARING_CONDUCT_HEARING_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 
 @Tag(name = "task-list-controller")
 @Slf4j
