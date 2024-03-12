@@ -1282,7 +1282,11 @@ public class ServiceOfApplicationService {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", selectedApplicant.getValue().getFirstName() + " "
                     + selectedApplicant.getValue().getLastName());
-                dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+                dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                dynamicData.put("isEnglish", documentLanguage.isGenEng());
+                dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
@@ -1354,7 +1358,11 @@ public class ServiceOfApplicationService {
                     try {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
-                        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+                        dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                        dynamicData.put("isEnglish", documentLanguage.isGenEng());
+                        dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                              .sendEmailUsingTemplateWithAttachments(authorization,
                                                 selectedRespondent.getValue().getSolicitorEmail(), docs,
