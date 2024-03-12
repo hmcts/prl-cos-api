@@ -578,7 +578,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                      emailAddress, e.getMessage());
+                      emailAddress, e.getMessage(), e);
         }
     }
 
@@ -598,8 +598,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      cafcassCymruEmailId, e.getMessage()
-            );
+                      cafcassCymruEmailId, e.getMessage(), e);
         }
 
     }
@@ -1008,8 +1007,6 @@ public class ManageOrderEmailService {
             .orderLink(manageCaseUrl + "/" + caseData.getId())
             .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentative())
             .build();
-        log.info("** Email tempplate vars : {}", emailTemplateVars);
-        log.info("*** Draft oder {}", draftOrder);
         emailService.send(
             draftOrder.getOtherDetails().getOrderCreatedByEmailId(),
             EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
@@ -1034,7 +1031,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      emailAddress, e.getMessage()
+                      emailAddress, e.getMessage(), e
             );
         }
     }
