@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,12 +43,14 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
@@ -91,6 +95,8 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -905,7 +911,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetailsForEditAndApprove() {
+    public void testSaveServeOrderDetailsForEditAndApprove() throws JsonProcessingException {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -970,14 +976,19 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetailsForEditAndReturnedOrder() {
+    public void testSaveServeOrderDetailsForEditAndReturnedOrder() throws JsonProcessingException {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
 
 
-        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder()
+            .value(HearingData.builder()
+                       .hearingJudgeNameAndEmail(
+                           JudicialUser.builder().build()
+                       )
+                       .build()).build();
 
         List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
         hearingDataCollection.add(hearingDataElement);
@@ -1620,5 +1631,105 @@ public class EditAndApproveDraftOrderControllerTest {
         assertExpectedException(() -> {
             editAndApproveDraftOrderController.editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testNoFieldsPopulateUploadOrder() throws Exception {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+
+        Assert.assertNotNull(response);
+        Map<String, Object> updatedCaseDataMap = response.getData();
+        Assert.assertNotNull(updatedCaseDataMap.get("draftOrderCollection"));
+        Assert.assertEquals("C100", updatedCaseDataMap.get("caseTypeOfApplication"));
+    }
+
+    @Test
+    public void testSkipUploadConditionWhenDraftOrderIsNull() throws Exception {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(null);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testPopulateCommonFieldsEditedOrder() throws Exception {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateCommonFields(authToken,s2sToken,callbackRequest);
+
+        Assert.assertNotNull(response);
+        Map<String, Object> updatedCaseDataMap = response.getData();
+        Assert.assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
+        Assert.assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
     }
 }

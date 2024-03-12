@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -220,8 +221,8 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).toList())
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).toList()))
+            .docs(listOfAttachments.stream().map(ElementUtils::element).toList())
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(Document::getDocumentFileName).toList()))
             .timeStamp(currentDate).build();
     }
 
@@ -262,23 +263,21 @@ public class SendgridService {
     private void attachFiles(String authorization, Mail mail, Map<String,
         String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
-
-        for (Document d : documents) {
+        documents.parallelStream().forEach(document -> {
             Attachments attachments = new Attachments();
             String documentAsString = "";
             documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                       .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
+                                                                          document.getDocumentUrl(),
                                                                           authorization,
                                                                           s2sToken
                                                                       ));
-            attachments.setFilename(d.getDocumentFileName());
+            attachments.setFilename(document.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
             mail.addAttachments(attachments);
-
-        }
+        });
     }
 
 }

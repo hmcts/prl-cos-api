@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -59,6 +61,8 @@ public class CourtNavCaseService {
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final SystemUserService systemUserService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -151,7 +155,7 @@ public class CourtNavCaseService {
         try {
             return coreCaseDataService.startUpdate(authorisation, eventRequestData, caseId, true);
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }
@@ -209,10 +213,37 @@ public class CourtNavCaseService {
     }
 
     public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
-        data.put("id", String.valueOf(id));
-        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
-        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("**********************Tab refresh started**************************");
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+
+        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
+
+        log.info("Following case event will be triggered {}", caseEvent.getValue());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        StartEventResponse startEventResponse = coreCaseDataService.startUpdate(systemAuthorisation,
+                                                                                eventRequestData,
+                                                                                String.valueOf(id),
+                                                                                true
+        );
+
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
+        caseDataMap.put("id", String.valueOf(id));
+        caseDataMap.putAll(documentGenService.generateDocuments(
+            authToken,
+            objectMapper.convertValue(data, CaseData.class)
+        ));
+        CaseData caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        CaseData latestCaseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+
+        allTabService.updateAllTabsIncludingConfTabRefactored(systemAuthorisation,
+                                                              String.valueOf(id),
+                                                              startEventResponse,
+                                                              eventRequestData,
+                                                              latestCaseData
+        );
         log.info("**********************Tab refresh and Courtnav case creation complete**************************");
     }
 }

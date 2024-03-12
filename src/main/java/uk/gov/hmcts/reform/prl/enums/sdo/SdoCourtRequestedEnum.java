@@ -14,7 +14,9 @@ public enum SdoCourtRequestedEnum {
     @JsonProperty("allegationsMade")
     allegationsMade("allegationsMade", "A list of allegations made"),
     @JsonProperty("writtenResponse")
-    writtenResponse("writtenResponse", "A written response to each of the allegations made");
+    writtenResponse("writtenResponse", "A written response to each of the allegations made"),
+    @JsonProperty("both")
+    both("both", "Both");
 
     private final String id;
     private final String displayedValue;

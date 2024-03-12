@@ -46,7 +46,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_S
         "rd_professional.api.url=localhost:8894",
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
-        "staffDetails.api.url=http://localhost:8899"
+        "staffDetails.api.url=http://localhost:8899",
+        "amRoleAssignment.api.url="
     }
 )
 @PactFolder("pacts")

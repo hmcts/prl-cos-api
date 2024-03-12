@@ -173,6 +173,8 @@ public class EditReturnedOrderService {
                                                                         Event.EDIT_RETURNED_ORDER.getId(), null))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 

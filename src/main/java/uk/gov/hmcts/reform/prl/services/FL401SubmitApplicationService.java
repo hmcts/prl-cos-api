@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -47,6 +48,7 @@ public class FL401SubmitApplicationService {
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -112,13 +114,13 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         return caseDataUpdated;
     }
 
     public CaseData fl401SendApplicationNotification(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
         try {
             SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
             eventPublisher.publishEvent(event);
@@ -131,7 +133,7 @@ public class FL401SubmitApplicationService {
                 .build();
 
         } catch (Exception e) {
-            log.error("Notification could not be sent due to {} ", e.getMessage());
+            log.error("Notification could not be sent due to ", e);
             caseData = caseData.toBuilder()
                 .isNotificationSent("No")
                 .build();

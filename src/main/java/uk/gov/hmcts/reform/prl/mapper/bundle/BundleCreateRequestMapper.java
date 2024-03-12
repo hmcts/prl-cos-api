@@ -67,7 +67,7 @@ public class BundleCreateRequestMapper {
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
-                .id(caseData.getApplicantName())
+                .bundleName(caseData.getApplicantName())
                 .caseData(mapCaseData(caseData,hearingDetails,
                     bundleConfigFileName))
                 .build())
@@ -131,9 +131,7 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
-            log.info("****** otherDocuments added" + otherDocuments);
         }
-        log.info("****** allOtherDocuments " + allOtherDocuments);
         return allOtherDocuments;
 
     }
@@ -267,7 +265,6 @@ public class BundleCreateRequestMapper {
         if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
             && !caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-            log.info("****** courtStaffUploadDocList" + courtStaffUploadDocList);
             allDocuments.addAll(courtStaffUploadDocList);
         }
         if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()
@@ -280,16 +277,13 @@ public class BundleCreateRequestMapper {
             List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
             allDocuments.addAll(legalProfUploadDocList);
         }
-        log.info("****** allDocuments" + allDocuments);
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         List<QuarantineLegalDoc>  allDocs = ElementUtils.unwrapElements(allDocuments);
         for (QuarantineLegalDoc doc : allDocs) {
             if (null != mapBundlingRequestDocumentForOtherDocs(doc)) {
                 otherBundlingDocuments.add(mapBundlingRequestDocumentForOtherDocs(doc));
-                log.info("****** This document added to List of otherBundlingDocuments" + doc);
             }
         }
-        log.info("****** Full list of otherBundlingDocuments" + otherBundlingDocuments);
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
 
