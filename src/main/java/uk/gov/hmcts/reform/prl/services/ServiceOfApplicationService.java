@@ -3037,60 +3037,6 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private List<Element<EmailNotificationDetails>> sendNotificationsAfterConfCheckToRespondentApplicantsC100(
-                                                                                                            String authorization,
-                                                                                                            List<DynamicMultiselectListElement>
-                                                                                                                selectedRespondents,
-                                                                                                            CaseData caseData,
-                                                                                                            List<Element<BulkPrintDetails>>
-                                                                                                                bulkPrintDetails,
-                                                                                                            List<Document> docs) {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
-            : new ArrayList<>();
-        removeCoverLettersFromThePacks(docs);
-        selectedRespondents.forEach(applicant -> {
-            Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getRespondents());
-            if (selectedParty.isPresent()) {
-                Element<PartyDetails> selectedRespondent = selectedParty.get();
-                CaseInvite caseInvite = getCaseInvite(selectedRespondent.getId(),caseInvites);
-                if (caseInvite == null) {
-                    caseInvite = c100CaseInviteService.generateCaseInvite(selectedRespondent, Yes);
-                    caseInvites.add(element(caseInvite));
-                }
-                if (isAccessEnabled(selectedRespondent)) {
-                    log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, docs,
-                                                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP);
-                    } else {
-                        Document coverLetter = generateAccessCodeLetter(authorization, caseData,selectedRespondent, caseInvite,
-                                                                        Templates.PRL_LET_ENG_RE5);
-                        sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, selectedRespondent,
-                                                            coverLetter, SERVED_PARTY_RESPONDENT);
-                    }
-                } else {
-                    log.info("Access to be granted");
-                    if (ContactPreferences.digital.equals(selectedRespondent.getValue().getContactPreferences())) {
-                        Document re5letter = generateAccessCodeLetter(authorization, caseData, selectedRespondent, caseInvite,
-                                                                      Templates.PRL_LET_ENG_RE5);
-                        List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(re5letter));
-                        combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicant(authorization, caseData, selectedRespondent, emailNotificationDetails, combinedDocs,
-                                                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP);
-                    } else {
-                        Document coverLetter = generateAccessCodeLetter(authorization, caseData,selectedRespondent, caseInvite,
-                                                                        Templates.PRL_LET_ENG_RE5);
-                        sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, selectedRespondent,
-                                                            coverLetter, SERVED_PARTY_RESPONDENT);
-                    }
-                }
-            }
-            caseData.setCaseInvites(caseInvites);
-        });
-        return emailNotificationDetails;
-    }
-
     public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
