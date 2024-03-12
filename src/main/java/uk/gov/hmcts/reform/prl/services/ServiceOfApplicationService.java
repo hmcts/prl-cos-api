@@ -1307,9 +1307,9 @@ public class ServiceOfApplicationService {
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
                         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
-                                                                                               selectedApplicant.getValue().getEmail(), docs,
-                                                                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                                                                               dynamicData, SERVED_PARTY_APPLICANT);
+                                                   selectedApplicant.getValue().getEmail(), docs,
+                                                   SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                   dynamicData, SERVED_PARTY_APPLICANT);
                     } else {
                         Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
                                                                         caseInvite, Templates.AP6_LETTER);
@@ -1356,10 +1356,10 @@ public class ServiceOfApplicationService {
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                                 .sendEmailUsingTemplateWithAttachments(authorization,
-                                                                                                        selectedRespondent.getValue().getSolicitorEmail(), docs,
-                                                                                                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
-                                                                                                        dynamicData, SERVED_PARTY_RESPONDENT)));
+                                             .sendEmailUsingTemplateWithAttachments(authorization,
+                                                selectedRespondent.getValue().getSolicitorEmail(), docs,
+                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
+                                                dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
                         log.error("Failed to send email to respondent solicitor {}", e);
                     }
