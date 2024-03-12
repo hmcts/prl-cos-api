@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -35,7 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -54,6 +55,8 @@ public class CaseApplicationResponseService {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final CaseService caseService;
     private final IdamClient idamClient;
+    private final DocumentLanguageService documentLanguageService;
+    private final UserService userService;
 
     public CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
 
@@ -71,11 +74,16 @@ public class CaseApplicationResponseService {
                                                              String caseId, String s2sToken) throws Exception {
 
         List<Element<Document>> responseDocs = new ArrayList<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         log.info(" Generating C7 Final document for respondent ");
-        Document document = generateFinalC7(caseData, authorisation);
-        responseDocs.add(element(document));
+        if (documentLanguage.isGenEng()) {
+            responseDocs.add(element(generateFinalC7(caseData, authorisation, false)));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            responseDocs.add(element(generateFinalC7(caseData, authorisation, true)));
+        }
         log.info("C7 Final document generated successfully for respondent ");
 
         Optional<Element<PartyDetails>> currentRespondent
@@ -235,7 +243,7 @@ public class CaseApplicationResponseService {
 
         if (null != element.getValue().getDocumentFileName()) {
             return switch (element.getValue().getDocumentFileName()) {
-                case "C7_Document.pdf" -> "respondentApplication";
+                case "C7_Document.pdf", "Final_C7_response_Welsh.pdf" -> "respondentApplication";
                 case "C1A_allegation_of_harm.pdf" -> "respondentC1AApplication";
                 default -> "ordersFromOtherProceedings";
             };
@@ -255,13 +263,13 @@ public class CaseApplicationResponseService {
         );
     }
 
-    private Document generateFinalC7(CaseData caseData, String authorisation) throws Exception {
+    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh) throws Exception {
 
         return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            C7_FINAL_ENGLISH,
-            false
+            C7_FINAL_RESPONDENT,
+            isWelsh
         );
     }
 
@@ -322,14 +330,14 @@ public class CaseApplicationResponseService {
         }
     }
 
-    public Document generateC7DraftDocument(String authorisation, CaseData caseData) throws Exception {
+    public Document generateC7DraftDocument(String authorisation, CaseData caseData, boolean isWelsh) throws Exception {
 
         log.info(" Generating C7 draft document for respondent ");
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             DOCUMENT_C7_DRAFT_HINT,
-            false
+            isWelsh
         );
         log.info("C7 draft document generated successfully for respondent ");
 

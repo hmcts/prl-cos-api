@@ -12,16 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseApplicationResponseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -31,7 +32,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseApplicationResponseController {
-    private final DocumentGenService documentGenService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
     private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
@@ -48,13 +48,15 @@ public class CaseApplicationResponseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody DocumentRequest documentRequest,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
+        log.info("document generation request received for {} C7", documentRequest.isWelsh());
         caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData);
+        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData,
+                                                                      documentRequest.isWelsh());
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
