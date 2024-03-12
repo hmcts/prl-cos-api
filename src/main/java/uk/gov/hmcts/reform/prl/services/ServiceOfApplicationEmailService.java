@@ -151,7 +151,7 @@ public class ServiceOfApplicationEmailService {
                     .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
             }
         } catch (IOException e) {
-            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
+            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
         }
         return null;
     }
@@ -184,7 +184,7 @@ public class ServiceOfApplicationEmailService {
             }
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
-                      email, e.getMessage()
+                      email, e.getMessage(), e
             );
         }
         return null;
