@@ -944,7 +944,7 @@ public class ServiceOfApplicationService {
                                                      Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("c1aExists", doesC1aExists(caseData));
+        dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
