@@ -2360,7 +2360,9 @@ public class ManageOrderService {
         }
 
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) || ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                caseData.getCreateSelectOrderOptions().toString(),
+                caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));

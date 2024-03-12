@@ -336,7 +336,7 @@ public class ManageOrdersUtils {
     }
 
     private static boolean isNotDaOrderSupportedCase(CaseData caseData) {
-        return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
+        return CollectionUtils.size(caseData.getApplicants()) > 1 || CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
     public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
