@@ -125,7 +125,6 @@ public class DocumentUtils {
         if (matcher.find()) {
             documentId = matcher.group(0);
         }
-        log.info("document id {}", documentId);
         return documentId;
     }
 

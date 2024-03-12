@@ -342,7 +342,6 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
-        log.info("caseData.getScannedDocuments() -- {}", caseData.getScannedDocuments());
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
@@ -404,19 +403,15 @@ public class ManageDocumentsService {
         try {
             if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                 UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
-                log.info(" DocumentId found {}", documentId);
                 Document newUploadedDocument = getNewUploadedDocument(
                     document,
                     documentId
                 );
-
-                log.info("document uploaded {}", newUploadedDocument);
                 if (null != newUploadedDocument) {
                     caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
                                                       authTokenGenerator.generate(),
                                                       documentId, true
                     );
-                    log.info("deleted document {}", documentId);
                     return newUploadedDocument;
                 }
 
@@ -481,7 +476,7 @@ public class ManageDocumentsService {
             );
             newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
         } catch (Exception ex) {
-            log.error("Failed to upload new document {}", ex.getMessage());
+            log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }
         return newUploadedDocument;
     }
@@ -687,9 +682,6 @@ public class ManageDocumentsService {
                         tempQuarantineObjectMap,
                         QuarantineLegalDoc.class
                     );
-
-                    log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
-                    log.info("updatedQuarantineLegalDocumentObject -- {}", updatedQuarantineLegalDocumentObject);
                     confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
                 } else {
                     confidentialTabDocuments.add(element);
