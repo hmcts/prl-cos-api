@@ -5263,6 +5263,7 @@ public class DraftAnOrderServiceTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
+        Element<PartyDetails> respondents = element(partyDetails);
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code(TEST_UUID)
             .label("test")
@@ -5281,8 +5282,10 @@ public class DraftAnOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
+            .respondents(List.of(respondents))
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(Yes)
+                              .fl404CustomFields(FL404.builder().build())
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())

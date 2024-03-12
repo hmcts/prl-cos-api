@@ -481,7 +481,7 @@ public class DraftAnOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) || ManageOrdersUtils.isDaOrderSelectedForCaCase(
-                caseData.getCreateSelectOrderOptions().toString(),
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
                 caseData)) {
                 FL404 fl404CustomFields = getFl404CustomFields(caseData);
                 caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().fl404CustomFields(
@@ -877,6 +877,9 @@ public class DraftAnOrderService {
             || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
             ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataMap.put(DA_ORDER_FOR_CA_CASE, ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(selectedOrder.getOrderType()),
+                caseData) ? Yes : No);
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
@@ -1223,24 +1226,7 @@ public class DraftAnOrderService {
                                       .getDisplayedValue() + BOLD_END : null)
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
-            CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-            if (ObjectUtils.isEmpty(orderType)) {
-                DraftOrder draftOrder;
-                if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                    draftOrder = getSelectedDraftOrderDetails(
-                        caseData.getDraftOrderCollection(),
-                        caseData.getManageOrders()
-                            .getRejectedOrdersDynamicList()
-                    );
-                } else {
-                    draftOrder = getSelectedDraftOrderDetails(
-                        caseData.getDraftOrderCollection(),
-                        caseData.getDraftOrdersDynamicList()
-                    );
-                }
-                orderType = draftOrder.getOrderType();
-            }
-            caseData = manageOrderService.populateCustomOrderFields(caseData, orderType);
+            caseData = manageOrderService.populateCustomOrderFields(caseData, getOrderType(callbackRequest, caseData));
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
@@ -1253,8 +1239,34 @@ public class DraftAnOrderService {
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
+            CreateSelectOrderOptionsEnum selectedOrder = getOrderType(callbackRequest, caseData);
+            if (ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(selectedOrder), caseData)) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData, selectedOrder);
+            }
+
         }
         return caseData;
+    }
+
+    private CreateSelectOrderOptionsEnum getOrderType(CallbackRequest callbackRequest, CaseData caseData) {
+        CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
+        if (ObjectUtils.isEmpty(orderType)) {
+            DraftOrder draftOrder;
+            if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                draftOrder = getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    caseData.getManageOrders()
+                        .getRejectedOrdersDynamicList()
+                );
+            } else {
+                draftOrder = getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    caseData.getDraftOrdersDynamicList()
+                );
+            }
+            orderType = draftOrder.getOrderType();
+        }
+        return orderType;
     }
 
     private static FL404 getFl404CustomFields(CaseData caseData) {
@@ -2148,7 +2160,9 @@ public class DraftAnOrderService {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+            caseData))) {
             if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(
                     caseData,
@@ -2203,7 +2217,7 @@ public class DraftAnOrderService {
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataUpdated.put(DA_ORDER_FOR_CA_CASE,
-                            ManageOrdersUtils.isDaOrderSelectedForCaCase(caseData.getCreateSelectOrderOptions().toString(),
+                            ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
