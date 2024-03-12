@@ -2332,15 +2332,19 @@ public class ServiceOfApplicationService {
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(dateCreated)
                 .build());
-
         }
     }
 
     private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
-        caseData.getApplicants().forEach(applicant -> packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                           applicant, PRL_LET_ENG_AP7)));
+        caseData.getApplicants().forEach(applicant ->
+                                         {
+                                             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                                                 packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                                    applicant, PRL_LET_ENG_AP7));
+                                             }
+                                         });
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
         return SoaPack.builder()
             .packDocument(wrapElements(packLdocs))
