@@ -53,22 +53,23 @@ public class AllTabServiceImpl implements AllTabsService {
     private final SystemUserService systemUserService;
 
     /**
-     * This method updates all tabs based on latest case data from DB
+     * This method updates all tabs based on latest case data from DB.
      * If additional params needs to be stored, then use getStartAllTabsUpdate
-     * followed by mapAndSubmitAllTabsUpdate
-     * @param caseId
-     * @return
-     */
+     * followed by mapAndSubmitAllTabsUpdate.
+     *
+     * @param caseId it will be used to start the transaction
+     * @return CaseDetails will be returned
+     **/
     @Override
     public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
-        if(StringUtils.isNotEmpty(caseId)) {
+        if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             return mapAndSubmitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseData()
+                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    caseId,
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    startAllTabsUpdateDataContent.caseData()
             );
         } else {
             log.error("All tabs update failed as no case found");
@@ -142,7 +143,11 @@ public class AllTabServiceImpl implements AllTabsService {
         return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
     }
 
-    public CaseDetails submitAllTabsUpdate(String systemAuthorisation, String caseId, StartEventResponse startEventResponse, EventRequestData eventRequestData, Map<String, Object> combinedFieldsMap) {
+    public CaseDetails submitAllTabsUpdate(String systemAuthorisation,
+                                           String caseId,
+                                           StartEventResponse startEventResponse,
+                                           EventRequestData eventRequestData,
+                                           Map<String, Object> combinedFieldsMap) {
         return ccdCoreCaseDataService.submitUpdate(
                 systemAuthorisation,
                 eventRequestData,

@@ -614,9 +614,16 @@ public class ManageDocumentsService {
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        Map<String, Object> updatedCaseDataMap = appendConfidentialDocumentNameForCourtAdmin(authorisation, startAllTabsUpdateDataContent.caseDataMap(), startAllTabsUpdateDataContent.caseData());
+        Map<String, Object> updatedCaseDataMap
+                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.caseData());
         //update all tabs
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(), String.valueOf(callbackRequest.getCaseDetails().getId()), startAllTabsUpdateDataContent.startEventResponse(), startAllTabsUpdateDataContent.eventRequestData(), updatedCaseDataMap);
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                updatedCaseDataMap);
     }
 
     public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
