@@ -2947,31 +2947,6 @@ public class ServiceOfApplicationService {
         return response;
     }
 
-    private void sendNotificationsToC100ApplicantsPersonalService(String authorization,
-                                                                  CaseData caseData,
-                                                                  List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                                  List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                  List<Document> packDocs) {
-        //Notify applicants based on contact preference
-        caseData.getApplicants().parallelStream().forEach(applicant -> {
-            if (isAccessEnabled(applicant)) {
-                //Already got dashboard access, send gov notify email with dashboard link.
-                log.debug("Applicant has access to dashboard, sending gov notify email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(caseData, packDocs, applicant)));
-            } else if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())
-                && YesOrNo.Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
-                //Email packs to applicants
-                log.debug("Sending applicant packs via email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendSoaPacksToPartyViaEmail(authorization, caseData, packDocs, applicant)));
-            } else {
-                //Post packs to applicants
-                log.debug("Sending applicant packs via post for {}", applicant.getId());
-                bulkPrintDetails.add(element(sendSoaPacksToPartyViaPost(authorization, caseData, packDocs, applicant)));
-            }
-        });
-    }
-
-
     private List<Element<EmailNotificationDetails>> sendNotificationsAfterConfCheckToCitizenApplicantsC100(String authorization,
                                                                                              List<DynamicMultiselectListElement> selectedApplicants,
                                                                                              CaseData caseData,
