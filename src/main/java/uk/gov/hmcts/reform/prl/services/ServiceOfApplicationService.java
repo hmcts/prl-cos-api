@@ -1344,7 +1344,8 @@ public class ServiceOfApplicationService {
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenApplicantsC100(String authorization,
                                                                                              List<DynamicMultiselectListElement> selectedApplicants,
-                                                                                             CaseData caseData, List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                                                             CaseData caseData, List<Element<BulkPrintDetails>>
+                                                                                                 bulkPrintDetails,
                                                                                              List<Document> staticDocs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
@@ -1414,7 +1415,8 @@ public class ServiceOfApplicationService {
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
                                                                                               List<DynamicMultiselectListElement> selectedRespondents,
-                                                                                              CaseData caseData, List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                                                              CaseData caseData, List<Element<BulkPrintDetails>>
+                                                                                                  bulkPrintDetails,
                                                                                               List<Document> docs, boolean isStaticDocs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
@@ -1433,7 +1435,7 @@ public class ServiceOfApplicationService {
                                                                  .sendEmailUsingTemplateWithAttachments(authorization,
                                                                                                         selectedRespondent.getValue().getEmail(),
                                                                                                         docs,
-                                                                                                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
+                                                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                                                                                                         dynamicData,
                                                                                                         SERVED_PARTY_RESPONDENT
                                                                  )));
@@ -2870,8 +2872,10 @@ public class ServiceOfApplicationService {
     }
 
     private EmailNotificationDetails sendNotificationForApplicantLegalRepPersonalService(CaseData caseData, String authorization,
-                                                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                                                         SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
+                                                                                         List<Element<EmailNotificationDetails>>
+                                                                                             emailNotificationDetails,
+                                                                                         SoaPack unServedApplicantPack, SoaPack
+                                                                                             unServedRespondentPack) {
         EmailNotificationDetails emailNotification;
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             emailNotification = sendEmailDaPersonalApplicantLegalRep(
@@ -3126,9 +3130,11 @@ public class ServiceOfApplicationService {
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsAfterConfCheckToCitizenApplicantsC100(String authorization,
-                                                                                                           List<DynamicMultiselectListElement> selectedApplicants,
+                                                                                                           List<DynamicMultiselectListElement>
+                                                                                                               selectedApplicants,
                                                                                                            CaseData caseData,
-                                                                                                           List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                                                                           List<Element<BulkPrintDetails>>
+                                                                                                               bulkPrintDetails,
                                                                                                            List<Document> docs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
