@@ -1293,12 +1293,17 @@ public class ServiceOfApplicationService {
                         emailService.send(
                             selectedApplicant.getValue().getEmail(),
                             EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
-                            buildApplicantEmail(caseData,selectedApplicant.getValue()),
+                            buildApplicantEmail(caseData, selectedApplicant.getValue()),
                             LanguagePreference.english
                         );
+                        emailNotificationDetails.add(element(EmailNotificationDetails.builder()
+                                                                 .servedParty(selectedApplicant.getValue().getFirstName()
+                                                                 + " " + selectedApplicant.getValue().getLastName())
+                                                                 .emailAddress(selectedApplicant.getValue().getEmail())
+                                                                 .build()));
                     } else {
                         Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
-                                                                        caseInvite, Templates.AP6_LETTER);
+                                                                        null, Templates.AP6_LETTER);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
                                                             bulkPrintDetails, selectedApplicant, coverLetter,
@@ -1310,14 +1315,13 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
-                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    selectedApplicant.getValue().getEmail(), docs,
                                                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                                   dynamicData, SERVED_PARTY_APPLICANT);
+                                                   dynamicData, SERVED_PARTY_APPLICANT)));
                     } else {
                         Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
                                                                         caseInvite, Templates.AP6_LETTER);
-
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
                                                             bulkPrintDetails, selectedApplicant, coverLetter,
