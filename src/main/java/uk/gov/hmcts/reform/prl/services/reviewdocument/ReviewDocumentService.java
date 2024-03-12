@@ -231,7 +231,6 @@ public class ReviewDocumentService {
                                                                       String submittedBy) {
 
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
-        log.info("** Quarantine Doc ** {}", quarantineLegalDoc);
 
         String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
 
@@ -399,7 +398,6 @@ public class ReviewDocumentService {
 
     private void removeFromScannedDocumentListAfterReview(Map<String, Object> caseDataUpdated,
                                                           CaseData caseData, UUID uuid) {
-        caseData.getScannedDocuments().forEach(sc -> log.info("scanned doc list id {}", sc.getId()));
         log.info("UUID is {}", uuid);
         Optional<Element<ScannedDocument>> scannedDocumentElement = caseData.getScannedDocuments().stream()
             .filter(element -> element.getId().equals(uuid)).findFirst();
@@ -407,7 +405,6 @@ public class ReviewDocumentService {
             log.info("removing document from scanned docs");
             caseData.getScannedDocuments().remove(scannedDocumentElement.get());
             caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
-            log.info("scanned documents after deletion {}", caseData.getScannedDocuments());
         }
     }
 
