@@ -5,12 +5,15 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +35,11 @@ public class WelshLangMapperTest {
             .attendHearing(AttendHearing.builder()
                                .welshNeeds(listOfChildren)
                                .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoHearingUrgentCheckList(List.of(SdoHearingUrgentCheckListEnum.immediateRisk))
+                                        .sdoTransferApplicationReason(List.of(SdoTransferApplicationReasonEnum
+                                                                                  .ongoingProceedings))
+                                        .build())
             .build();
 
         // Get the Welsh Value of each object using Welsh Mapper
@@ -49,6 +57,14 @@ public class WelshLangMapperTest {
         Assert.assertEquals(caseDataValues.get("ordersApplyingFor"),
                             Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(OrderTypeEnum
                                                                                .childArrangementsOrder
+                                                                               .getDisplayedValue())));
+        Assert.assertEquals(caseDataValues.get("sdoHearingUrgentCheckList"),
+                            Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(SdoHearingUrgentCheckListEnum
+                                                                               .immediateRisk
+                                                                               .getDisplayedValue())));
+        Assert.assertEquals(caseDataValues.get("sdoTransferApplicationReason"),
+                            Arrays.asList(WelshLangMapper.CA_WELSH_MAP.get(SdoTransferApplicationReasonEnum
+                                                                               .ongoingProceedings
                                                                                .getDisplayedValue())));
     }
 
