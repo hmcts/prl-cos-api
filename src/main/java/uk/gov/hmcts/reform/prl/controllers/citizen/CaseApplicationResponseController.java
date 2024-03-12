@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseApplicationResponseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -34,7 +32,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseApplicationResponseController {
-    private final DocumentGenService documentGenService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
     private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
