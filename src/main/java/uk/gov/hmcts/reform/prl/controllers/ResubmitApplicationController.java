@@ -228,7 +228,7 @@ public class ResubmitApplicationController {
                 eventPublisher.publishEvent(sendEmailToFl401CourtEvent);
                 caseDataUpdated.put("isNotificationSent", "Yes");
             } catch (Exception e) {
-                log.error("Notification could not be sent due to {} ", e.getMessage());
+                log.error("Notification could not be sent due to ", e);
                 caseDataUpdated.put("isNotificationSent", "No");
             }
 
