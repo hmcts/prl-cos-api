@@ -3122,6 +3122,9 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
@@ -3142,7 +3145,10 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
             .build();
+
+
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
@@ -3184,6 +3190,9 @@ public class ServiceOfApplicationServiceTest {
         Element respondentElement = element(uuid, partyDetails);
         respondents.add(respondentElement);
 
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
                                .code(uuid.toString())
@@ -3211,6 +3220,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
             .build();
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
@@ -3244,7 +3254,6 @@ public class ServiceOfApplicationServiceTest {
             .user(User.builder().idamId("12334566").build())
             .build();
 
-
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         UUID uuid = UUID.randomUUID();
         Element applicantElement = element(uuid, partyDetails);
@@ -3253,6 +3262,10 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element respondentElement = element(uuid, partyDetails);
         respondents.add(respondentElement);
+
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
 
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
@@ -3265,6 +3278,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .applicants(applicants)
             .respondents(respondents)
+            .caseInvites(caseInvites)
             .othersToNotify(respondents)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
@@ -3330,10 +3344,15 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
             .respondents(respondents)
+            .caseInvites(caseInvites)
             .othersToNotify(respondents)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
