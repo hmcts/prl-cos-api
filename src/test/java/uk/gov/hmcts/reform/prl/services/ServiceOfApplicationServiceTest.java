@@ -148,9 +148,6 @@ public class ServiceOfApplicationServiceTest {
     private LaunchDarklyClient launchDarklyClient;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private UserService userService;
 
     @Mock

@@ -54,9 +54,6 @@ public class EditReturnedOrderControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    @Mock
-    private CoreCaseDataService coreCaseDataService;
-
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
