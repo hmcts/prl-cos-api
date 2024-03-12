@@ -1299,7 +1299,7 @@ public class ServiceOfApplicationService {
             Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
             if (selectedParty.isPresent()) {
                 Element<PartyDetails> selectedRespondent = selectedParty.get();
-                if (YesNoDontKnow.yes.equals(selectedRespondent.getValue().getDoTheyHaveLegalRepresentation())) {
+                if (YesNoDontKnow.yes.equals(CaseUtils.hasLegalRepresentation(selectedRespondent.getValue()))) {
                     log.info("Respondent is represented");
                     try {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -1307,7 +1307,7 @@ public class ServiceOfApplicationService {
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                                  .sendEmailUsingTemplateWithAttachments(authorization,
-                                                selectedRespondent.getValue().getEmail(), docs,
+                                                selectedRespondent.getValue().getSolicitorEmail(), docs,
                                                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                                                 dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
