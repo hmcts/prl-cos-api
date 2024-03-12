@@ -2706,10 +2706,10 @@ public class ServiceOfApplicationService {
                 sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
                                                                emailNotifications, bulkPrintDetails);
 
-                if (!emailNotifications.isEmpty()) {
-                    emailNotificationDetails.addAll(emailNotifications);
-                } else {
+                if (emailNotifications.isEmpty() && bulkPrintDetails.isEmpty()) {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
+                } else {
+                    emailNotificationDetails.addAll(emailNotifications);
                 }
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
