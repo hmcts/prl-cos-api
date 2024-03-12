@@ -91,7 +91,7 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
         = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
 
-    private static final String VALID_CAFCASS_REQUEST_JSON
+    public static final String VALID_CAFCASS_REQUEST_JSON
         = "requests/cafcass-cymru-send-email-request.json";
 
 

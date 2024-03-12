@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -16,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -28,10 +31,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class C100RespondentSolicitorControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
@@ -58,6 +63,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    private static CaseDetails caseDetails;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -70,6 +77,26 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+    }
 
     @Test
     public void givenRequestBody_whenRespondent_solicitor_about_to_start_then200Response() throws Exception {
@@ -128,7 +155,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenKeep_details_private_list_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/keep-details-private-list")
@@ -180,11 +206,12 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenGenerate_c7c1a_draft_welshAndEnglish_document() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_DRAFT);
-
+        String requestBodyRevised = requestBody
+            .replace("1709890737146296", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/respondent-solicitor/generate-c7response-document")
@@ -203,10 +230,13 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     public void givenRequestBody_whenSubmit_c7C1A_final_welshAndEnglish_document() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_FINAL);
 
+        String requestBodyRevised = requestBody
+            .replace("1709204361187289", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/respondent-solicitor/submit-c7-response")
@@ -219,7 +249,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
                   "data.legalProfQuarantineDocsList[3].value.categoryName", equalTo("Respondent C1A Application"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
     }
 
 }
