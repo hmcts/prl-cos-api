@@ -65,9 +65,6 @@ public class ServiceOfApplicationControllerFunctionalTest {
     }
 
     @MockBean
-    private CoreCaseDataService coreCaseDataService;
-
-    @MockBean
     private SendAndReplyService sendAndReplyService;
 
     @Test
