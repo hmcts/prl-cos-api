@@ -327,7 +327,7 @@ public class ManageOrdersUtils {
                 if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
                     errorList.add("This order is not available to be created");
                 }
-                if (isDaOrderSelectedForCaCase(selectedOrder.toString()) && isNotDaOrderSupportedCase(caseData)) {
+                if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
                     errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -340,7 +340,7 @@ public class ManageOrdersUtils {
     }
 
     private static boolean isNotDaOrderSupportedCase(CaseData caseData) {
-        return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
+        return CollectionUtils.size(caseData.getApplicants()) > 1 || CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
     public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {

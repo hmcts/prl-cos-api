@@ -924,7 +924,9 @@ public class ManageOrderService {
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
-            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
@@ -1026,7 +1028,7 @@ public class ManageOrderService {
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
         if ((YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
             || YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
-            && childOption != null) {
+            && childOption != null && childOption.getValue() != null) {
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && childOption != null && childOption.getListItems() != null) {
@@ -2360,7 +2362,10 @@ public class ManageOrderService {
         }
 
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                || ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
+                caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
@@ -3092,7 +3097,7 @@ public class ManageOrderService {
         caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataUpdated.put(DA_ORDER_FOR_CA_CASE,
-                            ManageOrdersUtils.isDaOrderSelectedForCaCase(caseData.getCreateSelectOrderOptions().toString(),
+                            ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
                                                                          caseData) ? Yes : No);
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
