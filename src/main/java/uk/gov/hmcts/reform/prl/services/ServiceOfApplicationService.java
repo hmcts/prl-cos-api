@@ -947,7 +947,7 @@ public class ServiceOfApplicationService {
                                                                   List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                   List<Document> packDocs) {
         //Notify applicants based on contact preference
-        caseData.getApplicants().parallelStream().forEach(applicant -> {
+        caseData.getApplicants().forEach(applicant -> {
             if (isAccessEnabled(applicant)) {
                 //Already got dashboard access, send gov notify email with dashboard link.
                 log.debug("Applicant has access to dashboard, sending gov notify email for {}", applicant.getId());
