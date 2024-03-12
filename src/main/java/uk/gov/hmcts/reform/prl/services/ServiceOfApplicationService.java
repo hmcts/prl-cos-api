@@ -408,7 +408,7 @@ public class ServiceOfApplicationService {
                             emailNotificationDetails.add(element(emailNotification));
                         }
                     } catch (IOException e) {
-                        log.error("Failed to serve email to Local Authority");
+                        log.error("Failed to serve email to Local Authority", e);
                     }
                 }
             }
@@ -1311,7 +1311,7 @@ public class ServiceOfApplicationService {
                                                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
                                                 dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
-                        log.error("Failed to send email to respondent solicitor {}", e.getMessage());
+                        log.error("Failed to send email to respondent solicitor {}", e);
                     }
                 } else {
                     CaseInvite caseInvite = getCaseInvite(selectedRespondent.getId(),caseInvites);
@@ -1346,7 +1346,7 @@ public class ServiceOfApplicationService {
                                                  SERVED_PARTY_APPLICANT
                                              )));
         } catch (Exception e) {
-            log.error("Failed to send notification to applicant {}", e.getMessage());
+            log.error("Failed to send notification to applicant {}", e);
         }
     }
 
@@ -1532,7 +1532,7 @@ public class ServiceOfApplicationService {
                                                                                            name
                                                            ));
         } catch (Exception e) {
-            log.error("Failed to generate cover sheet {}", e.getMessage());
+            log.error("Failed to generate cover sheet {}", e);
         }
         return null;
     }
@@ -2696,7 +2696,7 @@ public class ServiceOfApplicationService {
                     return emailNotification;
                 }
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e.getMessage());
+                log.error("Failed to serve application via email notification to La {}", e);
             }
         }
         return null;
