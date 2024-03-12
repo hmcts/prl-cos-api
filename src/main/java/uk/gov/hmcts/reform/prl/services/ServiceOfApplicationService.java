@@ -1236,7 +1236,7 @@ public class ServiceOfApplicationService {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", selectedApplicant.getValue().getFirstName() + " "
                     + selectedApplicant.getValue().getLastName());
-                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
