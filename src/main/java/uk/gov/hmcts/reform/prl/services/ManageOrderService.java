@@ -924,7 +924,9 @@ public class ManageOrderService {
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
-            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
@@ -2362,7 +2364,7 @@ public class ManageOrderService {
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 || ManageOrdersUtils.isDaOrderSelectedForCaCase(
-                caseData.getCreateSelectOrderOptions().toString(),
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
                 caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }

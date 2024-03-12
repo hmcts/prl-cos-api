@@ -1212,7 +1212,9 @@ public class DraftAnOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)) {
             caseData = caseData.toBuilder()
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
