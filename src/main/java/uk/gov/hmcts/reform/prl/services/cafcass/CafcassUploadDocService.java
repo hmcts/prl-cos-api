@@ -125,7 +125,7 @@ public class CafcassUploadDocService {
                 caseId
             );
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }
