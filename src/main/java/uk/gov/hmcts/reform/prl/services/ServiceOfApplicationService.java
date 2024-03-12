@@ -1304,9 +1304,7 @@ public class ServiceOfApplicationService {
                     try {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
-                        dynamicData.put("caseName", caseData.getApplicantCaseName());
-                        dynamicData.put("caseNumber", caseData.getId());
-                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                                  .sendEmailUsingTemplateWithAttachments(authorization,
                                                 selectedRespondent.getValue().getEmail(), docs,
@@ -2151,7 +2149,6 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
         return dataMap;
     }
 
