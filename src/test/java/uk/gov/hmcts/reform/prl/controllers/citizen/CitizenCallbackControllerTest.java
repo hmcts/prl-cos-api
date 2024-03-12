@@ -145,17 +145,15 @@ public class CitizenCallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CitizenCaseSubmissionEmail.builder()
+                .caseNumber(String.valueOf(caseData.getId()))
+                .caseLink(citizenSignUpLink)
+                .applicantName(userDetails.getFullName())
+                .build();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .caseLink(citizenSignUpLink)
-            .applicantName(userDetails.getFullName())
-            .build();
-
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken, caseData);
         citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
         verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(anyString());

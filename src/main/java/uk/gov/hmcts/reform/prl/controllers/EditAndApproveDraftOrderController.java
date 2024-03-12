@@ -430,7 +430,8 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()

@@ -84,6 +84,9 @@ public class HearingManagementService {
                 customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
                 submitUpdate(fields, customFields);
             }
+            default -> {
+                break;
+            }
         }
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
@@ -161,7 +164,7 @@ public class HearingManagementService {
         );
     }
 
-    public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
+    public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) {
 
         log.info("Processing the callback for the caseId {} with next hearing date {}", nextHearingDateRequest.getCaseRef(),
                  nextHearingDateRequest.getNextHearingDetails().getHearingDateTime());
