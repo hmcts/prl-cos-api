@@ -108,8 +108,8 @@ public class AllTabServiceImpl implements AllTabsService {
         documentMap.put("finalWelshDocument", caseData.getFinalWelshDocument());
         documentMap.put("c8Document", caseData.getC8Document());
         documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
-        documentMap.put("draftOrderDoc", caseData.getDraftOrderDoc());
-        documentMap.put("draftOrderDocWelsh", caseData.getDraftOrderDocWelsh());
+        documentMap.put("submitAndPayDownloadApplicationLink", caseData.getSubmitAndPayDownloadApplicationLink());
+        documentMap.put("submitAndPayDownloadApplicationWelshLink", caseData.getSubmitAndPayDownloadApplicationWelshLink());
 
         return documentMap;
     }
