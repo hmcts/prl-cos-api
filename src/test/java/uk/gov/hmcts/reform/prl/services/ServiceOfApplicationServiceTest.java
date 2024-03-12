@@ -2504,7 +2504,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("documentURL", document.getDocumentURL());
     }
 
-    //@Test
+    @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigital() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
@@ -2579,155 +2579,11 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackApplicantLipCitizen() {
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
-            .build();
-        PartyDetails partyDetails2 = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
-            .solicitorEmail("abc")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .build();
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae"))
-            .value(partyDetails2)
-            .build();
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-        partyElementList.add(partyDetailsElement1);
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInvite = CaseInvite.builder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-        CaseInvite caseInvite1 = CaseInvite.builder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite1));
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(partyElementList)
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy(unrepresentedApplicant.toString())
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap<>());
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals(null, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Unrepresented applicant", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
-    }
-
-    @Test
-    public void testSendNotificationsWhenUnServedPackApplicantLipCitizenPost() {
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.post)
-            .build();
-        PartyDetails partyDetails2 = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
-            .solicitorEmail("abc")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .build();
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-        Element<PartyDetails> partyDetailsElement1 = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae"))
-            .value(partyDetails2)
-            .build();
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-        partyElementList.add(partyDetailsElement1);
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInvite = CaseInvite.builder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-        CaseInvite caseInvite1 = CaseInvite.builder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite1));
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(partyElementList)
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy(unrepresentedApplicant.toString())
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap<>());
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Unrepresented applicant", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
-    }
-
-    //@Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
@@ -2800,11 +2656,11 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
-    //@Test
+    @Test
     public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
@@ -2875,7 +2731,7 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
