@@ -328,7 +328,7 @@ public class C100RespondentSolicitorService {
         for (String field : RespondentSolicitorEvents.MIAM.getCaseFieldName().split(COMMA)) {
             updatedCaseData.remove(field);
         }
-        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+        for (String field : RespondentSolicitorEvents.OTHER_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
             updatedCaseData.remove(field);
         }
     }
