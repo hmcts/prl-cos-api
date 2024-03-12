@@ -897,7 +897,6 @@ public class ServiceOfApplicationService {
     }
 
     private void handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
-
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> c100StaticDocs, Map<String, Object> caseDataMap) {
@@ -2549,18 +2548,22 @@ public class ServiceOfApplicationService {
                                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-        List<Document> packDocs = new ArrayList<>();
+        List<Element<Document>> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             selectedPartyIds.forEach(partyId -> {
                 Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
-                packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                     party.get(), Templates.AP6_LETTER));
+                party.ifPresent(element -> packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    element,
+                    Templates.AP6_LETTER
+                ))));
             });
-            packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs));
+            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
         } else {
-            packDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs));
+            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
         }
-        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(wrapElements(packDocs)).partyIds(
+        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
