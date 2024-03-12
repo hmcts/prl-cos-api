@@ -387,6 +387,32 @@ public class CaseControllerTest {
     }
 
     @Test
+    public void testCitizenValidateAccessCodeInvalid() {
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        String caseId = "1234567891234567L";
+        String accessCode = "";
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("Invalid");
+
+        String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
+        assertNotNull(data);
+
+    }
+
+    @Test
     public void testretrieveCitizenCases() {
         List<CaseData> caseDataList = new ArrayList<>();
 
