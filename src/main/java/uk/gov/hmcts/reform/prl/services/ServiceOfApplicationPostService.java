@@ -39,8 +39,8 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
@@ -106,7 +106,7 @@ public class ServiceOfApplicationPostService {
         return generatedDocumentInfo;
     }
 
-    public List<Document> getCoverLetter(CaseData caseData, String auth, Address address, String name, boolean isForCitizen) throws Exception {
+    public List<Document> getCoverLetterServeOrder(CaseData caseData, String auth, Address address, String name) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, Object> dataMap = new HashMap<>();
         List<Document> coverLetterDocs = new ArrayList<>();
@@ -120,7 +120,7 @@ public class ServiceOfApplicationPostService {
                     auth, String.valueOf(caseData.getId()),
                     documentGenService.getTemplate(
                         caseData,
-                        !isForCitizen ? DOCUMENT_COVER_SHEET_HINT : DOCUMENT_COVER_SHEET_CITIZEN_HINT, Boolean.FALSE
+                        DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, Boolean.FALSE
                     ), dataMap
                 );
                 coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
@@ -130,7 +130,7 @@ public class ServiceOfApplicationPostService {
                     auth, String.valueOf(caseData.getId()),
                     documentGenService.getTemplate(
                         caseData,
-                        !isForCitizen ? DOCUMENT_COVER_SHEET_HINT : DOCUMENT_COVER_SHEET_CITIZEN_HINT, Boolean.TRUE
+                        DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, Boolean.TRUE
                     ), dataMap
                 );
                 coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
