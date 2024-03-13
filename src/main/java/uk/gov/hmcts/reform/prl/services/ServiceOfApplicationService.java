@@ -2998,7 +2998,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
             : new ArrayList<>();
-        removeCoverLettersFromThePacks(docs);
+        List<Document> finalDocs =  removeCoverLettersFromThePacks(docs);
         selectedApplicants.forEach(applicant -> {
             Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getApplicants());
             if (selectedParty.isPresent()) {
@@ -3015,7 +3015,7 @@ public class ServiceOfApplicationService {
                     );
                     emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(
                         caseData,
-                        docs,
+                        finalDocs,
                         selectedApplicant
                     )));
                 } else if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())
@@ -3028,7 +3028,7 @@ public class ServiceOfApplicationService {
                                                                   Templates.AP6_LETTER
                     );
                     List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
-                    combinedDocs.addAll(docs);
+                    combinedDocs.addAll(finalDocs);
                     log.info("Sending applicant packs via email for {}", selectedApplicant.getId());
                     sendEmailToCitizenApplicant(authorization,
                                                 caseData,
@@ -3049,7 +3049,7 @@ public class ServiceOfApplicationService {
                     );
                     sendPostWithAccessCodeLetterToParty(caseData,
                                                         authorization,
-                                                        docs,
+                                                        finalDocs,
                                                         bulkPrintDetails,
                                                         selectedApplicant,
                                                         coverLetter,
