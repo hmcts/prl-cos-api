@@ -458,7 +458,6 @@ public class ApplicationsTabService implements TabService {
             applicants.add(Element.<Applicant>builder().value(Applicant.builder().build()).build());
             return applicants;
         }
-
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
@@ -525,7 +524,6 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> currentRespondent : currentRespondents) {
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
-
             Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId())
                 .value(respondent.toBuilder()
                            .gender(
@@ -545,8 +543,10 @@ public class ApplicationsTabService implements TabService {
                                    ? YesNoDontKnow.getDisplayedValueIgnoreCase(
                                    respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
                            .build()).build();
+
             respondents.add(respondentElement);
         }
+
         return respondents;
     }
 

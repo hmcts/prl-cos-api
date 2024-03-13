@@ -94,7 +94,6 @@ public class CaseService {
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -102,6 +101,7 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final CaseSummaryTabService caseSummaryTab;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
@@ -324,8 +324,10 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                }
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
@@ -336,12 +338,25 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
+                        }
                 );
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
         return caseData;
+    }
+
+    private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
+        PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
+            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
+                                          YesOrNo.No)
+            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .build();
+        return updatedPartyDetails;
     }
 
 
