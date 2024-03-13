@@ -128,7 +128,7 @@ public class CitizenCallbackControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        doNothing().when(allTabsService).updateAllTabsIncludingConfTab(anyString());
+        when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
