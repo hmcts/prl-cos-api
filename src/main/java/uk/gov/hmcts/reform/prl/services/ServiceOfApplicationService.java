@@ -3151,11 +3151,11 @@ public class ServiceOfApplicationService {
                                                                        Element<PartyDetails> party) {
 
         //Send a gov notify email
-        serviceOfApplicationEmailService.sendEmailNotification(
-            caseData,
+        serviceOfApplicationEmailService.sendGovNotifyEmail(
+            LanguagePreference.getPreferenceLanguage(caseData),
             party.getValue().getEmail(),
             EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
-            buildCitizenEmailVars(caseData, party.getValue())
+            serviceOfApplicationEmailService.buildCitizenEmailVars(caseData, party.getValue())
         );
         //Create email notification with packs
         return EmailNotificationDetails.builder()
@@ -3164,17 +3164,6 @@ public class ServiceOfApplicationService {
             .docs(wrapElements(packDocs))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
-            .build();
-    }
-
-
-    private EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
-                                                    PartyDetails party) {
-        return CitizenEmailVars.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .applicantName(party.getLabelForDynamicList())
             .build();
     }
 }
