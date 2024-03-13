@@ -2757,7 +2757,7 @@ public class ServiceOfApplicationService {
                     return emailNotification;
                 }
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e);
+                log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
         }
         return null;
@@ -3019,7 +3019,6 @@ public class ServiceOfApplicationService {
                     .map(s -> s.getId().toString()).toList();
             }
 
-            log.info("c6aOrderIds {}", c6aOrderIds);
             if (c6aOrderIds.isEmpty()) {
                 errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -3029,10 +3028,7 @@ public class ServiceOfApplicationService {
 
             List<String> selectedSoaScreenOrders = caseData.getServiceOfApplicationScreen1().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("selectedSoaScreenOrders {}", selectedSoaScreenOrders);
 
-            log.info("with collectionto list selectedSoaScreenOrders {}", caseData.getServiceOfApplicationScreen1().getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList()));
             boolean isPresent = c6aOrderIds.stream().anyMatch(selectedSoaScreenOrders::contains);
             log.info("isPresent {}", isPresent);
 
