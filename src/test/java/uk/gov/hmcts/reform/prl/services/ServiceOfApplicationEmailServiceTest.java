@@ -100,54 +100,6 @@ public class ServiceOfApplicationEmailServiceTest {
         );
     }
 
-
-
-    @Test
-    public void testFl401EmailNotification() throws Exception {
-
-        PartyDetails party = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .build();
-        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                      Mockito.anyString(),
-                                                      Mockito.any(), Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
-        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                List.of(Document.builder().build()),
-                                                                                        "Applicant");
-
-        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                                   Mockito.anyString(),
-                                                                   Mockito.any(), Mockito.anyString()
-        );
-    }
-
-
-
-    @Test
-    public void testSendEmailNotificationToRespondentSolicitor() throws Exception {
-        PartyDetails party = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                List.of(Document.builder().build()),
-                                                                                    "Respondent");
-        verifyNoMoreInteractions(emailService);
-    }
-
     @Test
     public void testSendEmailNotificationToApplicantSolicitor() throws Exception {
         String authorization = "";
@@ -208,32 +160,6 @@ public class ServiceOfApplicationEmailServiceTest {
 
         verify(sendgridService, times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    public void testEmailnotificationToSolicitor() throws Exception {
-
-        PartyDetails party = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .build();
-        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                      Mockito.anyString(),
-                                                      Mockito.any(), Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
-        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                List.of(Document.builder().build()),
-                                                                          PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
-
-        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                                   Mockito.anyString(),
-                                                                   Mockito.any(), Mockito.anyString()
-        );
     }
 
     @Test
