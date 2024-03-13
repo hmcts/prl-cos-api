@@ -819,10 +819,14 @@ public class C100RespondentSolicitorService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        String surname = null;
+        if (userDetails.getSurname().isPresent()) {
+            surname = userDetails.getSurname().get();
+        }
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(userDetails.getSurname().isPresent() ? userDetails.getSurname().get() : null)
+            .surname(surname)
             .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
@@ -913,10 +917,14 @@ public class C100RespondentSolicitorService {
             dataMap
         );
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        String surname = null;
+        if (userDetails.getSurname().isPresent()) {
+            surname = userDetails.getSurname().get();
+        }
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(userDetails.getSurname().isPresent() ? userDetails.getSurname().get() : null)
+            .surname(surname)
             .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();

@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -173,10 +172,14 @@ public class ManageDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
+        String surname = null;
+        if (userDetails.getSurname().isPresent()) {
+            surname = userDetails.getSurname().get();
+        }
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(userDetails.getSurname().isPresent() ? userDetails.getSurname().get() : null)
+            .surname(surname)
             .forename(userDetails.getForename())
             .roles(getLoggedInUserType(authorization))
             .build();
@@ -707,7 +710,7 @@ public class ManageDocumentsService {
     public List<String> getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
-        List<String> loggedInUserType = new ArrayList<String>();
+        List<String> loggedInUserType = new ArrayList<>();
         if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
@@ -719,8 +722,7 @@ public class ManageDocumentsService {
             );
             List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                 .stream()
-                .map(role -> role.getRoleName()).collect(
-                    Collectors.toList());
+                .map(role -> role.getRoleName()).toList();
             if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
                 loggedInUserType.add(COURT_STAFF);
                 loggedInUserType.add(JUDGE_ROLE);
