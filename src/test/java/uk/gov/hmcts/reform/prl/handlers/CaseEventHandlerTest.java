@@ -25,20 +25,18 @@ import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
@@ -58,9 +56,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CaseEventHandlerTest {
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private TaskListService taskListService;
 
     @Mock
@@ -74,6 +69,9 @@ public class CaseEventHandlerTest {
 
     @Mock
     private RespondentTaskErrorService respondentTaskErrorService;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     @InjectMocks
     private CaseEventHandler caseEventHandler;
@@ -143,31 +141,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -224,31 +197,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        fl410renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -337,31 +285,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -560,30 +483,5 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 }

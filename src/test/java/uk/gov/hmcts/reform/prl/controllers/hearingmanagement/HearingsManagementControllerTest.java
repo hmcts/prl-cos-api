@@ -85,7 +85,7 @@ public class HearingsManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
 
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState);
+        hearingsManagementController.caseStateUpdateByHearingManagement("auth","s2s token", hearingRequest,caseState);
         assertTrue(true);
 
     }
@@ -102,7 +102,7 @@ public class HearingsManagementControllerTest {
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
         assertThrows(
             HearingManagementValidationException.class,
-            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState)
+            () -> hearingsManagementController.caseStateUpdateByHearingManagement("auth","s2s token", hearingRequest,caseState)
         );
     }
 
@@ -153,7 +153,7 @@ public class HearingsManagementControllerTest {
             objectMapper
         )).thenReturn(caseData);
 
-        hearingsManagementController.updateNextHearingDetailsCallback("auth",callbackRequest);
+        hearingsManagementController.updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
         assertTrue(true);
 
     }
