@@ -363,7 +363,7 @@ public class CaseUtils {
      * Please do not use this method as it was created for external user and it has dependency on idam roles.
      * We are depending on AM roles for internal users
      * @param userDetails
-     * @return
+     * @return string
      */
     public static String getUserRole(UserDetails userDetails) {
         if (null == userDetails || isEmpty(userDetails.getRoles())) {
