@@ -77,7 +77,6 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get("applicants"));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -103,7 +102,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}",e.getMessage());
+                log.error("Failed to generate C8 document for Fl401 case {}",e);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -125,7 +124,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   caseData.getRespondents());
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
+                log.error("Failed to generate C8 document for C100 case {}", e);
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
@@ -338,7 +337,6 @@ public class UpdatePartyDetailsService {
         }
         if (respondentList != null && !respondentList.isEmpty()) {
             log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
-            log.info("{}", respondent.getValue().getAddress());
             return true;
         }
         log.info("respondent data not changed");
