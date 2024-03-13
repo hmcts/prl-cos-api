@@ -81,8 +81,7 @@ public class HearingsManagementControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         State caseState = DECISION_OUTCOME;
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
 
         hearingsManagementController.caseStateUpdateByHearingManagement("auth","s2s token", hearingRequest,caseState);
@@ -108,8 +107,7 @@ public class HearingsManagementControllerTest {
 
     @Test
     public void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
         hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest);
@@ -147,6 +145,7 @@ public class HearingsManagementControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
