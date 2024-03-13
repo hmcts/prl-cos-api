@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
@@ -132,6 +133,10 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private Time dateTime;
 
+    private String applicantEmail;
+
+    private HearingDetailsEmail applicantEmailVars;
+
     @Mock
     private ObjectMapper objectMapper;
 
@@ -167,6 +172,9 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private C100CaseInviteService c100CaseInviteService;
+
+    @Mock
+    private EmailService emailService;
 
     @Mock
     private DocumentLanguageService documentLanguageService;
@@ -762,9 +770,26 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testgenerateAccessCodeLetter() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(parties)
+            .applicants(otherParities)
             .build();
         Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
@@ -3097,6 +3122,9 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
@@ -3117,7 +3145,10 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
             .build();
+
+
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
@@ -3159,6 +3190,9 @@ public class ServiceOfApplicationServiceTest {
         Element respondentElement = element(uuid, partyDetails);
         respondents.add(respondentElement);
 
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
                                .code(uuid.toString())
@@ -3186,6 +3220,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInvites)
             .build();
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
@@ -3219,7 +3254,6 @@ public class ServiceOfApplicationServiceTest {
             .user(User.builder().idamId("12334566").build())
             .build();
 
-
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         UUID uuid = UUID.randomUUID();
         Element applicantElement = element(uuid, partyDetails);
@@ -3228,6 +3262,10 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         Element respondentElement = element(uuid, partyDetails);
         respondents.add(respondentElement);
+
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
 
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
@@ -3240,6 +3278,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .applicants(applicants)
             .respondents(respondents)
+            .caseInvites(caseInvites)
             .othersToNotify(respondents)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
@@ -3305,10 +3344,15 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(uuid).build()));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
             .respondents(respondents)
+            .caseInvites(caseInvites)
             .othersToNotify(respondents)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
