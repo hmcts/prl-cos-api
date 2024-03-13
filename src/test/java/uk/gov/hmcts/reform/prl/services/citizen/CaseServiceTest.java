@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -450,8 +451,9 @@ public class CaseServiceTest {
         assertNotNull(actualCaseDetails);
     }
 
+
     @Test
-    public void testUpdateCaseDetailsCitizenNew() {
+    public void testUpdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(coreCaseDataService.eventRequest(any(),any())).thenReturn(EventRequestData.builder().build());
@@ -466,18 +468,10 @@ public class CaseServiceTest {
         )).thenReturn(
             startEventResponse);
         User user1 = User.builder().idamId("123").build();
-        PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test")
-            .citizenSosObject(CitizenSos.builder().build()).build();
-        PartyDetails applicant2 = PartyDetails.builder().email("test@hmcts.net").firstName("test")
-            .citizenSosObject(CitizenSos.builder().build()).build();
+        PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails applicant2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
         caseData = CaseData.builder()
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
-            .statementOfService(StatementOfService.builder()
-
-                                    .build())
             .build();
 
         when(CaseUtils.getCaseData(
@@ -531,39 +525,8 @@ public class CaseServiceTest {
         assertNotNull(caseDetailsAfterUpdate);
     }
 
-
     @Test
-    public void testUpdateCaseDetailsCitizenNewKeepDetailsPrivate() {
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(coreCaseDataService.eventRequest(any(),any())).thenReturn(EventRequestData.builder().build());
-        startEventResponse = StartEventResponse.builder().eventId(eventName)
-            .caseDetails(caseDetails)
-            .token(eventToken).build();
-        when(coreCaseDataService.startUpdate(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.anyString(),
-            Mockito.anyBoolean()
-        )).thenReturn(
-            startEventResponse);
-        User user1 = User.builder().idamId("123").build();
-        PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
-        PartyDetails respondent2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
-        caseData = CaseData.builder()
-            .applicants(Arrays.asList(element(respondent1), element(respondent2)))
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
-            .statementOfService(StatementOfService.builder().build())
-            .build();
-
-        when(CaseUtils.getCaseData(
-            startEventResponse.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        caseDataMap = caseData.toMap(objectMapper);
-        when(caseDataMock.toMap(any())).thenReturn(new HashMap<>());
+    public void testUpdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(coreCaseDataService.eventRequest(any(),any())).thenReturn(EventRequestData.builder().build());
@@ -615,7 +578,7 @@ public class CaseServiceTest {
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(partyDetails1)
-            .partyType(PartyEnum.applicant)
+            .partyType(PartyEnum.respondent)
             .build();
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
@@ -628,6 +591,7 @@ public class CaseServiceTest {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
                                                                            citizenUpdatedCaseData
         );
+
 
         assertNotNull(caseDetailsAfterUpdate);
     }
@@ -721,6 +685,7 @@ public class CaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
+
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -734,7 +699,7 @@ public class CaseServiceTest {
         citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(partyDetails1)
-            .partyType(PartyEnum.applicant)
+            .partyType(PartyEnum.respondent)
             .build();
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
         when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
@@ -799,6 +764,7 @@ public class CaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
+
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")

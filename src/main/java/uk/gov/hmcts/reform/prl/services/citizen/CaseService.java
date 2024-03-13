@@ -79,8 +79,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
-
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -101,7 +99,6 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-    private final CaseSummaryTabService caseSummaryTab;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
@@ -182,6 +179,11 @@ public class CaseService {
                 startEventResponse,
                 caseDataMap
             );
+            try {
+                log.info("caseDataMap going for submit ===>" + objectMapper.writeValueAsString(caseDataMap));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             return coreCaseDataService.submitUpdate(
                 authToken,
                 eventRequestData,
@@ -349,14 +351,12 @@ public class CaseService {
     }
 
     private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
-        PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
+        return partyDetails.toBuilder().canYouProvideEmailAddress(
             StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
             .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
             .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
                                           YesOrNo.No)
-            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
             .build();
-        return updatedPartyDetails;
     }
 
 
