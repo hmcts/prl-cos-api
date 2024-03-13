@@ -507,7 +507,8 @@ public class DraftAnOrderService {
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
                     caseData.getId(),
-                    draftOrder.getOrderType()
+                    draftOrder.getOrderType(),
+                    e
                 );
             }
         }

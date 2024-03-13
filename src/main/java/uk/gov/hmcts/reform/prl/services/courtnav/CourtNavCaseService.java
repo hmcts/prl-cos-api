@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -59,10 +60,10 @@ public class CourtNavCaseService {
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final SystemUserService systemUserService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()
@@ -152,7 +153,7 @@ public class CourtNavCaseService {
         try {
             return coreCaseDataService.startUpdate(authorisation, eventRequestData, caseId, true);
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }
