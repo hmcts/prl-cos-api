@@ -412,7 +412,7 @@ public class ServiceOfApplicationService {
                             emailNotificationDetails.add(element(emailNotification));
                         }
                     } catch (IOException e) {
-                        log.error("Failed to serve email to Local Authority", e);
+                        log.error("Failed to serve email to Local Authority");
                     }
                 }
             }
@@ -952,7 +952,7 @@ public class ServiceOfApplicationService {
                                                      Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
+        dynamicData.put("c1aExists", doesC1aExists(caseData));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
@@ -1344,7 +1344,7 @@ public class ServiceOfApplicationService {
                                                                                                         SERVED_PARTY_RESPONDENT
                                                                  )));
                     } catch (Exception e) {
-                        log.error("Failed to send email to respondent solicitor {}", e.getMessage());
+                        log.error("Failed to send email to respondent solicitor {}", e);
                     }
                 } else {
                     CaseInvite caseInvite = getCaseInvite(selectedRespondent.getId(),caseInvites);
@@ -1381,7 +1381,7 @@ public class ServiceOfApplicationService {
                                                  SERVED_PARTY_APPLICANT
                                              )));
         } catch (Exception e) {
-            log.error("Failed to send notification to applicant {}", e);
+            log.error("Failed to send notification to applicant {}", e.getMessage());
         }
     }
 
@@ -1554,7 +1554,7 @@ public class ServiceOfApplicationService {
                                                                                            name
                                                            ));
         } catch (Exception e) {
-            log.error("Failed to generate cover sheet {}", e);
+            log.error("Failed to generate cover sheet {}", e.getMessage());
         }
         return null;
     }
@@ -2351,12 +2351,8 @@ public class ServiceOfApplicationService {
     private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
-        caseData.getApplicants().forEach(applicant -> {
-            if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
-                packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                   applicant, PRL_LET_ENG_AP7));
-            }
-        });
+        caseData.getApplicants().forEach(applicant -> packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                                         applicant, PRL_LET_ENG_AP7)));
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
         return SoaPack.builder()
             .packDocument(wrapElements(packLdocs))
@@ -2779,7 +2775,7 @@ public class ServiceOfApplicationService {
                     return emailNotification;
                 }
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e);
+                log.error("Failed to serve application via email notification to La {}",  e.getMessage());
             }
         }
         return null;
