@@ -34,13 +34,13 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -1264,24 +1264,24 @@ public class EditAndApproveDraftOrderControllerTest {
             .id(123L)
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
-//            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
 
         editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         verify(manageOrderEmailService, times(1))
@@ -1390,7 +1390,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.generateDraftOrderDropDown(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .generateDraftOrderDropDown(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1419,7 +1420,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.populateJudgeOrAdminDraftOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1448,7 +1450,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.prepareDraftOrderCollection(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .prepareDraftOrderCollection(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1477,7 +1480,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.saveServeOrderDetails(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .saveServeOrderDetails(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1506,7 +1510,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1530,7 +1535,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
@@ -1580,7 +1585,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
@@ -1603,7 +1608,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1615,7 +1621,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.populateCommonFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .populateCommonFields(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1627,7 +1634,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -1639,7 +1647,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> editAndApproveDraftOrderController.editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> editAndApproveDraftOrderController
+            .editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
