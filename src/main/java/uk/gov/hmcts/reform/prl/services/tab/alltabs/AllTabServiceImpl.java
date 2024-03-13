@@ -56,7 +56,6 @@ public class AllTabServiceImpl implements AllTabsService {
      * This method updates all tabs based on latest case data from DB.
      * If additional params needs to be stored, then use getStartAllTabsUpdate
      * followed by mapAndSubmitAllTabsUpdate.
-     *
      * @param caseId it will be used to start the transaction
      * @return CaseDetails will be returned
      **/
@@ -110,7 +109,7 @@ public class AllTabServiceImpl implements AllTabsService {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
-            CaseEvent.valueOf(eventId),
+            CaseEvent.fromValue(eventId),
             systemUpdateUserId
         );
         StartEventResponse allTabsUpdateStartEventResponse =
