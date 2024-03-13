@@ -959,5 +959,5 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
-    public static final String DOCUMENT_COVER_SHEET_CITIZEN_HINT = "DOC_COVER_SHEET_CITIZEN";
+    public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
 }
