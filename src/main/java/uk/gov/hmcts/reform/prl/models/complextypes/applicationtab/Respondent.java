@@ -44,7 +44,5 @@ public class Respondent {
     private final YesOrNo isEmailAddressConfidential;
     private final YesOrNo isPhoneNumberConfidential;
     private final ContactPreferences contactPreferences;
-
-
 }
 
