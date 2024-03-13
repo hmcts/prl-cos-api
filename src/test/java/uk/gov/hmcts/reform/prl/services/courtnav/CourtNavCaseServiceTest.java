@@ -47,7 +47,7 @@ public class CourtNavCaseServiceTest {
     private final String authToken = "Bearer abc";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-    private static final String randomAlphaNumeric = "Abc123EFGH";
+    private static final String randomAlphaNumeric = "A1b2c3EFGH";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -116,8 +116,7 @@ public class CourtNavCaseServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithEventData() throws Exception {
-        Map<String, Object> tempMap = new HashMap<>();
+    public void shouldStartAndSubmitEventWithEventData() {
         courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
                                                     Mockito.anyString(),
@@ -126,12 +125,6 @@ public class CourtNavCaseServiceTest {
 
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
-        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
-            .Document.builder()
-            .documentFileName("private-law.pdf")
-            .documentUrl(randomAlphaNumeric)
-            .documentBinaryUrl(randomAlphaNumeric)
-            .build();
         Document document = testDocument();
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -215,14 +208,14 @@ public class CourtNavCaseServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(documentGenService.generateDocuments(authToken, caseData)).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab("1234567891234567");
 
-        courtNavCaseService.refreshTabs(authToken,stringObjectMap, 1234567891234567L);
+        courtNavCaseService.refreshTabs(authToken,"1234567891234567");
         verify(documentGenService, times(1))
             .generateDocuments(authToken,
                                caseData);
         verify(allTabService, times(1))
-            .updateAllTabsIncludingConfTab(caseData);
+            .updateAllTabsIncludingConfTab("1234567891234567");
 
     }
 

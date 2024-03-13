@@ -87,9 +87,6 @@ public class ServiceOfApplicationControllerFT {
     }
 
     @MockBean
-    private CoreCaseDataService coreCaseDataService;
-
-    @MockBean
     private SendAndReplyService sendAndReplyService;
 
     @MockBean
