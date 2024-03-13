@@ -1075,7 +1075,7 @@ public class ServiceOfApplicationService {
                                                      Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("c1aExists", doesC1aExists(caseData));
+        dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
@@ -2432,7 +2432,6 @@ public class ServiceOfApplicationService {
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(dateCreated)
                 .build());
-
         } else if (SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
             || SoaCitizenServingRespondentsEnum.courtBailiff
@@ -2500,8 +2499,12 @@ public class ServiceOfApplicationService {
     private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
-        caseData.getApplicants().forEach(applicant -> packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                           applicant, PRL_LET_ENG_AP7)));
+        caseData.getApplicants().forEach(applicant -> {
+            if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                   applicant, PRL_LET_ENG_AP7));
+            }
+        });
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
         return SoaPack.builder()
             .packDocument(wrapElements(packLdocs))
