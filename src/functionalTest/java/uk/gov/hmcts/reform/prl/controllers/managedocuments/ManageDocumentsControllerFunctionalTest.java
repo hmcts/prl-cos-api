@@ -328,7 +328,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBody)
             .when()
