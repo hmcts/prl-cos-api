@@ -362,7 +362,7 @@ public class CaseUtils {
     /**
      * Please do not use this method as it was created for external user and it has dependency on idam roles.
      * We are depending on AM roles for internal users
-     * @param userDetails
+     * @param userDetails It takes User Details as input and returns roles for users
      * @return string
      */
     public static String getUserRole(UserDetails userDetails) {
