@@ -645,6 +645,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
