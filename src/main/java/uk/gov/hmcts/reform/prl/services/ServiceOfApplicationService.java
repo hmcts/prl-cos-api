@@ -951,7 +951,7 @@ public class ServiceOfApplicationService {
             if (isAccessEnabled(applicant)) {
                 //Already got dashboard access, send gov notify email with dashboard link.
                 log.debug("Applicant has access to dashboard, sending gov notify email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packDocs, applicant)));
+                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packDocs, applicant, PRL_LET_ENG_AP8)));
             } else if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())
                 && YesOrNo.Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
                 //Email packs to applicants
@@ -968,7 +968,8 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendEmailToUnrepresentedApplicant(String authorization,
                                                                        CaseData caseData,
                                                                        List<Document> packDocs,
-                                                                       Element<PartyDetails> party) {
+                                                                       Element<PartyDetails> party,
+                                                                       String template) {
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendEmailNotification(
@@ -978,7 +979,7 @@ public class ServiceOfApplicationService {
             buildCitizenEmailVars(caseData, party.getValue())
         );
         //Generate cover letter without access code for applicant who has access to dashboard
-        List<Document> packsWithCoverLetter = generateCoverLetter(authorization, caseData, party, PRL_LET_ENG_AP8, false);
+        List<Document> packsWithCoverLetter = generateCoverLetter(authorization, caseData, party, template, false);
         packsWithCoverLetter.addAll(packDocs);
         //Create email notification with packs
         return EmailNotificationDetails.builder()
@@ -1079,7 +1080,7 @@ public class ServiceOfApplicationService {
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
-            emailNotification = sendEmailToUnrepresentedApplicant(authorization, caseData, docs, selectedApplicant);
+            emailNotification = sendEmailToUnrepresentedApplicant(authorization, caseData, docs, selectedApplicant, PRL_LET_ENG_AP7);
         } else {
              emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
