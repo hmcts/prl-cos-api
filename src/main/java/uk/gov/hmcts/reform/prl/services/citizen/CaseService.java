@@ -615,6 +615,7 @@ public class CaseService {
             );
         }
         return CitizenDocuments.builder()
+            .partyId(quarantineDoc.getUploadedByIdamId())
             .partyType(quarantineDoc.getDocumentParty())
             .categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(quarantineDoc.getUploadedBy())
