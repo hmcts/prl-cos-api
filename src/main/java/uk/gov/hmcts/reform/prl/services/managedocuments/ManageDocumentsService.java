@@ -172,14 +172,12 @@ public class ManageDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
-        String surname = null;
-        if (userDetails.getSurname().isPresent()) {
-            surname = userDetails.getSurname().get();
-        }
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(surname)
+            .surname(surname[0])
             .forename(userDetails.getForename())
             .roles(getLoggedInUserType(authorization))
             .build();

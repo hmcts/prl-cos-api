@@ -82,14 +82,12 @@ public class ManageDocumentsController extends AbstractCallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         //validation for empty restricted reason for solicitor
 
-        String surname = null;
-        if (userDetails.getSurname().isPresent()) {
-            surname = userDetails.getSurname().get();
-        }
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(surname)
+            .surname(surname[0])
             .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
