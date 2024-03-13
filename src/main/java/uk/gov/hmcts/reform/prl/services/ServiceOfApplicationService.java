@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -102,6 +103,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
@@ -289,6 +291,9 @@ public class ServiceOfApplicationService {
     private String citizenUrl;
 
     private final CoreCaseDataService coreCaseDataService;
+
+    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -1357,16 +1362,12 @@ public class ServiceOfApplicationService {
             Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
             if (selectedParty.isPresent()) {
                 Element<PartyDetails> selectedRespondent = selectedParty.get();
-                if (YesNoDontKnow.yes.equals(CaseUtils.hasLegalRepresentation(selectedRespondent.getValue()))) {
+                if (CaseUtils.hasLegalRepresentation(selectedRespondent.getValue())) {
                     log.info("Respondent is represented");
                     try {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
-                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                        dynamicData.put("isEnglish", documentLanguage.isGenEng());
-                        dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
-
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                              .sendEmailUsingTemplateWithAttachments(authorization,
                                                 selectedRespondent.getValue().getSolicitorEmail(), docs,
@@ -2595,6 +2596,15 @@ public class ServiceOfApplicationService {
             Collectors.toList());
         List<Element<Document>> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+            selectedPartyIds.forEach(partyId -> {
+                Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getApplicants());
+                party.ifPresent(element -> packDocs.add(element(generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    element,
+                    Templates.AP6_LETTER
+                ))));
+            });
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
         } else {
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
@@ -2799,7 +2809,7 @@ public class ServiceOfApplicationService {
                     return emailNotification;
                 }
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e);
+                log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
         }
         return null;
@@ -2989,45 +2999,65 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
             : new ArrayList<>();
+        removeCoverLettersFromThePacks(docs);
         selectedApplicants.forEach(applicant -> {
             Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getApplicants());
             if (selectedParty.isPresent()) {
                 Element<PartyDetails> selectedApplicant = selectedParty.get();
-                CaseInvite caseInvite = getCaseInvite(selectedApplicant.getId(),caseInvites);
+                CaseInvite caseInvite = getCaseInvite(selectedApplicant.getId(), caseInvites);
                 if (caseInvite == null) {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
                 if (isAccessEnabled(selectedApplicant)) {
-                    log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
-                    } else {
-                        Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
-                                                                        caseInvite, Templates.AP6_LETTER);
-                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
-                                                            docs,
-                                                            bulkPrintDetails, selectedApplicant, coverLetter,
-                                                            SERVED_PARTY_APPLICANT);
-                    }
+                    log.info(
+                        "Applicant has access to dashboard, sending gov notify email for {}",
+                        selectedApplicant.getId()
+                    );
+                    emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(
+                        caseData,
+                        docs,
+                        selectedApplicant
+                    )));
+                } else if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())
+                    && YesOrNo.Yes.equals(selectedApplicant.getValue().getCanYouProvideEmailAddress())) {
+                    //Email packs to applicants
+                    Document ap6Letter = generateAccessCodeLetter(authorization,
+                                                                  caseData,
+                                                                  selectedApplicant,
+                                                                  caseInvite,
+                                                                  Templates.AP6_LETTER
+                    );
+                    List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
+                    combinedDocs.addAll(docs);
+                    log.info("Sending applicant packs via email for {}", selectedApplicant.getId());
+                    sendEmailToCitizenApplicant(authorization,
+                                                caseData,
+                                                selectedApplicant,
+                                                emailNotificationDetails,
+                                                combinedDocs,
+                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
+                    );
                 } else {
-                    log.info("Access to be granted");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
-                                                                      Templates.AP6_LETTER);
-                        List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
-                        combinedDocs.addAll(docs);
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
-                                           emailNotificationDetails, combinedDocs);
-                    } else {
-                        Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
-                                                                        caseInvite, Templates.AP6_LETTER);
-                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
-                                                            getNotificationPack(caseData, PrlAppsConstants.R, docs),
-                                                            bulkPrintDetails, selectedApplicant, coverLetter,
-                                                            SERVED_PARTY_APPLICANT);
-                    }
+                    //Post packs to applicants
+                    log.info("Sending applicant packs via post for {}", selectedApplicant.getId());
+                    Document coverLetter = generateAccessCodeLetter(
+                        authorization,
+                        caseData,
+                        selectedApplicant,
+                        caseInvite,
+                        Templates.AP6_LETTER
+                    );
+                    sendPostWithAccessCodeLetterToParty(caseData,
+                                                        authorization,
+                                                        docs,
+                                                        bulkPrintDetails,
+                                                        selectedApplicant,
+                                                        coverLetter,
+                                                        SERVED_PARTY_APPLICANT
+                    );
                 }
+
             }
             caseData.setCaseInvites(caseInvites);
         });
@@ -3087,6 +3117,64 @@ public class ServiceOfApplicationService {
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
+            .build();
+    }
+
+    private void sendEmailToCitizenApplicant(String authorization,
+                                             CaseData caseData, Element<PartyDetails> applicant,
+                                             List<Element<EmailNotificationDetails>> notificationList, List<Document> docs,
+                                             SendgridEmailTemplateNames template) {
+        try {
+            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            dynamicData.put("name", caseData.getApplicants().get(0).getValue().getFirstName()
+                + " " + caseData.getApplicants().get(0).getValue().getLastName());
+            dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            dynamicData.put("isEnglish", documentLanguage.isGenEng());
+            dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+            notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                authorization,
+                caseData.getApplicants().get(0).getValue().getEmail(),
+                docs,
+                template,
+                dynamicData,
+                SERVED_PARTY_APPLICANT
+            )));
+
+        } catch (Exception e) {
+            log.error("Failed to send notification to applicant {}", e.getMessage());
+        }
+    }
+
+    private EmailNotificationDetails sendEmailToUnrepresentedApplicant(CaseData caseData,
+                                                                       List<Document> packDocs,
+                                                                       Element<PartyDetails> party) {
+
+        //Send a gov notify email
+        serviceOfApplicationEmailService.sendEmailNotification(
+            caseData,
+            party.getValue().getEmail(),
+            EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+            buildCitizenEmailVars(caseData, party.getValue())
+        );
+        //Create email notification with packs
+        return EmailNotificationDetails.builder()
+            .emailAddress(party.getValue().getEmail())
+            .servedParty(SERVED_PARTY_APPLICANT)
+            .docs(wrapElements(packDocs))
+            .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .build();
+    }
+
+
+    private EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
+                                                    PartyDetails party) {
+        return CitizenEmailVars.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .applicantName(party.getLabelForDynamicList())
             .build();
     }
 }
