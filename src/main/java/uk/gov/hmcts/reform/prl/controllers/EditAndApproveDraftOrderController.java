@@ -451,7 +451,7 @@ public class EditAndApproveDraftOrderController {
                         draftOrder
                     );
                 } catch (Exception e) {
-                    log.error("Failed to send email to solicitor : {}", e.getMessage());
+                    log.error("Failed to send email to solicitor :", e);
                 }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
