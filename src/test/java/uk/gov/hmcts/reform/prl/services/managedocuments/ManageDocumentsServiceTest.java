@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -71,6 +72,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
@@ -157,6 +159,8 @@ public class ManageDocumentsServiceTest {
 
     UserDetails userDetailsSolicitorRole;
 
+    UserDetails userDetailsBulScanRole;
+
     UserDetails userDetailsCitizenRole;
 
     UserDetails userDetailsCafcassRole;
@@ -209,6 +213,12 @@ public class ManageDocumentsServiceTest {
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+        userDetailsBulScanRole = UserDetails.builder()
+            .id("123")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(Roles.BULK_SCAN.getValue()))
             .build();
         userDetailsCafcassRole = UserDetails.builder()
             .id("234")
@@ -1090,6 +1100,16 @@ public class ManageDocumentsServiceTest {
         List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
         assertEquals(UserRoles.CITIZEN.name(), loggedInUserTypeList.get(0));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForBulkScan() {
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsBulScanRole);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
+        assertNotNull(loggedInUserTypeList);
+        assertEquals(BULK_SCAN, loggedInUserTypeList.get(0));
     }
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
