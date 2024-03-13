@@ -59,7 +59,7 @@ public class BulkPrintService {
         } catch (NullPointerException e) {
             throw new NullPointerException("Null Pointer exception at bulk print send : " + e);
         } catch (Exception e) {
-            log.info("The bulk print service has failed during convertToPdf: {}", e);
+            log.info("The bulk print service has failed during convertToPdf", e);
         }
 
         final List<String> stringifiedDocuments = pdfDocuments.stream()

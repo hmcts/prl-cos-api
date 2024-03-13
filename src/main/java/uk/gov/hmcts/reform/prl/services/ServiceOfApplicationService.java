@@ -2750,27 +2750,22 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>();
                 sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
-                                                               emailNotifications, bulkPrintDetails);
+                                                               emailNotificationDetails, bulkPrintDetails);
 
-                if (emailNotifications.isEmpty() && bulkPrintDetails.isEmpty()) {
+                if (CollectionUtils.isEmpty(emailNotificationDetails)
+                    && CollectionUtils.isEmpty(bulkPrintDetails)) {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
-                } else {
-                    emailNotificationDetails.addAll(emailNotifications);
                 }
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
-                    List<Element<EmailNotificationDetails>> applicantEmailList = new ArrayList<>();
-                    sendNotificationForUnservedApplicantPack(caseData, authorization, applicantEmailList,
+                    sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    if (applicantEmailList.isEmpty()) {
+                    if (CollectionUtils.isEmpty(emailNotificationDetails)
+                        && CollectionUtils.isEmpty(bulkPrintDetails)) {
                         failedPacksMap.put(APPLICANT_PACK, "Yes");
-                    } else {
-                        emailNotificationDetails.addAll(applicantEmailList);
                     }
-
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
