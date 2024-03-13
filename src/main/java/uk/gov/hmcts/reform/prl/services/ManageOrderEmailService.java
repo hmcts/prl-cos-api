@@ -448,7 +448,13 @@ public class ManageOrderEmailService {
             caseData.getApplicants().forEach(party -> {
                 if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
-                    log.info("===== CA serving unrepresented applicant via email ====");
+                    log.info("Contact preference set as email" + party.getValue().getEmail());
+                    Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+                    dynamicData.put("name",party.getValue().getLabelForDynamicList());
+                    dynamicData.put("dashBoardLink",citizenDashboardUrl);
+                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
+                                         SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+                    );
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -539,6 +545,7 @@ public class ManageOrderEmailService {
             log.error("Exception occurred in sending order docs to unrepresented applicant", e);
         }
     }
+
 
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   String respondentOption,
