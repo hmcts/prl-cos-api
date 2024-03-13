@@ -799,6 +799,8 @@ public class PrlAppsConstants {
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
         + "hence not sending any documents ";
+    public static final String CITIZEN_CAN_VIEW_ONLINE = "Citizen can login to dashboard to view documents, "
+        + "hence not attaching any documents in the email ";
     public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
     public static final String SOA_OTHER_PEOPLE_PRESENT_IN_CASE = "soaOtherPeoplePresentInCaseFlag";
     public static final String SOA_CYMRU_EMAIL = "soaCafcassCymruEmail";
@@ -830,8 +832,7 @@ public class PrlAppsConstants {
     public static final String SOA_MULTIPART_FILE = "files";
     public static final String SOA_CITIZEN = "CITIZEN";
     public static final String SOA_SOLICITOR = "SOLICITOR";
-
-
+    public static final String COURT_BAILIFF = "Court bailiff";
     public static final String COURT_ADMIN = "Court admin";
     public static final String JUDICIARY = "Judiciary";
     public static final String LEGAL_ADVISER = "Legal adviser";
