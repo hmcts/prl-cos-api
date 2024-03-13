@@ -210,9 +210,6 @@ public class ManageDocumentsServiceTest {
             .surname("test")
             .roles(Collections.singletonList(SOLICITOR_ROLE))
             .build();
-
-
-
         userDetailsCafcassRole = UserDetails.builder()
             .id("234")
             .forename("test")
