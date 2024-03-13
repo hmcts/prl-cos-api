@@ -1103,7 +1103,7 @@ public class DocumentGenService {
                                                                              .build()).build();
 
         } catch (Exception e) {
-            log.error("Error while uploading document ." + e.getMessage());
+            log.error("Error while uploading document .", e);
             throw e;
         }
     }
@@ -1118,7 +1118,7 @@ public class DocumentGenService {
             return DocumentResponse.builder().status("Success").build();
 
         } catch (Exception e) {
-            log.error("Error while deleting  document ." + e.getMessage());
+            log.error("Error while deleting  document .", e);
             throw e;
         }
     }
@@ -1131,7 +1131,7 @@ public class DocumentGenService {
             );
 
         } catch (Exception e) {
-            log.error("Error while downloading  document ." + e.getMessage());
+            log.error("Error while downloading  document .", e);
             throw e;
         }
     }
