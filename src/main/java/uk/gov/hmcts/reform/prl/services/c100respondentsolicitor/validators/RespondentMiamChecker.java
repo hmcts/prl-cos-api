@@ -33,9 +33,6 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             .filter(miam -> anyNonEmpty(
                 miam.getAttendedMiam(),
                 miam.getReasonNotAttendingMiam(),
-                miam.getWillingToAttendMiam(),
-                miam.getAttendedMiam(),
-                miam.getReasonNotAttendingMiam(),
                 miam.getWillingToAttendMiam()
             )).isPresent()).isPresent();
     }
@@ -44,39 +41,36 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
         boolean isFinished = false;
-        if (response.isPresent()) {
-            Optional<Miam> miam
-                = Optional.ofNullable(response.get().getMiam());
-            if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
-                respondentTaskErrorService.removeError(MIAM_ERROR);
-                isFinished = true;
-            }
-        }
         respondentTaskErrorService.addEventError(
             MIAM,
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
+        if (response.isPresent()) {
+            Optional<Miam> miam
+                = Optional.ofNullable(response.get().getMiam());
+            if (miam.isPresent() && checkMiamManadatoryCompleted(miam.get())) {
+                respondentTaskErrorService.removeError(MIAM_ERROR);
+                isFinished = true;
+            }
+        }
         return isFinished;
     }
 
-    private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
+    private boolean checkMiamManadatoryCompleted(Miam miam) {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
-        if (miam.isPresent()) {
-            fields.add(ofNullable(miam.get().getAttendedMiam()));
-            Optional<YesOrNo> attendMiam = ofNullable(miam.get().getAttendedMiam());
-            if (attendMiam.isPresent()
-                && YesOrNo.No.equals(attendMiam.get())) {
-                fields.add(ofNullable(miam.get().getWillingToAttendMiam()));
-                YesOrNo willingToAttendMiam = miam.get().getWillingToAttendMiam();
-                if (YesOrNo.No.equals(willingToAttendMiam)) {
-                    fields.add(ofNullable(miam.get().getReasonNotAttendingMiam()));
-                }
+        fields.add(ofNullable(miam.getAttendedMiam()));
+        Optional<YesOrNo> attendMiam = ofNullable(miam.getAttendedMiam());
+        if (attendMiam.isPresent()
+            && YesOrNo.No.equals(attendMiam.get())) {
+            fields.add(ofNullable(miam.getWillingToAttendMiam()));
+            YesOrNo willingToAttendMiam = miam.getWillingToAttendMiam();
+            if (YesOrNo.No.equals(willingToAttendMiam)) {
+                fields.add(ofNullable(miam.getReasonNotAttendingMiam()));
             }
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
     }
 }
