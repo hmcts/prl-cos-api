@@ -176,7 +176,7 @@ public class ManageDocumentsService {
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(userDetails.getSurname().get())
+            .surname(userDetails.getSurname().isPresent() ? userDetails.getSurname().get() : null)
             .forename(userDetails.getForename())
             .roles(getLoggedInUserType(authorization))
             .build();
@@ -741,28 +741,31 @@ public class ManageDocumentsService {
                 loggedInUserType.add(BULK_SCAN);
             }
         } else {
-
-            if (roles.contains(Roles.JUDGE.getValue())) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(JUDGE_ROLE);
-            } else if (roles.contains(Roles.LEGAL_ADVISER.getValue())) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(LEGAL_ADVISER_ROLE);
-            } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(COURT_ADMIN_ROLE);
-            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType.add(LEGAL_PROFESSIONAL);
-                loggedInUserType.add(SOLICITOR_ROLE);
-            } else if (roles.contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType.add(UserRoles.CITIZEN.name());
-            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
-                loggedInUserType.add(BULK_SCAN);
-            } else {
-                loggedInUserType.add(UserRoles.CAFCASS.name());
-            }
+            checkExistingIdamRoleConfig(roles, loggedInUserType);
         }
 
         return loggedInUserType;
+    }
+
+    private static void checkExistingIdamRoleConfig(List<String> roles, List<String> loggedInUserType) {
+        if (roles.contains(Roles.JUDGE.getValue())) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(JUDGE_ROLE);
+        } else if (roles.contains(Roles.LEGAL_ADVISER.getValue())) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(LEGAL_ADVISER_ROLE);
+        } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(COURT_ADMIN_ROLE);
+        } else if (roles.contains(Roles.SOLICITOR.getValue())) {
+            loggedInUserType.add(LEGAL_PROFESSIONAL);
+            loggedInUserType.add(SOLICITOR_ROLE);
+        } else if (roles.contains(Roles.CITIZEN.getValue())) {
+            loggedInUserType.add(UserRoles.CITIZEN.name());
+        } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+            loggedInUserType.add(BULK_SCAN);
+        } else {
+            loggedInUserType.add(UserRoles.CAFCASS.name());
+        }
     }
 }
