@@ -1197,7 +1197,6 @@ public class DocumentGenService {
     }
 
     private boolean checkFileFormat(String fileName) {
-        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');

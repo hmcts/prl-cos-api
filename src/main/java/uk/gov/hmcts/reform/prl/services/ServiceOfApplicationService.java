@@ -1074,16 +1074,12 @@ public class ServiceOfApplicationService {
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+        dynamicData.put("name", selectedApplicant.getValue().getLabelForDynamicList());
         dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
-            emailNotification = serviceOfApplicationEmailService
-                .sendGovNotifyEmailAndGetEmailDetails(caseData, selectedApplicant.getValue().getEmail(),
-                                                      EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
-                                                      serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,selectedApplicant.getValue()),
-                                                      selectedApplicant.getValue().getLabelForDynamicList());
+            emailNotification = sendEmailToUnrepresentedApplicant(authorization, caseData, docs, selectedApplicant);
         } else {
              emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
@@ -2760,27 +2756,22 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>();
                 sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
-                                                               emailNotifications, bulkPrintDetails);
+                                                               emailNotificationDetails, bulkPrintDetails);
 
-                if (emailNotifications.isEmpty() && bulkPrintDetails.isEmpty()) {
+                if (CollectionUtils.isEmpty(emailNotificationDetails)
+                    && CollectionUtils.isEmpty(bulkPrintDetails)) {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
-                } else {
-                    emailNotificationDetails.addAll(emailNotifications);
                 }
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
-                    List<Element<EmailNotificationDetails>> applicantEmailList = new ArrayList<>();
-                    sendNotificationForUnservedApplicantPack(caseData, authorization, applicantEmailList,
+                    sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    if (applicantEmailList.isEmpty()) {
+                    if (CollectionUtils.isEmpty(emailNotificationDetails)
+                        && CollectionUtils.isEmpty(bulkPrintDetails)) {
                         failedPacksMap.put(APPLICANT_PACK, "Yes");
-                    } else {
-                        emailNotificationDetails.addAll(applicantEmailList);
                     }
-
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
