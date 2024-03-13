@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -94,14 +95,18 @@ public class ReviewDocumentServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @Mock
-    ManageDocumentsService manageDocumentsService;
+    AllTabsService allTabsService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    AllTabServiceImpl allTabServiceImpl;
+
+    @Mock
+    ManageDocumentsService manageDocumentsService;
 
     @Mock
     ObjectMapper objectMapper;
 
+    private final String authorization = "authToken";
     Element element;
     Document document;
     QuarantineLegalDoc quarantineLegalDoc;
@@ -117,8 +122,6 @@ public class ReviewDocumentServiceTest {
     QuarantineLegalDoc quarantineCaseDoc;
 
     QuarantineLegalDoc bulkScanQuarantineDoc;
-
-    private final String authorization = "authToken";
 
     @Before
     public void init() {
@@ -639,9 +642,13 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
 
         Assert.assertNotNull(response);
@@ -660,9 +667,11 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+                      EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
@@ -679,9 +688,11 @@ public class ReviewDocumentServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
                                                                                                         EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
