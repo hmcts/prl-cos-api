@@ -601,11 +601,20 @@ public class CaseService {
     }
 
     private CitizenDocuments createCitizenDocument(QuarantineLegalDoc quarantineDoc) {
-        String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineDoc.getCategoryId(), null);
-        Document existingDocument = objectMapper.convertValue(
-            objectMapper.convertValue(quarantineDoc, Map.class).get(attributeName),
-            Document.class
-        );
+        Document existingDocument = null;
+        // If the quarantine doc is from Quarantine List then send the citizen document object
+        if (quarantineDoc.getCitizenQuarantineDocument() != null && quarantineDoc.getCitizenQuarantineDocument().getDocumentUrl() != null) {
+            existingDocument = quarantineDoc.getCitizenQuarantineDocument();
+        } else {
+            String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
+                quarantineDoc.getCategoryId(),
+                null
+            );
+            existingDocument = objectMapper.convertValue(
+                objectMapper.convertValue(quarantineDoc, Map.class).get(attributeName),
+                Document.class
+            );
+        }
         return CitizenDocuments.builder()
             .partyType(quarantineDoc.getDocumentParty())
             .categoryId(quarantineDoc.getCategoryId())
