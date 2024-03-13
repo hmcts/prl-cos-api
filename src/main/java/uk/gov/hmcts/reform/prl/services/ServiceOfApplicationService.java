@@ -412,7 +412,7 @@ public class ServiceOfApplicationService {
                             emailNotificationDetails.add(element(emailNotification));
                         }
                     } catch (IOException e) {
-                        log.error("Failed to serve email to Local Authority");
+                        log.error("Failed to serve email to Local Authority", e);
                     }
                 }
             }
@@ -947,11 +947,12 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void sendEmailToApplicantLipPersonalC100(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>>
-        emailNotificationDetails, Element<PartyDetails> selectedApplicant, List<Document> docs) {
+    private void sendEmailToApplicantLipPersonalC100(CaseData caseData, String authorization,
+                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                     Element<PartyDetails> selectedApplicant, List<Document> docs) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("c1aExists", doesC1aExists(caseData));
+        dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
@@ -1380,7 +1381,7 @@ public class ServiceOfApplicationService {
                                                  SERVED_PARTY_APPLICANT
                                              )));
         } catch (Exception e) {
-            log.error("Failed to send notification to applicant {}", e.getMessage());
+            log.error("Failed to send notification to applicant {}", e);
         }
     }
 
@@ -1553,7 +1554,7 @@ public class ServiceOfApplicationService {
                                                                                            name
                                                            ));
         } catch (Exception e) {
-            log.error("Failed to generate cover sheet {}", e.getMessage());
+            log.error("Failed to generate cover sheet {}", e);
         }
         return null;
     }
@@ -2344,15 +2345,18 @@ public class ServiceOfApplicationService {
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(dateCreated)
                 .build());
-
         }
     }
 
     private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
-        caseData.getApplicants().forEach(applicant -> packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                           applicant, PRL_LET_ENG_AP7)));
+        caseData.getApplicants().forEach(applicant -> {
+            if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                   applicant, PRL_LET_ENG_AP7));
+            }
+        });
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
         return SoaPack.builder()
             .packDocument(wrapElements(packLdocs))
@@ -2605,6 +2609,19 @@ public class ServiceOfApplicationService {
                     failedPacksMap.put(APPLICANT_PACK, "Yes");
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
+            } else if (unServedApplicantPack != null
+                && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
+                unServedApplicantPack.getPersonalServiceBy())) {
+                List<Element<EmailNotificationDetails>> emailNotifications = new ArrayList<>();
+                sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
+                                                               emailNotifications, bulkPrintDetails);
+
+                if (emailNotifications.isEmpty() && bulkPrintDetails.isEmpty()) {
+                    failedPacksMap.put(APPLICANT_PACK, "Yes");
+                } else {
+                    emailNotificationDetails.addAll(emailNotifications);
+                }
+                whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
                     List<Element<EmailNotificationDetails>> applicantEmailList = new ArrayList<>();
@@ -2701,7 +2718,7 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendNotificationForApplicantLegalRepPersonalService(CaseData caseData, String authorization,
                                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                      SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
-        EmailNotificationDetails emailNotification = null;
+        EmailNotificationDetails emailNotification;
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             emailNotification = sendEmailDaPersonalApplicantLegalRep(
                 caseData,
@@ -2720,6 +2737,33 @@ public class ServiceOfApplicationService {
         return emailNotification;
     }
 
+    private void sendNotificationForApplicantLipPersonalService(CaseData caseData, String authorization,
+                                                                                         SoaPack unServedApplicantPack,
+                                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Document>> packDocs = unServedApplicantPack.getPackDocument();
+            List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
+            caseData.getApplicants().forEach(applicant -> {
+                if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                              applicant, PRL_LET_ENG_AP7);
+                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
+                    if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
+                        docs.addAll(documents);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, docs);
+                    } else {
+                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
+                                                            documents,
+                                                            bulkPrintDetails,
+                                                            applicant, ap7Letter,
+                                                            SERVED_PARTY_APPLICANT);
+                    }
+                }
+            });
+        }
+    }
+
     private EmailNotificationDetails checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
@@ -2735,7 +2779,7 @@ public class ServiceOfApplicationService {
                     return emailNotification;
                 }
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e.getMessage());
+                log.error("Failed to serve application via email notification to La {}", e);
             }
         }
         return null;
@@ -2774,7 +2818,6 @@ public class ServiceOfApplicationService {
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                 authorization,
                 applicantList,
