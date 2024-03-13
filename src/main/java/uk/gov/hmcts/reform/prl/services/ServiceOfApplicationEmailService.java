@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -44,6 +45,9 @@ public class ServiceOfApplicationEmailService {
     private String citizenUrl;
 
     private final SendgridService sendgridService;
+
+    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails,
@@ -179,5 +183,17 @@ public class ServiceOfApplicationEmailService {
             );
         }
         return null;
+    }
+
+
+    public void sendEmailNotification(CaseData caseData,
+                                      String email,
+                                      EmailTemplateNames template,
+                                      EmailTemplateVars emailTemplateVars) {
+        //send gov notify email
+        emailService.sendSoa(email,
+                             template,
+                             emailTemplateVars,
+                             LanguagePreference.getPreferenceLanguage(caseData));
     }
 }
