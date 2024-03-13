@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -71,6 +75,9 @@ public class ListOnNoticeControllerTest {
     ListOnNoticeService listOnNoticeService;
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    AllTabServiceImpl allTabService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -342,6 +349,9 @@ public class ListOnNoticeControllerTest {
             .build();
         doNothing().when(listOnNoticeService)
             .sendNotification(Mockito.any(),Mockito.anyString());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
         verify(listOnNoticeService,times(1)).sendNotification(Mockito.any(),Mockito.any());
     }
