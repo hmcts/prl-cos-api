@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -28,10 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
@@ -188,5 +186,27 @@ public class ServiceOfApplicationEmailService {
             );
         }
         return null;
+    }
+
+    public EmailNotificationDetails sendGovNotifyEmailAndGetEmailDetails(CaseData caseData,
+                                                                         String email,
+                                                                         EmailTemplateNames template,
+                                                                         EmailTemplateVars emailTemplateVars,
+                                                                         String servedParty) {
+        sendEmailNotification(caseData, email, template, emailTemplateVars);
+        return EmailNotificationDetails.builder()
+            .emailAddress(email)
+            .servedParty(servedParty)
+            .build();
+    }
+
+    public EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
+                                                    PartyDetails party) {
+        return CitizenEmailVars.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .applicantName(party.getLabelForDynamicList())
+            .build();
     }
 }

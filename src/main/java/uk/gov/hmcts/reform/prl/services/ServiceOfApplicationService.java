@@ -1077,14 +1077,24 @@ public class ServiceOfApplicationService {
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
-        EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
-            authorization,
-            selectedApplicant.getValue().getEmail(),
-            docs,
-            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-            dynamicData,
-            SERVED_PARTY_APPLICANT_SOLICITOR
-        );
+        EmailNotificationDetails emailNotification;
+        if (isAccessEnabled(selectedApplicant)) {
+            emailNotification = serviceOfApplicationEmailService
+                .sendGovNotifyEmailAndGetEmailDetails(caseData, selectedApplicant.getValue().getEmail(),
+                                                      EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+                                                      serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,selectedApplicant.getValue()),
+                                                      selectedApplicant.getValue().getLabelForDynamicList());
+        } else {
+             emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                authorization,
+                selectedApplicant.getValue().getEmail(),
+                docs,
+                SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                dynamicData,
+                SERVED_PARTY_APPLICANT_SOLICITOR
+            );
+        }
+
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification));
         }
