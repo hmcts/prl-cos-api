@@ -42,7 +42,7 @@ java:
     AM_ROLE_ASSIGNMENT_API_URL: http://prl-ccd-definitions-pr-2006-am-role-assignment-service
     CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2006-ccd-data-store-api
     CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2006-cdam
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1984-aac-manage-case-assignment
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2006-aac-manage-case-assignment
     BUNDLE_URL: http://prl-ccd-definitions-pr-2006-em-ccdorc
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
