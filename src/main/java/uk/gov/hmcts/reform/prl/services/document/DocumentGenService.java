@@ -1419,7 +1419,7 @@ public class DocumentGenService {
             .isConfidential(documentRequest.getIsConfidential())
             .isRestricted(documentRequest.getIsRestricted())
             .restrictedDetails(documentRequest.getRestrictDocumentDetails())
-            .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+            .uploadedBy(documentRequest.getPartyName())
             .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
             .uploaderRole(CITIZEN)
             .build();
