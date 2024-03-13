@@ -718,20 +718,22 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                .stream()
-                .map(role -> role.getRoleName()).toList();
-            if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(JUDGE_ROLE);
-            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(LEGAL_ADVISER_ROLE);
-            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType.add(COURT_STAFF);
-                loggedInUserType.add(COURT_ADMIN_ROLE);
-            } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
-                loggedInUserType.add(UserRoles.CAFCASS.name());
+            if (roleAssignmentServiceResponse != null) {
+                List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                    .stream()
+                    .map(role -> role.getRoleName()).toList();
+                if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+                    loggedInUserType.add(COURT_STAFF);
+                    loggedInUserType.add(JUDGE_ROLE);
+                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                    loggedInUserType.add(COURT_STAFF);
+                    loggedInUserType.add(LEGAL_ADVISER_ROLE);
+                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                    loggedInUserType.add(COURT_STAFF);
+                    loggedInUserType.add(COURT_ADMIN_ROLE);
+                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
+                    loggedInUserType.add(UserRoles.CAFCASS.name());
+                }
             } else if (roles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
