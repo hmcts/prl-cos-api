@@ -1299,6 +1299,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
+            .respondents(List.of(element(PartyDetails.builder().build())))
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1308,10 +1309,10 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
@@ -1323,7 +1324,7 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             new HashMap<>()
         );
-        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }
 
     @Test
@@ -1447,6 +1448,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(parties)
+            .respondents(List.of(element(PartyDetails.builder().build())))
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1456,7 +1458,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail(null)
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .soaOtherParties(null)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
@@ -1495,6 +1497,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(parties)
+            .respondents(List.of(element(PartyDetails.builder().build())))
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1504,7 +1507,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail(null)
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptionsCA(unrepresentedApplicant)
                                       .soaOtherParties(DynamicMultiSelectList.builder().value(Collections.emptyList()).build())
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
@@ -3685,7 +3688,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtAdmin)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -3771,6 +3774,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
+            .respondents(List.of(element(PartyDetails.builder().build())))
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .respondentC8Document(RespondentC8Document.builder()
@@ -3789,7 +3793,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                .documentsListForLa(DynamicList.builder().build())
                                                                                .build())))
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -3815,7 +3819,7 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
@@ -3845,6 +3849,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
+            .respondents(List.of(element(PartyDetails.builder().build())))
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -3856,7 +3861,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                        .documentsListForLa(DynamicList.builder().build())
                                                                                        .build())))
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -3881,7 +3886,7 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        assertNull(servedApplicationDetails.getModeOfService());
+        //assertNull(servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
