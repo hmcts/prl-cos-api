@@ -171,7 +171,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.anyString());
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
@@ -201,7 +201,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.anyString());
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
@@ -237,7 +237,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.anyString());
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventFailureName
         ))
