@@ -297,7 +297,7 @@ public class ManageOrderEmailService {
             otherEmails = manageOrders.getOtherEmailAddress()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
         }
 
         cafcassEmails.addAll(otherEmails);
@@ -522,15 +522,13 @@ public class ManageOrderEmailService {
                                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                                            Element<PartyDetails> party) {
         log.info("inside  sendPersonalServiceNotificationsForUnrepresentedApplicant");
-        log.info("partyDeatils ===>" +  party.getValue().getLabelForDynamicList());
         try {
             UUID bulkPrintId = sendOrderDocumentViaPost(
                 caseData,
                 party.getValue().getAddress(),
                 party.getValue().getLabelForDynamicList(),
                 authorisation,
-                orderDocuments,
-                true
+                orderDocuments
             );
             log.info("** bulk print id {}", bulkPrintId);
             bulkPrintOrderDetails.add(element(
@@ -584,7 +582,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                      emailAddress, e.getMessage());
+                      emailAddress, e.getMessage(), e);
         }
     }
 
@@ -604,8 +602,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      cafcassCymruEmailId, e.getMessage()
-            );
+                      cafcassCymruEmailId, e.getMessage(), e);
         }
 
     }
@@ -743,7 +740,7 @@ public class ManageOrderEmailService {
                 && isNotEmpty(organisationPostalInfo.getPostalAddress().getAddressLine1())) {
                 try {
                     UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getPostalAddress(),
-                                                                organisationPostalInfo.getPostalName(), authorisation, orderDocuments, false);
+                                                                organisationPostalInfo.getPostalName(), authorisation, orderDocuments);
                     log.info("** bulk print id {}", bulkPrintId);
                     //PRL-4225 save bulk print details
                     bulkPrintOrderDetails.add(element(
@@ -769,7 +766,7 @@ public class ManageOrderEmailService {
             try {
                 UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
                                                             applicantElement.getValue().getLabelForDynamicList(),
-                                                            authorisation, orderDocuments, false
+                                                            authorisation, orderDocuments
                 );
                 //PRL-4225 save bulk print details
                 bulkPrintOrderDetails.add(element(
@@ -804,7 +801,7 @@ public class ManageOrderEmailService {
                     && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
                     try {
                         UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson.getAddress(),
-                                                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments, false);
+                                                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments);
                         //PRL-4225 save bulk print details
                         bulkPrintOrderDetails.add(element(
                             buildBulkPrintOrderDetail(bulkPrintId, id,
@@ -925,7 +922,7 @@ public class ManageOrderEmailService {
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData.getAddress(),
-                                                                        partyData.getLabelForDynamicList(), authorisation, orderDocuments, false);
+                                                                        partyData.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                 buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
@@ -947,16 +944,14 @@ public class ManageOrderEmailService {
                                           Address address,
                                           String name,
                                           String authorisation,
-                                          List<Document> orderDocuments,
-                                          boolean isForCitizen) throws Exception {
+                                          List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
+        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetterServeOrder(
             caseData,
             authorisation,
             address,
-            name,
-            isForCitizen
+            name
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
             documents.addAll(coverLetterDocs);
@@ -1014,8 +1009,6 @@ public class ManageOrderEmailService {
             .orderLink(manageCaseUrl + "/" + caseData.getId())
             .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentative())
             .build();
-        log.info("** Email tempplate vars : {}", emailTemplateVars);
-        log.info("*** Draft oder {}", draftOrder);
         emailService.send(
             draftOrder.getOtherDetails().getOrderCreatedByEmailId(),
             EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
@@ -1040,7 +1033,7 @@ public class ManageOrderEmailService {
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
-                      emailAddress, e.getMessage()
+                      emailAddress, e.getMessage(), e
             );
         }
     }
