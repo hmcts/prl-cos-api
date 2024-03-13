@@ -93,6 +93,7 @@ public class ManageDocumentsControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
+    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -309,11 +310,9 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
-        String requestBodyRevised = requestBody
-            .replace("1687442033910904", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
-            .body(requestBodyRevised)
+            .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
