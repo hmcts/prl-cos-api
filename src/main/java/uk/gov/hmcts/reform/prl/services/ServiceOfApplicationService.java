@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -45,7 +46,10 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
@@ -98,6 +102,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -278,6 +283,7 @@ public class ServiceOfApplicationService {
     private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
+    private final EmailService emailService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1273,14 +1279,31 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", selectedApplicant.getValue().getFirstName() + " "
+                    + selectedApplicant.getValue().getLastName());
+                dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                dynamicData.put("isEnglish", documentLanguage.isGenEng());
+                dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        List<Document> docs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        emailService.send(
+                            selectedApplicant.getValue().getEmail(),
+                            EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                            buildApplicantEmail(caseData, selectedApplicant.getValue()),
+                            LanguagePreference.english
+                        );
+                        emailNotificationDetails.add(element(EmailNotificationDetails.builder()
+                                                                 .servedParty(selectedApplicant.getValue().getFirstName()
+                                                                 + " " + selectedApplicant.getValue().getLastName())
+                                                                 .emailAddress(selectedApplicant.getValue().getEmail())
+                                                                 .build()));
                     } else {
                         Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
-                                                                        caseInvite, Templates.AP6_LETTER);
+                                                                        null, Templates.AP6_LETTER);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
                                                             bulkPrintDetails, selectedApplicant, coverLetter,
@@ -1292,12 +1315,13 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
-                                                                           emailNotificationDetails, docs);
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
+                                                   selectedApplicant.getValue().getEmail(), docs,
+                                                   SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                   dynamicData, SERVED_PARTY_APPLICANT)));
                     } else {
                         Document coverLetter = generateAccessCodeLetter(authorization, caseData, selectedApplicant,
                                                                         caseInvite, Templates.AP6_LETTER);
-
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
                                                             bulkPrintDetails, selectedApplicant, coverLetter,
@@ -1308,6 +1332,18 @@ public class ServiceOfApplicationService {
             caseData.setCaseInvites(caseInvites);
         });
         return emailNotificationDetails;
+    }
+
+
+    private EmailTemplateVars buildApplicantEmail(CaseData caseData, PartyDetails selectedApplicant) {
+
+        return CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .applicantName(selectedApplicant.getFirstName() + " "
+                               + selectedApplicant.getLastName())
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .build();
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
@@ -1321,15 +1357,21 @@ public class ServiceOfApplicationService {
             Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
             if (selectedParty.isPresent()) {
                 Element<PartyDetails> selectedRespondent = selectedParty.get();
-                if (YesNoDontKnow.yes.equals(selectedRespondent.getValue().getDoTheyHaveLegalRepresentation())) {
+                if (YesNoDontKnow.yes.equals(CaseUtils.hasLegalRepresentation(selectedRespondent.getValue()))) {
                     log.info("Respondent is represented");
                     try {
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToSolicitor(
-                            authorization, caseData,
-                            selectedRespondent.getValue(),
-                            isStaticDocs ? getNotificationPack(caseData, PrlAppsConstants.S, docs) : docs,
-                            SERVED_PARTY_RESPONDENT
-                        )));
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
+                        dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                        dynamicData.put("isEnglish", documentLanguage.isGenEng());
+                        dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                             .sendEmailUsingTemplateWithAttachments(authorization,
+                                                selectedRespondent.getValue().getSolicitorEmail(), docs,
+                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP,
+                                                dynamicData, SERVED_PARTY_RESPONDENT)));
                     } catch (Exception e) {
                         log.error("Failed to send email to respondent solicitor {}", e);
                     }
