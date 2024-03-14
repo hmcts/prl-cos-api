@@ -1,16 +1,15 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.microsoft.applicationinsights.boot.dependencies.apachecommons.io.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -59,44 +58,12 @@ public class ServiceOfApplicationEmailService {
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
 
-    public EmailNotificationDetails sendEmailNotificationToSolicitor(String authorization, CaseData caseData,
-                                                                     PartyDetails partyDetails,
-                                                                     List<Document> docs, String servedParty) throws Exception {
-        Map<String, String> temp = new HashMap<>();
-        if (!PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR.equalsIgnoreCase(servedParty)) {
-            temp.put("specialNote", "Yes");
-        }
-        log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
-        log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
-        log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
-
-        temp.putAll(EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
-                                             null, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        temp,
-                                                        partyDetails.getSolicitorEmail(),
-                                                        docs,
-                                                        servedParty
-        );
-    }
-
-    public void sendEmailNotification(CaseData caseData,
-                                      String email,
-                                      EmailTemplateNames template,
-                                      EmailTemplateVars emailTemplateVars) {
-        //send gov notify email
-        emailService.sendSoa(email,
-                             template,
-                             emailTemplateVars,
-                             LanguagePreference.getPreferenceLanguage(caseData));
-    }
-
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
-        emailService.sendSoa(
+        sendGovNotifyEmail(
+            LanguagePreference.english,
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
-            buildCafcassEmail(caseData),
-            LanguagePreference.english
+            buildCafcassEmail(caseData)
         );
         return EmailNotificationDetails.builder()
             .emailAddress(email)
@@ -188,5 +155,26 @@ public class ServiceOfApplicationEmailService {
             );
         }
         return null;
+    }
+
+    public EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
+                                                   PartyDetails party) {
+        return CitizenEmailVars.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl)
+            .applicantName(party.getLabelForDynamicList())
+            .build();
+    }
+
+    public void sendGovNotifyEmail(LanguagePreference languagePreference,
+                                   String email,
+                                   EmailTemplateNames template,
+                                   EmailTemplateVars emailTemplateVars) {
+        //send gov notify email
+        emailService.sendSoa(email,
+                             template,
+                             emailTemplateVars,
+                             languagePreference);
     }
 }
