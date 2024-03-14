@@ -191,7 +191,7 @@ public class CaseService {
             }
             if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-                caseDataMap.put("respondentsConfidentialDetails", caseData.getRespondentConfidentialDetails());
+                caseDataMap.put("respondentConfidentialDetails", caseData.getRespondentConfidentialDetails());
                 try {
                     log.info("ServiceOfApplicationUploadDocs 4 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
                 } catch (JsonProcessingException e) {
