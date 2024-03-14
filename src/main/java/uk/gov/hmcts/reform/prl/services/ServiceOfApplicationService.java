@@ -3133,9 +3133,11 @@ public class ServiceOfApplicationService {
                         selectedApplicant.getId()
                     );
                     emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(
+                        authorization,
                         caseData,
                         finalDocs,
-                        selectedApplicant
+                        selectedApplicant,
+                        Templates.AP6_LETTER
                     )));
                 } else if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())
                     && YesOrNo.Yes.equals(selectedApplicant.getValue().getCanYouProvideEmailAddress())) {
@@ -3258,26 +3260,5 @@ public class ServiceOfApplicationService {
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
-    }
-
-    private EmailNotificationDetails sendEmailToUnrepresentedApplicant(CaseData caseData,
-                                                                       List<Document> packDocs,
-                                                                       Element<PartyDetails> party) {
-
-        //Send a gov notify email
-        serviceOfApplicationEmailService.sendGovNotifyEmail(
-            LanguagePreference.getPreferenceLanguage(caseData),
-            party.getValue().getEmail(),
-            EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
-            serviceOfApplicationEmailService.buildCitizenEmailVars(caseData, party.getValue())
-        );
-        //Create email notification with packs
-        return EmailNotificationDetails.builder()
-            .emailAddress(party.getValue().getEmail())
-            .servedParty(SERVED_PARTY_APPLICANT)
-            .docs(wrapElements(packDocs))
-            .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
-            .build();
     }
 }
