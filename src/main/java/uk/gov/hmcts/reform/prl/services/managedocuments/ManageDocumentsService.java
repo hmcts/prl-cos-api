@@ -713,7 +713,7 @@ public class ManageDocumentsService {
         List<String> roles = userDetails.getRoles();
         List<String> loggedInUserType = new ArrayList<>();
         if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
-            log.info("RoleAssignnn {}",userDetails.getEmail());
+            log.info("RoleAssignnn {}", userDetails.getEmail());
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -722,12 +722,19 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            log.info("roleAssignmentServiceResponse {}",roleAssignmentServiceResponse);
-            if (roleAssignmentServiceResponse != null) {
+            log.info("roleAssignmentServiceResponse {}", roleAssignmentServiceResponse);
+            if (roles.contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType.add(LEGAL_PROFESSIONAL);
+                loggedInUserType.add(SOLICITOR_ROLE);
+            } else if (roles.contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType.add(UserRoles.CITIZEN.name());
+            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+                loggedInUserType.add(BULK_SCAN);
+            } else if (roleAssignmentServiceResponse != null) {
                 List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                     .stream()
                     .map(role -> role.getRoleName()).toList();
-                log.info("amrolessss {}",amRoles);
+                log.info("amrolessss {}", amRoles);
                 if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(JUDGE_ROLE);
@@ -740,13 +747,6 @@ public class ManageDocumentsService {
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
                 }
-            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType.add(LEGAL_PROFESSIONAL);
-                loggedInUserType.add(SOLICITOR_ROLE);
-            } else if (roles.contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType.add(UserRoles.CITIZEN.name());
-            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
-                loggedInUserType.add(BULK_SCAN);
             }
         } else {
             checkExistingIdamRoleConfig(roles, loggedInUserType);
