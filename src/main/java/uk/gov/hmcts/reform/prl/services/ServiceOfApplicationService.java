@@ -77,7 +77,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -591,11 +590,11 @@ public class ServiceOfApplicationService {
                                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                          List<Document> c100StaticDocs,
                                                                          Map<String, Object> caseDataMap) {
-        List<Document> packjDocs = getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         populateLanguageMap(caseData, dynamicData);
+        List<Document> packjDocs = getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -626,11 +625,11 @@ public class ServiceOfApplicationService {
                                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                           List<Document> staticDocs,
                                                                           Map<String, Object> caseDataMap) {
-        List<Document> packcDocs = new ArrayList<>(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         populateLanguageMap(caseData, dynamicData);
+        List<Document> packcDocs = new ArrayList<>(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
             caseData.getApplicantsFL401().getSolicitorEmail(),
