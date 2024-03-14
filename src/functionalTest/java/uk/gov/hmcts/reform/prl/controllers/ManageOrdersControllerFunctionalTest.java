@@ -8,7 +8,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -31,6 +30,9 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -135,7 +137,10 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String JUDGE_DRAFT_SDO_ORDER_BODY = "requests/judge-draft-order-request.json";
 
     @Before
-    public void setup(){
+    public void setup() {
+        caseDetails = CaseDetails.builder()
+            .id(1709662358269545L)
+            .build();
     }
 
     @Test
@@ -178,7 +183,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
@@ -240,12 +244,16 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
-
     @Test
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
-
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", caseDetails.getId().toString());
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails).build();
+            .caseDetails(caseDetails)
+            .build();
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -254,7 +262,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.id", equalTo(caseDetails.getData().get("id")))
+            .body("data.id", equalTo(caseDetails.getId().toString()))
             .assertThat().statusCode(200);
     }
 
@@ -292,7 +300,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1702636092071141", "1708388034079121");
+            .replace("1702636092071141", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -310,8 +318,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("Resssssspp11111 " + resp.getData());
-
     }
 
     @Test
@@ -337,9 +343,9 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
 
         String requestBodyRevised = requestBody
-            .replace("1702636092071141", "1708388034079121");
+            .replace("1702636092071141", caseDetails.getId().toString());
 
-        request
+        AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -355,7 +361,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
 
     }
 
@@ -476,15 +481,22 @@ public class ManageOrdersControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
-    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
+    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("cafcassCymruEmail", "test@hmcts.net");
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails).build();
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        String requestBodyRevised = requestBody
+            .replace("1703068453862935", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(callbackRequest)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
@@ -618,7 +630,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", "1708388034079121");
+            .replace("1706997775517206", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -636,8 +648,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("Resssssspp " + resp.getData());
-
     }
 
 
@@ -664,6 +674,5 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
     }
 }
