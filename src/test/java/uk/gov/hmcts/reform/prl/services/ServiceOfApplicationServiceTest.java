@@ -556,7 +556,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
@@ -585,7 +585,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
@@ -605,7 +605,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
@@ -2562,7 +2562,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2634,7 +2634,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap<>());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         //assertEquals(null, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2706,7 +2706,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap<>());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2783,7 +2783,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2858,7 +2858,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2938,7 +2938,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
+            .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -3630,7 +3630,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
@@ -3745,7 +3745,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
