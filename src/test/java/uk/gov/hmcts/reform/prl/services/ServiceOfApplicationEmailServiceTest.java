@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,17 +14,17 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,23 +37,10 @@ public class ServiceOfApplicationEmailServiceTest {
     @Mock
     private EmailService emailService;
 
-    @Mock
-    private UserService userService;
-
     @InjectMocks
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
-    @Mock
-    private DgsService dgsService;
 
-    @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
-
-    @Mock
-    private Time dateTime;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @Mock
     SendgridService sendgridService;
@@ -130,7 +116,7 @@ public class ServiceOfApplicationEmailServiceTest {
         );
     }
 
-    //@Test
+    @Test
     public void testCafcassEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -153,6 +139,8 @@ public class ServiceOfApplicationEmailServiceTest {
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .build();
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
         serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData, "email",
                                                                               List.of(Document.builder().build()),
                                                                                "Local authority");
@@ -194,6 +182,8 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Test
     public void testsendEmailUsingTemplateWithAttachments() throws Exception {
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(Mockito.any(),Mockito.anyString(),Mockito.any()))
+            .thenReturn(true);
         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
                                                                                "", List.of(Document.builder().build()),
                                                                                SendgridEmailTemplateNames
@@ -203,5 +193,14 @@ public class ServiceOfApplicationEmailServiceTest {
 
         verify(sendgridService, times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testCitizenEmailVars() {
+        EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
+                                                                                                         .id(123l)
+                                                                                                         .build(),
+                                                                                 PartyDetails.builder().build());
+        assertEquals("123", emailTemplateVars.getCaseReference());
     }
 }

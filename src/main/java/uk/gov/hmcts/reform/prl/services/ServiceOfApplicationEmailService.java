@@ -120,6 +120,7 @@ public class ServiceOfApplicationEmailService {
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
         }
+        log.error("there is a failure in sending email for party {}", servedParty);
         return null;
     }
 
