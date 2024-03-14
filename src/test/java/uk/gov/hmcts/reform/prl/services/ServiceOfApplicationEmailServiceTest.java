@@ -40,8 +40,6 @@ public class ServiceOfApplicationEmailServiceTest {
     @InjectMocks
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
-
-
     @Mock
     SendgridService sendgridService;
 
@@ -198,7 +196,7 @@ public class ServiceOfApplicationEmailServiceTest {
     @Test
     public void testCitizenEmailVars() {
         EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
-                                                                                                         .id(123l)
+                                                                                                         .id(123L)
                                                                                                          .build(),
                                                                                  PartyDetails.builder().build());
         assertEquals("123", emailTemplateVars.getCaseReference());
