@@ -39,6 +39,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
@@ -125,6 +126,7 @@ public class SendgridService {
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
+        long startTime = System.currentTimeMillis();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
@@ -139,6 +141,9 @@ public class SendgridService {
         } catch (IOException ex) {
             log.info("error is {}", ex.getMessage());
             throw new IOException(ex.getMessage());
+        } finally {
+            log.info("*** Response time taken by sendgrid - {} ms",
+                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         }
     }
 

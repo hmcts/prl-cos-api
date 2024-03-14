@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Base64.getEncoder;
 
@@ -52,6 +53,7 @@ public class BulkPrintService {
         String s2sToken = authTokenGenerator.generate();
         List<Document> pdfDocuments = new ArrayList<>();
 
+        long docConvertStart = System.currentTimeMillis();
         try {
             for (Document doc:documents) {
                 pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
@@ -61,13 +63,15 @@ public class BulkPrintService {
         } catch (Exception e) {
             log.info("The bulk print service has failed during convertToPdf", e);
         }
+        log.info("*** Response time taken to convert to pdf - {} ms",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - docConvertStart));
 
         final List<String> stringifiedDocuments = pdfDocuments.stream()
             .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .toList();
         log.info("Sending {} for case {}", letterType, caseId);
-
+        long startTime = System.currentTimeMillis();
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
@@ -76,7 +80,8 @@ public class BulkPrintService {
                     getAdditionalData(caseId, letterType, recipientName)
                 )
             );
-
+        log.info("*** Response time taken by bulk print - {} ms",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         log.info(
             "Letter service produced the following letter Id {} for case {}",
             sendLetterResponse != null ? sendLetterResponse.letterId : "SOMETHING WRONG",
