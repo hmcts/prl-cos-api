@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -946,6 +947,7 @@ public class ServiceOfApplicationService {
                                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                   List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                   List<Document> packDocs) {
+        long startTime = System.currentTimeMillis();
         //Notify applicants based on contact preference
         caseData.getApplicants().parallelStream().forEach(applicant -> {
             if (isAccessEnabled(applicant)) {
@@ -963,6 +965,8 @@ public class ServiceOfApplicationService {
                 bulkPrintDetails.add(element(sendSoaPacksToPartyViaPost(authorization, caseData, packDocs, applicant)));
             }
         });
+        log.info("*** Time taken to notify C100 applicants personal service - {} ms",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
     }
 
     private EmailNotificationDetails sendEmailToUnrepresentedApplicant(String authorization,
