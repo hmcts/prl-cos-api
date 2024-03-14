@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
@@ -144,6 +145,7 @@ public class CaseService {
                                                 CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         UserDetails userDetails = idamClient.getUserDetails(authToken);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         StartEventResponse startEventResponse =
