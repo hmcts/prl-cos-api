@@ -706,10 +706,14 @@ public class ManageDocumentsService {
     }
 
     public List<String> getLoggedInUserType(String authorisation) {
+        log.info("=====STARTTTT");
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        log.info("UUUUU {}",userDetails.getEmail());
+        log.info("ROLESSSS {}",userDetails.getRoles());
         List<String> roles = userDetails.getRoles();
         List<String> loggedInUserType = new ArrayList<>();
         if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+            log.info("RoleAssignnn {}",userDetails.getEmail());
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -718,10 +722,12 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
+            log.info("roleAssignmentServiceResponse {}",roleAssignmentServiceResponse);
             if (roleAssignmentServiceResponse != null) {
                 List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                     .stream()
                     .map(role -> role.getRoleName()).toList();
+                log.info("amrolessss {}",amRoles);
                 if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(JUDGE_ROLE);
@@ -745,7 +751,7 @@ public class ManageDocumentsService {
         } else {
             checkExistingIdamRoleConfig(roles, loggedInUserType);
         }
-
+        log.info("=====ENDDDDDD");
         return loggedInUserType;
     }
 
