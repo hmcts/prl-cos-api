@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,9 +47,6 @@ public class HearingsManagementController {
     private final HearingManagementService hearingManagementService;
     private final AllTabServiceImpl allTabsService;
 
-    @Value("${citizen.url}")
-    private String hearingDetailsUrl;
-
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
     @ApiResponses(value = {
@@ -60,7 +56,7 @@ public class HearingsManagementController {
     public void caseStateUpdateByHearingManagement(@RequestHeader("authorization") String authorisation,
                                                    @RequestHeader("serviceAuthorization") String s2sToken,
                                                    @RequestBody HearingRequest hearingRequest,
-                                                   @PathVariable("caseState") State caseState) throws Exception {
+                                                   @PathVariable("caseState") State caseState) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, caseState);
         } else {
@@ -76,7 +72,7 @@ public class HearingsManagementController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
+                                                         @RequestBody NextHearingDateRequest nextHearingDateRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
         } else {
