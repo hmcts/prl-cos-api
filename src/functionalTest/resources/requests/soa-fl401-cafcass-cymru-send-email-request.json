@@ -10,70 +10,13 @@
     "security_classification": "PUBLIC",
     "case_data": {
       "manageOrderHeader1": null,
-      "caseTypeOfApplication": "C100",
-      "applicantOrRespondentCaseName": "C100 test case",
+      "caseTypeOfApplication": "FL401",
+      "applicantOrRespondentCaseName": "FL401 test case",
       "manageOrdersOptions": "servedSavedOrders",
       "performingUser": null,
       "performingAction": null,
       "judgeLaReviewRequired": null,
       "markedToServeEmailNotification": "Yes",
-      "applicants": [
-        {
-          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
-          "value": {
-            "firstName": "test",
-            "lastName": "data",
-            "previousName": null,
-            "dateOfBirth": "1989-11-30",
-            "isDateOfBirthUnknown": null,
-            "gender": "male",
-            "otherGender": null,
-            "placeOfBirth": "London",
-            "address": {
-              "AddressLine1": "Ministry Of Justice",
-              "AddressLine2": "Seventh Floor 102 Petty France",
-              "AddressLine3": "",
-              "PostTown": "",
-              "County": "",
-              "Country": "",
-              "PostCode": "RH117RQ"
-            },
-            "isAddressUnknown": null,
-            "isAddressConfidential": "No",
-            "isAtAddressLessThan5Years": "No",
-            "addressLivedLessThan5YearsDetails": null,
-            "canYouProvideEmailAddress": "No",
-            "email": null,
-            "isEmailAddressConfidential": null,
-            "landline": null,
-            "phoneNumber": "4635635636",
-            "isPhoneNumberConfidential": "No",
-            "relationshipToChildren": null,
-            "isDateOfBirthKnown": null,
-            "isCurrentAddressKnown": null,
-            "canYouProvidePhoneNumber": null,
-            "isPlaceOfBirthKnown": null,
-            "solicitorOrg": {},
-            "solicitorAddress": {
-              "AddressLine1": null,
-              "AddressLine2": null,
-              "AddressLine3": null,
-              "PostTown": null,
-              "County": null,
-              "Country": null,
-              "PostCode": null
-            },
-            "dxNumber": null,
-            "solicitorReference": null,
-            "representativeFirstName": "repFirstName",
-            "representativeLastName": "repLastName",
-            "isAtAddressLessThan5YearsWithDontKnow": null,
-            "doTheyHaveLegalRepresentation": null,
-            "sendSignUpLink": null,
-            "solicitorEmail": null
-          }
-        }
-      ],
       "orderCollection": [
         {
           "id": "87e63f63-c0d8-4593-bfbb-565799a8a63f",
