@@ -81,11 +81,10 @@ public class HearingsManagementControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         State caseState = DECISION_OUTCOME;
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
 
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState);
+        hearingsManagementController.caseStateUpdateByHearingManagement("auth","s2s token", hearingRequest,caseState);
         assertTrue(true);
 
     }
@@ -102,14 +101,13 @@ public class HearingsManagementControllerTest {
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
         assertThrows(
             HearingManagementValidationException.class,
-            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState)
+            () -> hearingsManagementController.caseStateUpdateByHearingManagement("auth","s2s token", hearingRequest,caseState)
         );
     }
 
     @Test
     public void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
         hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest);
@@ -147,13 +145,14 @@ public class HearingsManagementControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
 
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
 
-        hearingsManagementController.updateNextHearingDetailsCallback("auth",callbackRequest);
+        hearingsManagementController.updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
         assertTrue(true);
 
     }

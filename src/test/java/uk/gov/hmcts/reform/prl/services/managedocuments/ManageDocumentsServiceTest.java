@@ -17,7 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -28,7 +27,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
-import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -40,9 +38,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -65,12 +63,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -88,7 +84,7 @@ public class ManageDocumentsServiceTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
-    CoreCaseDataService coreCaseDataService;
+    AllTabServiceImpl allTabService;
 
     @Mock
     SystemUserService systemUserService;
@@ -246,10 +242,6 @@ public class ManageDocumentsServiceTest {
                  .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any(UUID.class)))
             .thenReturn(expectedResponse);
 
-        byte[] pdf = new byte[]{1,2,3,4,5};
-        MultipartFile file = new InMemoryMultipartFile(SOA_MULTIPART_FILE,
-                                                       "Confidential_" + document1.getDocumentFileName(),
-                                                       APPLICATION_PDF_VALUE, pdf);
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         Mockito.when(caseDocumentClient.uploadDocuments(anyString(), anyString(), anyString(), anyString(), anyList()))
@@ -313,7 +305,7 @@ public class ManageDocumentsServiceTest {
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         List<DynamicListElement> listItems = updatedCaseData.getDocumentManagementDetails().getManageDocuments()
             .get(0).getValue().getDocumentCategories().getListItems();
-        Assert.assertEquals(null, listItems);
+        assertNull(listItems);
     }
 
     @Test
@@ -1082,16 +1074,6 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testUpdateCaseData() {
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        manageDocumentsService.updateCaseData(callbackRequest, caseDataUpdated);
-        assertNotNull(callbackRequest);
-    }
-
-    @Test
     public void validateNonCourtUser() {
         ManageDocuments manageDocument = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
@@ -1207,7 +1189,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
         Map<String,Object> caseDataUpdated = manageDocumentsService
-            .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
+            .appendConfidentialDocumentNameForCourtAdmin(auth, caseDataMapInitial, caseData);
         assertNotNull(caseDataUpdated);
         assertNull(caseDataUpdated.get("manageDocuments"));
 
@@ -1226,8 +1208,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
-        Map<String,Object> caseDataUpdated = manageDocumentsService
-            .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
+        Map<String, Object> caseDataUpdated = manageDocumentsService
+                .appendConfidentialDocumentNameForCourtAdmin(auth, caseDataMapInitial, caseData);
         assertNotNull(caseDataUpdated);
         assertNull(caseDataUpdated.get("manageDocuments"));
     }
@@ -1274,7 +1256,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
         Map<String,Object> caseDataUpdated = manageDocumentsService
-            .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
+                .appendConfidentialDocumentNameForCourtAdmin(auth, caseDataMapInitial, caseData);
 
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.get("confidentialDocuments"));
@@ -1325,7 +1307,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
         Map<String,Object> caseDataUpdated = manageDocumentsService
-            .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
+                .appendConfidentialDocumentNameForCourtAdmin(auth, caseDataMapInitial, caseData);
 
         assertNotNull(caseDataUpdated);
         assertNotNull(caseDataUpdated.get("restrictedDocuments"));

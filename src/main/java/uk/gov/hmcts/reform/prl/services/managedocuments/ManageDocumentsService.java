@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,21 +32,19 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,14 +84,13 @@ public class ManageDocumentsService {
     private final UserService userService;
     private final CaseDocumentClient caseDocumentClient;
     private final SystemUserService systemUserService;
-    private final CoreCaseDataService coreCaseDataService;
+    private final AllTabServiceImpl allTabService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
-    private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -203,9 +201,9 @@ public class ManageDocumentsService {
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
-        String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
+        String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
-        if (restrcitedKey != null) {
+        if (restrictedKey != null) {
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
@@ -233,11 +231,11 @@ public class ManageDocumentsService {
 
             moveToConfidentialOrRestricted(
                 caseDataUpdated,
-                CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
+                CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
                     ? caseData.getReviewDocuments().getConfidentialDocuments()
                     : caseData.getReviewDocuments().getRestrictedDocuments(),
                 finalConfidentialDocument,
-                restrcitedKey
+                restrictedKey
             );
         } else {
             // Remove these attributes for Non Confidential documents
@@ -526,45 +524,38 @@ public class ManageDocumentsService {
         }
 
         switch (userRole) {
-            case SOLICITOR:
+            case SOLICITOR -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("legalProfUploadDocListDocTab", quarantineDocs);
                 } else {
                     caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
                 }
-                break;
-
-            case CAFCASS:
+            }
+            case CAFCASS -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("cafcassUploadDocListDocTab", quarantineDocs);
                 } else {
                     caseDataUpdated.put("cafcassQuarantineDocsList", quarantineDocs);
                 }
-                break;
-
-            case COURT_STAFF:
+            }
+            case COURT_STAFF -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
                     caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
                 }
-                break;
-
-            case COURT_ADMIN:
+            }
+            case COURT_ADMIN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 }
-                break;
-
-            case BULK_SCAN:
+            }
+            case BULK_SCAN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
-                break;
-
-            default:
-                throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
-
+            }
+            default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
 
@@ -615,25 +606,38 @@ public class ManageDocumentsService {
         }
     }
 
-    public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(CallbackRequest callbackRequest, String authorization) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+    public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        Map<String, Object> updatedCaseDataMap
+                = appendConfidentialDocumentNameForCourtAdmin(authorisation,
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.caseData());
+        //update all tabs
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                updatedCaseDataMap);
+    }
+
+    public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
         if (userRole.equals(COURT_ADMIN) || userRole.equals(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
-                caseDataUpdated.put("confidentialDocuments", confidentialDocuments);
+                caseDataMap.put("confidentialDocuments", confidentialDocuments);
             }
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
                 List<Element<QuarantineLegalDoc>> restrictedDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getRestrictedDocuments());
-                caseDataUpdated.put("restrictedDocuments", restrictedDocuments);
+                caseDataMap.put("restrictedDocuments", restrictedDocuments);
             }
         }
-        caseDataUpdated.remove("manageDocuments");
-        return caseDataUpdated;
+        caseDataMap.remove("manageDocuments");
+        return caseDataMap;
     }
 
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
@@ -673,15 +677,5 @@ public class ManageDocumentsService {
             m -> m.getValue().getDocumentUploadedDate(),
             Comparator.reverseOrder()
         )).toList();
-    }
-
-    public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            callbackRequest.getCaseDetails().getId(),
-            "internal-update-all-tabs",
-            caseDataUpdated
-        );
     }
 }

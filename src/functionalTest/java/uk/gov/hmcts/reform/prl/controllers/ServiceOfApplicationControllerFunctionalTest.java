@@ -18,7 +18,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -64,9 +63,6 @@ public class ServiceOfApplicationControllerFunctionalTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
-
-    @MockBean
-    private CoreCaseDataService coreCaseDataService;
 
     @MockBean
     private SendAndReplyService sendAndReplyService;
