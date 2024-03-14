@@ -2426,7 +2426,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("circuit-judge");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
                                                                      .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());

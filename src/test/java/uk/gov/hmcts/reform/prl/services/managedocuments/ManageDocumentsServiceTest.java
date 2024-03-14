@@ -495,7 +495,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "circuit-judge");
+            "allocated-magistrate");
         when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "456")).thenReturn(
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
@@ -829,7 +829,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "listed-hearing-viewer");
+            "caseworker-privatelaw-externaluser-viewonly");
         when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "234")).thenReturn(
             roleAssignmentServiceResponse);
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
