@@ -1037,8 +1037,6 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        //when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        //when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
