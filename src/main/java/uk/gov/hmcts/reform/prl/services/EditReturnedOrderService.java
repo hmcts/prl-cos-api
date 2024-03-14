@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_SOLICITOR_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -132,6 +134,8 @@ public class EditReturnedOrderService {
     public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
         Map<String,Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        caseDataMap.put(WA_ORDER_COLLECTION_ID, elementUtils.getDynamicListSelectedValue(caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper));
+        caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId()));
         DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                  caseData.getManageOrders().getRejectedOrdersDynamicList());
 
