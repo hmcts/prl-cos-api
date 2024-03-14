@@ -590,10 +590,7 @@ public class ApplicationsTabServiceTest {
                                          .childPsychologicalAbuse(childAbuse)
                                          .childEmotionalAbuse(childAbuse)
                                          .childFinancialAbuse(childAbuse)
-                                         .childSexualAbuse(childAbuse)
-                                         .newAllegationsOfHarmSubstanceAbuseYesNo(No)
-                                         .newAllegationsOfHarmOtherConcerns(No)
-                                         .build()).build();
+                                         .childSexualAbuse(childAbuse).build()).build();
 
         when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
             .thenReturn(allegationsOfHarmRevisedOrders);

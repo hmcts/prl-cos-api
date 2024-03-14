@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
@@ -8,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOverview;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
@@ -30,9 +33,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AllegationOfHarmRevisedService {
 
-
+    private final ObjectMapper objectMapper;
     public static final String CASE_FIELD_WHICH_CHILDREN_ARE_RISK = "whichChildrenAreRisk";
 
     public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
@@ -106,7 +110,6 @@ public class AllegationOfHarmRevisedService {
         caseDataMap.put("childSexualAbuse", null);
         caseDataMap.put("childEmotionalAbuse", null);
         caseDataMap.put("childFinancialAbuse", null);
-
         return caseDataMap;
     }
 
@@ -345,9 +348,33 @@ public class AllegationOfHarmRevisedService {
                     }
                 });
             caseDataMap.putAll(finalCaseDataMap);
+
+            caseDataMap = clearDataOfAllegationOfHarmOverviewTable(caseData, caseDataMap);
         } else if (YesOrNo.No.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmChildAbuseYesNo())) {
             caseDataMap = cleardDataForAllegationOfHarmForNoSelection(caseDataMap);
         }
+        return caseDataMap;
+    }
+
+    private Map<String, Object> clearDataOfAllegationOfHarmOverviewTable(CaseData caseData, Map<String, Object> caseDataMap) {
+        if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
+            caseData = caseData.toBuilder()
+                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised().toBuilder()
+                                             .newAllegationsOfHarmSubstanceAbuseDetails(null)
+                                             .build())
+                .build();
+        }
+
+        if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcerns())) {
+            caseData = caseData.toBuilder()
+                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised().toBuilder()
+                                             .newAllegationsOfHarmOtherConcernsDetails(null)
+                                             .build())
+                .build();
+        }
+        AllegationsOfHarmRevisedOverview allegationsOfHarmRevisedOverview = objectMapper
+            .convertValue(caseData, AllegationsOfHarmRevisedOverview.class);
+        caseDataMap.put("allegationsOfHarmRevisedOverviewTable", objectMapper.convertValue(allegationsOfHarmRevisedOverview, Map.class));
         return caseDataMap;
     }
 }

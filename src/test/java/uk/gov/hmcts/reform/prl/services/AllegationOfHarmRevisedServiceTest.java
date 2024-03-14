@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +25,9 @@ import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllegationOfHarmRevisedServiceTest {
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @InjectMocks
     AllegationOfHarmRevisedService allegationOfHarmService;
@@ -236,6 +241,10 @@ public class AllegationOfHarmRevisedServiceTest {
             .childEmotionalAbuse(ChildAbuse.builder()
                                      .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
                                      .build())
+            .newAllegationsOfHarmSubstanceAbuseYesNo(YesOrNo.No)
+            .newAllegationsOfHarmSubstanceAbuseDetails("HARMFUL_SUBSTANCE_ABUSE")
+            .newAllegationsOfHarmOtherConcerns(YesOrNo.No)
+            .newAllegationsOfHarmOtherConcernsDetails("OTHER_CONCERNS")
             .build();
 
         Map<String, Object> caseDataMap = allegationOfHarmService
@@ -257,6 +266,10 @@ public class AllegationOfHarmRevisedServiceTest {
             .childPsychologicalAbuse(ChildAbuse.builder()
                                          .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
                                          .build())
+            .newAllegationsOfHarmSubstanceAbuseYesNo(YesOrNo.No)
+            .newAllegationsOfHarmSubstanceAbuseDetails("HARMFUL_SUBSTANCE_ABUSE")
+            .newAllegationsOfHarmOtherConcerns(YesOrNo.No)
+            .newAllegationsOfHarmOtherConcernsDetails("OTHER_CONCERNS")
             .build();
 
         Map<String, Object> caseDataMap = allegationOfHarmService

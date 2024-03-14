@@ -586,31 +586,10 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getAllegationsOfHarmRevisedOverviewTable(CaseData caseData) {
-        clearFieldsForAllegationOfHarmOverview(caseData);
         AllegationsOfHarmRevisedOverview allegationsOfHarmRevisedOverview = objectMapper
                 .convertValue(caseData, AllegationsOfHarmRevisedOverview.class);
         return toMap(allegationsOfHarmRevisedOverview);
 
-    }
-
-    private void clearFieldsForAllegationOfHarmOverview(CaseData caseData) {
-        if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
-                                             .toBuilder()
-                                             .newAllegationsOfHarmSubstanceAbuseDetails(null)
-                                             .build())
-                .build();
-        }
-
-        if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcerns())) {
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
-                                             .toBuilder()
-                                             .newAllegationsOfHarmOtherConcernsDetails(null)
-                                             .build())
-                .build();
-        }
     }
 
     public Map<String, Object> getMiamTable(CaseData caseData) {
