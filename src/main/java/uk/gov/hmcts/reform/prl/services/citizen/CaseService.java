@@ -145,7 +145,7 @@ public class CaseService {
                                                 CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         StartEventResponse startEventResponse =
@@ -164,6 +164,7 @@ public class CaseService {
         }
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
@@ -171,15 +172,19 @@ public class CaseService {
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
+                caseDataMap.put(C100_APPLICANTS, caseData.getApplicants());
+                caseDataMap.put(C100_RESPONDENTS, caseData.getRespondents());
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
+                caseDataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+                caseDataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
             try {
                 log.info("ServiceOfApplicationUploadDocs 2 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            caseData = generateAnswersForNoc(caseData);
+            caseDataMap.putAll(generateAnswersForNoc(caseData, caseDataMap));
             try {
                 log.info("ServiceOfApplicationUploadDocs 3 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
             } catch (JsonProcessingException e) {
@@ -187,13 +192,14 @@ public class CaseService {
             }
             if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+                caseDataMap.put("respondentsConfidentialDetails", caseData.getRespondentConfidentialDetails());
                 try {
                     log.info("ServiceOfApplicationUploadDocs 4 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
                 } catch (JsonProcessingException e) {
                     log.info("error");
                 }
             }
-            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            //Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
@@ -311,8 +317,8 @@ public class CaseService {
         return docs;
     }
 
-    private CaseData generateAnswersForNoc(CaseData caseData) {
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+    private Map<String, Object> generateAnswersForNoc(CaseData caseData, Map<String, Object> caseDataMap) {
+        //Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         if (isNotEmpty(caseDataMap)) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -322,8 +328,8 @@ public class CaseService {
                 caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
             }
         }
-        caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
-        return caseData;
+        //caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        return caseDataMap;
     }
 
     private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
@@ -340,6 +346,7 @@ public class CaseService {
     }
 
     private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
