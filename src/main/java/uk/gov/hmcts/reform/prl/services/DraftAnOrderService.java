@@ -1250,7 +1250,7 @@ public class DraftAnOrderService {
 
     private CreateSelectOrderOptionsEnum getOrderType(CallbackRequest callbackRequest, CaseData caseData) {
         CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-        if (ObjectUtils.isEmpty(orderType)) {
+        if (ObjectUtils.isEmpty(orderType) && CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
             DraftOrder draftOrder;
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 draftOrder = getSelectedDraftOrderDetails(
