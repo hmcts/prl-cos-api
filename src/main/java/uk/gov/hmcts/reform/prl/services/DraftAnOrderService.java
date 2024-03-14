@@ -223,7 +223,6 @@ public class DraftAnOrderService {
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Map<String, Object> draftOrderCollectionMap= new HashMap<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
@@ -242,9 +241,7 @@ public class DraftAnOrderService {
         ));
         log.info("*******0******** {}", draftOrderList.get(0).getId());
         log.info("*******last******** {}", draftOrderList.get(draftOrderList.size() - 1).getId());
-        draftOrderCollectionMap.put("draftOrderCollectionId", draftOrderList.get(0).getId());
-        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
-        );
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList,"draftOrderCollectionId", draftOrderList.get(0).getId());
     }
 
     private static void defaultHearingOptionToDateReservedWithListAssist(DraftOrder draftOrder) {
