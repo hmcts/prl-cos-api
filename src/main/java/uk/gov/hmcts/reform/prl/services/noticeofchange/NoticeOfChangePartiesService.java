@@ -741,7 +741,6 @@ public class NoticeOfChangePartiesService {
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
                 List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseId));
-                log.info("CaseEventDetail ===> " + eventsForCase);
                 for (CaseEventDetail eventDetail : eventsForCase) {
                     if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equalsIgnoreCase(eventDetail.getStateId())) {
                         log.info("Case in hearing state, hence updating access code");
@@ -964,6 +963,19 @@ public class NoticeOfChangePartiesService {
             + " " + oldPartyDetails.getValue().getRepresentativeLastName() : newPartyDetails.getValue().getRepresentativeFirstName()
             + " " + newPartyDetails.getValue().getRepresentativeLastName();
         String accessCode = getAccessCode(caseData, newPartyDetails);
+
+        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null
+            ? caseData.getCaseInvites() : new ArrayList<>();
+        if (accessCode.equalsIgnoreCase(BLANK_STRING)) {
+            generateNewAccessCode(
+                caseData,
+                newPartyDetails,
+                solicitorRole, caseInvites
+            );
+        } else {
+            log.info("Set existing pin citizen after removing legal representation");
+        }
+
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             caseData,
             solicitorRole,
