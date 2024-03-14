@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-import org.junit.Ignore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -31,9 +34,11 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -77,6 +82,10 @@ public class CaseEventHandlerTest {
 
     @InjectMocks
     private CaseEventHandler caseEventHandler;
+    @Mock
+    private  ObjectMapper objectMapper;
+
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Test
     public void shouldUpdateTaskListForCasesInOpenStateC100() {
@@ -134,6 +143,16 @@ public class CaseEventHandlerTest {
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -190,6 +209,16 @@ public class CaseEventHandlerTest {
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -277,6 +306,18 @@ public class CaseEventHandlerTest {
                 "B",
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -476,6 +517,16 @@ public class CaseEventHandlerTest {
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
