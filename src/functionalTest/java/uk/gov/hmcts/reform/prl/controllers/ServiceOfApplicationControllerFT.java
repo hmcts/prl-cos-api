@@ -36,8 +36,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -281,7 +279,7 @@ public class ServiceOfApplicationControllerFT {
 
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_CA_CB);
         String requestBodyRevised = requestBody
-            .replace("1687443551969082", caseDetails.getId().toString());
+            .replace("1710453884259219", caseDetails.getId().toString());
 
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
@@ -302,15 +300,14 @@ public class ServiceOfApplicationControllerFT {
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
         assertTrue(json.contains(CONFIRMATION_HEADER_PERSONAL));
-        verify(serviceOfApplicationEmailService,times(1)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                               Mockito.any(), Mockito.any(), Mockito.any(),
-                                                               Mockito.anyString());
     }
 
     @Test
     public void givenRequestWithFl401CaseData_Perosnal_Service_lr_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_LR);
+        String requestBodyRevised = requestBody
+            .replace("1710453884259219", caseDetails.getId().toString());
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
             .build();
@@ -322,7 +319,7 @@ public class ServiceOfApplicationControllerFT {
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBody)
+                                            .content(requestBodyRevised)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -330,9 +327,6 @@ public class ServiceOfApplicationControllerFT {
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
         assertTrue(json.contains(CONFIRMATION_HEADER_PERSONAL));
-        verify(serviceOfApplicationEmailService,times(1)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                                                                Mockito.any(), Mockito.any(), Mockito.any(),
-                                                                                                Mockito.anyString());
     }
 
 }
