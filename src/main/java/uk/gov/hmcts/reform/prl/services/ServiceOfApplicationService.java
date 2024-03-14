@@ -518,9 +518,7 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                dynamicData.put("eng", documentLanguage.isGenEng());
-                dynamicData.put("wel", documentLanguage.isGenWelsh());
+                populateLanguageMap(caseData, dynamicData);
                 EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                     .sendEmailUsingTemplateWithAttachments(
                         authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
@@ -597,9 +595,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put("eng", documentLanguage.isGenEng());
-        dynamicData.put("wel", documentLanguage.isGenWelsh());
+        populateLanguageMap(caseData, dynamicData);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -620,6 +616,12 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
 
+    private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put("eng", documentLanguage.isGenEng());
+        dynamicData.put("wel", documentLanguage.isGenWelsh());
+    }
+
     private void sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(CaseData caseData, String authorization,
                                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                           List<Document> staticDocs,
@@ -628,9 +630,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put("eng", documentLanguage.isGenEng());
-        dynamicData.put("wel", documentLanguage.isGenWelsh());
+        populateLanguageMap(caseData, dynamicData);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
             caseData.getApplicantsFL401().getSolicitorEmail(),
@@ -816,9 +816,7 @@ public class ServiceOfApplicationService {
                         dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                         dynamicData.put("respondent", true);
-                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                        dynamicData.put("eng", documentLanguage.isGenEng());
-                        dynamicData.put("wel", documentLanguage.isGenWelsh());
+                        populateLanguageMap(caseData, dynamicData);
                         List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
                         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
@@ -1521,9 +1519,7 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                dynamicData.put("eng", documentLanguage.isGenEng());
-                dynamicData.put("wel", documentLanguage.isGenWelsh());
+                populateLanguageMap(caseData, dynamicData);
                 emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
@@ -1558,9 +1554,7 @@ public class ServiceOfApplicationService {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                dynamicData.put("eng", documentLanguage.isGenEng());
-                dynamicData.put("wel", documentLanguage.isGenWelsh());
+                populateLanguageMap(caseData, dynamicData);
                 List<Document> finalDocumentList = new ArrayList<>(
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
@@ -1610,9 +1604,7 @@ public class ServiceOfApplicationService {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                    DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                    dynamicData.put("eng", documentLanguage.isGenEng());
-                    dynamicData.put("wel", documentLanguage.isGenWelsh());
+                    populateLanguageMap(caseData, dynamicData);
                     EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                         .sendEmailUsingTemplateWithAttachments(
                             authorization, party.get().getValue().getSolicitorEmail(),
@@ -1933,22 +1925,17 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                if (null != caseData.getFinalDocument()) {
-                    docs.add(caseData.getFinalDocument());
-                }
-                if (null != caseData.getC1ADocument()) {
-                    docs.add(caseData.getC1ADocument());
-                }
-
+            if (documentLanguage.isGenEng() && null != caseData.getFinalDocument()) {
+                docs.add(caseData.getFinalDocument());
             }
-            if (documentLanguage.isGenWelsh()) {
-                if (null != caseData.getFinalWelshDocument()) {
-                    docs.add(caseData.getFinalWelshDocument());
-                }
-                if (null != caseData.getC1AWelshDocument()) {
-                    docs.add(caseData.getC1AWelshDocument());
-                }
+            if (documentLanguage.isGenWelsh() && null != caseData.getFinalWelshDocument()) {
+                docs.add(caseData.getFinalWelshDocument());
+            }
+            if (documentLanguage.isGenEng() && null != caseData.getC1ADocument()) {
+                docs.add(caseData.getC1ADocument());
+            }
+            if (documentLanguage.isGenWelsh() && null != caseData.getC1AWelshDocument()) {
+                docs.add(caseData.getC1AWelshDocument());
             }
         } else {
             docs.add(caseData.getFinalDocument());
