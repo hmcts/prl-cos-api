@@ -2737,7 +2737,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
-    public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization, Map<String, String> failedPacksMap) {
+    public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
         //Suppressed java:S6541 , suppression will be removed after refactoring in the IP sprint.
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -2755,8 +2755,6 @@ public class ServiceOfApplicationService {
                     authorization, emailNotificationDetails, unServedApplicantPack, unServedRespondentPack);
                 if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
-                } else {
-                    failedPacksMap.put(APPLICANT_PACK, "Yes");
                 }
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else if (unServedApplicantPack != null
@@ -2764,20 +2762,11 @@ public class ServiceOfApplicationService {
                 unServedApplicantPack.getPersonalServiceBy())) {
                 sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
                                                                emailNotificationDetails, bulkPrintDetails);
-
-                if (CollectionUtils.isEmpty(emailNotificationDetails)
-                    && CollectionUtils.isEmpty(bulkPrintDetails)) {
-                    failedPacksMap.put(APPLICANT_PACK, "Yes");
-                }
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    if (CollectionUtils.isEmpty(emailNotificationDetails)
-                        && CollectionUtils.isEmpty(bulkPrintDetails)) {
-                        failedPacksMap.put(APPLICANT_PACK, "Yes");
-                    }
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
@@ -2795,20 +2784,14 @@ public class ServiceOfApplicationService {
                         );
                     } else {
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                        List<Element<EmailNotificationDetails>> respondentEmailList = new ArrayList<>();
                         sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
                                                                            authorization,
-                                                                           respondentEmailList,
+                                                                           emailNotificationDetails,
                                                                            bulkPrintDetails,
                                                                            respondentList,
                                                                            respondentDocs,
                                                                            respondentDocs
                         );
-                        if (respondentEmailList.isEmpty()) {
-                            failedPacksMap.put("respondantPack", "Yes");
-                        } else {
-                            emailNotificationDetails.addAll(respondentEmailList);
-                        }
                     }
 
                 }
@@ -2835,8 +2818,6 @@ public class ServiceOfApplicationService {
         EmailNotificationDetails emailNotification = checkAndServeLocalAuthorityEmail(caseData, authorization);
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification));
-        } else {
-            failedPacksMap.put("laPack", "Yes");
         }
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
@@ -3068,11 +3049,9 @@ public class ServiceOfApplicationService {
         final ResponseEntity<SubmittedCallbackResponse> response;
         String confirmationHeader;
         String confirmationBody;
-        Map<String, String> failedPacksMap = new HashMap<>();
         caseData = sendNotificationsForUnServedPacks(
             caseData,
-            authorisation,
-            failedPacksMap
+            authorisation
         );
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
@@ -3094,20 +3073,15 @@ public class ServiceOfApplicationService {
 
             );
         }
-        if (!Objects.equals(failedPacksMap.get(APPLICANT_PACK), "Yes")) {
-            caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
-        }
+        caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
         if (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
             && (null == caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()
             || SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-            caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))
-            && !Objects.equals(failedPacksMap.get("respondantPack"), "Yes")) {
+            caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))) {
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         }
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
-        if (!Objects.equals(failedPacksMap.get("laPack"), "Yes")) {
-            caseDataMap.put(UNSERVED_LA_PACK, null);
-        }
+        caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
         response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(confirmationHeader)
