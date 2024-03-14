@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOverview;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
@@ -356,54 +355,12 @@ public class AllegationOfHarmRevisedService {
     }
 
     private Map<String, Object> clearDataOfAllegationOfHarmOverviewTable(CaseData caseData, Map<String, Object> caseDataMap) {
-        log.info("NewAllegationsOfHarmSubstanceAbuseYesNo: {}", caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseYesNo());
-        log.info("NewAllegationsOfHarmOtherConcerns: {}", caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcerns());
         if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseYesNo())) {
-            log.info("newAllegationsOfHarmSubstanceAbuseDetails BEFORE : {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseDetails());
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised().toBuilder()
-                                             .newAllegationsOfHarmSubstanceAbuseDetails(null)
-                                             .build())
-                .build();
-            log.info("newAllegationsOfHarmSubstanceAbuseDetails AFTER-1 : {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseDetails());
-            AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised().toBuilder()
-                .newAllegationsOfHarmSubstanceAbuseDetails(null)
-                .newAllegationsOfHarmSubstanceAbuseDetails("")
-                .build();
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(allegationOfHarmRevised)
-                .build();
-
-            log.info("newAllegationsOfHarmSubstanceAbuseDetails AFTER-2 : {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmSubstanceAbuseDetails());
+            caseDataMap.put("newAllegationsOfHarmSubstanceAbuseDetails", null);
         }
-
         if ((YesOrNo.No).equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcerns())) {
-            log.info("newAllegationsOfHarmOtherConcernsDetails BEFORE: {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcernsDetails());
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised().toBuilder()
-                                             .newAllegationsOfHarmOtherConcernsDetails(null)
-                                             .build())
-                .build();
-            log.info("newAllegationsOfHarmOtherConcernsDetails AFTER-1: {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcernsDetails());
-            AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised().toBuilder()
-                .newAllegationsOfHarmOtherConcernsDetails(null)
-                .newAllegationsOfHarmOtherConcernsDetails("")
-                .build();
-            caseData = caseData.toBuilder()
-                .allegationOfHarmRevised(allegationOfHarmRevised)
-                .build();
-            log.info("newAllegationsOfHarmOtherConcernsDetails AFTER-2: {}",
-                     caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmOtherConcernsDetails());
+            caseDataMap.put("newAllegationsOfHarmOtherConcernsDetails", null);
         }
-        AllegationsOfHarmRevisedOverview allegationsOfHarmRevisedOverview = objectMapper
-            .convertValue(caseData, AllegationsOfHarmRevisedOverview.class);
-        log.info("allegationsOfHarmRevisedOverview: {}", allegationsOfHarmRevisedOverview);
-        caseDataMap.put("allegationsOfHarmRevisedOverviewTable", objectMapper.convertValue(allegationsOfHarmRevisedOverview, Map.class));
         return caseDataMap;
     }
 }
