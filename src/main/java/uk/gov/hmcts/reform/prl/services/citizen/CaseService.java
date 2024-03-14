@@ -155,6 +155,11 @@ public class CaseService {
             );
 
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        try {
+            log.info("ServiceOfApplicationUploadDocs 1 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
@@ -167,9 +172,24 @@ public class CaseService {
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
+            try {
+                log.info("ServiceOfApplicationUploadDocs 2 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             caseData = generateAnswersForNoc(caseData);
+            try {
+                log.info("ServiceOfApplicationUploadDocs 3 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+                try {
+                    log.info("ServiceOfApplicationUploadDocs 4 ===>" + objectMapper.writeValueAsString(caseData.getServiceOfApplicationUploadDocs()));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
