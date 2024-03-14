@@ -324,25 +324,28 @@ public class ManageOrdersUtils {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (isDaOrderSelectedForCaCase(selectedOrder.toString()) && isNotDaOrderSupportedCase(caseData)) {
+                if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
+                    errorList.add("This order is not available to be created");
+                }
+                if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
                     errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                    .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
-
         return !errorList.isEmpty();
     }
 
     private static boolean isNotDaOrderSupportedCase(CaseData caseData) {
-        return CollectionUtils.size(caseData.getApplicants()) > 1 &&  CollectionUtils.size(caseData.getRespondents()) > 1;
+        return CollectionUtils.size(caseData.getApplicants()) > 1 || CollectionUtils.size(caseData.getRespondents()) > 1;
     }
 
-    private static boolean isDaOrderSelectedForCaCase(String selectedOrder) {
-        return Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+    public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
+                VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 

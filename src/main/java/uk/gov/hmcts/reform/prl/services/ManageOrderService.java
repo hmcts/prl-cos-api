@@ -112,6 +112,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_ORDER_FOR_CA_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_HEARING_DETAILS;
@@ -923,7 +924,9 @@ public class ManageOrderService {
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
-            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
@@ -1025,7 +1028,7 @@ public class ManageOrderService {
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
         if ((YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
             || YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
-            && childOption != null) {
+            && childOption != null && childOption.getValue() != null) {
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && childOption != null && childOption.getListItems() != null) {
@@ -1830,7 +1833,7 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -1919,7 +1922,7 @@ public class ManageOrderService {
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -2076,32 +2079,37 @@ public class ManageOrderService {
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
         if (orderData != null) {
+
+            PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+            PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
             orderData = orderData.toBuilder()
                 .fl404bCaseNumber(String.valueOf(caseData.getId()))
                 .fl404bCourtName(caseData.getCourtName())
                 .fl404bApplicantName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
+                    applicant1.getFirstName(),
+                    applicant1.getLastName()
                 ))
                 .fl404bRespondentName(String.format(
                     PrlAppsConstants.FORMAT,
-                    caseData.getRespondentsFL401().getFirstName(),
-                    caseData.getRespondentsFL401().getLastName()
+                    respondent1.getFirstName(),
+                    respondent1.getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
-                                              ? caseData.getApplicantsFL401().getSolicitorReference() : "")
-                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
-                                               ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                .fl404bApplicantReference(applicant1.getSolicitorReference() != null
+                                              ? applicant1.getSolicitorReference() : "")
+                .fl404bRespondentReference(respondent1.getSolicitorReference() != null
+                                               ? respondent1.getSolicitorReference() : "")
                 .build();
 
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            if (ofNullable(respondent1.getAddress()).isPresent()) {
                 orderData = orderData.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                    .fl404bRespondentAddress(respondent1.getAddress()).build();
             }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
                 orderData = orderData.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                    .fl404bRespondentDob(respondent1.getDateOfBirth()).build();
             }
         }
         caseData = caseData.toBuilder()
@@ -2354,7 +2362,10 @@ public class ManageOrderService {
         }
 
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                || ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
+                caseData)) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
@@ -2413,7 +2424,6 @@ public class ManageOrderService {
     }
 
     private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
-        log.info("---- Legal rep present ----{}", email);
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
             log.info("---- Legal rep present ----");
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
@@ -2524,7 +2534,7 @@ public class ManageOrderService {
                     judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
             } catch (Exception e) {
-                log.error("User details not found for personal code {}", personalCodes);
+                log.error("User details not found for personal code {}", personalCodes, e);
             }
         }
         return judgeFullName;
@@ -3086,6 +3096,9 @@ public class ManageOrderService {
         //children dynamic multi select list
         caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put(DA_ORDER_FOR_CA_CASE,
+                            ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                                         caseData) ? Yes : No);
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
