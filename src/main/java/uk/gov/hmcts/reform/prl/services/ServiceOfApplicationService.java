@@ -953,7 +953,8 @@ public class ServiceOfApplicationService {
             if (isAccessEnabled(applicant)) {
                 //Already got dashboard access, send gov notify email with dashboard link.
                 log.debug("Applicant has access to dashboard, sending gov notify email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packDocs, applicant, PRL_LET_ENG_AP8)));
+                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packDocs,
+                                                                                       applicant, PRL_LET_ENG_AP8)));
             } else if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())
                 && YesOrNo.Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
                 //Email packs to applicants
@@ -1086,7 +1087,7 @@ public class ServiceOfApplicationService {
         if (isAccessEnabled(selectedApplicant)) {
             emailNotification = sendEmailToUnrepresentedApplicant(authorization, caseData, docs, selectedApplicant, PRL_LET_ENG_AP7);
         } else {
-             emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+            emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 selectedApplicant.getValue().getEmail(),
                 docs,
