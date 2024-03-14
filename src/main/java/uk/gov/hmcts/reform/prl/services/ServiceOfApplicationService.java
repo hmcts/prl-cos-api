@@ -46,8 +46,6 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -1297,7 +1295,8 @@ public class ServiceOfApplicationService {
                         emailService.send(
                             selectedApplicant.getValue().getEmail(),
                             EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
-                            buildApplicantEmail(caseData, selectedApplicant.getValue()),
+                            serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
+                                                                                   selectedApplicant.getValue()),
                             LanguagePreference.english
                         );
                         emailNotificationDetails.add(element(EmailNotificationDetails.builder()
@@ -1319,7 +1318,8 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                 .sendEmailUsingTemplateWithAttachments(authorization,
                                                    selectedApplicant.getValue().getEmail(), docs,
                                                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                    dynamicData, SERVED_PARTY_APPLICANT)));
@@ -1336,18 +1336,6 @@ public class ServiceOfApplicationService {
             caseData.setCaseInvites(caseInvites);
         });
         return emailNotificationDetails;
-    }
-
-
-    private EmailTemplateVars buildApplicantEmail(CaseData caseData, PartyDetails selectedApplicant) {
-
-        return CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .applicantName(selectedApplicant.getFirstName() + " "
-                               + selectedApplicant.getLastName())
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .build();
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondentsC100(String authorization,
