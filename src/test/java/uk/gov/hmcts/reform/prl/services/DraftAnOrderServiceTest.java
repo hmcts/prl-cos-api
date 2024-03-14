@@ -4056,7 +4056,6 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test")
                               .build())
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
-            .orderType(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .manageOrderHearingDetails(List.of(element(HearingData.builder().build())))
             .build();
 
@@ -4064,7 +4063,7 @@ public class DraftAnOrderServiceTest {
             .value(draftOrder).build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code(TEST_UUID).label("test")
                                                                   .build()).build();
 
         CaseData caseData = CaseData.builder()
@@ -4074,7 +4073,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .isTheOrderAboutChildren(Yes)
                               .build())
-            .draftOrdersDynamicList(TEST_UUID)
+            .draftOrdersDynamicList(dynamicList)
             .doYouWantToEditTheOrder(No)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
