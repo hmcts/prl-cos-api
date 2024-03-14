@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -60,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class CaseEventHandlerTest {
 
     @Mock
