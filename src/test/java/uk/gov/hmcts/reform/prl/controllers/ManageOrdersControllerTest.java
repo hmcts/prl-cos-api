@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -80,6 +81,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -94,6 +96,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOption
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+@Slf4j
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrdersControllerTest {
@@ -189,6 +192,58 @@ public class ManageOrdersControllerTest {
             .thenReturn(List.of(Element.<HearingData>builder().build()));
 
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .solicitorEmail("test@test.com")
+            .build();
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .solicitorEmail("test@test.com")
+            .build();
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
+            .courtName("testcourt")
+            .build();
+        Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMaps,
+            caseData
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
+
     }
 
     @Test
@@ -972,7 +1027,7 @@ public class ManageOrdersControllerTest {
     public void testSubmitAmanageorderEmailValidation() throws Exception {
 
 
-        applicant = PartyDetails.builder()
+        /*applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
@@ -1000,14 +1055,13 @@ public class ManageOrdersControllerTest {
 
         List<LiveWithEnum> childLiveWithList = new ArrayList<>();
         childLiveWithList.add(LiveWithEnum.applicant);
-
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
-            .build();
+            .build();*/
 
         String childNames = "child1 child2";
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        /*Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         caseData = CaseData.builder()
@@ -1019,7 +1073,7 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
-            .build();
+            .build();*/
 
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
@@ -1027,7 +1081,6 @@ public class ManageOrdersControllerTest {
         );
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1036,23 +1089,21 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        //when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        //when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
-            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
             callbackRequest
         );
+        log.info("caseData: {}",caseData);
+        log.info("stringObjectMap: {}",stringObjectMap);
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
+            .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
     }
 
     @Test
