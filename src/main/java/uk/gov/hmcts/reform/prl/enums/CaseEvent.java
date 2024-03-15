@@ -30,7 +30,7 @@ public enum CaseEvent {
     INTERNAL_UPDATE_TASK_LIST("internal-update-task-list"),
     CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF"),
     CITIZEN_CASE_WITHDRAW("citizenCaseWithdraw"),
-    UPDATE_NEXT_HEARING_DATE_IN_CCD("updateNextHearingInfo"),
+    UPDATE_NEXT_HEARING_DATE_IN_CCD("UpdateNextHearingInfo"),
     HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
     HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome"),
     CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
