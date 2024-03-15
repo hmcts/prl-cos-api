@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
@@ -16,8 +17,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -33,22 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -111,22 +97,30 @@ public class ServiceOfApplicationPostService {
         return generatedDocumentInfo;
     }
 
-    public List<Document> getStaticDocs(String auth, String caseType) {
+    public List<Document> getStaticDocs(String auth, String caseType, CaseData caseData) {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            uploadResponse = caseDocumentClient.uploadDocuments(
-                auth,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
+            List<MultipartFile> files = new ArrayList<>();
+            if (documentLanguage.isGenEng()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    PRIVACY_DOCUMENT_FILENAME,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                ));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    PRIVACY_DOCUMENT_FILENAME_WELSH,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
+                ));
+            }
+            files.addAll(
                 List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_MEDIATION_VOUCHER_FILENAME,
@@ -150,14 +144,34 @@ public class ServiceOfApplicationPostService {
                         SOA_C9_PERSONAL_SERVICE_FILENAME,
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
-                    ),
+                    )
+                )
+            );
+            if (documentLanguage.isGenEng()) {
+                files.add(
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         C1A_BLANK_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
-                    )
-                )
+                    ));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                files.add(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        C1A_BLANK_DOCUMENT_WELSH_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_WELSH_FILENAME)
+                    ));
+            }
+
+            uploadResponse = caseDocumentClient.uploadDocuments(
+                auth,
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                files
             );
         } else {
 
@@ -183,8 +197,7 @@ public class ServiceOfApplicationPostService {
             );
         }
         if (null != uploadResponse) {
-            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
-                Collectors.toList());
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
