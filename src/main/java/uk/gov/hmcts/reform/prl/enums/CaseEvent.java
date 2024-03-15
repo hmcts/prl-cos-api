@@ -22,6 +22,8 @@ public enum CaseEvent {
     REVIEW_AND_SUBMIT("reviewAndSubmit"),
     PAYMENT_SUCCESS_CALLBACK("paymentSuccessCallback"),
     PAYMENT_FAILURE_CALLBACK("paymentFailureCallback"),
+    AWP_PAYMENT_SUCCESS_CALLBACK("awpPaymentSuccessCallback"),
+    AWP_PAYMENT_FAILURE_CALLBACK("awpPaymentFailureCallback"),
     UPDATE_ALL_TABS("internal-update-all-tabs"),
     COURTNAV_CASE_CREATION("courtnav-case-creation"),
     COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload"),
