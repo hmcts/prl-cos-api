@@ -121,22 +121,6 @@ public class ServiceOfApplicationControllerFT {
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
-
-        /*String requestBody1 = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON_FL401);
-        caseDetails1 =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody1)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());*/
     }
 
     @Test

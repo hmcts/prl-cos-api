@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -157,17 +155,13 @@ public class ListOnNoticeController {
     public void sendListOnNoticeNotification(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        log.info("KKKKKKKKKK {}",result);
+        @RequestBody CallbackRequest callbackRequest) {
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
-            log.info("MApppppp {}",selectedAndAdditionalReasons);
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
                 CaseData caseData = objectMapper.convertValue(
                     callbackRequest.getCaseDetails().getData(),
