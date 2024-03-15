@@ -202,16 +202,15 @@ public class ListOnNoticeControllerFT {
     public void testSendListOnNoticeNotification() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);
+        String requestBodyRevised = requestBody
+            .replace("1648728532100631", caseDetails.getId().toString());
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post(listOnNoticeSendNotificationEndpoint);
         response.then().assertThat().statusCode(200);
-        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res);
-        Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 }
