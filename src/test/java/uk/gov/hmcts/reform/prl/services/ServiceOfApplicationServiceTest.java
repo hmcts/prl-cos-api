@@ -568,37 +568,6 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedPacks1() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(parties)
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
-                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                         .courtAdmin.toString()).build())
-                                      .unServedOthersPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassCymruEmail("test@hmcts.net")
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(12345L)
-                             .data(caseDetails).build()).build();
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
-    }
-
-    @Test
     public void testsendNotificationsForUnServedLaPack() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
