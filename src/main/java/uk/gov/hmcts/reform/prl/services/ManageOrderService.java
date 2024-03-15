@@ -1042,7 +1042,7 @@ public class ManageOrderService {
         String selectedChildNames;
         childList = new ArrayList<>();
         for (DynamicMultiselectListElement dynamicMultiselectChildElement : dynamicMultiselectListElements) {
-            childList.add(dynamicMultiselectChildElement.getLabel().trim());
+            childList.add(org.apache.commons.lang3.StringUtils.trimToEmpty(dynamicMultiselectChildElement.getLabel()));
         }
         selectedChildNames = String.join(", ", childList);
         return selectedChildNames;
