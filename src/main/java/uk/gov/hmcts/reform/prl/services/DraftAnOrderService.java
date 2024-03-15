@@ -2093,14 +2093,14 @@ public class DraftAnOrderService {
                 caseData.getDraftOrdersDynamicList()
             )
                 .getLabelForOrdersDynamicList();
-        } else if(DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
+        } else if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
             if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
                 return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue());
             } else if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
                 return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(
                     caseData));
             }
-        }else if(EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)){
+        } else if (EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
             return getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getManageOrders().getRejectedOrdersDynamicList()
