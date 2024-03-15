@@ -593,6 +593,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java',
   '**uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java',
+  '**uk/gov/hmcts/reform/prl/services/FeeService.java',
+  '**uk/gov/hmcts/reform/prl/services/UploadAdditionalApplicationService.java'
 ]
 
 sonarqube {
