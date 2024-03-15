@@ -75,69 +75,40 @@ public class ServiceOfApplicationPostService {
         return sendBulkPrint(caseData, authorisation, docs, partyDetails, servedParty);
     }
 
-    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name) throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        List<Document> coversheets = new ArrayList<>();
         if (null != address && null != address.getAddressLine1()) {
-            generatedDocumentInfo = dgsService.generateDocument(
-                auth,
-
-                CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
-                    ServiceOfApplication.builder().coverPageAddress(Address.builder()
-                                                                        .addressLine1(address.getAddressLine1())
-                                                                        .addressLine2(address.getAddressLine2())
-                                                                        .addressLine3(address.getAddressLine3())
-                                                                        .county(address.getCounty())
-                                                                        .postCode(address.getPostCode())
-                                                                        .postTown(address.getPostTown())
-                                                                        .build())
-                        .coverPagePartyName(null != name ? name : " ").build()
-                ).build()).build(),
-                documentGenService.getTemplate(
-                    caseData,
-                    DOCUMENT_COVER_SHEET_HINT,
-                    documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
-                )
-            );
-        } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
-        }
-        return generatedDocumentInfo;
-    }
-
-    public List<Document> getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, Object> dataMap = new HashMap<>();
-        List<Document> coverLetterDocs = new ArrayList<>();
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (null != address && null != address.getAddressLine1()) {
-            dataMap.put("coverPagePartyName", name);
-            dataMap.put("coverPageAddress", address);
-            dataMap.put("id", String.valueOf(caseData.getId()));
+            GeneratedDocumentInfo generatedDocumentInfo = null;
             if (documentLanguage.isGenEng()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth, String.valueOf(caseData.getId()),
-                    documentGenService.getTemplate(
-                        caseData,
-                        DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
-                    ), dataMap
-                );
-                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false);
             }
             if (documentLanguage.isGenWelsh()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth, String.valueOf(caseData.getId()),
-                    documentGenService.getTemplate(
-                        caseData,
-                        DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
-                    ), dataMap
-                );
-                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+                generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true);
             }
+            coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
-        return coverLetterDocs;
+        return coversheets;
+    }
+
+    private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
+                                                                           Address address, String name,
+                                                                           boolean isWelsh) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo;
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverPagePartyName", null != name ? name : " ");
+        dataMap.put("coverPageAddress", address);
+        dataMap.put("id", String.valueOf(caseData.getId()));
+        generatedDocumentInfo = dgsService.generateDocument(
+            auth, String.valueOf(caseData.getId()),
+            documentGenService.getTemplate(
+                caseData,
+                DOCUMENT_COVER_SHEET_HINT, isWelsh
+            ), dataMap
+        );
+        return generatedDocumentInfo;
     }
 
     public List<Document> getStaticDocs(String auth, String caseType) {

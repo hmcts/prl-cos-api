@@ -188,6 +188,8 @@ public class ServiceOfApplicationService {
     public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
     public static final String APPLICANT_PACK = "applicantPack";
     public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
+    public static final String ENG = "eng";
+    public static final String WEL = "wel";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -341,8 +343,11 @@ public class ServiceOfApplicationService {
                 List<Document> docs = new ArrayList<>();
                 if (party.isPresent() && null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
-                    docs.add(getCoverSheet(authorization, caseData, party.get().getValue().getAddress(),
-                                                party.get().getValue().getLabelForDynamicList()));
+                    docs.addAll(serviceOfApplicationPostService
+                                 .getCoverSheets(caseData, authorization,
+                                                 party.get().getValue().getAddress(),
+                                                 party.get().getValue().getLabelForDynamicList()
+                                 ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
@@ -619,8 +624,8 @@ public class ServiceOfApplicationService {
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put("eng", documentLanguage.isGenEng());
-        dynamicData.put("wel", documentLanguage.isGenWelsh());
+        dynamicData.put(ENG, documentLanguage.isGenEng());
+        dynamicData.put(WEL, documentLanguage.isGenWelsh());
     }
 
     private void sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(CaseData caseData, String authorization,
@@ -1654,10 +1659,11 @@ public class ServiceOfApplicationService {
 
         List<Document> docs = new ArrayList<>();
         try {
-            docs.add(getCoverSheet(authorization, caseData,
-                                   party.getValue().getAddress(),
-                                   party.getValue().getLabelForDynamicList()
-            ));
+            docs.addAll(serviceOfApplicationPostService
+                         .getCoverSheets(caseData, authorization,
+                                         party.getValue().getAddress(),
+                                         party.getValue().getLabelForDynamicList()
+                         ));
             docs.add(coverLetter);
             docs.addAll(packDocs);
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -1680,20 +1686,6 @@ public class ServiceOfApplicationService {
                 .filter(element -> code.equalsIgnoreCase(String.valueOf(element.getId()))).findFirst();
         }
         return party;
-    }
-
-    public Document getCoverSheet(String authorization, CaseData caseData, Address address, String name) {
-
-        try {
-            return DocumentUtils.toCoverSheetDocument(serviceOfApplicationPostService
-                                                           .getCoverLetterGeneratedDocInfo(caseData, authorization,
-                                                                                           address,
-                                                                                           name
-                                                           ));
-        } catch (Exception e) {
-            log.error("Failed to generate cover sheet {}", e);
-        }
-        return null;
     }
 
     public List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
