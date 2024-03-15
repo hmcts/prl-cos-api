@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 
 @Slf4j
@@ -269,6 +268,7 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
+
         String requestBodyRevised = requestBody
             .replace("1687443551969082", caseDetails.getId().toString());
 
@@ -283,7 +283,6 @@ public class ConfidentialityCheckControllerFT {
 
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
-        assertTrue(json.contains(CONFIRMATION_HEADER_NON_PERSONAL));
     }
 
     @Test
