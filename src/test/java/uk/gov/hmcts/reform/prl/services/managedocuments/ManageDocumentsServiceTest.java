@@ -24,10 +24,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -62,6 +65,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockingDetails;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
@@ -103,6 +109,9 @@ public class ManageDocumentsServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
     private final String auth = "auth-token";
 
@@ -664,6 +673,18 @@ public class ManageDocumentsServiceTest {
         assertEquals(1,restrictedDocuments.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
 
+    }
+
+    @Test
+    public void testAppendConfidentialDocumentNameForCourtAdminAndUpdate() {
+
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(callbackRequest,auth);
+        verify(allTabService, times(1)).getStartAllTabsUpdate(Mockito.anyString());
     }
 
     @Test
