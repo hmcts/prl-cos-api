@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -25,6 +26,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -157,8 +161,11 @@ public class HearingsManagementControllerTest {
             objectMapper
         )).thenReturn(caseData);
 
-        hearingsManagementController.updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
-        assertTrue(true);
+        AboutToStartOrSubmitCallbackResponse  aboutToStartOrSubmitCallbackResponse = hearingsManagementController
+            .updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+        assertEquals("C100", aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
 
     }
 
@@ -213,9 +220,9 @@ public class HearingsManagementControllerTest {
             objectMapper
         )).thenReturn(caseData);
 
-        hearingsManagementController.updateAllTabsAfterHmcCaseState("auth", "s2s token", callbackRequest);
-        assertTrue(true);
-
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = hearingsManagementController
+            .updateAllTabsAfterHmcCaseState("auth", "s2s token", callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
