@@ -586,14 +586,18 @@ public class UploadAdditionalApplicationService {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         String representedPartyType = "";
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            log.info("************* User details found::" + userDetails.getRoles());
             FindUserCaseRolesResponse findUserCaseRolesResponse
                 = userDataStoreService.findUserCaseRoles(
                 String.valueOf(caseData.getId()),
                 authorisation
             );
+            log.info("************* findUserCaseRolesResponse retrieved found::" + findUserCaseRolesResponse);
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                log.info("************* caseUser found and case role is::" + caseUser.getCaseRole());
                 Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
                 if (solicitorRole.isPresent()) {
+                    log.info("************* solicitorRole.isPresent() is true::" + solicitorRole.get().getRepresenting());
                     switch (solicitorRole.get().getRepresenting()) {
                         case CAAPPLICANT:
                             representedPartyType = CAAPPLICANT.name();
@@ -611,12 +615,15 @@ public class UploadAdditionalApplicationService {
                             break;
                     }
                 } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    log.info("************* solicitorRole.isPresent() is false and I am inside c100 cases::");
                     representedPartyType = CAAPPLICANT.name();
                 } else {
+                    log.info("************* solicitorRole.isPresent() is false and I am inside FL401 cases::");
                     representedPartyType = DAAPPLICANT.name();
                 }
             }
         }
+        log.info("************* representedPartyType is::" + representedPartyType);
         return representedPartyType;
     }
 

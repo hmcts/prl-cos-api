@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,12 +62,24 @@ public class ApplicationsFeeCalculator {
     public static final String FC600_COMMITTAL_APPLICATION = "FC600_COMMITTAL_APPLICATION";
 
     private final FeeService feeService;
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> calculateAdditionalApplicationsFee(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
         try {
+            log.info("************* Inside calculateAdditionalApplicationsFee::");
             final List<FeeType> feeTypes = getFeeTypes(caseData);
+            try {
+                log.info("feeTypes is ===>" + objectMapper.writeValueAsString(feeTypes));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
+            try {
+                log.info("feeResponse is ===>" + objectMapper.writeValueAsString(feeResponse));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             }
@@ -108,7 +122,18 @@ public class ApplicationsFeeCalculator {
     public List<FeeType> getFeeTypes(CaseData caseData) {
         List<FeeType> feeTypes = new ArrayList<>();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
+        try {
+            log.info("uploadAdditionalApplicationData is ===>" + objectMapper.writeValueAsString(uploadAdditionalApplicationData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
+        try {
+            log.info("************* existingApplicationTypes is ===>" + objectMapper.writeValueAsString(existingApplicationTypes));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
         boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
@@ -119,18 +144,26 @@ public class ApplicationsFeeCalculator {
         boolean skipC2PaymentForDaApplicant = DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
         boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
             && !c2ApplicationAlreadyPresentForRespondent && applyOrderWithoutGivingNoticeToRespondent;
-
+        log.info("********************** fl403ApplicationAlreadyPresentForRespondent is ===>" + fl403ApplicationAlreadyPresentForRespondent);
+        log.info("********************** c2ApplicationAlreadyPresentForRespondent is ===>" + c2ApplicationAlreadyPresentForRespondent);
+        log.info("********************** applyOrderWithoutGivingNoticeToRespondent is ===>" + applyOrderWithoutGivingNoticeToRespondent);
+        log.info("********************** skipC2PaymentForDaApplicant is ===>" + skipC2PaymentForDaApplicant);
+        log.info("********************** skipC2PaymentForDaRespondent is ===>" + skipC2PaymentForDaRespondent);
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !skipC2PaymentForDaApplicant && !skipC2PaymentForDaRespondent) {
+                log.info("********************** Ideally should be here");
                 boolean skipC2PaymentsBasedOnHearingDate = shouldSkipPayments(uploadAdditionalApplicationData);
+                log.info("********************** skipC2PaymentsBasedOnHearingDate is ===>" + skipC2PaymentsBasedOnHearingDate);
                 feeTypes.addAll(getC2ApplicationsFeeTypes(
                     uploadAdditionalApplicationData,
                     skipC2PaymentsBasedOnHearingDate
                 ));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
+                log.info("********************** Inside other bundles");
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
+                log.info("********************** otherApplicationType:: " + otherApplicationType);
                 fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData),
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
@@ -148,11 +181,14 @@ public class ApplicationsFeeCalculator {
     private boolean shouldSkipPayments(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
         C2DocumentBundle temporaryC2Bundle = uploadAdditionalApplicationData.getTemporaryC2Document();
         boolean skipPayments = false;
+        log.info("********************** Inside shouldSkipPayments");
         if (null != temporaryC2Bundle.getHearingList()) {
             DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
+            log.info("********************** selectedHearingElement is :: " + selectedHearingElement);
             if (isNotEmpty(selectedHearingElement)
                 && StringUtils.isNotEmpty(selectedHearingElement.getLabel())
                 && selectedHearingElement.getLabel().contains(HYPHEN_SEPARATOR)) {
+                log.info("********************** selectedHearingElement is :: " + selectedHearingElement.getLabel());
                 String selectedHearingDate = selectedHearingElement.getLabel().split(HYPHEN_SEPARATOR)[1];
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
@@ -161,8 +197,11 @@ public class ApplicationsFeeCalculator {
                 ).atStartOfDay();
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+
+                log.info("********************** skipPayments is :: " + skipPayments);
             }
         }
+        log.info("********************** final skipPayments is :: " + skipPayments);
         return skipPayments;
     }
 
@@ -195,10 +234,13 @@ public class ApplicationsFeeCalculator {
 
     private static Optional<FeeType> fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType, boolean skipPaymentsBasedOnHearingDate) {
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
+            log.info("********************** I am inside C2ApplicationTypeEnum.applicationWithNotice");
             return Optional.of(C2_WITH_NOTICE);
         } else if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithoutNotice && !skipPaymentsBasedOnHearingDate) {
+            log.info("********************** I am inside C2ApplicationTypeEnum.applicationWithoutNotice");
             return Optional.of(C2_WITHOUT_NOTICE);
         } else {
+            log.info("********************** Oh sad! very sad");
             return Optional.empty();
         }
     }
