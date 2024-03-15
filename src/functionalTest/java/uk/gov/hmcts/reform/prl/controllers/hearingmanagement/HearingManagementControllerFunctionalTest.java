@@ -25,10 +25,6 @@ import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementServi
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
@@ -98,23 +94,30 @@ public class HearingManagementControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenHearing_management_state_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
-        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-        mockMvc.perform(put("/hearing-management-state-update/{caseState}","DECISION_OUTCOME")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("serviceAuthorization", "sauth")
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+        String requestBodyRevised = requestBody
+            .replace("1111111", caseDetails.getId().toString());
+        request1
+            .header("authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("serviceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .pathParam("caseState","DECISION_OUTCOME")
+            .when().contentType(String.valueOf(MediaType.APPLICATION_JSON))
+            .accept(String.valueOf(MediaType.APPLICATION_JSON))
+            .put("/hearing-management-state-update/{caseState}")
+            .then().assertThat().statusCode(200);
     }
 
     @Test
     public void givenRequestBody_whenHearing_management_next_hearing_details_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_NEXT_HEARING_DETAILS_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("1710453963689559", caseDetails.getId().toString());
+
         request1
-            .header("authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("serviceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when().contentType(String.valueOf(MediaType.APPLICATION_JSON))
             .accept(String.valueOf(MediaType.APPLICATION_JSON))
             .put("/hearing-management-next-hearing-date-update")
