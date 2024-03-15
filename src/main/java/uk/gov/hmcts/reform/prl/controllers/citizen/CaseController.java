@@ -114,6 +114,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
+            log.info("*** printing case data" + citizenUpdatedCaseData);
             CaseDetails caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 caseId,
