@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -44,6 +45,7 @@ import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -72,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_STATEMENT_OF_SERVICE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -94,6 +97,7 @@ public class CaseService {
     public static final String CASE_INVITES = "caseInvites";
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
+    public static final String STATEMENT_OF_SERVICE = "statementOfService";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -106,6 +110,7 @@ public class CaseService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
+    private final AllTabServiceImpl allTabService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -161,7 +166,7 @@ public class CaseService {
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
-        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
+        if (CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
@@ -227,7 +232,7 @@ public class CaseService {
         return caseName;
     }
 
-    private CaseData handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
+    private StatementOfService handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
         CitizenSos citizenSos = partyDetails.getCitizenSosObject();
         StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
             .citizenPartiesServedList(getPartyNames(citizenSos.getPartiesServed(), caseData, partyType))
@@ -241,16 +246,14 @@ public class CaseService {
             List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
             List<Element<StmtOfServiceAddRecipient>> mutableList = new ArrayList<>(sosList);
             mutableList.add(element(sosObject));
-            caseData.setStatementOfService(StatementOfService.builder()
+            return StatementOfService.builder()
                                                .stmtOfServiceAddRecipient(mutableList)
-                                               .build());
+                                               .build();
         } else {
-            caseData
-                .setStatementOfService(StatementOfService.builder()
+            return StatementOfService.builder()
                                            .stmtOfServiceAddRecipient(List.of(element(sosObject)))
-                                           .build());
+                                           .build();
         }
-        return caseData;
     }
 
     private String getPartyNames(String parties, CaseData caseData, PartyEnum partyType) {
@@ -576,5 +579,70 @@ public class CaseService {
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
+    }
+
+    public CaseDetails updateCaseDetailsFromCitizen(String authToken,
+                                         String caseId,
+                                         String eventId,
+                                         CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken, false);
+
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
+
+        if (null != partyDetails.getUser()) {
+            switch (caseEvent) {
+                case CITIZEN_STATEMENT_OF_SERVICE: {
+                    caseDataUpdated.put(
+                        STATEMENT_OF_SERVICE,
+                        handleCitizenStatementOfService(caseData, partyDetails, partyType)
+                    );
+                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
+                    break;
+                }
+                case KEEP_DETAILS_PRIVATE: {
+                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+                    caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
+                    break;
+                }
+                default: {
+                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
+                    break;
+                }
+            }
+            return allTabService.submitAllTabsUpdateForSpecificUserEvent(
+                startAllTabsUpdateDataContent.systemAuthorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated,
+                false
+            );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private CaseData populatePartyDetails(CitizenUpdatedCaseData citizenUpdatedCaseData,
+                                            CaseData caseData,
+                                            PartyDetails partyDetails,
+                                            PartyEnum partyType) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
+            caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
+        } else {
+            caseData = getFlCaseData(caseData, partyDetails, partyType);
+        }
+        caseData = generateAnswersForNoc(caseData);
+        return caseData;
     }
 }

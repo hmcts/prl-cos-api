@@ -246,4 +246,52 @@ public class AllTabServiceImpl implements AllTabsService {
         }
     }
 
+    @Override
+    public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
+                                                                            String eventId,
+                                                                            String authorization,
+                                                                            boolean isRepresented) {
+        String userId = systemUserService.getUserId(authorization);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.fromValue(eventId),
+            userId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                authorization,
+                allTabsUpdateEventRequestData,
+                caseId,
+                isRepresented
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            authorization,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData
+        );
+    }
+
+    public CaseDetails submitAllTabsUpdateForSpecificUserEvent(String systemAuthorisation,
+                                                               String caseId,
+                                                               StartEventResponse startEventResponse,
+                                                               EventRequestData eventRequestData,
+                                                               Map<String, Object> combinedFieldsMap,
+                                                               boolean isRepresented) {
+        return ccdCoreCaseDataService.submitUpdate(
+            systemAuthorisation,
+            eventRequestData,
+            ccdCoreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                combinedFieldsMap
+            ),
+            caseId,
+            isRepresented
+        );
+    }
+
 }

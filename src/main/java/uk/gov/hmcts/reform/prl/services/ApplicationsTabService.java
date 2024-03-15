@@ -111,11 +111,15 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
@@ -210,9 +214,13 @@ public class ApplicationsTabService implements TabService {
 
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            applicationTab.put(C100_APPLICANTS, caseData.getApplicants());
+            applicationTab.put(C100_RESPONDENTS, caseData.getRespondents());
             applicationTab.put(C100_APPLICANT_TABLE, getApplicantsTable(caseData));
             applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            applicationTab.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+            applicationTab.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             applicationTab.put(FL401_APPLICANT_TABLE, getFl401ApplicantsTable(caseData));
             applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
         }
