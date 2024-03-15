@@ -58,6 +58,7 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenUpdate_citizen_application_then200Response() throws Exception {
+
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(Map.of("id", 1)).build();
         when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(caseDetails);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);

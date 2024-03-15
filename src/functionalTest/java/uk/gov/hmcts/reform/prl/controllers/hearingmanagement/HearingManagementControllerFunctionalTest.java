@@ -95,7 +95,7 @@ public class HearingManagementControllerFunctionalTest {
     public void givenRequestBody_whenHearing_management_state_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
         String requestBodyRevised = requestBody
-            .replace("1111111", caseDetails.getId().toString());
+            .replace("123456789", caseDetails.getId().toString());
         request1
             .header("authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("serviceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
