@@ -1056,7 +1056,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
-        when(serviceOfApplicationPostService.getStaticDocs(authorization,PrlAppsConstants.C100_CASE_TYPE))
+        when(serviceOfApplicationPostService.getStaticDocs(authorization,PrlAppsConstants.C100_CASE_TYPE, caseData))
             .thenReturn(c100StaticDocs);
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
@@ -1285,7 +1285,7 @@ public class ServiceOfApplicationServiceTest {
                                                                        .surname("test").build());
         List<Document> staticDocs = new ArrayList<>();
         staticDocs.add(Document.builder().documentBinaryUrl("testUrl").documentFileName("Blank.pdf").build());
-        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString()))
+        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString(), Mockito.any(CaseData.class)))
             .thenReturn(staticDocs);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,

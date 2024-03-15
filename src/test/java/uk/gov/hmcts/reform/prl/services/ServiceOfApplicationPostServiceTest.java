@@ -428,11 +428,13 @@ public class ServiceOfApplicationPostServiceTest {
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(Mockito.anyString(), Mockito.anyString(),
                                                 Mockito.anyString(), Mockito.anyString(),
-                                                Mockito.any(List.class))).thenReturn(uploadResponse);
+                                                Mockito.anyList())).thenReturn(uploadResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100"));
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100", caseData));
 
 
     }
@@ -515,7 +517,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401"));
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
 
     }
