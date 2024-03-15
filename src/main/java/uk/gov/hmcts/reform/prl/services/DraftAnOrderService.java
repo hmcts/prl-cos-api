@@ -988,6 +988,7 @@ public class DraftAnOrderService {
 
     public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
+        log.info("******orderId from getSelectedDraftOrderDetails {}", orderId);
         return draftOrderCollection.stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)

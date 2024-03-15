@@ -134,8 +134,6 @@ public class EditReturnedOrderService {
     public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
         Map<String,Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
-        caseDataMap.put(WA_ORDER_COLLECTION_ID, elementUtils.getDynamicListSelectedValue(caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper));
-        caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId()));
         DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                  caseData.getManageOrders().getRejectedOrdersDynamicList());
 
@@ -158,6 +156,10 @@ public class EditReturnedOrderService {
             ));
             caseDataMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         } else {
+            caseDataMap.put(WA_ORDER_COLLECTION_ID, elementUtils.getDynamicListSelectedValue(caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper));
+            caseDataMap.put(WA_ORDER_NAME_SOLICITOR_CREATED, draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_RETURNED_ORDER.getId()));
+            log.info("****order collection id****" , caseDataMap.get(WA_ORDER_COLLECTION_ID));
+            log.info("****orderNameSolresubmitted****" , caseDataMap.get(WA_ORDER_COLLECTION_ID));
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
         }
         return caseDataMap;
