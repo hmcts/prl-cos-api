@@ -2081,8 +2081,10 @@ public class ManageOrderService {
         if (orderData != null) {
 
             PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && CollectionUtils.isNotEmpty(caseData.getApplicants())
                 ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
             PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && CollectionUtils.isNotEmpty(caseData.getRespondents())
                 ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
             orderData = orderData.toBuilder()
                 .fl404bCaseNumber(String.valueOf(caseData.getId()))
