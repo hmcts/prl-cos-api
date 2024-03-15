@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -331,7 +332,7 @@ public class ListOnNoticeControllerTest {
     }
 
     @Test
-    public void testSendListOnNoticeNotification() {
+    public void testSendListOnNoticeNotification() throws JsonProcessingException {
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .id(12345L)
