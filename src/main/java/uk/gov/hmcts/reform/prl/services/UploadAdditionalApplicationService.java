@@ -590,7 +590,7 @@ public class UploadAdditionalApplicationService {
                     log.info("************* solicitorRole.isPresent() is false and I am inside c100 cases::");
                     representedPartyType = CAAPPLICANT.name();
                 } else {
-                    representedPartyType = fidnSolicitorRepresentedPartyType(caseUser, representedPartyType);
+                    representedPartyType = findSolicitorRepresentedPartyType(caseUser, representedPartyType);
                 }
             }
         }
@@ -598,7 +598,7 @@ public class UploadAdditionalApplicationService {
         return representedPartyType;
     }
 
-    private static String fidnSolicitorRepresentedPartyType(CaseUser caseUser, String representedPartyType) {
+    private static String findSolicitorRepresentedPartyType(CaseUser caseUser, String representedPartyType) {
         Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
         if (solicitorRole.isPresent()) {
             log.info("************* solicitorRole.isPresent() is true::" + solicitorRole.get().getRepresenting());
@@ -607,6 +607,9 @@ public class UploadAdditionalApplicationService {
                 case CARESPONDENT -> representedPartyType = CARESPONDENT.name();
                 case DAAPPLICANT -> representedPartyType = DAAPPLICANT.name();
                 case DARESPONDENT -> representedPartyType = DARESPONDENT.name();
+                default ->
+                    throw new IllegalStateException("Unexpected value: "
+                                                        + solicitorRole.get().getRepresenting());
             }
         }
         return representedPartyType;
