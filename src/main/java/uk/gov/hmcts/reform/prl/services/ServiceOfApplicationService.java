@@ -341,7 +341,7 @@ public class ServiceOfApplicationService {
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
-                        party.get().getValue(),
+                        party.get(),
                         ListUtils.union(docs, packN),
                         servedParty
                     )));
@@ -1010,7 +1010,7 @@ public class ServiceOfApplicationService {
             .docs(wrapElements(packsWithCoverLetter))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
-            .partyIds(party.getId().toString())
+            .partyIds(String.valueOf(party.getId()))
             .build();
     }
 
@@ -1054,9 +1054,12 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT
             );
 
-        return emailNotificationDetails.toBuilder()
-            .partyIds(party.getId().toString())
-            .build();
+        if (null != emailNotificationDetails) {
+            return emailNotificationDetails.toBuilder()
+                .partyIds(String.valueOf(party.getId()))
+                .build();
+        }
+        return emailNotificationDetails;
     }
 
     private void sendSoaPacksToPartyViaPost(String authorization,
@@ -1664,7 +1667,7 @@ public class ServiceOfApplicationService {
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                 caseData,
                 authorization,
-                party.getValue(),
+                party,
                 docs,
                 servedParty
             )));

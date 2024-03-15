@@ -184,7 +184,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         assertNotNull(serviceOfApplicationPostService
                          .sendPostNotificationToParty(caseData,
-                                                      AUTH, partyDetails, documentList, SERVED_PARTY_OTHER));
+                                                      AUTH, partyDetailsElement, documentList, SERVED_PARTY_OTHER));
 
     }
 
@@ -815,7 +815,7 @@ public class ServiceOfApplicationPostServiceTest {
         CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
-                                                                        partyDetails, documentList, "test name");
+                                                                        element(partyDetails), documentList, "test name");
         assertNotNull(bulkPrintOrderDetail);
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
@@ -863,7 +863,7 @@ public class ServiceOfApplicationPostServiceTest {
         CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
-                                                                        partyDetails, documentList, "test name");
+                                                                        element(partyDetails), documentList, "test name");
         assertNotNull(bulkPrintOrderDetail);
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
