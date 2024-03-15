@@ -266,7 +266,7 @@ public class ServiceOfApplicationPostServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetterGeneratedDocInfo(caseData,
+                          .getCoverSheets(caseData,
                                                        AUTH, address, "test name"));
 
     }
@@ -349,7 +349,7 @@ public class ServiceOfApplicationPostServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetterGeneratedDocInfo(caseData,
+                          .getCoverSheets(caseData,
                                                           AUTH, address, "test name"));
 
     }
@@ -557,7 +557,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                                           AUTH, address, "test name"));
 
     }
@@ -582,7 +582,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                           AUTH, address, "test name"));
 
     }
@@ -606,7 +606,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertTrue(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                           AUTH, address, "test name").isEmpty());
 
     }
@@ -766,9 +766,9 @@ public class ServiceOfApplicationPostServiceTest {
     public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
-        GeneratedDocumentInfo generatedDocumentInfo = serviceOfApplicationPostService
-            .getCoverLetterGeneratedDocInfo(caseData,AUTH,address,"test name");
-        assertEquals(null, generatedDocumentInfo);
+        List<Document> coversheets = serviceOfApplicationPostService
+            .getCoverSheets(caseData,AUTH,address,"test name");
+        assertEquals(0, coversheets.size());
     }
 
     @Test

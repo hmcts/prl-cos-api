@@ -839,7 +839,7 @@ public class ManageOrderEmailService {
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
+        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(
             caseData,
             authorisation,
             address,
