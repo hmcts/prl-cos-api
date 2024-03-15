@@ -638,9 +638,8 @@ public class ManageDocumentsService {
     public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(CallbackRequest callbackRequest, String authorization) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        UserDetails userDetails = userService.getUserDetails(authorization);
-        String userRole = CaseUtils.getUserRole(userDetails);
-        if (userRole.equals(COURT_ADMIN) || userRole.equals(COURT_STAFF)) {
+        List<String> userRole = getLoggedInUserType(authorization);
+        if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
