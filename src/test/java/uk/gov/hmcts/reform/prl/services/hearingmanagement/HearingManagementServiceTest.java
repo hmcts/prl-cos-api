@@ -251,6 +251,24 @@ public class HearingManagementServiceTest {
     }
 
     @Test
+    public void testHmcStateAsListedAndStateChangeForHearingAndNotificationForC100() throws Exception {
+        caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(c100CaseData);
+
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,PREPARE_FOR_HEARING_CONDUCT_HEARING);
+
+        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+                                                             Mockito.any(),
+                                                             Mockito.anyString(),
+                                                             Mockito.anyBoolean()
+        );
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(Mockito.anyString(), Mockito.any(),
+                                                              Mockito.any(), Mockito.anyString(), Mockito.anyBoolean());
+
+        assertTrue(true);
+    }
+
+    @Test
     public void testHmcStatusAsChangedStateChangeAndNotificationForC100() throws Exception {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
