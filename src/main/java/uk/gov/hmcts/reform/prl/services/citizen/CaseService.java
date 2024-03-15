@@ -98,6 +98,7 @@ public class CaseService {
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     public static final String STATEMENT_OF_SERVICE = "statementOfService";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -585,6 +586,7 @@ public class CaseService {
                                          String caseId,
                                          String eventId,
                                          CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        log.info("inside updateCaseDetailsFromCitizen");
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -611,6 +613,7 @@ public class CaseService {
                 case KEEP_DETAILS_PRIVATE: {
                     caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
                     caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+                    caseDataUpdated.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseData.getRespondentConfidentialDetails());
                     caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
                     break;
                 }
@@ -620,6 +623,7 @@ public class CaseService {
                     break;
                 }
             }
+            log.info("caseDataUpdated before submitting event ===>" + caseDataUpdated);
             return allTabService.submitAllTabsUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.systemAuthorisation(),
                 caseId,
