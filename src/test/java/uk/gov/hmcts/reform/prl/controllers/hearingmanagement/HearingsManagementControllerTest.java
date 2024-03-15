@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -19,11 +20,15 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,6 +54,9 @@ public class HearingsManagementControllerTest {
 
     @Mock
     private HearingManagementService hearingManagementService;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
 
     private HearingRequest hearingRequest;
     @MockBean
@@ -126,6 +134,7 @@ public class HearingsManagementControllerTest {
         );
     }
 
+
     @Test
     public void shouldDoNextHearingDetailsCallbackWhenAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -152,8 +161,93 @@ public class HearingsManagementControllerTest {
             objectMapper
         )).thenReturn(caseData);
 
-        hearingsManagementController.updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
-        assertTrue(true);
+        AboutToStartOrSubmitCallbackResponse  aboutToStartOrSubmitCallbackResponse = hearingsManagementController
+            .updateNextHearingDetailsCallback("auth", "s2s token", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+        assertEquals("C100", aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
 
     }
+
+    @Test
+    public void shouldDoNextHearingDetailsCallbackErrorWhenAboutToSubmit() throws Exception {
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.updateNextHearingDetailsCallback("auth","s2s token", callbackRequest)
+        );
+    }
+
+    @Test
+    public void shouldDoNextHearingDetailsCallbackWhenAboutToUpdate() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = hearingsManagementController
+            .updateAllTabsAfterHmcCaseState("auth", "s2s token", callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData());
+    }
+
+    @Test
+    public void shouldReturnErrorIfInvalidAuthTokenIsProvidedAllTabs() throws Exception {
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.updateAllTabsAfterHmcCaseState("auth","s2s token", callbackRequest)
+        );
+    }
+
 }
