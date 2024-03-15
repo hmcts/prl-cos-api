@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
@@ -75,6 +77,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_STATEMENT_OF_SERVICE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -175,7 +178,7 @@ public class CaseService {
             if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
-                caseData = getFlCaseData(caseData, partyDetails, partyType);
+                caseData = updatingPartyDetailsDa(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
             if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
@@ -307,7 +310,7 @@ public class CaseService {
         return caseData;
     }
 
-    private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+    private static CaseData updatingPartyDetailsDa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
         if (PartyEnum.applicant.equals(partyType)) {
             if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
@@ -355,10 +358,10 @@ public class CaseService {
 
     private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
         PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
-            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : No)
+            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : No)
             .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
-                                          YesOrNo.No)
+                                          No)
             //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
             .build();
         return updatedPartyDetails;
@@ -606,19 +609,23 @@ public class CaseService {
                         STATEMENT_OF_SERVICE,
                         handleCitizenStatementOfService(caseData, partyDetails, partyType)
                     );
-                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    caseData = populateCaDaPartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
                     caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
                     break;
                 }
                 case KEEP_DETAILS_PRIVATE: {
-                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    if (ObjectUtils.isNotEmpty(partyDetails.getResponse())
+                        && ObjectUtils.isNotEmpty(partyDetails.getResponse().getKeepDetailsPrivate())) {
+                        partyDetails = updateConfidentialData(partyDetails);
+                    }
+                    caseData = populateCaDaPartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
                     caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
                     caseDataUpdated.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseData.getRespondentConfidentialDetails());
                     caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
                     break;
                 }
                 default: {
-                    caseData = populatePartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                    caseData = populateCaDaPartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
                     caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
                     break;
                 }
@@ -637,14 +644,81 @@ public class CaseService {
         }
     }
 
-    private CaseData populatePartyDetails(CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                            CaseData caseData,
-                                            PartyDetails partyDetails,
-                                            PartyEnum partyType) {
+    private PartyDetails updateConfidentialData(PartyDetails partyDetails) {
+        return partyDetails.toBuilder()
+            .isPhoneNumberConfidential(Yes.equals(partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
+                && partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                ConfidentialityListEnum.phoneNumber) ? Yes : No)
+            .isAddressConfidential(Yes.equals(partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
+                                           && partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                ConfidentialityListEnum.address) ? Yes : No)
+            .isEmailAddressConfidential(Yes.equals(partyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
+                                       && partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                ConfidentialityListEnum.email) ? Yes : No)
+            .build();
+
+    }
+
+    /*public CaseDetails updateCaseFromCitizen(CaseData caseData, String authToken, String s2sToken,
+                                  String caseId, String eventId, String accessCode) throws JsonProcessingException {
+
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken, false);
+
+
+        switch (caseEvent) {
+            case LINK_CASE: {
+                linkCitizenToCase(authToken, s2sToken, caseId, accessCode);
+                break;
+            }
+            case CITIZEN_CASE_SUBMIT, CITIZEN_CASE_SUBMIT_WITH_HWF : {
+                UserDetails userDetails = idamClient.getUserDetails(authToken);
+                UserInfo userInfo = UserInfo
+                    .builder()
+                    .idamId(userDetails.getId())
+                    .firstName(userDetails.getForename())
+                    .lastName(userDetails.getSurname().orElse(null))
+                    .emailAddress(userDetails.getEmail())
+                    .build();
+
+                CaseData updatedCaseData = caseDataMapper
+                    .buildUpdatedCaseData(startAllTabsUpdateDataContent.caseData().toBuilder().userInfo(wrapElements(userInfo))
+                                              .courtName(C100_DEFAULT_COURT_NAME)
+                                              .taskListVersion(TASK_LIST_VERSION_V2)
+                                              .build());
+                caseDataUpdated = updatedCaseData.toMap(objectMapper);
+                break;
+            }
+            default: {
+                caseData = populateCaDaPartyDetails(citizenUpdatedCaseData, caseData, partyDetails, partyType);
+                caseDataUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(caseData));
+                break;
+            }
+        }
+        Iterables.removeIf(caseDataUpdated.values(), Objects::isNull);
+        log.info("caseDataUpdated before submitting event ===>" + caseDataUpdated);
+        return allTabService.submitAllTabsUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.systemAuthorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated,
+            false
+        );
+    }*/
+
+
+    private CaseData populateCaDaPartyDetails(CitizenUpdatedCaseData citizenUpdatedCaseData,
+                                              CaseData caseData,
+                                              PartyDetails partyDetails,
+                                              PartyEnum partyType) {
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
             caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
         } else {
-            caseData = getFlCaseData(caseData, partyDetails, partyType);
+            caseData = updatingPartyDetailsDa(caseData, partyDetails, partyType);
         }
         caseData = generateAnswersForNoc(caseData);
         return caseData;
