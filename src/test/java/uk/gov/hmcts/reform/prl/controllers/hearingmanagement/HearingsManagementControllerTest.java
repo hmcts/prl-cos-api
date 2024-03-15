@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -49,6 +50,9 @@ public class HearingsManagementControllerTest {
 
     @Mock
     private HearingManagementService hearingManagementService;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
 
     private HearingRequest hearingRequest;
     @MockBean
@@ -126,6 +130,7 @@ public class HearingsManagementControllerTest {
         );
     }
 
+
     @Test
     public void shouldDoNextHearingDetailsCallbackWhenAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -156,4 +161,86 @@ public class HearingsManagementControllerTest {
         assertTrue(true);
 
     }
+
+    @Test
+    public void shouldDoNextHearingDetailsCallbackErrorWhenAboutToSubmit() throws Exception {
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.updateNextHearingDetailsCallback("auth","s2s token", callbackRequest)
+        );
+    }
+
+    @Test
+    public void shouldDoNextHearingDetailsCallbackWhenAboutToUpdate() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+
+        hearingsManagementController.updateAllTabsAfterHmcCaseState("auth", "s2s token", callbackRequest);
+        assertTrue(true);
+
+    }
+
+    @Test
+    public void shouldReturnErrorIfInvalidAuthTokenIsProvidedAllTabs() throws Exception {
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.updateAllTabsAfterHmcCaseState("auth","s2s token", callbackRequest)
+        );
+    }
+
 }
