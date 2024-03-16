@@ -462,8 +462,14 @@ public class ApplicationsTabService implements TabService {
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
-                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue())
-                           .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender())
+                                                        .getDisplayedValue())
+                           .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo
+                               .Yes : YesOrNo.No)
+                           .isAtAddressLessThan5YearsWithDontKnow(
+                               applicant.getIsAtAddressLessThan5YearsWithDontKnow() != null
+                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                   applicant.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
                            .build())
                 .build();
             applicants.add(applicantElement);
@@ -488,7 +494,8 @@ public class ApplicationsTabService implements TabService {
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
                 party = Element.<PartyDetails>builder()
-                    .value(party.getValue().toBuilder().address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                    .value(party.getValue().toBuilder().address(Address.builder()
+                                                                    .addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
                                                                     .build()).build())
                     .id(party.getId())
                     .build();
