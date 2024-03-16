@@ -217,6 +217,14 @@ public class DocumentGenService {
     protected String solicitorC7FinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_template}")
+    protected String solicitorC7WelshDraftTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_filename}")
+    protected String solicitorC7WelshDraftFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_template}")
+    protected String solicitorC7WelshFinalTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_filename}")
+    protected String solicitorC7WelshFinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
@@ -724,10 +732,10 @@ public class DocumentGenService {
                 fileName = docC7FinalWelshFilename;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                fileName = solicitorC7DraftFilename;
+                fileName = findDocCoverSheetC7DraftFileName(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                fileName = solicitorC7FinalFilename;
+                fileName = findDocCoverSheetC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 fileName = solicitorC1AFinalFilename;
@@ -842,10 +850,10 @@ public class DocumentGenService {
                 template = docC7FinalWelshTemplate;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                template = solicitorC7DraftTemplate;
+                template = findDocCoverSheetC7DraftTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                template = solicitorC7FinalTemplate;
+                template = findDocCoverSheetC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 template = solicitorC1AFinalTemplate;
@@ -912,6 +920,22 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftTemplate : solicitorC7WelshDraftTemplate;
+    }
+
+    private String findDocCoverSheetC7FinalTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalTemplate : solicitorC7WelshFinalTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftFilename : solicitorC7WelshDraftFilename;
+    }
+
+    private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {

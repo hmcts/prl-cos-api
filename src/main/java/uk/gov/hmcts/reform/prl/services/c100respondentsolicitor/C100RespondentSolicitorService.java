@@ -127,6 +127,8 @@ public class C100RespondentSolicitorService {
 
         You can contact your local court at\s""";
 
+    private final DocumentLanguageService documentLanguageService;
+
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -901,15 +903,30 @@ public class C100RespondentSolicitorService {
             Element<PartyDetails> representedRespondent,
             List<QuarantineLegalDoc> quarantineLegalDocList
     ) throws Exception {
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
-        Document c7FinalDocument  = documentGenService.generateSingleDocument(
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        if (documentLanguage.isGenWelsh()) {
+            Document c7WelshFinalDocument = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C7_FINAL_DOCUMENT,
-                false,
+                true,
                 dataMap
+            );
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
+        }
+
+        Document c7FinalDocument = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C7_FINAL_DOCUMENT,
+            false,
+            dataMap
         );
-        UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (representedRespondent.getValue().getResponse() != null
@@ -1073,6 +1090,7 @@ public class C100RespondentSolicitorService {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
+        log.info("Datamap generated in method populateDataMap {}", dataMap);
         return dataMap;
     }
 
@@ -1081,27 +1099,31 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
-        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
+        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication().getDisplayedValue());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
+        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt().getDisplayedValue());
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
-        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
+        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam().getDisplayedValue());
+        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam().getDisplayedValue());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
-        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
+        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren().getDisplayedValue());
+        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl().getDisplayedValue());
         dataMap.put(
                 "reasonForChildDetails",
                 response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails()
         );
-        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
+        dataMap.put(
+            "reasonForParent",
+            null != response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl() ? response
+                .getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue() : null
+        );
         dataMap.put(
                 "reasonForParentDetails",
                 response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails()
         );
         dataMap.put(
                 "reasonForJurisdiction",
-                response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl()
+                response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl().getDisplayedValue()
         );
         dataMap.put(
                 "reasonForJurisdictionDetails",
@@ -1109,7 +1131,7 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put(
                 "requestToAuthority",
-                response.getCitizenInternationalElements().getAnotherCountryAskedInformation()
+                response.getCitizenInternationalElements().getAnotherCountryAskedInformation().getDisplayedValue()
         );
         dataMap.put(
                 "requestToAuthorityDetails",
@@ -1122,7 +1144,8 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (null != response.getResponseToAllegationsOfHarm()) {
-            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
+                .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
         }
     }
 
@@ -1298,6 +1321,19 @@ public class C100RespondentSolicitorService {
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        if (documentLanguage.isGenWelsh()) {
+            document = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_DRAFT_DOCUMENT,
+                true,
+                dataMap
+            );
+            caseDataUpdated.put("draftC7WelshResponseDoc", document);
+        }
 
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
                 && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
