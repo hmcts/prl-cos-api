@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
@@ -33,6 +34,8 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 
 import java.util.Arrays;
 import java.util.List;
@@ -635,6 +638,49 @@ public class WelshLangMapper {
          */
         welshMap.put(LanguagePreference.english.getDisplayedValue(), "Saesneg");
         welshMap.put(LanguagePreference.welsh.getDisplayedValue(), "Cymraeg");
+
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.immediateRisk.getDisplayedValue(),
+            "Mae tystiolaeth o risg uniongyrchol o niwed i'r plentyn(plant)"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.applicantsCare.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu bod yr atebydd yn ceisio tynnu'r plentyn(plant) o ofal y ceisydd"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.seekToFrustrate.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu y byddai'r atebydd yn ceisio rhwystro'r broses os na wrandewir y cais ar frys"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.leaveTheJurisdiction.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu y gall yr atebydd geisio gadael yr awdurdodaeth gyda'r plentyn (plant) os na wrandewir y cais ar frys"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.other.getDisplayedValue(),
+            "Rheswm arall nad yw wedi’i restru"
+        );
+
+        welshMap.put(
+            SdoTransferApplicationReasonEnum.courtInAreaChildLives.getDisplayedValue(),
+            "Mae llys arall yn yr ardal lle mae'r plentyn fel arfer yn byw"
+        );
+        welshMap.put(
+            SdoTransferApplicationReasonEnum.ongoingProceedings.getDisplayedValue(),
+            "Mae achosion parhaus mewn llys arall"
+        );
+
+        welshMap.put(
+            HearingChannelsEnum.VID.getDisplayedValue(),
+            "Drwy fideo"
+        );
+        welshMap.put(
+            HearingChannelsEnum.TEL.getDisplayedValue(),
+            "Dros y ffôn"
+        );
+        welshMap.put(
+            HearingChannelsEnum.ONPPRS.getDisplayedValue(),
+            "Ar bapur"
+        );
 
         return welshMap;
     }
