@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -94,6 +96,7 @@ public class CaseService {
     public static final String CASE_INVITES = "caseInvites";
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -106,6 +109,7 @@ public class CaseService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
+    private final LaunchDarklyClient launchDarklyClient;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -513,7 +517,9 @@ public class CaseService {
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
         String accessCodeStatus = INVALID;
-        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
+        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
+            || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && !launchDarklyClient.isFeatureEnabled(CITIZEN_ALLOW_DA_JOURNEY))) {
             return accessCodeStatus;
         }
         List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
