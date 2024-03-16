@@ -155,9 +155,6 @@ public class C100RespondentSolicitorServiceTest {
     DocumentGenService documentGenService;
 
     @Mock
-    DocumentLanguageService documentLanguageService;
-
-    @Mock
     RespondentAllegationsOfHarmData allegationsOfHarmData;
 
     @Mock
@@ -1096,7 +1093,6 @@ public class C100RespondentSolicitorServiceTest {
         UserDetails userDetails = UserDetails.builder().forename("test")
                 .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(
             Mockito.any(CaseData.class)
         )).thenReturn(documentLanguage);
@@ -1285,7 +1281,6 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(
             Mockito.any(CaseData.class)
         )).thenReturn(documentLanguage);
