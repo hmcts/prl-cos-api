@@ -127,8 +127,6 @@ public class C100RespondentSolicitorService {
 
         You can contact your local court at\s""";
 
-    private final DocumentLanguageService documentLanguageService;
-
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -920,15 +918,17 @@ public class C100RespondentSolicitorService {
             quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
         }
 
-        Document c7FinalDocument = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            SOLICITOR_C7_FINAL_DOCUMENT,
-            false,
-            dataMap
-        );
-        quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            Document c7FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_FINAL_DOCUMENT,
+                false,
+                dataMap
+            );
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
+        }
+
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
@@ -1312,20 +1312,20 @@ public class C100RespondentSolicitorService {
 
         }
         Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
-        Document document = documentGenService.generateSingleDocument(
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenWelsh()) {
+            Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C7_DRAFT_DOCUMENT,
                 false,
                 dataMap
-        );
-        caseDataUpdated.put("draftC7ResponseDoc", document);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            );
+            caseDataUpdated.put("draftC7ResponseDoc", document);
+        }
 
         if (documentLanguage.isGenWelsh()) {
-            document = documentGenService.generateSingleDocument(
+            Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C7_DRAFT_DOCUMENT,
