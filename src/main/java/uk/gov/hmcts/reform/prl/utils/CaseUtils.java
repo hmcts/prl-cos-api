@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,6 +46,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
@@ -608,5 +610,38 @@ public class CaseUtils {
         return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || (currentParty.getIsEmailAddressConfidential() != null
             && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static String getApplicantNameForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
+                             applicant1.getLastName()
+        );
+
+    }
+
+    public static String getApplicantReferenceForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return applicant1.getSolicitorReference();
+    }
+
+    public static String getRespondentForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        return String.format(
+            PrlAppsConstants.FORMAT, respondent1.getFirstName(),
+            respondent1.getLastName()
+        );
+    }
+
+    public static LocalDate getRespondentDobForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
+            respondent1.getDateOfBirth();
+        }
+        return null;
     }
 }
