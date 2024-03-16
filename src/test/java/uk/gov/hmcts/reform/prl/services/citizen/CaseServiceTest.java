@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -55,6 +56,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -149,6 +151,9 @@ public class CaseServiceTest {
 
     @Mock
     RoleAssignmentService roleAssignmentService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     ApplicationsTabService applicationsTabService;
@@ -818,6 +823,50 @@ public class CaseServiceTest {
             .build();
         when(coreCaseDataApi.getCase(authToken, s2sToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+
+        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void testValidateAccessCodeForToggleInvalidEmptyCaseInvites() {
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantCaseName("test")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234567891234567L)
+            .data(stringObjectMap)
+            .build();
+        when(coreCaseDataApi.getCase(authToken, s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")).thenReturn(false);
+
+        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void testValidateAccessCodeForToggleInvalidWithCaseInvites() {
+        List<CaseInvite> caseInvites = new ArrayList<>();
+        caseInvites.add(CaseInvite.builder().partyId(testUuid).build());
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantCaseName("test")
+            .caseInvites(wrapElements(caseInvites)).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234567891234567L)
+            .data(stringObjectMap)
+            .build();
+        when(coreCaseDataApi.getCase(authToken, s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")).thenReturn(false);
 
         String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
 
