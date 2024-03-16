@@ -1121,6 +1121,9 @@ public class DraftAnOrderService {
                 .build();
 
         } else {
+            boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(draftOrder.getOrderType()), caseData);
             return draftOrder.toBuilder()
                 .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
                 .orderDocument(orderDocumentEng)
@@ -1163,11 +1166,16 @@ public class DraftAnOrderService {
                 .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
                 .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
                 .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-                .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
-                .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
-                .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+                .manageOrdersApplicant(isDaOrderSelectedForCaCase ? CaseUtils.getApplicantNameForDaOrderSelectedForCaCase(caseData)
+                                           : CaseUtils.getApplicant(caseData))
+                .manageOrdersApplicantReference(isDaOrderSelectedForCaCase ? CaseUtils.getApplicantReferenceForDaOrderSelectedForCaCase(caseData)
+                                                    : CaseUtils.getApplicantReference(caseData))
+                .manageOrdersRespondent(isDaOrderSelectedForCaCase
+                                            ? CaseUtils.getRespondentForDaOrderSelectedForCaCase(caseData)
+                                            : caseData.getManageOrders().getManageOrdersRespondent())
                 .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
-                .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+                .manageOrdersRespondentDob(isDaOrderSelectedForCaCase ? CaseUtils.getRespondentDobForDaOrderSelectedForCaCase(caseData)
+                                               : caseData.getManageOrders().getManageOrdersRespondentDob())
                 .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
                 .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
                 .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
