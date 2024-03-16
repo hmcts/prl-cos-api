@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,8 +23,9 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
@@ -40,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -95,7 +98,6 @@ public class CaseService {
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -104,6 +106,8 @@ public class CaseService {
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final CaseSummaryTabService caseSummaryTab;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
     private final LaunchDarklyClient launchDarklyClient;
     private static final String INVALID_CLIENT = "Invalid Client";
@@ -143,24 +147,53 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
+                                                String caseId,
+                                                String eventId,
+                                                CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
 
-        CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        PartyDetails partyDetails = updateCaseData.getPartyDetails();
-        PartyEnum partyType = updateCaseData.getPartyType();
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
         if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
+                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            }
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
+                caseData));
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                caseDataMap
+            );
+            return coreCaseDataService.submitUpdate(
+                authToken,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                false
+            );
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -296,8 +329,10 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                }
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
@@ -308,12 +343,25 @@ public class CaseService {
                     partyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
-                .ifPresent(party ->
-                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                .ifPresent(party -> {
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
+                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
+                        }
                 );
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
         return caseData;
+    }
+
+    private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
+        PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
+            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
+                                          YesOrNo.No)
+            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .build();
+        return updatedPartyDetails;
     }
 
 

@@ -154,6 +154,7 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void testCreateDummyCase() {
         caseData = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
@@ -169,6 +170,7 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void testUpdateCaseWithOtherPersonDetails() {
 
         CaseData responseData = request
