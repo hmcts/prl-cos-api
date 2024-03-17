@@ -686,13 +686,14 @@ public class CaseService {
                 if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
                     String partyIdamId = partyDetails.getUser().getIdamId();
                     if (PartyEnum.applicant.equals(partyType)) {
-                        List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
-                        actualPartyDetailsElement = applicants.stream()
+                        List<Element<PartyDetails>> parties = new ArrayList<>(caseData.getApplicants());
+                        actualPartyDetailsElement = parties.stream()
                         .filter(x -> x.getValue().getUser().getIdamId().equalsIgnoreCase(
-                            partyIdamId)).findFirst().ifPresent(party -> {
-                            PartyDetails updatedPartyDetails = getUpdatedPartyDetails(party);
-                            applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
-                        });
+                            partyIdamId)).findFirst();
+
+                        if(actualPartyDetailsElement.isPresent()) {
+                            PartyDetails actualPartyDetails = actualPartyDetailsElement.get().getValue();
+                        }
                     }
 
                 } else {
