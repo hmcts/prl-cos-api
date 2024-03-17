@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.CitizenConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -109,6 +110,7 @@ public class CaseService {
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final CitizenConfidentialDetailsMapper citizenConfidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
     private final AllTabServiceImpl allTabService;
@@ -645,77 +647,14 @@ public class CaseService {
                                                  String caseId,
                                                  String eventId,
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        log.info("*************** Inside updateCitizenPartyDetails");
-        try {
-            log.info("citizenUpdatedCaseData ===>" + objectMapper.writeValueAsString(citizenUpdatedCaseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("*************** eventId received from " + caseEvent.getValue());
-
-
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken);
-
-        try {
-            log.info("startAllTabsUpdateDataContent case data ===>" + objectMapper.writeValueAsString(
-                startAllTabsUpdateDataContent.caseData()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
-        try {
-            log.info("startAllTabsUpdateDataContent case data map ===>" + objectMapper.writeValueAsString(
-                startAllTabsUpdateDataContent.caseDataMap()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
-        CaseData caseData = startAllTabsUpdateDataContent.caseData();
-
-        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
-        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
-        Map<String, Object> caseDataUpdated = new HashMap<>();
         switch (caseEvent) {
-            case CONFIRM_YOUR_DETAILS -> {
-                break;
-            }
             case KEEP_DETAILS_PRIVATE -> {
-                Optional<Element<PartyDetails>> actualPartyDetailsElement;
-                if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
-                    String partyIdamId = partyDetails.getUser().getIdamId();
-                    if (PartyEnum.applicant.equals(partyType)) {
-                        List<Element<PartyDetails>> parties = new ArrayList<>(caseData.getApplicants());
-                        actualPartyDetailsElement = parties.stream()
-                        .filter(x -> x.getValue().getUser().getIdamId().equalsIgnoreCase(
-                            partyIdamId)).findFirst();
-
-                        if (actualPartyDetailsElement.isPresent()) {
-                            PartyDetails actualPartyDetails = actualPartyDetailsElement.get().getValue();
-                        }
-                    }
-
-                }
-                if (ObjectUtils.isNotEmpty(partyDetails.getResponse())
-                    && ObjectUtils.isNotEmpty(partyDetails.getResponse().getKeepDetailsPrivate())) {
-                    partyDetails = updateConfidentialData(partyDetails);
-                }
-            }
-            default -> {
-
+                return citizenConfidentialDetailsMapper.mapConfidentialData(caseId, eventId, citizenUpdatedCaseData);
             }
         }
-
-        return allTabService.submitAllTabsUpdateForSpecificUserEvent(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataUpdated,
-            false
-        );
-
+        return null;
     }
 
     private PartyDetails updateConfidentialData(PartyDetails partyDetails) {
