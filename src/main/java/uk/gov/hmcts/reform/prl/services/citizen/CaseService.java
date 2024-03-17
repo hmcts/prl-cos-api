@@ -653,7 +653,7 @@ public class CaseService {
         }
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("*************** eventId received from " + caseEvent.getValue());
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken);
@@ -676,7 +676,7 @@ public class CaseService {
 
         PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
-
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
                 break;
@@ -691,17 +691,19 @@ public class CaseService {
                         .filter(x -> x.getValue().getUser().getIdamId().equalsIgnoreCase(
                             partyIdamId)).findFirst();
 
-                        if(actualPartyDetailsElement.isPresent()) {
+                        if (actualPartyDetailsElement.isPresent()) {
                             PartyDetails actualPartyDetails = actualPartyDetailsElement.get().getValue();
                         }
                     }
 
-                } else {
-
                 }
-                if (ObjectUtils.isNotEmpty(partyDetails.getResponse()) && ObjectUtils.isNotEmpty(partyDetails.getResponse().getKeepDetailsPrivate())) {
+                if (ObjectUtils.isNotEmpty(partyDetails.getResponse())
+                    && ObjectUtils.isNotEmpty(partyDetails.getResponse().getKeepDetailsPrivate())) {
                     partyDetails = updateConfidentialData(partyDetails);
                 }
+            }
+            default -> {
+
             }
         }
 

@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
+
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
