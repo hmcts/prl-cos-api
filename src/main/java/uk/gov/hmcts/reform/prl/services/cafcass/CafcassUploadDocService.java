@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFC
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCaseDataWithUploadedDocs;
 
 @Slf4j
 @Service
@@ -69,25 +68,21 @@ public class CafcassUploadDocService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            updateCcdAfterUploadingDocument(authorisation, document, typeOfDocument, caseId, caseData, uploadResponse);
+            updateCcdAfterUploadingDocument(document, typeOfDocument, caseId, caseData, uploadResponse);
 
         }
     }
 
-    private void updateCcdAfterUploadingDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId,
+    private void updateCcdAfterUploadingDocument(MultipartFile document, String typeOfDocument, String caseId,
                                                  CaseData tempCaseData, UploadResponse uploadResponse) {
 
         // get the existing CCD record with all the uploaded documents
-        CaseData caseData = getCaseDataWithUploadedDocs(
-            caseId,
-            document.getOriginalFilename(),
-            typeOfDocument,
-            tempCaseData,
-            uploadResponse.getDocuments().get(0)
-        );
 
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(String.valueOf(
-            caseId), CAFCASS_DOCUMENT_UPLOAD_EVENT_ID);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            String.valueOf(
+                caseId),
+            CAFCASS_DOCUMENT_UPLOAD_EVENT_ID
+        );
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
 
         allTabService.submitAllTabsUpdate(

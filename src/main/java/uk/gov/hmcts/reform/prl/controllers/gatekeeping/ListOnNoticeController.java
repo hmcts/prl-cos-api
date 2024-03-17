@@ -156,6 +156,7 @@ public class ListOnNoticeController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
                 callbackRequest.getCaseDetails().getId()));
