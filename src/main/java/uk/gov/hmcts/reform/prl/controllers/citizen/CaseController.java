@@ -126,6 +126,28 @@ public class CaseController {
         }
     }
 
+    @PostMapping(value = "{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Processing citizen updates")
+    public CaseData updatePartyDetails(
+        @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
+        @PathVariable("eventId") String eventId,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.updateCitizenPartyDetails(
+                authorisation,
+                caseId,
+                eventId,
+                citizenUpdatedCaseData
+            );
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
     public List<CaseData> retrieveCases(
         @PathVariable("role") String role,

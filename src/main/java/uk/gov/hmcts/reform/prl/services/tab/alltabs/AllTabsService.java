@@ -15,5 +15,5 @@ public interface AllTabsService {
 
     Map<String, Object> getAllTabsFields(CaseData caseData);
 
-    StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId, String eventId, String authorization, boolean isRepresented);
+    StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId, String eventId, String authorization);
 }

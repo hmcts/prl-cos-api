@@ -48,7 +48,6 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -87,7 +86,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -110,7 +108,6 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-    private final CaseSummaryTabService caseSummaryTab;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
@@ -595,7 +592,7 @@ public class CaseService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken, false);
+            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken);
 
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
@@ -642,6 +639,80 @@ public class CaseService {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public CaseDetails updateCitizenPartyDetails(String authToken,
+                                                 String caseId,
+                                                 String eventId,
+                                                 CitizenUpdatedCaseData citizenUpdatedCaseData) {
+        log.info("*************** Inside updateCitizenPartyDetails");
+        try {
+            log.info("citizenUpdatedCaseData ===>" + objectMapper.writeValueAsString(citizenUpdatedCaseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        log.info("*************** eventId received from " + caseEvent.getValue());
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken);
+
+        try {
+            log.info("startAllTabsUpdateDataContent case data ===>" + objectMapper.writeValueAsString(
+                startAllTabsUpdateDataContent.caseData()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        try {
+            log.info("startAllTabsUpdateDataContent case data map ===>" + objectMapper.writeValueAsString(
+                startAllTabsUpdateDataContent.caseDataMap()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
+
+        switch (caseEvent) {
+            case CONFIRM_YOUR_DETAILS -> {
+                break;
+            }
+            case KEEP_DETAILS_PRIVATE -> {
+                Optional<Element<PartyDetails>> actualPartyDetailsElement;
+                if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
+                    String partyIdamId = partyDetails.getUser().getIdamId();
+                    if (PartyEnum.applicant.equals(partyType)) {
+                        List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+                        actualPartyDetailsElement = applicants.stream()
+                        .filter(x -> x.getValue().getUser().getIdamId().equalsIgnoreCase(
+                            partyIdamId)).findFirst().ifPresent(party -> {
+                            PartyDetails updatedPartyDetails = getUpdatedPartyDetails(party);
+                            applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                        });
+                    }
+
+                } else {
+
+                }
+                if (ObjectUtils.isNotEmpty(partyDetails.getResponse()) && ObjectUtils.isNotEmpty(partyDetails.getResponse().getKeepDetailsPrivate())) {
+                    partyDetails = updateConfidentialData(partyDetails);
+                }
+            }
+        }
+
+        return allTabService.submitAllTabsUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.systemAuthorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated,
+            false
+        );
+
     }
 
     private PartyDetails updateConfidentialData(PartyDetails partyDetails) {
