@@ -145,7 +145,7 @@ public class UploadAdditionalApplicationService {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
                 case CA_APPLICANT, DA_APPLICANT -> author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                 case CA_RESPONDENT, DA_RESPONDENT -> author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
-                default -> log.info("Representing party did not match");
+                default -> author = userDetails.getFullName();
             }
         } else {
             author = userDetails.getFullName();
