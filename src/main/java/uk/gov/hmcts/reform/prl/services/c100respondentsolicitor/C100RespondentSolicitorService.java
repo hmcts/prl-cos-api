@@ -826,9 +826,18 @@ public class C100RespondentSolicitorService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
         CaseData caseData = objectMapper.convertValue(
-                updatedCaseData,
-                CaseData.class
+            updatedCaseData,
+            CaseData.class
         );
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -842,8 +851,11 @@ public class C100RespondentSolicitorService {
             if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
                     && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument() != null) {
-                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
-                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
+                    updatedUserDetails,
+                    representedRespondent.getValue().getResponse()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()
+                ));
             }
 
             /**
