@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
 
-public record StartAllTabsUpdateDataContent(String systemAuthorisation,
+public record StartAllTabsUpdateDataContent(String authorisation,
                                             EventRequestData eventRequestData,
                                             StartEventResponse startEventResponse,
                                             Map<String, Object> caseDataMap,

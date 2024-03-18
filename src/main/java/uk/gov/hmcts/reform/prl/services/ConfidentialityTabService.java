@@ -41,6 +41,7 @@ public class ConfidentialityTabService {
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+        List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
@@ -54,11 +55,22 @@ public class ConfidentialityTabService {
 
             List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
 
+            Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
+            if (respondentsList.isPresent()) {
+                List<PartyDetails> respondents = caseData.getRespondents().stream()
+                    .map(Element::getValue)
+                    .toList();
+                respondentConfidentialDetails = getConfidentialApplicantDetails(
+                    respondents);
+            }
+
             return Map.of(
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "childrenConfidentialDetails",
-                childrenConfidentialDetails
+                childrenConfidentialDetails,
+                "respondentConfidentialDetails",
+                respondentConfidentialDetails
             );
 
         } else {
@@ -68,13 +80,21 @@ public class ConfidentialityTabService {
                     fl401Applicant);
             }
 
+            if (null != caseData.getRespondentsFL401()) {
+                List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
+                respondentConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Respondent);
+            }
+
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
             return Map.of(
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "fl401ChildrenConfidentialDetails",
-                childrenConfidentialDetails
+                childrenConfidentialDetails,
+                "respondentConfidentialDetails",
+                respondentConfidentialDetails
             );
 
         }

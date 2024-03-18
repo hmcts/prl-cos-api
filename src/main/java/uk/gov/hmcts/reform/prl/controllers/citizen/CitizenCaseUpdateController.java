@@ -35,11 +35,6 @@ public class CitizenCaseUpdateController {
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
-    private boolean isAuthorized(String authorisation, String s2sToken) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
-    }
-
     @PostMapping(value = "{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
     public CaseData updatePartyDetailsFromCitizen(
@@ -49,7 +44,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** printing case data" + citizenUpdatedCaseData);
             CaseDetails caseDetails = citizenCaseUpdateService.updateCitizenPartyDetails(
                 authorisation,

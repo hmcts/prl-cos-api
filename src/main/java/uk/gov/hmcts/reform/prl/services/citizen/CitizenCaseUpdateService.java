@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.HashMap;
-
 
 @Slf4j
 @Service
@@ -37,37 +35,31 @@ public class CitizenCaseUpdateService {
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
 
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(
-            new HashMap<>(),
-            dbCaseData
-        );
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = null;
         PartyDetails newPartyDetailsFromCitizen = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
 
         switch (caseEvent) {
-            case KEEP_DETAILS_PRIVATE -> {
-                // return citizenConfidentialDetailsMapper.mapConfidentialData(caseId, eventId, citizenUpdatedCaseData);
-            }
-            case CONFIRM_YOUR_DETAILS ->
+            case KEEP_DETAILS_PRIVATE, CONFIRM_YOUR_DETAILS ->
                 citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
                     citizenUpdatedCaseData,
-                    citizenUpdatePartyDataContent,
-                    newPartyDetailsFromCitizen,
-                    partyType
+                    dbCaseData,
+                    partyType,
+                    caseEvent
                 );
             default -> {
                 //in default case
             }
         }
-
+        log.info("*************** Going to update party details received from Citizen");
         allTabService.submitUpdateForSpecificUserEvent(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             caseId,
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
             citizenUpdatePartyDataContent.updatedCaseDataMap()
         );
-
+        log.info("*************** Going to refresh all tabs after updating citizen party details");
         return allTabService.updateAllTabsIncludingConfTab(String.valueOf(caseId));
     }
 }

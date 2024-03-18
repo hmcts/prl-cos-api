@@ -102,7 +102,7 @@ public class CitizenConfidentialDetailsMapper {
         caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
 
         return allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             caseId,
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),

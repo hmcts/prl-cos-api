@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,6 +28,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -38,24 +43,28 @@ public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                                                CitizenUpdatePartyDataContent citizenUpdatePartyDataContent,
-                                                                PartyDetails newPartyDetailsFromCitizen,
-                                                                PartyEnum partyType) {
-        log.info("Updating parties personal details from citizen");
-        Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.updatedCaseDataMap();
-        CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
+                                                                CaseData dbCaseData,
+                                                                PartyEnum partyType,
+                                                                CaseEvent caseEvent) {
+        log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
 
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
-            caseData = updatingPartyDetailsCa(caseData, newPartyDetailsFromCitizen, partyType);
+            dbCaseData = updatingPartyDetailsCa(dbCaseData, citizenUpdatedCaseData.getPartyDetails(), partyType, caseEvent);
         } else {
-            caseData = updatingPartyDetailsDa(caseData, newPartyDetailsFromCitizen, partyType);
+            dbCaseData = updatingPartyDetailsDa(dbCaseData, citizenUpdatedCaseData.getPartyDetails(), partyType, caseEvent);
         }
-        generateAnswersForNoc(caseData, caseDataMapToBeUpdated);
-        //check if anything needs to do for citizen flags
-        putUpdatedApplicantRespondentDetailsInMap(caseData, caseDataMapToBeUpdated);
+
+        if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+            generateAnswersForNoc(dbCaseData, caseDataMapToBeUpdated);
+            //check if anything needs to do for citizen flags
+        }
+
+        putUpdatedApplicantRespondentDetailsInMap(dbCaseData, caseDataMapToBeUpdated);
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         log.info("Updated caseDataMap =>" + caseDataMapToBeUpdated);
-        return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
+        log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
+        return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, dbCaseData);
     }
 
     private void generateAnswersForNoc(CaseData caseData, Map<String, Object> caseDataMapToBeUpdated) {
@@ -82,21 +91,21 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails newPartyDetailsFromCitizen,
-                                                   PartyEnum partyType) {
+    private CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails citizenProvidedPartyDetails,
+                                                   PartyEnum partyType, CaseEvent caseEvent) {
+        log.info("Inside updatingPartyDetailsCa");
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    newPartyDetailsFromCitizen.getUser().getIdamId()
+                    citizenProvidedPartyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(
-                                   party.getValue(),
-                                   newPartyDetailsFromCitizen
-                               );
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                                          party.getValue(),
+                                                                                          caseEvent);
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
@@ -105,14 +114,13 @@ public class CitizenPartyDetailsMapper {
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    newPartyDetailsFromCitizen.getUser().getIdamId()
+                    citizenProvidedPartyDetails.getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(
-                                   party.getValue(),
-                                   newPartyDetailsFromCitizen
-                               );
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                                          party.getValue(),
+                                                                                          caseEvent);
                     respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
@@ -120,39 +128,86 @@ public class CitizenPartyDetailsMapper {
         return caseData;
     }
 
-    private static CaseData updatingPartyDetailsDa(CaseData caseData, PartyDetails newPartyDetailsFromCitizen, PartyEnum partyType) {
+    private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
+                                                                   PartyDetails existingPartyDetails,
+                                                                   CaseEvent caseEvent) {
+        log.info("Inside getUpdatedPartyDetailsBasedOnEvent for event " + caseEvent.getValue());
+        if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+            return updateCitizenPersonalDetails(
+                existingPartyDetails,
+                citizenProvidedPartyDetails
+            );
+        } else if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+            return updateCitizenConfidentialData(
+                existingPartyDetails,
+                citizenProvidedPartyDetails
+            );
+        }
+        return existingPartyDetails;
+    }
+
+    private CaseData updatingPartyDetailsDa(CaseData caseData,
+                                                   PartyDetails citizenProvidedPartyDetails,
+                                                   PartyEnum partyType,
+                                                   CaseEvent caseEvent) {
+        log.info("Inside updatingPartyDetailsDa");
         PartyDetails partyDetails;
         if (PartyEnum.applicant.equals(partyType)) {
-            if (newPartyDetailsFromCitizen.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetails(caseData.getApplicantsFL401(), newPartyDetailsFromCitizen);
+            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                  caseData.getApplicantsFL401(),
+                                                                  caseEvent);
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
             }
         } else {
-            if (newPartyDetailsFromCitizen.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetails(caseData.getRespondentsFL401(), newPartyDetailsFromCitizen);
+            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                  caseData.getRespondentsFL401(),
+                                                                  caseEvent);
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
             }
         }
         return caseData;
     }
 
-    private static PartyDetails getUpdatedPartyDetails(PartyDetails existingPartyDetails, PartyDetails newPartyDetailsFromCitizen) {
+    private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        log.info("Updating parties personal details");
         return existingPartyDetails.toBuilder()
-            .canYouProvideEmailAddress(StringUtils.isNotEmpty(newPartyDetailsFromCitizen.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-            .email(newPartyDetailsFromCitizen.getEmail())
-            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(newPartyDetailsFromCitizen.getPhoneNumber()) ? YesOrNo.Yes :
+            .canYouProvideEmailAddress(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
+            .email(citizenProvidedPartyDetails.getEmail())
+            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber()) ? YesOrNo.Yes :
                                           YesOrNo.No)
-            .phoneNumber(newPartyDetailsFromCitizen.getPhoneNumber())
+            .phoneNumber(citizenProvidedPartyDetails.getPhoneNumber())
             //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
-            .isCurrentAddressKnown(newPartyDetailsFromCitizen.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-            .address(newPartyDetailsFromCitizen.getAddress())
-            .addressLivedLessThan5YearsDetails(newPartyDetailsFromCitizen.getAddressLivedLessThan5YearsDetails())
-            .firstName(newPartyDetailsFromCitizen.getFirstName())
-            .lastName(newPartyDetailsFromCitizen.getLastName())
-            .previousName(newPartyDetailsFromCitizen.getPreviousName())
+            .isCurrentAddressKnown(citizenProvidedPartyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
+            .address(citizenProvidedPartyDetails.getAddress())
+            .addressLivedLessThan5YearsDetails(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
+            .firstName(citizenProvidedPartyDetails.getFirstName())
+            .lastName(citizenProvidedPartyDetails.getLastName())
+            .previousName(citizenProvidedPartyDetails.getPreviousName())
             .response(existingPartyDetails.getResponse().toBuilder()
-                          .citizenDetails(newPartyDetailsFromCitizen.getResponse().getCitizenDetails())
+                          .citizenDetails(citizenProvidedPartyDetails.getResponse().getCitizenDetails())
                           .build())
             .build();
+    }
+
+    private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        log.info("Updating parties confidential details");
+        if (null != citizenProvidedPartyDetails.getResponse()
+            && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
+            && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
+            && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList()) {
+            return existingPartyDetails.toBuilder()
+                .response(existingPartyDetails.getResponse().toBuilder().keepDetailsPrivate(
+                    citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()).build())
+                .isPhoneNumberConfidential(
+                    citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                        ConfidentialityListEnum.phoneNumber) ? Yes : No)
+                .isAddressConfidential(existingPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                    ConfidentialityListEnum.address) ? Yes : No)
+                .isEmailAddressConfidential(existingPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                    ConfidentialityListEnum.email) ? Yes : No).build();
+        }
+        return existingPartyDetails;
     }
 }
