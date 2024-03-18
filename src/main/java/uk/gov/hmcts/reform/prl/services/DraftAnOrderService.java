@@ -1250,7 +1250,7 @@ public class DraftAnOrderService {
 
     private CreateSelectOrderOptionsEnum getOrderType(CallbackRequest callbackRequest, CaseData caseData) {
         CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-        if (ObjectUtils.isEmpty(orderType) && CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
+        if (ObjectUtils.isEmpty(orderType) && !Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             DraftOrder draftOrder;
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 draftOrder = getSelectedDraftOrderDetails(
@@ -2197,11 +2197,13 @@ public class DraftAnOrderService {
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
             caseDataUpdated.put(DATE_ORDER_MADE, caseData.getDateOrderMade());
             CaseData caseData1 = caseData.toBuilder().build();
-            caseDataUpdated.putAll(manageOrderService.getCaseData(
-                authorisation,
-                caseData1,
-                caseData.getCreateSelectOrderOptions()
-            ));
+            if (ObjectUtils.isNotEmpty(caseData.getCreateSelectOrderOptions())) {
+                caseDataUpdated.putAll(manageOrderService.getCaseData(
+                    authorisation,
+                    caseData1,
+                    caseData.getCreateSelectOrderOptions()
+                ));
+            }
         }
 
         return caseDataUpdated;
