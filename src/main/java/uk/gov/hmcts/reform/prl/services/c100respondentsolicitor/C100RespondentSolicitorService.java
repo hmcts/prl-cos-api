@@ -826,9 +826,18 @@ public class C100RespondentSolicitorService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
         CaseData caseData = objectMapper.convertValue(
-                updatedCaseData,
-                CaseData.class
+            updatedCaseData,
+            CaseData.class
         );
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -842,8 +851,11 @@ public class C100RespondentSolicitorService {
             if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
                     && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument() != null) {
-                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
-                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
+                    updatedUserDetails,
+                    representedRespondent.getValue().getResponse()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()
+                ));
             }
 
             /**
@@ -905,7 +917,17 @@ public class C100RespondentSolicitorService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
 
         if (documentLanguage.isGenWelsh()) {
             Document c7WelshFinalDocument = documentGenService.generateSingleDocument(
@@ -915,7 +937,7 @@ public class C100RespondentSolicitorService {
                 true,
                 dataMap
             );
-            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(updatedUserDetails, c7WelshFinalDocument));
         }
 
         if (documentLanguage.isGenEng()) {
@@ -926,7 +948,7 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(updatedUserDetails,c7FinalDocument));
         }
 
         if (representedRespondent.getValue().getResponse() != null
@@ -940,7 +962,7 @@ public class C100RespondentSolicitorService {
                     false,
                     dataMap
                 );
-                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument));
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(updatedUserDetails, c1aFinalDocument));
             }
 
             if (documentLanguage.isGenWelsh()) {
@@ -952,7 +974,7 @@ public class C100RespondentSolicitorService {
                     true,
                     dataMap
                 );
-                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh));
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(updatedUserDetails, c1aFinalDocumentWelsh));
             }
         }
         log.info("after submit -->");
