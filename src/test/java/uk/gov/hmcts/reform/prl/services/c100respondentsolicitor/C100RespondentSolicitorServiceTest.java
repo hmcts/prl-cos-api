@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -172,6 +173,8 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     OrganisationService organisationService;
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
 
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
@@ -1100,6 +1103,7 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
@@ -1229,11 +1233,13 @@ public class C100RespondentSolicitorServiceTest {
                     .build();
 
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
-            String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
+
             callbackRequest.setEventId(event);
+            when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+
             UserDetails userDetails = UserDetails.builder().forename("test")
                     .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
-
+            String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                     authToken, callbackRequest
@@ -1273,6 +1279,7 @@ public class C100RespondentSolicitorServiceTest {
                 Mockito.anyBoolean(),
                 Mockito.any(HashMap.class)
         )).thenReturn(document);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         UserDetails userDetails = UserDetails.builder().forename("test")
