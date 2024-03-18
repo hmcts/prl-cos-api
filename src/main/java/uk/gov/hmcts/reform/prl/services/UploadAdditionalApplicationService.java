@@ -145,8 +145,7 @@ public class UploadAdditionalApplicationService {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
                 case CA_APPLICANT, DA_APPLICANT -> author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                 case CA_RESPONDENT, DA_RESPONDENT -> author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
-                default -> {
-                }
+                default -> log.info("Representing party did not match");
             }
         } else {
             author = userDetails.getFullName();
@@ -601,8 +600,7 @@ public class UploadAdditionalApplicationService {
                 case CARESPONDENT -> representedPartyType = CARESPONDENT.name();
                 case DAAPPLICANT -> representedPartyType = DAAPPLICANT.name();
                 case DARESPONDENT -> representedPartyType = DARESPONDENT.name();
-                default -> {
-                }
+                default -> log.info("No matching solicitor role found");
             }
         }
         return representedPartyType;
