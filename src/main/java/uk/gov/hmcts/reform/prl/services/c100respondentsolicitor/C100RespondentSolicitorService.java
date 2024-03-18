@@ -807,9 +807,18 @@ public class C100RespondentSolicitorService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
         CaseData caseData = objectMapper.convertValue(
-                updatedCaseData,
-                CaseData.class
+            updatedCaseData,
+            CaseData.class
         );
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -823,8 +832,11 @@ public class C100RespondentSolicitorService {
             if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
                     && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument() != null) {
-                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
-                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
+                    updatedUserDetails,
+                    representedRespondent.getValue().getResponse()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()
+                ));
             }
 
             /**
@@ -883,27 +895,36 @@ public class C100RespondentSolicitorService {
             List<QuarantineLegalDoc> quarantineLegalDocList
     ) throws Exception {
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
-        Document c7FinalDocument  = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C7_FINAL_DOCUMENT,
-                false,
-                dataMap
+        Document c7FinalDocument = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C7_FINAL_DOCUMENT,
+            false,
+            dataMap
         );
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
+        quarantineLegalDocList.add(getC7QuarantineLegalDoc(updatedUserDetails, c7FinalDocument));
 
         if (representedRespondent.getValue().getResponse() != null
-                && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
-                && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
+            && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
             Document c1aFinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    SOLICITOR_C1A_FINAL_DOCUMENT,
-                    false,
-                    dataMap
+                authorisation,
+                caseData,
+                SOLICITOR_C1A_FINAL_DOCUMENT,
+                false,
+                dataMap
             );
-            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails,c1aFinalDocument));
+            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(updatedUserDetails, c1aFinalDocument));
         }
         return dataMap;
     }
