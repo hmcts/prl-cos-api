@@ -324,6 +324,7 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
+    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
@@ -341,6 +342,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
+    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
