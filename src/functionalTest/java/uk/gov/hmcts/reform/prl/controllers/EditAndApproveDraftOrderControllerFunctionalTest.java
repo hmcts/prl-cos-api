@@ -224,7 +224,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     /**
      * Judge editApprove - approves the order with one hearing which is created by solicitor.
      */
-    @Ignore
     @Test
     public void givenRequestBody_whenJudge_edit_approve_soli_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY);
