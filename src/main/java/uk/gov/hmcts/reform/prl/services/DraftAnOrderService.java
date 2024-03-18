@@ -370,7 +370,7 @@ public class DraftAnOrderService {
                         eventId
                     );
                 }
-
+                log.info("inside removeDraftOrderAndAddToFinalOrder =================   *************  ");
                 updatedCaseData.put(
                     ORDER_COLLECTION,
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
@@ -419,7 +419,7 @@ public class DraftAnOrderService {
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
-
+        log.info("inside getFinalOrderCollection =================   *************  ");
         List<Element<OrderDetails>> orderCollection;
         if (caseData.getOrderCollection() != null) {
             orderCollection = caseData.getOrderCollection();
@@ -444,6 +444,7 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
+        log.info("inside convertDraftOrderToFinal =================   *************  ");
         String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
         OrderDetails orderDetails = getOrderDetails(
             caseData,
@@ -462,6 +463,7 @@ public class DraftAnOrderService {
     }
 
     private OrderDetails generateFinalOrderDocument(String auth, CaseData caseData, DraftOrder draftOrder, OrderDetails orderDetails) {
+        log.info("inside generateFinalOrderDocument =================   *************  ");
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
@@ -523,11 +525,21 @@ public class DraftAnOrderService {
     }
 
     private CaseData updateCaseDataForDocmosis(CaseData caseData, DraftOrder draftOrder) {
+        log.info("inside updateCaseDataForDocmosis =================   *************  ");
         manageOrderService.populateChildrenListForDocmosis(caseData);
         if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
             && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
             caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
         }
+        log.info("Condition eval: {}", (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData))
+            && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType()));
+        log.info("Condition eval-2: {} ", caseData.getCreateSelectOrderOptions());
+        log.info("Condition eval-3: {}", (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)));
+        log.info("condition eval-4: {}", draftOrder.getOrderType());
         if ((FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
                                                             caseData))
@@ -535,6 +547,7 @@ public class DraftAnOrderService {
             boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
                 String.valueOf(draftOrder.getOrderType()), caseData);
+            log.info("condition eval-5: {}", isDaOrderSelectedForCaCase);
             caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
                                                              .manageOrdersApplicant(isDaOrderSelectedForCaCase
                                                                                         ? CaseUtils
@@ -558,6 +571,10 @@ public class DraftAnOrderService {
                                                                                             ? caseData.getRespondentsFL401().getDateOfBirth() : null)
                                                              .build())
                 .build();
+            log.info("getManageOrdersApplicant : {}", caseData.getManageOrders().getManageOrdersApplicant());
+            log.info("manageOrdersApplicantReference : {}", caseData.getManageOrders().getManageOrdersApplicantReference());
+            log.info("getManageOrdersRespondent : {}", caseData.getManageOrders().getManageOrdersRespondent());
+            log.info("getManageOrdersRespondentDob : {}", caseData.getManageOrders().getManageOrdersRespondentDob());
         }
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             caseData = manageOrderService.populateJudgeNames(caseData);
