@@ -132,20 +132,20 @@ public class CaseDataService {
 
     private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
         Map<String, Address> orgIdToAddressMap = new HashMap<>();
-        final List<String>[] orgIdListForAllCases = new List[]{new ArrayList<>()};
+        List<String> orgIdListForAllCases = new ArrayList<>();
         filteredCafcassData.getCases().stream().forEach(
             caseDetail -> {
                 CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
-                orgIdListForAllCases[0] = cafCassCaseData.getApplicants().stream()
+                orgIdListForAllCases.addAll(cafCassCaseData.getApplicants().stream()
                     .filter(party -> party.getValue().getSolicitorOrg() != null)
                     .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                    .collect(Collectors.toList());
-                orgIdListForAllCases[0].addAll(cafCassCaseData.getRespondents().stream()
+                    .collect(Collectors.toList()));
+                orgIdListForAllCases.addAll(cafCassCaseData.getRespondents().stream()
                                                    .filter(party -> party.getValue().getSolicitorOrg() != null)
                                                    .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
                                                    .toList());
             });
-        orgIdListForAllCases[0].stream().distinct()
+        orgIdListForAllCases.stream().distinct()
             .forEach(orgId ->
                          orgIdToAddressMap.put(
                              orgId,
