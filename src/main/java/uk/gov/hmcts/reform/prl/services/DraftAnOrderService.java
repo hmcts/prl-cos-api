@@ -2197,11 +2197,13 @@ public class DraftAnOrderService {
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
             caseDataUpdated.put(DATE_ORDER_MADE, caseData.getDateOrderMade());
             CaseData caseData1 = caseData.toBuilder().build();
-            caseDataUpdated.putAll(manageOrderService.getCaseData(
-                authorisation,
-                caseData1,
-                caseData.getCreateSelectOrderOptions()
-            ));
+            if (ObjectUtils.isNotEmpty(caseData.getCreateSelectOrderOptions())) {
+                caseDataUpdated.putAll(manageOrderService.getCaseData(
+                    authorisation,
+                    caseData1,
+                    caseData.getCreateSelectOrderOptions()
+                ));
+            }
         }
 
         return caseDataUpdated;
