@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -62,11 +61,6 @@ public class FeeService {
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
         try {
-            log.info("parameters are ===>" + objectMapper.writeValueAsString(parameters));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        try {
             return feesRegisterApi.findFee(
                 parameters.getChannel(),
                 parameters.getEvent(),
@@ -87,15 +81,9 @@ public class FeeService {
 
     public FeeResponse getFeesDataForAdditionalApplications(List<FeeType> applicationsFeeTypes) {
         List<FeeResponse> feeResponses = new ArrayList<>();
-        applicationsFeeTypes.stream().forEach(feeType -> {
+        applicationsFeeTypes.forEach(feeType -> {
             try {
-                log.info("feeType is ===>" + objectMapper.writeValueAsString(feeType));
                 FeeResponse feeResponse = fetchFeeDetails(feeType);
-                try {
-                    log.info("feeResponse is ===>" + objectMapper.writeValueAsString(feeResponse));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
                 feeResponses.add(feeResponse);
             } catch (Exception ex) {
                 throw new FeeRegisterException(ex.getMessage());
@@ -105,11 +93,6 @@ public class FeeService {
     }
 
     private Optional<FeeResponse> extractFeeToUse(List<FeeResponse> feeResponses) {
-        try {
-            log.info("feeResponse is ===>" + objectMapper.writeValueAsString(feeResponses));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         return ofNullable(feeResponses).stream()
             .flatMap(Collection::stream)
             .filter(Objects::nonNull)
@@ -118,7 +101,7 @@ public class FeeService {
 
     private FeeResponse getFeeResponseWithHighestCharges(List<FeeResponse> feeResponses) {
         var feeResponse = extractFeeToUse(feeResponses);
-        return feeResponse.isPresent() ? feeResponse.get() : null;
+        return feeResponse.orElse(null);
     }
 
     private boolean checkIsHearingDate14DaysAway(String hearingDate, String applicationReason) {
@@ -207,7 +190,7 @@ public class FeeService {
     private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
         Optional<FeeType> feeType;
         feeType = fromOtherPartyConsentAndHearing(partyConsent, isHearingDate14DaysAway);
-        return feeType.isPresent() ? feeType.get() : null;
+        return feeType.orElse(null);
     }
 
     private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
@@ -245,7 +228,7 @@ public class FeeService {
 
         String caseId = feeRequest.getCaseId();
 
-        FeeResponse feeResponse = null;
+        FeeResponse feeResponse;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
             serviceAuthorization,
