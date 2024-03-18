@@ -643,7 +643,7 @@ public class CaseService {
         }
     }
 
-    public CaseDetails updateCitizenPartyDetails(String authToken,
+    public CaseDetails updateCitizenPartyDetails(String authorisation,
                                                  String caseId,
                                                  String eventId,
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
@@ -651,6 +651,27 @@ public class CaseService {
         log.info("*************** eventId received from " + caseEvent.getValue());
         switch (caseEvent) {
             case KEEP_DETAILS_PRIVATE -> {
+                return citizenConfidentialDetailsMapper.mapConfidentialData(caseId, eventId, citizenUpdatedCaseData);
+            }
+            case CONFIRM_YOUR_DETAILS -> {
+                Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
+
+                CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
+
+                PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+                PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
+                if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
+                    dbCaseData = updatingPartyDetailsCa(dbCaseData, partyDetails, partyType);
+                } else {
+                    dbCaseData = getFlCaseData(dbCaseData, partyDetails, partyType);
+                }
+                dbCaseData = generateAnswersForNoc(dbCaseData);
+                caseDataMapToBeUpdated.putAll(applicationsTabService.updateCitizenPartiesTab(
+                    dbCaseData));
+                Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
                 return citizenConfidentialDetailsMapper.mapConfidentialData(caseId, eventId, citizenUpdatedCaseData);
             }
         }

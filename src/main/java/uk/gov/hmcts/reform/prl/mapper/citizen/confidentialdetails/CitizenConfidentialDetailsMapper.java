@@ -65,43 +65,42 @@ public class CitizenConfidentialDetailsMapper {
             if (PartyEnum.applicant.equals(partyType)) {
                 Optional<List<Element<PartyDetails>>> partyList = ofNullable(caseData.getApplicants());
                 if (partyList.isPresent()) {
-                    updatePartyList(partyList.get(), partyDetails);
+                    updatePartyList(eventId, partyList.get(), partyDetails);
                     caseData = caseData.toBuilder().applicants(partyList.get()).build();
                     caseDataToUpdate.put(C100_APPLICANTS, partyList.get());
-                    caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
                 }
             } else {
                 Optional<List<Element<PartyDetails>>> partyList = ofNullable(caseData.getRespondents());
                 if (partyList.isPresent()) {
-                    updatePartyList(partyList.get(), partyDetails);
+                    updatePartyList(eventId, partyList.get(), partyDetails);
                     caseData = caseData.toBuilder().respondents(partyList.get()).build();
                     caseDataToUpdate.put(C100_RESPONDENTS, partyList.get());
-                    caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
                 }
             }
         } else {
             if (PartyEnum.applicant.equals(partyType)) {
                 if (null != caseData.getApplicantsFL401()) {
                     PartyDetails updatedPartyDetails = updateCitizenConfidentialData(
+                        eventId,
                         caseData.getApplicantsFL401(),
                         partyDetails
                     );
                     caseData = caseData.toBuilder().applicantsFL401(updatedPartyDetails).build();
                     caseDataToUpdate.put(FL401_APPLICANTS, updatedPartyDetails);
-                    caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
                 }
             } else {
                 if (null != caseData.getRespondentsFL401()) {
                     PartyDetails updatedPartyDetails = updateCitizenConfidentialData(
+                        eventId,
                         caseData.getRespondentsFL401(),
                         partyDetails
                     );
                     caseData = caseData.toBuilder().respondentsFL401(updatedPartyDetails).build();
                     caseDataToUpdate.put(FL401_RESPONDENTS, updatedPartyDetails);
-                    caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
                 }
             }
         }
+        caseDataToUpdate.putAll(allTabService.findCaseDataMap(caseData));
 
         return allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.systemAuthorisation(),
@@ -112,7 +111,7 @@ public class CitizenConfidentialDetailsMapper {
         );
     }
 
-    private void updatePartyList(List<Element<PartyDetails>> partyList, PartyDetails partyDetails) {
+    private void updatePartyList(String eventId, List<Element<PartyDetails>> partyList, PartyDetails partyDetails) {
         partyList.stream()
             .filter(party -> Objects.equals(
                 party.getValue().getUser().getIdamId(),
@@ -121,7 +120,7 @@ public class CitizenConfidentialDetailsMapper {
             .findFirst()
             .ifPresent(party -> {
                            PartyDetails updatedPartyDetails = updateCitizenConfidentialData(
-                               party.getValue(),
+                               eventId, party.getValue(),
                                partyDetails
                            );
                            partyList.set(
@@ -132,19 +131,17 @@ public class CitizenConfidentialDetailsMapper {
             );
     }
 
-    private PartyDetails updateCitizenConfidentialData(PartyDetails dbPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenConfidentialData(String eventId, PartyDetails dbPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList()) {
-            return dbPartyDetails.toBuilder()
-                .isPhoneNumberConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.phoneNumber) ? Yes : No)
-                .isAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.address) ? Yes : No)
-                .isEmailAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.email) ? Yes : No)
-                .build();
+            return dbPartyDetails.toBuilder().response(dbPartyDetails.getResponse().toBuilder().keepDetailsPrivate(
+                citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()).build()).isPhoneNumberConfidential(
+                citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                    ConfidentialityListEnum.phoneNumber) ? Yes : No).isAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                ConfidentialityListEnum.address) ? Yes : No).isEmailAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                ConfidentialityListEnum.email) ? Yes : No).build();
         }
         return dbPartyDetails;
     }
