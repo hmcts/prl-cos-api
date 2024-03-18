@@ -69,17 +69,7 @@ public class ApplicationsFeeCalculator {
         try {
             log.info("************* Inside calculateAdditionalApplicationsFee::");
             final List<FeeType> feeTypes = getFeeTypes(caseData);
-            try {
-                log.info("feeTypes is ===>" + objectMapper.writeValueAsString(feeTypes));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            try {
-                log.info("feeResponse is ===>" + objectMapper.writeValueAsString(feeResponse));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             }
@@ -122,18 +112,8 @@ public class ApplicationsFeeCalculator {
     public List<FeeType> getFeeTypes(CaseData caseData) {
         List<FeeType> feeTypes = new ArrayList<>();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
-        try {
-            log.info("uploadAdditionalApplicationData is ===>" + objectMapper.writeValueAsString(uploadAdditionalApplicationData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
 
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
-        try {
-            log.info("************* existingApplicationTypes is ===>" + objectMapper.writeValueAsString(existingApplicationTypes));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
         boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
