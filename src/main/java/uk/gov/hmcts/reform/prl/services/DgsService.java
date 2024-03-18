@@ -40,8 +40,10 @@ public class DgsService {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
 
-            log.debug(" generateDocument ---->  "+ dataMap.toString());
-            dataMap.forEach((key, value) -> log.debug(" generateDocument ---->  " + key + ":" + value));
+            if (dataMap != null) {
+                log.debug(" generateDocument ---->  " + dataMap.toString());
+                dataMap.forEach((key, value) -> log.debug(" generateDocument ---->  " + key + ":" + value));
+            }
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(dataMap).build()
