@@ -1155,7 +1155,8 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
-        if (null != response.getResponseToAllegationsOfHarm()) {
+        if (null != response.getResponseToAllegationsOfHarm()
+            && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
             dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
                 .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
         }
