@@ -38,7 +38,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -95,7 +94,6 @@ public class ManageDocumentsService {
     private final CaseDocumentClient caseDocumentClient;
     private final SystemUserService systemUserService;
     private final AllTabServiceImpl allTabService;
-    private final CoreCaseDataService coreCaseDataService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
 
@@ -643,11 +641,9 @@ public class ManageDocumentsService {
                 updatedCaseDataMap);
     }
 
-    public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(CallbackRequest callbackRequest, String authorization) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+    public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(String authorization, Map<String, Object> caseDataMap, CaseData caseData) {
         List<String> userRole = getLoggedInUserType(authorization);
-        if (userRole.contains(COURT_ADMIN_ROLE) || userRole.contains(COURT_STAFF)) {
+        if (userRole.contains(COURT_ADMIN) || userRole.contains(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
