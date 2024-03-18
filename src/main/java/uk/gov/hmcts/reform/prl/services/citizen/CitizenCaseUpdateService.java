@@ -60,6 +60,6 @@ public class CitizenCaseUpdateService {
             citizenUpdatePartyDataContent.updatedCaseDataMap()
         );
         log.info("*************** Going to refresh all tabs after updating citizen party details");
-        return allTabService.updateAllTabsIncludingConfTab(String.valueOf(caseId));
+        return allTabService.updateAllTabsIncludingConfTab(caseId);
     }
 }
