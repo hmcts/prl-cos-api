@@ -529,7 +529,7 @@ public class DraftAnOrderService {
             caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
         }
         if ((FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(draftOrder.getOrderType()),
                                                             caseData))
             && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
             boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -549,8 +549,9 @@ public class DraftAnOrderService {
                                                                  .getRespondentForDaOrderSelectedForCaCase(caseData)
                                                                                          : CaseUtils.getRespondent(caseData))
                                                              .manageOrdersRespondentReference(
-                                                                 caseData.getRespondentsFL401().getSolicitorReference() != null
-                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                                                                 caseData.getRespondentsFL401() != null
+                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() : "" : null)
                                                              .manageOrdersRespondentDob(isDaOrderSelectedForCaCase
                                                                                             ? CaseUtils
                                                                  .getRespondentDobForDaOrderSelectedForCaCase(caseData)

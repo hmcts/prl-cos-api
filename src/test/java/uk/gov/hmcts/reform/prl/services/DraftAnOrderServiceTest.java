@@ -5658,6 +5658,7 @@ public class DraftAnOrderServiceTest {
             .firstName("FIRST_NAME")
             .lastName("LAST_NAME")
             .dateOfBirth(LocalDate.now().minusYears(20))
+            .solicitorReference("SOLICITOR_REFERENCE")
             .build();
         Element<PartyDetails> respondents = element(respondentPartyDetails);
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
