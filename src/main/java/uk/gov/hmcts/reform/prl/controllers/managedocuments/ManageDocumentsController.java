@@ -79,14 +79,24 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         //validation for empty restricted reason for solicitor
+
+        final String[] surname = {null};
+        userDetails.getSurname().ifPresent(snm -> surname[0] = snm);
+        UserDetails updatedUserDetails = UserDetails.builder()
+            .email(userDetails.getEmail())
+            .id(userDetails.getId())
+            .surname(surname[0])
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
+            .roles(manageDocumentsService.getLoggedInUserType(authorisation))
+            .build();
+
         List<String> errorList = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetails);
 
         //validation for documentParty - COURT to be selected only for court staff
-        errorList.addAll(manageDocumentsService.validateCourtUser(callbackRequest, userDetails));
-
+        errorList.addAll(manageDocumentsService.validateCourtUser(callbackRequest, updatedUserDetails));
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         if (CollectionUtils.isNotEmpty(errorList)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
