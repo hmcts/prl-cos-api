@@ -170,7 +170,8 @@ public class CaseDataService {
                                          return Element.<ApplicantDetails>builder().id(updatedParty.getId())
                                              .value(updatedParty.getValue().toBuilder()
                                                         .solicitorAddress(
-                                                            uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                                            address != null
+                                                                ? uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
                                                                 .addressLine1(address.getAddressLine1())
                                                                 .addressLine2(address.getAddressLine2())
                                                                 .addressLine3(address.getAddressLine3())
@@ -178,7 +179,7 @@ public class CaseDataService {
                                                                 .country(address.getCountry())
                                                                 .postTown(address.getPostTown())
                                                                 .postCode(address.getPostCode())
-                                                                .build()
+                                                                .build() : null
                                                         )
                                                         .build()).build();
                                      })
