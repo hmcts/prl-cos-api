@@ -237,7 +237,6 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCaseDetails(authToken, caseId, eventId, citizenUpdatedCaseData)).thenReturn(caseDetails);
-        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
 
         CaseData caseData1 = caseController.caseUpdate(
             citizenUpdatedCaseData,
