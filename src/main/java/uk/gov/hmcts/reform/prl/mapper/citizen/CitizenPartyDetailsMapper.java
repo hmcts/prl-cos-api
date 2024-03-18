@@ -38,9 +38,9 @@ public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CitizenUpdatedCaseData citizenUpdatedCaseData,
-                                                                 CitizenUpdatePartyDataContent citizenUpdatePartyDataContent,
-                                                                 PartyDetails newPartyDetailsFromCitizen,
-                                                                 PartyEnum partyType) {
+                                                                CitizenUpdatePartyDataContent citizenUpdatePartyDataContent,
+                                                                PartyDetails newPartyDetailsFromCitizen,
+                                                                PartyEnum partyType) {
         log.info("Updating parties personal details from citizen");
         Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.updatedCaseDataMap();
         CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
@@ -93,10 +93,12 @@ public class CitizenPartyDetailsMapper {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                               PartyDetails updatedPartyDetails = getUpdatedPartyDetails(party.getValue(), newPartyDetailsFromCitizen);
-                               applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
-                           }
-                );
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(
+                                   party.getValue(),
+                                   newPartyDetailsFromCitizen
+                               );
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                });
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
@@ -107,10 +109,12 @@ public class CitizenPartyDetailsMapper {
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                               PartyDetails updatedPartyDetails = getUpdatedPartyDetails(party.getValue(), newPartyDetailsFromCitizen);
-                               respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
-                           }
-                );
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(
+                                   party.getValue(),
+                                   newPartyDetailsFromCitizen
+                               );
+                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
+                });
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
         return caseData;

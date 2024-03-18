@@ -118,16 +118,12 @@ public class CitizenConfidentialDetailsMapper {
             ))
             .findFirst()
             .ifPresent(party -> {
-                           PartyDetails updatedPartyDetails = updateCitizenConfidentialData(
-                               eventId, party.getValue(),
-                               partyDetails
+                PartyDetails updatedPartyDetails = updateCitizenConfidentialData(eventId,
+                                                                                            party.getValue(),
+                                                                                            partyDetails
                            );
-                           partyList.set(
-                               partyList.indexOf(party),
-                               element(party.getId(), updatedPartyDetails)
-                           );
-                       }
-            );
+                partyList.set(partyList.indexOf(party), element(party.getId(), updatedPartyDetails));
+            });
     }
 
     private PartyDetails updateCitizenConfidentialData(String eventId, PartyDetails dbPartyDetails, PartyDetails citizenProvidedPartyDetails) {
@@ -138,9 +134,11 @@ public class CitizenConfidentialDetailsMapper {
             return dbPartyDetails.toBuilder().response(dbPartyDetails.getResponse().toBuilder().keepDetailsPrivate(
                 citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()).build()).isPhoneNumberConfidential(
                 citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.phoneNumber) ? Yes : No).isAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                ConfidentialityListEnum.address) ? Yes : No).isEmailAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                ConfidentialityListEnum.email) ? Yes : No).build();
+                    ConfidentialityListEnum.phoneNumber) ? Yes : No)
+                .isAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                    ConfidentialityListEnum.address) ? Yes : No)
+                .isEmailAddressConfidential(dbPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                    ConfidentialityListEnum.email) ? Yes : No).build();
         }
         return dbPartyDetails;
     }
