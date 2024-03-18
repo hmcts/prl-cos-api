@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
@@ -189,6 +188,8 @@ public class ServiceOfApplicationService {
     public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
     public static final String ENG = "eng";
     public static final String WEL = "wel";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -816,7 +817,7 @@ public class ServiceOfApplicationService {
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
-            if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
+            if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
                 if (party.get().getValue().getSolicitorEmail() != null) {
                     try {
                         log.info(
@@ -844,8 +845,7 @@ public class ServiceOfApplicationService {
                         throw new RuntimeException(e);
                     }
                 }
-            } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
-                || YesNoDontKnow.dontKnow.equals(party.get().getValue().getDoTheyHaveLegalRepresentation()))) {
+            } else if (party.isPresent() && (!CaseUtils.hasLegalRepresentation(party.get().getValue()))) {
                 if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
@@ -907,36 +907,32 @@ public class ServiceOfApplicationService {
         log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                if (!YesNoDontKnow.yes.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())) {
-                    String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-                    List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
-                    caseData.getApplicants().forEach(selectedApplicant -> {
-                        if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
-                            Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                      selectedApplicant, PRL_LET_ENG_AP7);
-                            List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
-                            if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                                docs.addAll(packLdocs);
-                                sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, selectedApplicant, docs);
-                            } else {
-                                sendPostWithAccessCodeLetterToParty(caseData, authorization,
-                                                                    packLdocs,
-                                                                    bulkPrintDetails, selectedApplicant, ap7Letter,
-                                                                    SERVED_PARTY_APPLICANT);
-                            }
-                        }
-                    });
-
-                    caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
-                        .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
-                        .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
-                        .servedBy(UNREPRESENTED_APPLICANT)
-                        .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                        .packCreatedDate(dateCreated)
-                        .build());
+            String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+            List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
+            caseData.getApplicants().forEach(selectedApplicant -> {
+                if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
+                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                              selectedApplicant, PRL_LET_ENG_AP7);
+                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
+                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                        docs.addAll(packLdocs);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, selectedApplicant, docs);
+                    } else {
+                        sendPostWithAccessCodeLetterToParty(caseData, authorization,
+                                                            packLdocs,
+                                                            bulkPrintDetails, selectedApplicant, ap7Letter,
+                                                            SERVED_PARTY_APPLICANT);
+                    }
                 }
-            }
+            });
+
+            caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+                .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
+                .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
+                .servedBy(UNREPRESENTED_APPLICANT)
+                .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                .packCreatedDate(dateCreated)
+                .build());
         } else {
             log.info("personal service - court bailiff/court admin");
             List<Document> packjDocs = new ArrayList<>(getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs));
@@ -1027,8 +1023,8 @@ public class ServiceOfApplicationService {
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put("isEnglish", documentLanguage.isGenEng());
-        dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
 
         return serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
@@ -1422,8 +1418,8 @@ public class ServiceOfApplicationService {
                     + selectedApplicant.getValue().getLastName());
                 dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                dynamicData.put("isEnglish", documentLanguage.isGenEng());
-                dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+                dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+                dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
 
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
@@ -1521,21 +1517,6 @@ public class ServiceOfApplicationService {
     private boolean isAccessEnabled(Element<PartyDetails> party) {
         return party.getValue() != null && party.getValue().getUser() != null
             && party.getValue().getUser().getIdamId() != null;
-    }
-
-    private void sendEmailToCitizen(String authorization,
-                                    CaseData caseData, Element<PartyDetails> applicant,
-                                    List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
-        try {
-            notificationList.add(element(serviceOfApplicationEmailService
-                                             .sendEmailNotificationToApplicant(
-                                                 authorization, caseData, applicant.getValue(),
-                                                 docs,
-                                                 SERVED_PARTY_APPLICANT
-                                             )));
-        } catch (Exception e) {
-            log.error("Failed to send notification to applicant {}", e);
-        }
     }
 
     private EmailNotificationDetails sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
@@ -3247,8 +3228,8 @@ public class ServiceOfApplicationService {
                 + " " + caseData.getApplicants().get(0).getValue().getLastName());
             dynamicData.put(DASH_BOARD_LINK, citizenUrl);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            dynamicData.put("isEnglish", documentLanguage.isGenEng());
-            dynamicData.put("isWelsh", documentLanguage.isGenWelsh());
+            dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+            dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 caseData.getApplicants().get(0).getValue().getEmail(),
