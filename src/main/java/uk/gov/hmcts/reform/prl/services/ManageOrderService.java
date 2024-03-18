@@ -1877,7 +1877,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
-            Map<String, String> fieldsMap = ObjectUtils.isNotEmpty(selectOrderOption) ? getOrderTemplateAndFile(selectOrderOption) : new HashMap<>();
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = filterEmptyHearingDetails(caseData);
