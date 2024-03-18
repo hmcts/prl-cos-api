@@ -35,7 +35,7 @@ public class CitizenCaseUpdateController {
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
-    @PostMapping(value = "{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "{caseId}/{eventId}/citizen-update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
     public CaseData updatePartyDetailsFromCitizen(
         @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
