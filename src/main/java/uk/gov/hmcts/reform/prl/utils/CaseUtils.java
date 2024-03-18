@@ -640,7 +640,7 @@ public class CaseUtils {
         PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
         if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
-            respondent1.getDateOfBirth();
+            return respondent1.getDateOfBirth();
         }
         return null;
     }
