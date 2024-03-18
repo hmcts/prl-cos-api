@@ -474,13 +474,15 @@ class UploadAdditionalApplicationServiceTest {
         "[C100APPLICANTSOLICITOR1]",
         "[FL401APPLICANTSOLICITOR]",
         "[C100RESPONDENTSOLICITOR1]",
-        "[FL401RESPONDENTSOLICITOR]"})
+        "[FL401RESPONDENTSOLICITOR]",
+        "TEST"})
     void testCalculateAdditionalApplicationsFeeForApplicantSolicitor(String roles) throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .build();
         Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
