@@ -528,19 +528,34 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
             caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
         }
-        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+        if ((FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData))
             && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
+            boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(draftOrder.getOrderType()), caseData);
             caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
-                                                             .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
-                                                             .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
-                                                                 caseData))
-                                                             .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
+                                                             .manageOrdersApplicant(isDaOrderSelectedForCaCase
+                                                                                        ? CaseUtils
+                                                                 .getApplicantNameForDaOrderSelectedForCaCase(caseData)
+                                                                                        : CaseUtils.getApplicant(caseData))
+                                                             .manageOrdersApplicantReference(isDaOrderSelectedForCaCase
+                                                                                                 ? CaseUtils
+                                                                 .getApplicantReferenceForDaOrderSelectedForCaCase(caseData)
+                                                                                                 : CaseUtils.getApplicantReference(caseData))
+                                                             .manageOrdersRespondent(isDaOrderSelectedForCaCase
+                                                                                         ? CaseUtils
+                                                                 .getRespondentForDaOrderSelectedForCaCase(caseData)
+                                                                                         : CaseUtils.getRespondent(caseData))
                                                              .manageOrdersRespondentReference(
                                                                  caseData.getRespondentsFL401().getSolicitorReference() != null
                                                                      ? caseData.getRespondentsFL401().getSolicitorReference() : "")
-                                                             .manageOrdersRespondentDob(
-                                                                 null != caseData.getRespondentsFL401().getDateOfBirth()
-                                                                     ? caseData.getRespondentsFL401().getDateOfBirth() : null)
+                                                             .manageOrdersRespondentDob(isDaOrderSelectedForCaCase
+                                                                                            ? CaseUtils
+                                                                 .getRespondentDobForDaOrderSelectedForCaCase(caseData)
+                                                                                            : null != caseData.getRespondentsFL401().getDateOfBirth()
+                                                                                            ? caseData.getRespondentsFL401().getDateOfBirth() : null)
                                                              .build())
                 .build();
         }
