@@ -108,13 +108,16 @@ public class RequestUpdateCallbackServiceTest {
         startEventResponse = StartEventResponse.builder().eventId(eventName)
             .caseDetails(caseDetails)
             .token(eventToken).build();
+        when(coreCaseDataService.findCaseById(
+            Mockito.anyString(),
+            Mockito.anyString()
+        )).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate(
             Mockito.anyString(),
             Mockito.any(),
             Mockito.anyString(),
             Mockito.anyBoolean()
-        )).thenReturn(
-            startEventResponse);
+        )).thenReturn(startEventResponse);
         when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any(), any())).thenCallRealMethod();
     }
 
