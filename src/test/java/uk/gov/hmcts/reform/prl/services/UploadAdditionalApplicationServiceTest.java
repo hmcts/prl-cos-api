@@ -470,7 +470,11 @@ class UploadAdditionalApplicationServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"[APPLICANTSOLICITOR]","[C100APPLICANTSOLICITOR1]","[FL401APPLICANTSOLICITOR]","[C100RESPONDENTSOLICITOR1]","[FL401RESPONDENTSOLICITOR]"})
+    @ValueSource(strings = {"[APPLICANTSOLICITOR]",
+        "[C100APPLICANTSOLICITOR1]",
+        "[FL401APPLICANTSOLICITOR]",
+        "[C100RESPONDENTSOLICITOR1]",
+        "[FL401RESPONDENTSOLICITOR]"})
     void testCalculateAdditionalApplicationsFeeForApplicantSolicitor(String roles) throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
