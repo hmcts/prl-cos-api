@@ -139,14 +139,13 @@ public class UploadAdditionalApplicationService {
     }
 
     private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserDetails userDetails, String partyName) {
-        String author;
+        String author = null;
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
                 case CA_APPLICANT, DA_APPLICANT -> author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                 case CA_RESPONDENT, DA_RESPONDENT -> author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
-                default ->
-                    throw new IllegalStateException("Unexpected value: " + uploadAdditionalApplicationData.getRepresentedPartyType());
+                default -> {}
             }
         } else {
             author = userDetails.getFullName();
@@ -576,40 +575,32 @@ public class UploadAdditionalApplicationService {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         String representedPartyType = "";
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-            log.info("************* User details found::" + userDetails.getRoles());
             FindUserCaseRolesResponse findUserCaseRolesResponse
                 = userDataStoreService.findUserCaseRoles(
                 String.valueOf(caseData.getId()),
                 authorisation
             );
-            log.info("************* findUserCaseRolesResponse retrieved found::" + findUserCaseRolesResponse);
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                log.info("************* caseUser found and case role is::" + caseUser.getCaseRole());
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && APPLICANTSOLICITOR.equalsIgnoreCase(caseUser.getCaseRole())) {
-                    log.info("************* solicitorRole.isPresent() is false and I am inside c100 cases::");
                     representedPartyType = CAAPPLICANT.name();
                 } else {
                     representedPartyType = findSolicitorRepresentedPartyType(caseUser, representedPartyType);
                 }
             }
         }
-        log.info("************* representedPartyType is::" + representedPartyType);
         return representedPartyType;
     }
 
     private static String findSolicitorRepresentedPartyType(CaseUser caseUser, String representedPartyType) {
         Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
         if (solicitorRole.isPresent()) {
-            log.info("************* solicitorRole.isPresent() is true::" + solicitorRole.get().getRepresenting());
             switch (solicitorRole.get().getRepresenting()) {
                 case CAAPPLICANT -> representedPartyType = CAAPPLICANT.name();
                 case CARESPONDENT -> representedPartyType = CARESPONDENT.name();
                 case DAAPPLICANT -> representedPartyType = DAAPPLICANT.name();
                 case DARESPONDENT -> representedPartyType = DARESPONDENT.name();
-                default ->
-                    throw new IllegalStateException("Unexpected value: "
-                                                        + solicitorRole.get().getRepresenting());
+                default -> {}
             }
         }
         return representedPartyType;
