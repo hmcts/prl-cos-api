@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -40,7 +41,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -249,6 +251,8 @@ public class StmtOfServImplService {
                            List<Element<BulkPrintDetails>> bulkPrintDetails,
                            SoaPack unServedRespondentPack,
                            String authorization, String casTypeOfApplication) {
+        String whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy())
+            .getDisplayedValue().equals("Court admin") ? COURT_ADMIN : COURT_BAILIFF;
         if (FL401_CASE_TYPE.equalsIgnoreCase(casTypeOfApplication)) {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
@@ -296,7 +300,7 @@ public class StmtOfServImplService {
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(COURT)
+            .whoIsResponsible(whoIsResponsible)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 }

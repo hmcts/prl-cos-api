@@ -165,8 +165,8 @@ public class ServiceOfApplicationService {
     public static final String EMAIL = "email";
     public static final String POST = "post";
     public static final String COURT = "Court";
-    public static final String COURT_ADMIN = "Court admin";
-    public static final String COURT_BAILIFF = "Court bailiff";
+    public static final String COURT_ADMIN = "Court - court admin";
+    public static final String COURT_BAILIFF = "Court - court bailiff";
 
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
@@ -475,8 +475,9 @@ public class ServiceOfApplicationService {
                                                     emailNotificationDetails,
                                                     bulkPrintDetails, c100StaticDocs,
                                                     caseDataMap);
-                whoIsResponsibleForServing = caseData.getServiceOfApplication()
-                        .getSoaCitizenServingRespondentsOptionsCA().getDisplayedValue();
+                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication()
+                        .getSoaCitizenServingRespondentsOptionsCA()) ? COURT_BAILIFF : COURT_ADMIN;
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -485,8 +486,9 @@ public class ServiceOfApplicationService {
                 sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
             }
         } else {
-            whoIsResponsibleForServing = caseData.getServiceOfApplication()
-                .getSoaCitizenServingRespondentsOptionsDA().getDisplayedValue();
+            whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+                .equals(caseData.getServiceOfApplication()
+                .getSoaCitizenServingRespondentsOptionsDA()) ? COURT_BAILIFF : COURT_ADMIN;
             if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                 .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
                 getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
@@ -2768,7 +2770,7 @@ public class ServiceOfApplicationService {
                 && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
                 whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())
-                    .getDisplayedValue();
+                    .getDisplayedValue().equals("Court admin") ? COURT_ADMIN : COURT_BAILIFF;
             }
             if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null
                 && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
@@ -2778,7 +2780,7 @@ public class ServiceOfApplicationService {
                     unServedRespondentPack.getPersonalServiceBy()
                 );
                 whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy())
-                    .getDisplayedValue();
+                    .getDisplayedValue().equals("Court admin") ? COURT_ADMIN : COURT_BAILIFF;
             }
 
             if ((unServedApplicantPack != null
@@ -2989,7 +2991,7 @@ public class ServiceOfApplicationService {
                                                                  caseData,
                                                                  emailNotificationDetails,
                                                                  bulkPrintDetails,
-                                                            removeCoverLettersFromThePacks(packDocs));
+                                                                 removeCoverLettersFromThePacks(packDocs));
             } else {
                 emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                     authorization,
