@@ -2791,7 +2791,7 @@ public class ServiceOfApplicationService {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    whoIsResponsible = unServedApplicantPack.getPersonalServiceBy();
+                    whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()).toString();
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
