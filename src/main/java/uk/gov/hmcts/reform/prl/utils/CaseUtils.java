@@ -182,7 +182,6 @@ public class CaseUtils {
     }
 
     public static YesOrNo cafcassFlag(String regionId) {
-        log.info("regionId ===> " + regionId);
         YesOrNo cafcassFlag = YesOrNo.No; //wales
         if (regionId != null) {
             int intRegionId = Integer.parseInt(regionId);
@@ -360,6 +359,12 @@ public class CaseUtils {
         });
     }
 
+    /**
+     * Please do not use this method as it was created for external user and it has dependency on idam roles.
+     * We are depending on AM roles for internal users
+     * @param userDetails It takes User Details as input and returns roles for users
+     * @return string
+     */
     public static String getUserRole(UserDetails userDetails) {
         if (null == userDetails || isEmpty(userDetails.getRoles())) {
             throw new IllegalStateException("Unexpected user");
@@ -374,6 +379,8 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
             return COURT_STAFF;
+        } else if (roles.contains(CAFCASS)) {
+            return CAFCASS;
         }
 
         return CAFCASS;
