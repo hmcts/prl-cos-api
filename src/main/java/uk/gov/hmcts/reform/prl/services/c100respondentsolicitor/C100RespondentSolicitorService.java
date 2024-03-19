@@ -839,6 +839,8 @@ public class C100RespondentSolicitorService {
                         .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
                     "respondentC1AResponse", "Respondent C1A response"));
             }
+            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
+            log.info("quarantine legal doc list {} ", quarantineLegalDocList);
             moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
             /**
              * After adding the document to the Quarantine List,
@@ -883,7 +885,6 @@ public class C100RespondentSolicitorService {
                     createdBy,
                     dataMap
             );
-            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
         }
 
         return updatedCaseData;
