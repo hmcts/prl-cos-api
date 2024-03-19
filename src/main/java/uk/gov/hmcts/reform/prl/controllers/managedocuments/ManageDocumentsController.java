@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -119,6 +120,10 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        System.out.println("JJJJJJJJ== >" + result);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
