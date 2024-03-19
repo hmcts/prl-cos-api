@@ -2764,11 +2764,19 @@ public class ServiceOfApplicationService {
             //            whoIsResponsible = SoaCitizenServingRespondentsEnum
             //            .getValue(unServedApplicantPack.getPersonalServiceBy()).getDisplayedValue();
             //            }
-            if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null) {
+            if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null
+                && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
+                unServedApplicantPack.getPersonalServiceBy())) {
                 whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())
                     .getDisplayedValue();
             }
-            if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null) {
+            if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null
+                && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
+                unServedRespondentPack.getPersonalServiceBy())) {
+                log.info(
+                    "Debu unServedRespondentPack.getPersonalServiceBy(){}",
+                    unServedRespondentPack.getPersonalServiceBy()
+                );
                 whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy())
                     .getDisplayedValue();
             }
