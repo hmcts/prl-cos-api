@@ -641,6 +641,8 @@ public class ServiceOfApplicationService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         dynamicData.put(ENG, documentLanguage.isGenEng());
         dynamicData.put(WEL, documentLanguage.isGenWelsh());
+        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
     }
 
     private void sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(CaseData caseData, String authorization,
@@ -1032,9 +1034,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
-        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+        populateLanguageMap(caseData, dynamicData);
 
         return serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
@@ -1427,9 +1427,7 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", selectedApplicant.getValue().getFirstName() + " "
                     + selectedApplicant.getValue().getLastName());
                 dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
-                dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+                populateLanguageMap(caseData,dynamicData);
 
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
@@ -3251,9 +3249,7 @@ public class ServiceOfApplicationService {
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getFirstName()
                 + " " + caseData.getApplicants().get(0).getValue().getLastName());
             dynamicData.put(DASH_BOARD_LINK, citizenUrl);
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
-            dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+            populateLanguageMap(caseData,dynamicData);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 caseData.getApplicants().get(0).getValue().getEmail(),
