@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -35,7 +34,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -53,14 +51,14 @@ public class HearingsManagementController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void caseStateUpdateByHearingManagement(@RequestHeader("authorization") String authorisation,
-                                                   @RequestHeader("serviceAuthorization") String s2sToken,
+    public void caseStateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
                                                    @RequestBody HearingRequest hearingRequest,
-                                                   @PathVariable("caseState") State caseState) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, caseState);
+                                                   @PathVariable("caseState") State caseState) throws Exception {
+
+        if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+            throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
-            throw (new HearingManagementValidationException(INVALID_CLIENT));
+            hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
         }
     }
 
@@ -70,13 +68,14 @@ public class HearingsManagementController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorisation,
+    public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorization,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @RequestBody NextHearingDateRequest nextHearingDateRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
+                                                         @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
+        if (Boolean.FALSE.equals(authorisationService.authoriseUser(authorization))
+            && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+            throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
-            throw (new HearingManagementValidationException(INVALID_CLIENT));
+            hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
         }
     }
 
@@ -89,21 +88,14 @@ public class HearingsManagementController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updateNextHearingDetailsCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put(
-                "nextHearingDetails",
-                hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId()))
-            );
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new HearingManagementValidationException(INVALID_CLIENT));
-        }
+        caseDataUpdated.put("nextHearingDetails",
+                            hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/update-allTabs-after-hmc-case-state/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -111,13 +103,10 @@ public class HearingsManagementController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            return AboutToStartOrSubmitCallbackResponse.builder().build();
-        } else {
-            throw (new HearingManagementValidationException(INVALID_CLIENT));
-        }
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData));
+        return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }

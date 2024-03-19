@@ -1039,8 +1039,12 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
+                                                StartEventResponse.builder().build(), stringObjectMap, caseData);
+        when(allTabService.getStartAllTabsUpdate("12345")).thenReturn(startAllTabsUpdateDataContent);
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = new StartAllTabsUpdateDataContent(authToken,
@@ -1050,7 +1054,8 @@ public class ManageOrdersControllerTest {
                                                 caseData);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
+            = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
             callbackRequest
