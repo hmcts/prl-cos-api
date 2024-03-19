@@ -123,7 +123,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("JJJJJJJJ== >" + result);
+        log.info("JJJJJJJJ== >{}", result);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
