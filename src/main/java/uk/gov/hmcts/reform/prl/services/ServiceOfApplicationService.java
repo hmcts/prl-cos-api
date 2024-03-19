@@ -908,12 +908,10 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
-        log.info("isAllApplicantsAreLiP==> {}", isAllApplicantsAreLiP);
+        log.info("isAllApplicantsAreLiP--> {}", isAllApplicantsAreLiP);
         if (null == isAllApplicantsAreLiP) {
-            log.info("isAllApplicantsAreLiP==>FirstTTTTT {}", isAllApplicantsAreLiP);
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? YES : NO);
         } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
-            log.info("isAllApplicantsAreLiP==> SubTTTTT {}", isAllApplicantsAreLiP);
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
         }
         return caseDataMap;
