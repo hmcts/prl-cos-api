@@ -1860,6 +1860,7 @@ public class ServiceOfApplicationService {
             caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                                String.valueOf(caseData.getId())));
         }
+        caseDataUpdated.put(WA_IS_APPLICANT_REPRESENTED,caseData.getIsApplicantRepresented());
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
