@@ -730,6 +730,7 @@ public class ManageDocumentsService {
                 List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                     .stream()
                     .map(role -> role.getRoleName()).toList();
+                log.info("amRolessssss---->{}",amRoles);
                 if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(JUDGE_ROLE);
@@ -737,6 +738,7 @@ public class ManageDocumentsService {
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(LEGAL_ADVISER_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                    log.info("ADMINNNNNNNNNNN----");
                     loggedInUserType.add(COURT_STAFF);
                     loggedInUserType.add(COURT_ADMIN_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
@@ -746,6 +748,9 @@ public class ManageDocumentsService {
         } else {
             checkExistingIdamRoleConfig(roles, loggedInUserType);
         }
+
+
+        log.info("loggedInUserTypeeeee---->{}",loggedInUserType);
         return loggedInUserType;
     }
 
