@@ -1122,7 +1122,7 @@ public class C100RespondentSolicitorService {
             "currentOrPastProceedingsForChildren",
             response.getCurrentOrPastProceedingsForChildren() != null ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
         );
-        if(response.getCitizenInternationalElements() != null) {
+        if (response.getCitizenInternationalElements() != null) {
             dataMap.put(
                 "reasonForChild",
                 null != response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl() ?
