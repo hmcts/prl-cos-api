@@ -3110,7 +3110,7 @@ public class ManageOrderService {
         //children dynamic multi select list
         caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-        //caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
+        caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
         caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
