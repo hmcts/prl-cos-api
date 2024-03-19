@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,8 +20,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
@@ -31,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
@@ -49,6 +54,9 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;
@@ -567,5 +575,27 @@ public class StmtOfServImplServiceTest {
 
         assertNotNull(updatedCaseData);
 
+    }
+
+    @Test
+    public void testcheckAndServeRespondentPacksPersonalService() {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        CaseData caseData = CaseData.builder()
+            .respondents(List.of(element(PartyDetails.builder().build())))
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService.checkAndServeRespondentPacksPersonalService(emailNotificationDetails, bulkPrintDetails,
+                                                                                                   SoaPack.builder()
+                                                                                                       .personalServiceBy(
+                                                                                                           SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                                                                                                       .packDocument(List.of(element(Document.builder().build())))
+                                                                                                       .build(), authToken, caseData);
+        assertNotNull(servedApplicationDetails);
+        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
     }
 }
