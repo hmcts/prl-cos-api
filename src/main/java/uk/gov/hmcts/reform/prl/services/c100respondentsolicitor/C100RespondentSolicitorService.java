@@ -1118,37 +1118,46 @@ public class C100RespondentSolicitorService {
         dataMap.put("attendedMiam", response.getMiam().getAttendedMiam().getDisplayedValue());
         dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam().getDisplayedValue());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren().getDisplayedValue());
-        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl().getDisplayedValue());
         dataMap.put(
+            "currentOrPastProceedingsForChildren",
+            response.getCurrentOrPastProceedingsForChildren() != null ? response.getCurrentOrPastProceedingsForChildren().getDisplayedValue() : null
+        );
+        if(response.getCitizenInternationalElements() != null) {
+            dataMap.put(
+                "reasonForChild",
+                null != response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl() ?
+                    response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl().getDisplayedValue() : null
+            );
+            dataMap.put(
                 "reasonForChildDetails",
                 response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails()
-        );
-        dataMap.put(
-            "reasonForParent",
-            null != response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl() ? response
-                .getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue() : null
-        );
-        dataMap.put(
+            );
+            dataMap.put(
+                "reasonForParent",
+                null != response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl() ? response
+                    .getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl().getDisplayedValue() : null
+            );
+            dataMap.put(
                 "reasonForParentDetails",
                 response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails()
-        );
-        dataMap.put(
+            );
+            dataMap.put(
                 "reasonForJurisdiction",
                 response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl().getDisplayedValue()
-        );
-        dataMap.put(
+            );
+            dataMap.put(
                 "reasonForJurisdictionDetails",
                 response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails()
-        );
-        dataMap.put(
+            );
+            dataMap.put(
                 "requestToAuthority",
                 response.getCitizenInternationalElements().getAnotherCountryAskedInformation().getDisplayedValue()
-        );
-        dataMap.put(
+            );
+            dataMap.put(
                 "requestToAuthorityDetails",
                 response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails()
-        );
+            );
+        }
         dataMap.put(
                 "solicitorRepresented",
                 solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
