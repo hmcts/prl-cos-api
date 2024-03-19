@@ -892,23 +892,20 @@ public class C100RespondentSolicitorService {
     private void updateListWithPreviousOrderDocuments(UserDetails updatedUserDetails,
                                                       List<QuarantineLegalDoc> quarantineLegalDocList,
                                                       Element<PartyDetails> representedRespondent) {
-        if (null != representedRespondent.getValue().getResponse().getCurrentOrPreviousProceedings()) {
-            representedRespondent.getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList()
-                .stream()
-                .filter(proceedings -> Objects.nonNull(proceedings)
-                    && !proceedings.getValue().getProceedingDetails().isEmpty())
-                .forEach(proceedings -> proceedings.getValue().getProceedingDetails()
-                    .stream()
-                    .filter(otherProceeding -> Objects.nonNull(otherProceeding)
-                        && null != otherProceeding.getValue().getOrderDocument())
-                    .forEach(otherProceeding -> {
+        if (null != representedRespondent.getValue().getResponse().getRespondentExistingProceedings()) {
+            representedRespondent.getValue().getResponse().getRespondentExistingProceedings().stream()
+                .filter(
+                    proceedings -> Objects.nonNull(proceedings) && null != proceedings.getValue().getUploadRelevantOrder())
+                .forEach(
+                    proceedings -> {
                         quarantineLegalDocList.add(getQuarantineLegalDocuments(
                             updatedUserDetails,
-                            otherProceeding.getValue().getOrderDocument(),
-                            "previousOrdersSubmitted", "Orders from other proceedings"
+                            proceedings.getValue().getUploadRelevantOrder(),
+                            "previousOrdersSubmitted",
+                            "Orders from other proceedings"
                         ));
-                        otherProceeding.getValue().toBuilder().orderDocument(null);
-                    }));
+                        proceedings.getValue().toBuilder().uploadRelevantOrder(null);
+                    });
         }
     }
 
