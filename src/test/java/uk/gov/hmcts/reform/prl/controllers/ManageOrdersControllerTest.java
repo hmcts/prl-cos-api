@@ -1046,13 +1046,6 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(authToken,
-                                                EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(),
-                                                stringObjectMap,
-                                                caseData);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.sendEmailNotificationOnClosingOrder(
