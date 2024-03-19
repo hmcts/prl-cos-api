@@ -1483,6 +1483,7 @@ public class ServiceOfApplicationService {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                        populateLanguageMap(caseData, dynamicData);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                              .sendEmailUsingTemplateWithAttachments(authorization,
                                                 selectedRespondent.getValue().getSolicitorEmail(), docs,
@@ -2524,7 +2525,7 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private Document generateCoverLetterBasedOnCaseAccess(String authorization, CaseData caseData,
+    public Document generateCoverLetterBasedOnCaseAccess(String authorization, CaseData caseData,
                                                       Element<PartyDetails> applicant, String template) {
         Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
