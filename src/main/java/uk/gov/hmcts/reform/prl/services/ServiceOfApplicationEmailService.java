@@ -115,7 +115,8 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+                    .build();
             }
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
