@@ -1824,7 +1824,6 @@ public class ServiceOfApplicationService {
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("CASEEEEEE DAtaaa --> {}",caseData);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
         String cafcassCymruEmailAddress = welshCourtEmail
