@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -171,19 +171,30 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         log.info("Updating parties personal details");
+        boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
+            && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
+
+        boolean isEmailNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getEmail());
+
+        boolean isPhoneNoNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber());
+
         return existingPartyDetails.toBuilder()
-            .canYouProvideEmailAddress(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-            .email(citizenProvidedPartyDetails.getEmail())
-            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber()) ? YesOrNo.Yes :
-                                          YesOrNo.No)
-            .phoneNumber(citizenProvidedPartyDetails.getPhoneNumber())
+            .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .email(isEmailNeedsToUpdate
+                       ? citizenProvidedPartyDetails.getEmail() : existingPartyDetails.getEmail())
+            .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .phoneNumber(isPhoneNoNeedsToUpdate
+                             ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
             //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
-            .isCurrentAddressKnown(citizenProvidedPartyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-            .address(citizenProvidedPartyDetails.getAddress())
-            .addressLivedLessThan5YearsDetails(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
+            .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
+            .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
+                                                   ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
+                                                   : existingPartyDetails.getAddressLivedLessThan5YearsDetails())
             .firstName(citizenProvidedPartyDetails.getFirstName())
             .lastName(citizenProvidedPartyDetails.getLastName())
-            .previousName(citizenProvidedPartyDetails.getPreviousName())
+            .previousName(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPreviousName())
+                              ? citizenProvidedPartyDetails.getPreviousName() : existingPartyDetails.getPreviousName())
             .response(existingPartyDetails.getResponse().toBuilder()
                           .citizenDetails(citizenProvidedPartyDetails.getResponse().getCitizenDetails())
                           .build())
@@ -197,15 +208,16 @@ public class CitizenPartyDetailsMapper {
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList()) {
             return existingPartyDetails.toBuilder()
-                .response(existingPartyDetails.getResponse().toBuilder().keepDetailsPrivate(
-                    citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()).build())
+                .response(existingPartyDetails.getResponse().toBuilder()
+                              .keepDetailsPrivate(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate())
+                              .build())
                 .isPhoneNumberConfidential(
                     citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                        ConfidentialityListEnum.phoneNumber) ? Yes : No)
+                        ConfidentialityListEnum.phoneNumber) ? Yes : existingPartyDetails.getIsPhoneNumberConfidential())
                 .isAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.address) ? Yes : No)
+                    ConfidentialityListEnum.address) ? Yes : existingPartyDetails.getIsAddressConfidential())
                 .isEmailAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.email) ? Yes : No).build();
+                    ConfidentialityListEnum.email) ? Yes : existingPartyDetails.getIsEmailAddressConfidential()).build();
         }
         return existingPartyDetails;
     }
