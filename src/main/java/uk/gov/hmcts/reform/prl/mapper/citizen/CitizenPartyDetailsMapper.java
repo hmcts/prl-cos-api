@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
