@@ -45,6 +45,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("abouttttttttt to start");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
                                                                            .getSoaCaseFieldsMap(authorisation,
