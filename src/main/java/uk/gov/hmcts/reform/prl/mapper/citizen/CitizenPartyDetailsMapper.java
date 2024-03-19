@@ -61,7 +61,7 @@ public class CitizenPartyDetailsMapper {
         }
 
         putUpdatedApplicantRespondentDetailsInMap(dbCaseData, caseDataMapToBeUpdated);
-        Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+        //Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         log.info("Updated caseDataMap =>" + caseDataMapToBeUpdated);
         log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
         return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, dbCaseData);

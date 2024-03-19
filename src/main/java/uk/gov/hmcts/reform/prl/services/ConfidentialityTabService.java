@@ -68,9 +68,9 @@ public class ConfidentialityTabService {
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "childrenConfidentialDetails",
-                childrenConfidentialDetails,
-                "respondentConfidentialDetails",
-                respondentConfidentialDetails
+                childrenConfidentialDetails
+                // "respondentConfidentialDetails",
+                // respondentConfidentialDetails
             );
 
         } else {
