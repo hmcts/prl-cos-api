@@ -2761,11 +2761,17 @@ public class ServiceOfApplicationService {
         String whoIsResponsible = COURT;
         if (unServedApplicantPack != null || unServedRespondentPack != null) {
             //            if(unServedApplicantPack != null){
-            //            whoIsResponsible =  unServedApplicantPack.getPersonalServiceBy().toString();
+            //            whoIsResponsible = SoaCitizenServingRespondentsEnum
+            //            .getValue(unServedApplicantPack.getPersonalServiceBy()).getDisplayedValue();
             //            }
-            //            if(unServedApplicantPack != null){
-            //                whoIsResponsible =  unServedApplicantPack.getPersonalServiceBy().toString();
-            //            }
+            if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null) {
+                whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())
+                    .getDisplayedValue();
+            }
+            if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null) {
+                whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy())
+                    .getDisplayedValue();
+            }
 
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
@@ -2789,7 +2795,7 @@ public class ServiceOfApplicationService {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()).toString();
+                    //whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()).getDisplayedValue();
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
