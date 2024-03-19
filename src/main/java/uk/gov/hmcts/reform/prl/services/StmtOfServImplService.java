@@ -294,7 +294,7 @@ public class StmtOfServImplService {
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            List<Element<Document>> packDocs= new ArrayList<>();
+            List<Element<Document>> packDocs = new ArrayList<>();
             caseData.getRespondents().forEach(respondent -> {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
