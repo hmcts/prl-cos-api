@@ -36,7 +36,6 @@ public class CitizenCaseUpdateService {
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = null;
-        PartyDetails newPartyDetailsFromCitizen = citizenUpdatedCaseData.getPartyDetails();
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
 
         switch (caseEvent) {
