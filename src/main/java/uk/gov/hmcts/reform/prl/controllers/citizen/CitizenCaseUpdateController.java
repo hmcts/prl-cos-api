@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,7 +46,12 @@ public class CitizenCaseUpdateController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** printing case data" + citizenUpdatedCaseData);
+            try {
+                log.info("*** printing case data" + objectMapper.writeValueAsString(
+                    citizenUpdatedCaseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             CaseDetails caseDetails = citizenCaseUpdateService.updateCitizenPartyDetails(
                 authorisation,
                 caseId,
