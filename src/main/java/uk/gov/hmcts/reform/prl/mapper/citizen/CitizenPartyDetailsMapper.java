@@ -203,9 +203,9 @@ public class CitizenPartyDetailsMapper {
                 .isPhoneNumberConfidential(
                     citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
                         ConfidentialityListEnum.phoneNumber) ? Yes : No)
-                .isAddressConfidential(existingPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                .isAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
                     ConfidentialityListEnum.address) ? Yes : No)
-                .isEmailAddressConfidential(existingPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
+                .isEmailAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
                     ConfidentialityListEnum.email) ? Yes : No).build();
         }
         return existingPartyDetails;
