@@ -4,6 +4,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,18 @@ public class EmailUtils {
 
         dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+
+        return dynamicTemplateData;
+    }
+
+    public static Map<String, Object> getCommonSendgridDynamicTemplateData(CaseData caseData,
+                                                                           DocumentLanguage documentLanguage) {
+        Map<String, Object> dynamicTemplateData = new HashMap<>();
+
+        dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
+        dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+        dynamicTemplateData.put("isEnglish", documentLanguage.isGenEng());
+        dynamicTemplateData.put("isWelsh", documentLanguage.isGenWelsh());
 
         return dynamicTemplateData;
     }
