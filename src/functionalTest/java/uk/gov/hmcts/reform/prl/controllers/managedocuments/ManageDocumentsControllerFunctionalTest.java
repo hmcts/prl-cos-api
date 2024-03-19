@@ -335,7 +335,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            //.body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
+            .body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
@@ -365,6 +365,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("VVVV " + response);
 
     }
 
