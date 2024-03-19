@@ -242,7 +242,8 @@ public class StmtOfServImplService {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
@@ -268,7 +269,9 @@ public class StmtOfServImplService {
                                                          .map(Document::getDocumentFileName).toList()))
                                                      .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                                     .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                                     .partyIds(getPartyIds(caseData.getRespondents()))
+                                                     .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                           caseData.getRespondents(),
+                                                                           caseData.getRespondentsFL401()))
                                                      .build()));
         } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
@@ -282,7 +285,9 @@ public class StmtOfServImplService {
                                              .printDocs(unServedRespondentPack.getPackDocument())
                                              .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                             .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                             .partyIds(getPartyIds(caseData.getRespondents()))
+                                             .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                   caseData.getRespondents(),
+                                                                   caseData.getRespondentsFL401()))
                                              .build()));
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
@@ -295,9 +300,14 @@ public class StmtOfServImplService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private String getPartyIds(List<Element<PartyDetails>> respondents) {
+    private String getPartyIds(String caseTypeOfApplication,
+                               List<Element<PartyDetails>> parties,
+                               PartyDetails fl401Party) {
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return String.valueOf(fl401Party.getPartyId());
+        }
         return String.join(COMMA,
-                           CaseUtils.getPartyIdList(respondents).stream()
+                           CaseUtils.getPartyIdList(parties).stream()
                                .map(Element::getValue)
                                .toList());
     }
