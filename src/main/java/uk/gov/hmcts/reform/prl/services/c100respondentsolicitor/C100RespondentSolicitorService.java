@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -832,13 +833,13 @@ public class C100RespondentSolicitorService {
             if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
                     && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument() != null) {
-                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
+                quarantineLegalDocList.add(getQuarantineLegalDocuments(
                     updatedUserDetails,
                     representedRespondent.getValue().getResponse()
-                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()
-                ));
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
+                    "respondentC1AResponse", "Respondent C1A response"));
             }
-
+            moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
             /**
              * After adding the document to the Quarantine List,
              * will be removing the document from the Response to allegation
@@ -882,9 +883,33 @@ public class C100RespondentSolicitorService {
                     createdBy,
                     dataMap
             );
+            updateListWithPreviousOrderDocuments(updatedUserDetails, quarantineLegalDocList, representedRespondent);
         }
-        moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
+
         return updatedCaseData;
+    }
+
+    private void updateListWithPreviousOrderDocuments(UserDetails updatedUserDetails,
+                                                      List<QuarantineLegalDoc> quarantineLegalDocList,
+                                                      Element<PartyDetails> representedRespondent) {
+        if (null != representedRespondent.getValue().getResponse().getCurrentOrPreviousProceedings()) {
+            representedRespondent.getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList()
+                .stream()
+                .filter(proceedings -> Objects.nonNull(proceedings)
+                    && !proceedings.getValue().getProceedingDetails().isEmpty())
+                .forEach(proceedings -> proceedings.getValue().getProceedingDetails()
+                    .stream()
+                    .filter(otherProceeding -> Objects.nonNull(otherProceeding)
+                        && null != otherProceeding.getValue().getOrderDocument())
+                    .forEach(otherProceeding -> {
+                        quarantineLegalDocList.add(getQuarantineLegalDocuments(
+                            updatedUserDetails,
+                            otherProceeding.getValue().getOrderDocument(),
+                            "previousOrdersSubmitted", "Orders from other proceedings"
+                        ));
+                        otherProceeding.getValue().toBuilder().orderDocument(null);
+                    }));
+        }
     }
 
     private Map<String, Object> generateRespondentDocsAndUpdateCaseData(
@@ -912,7 +937,8 @@ public class C100RespondentSolicitorService {
             .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
-        quarantineLegalDocList.add(getC7QuarantineLegalDoc(updatedUserDetails, c7FinalDocument));
+        quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c7FinalDocument,
+                                                               "respondentApplication", "Respondent Application"));
 
         if (representedRespondent.getValue().getResponse() != null
             && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
@@ -924,7 +950,8 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(updatedUserDetails, c1aFinalDocument));
+            quarantineLegalDocList.add(getQuarantineLegalDocuments(updatedUserDetails, c1aFinalDocument,
+                                                                "respondentC1AApplication","Respondent C1A Application"));
         }
         return dataMap;
     }
@@ -1342,48 +1369,20 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private QuarantineLegalDoc getC7QuarantineLegalDoc(UserDetails userDetails, Document c7doc) {
+    private QuarantineLegalDoc getQuarantineLegalDocuments(UserDetails userDetails, Document document,
+                                                       String categoryId, String categoryName) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         return QuarantineLegalDoc.builder()
                 .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentApplication")
-                .categoryName("Respondent Application")
-                .fileName(c7doc.getDocumentFileName())
-                .isConfidential(Yes)
-                .uploadedBy(userDetails.getFullName())
-                .uploaderRole(loggedInUserType)
-                .document(c7doc)
-                .build();
-
-    }
-
-    private QuarantineLegalDoc getC1AQuarantineLegalDoc(UserDetails userDetails, Document c1aDoc) {
-        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-        return QuarantineLegalDoc.builder()
-                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentC1AApplication")
-                .categoryName("Respondent C1A Application")
-                .isConfidential(Yes)
-                .fileName(c1aDoc.getDocumentFileName())
-                .uploadedBy(userDetails.getFullName())
-                .uploaderRole(loggedInUserType)
-                .document(c1aDoc)
-                .build();
-    }
-
-    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document) {
-        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-        return QuarantineLegalDoc.builder()
-                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentC1AResponse")
-                .categoryName("Respondent C1A response")
-                .isConfidential(Yes)
+                .categoryId(categoryId)
+                .categoryName(categoryName)
                 .fileName(document.getDocumentFileName())
+                .isConfidential(Yes)
                 .uploadedBy(userDetails.getFullName())
                 .uploaderRole(loggedInUserType)
                 .document(document)
                 .build();
-    }
 
+    }
 
 }
