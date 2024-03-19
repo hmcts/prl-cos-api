@@ -135,7 +135,7 @@ public class StmtOfServImplService {
                 .equals(caseData.getStatementOfService()
                             .getStmtOfServiceWhatWasServed())
             ) {
-                caseData = cleanupRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
+                caseData = cleanupAndServeRespondentPacksPersonalService(caseData, authorisation);
                 caseDataUpdateMap.put(
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
@@ -203,14 +203,14 @@ public class StmtOfServImplService {
         return Collections.emptyList();
     }
 
-    private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {
+    private CaseData cleanupAndServeRespondentPacksPersonalService(CaseData caseData, String authorisation) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         }
-        finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksCaOrBailiffPersonalService(
+        finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksPersonalService(
             emailNotificationDetails,
             bulkPrintDetails,
             caseData.getServiceOfApplication().getUnServedRespondentPack(),
@@ -244,7 +244,7 @@ public class StmtOfServImplService {
         return respondentListItems;
     }
 
-    public ServedApplicationDetails checkAndServeRespondentPacksCaOrBailiffPersonalService(
+    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(
         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                            List<Element<BulkPrintDetails>> bulkPrintDetails,
                            SoaPack unServedRespondentPack,
