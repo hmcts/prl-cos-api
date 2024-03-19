@@ -39,7 +39,8 @@ public enum CaseEvent {
     C100_MANAGE_SUPPORT("c100ManageSupport"),
     FL401_MANAGE_SUPPORT("fl401ManageSupport"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
-    CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService");
+    CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
+    CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes");
 
     private final String value;
 

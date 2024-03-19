@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
@@ -47,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -69,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
@@ -116,6 +120,7 @@ public class CaseService {
     private static final String INVALID_CLIENT = "Invalid Client";
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final AddCaseNoteService addCaseNoteService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -741,5 +746,58 @@ public class CaseService {
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
+    }
+
+    public ResponseEntity<Object> addLanguageSupportCaseNotes(
+        String caseId, String authToken, LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest) {
+        log.info("Inside addLanguageSupportCaseNotes for caseId {}", caseId);
+        log.info("Inside addLanguageSupportCaseNotes languageSupportCaseNotesRequest {}", languageSupportCaseNotesRequest);
+
+        if (StringUtils.isEmpty(languageSupportCaseNotesRequest.getPartyIdamId())
+            || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        CaseEvent caseEvent = CaseEvent.CITIZEN_LANG_SUPPORT_NOTES;
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+
+        CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+            "Citizen added language support needs",
+            languageSupportCaseNotesRequest.getLanguageSupportNotes(),
+            idamClient.getUserDetails(authToken)
+        );
+        Map<String, Object> caseNotesMap = new HashMap<>();
+        caseNotesMap.put(
+            CASE_NOTES,
+            addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+        );
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            caseNotesMap
+        );
+
+        coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
     }
 }
