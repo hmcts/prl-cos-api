@@ -948,45 +948,33 @@ public class ServiceOfApplicationService {
                                                                   List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                   List<Document> packDocs) {
         long startTime = System.currentTimeMillis();
-        //C9 to be excluded for applicants except main
+        //C9 to be excluded for other applicants except main
         List<Document> packDocsWithoutC9 = packDocs.stream()
             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
-        //Notify main applicant(auto access to dashboard) via gov notify email or via post
-        Element<PartyDetails> mainApplicant = caseData.getApplicants().get(0);
-        if (ContactPreferences.digital.equals(mainApplicant.getValue().getContactPreferences())) {
-            //Notify applicants via email
-            sendEmailToApplicantLipPersonalC100(caseData,
-                                                authorization,
-                                                emailNotificationDetails,
-                                                mainApplicant,
-                                                packDocs,
-                                                PRL_LET_ENG_AP8,
-                                                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
-            );
-        } else {
-            //Post packs to applicants
-            sendSoaPacksToPartyViaPost(authorization, caseData, packDocs, bulkPrintDetails, mainApplicant);
+        for (int i = 0; i < caseData.getApplicants().size(); i++) {
+            if (ContactPreferences.digital.equals(caseData.getApplicants().get(i)
+                                                      .getValue().getContactPreferences())) {
+                //Notify applicants via email, if dashboard access then via gov notify email else via send grid
+                sendEmailToApplicantLipPersonalC100(
+                    caseData,
+                    authorization,
+                    emailNotificationDetails,
+                    caseData.getApplicants().get(i),
+                    0 == i ? packDocs : packDocsWithoutC9,
+                    PRL_LET_ENG_AP8,
+                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
+                );
+            } else {
+                //Post packs to applicants
+                sendSoaPacksToPartyViaPost(
+                    authorization,
+                    caseData,
+                    0 == i ? packDocs : packDocsWithoutC9,
+                    bulkPrintDetails,
+                    caseData.getApplicants().get(i)
+                );
+            }
         }
-
-        //Notify remaining applicants based on contact preference
-        caseData.getApplicants().stream()
-            .skip(0)
-            .forEach(applicant -> {
-                if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
-                    //Notify applicants via email
-                    sendEmailToApplicantLipPersonalC100(caseData,
-                                                        authorization,
-                                                        emailNotificationDetails,
-                                                        applicant,
-                                                        packDocsWithoutC9,
-                                                        PRL_LET_ENG_AP8,
-                                                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
-                    );
-                } else {
-                    //Post packs to applicants
-                    sendSoaPacksToPartyViaPost(authorization, caseData, packDocsWithoutC9, bulkPrintDetails, applicant);
-                }
-            });
         log.info(
             "*** Time taken to notify C100 applicants personal service - {} ms",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
