@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -69,10 +70,11 @@ public class ServiceOfApplicationPostService {
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,
-                                                        PartyDetails partyDetails,
-                                                        List<Document> docs, String servedParty) {
+                                                        Element<PartyDetails> party,
+                                                        List<Document> docs,
+                                                        String servedParty) {
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, partyDetails, servedParty);
+        return sendBulkPrint(caseData, authorisation, docs, party, servedParty);
     }
 
     public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name) throws Exception {
@@ -262,10 +264,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                           List<Document> docs, PartyDetails partyDetails, String servedParty) {
+                                           List<Document> docs, Element<PartyDetails> party, String servedParty) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
+        PartyDetails partyDetails = party.getValue();
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
@@ -295,7 +298,9 @@ public class ServiceOfApplicationPostService {
             .recipientsName(partyDetails.getLabelForDynamicList())
             .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
-            .timeStamp(currentDate).build();
+            .timeStamp(currentDate)
+            .partyIds(String.valueOf(party.getId()))
+            .build();
     }
 
 }
