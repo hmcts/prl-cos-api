@@ -161,8 +161,6 @@ public class ServiceOfApplicationService {
     public static final String APPLICANTS = "applicants";
     public static final String CASE_INVITES = "caseInvites";
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-    public static final String EMAIL = "email";
     public static final String POST = "post";
     public static final String COURT = "Court";
     public static final String COURT_ADMIN = "Court - court admin";
@@ -189,7 +187,6 @@ public class ServiceOfApplicationService {
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
     public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
-    public static final String APPLICANT_PACK = "applicantPack";
     public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
     public static final String ENG = "eng";
     public static final String WEL = "wel";
@@ -297,7 +294,7 @@ public class ServiceOfApplicationService {
     private String citizenUrl;
 
     private final CoreCaseDataService coreCaseDataService;
-    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+    private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -356,7 +353,7 @@ public class ServiceOfApplicationService {
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
-                        party.get().getValue(),
+                        party.get(),
                         ListUtils.union(docs, packN),
                         servedParty
                     )));
@@ -445,10 +442,9 @@ public class ServiceOfApplicationService {
             }
         }
 
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(formatter)
+            .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
@@ -925,13 +921,12 @@ public class ServiceOfApplicationService {
             List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
             caseData.getApplicants().forEach(selectedApplicant -> {
                 if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
-                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                              selectedApplicant, PRL_LET_ENG_AP7);
-                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        docs.addAll(packLdocs);
-                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, selectedApplicant, docs);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, selectedApplicant, packLdocs,
+                                                            PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
                     } else {
+                        Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                  selectedApplicant, PRL_LET_ENG_AP7, true);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             packLdocs,
                                                             bulkPrintDetails, selectedApplicant, ap7Letter,
@@ -967,26 +962,37 @@ public class ServiceOfApplicationService {
                                                                   List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                   List<Document> packDocs) {
         long startTime = System.currentTimeMillis();
-        //Notify applicants based on contact preference
-        caseData.getApplicants().parallelStream().forEach(applicant -> {
-            if (isAccessEnabled(applicant)) {
-                //Already got dashboard access, send gov notify email with dashboard link.
-                log.debug("Applicant has access to dashboard, sending gov notify email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packDocs,
-                                                                                       applicant, PRL_LET_ENG_AP8)));
-            } else if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())
-                && YesOrNo.Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
-                //Email packs to applicants
-                log.debug("Sending applicant packs via email for {}", applicant.getId());
-                emailNotificationDetails.add(element(sendSoaPacksToPartyViaEmail(authorization, caseData, packDocs, applicant)));
+        //C9 to be excluded for other applicants except main
+        List<Document> packDocsWithoutC9 = packDocs.stream()
+            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
+        for (int i = 0; i < caseData.getApplicants().size(); i++) {
+            if (ContactPreferences.digital.equals(caseData.getApplicants().get(i)
+                                                      .getValue().getContactPreferences())) {
+                //Notify applicants via email, if dashboard access then via gov notify email else via send grid
+                sendEmailToApplicantLipPersonalC100(
+                    caseData,
+                    authorization,
+                    emailNotificationDetails,
+                    caseData.getApplicants().get(i),
+                    0 == i ? packDocs : packDocsWithoutC9,
+                    PRL_LET_ENG_AP8,
+                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
+                );
             } else {
                 //Post packs to applicants
-                log.debug("Sending applicant packs via post for {}", applicant.getId());
-                bulkPrintDetails.add(element(sendSoaPacksToPartyViaPost(authorization, caseData, packDocs, applicant)));
+                sendSoaPacksToPartyViaPost(
+                    authorization,
+                    caseData,
+                    0 == i ? packDocs : packDocsWithoutC9,
+                    bulkPrintDetails,
+                    caseData.getApplicants().get(i)
+                );
             }
-        });
-        log.info("*** Time taken to notify C100 applicants personal service - {} ms",
-                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
+        }
+        log.info(
+            "*** Time taken to notify C100 applicants personal service - {} ms",
+            TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
+        );
     }
 
     private EmailNotificationDetails sendEmailToUnrepresentedApplicant(String authorization,
@@ -1003,8 +1009,10 @@ public class ServiceOfApplicationService {
             buildCitizenEmailVars(caseData, party.getValue())
         );
         //Generate cover letter without access code for applicant who has access to dashboard
-        List<Document> packsWithCoverLetter = generateCoverLetter(authorization, caseData, party, template, false);
+        List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                                            party, template, false))));
         packsWithCoverLetter.addAll(packDocs);
+
         //Create email notification with packs
         return EmailNotificationDetails.builder()
             .emailAddress(party.getValue().getEmail())
@@ -1012,6 +1020,7 @@ public class ServiceOfApplicationService {
             .docs(wrapElements(packsWithCoverLetter))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .partyIds(String.valueOf(party.getId()))
             .build();
     }
 
@@ -1028,61 +1037,66 @@ public class ServiceOfApplicationService {
     private EmailNotificationDetails sendSoaPacksToPartyViaEmail(String authorization,
                                                                  CaseData caseData,
                                                                  List<Document> packDocs,
-                                                                 Element<PartyDetails> party) {
+                                                                 Element<PartyDetails> party,
+                                                                 String coverLetterTemplate,
+                                                                 SendgridEmailTemplateNames emailTemplate) {
         //Generate access code if party does not have access to dashboard
-        List<Document> packsWithCoverLetter = generateCoverLetter(authorization, caseData, party, PRL_LET_ENG_AP8, true);
+        List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                            caseData,
+                                                                                                            party,
+                                                                                                            coverLetterTemplate,
+                                                                                                            true))));
         packsWithCoverLetter.addAll(packDocs);
 
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData, documentLanguage);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
         populateLanguageMap(caseData, dynamicData);
 
-        return serviceOfApplicationEmailService
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
                 authorization,
                 party.getValue().getEmail(),
                 packsWithCoverLetter,
-                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                emailTemplate,
                 dynamicData,
                 SERVED_PARTY_APPLICANT
             );
+
+        if (null != emailNotificationDetails) {
+            return emailNotificationDetails.toBuilder()
+                .partyIds(String.valueOf(party.getId()))
+                .build();
+        }
+        return emailNotificationDetails;
     }
 
-    private BulkPrintDetails sendSoaPacksToPartyViaPost(String authorization,
+    private void sendSoaPacksToPartyViaPost(String authorization,
                                                         CaseData caseData,
                                                         List<Document> packDocs,
+                                                        List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         Element<PartyDetails> party) {
-        //Generate access code if party does not have access to dashboard
-        List<Document> packsWithCoverLetter = generateCoverLetter(authorization, caseData, party, PRL_LET_ENG_AP8, true);
-        packsWithCoverLetter.addAll(packDocs);
-
-        return serviceOfApplicationPostService.sendPostNotificationToParty(caseData,
-                                                                           authorization,
-                                                                           party.getValue(),
-                                                                           packsWithCoverLetter,
-                                                                           SERVED_PARTY_APPLICANT);
-    }
-
-    private List<Document> generateCoverLetter(String authorization,
-                                               CaseData caseData,
-                                               Element<PartyDetails> party,
-                                               String template,
-                                               boolean isAccessCodeNeeded) {
-        CaseInvite caseInvite = null;
-        if (isAccessCodeNeeded) {
-            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
-        }
-        List<Document> packsWithCoverLetter = new ArrayList<>();
-        packsWithCoverLetter.add(generateAccessCodeLetter(authorization, caseData, party, caseInvite, template));
-        return packsWithCoverLetter;
+        log.debug("Sending applicant packs via post for {}", party.getId());
+        Document ap8CoverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                       party, PRL_LET_ENG_AP8, true
+        );
+        sendPostWithAccessCodeLetterToParty(
+            caseData,
+            authorization,
+            packDocs,
+            bulkPrintDetails,
+            party,
+            ap8CoverLetter,
+            SERVED_PARTY_APPLICANT
+        );
     }
 
     private SoaPack generateRespondentsPack(String authorization,
                                             CaseData caseData,
                                             List<Document> c100StaticDocs) {
-        List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs, true);
-
+        List<Document> packkDocs = generatePartiesPackDocsWithCoverLetter(authorization, caseData, caseData.getRespondents(),
+                                                                          PRL_LET_ENG_RE5, PrlAppsConstants.K, c100StaticDocs);
         return SoaPack.builder()
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -1093,25 +1107,29 @@ public class ServiceOfApplicationService {
 
     }
 
-    private void sendEmailToApplicantLipPersonalC100(CaseData caseData, String authorization,
+    private void sendEmailToApplicantLipPersonalC100(CaseData caseData,
+                                                     String authorization,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                     Element<PartyDetails> selectedApplicant, List<Document> docs) {
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("name", selectedApplicant.getValue().getLabelForDynamicList());
-        dynamicData.put("c1aExists", Yes.equals(doesC1aExists(caseData)));
-        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+                                                     Element<PartyDetails> selectedApplicant,
+                                                     List<Document> docs,
+                                                     String coverLetterTemplate,
+                                                     SendgridEmailTemplateNames emailTemplate) {
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
-            emailNotification = sendEmailToUnrepresentedApplicant(authorization, caseData, docs, selectedApplicant, PRL_LET_ENG_AP7);
+            log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
+            emailNotification = sendEmailToUnrepresentedApplicant(authorization,
+                                                                  caseData,
+                                                                  docs,
+                                                                  selectedApplicant,
+                                                                  coverLetterTemplate);
         } else {
-            emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
-                authorization,
-                selectedApplicant.getValue().getEmail(),
-                docs,
-                SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                dynamicData,
-                SERVED_PARTY_APPLICANT_SOLICITOR
-            );
+            log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
+            emailNotification = sendSoaPacksToPartyViaEmail(authorization,
+                                                            caseData,
+                                                            docs,
+                                                            selectedApplicant,
+                                                            coverLetterTemplate,
+                                                            emailTemplate);
         }
 
         if (emailNotification != null) {
@@ -1665,7 +1683,7 @@ public class ServiceOfApplicationService {
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                 caseData,
                 authorization,
-                party.getValue(),
+                party,
                 docs,
                 servedParty
             )));
@@ -2471,21 +2489,13 @@ public class ServiceOfApplicationService {
                                                            boolean isCitizen,
                                                            String serviceBy) {
         List<Document> packjDocs;
-        List<Document> packkDocs;
+        List<Document> packkDocs = generatePartiesPackDocsWithCoverLetter(authorization, caseData, caseData.getRespondents(),
+                                                                                    PRL_LET_ENG_RE5, PrlAppsConstants.K, c100StaticDocs);
         if (isCitizen) {
             packjDocs = generatePartiesPackDocsWithCoverLetter(authorization, caseData, caseData.getApplicants(),
                                                                PRL_LET_ENG_AP8, PrlAppsConstants.J, c100StaticDocs);
-
-            packkDocs = generatePartiesPackDocsWithCoverLetter(authorization, caseData, caseData.getRespondents(),
-                                                               PRL_LET_ENG_RE5, PrlAppsConstants.K, c100StaticDocs);
         } else {
             packjDocs = getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
-            packkDocs = getDocumentsForCaorBailiffToServeRespondents(
-                caseData,
-                authorization,
-                c100StaticDocs,
-                true
-            );
         }
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packkDocs))
@@ -2514,7 +2524,7 @@ public class ServiceOfApplicationService {
                                                                   String requiredPack,
                                                                   List<Document> c100StaticDocs) {
         List<Document> packDocs = new ArrayList<>();
-        parties.forEach(party -> packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template)));
+        parties.forEach(party -> packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template, true)));
         packDocs.addAll(getNotificationPack(caseData, requiredPack, c100StaticDocs));
         return packDocs;
     }
@@ -2525,7 +2535,7 @@ public class ServiceOfApplicationService {
         caseData.getApplicants().forEach(applicant -> {
             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                 packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                   applicant, PRL_LET_ENG_AP7));
+                                                                   applicant, PRL_LET_ENG_AP7, true));
             }
         });
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
@@ -2538,15 +2548,16 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private Document generateCoverLetterBasedOnCaseAccess(String authorization, CaseData caseData,
-                                                      Element<PartyDetails> applicant, String template) {
-        Map<String, Object> dataMap;
+    private Document generateCoverLetterBasedOnCaseAccess(String authorization,
+                                                          CaseData caseData,
+                                                          Element<PartyDetails> party,
+                                                          String template,
+                                                          boolean isAccessCodeNeeded) {
         CaseInvite caseInvite = null;
-        if (!isAccessEnabled(applicant)) {
-            caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
+        if (isAccessCodeNeeded && !isAccessEnabled(party)) {
+            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
-        dataMap = populateAccessCodeMap(caseData, applicant, caseInvite);
-        return fetchCoverLetter(authorization, template, dataMap);
+        return generateAccessCodeLetter(authorization, caseData, party, caseInvite, template);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
@@ -2739,7 +2750,8 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData,
                     element,
-                    Templates.AP6_LETTER
+                    Templates.AP6_LETTER,
+                    true
                 ))));
             });
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
@@ -2910,13 +2922,12 @@ public class ServiceOfApplicationService {
             List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
-                    Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                              applicant, PRL_LET_ENG_AP7);
-                    List<Document> docs = new ArrayList<>(Collections.singletonList(ap7Letter));
                     if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
-                        docs.addAll(documents);
-                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, docs);
+                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, documents,
+                                                            PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
                     } else {
+                        Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
+                                                                                  applicant, PRL_LET_ENG_AP7, true);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             documents,
                                                             bulkPrintDetails,
