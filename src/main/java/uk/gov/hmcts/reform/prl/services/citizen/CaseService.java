@@ -106,6 +106,7 @@ public class CaseService {
     public static final String CASE_INVITES = "caseInvites";
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
+    public static final String LANG_SUPPORT_NEED_SUBJECT = "Support needs request";
     private final CoreCaseDataApi coreCaseDataApi;
 
     private final CaseRepository caseRepository;
@@ -754,49 +755,48 @@ public class CaseService {
         log.info("Inside addLanguageSupportCaseNotes languageSupportCaseNotesRequest {}", languageSupportCaseNotesRequest);
 
         if (StringUtils.isEmpty(languageSupportCaseNotesRequest.getPartyIdamId())
-            || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
+                || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-        CaseEvent caseEvent = CaseEvent.CITIZEN_LANG_SUPPORT_NOTES;
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-            caseEvent,
-            userDetails.getId()
+                CaseEvent.CITIZEN_LANG_SUPPORT_NOTES,
+                userDetails.getId()
         );
 
         StartEventResponse startEventResponse =
-            coreCaseDataService.startUpdate(
-                authToken,
-                eventRequestData,
-                caseId,
-                false
-            );
+                coreCaseDataService.startUpdate(
+                        authToken,
+                        eventRequestData,
+                        caseId,
+                        false
+                );
 
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
 
         CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
-            "Citizen added language support needs",
-            languageSupportCaseNotesRequest.getLanguageSupportNotes(),
-            idamClient.getUserDetails(authToken)
+                LANG_SUPPORT_NEED_SUBJECT,
+                languageSupportCaseNotesRequest.getLanguageSupportNotes(),
+                userDetails
         );
         Map<String, Object> caseNotesMap = new HashMap<>();
         caseNotesMap.put(
-            CASE_NOTES,
-            addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+                CASE_NOTES,
+                addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
         );
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-            startEventResponse,
-            caseNotesMap
+                startEventResponse,
+                caseNotesMap
         );
 
         coreCaseDataService.submitUpdate(
-            authToken,
-            eventRequestData,
-            caseDataContent,
-            caseId,
-            false
+                authToken,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                false
         );
         return ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
     }
