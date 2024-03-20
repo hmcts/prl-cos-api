@@ -685,7 +685,7 @@ public class ServiceOfApplicationService {
         List<Document> re5Letters = new ArrayList<>();
         if (attachLetters) {
             for (Element<PartyDetails> respondent: caseData.getRespondents()) {
-                re5Letters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                re5Letters.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
                                                         PRL_LET_ENG_RE5));
             }
         }
@@ -926,7 +926,7 @@ public class ServiceOfApplicationService {
                                                             PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                  selectedApplicant, PRL_LET_ENG_AP7, true);
+                                                                                  selectedApplicant, PRL_LET_ENG_AP7);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             packLdocs,
                                                             bulkPrintDetails, selectedApplicant, ap7Letter,
@@ -1010,7 +1010,7 @@ public class ServiceOfApplicationService {
         );
         //Generate cover letter without access code for applicant who has access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                                            party, template, false))));
+                                                                                                            party, template))));
         packsWithCoverLetter.addAll(packDocs);
 
         //Create email notification with packs
@@ -1044,8 +1044,7 @@ public class ServiceOfApplicationService {
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization,
                                                                                                             caseData,
                                                                                                             party,
-                                                                                                            coverLetterTemplate,
-                                                                                                            true))));
+                                                                                                            coverLetterTemplate))));
         packsWithCoverLetter.addAll(packDocs);
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1079,8 +1078,7 @@ public class ServiceOfApplicationService {
                                                         Element<PartyDetails> party) {
         log.debug("Sending applicant packs via post for {}", party.getId());
         Document ap8CoverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                       party, PRL_LET_ENG_AP8, true
-        );
+                                                                       party, PRL_LET_ENG_AP8);
         sendPostWithAccessCodeLetterToParty(
             caseData,
             authorization,
@@ -1515,6 +1513,7 @@ public class ServiceOfApplicationService {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", selectedRespondent.getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+                        populateLanguageMap(caseData, dynamicData);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                              .sendEmailUsingTemplateWithAttachments(authorization,
                                                 selectedRespondent.getValue().getSolicitorEmail(), docs,
@@ -2524,7 +2523,7 @@ public class ServiceOfApplicationService {
                                                                   String requiredPack,
                                                                   List<Document> c100StaticDocs) {
         List<Document> packDocs = new ArrayList<>();
-        parties.forEach(party -> packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template, true)));
+        parties.forEach(party -> packDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, party, template)));
         packDocs.addAll(getNotificationPack(caseData, requiredPack, c100StaticDocs));
         return packDocs;
     }
@@ -2535,7 +2534,7 @@ public class ServiceOfApplicationService {
         caseData.getApplicants().forEach(applicant -> {
             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                 packLdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                   applicant, PRL_LET_ENG_AP7, true));
+                                                                   applicant, PRL_LET_ENG_AP7));
             }
         });
         packLdocs.addAll(getNotificationPack(caseData, L, c100StaticDocs));
@@ -2548,16 +2547,17 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private Document generateCoverLetterBasedOnCaseAccess(String authorization,
-                                                          CaseData caseData,
-                                                          Element<PartyDetails> party,
-                                                          String template,
-                                                          boolean isAccessCodeNeeded) {
+    public Document generateCoverLetterBasedOnCaseAccess(String authorization,
+                                                         CaseData caseData,
+                                                         Element<PartyDetails> party,
+                                                         String template) {
+        Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
-        if (isAccessCodeNeeded && !isAccessEnabled(party)) {
+        if (!isAccessEnabled(party)) {
             caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
-        return generateAccessCodeLetter(authorization, caseData, party, caseInvite, template);
+        dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        return fetchCoverLetter(authorization, template, dataMap);
     }
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
@@ -2750,8 +2750,7 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData,
                     element,
-                    Templates.AP6_LETTER,
-                    true
+                    Templates.AP6_LETTER
                 ))));
             });
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
@@ -2936,7 +2935,7 @@ public class ServiceOfApplicationService {
                                                             PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                  applicant, PRL_LET_ENG_AP7, true);
+                                                                                  applicant, PRL_LET_ENG_AP7);
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             documents,
                                                             bulkPrintDetails,
