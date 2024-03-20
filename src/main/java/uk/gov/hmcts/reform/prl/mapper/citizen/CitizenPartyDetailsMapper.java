@@ -274,8 +274,8 @@ public class CitizenPartyDetailsMapper {
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
                                                             : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
-                          .citizenFlags(isCitizenFlagsPresent ?
-                              updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
+                          .citizenFlags(isCitizenFlagsPresent
+                                            ? updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
                                                  citizenProvidedPartyDetails.getResponse().getCitizenFlags())
                                             : existingPartyDetails.getResponse().getCitizenFlags()
                           )
