@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
