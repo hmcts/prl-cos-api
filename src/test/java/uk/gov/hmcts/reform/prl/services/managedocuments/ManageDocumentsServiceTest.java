@@ -30,6 +30,9 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -40,6 +43,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -65,10 +71,14 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -82,6 +92,9 @@ public class ManageDocumentsServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -145,6 +158,10 @@ public class ManageDocumentsServiceTest {
 
     UserDetails userDetailsSolicitorRole;
 
+    UserDetails userDetailsBulScanRole;
+
+    UserDetails userDetailsCitizenRole;
+
     UserDetails userDetailsCafcassRole;
 
     UserDetails userDetailsCourtAdminRole;
@@ -160,6 +177,9 @@ public class ManageDocumentsServiceTest {
     QuarantineLegalDoc quarantineConfidentialDoc;
 
     QuarantineLegalDoc quarantineCaseDoc;
+
+    @Mock
+    private RoleAssignmentApi roleAssignmentApi;
 
     @Before
     public void init() {
@@ -188,25 +208,43 @@ public class ManageDocumentsServiceTest {
             .listItems(dynamicListElementList).build();
 
         userDetailsSolicitorRole = UserDetails.builder()
+            .id("123")
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(SOLICITOR_ROLE))
             .build();
-
+        userDetailsBulScanRole = UserDetails.builder()
+            .id("123")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(Roles.BULK_SCAN.getValue()))
+            .build();
         userDetailsCafcassRole = UserDetails.builder()
+            .id("234")
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(CAFCASS_ROLE))
             .build();
         userDetailsCourtAdminRole = UserDetails.builder()
+            .id("345")
             .forename("test")
             .surname("test")
-            .roles(Collections.singletonList(COURT_ADMIN_ROLE))
+            .roles(List.of(COURT_ADMIN_ROLE, COURT_STAFF))
             .build();
         userDetailsCourtStaffRoleExpectAdmin = UserDetails.builder()
+            .id("456")
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(JUDGE_ROLE))
+            .build();
+
+
+
+        userDetailsCitizenRole = UserDetails.builder()
+            .id("678")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(CITIZEN_ROLE))
             .build();
 
         confidentialDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -454,6 +492,12 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "allocated-magistrate");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "456")).thenReturn(
+            roleAssignmentServiceResponse);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -465,8 +509,182 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testCopyDocumentIfRestrictedWithCourtAdminRoleOld() {
+    public void testCopyDocumentIfNotRestrictedWithJudgeRole() {
 
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.RESPONDENT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
+
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+        assertNotNull(courtStaffUploadDocListDocTab);
+        assertEquals(1,courtStaffUploadDocListDocTab.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithLaRole() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        cafcassQuarantineDocsListInitial.add(element(QuarantineLegalDoc.builder().build()));
+        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
+
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        cafcassUploadDocListDocTabInitial.add(quarantineLegalDocElement);
+        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().cafcassUploadDocListDocTab(cafcassUploadDocListDocTabInitial).build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        UserDetails userDetailsCourtStaffRoleLA = UserDetails.builder()
+            .id("456")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+            .build();
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleLA);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "tribunal-caseworker");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "456")).thenReturn(
+            roleAssignmentServiceResponse);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+        assertNotNull(courtStaffQuarantineDocsList);
+        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+
+    }
+
+    @Test
+    public void testCopyDocumentIfNotRestrictedWithLaRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.RESPONDENT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        UserDetails userDetailsCourtStaffRoleLA = UserDetails.builder()
+            .id("456")
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+            .build();
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleLA);
+
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+        assertNotNull(courtStaffUploadDocListDocTab);
+        assertEquals(1,courtStaffUploadDocListDocTab.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCourtAdminRoleOld() {
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
@@ -570,6 +788,8 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testCopyDocumentIfRestrictedWithCafcassRoleWithNonEmptyCafcassUploadDocListDocTab() {
 
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
@@ -606,7 +826,12 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
-
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-externaluser-viewonly");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "234")).thenReturn(
+            roleAssignmentServiceResponse);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
@@ -850,6 +1075,9 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
@@ -864,8 +1092,37 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testCopyDocumentIfNotRestrictedAndUploadedOnBehalfOfCourt() {
+    public void testGetLoggedInUserTypeForCitizen() {
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
+        assertNotNull(loggedInUserTypeList);
+        assertEquals(UserRoles.CITIZEN.name(), loggedInUserTypeList.get(0));
+    }
 
+    @Test
+    public void testGetLoggedInUserTypeForBulkScan() {
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsBulScanRole);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
+        assertNotNull(loggedInUserTypeList);
+        assertEquals(BULK_SCAN, loggedInUserTypeList.get(0));
+    }
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
+    }
+
+    @Test
+    public void testCopyDocumentIfNotRestrictedAndUploadedOnBehalfOfCourt() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
             .documentCategories(dynamicList)
@@ -903,7 +1160,12 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
-
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "hearing-centre-admin");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "345")).thenReturn(
+            roleAssignmentServiceResponse);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
@@ -915,7 +1177,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void returnTrueIfUserIsCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
-
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsCourtAdminRole));
     }
 
@@ -1120,6 +1382,7 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void validateCourtUser() {
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         ManageDocuments manageDocument = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
             .documentCategories(dynamicList)
@@ -1139,7 +1402,7 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
+        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_STAFF)).build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails);
         Assert.assertTrue(list.isEmpty());
