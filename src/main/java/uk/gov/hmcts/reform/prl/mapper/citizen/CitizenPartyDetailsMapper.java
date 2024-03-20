@@ -130,29 +130,49 @@ public class CitizenPartyDetailsMapper {
                                                                    PartyDetails existingPartyDetails,
                                                                    CaseEvent caseEvent) {
         log.info("Inside getUpdatedPartyDetailsBasedOnEvent for event " + caseEvent.getValue());
-        if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
-            return updateCitizenPersonalDetails(
-                existingPartyDetails,
-                citizenProvidedPartyDetails
-            );
-        } else if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-            return updateCitizenConfidentialData(
-                existingPartyDetails,
-                citizenProvidedPartyDetails
-            );
-        } else if (CaseEvent.CITIZEN_CASE_UPDATE.equals(caseEvent)) {
-            return updateCitizenData(
-                existingPartyDetails,
-                citizenProvidedPartyDetails
-            );
+
+        switch (caseEvent) {
+            case CONFIRM_YOUR_DETAILS -> {
+                return updateCitizenPersonalDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case KEEP_DETAILS_PRIVATE -> {
+                return updateCitizenConfidentialData(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case CONSENT_TO_APPLICATION -> {
+                return updateCitizenConsentDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            default -> {
+                return updateCitizenResponseDataForOtherEvents(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
         }
-        return existingPartyDetails;
     }
 
-    private PartyDetails updateCitizenData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenConsentDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
+                          .consent(citizenProvidedPartyDetails.getResponse().getConsent())
+                          .build())
+            .build();
+    }
+
+    private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
                           .citizenFlags(citizenProvidedPartyDetails.getResponse().getCitizenFlags())
                           .build())
             .build();
