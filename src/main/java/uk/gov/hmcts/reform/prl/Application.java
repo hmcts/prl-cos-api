@@ -17,16 +17,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
                                     "uk.gov.hmcts.reform.prl.clients",
                                     "uk.gov.hmcts.reform.ccd.client","uk.gov.hmcts.reform.authorisation"
 })
-/*
- I don't know why this was not working, but I did what was suggested here:
- https://stackoverflow.com/questions/26889970/
- intellij-incorrectly-saying-no-beans-of-type-found-for-autowired-repository/41766552
-    @SpringBootApplication(
-    scanBasePackages = {
-        "uk.gov.hmcts.reform.prl"
-      }
-    )
- */
 @EnableAsync
 @EnableCaching
 @EnableScheduling
