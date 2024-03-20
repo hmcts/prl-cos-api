@@ -324,12 +324,11 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
-        request
+        AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBody)
             .when()
@@ -340,9 +339,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("PPPPPPPPPPPPPP " + response);
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
@@ -366,6 +365,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("VVVV " + response);
 
     }
 

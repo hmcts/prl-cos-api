@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,6 +47,10 @@ public class ManageDocumentsController extends AbstractCallbackController {
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
+
+
+    @org.springframework.beans.factory.annotation.Value("${amRoleAssignment.api.url}")
+    private String linkkkk;
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -119,6 +124,13 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        log.info("JJJJJJJJ== >{}", result);
+        log.info("================= >");
+        log.info("*****************== >");
+        log.info("=======LINKKKKKKK======= > {}",linkkkk);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }

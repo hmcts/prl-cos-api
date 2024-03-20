@@ -534,6 +534,8 @@ commonData:
 amRoleAssignment:
   api:
     url: ${AM_ROLE_ASSIGNMENT_API_URL:http://am-role-assignment-service-aat.service.core-compute-aat.internal}
+    #url: ${AM_ROLE_ASSIGNMENT_API_URL:https://am-role-assignment-service-pr-2028.preview.platform.hmcts.net/}
+
 
 
 
