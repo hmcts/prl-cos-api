@@ -48,12 +48,12 @@ public class CitizenResponseNotificationEmailService {
                 ));
 
             for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-                emailService.send(
+                /*emailService.send(
                     appSols.getKey(),
                     EmailTemplateNames.CA_APPLICANT_SOLICITOR_RES_NOTIFICATION,
                     buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
                     LanguagePreference.english
-                );
+                );*/
             }
         }
     }
