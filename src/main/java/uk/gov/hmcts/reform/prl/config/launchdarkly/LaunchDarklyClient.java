@@ -16,6 +16,10 @@ public class LaunchDarklyClient {
 
     private final LDClientInterface internalClient;
 
+    @Value("${launchdarkly.sdk.environment}")
+    private String environment;
+
+
     @Autowired
     public LaunchDarklyClient(
         LaunchDarkClientFactory ldClientFactory,
@@ -33,6 +37,17 @@ public class LaunchDarklyClient {
     public boolean isFeatureEnabled(String feature, LDUser user) {
         return internalClient.boolVariation(feature, user, false);
     }
+    public boolean isFeatureEnabledForEnv(String feature) {
+
+        LDUser user = new LDUser.Builder("prl-cos-api")
+            .firstName("PRIVATE LAW")
+            .custom("environment", environment)
+            .build();
+
+        return internalClient.boolVariation(feature, user, false);
+    }
+
+
 
     private void close() {
         try {

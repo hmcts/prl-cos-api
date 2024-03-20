@@ -372,6 +372,7 @@ locationfinder:
 
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  environment: ${LAUNCH_DARKLY_ENV:preview}
 
 rd_professional:
   api:
