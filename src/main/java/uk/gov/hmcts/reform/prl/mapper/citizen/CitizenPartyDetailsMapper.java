@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
@@ -266,15 +267,42 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
                                                             : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
-                          .citizenFlags(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags())
-                          ? citizenProvidedPartyDetails.getResponse().getCitizenFlags() : existingPartyDetails.getResponse().getCitizenFlags())
+                          .citizenFlags(isCitizenFlagsPresent ?
+                              updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
+                                                 citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                                            : existingPartyDetails.getResponse().getCitizenFlags()
+                          )
                           .build())
+            .build();
+    }
+
+    private CitizenFlags updateCitizenFlags(CitizenFlags existingCitizenFlgs, CitizenFlags updatedCitizenFlags) {
+        return existingCitizenFlgs.toBuilder()
+            .isApplicationViewed(isNotEmpty(updatedCitizenFlags.getIsApplicationViewed())
+                                     ? updatedCitizenFlags.getIsApplicationViewed()
+                                     : existingCitizenFlgs.getIsApplicationViewed())
+            .isAllDocumentsViewed(isNotEmpty(updatedCitizenFlags.getIsAllDocumentsViewed())
+                                      ? updatedCitizenFlags.getIsAllDocumentsViewed()
+                                      : existingCitizenFlgs.getIsAllDocumentsViewed())
+            .isAllegationOfHarmViewed(isNotEmpty(updatedCitizenFlags.getIsAllegationOfHarmViewed())
+                                      ? updatedCitizenFlags.getIsAllegationOfHarmViewed()
+                                      : existingCitizenFlgs.getIsAllegationOfHarmViewed())
+            .isResponseInitiated(isNotEmpty(updatedCitizenFlags.getIsResponseInitiated())
+                                          ? updatedCitizenFlags.getIsResponseInitiated()
+                                          : existingCitizenFlgs.getIsResponseInitiated())
+            .isApplicationToBeServed(isNotEmpty(updatedCitizenFlags.getIsApplicationToBeServed())
+                                     ? updatedCitizenFlags.getIsApplicationToBeServed()
+                                     : existingCitizenFlgs.getIsApplicationToBeServed())
+            .isStatementOfServiceProvided(isNotEmpty(updatedCitizenFlags.getIsStatementOfServiceProvided())
+                                         ? updatedCitizenFlags.getIsStatementOfServiceProvided()
+                                         : existingCitizenFlgs.getIsStatementOfServiceProvided())
             .build();
     }
 
