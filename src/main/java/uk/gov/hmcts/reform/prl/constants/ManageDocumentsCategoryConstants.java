@@ -14,7 +14,6 @@ public class ManageDocumentsCategoryConstants {
     public static final String PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION = "previousOrdersSubmittedWithApplication";
     public static final String RESPONDENT_APPLICATION = "respondentApplication";
     public static final String ORDERS_FROM_OTHER_PROCEEDINGS = "ordersFromOtherProceedings";
-    public static final String PREVIOUS_ORDER_SUBMITTED = "previousOrdersSubmitted";
     public static final String RESPONDENT_C1A_APPLICATION = "respondentC1AApplication";
     public static final String RESPONDENT_C1A_RESPONSE = "respondentC1AResponse";
     public static final String APPLICATIONS_FROM_OTHER_PROCEEDINGS = "applicationsFromOtherProceedings";
