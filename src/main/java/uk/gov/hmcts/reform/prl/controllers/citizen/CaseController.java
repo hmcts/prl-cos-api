@@ -87,7 +87,8 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             try {
-                log.info("*** printing case data" + objectMapper.writeValueAsString(
+                log.info("*** event received from citizen" + eventId);
+                log.info("*** printing case data " + objectMapper.writeValueAsString(
                     caseData));
             } catch (JsonProcessingException e) {
                 log.info("error");
@@ -122,6 +123,7 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             try {
+                log.info("*** event received from citizen" + eventId);
                 log.info("*** printing case data" + objectMapper.writeValueAsString(
                     updateCaseData));
             } catch (JsonProcessingException e) {
