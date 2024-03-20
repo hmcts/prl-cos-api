@@ -1605,7 +1605,7 @@ public class ManageOrderService {
     private void updatePersonalServedParties(OrdersServingRespondentsEnum servingRespondentsOptions,
                                              List<Element<ServedParties>> servedParties, String representativeName) {
         if (null != servingRespondentsOptions) {
-            if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+            if (OrdersServingRespondentsEnum.applicantLegalRepresentative
                 .equals(servingRespondentsOptions)) {
                 servedParties.add(element(ServedParties.builder()
                                               .partyId("11111111-1111-1111-1111-111111111111")//adding some default value
