@@ -9,15 +9,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 
 import static uk.gov.hmcts.reform.prl.config.CacheConfiguration.SYS_USER_CACHE;
 
 @Service
 @Slf4j
-@CacheConfig(cacheNames = SYS_USER_CACHE)
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@CacheConfig(cacheNames = SYS_USER_CACHE)
 public class SystemUserService {
+
+    private final OAuth2Configuration auth;
 
     private final SystemUserConfiguration userConfig;
 
