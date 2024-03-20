@@ -707,10 +707,8 @@ public class ManageDocumentsService {
     public List<String> getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
-        log.info("user role {} ", roles);
         List<String> loggedInUserType = new ArrayList<>();
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")
-            && !roles.contains(Roles.SOLICITOR.getValue())) {
+        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
