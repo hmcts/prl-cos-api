@@ -335,7 +335,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            //.body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
+            .body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
@@ -359,9 +359,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            //.body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
-            //      "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
-            //      "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
+            .body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
+                  "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
+                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
