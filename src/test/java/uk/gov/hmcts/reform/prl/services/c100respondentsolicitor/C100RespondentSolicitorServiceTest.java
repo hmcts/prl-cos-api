@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
@@ -35,8 +38,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespDomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
@@ -60,8 +65,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToA
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -70,7 +80,9 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,21 +99,27 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.RESPONSE_ALREADY_SUBMITTED_ERROR;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.TECH_ERROR;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorServiceTest {
 
     @InjectMocks
     C100RespondentSolicitorService respondentSolicitorService;
+
+    @Mock
+    ReviewDocumentService reviewDocumentService;
 
     CaseData caseData;
 
@@ -127,6 +145,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ResponseSubmitChecker responseSubmitChecker;
+
+    @Mock
+    DocumentLanguageService documentLanguageService;
 
     @Mock
     RespondentSolicitorMiamService miamService;
@@ -172,8 +193,23 @@ public class C100RespondentSolicitorServiceTest {
 
     CallbackRequest callbackRequest2;
 
+    QuarantineLegalDoc quarantineLegalDoc;
+
+    Document document;
+
     @Before
     public void setUp() {
+
+        document = Document.builder()
+            .documentFileName("test.pdf")
+            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
+            .build();
+
+        quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
+            .categoryId("respondentC1AApplication")
+            .documentUploadedDate(LocalDateTime.now())
+            .build();
 
         RespDomesticAbuseBehaviours domesticAbuseBehaviours = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -287,6 +323,7 @@ public class C100RespondentSolicitorServiceTest {
                 .email("abc@xyz.com")
                 .phoneNumber("1234567890")
                 .response(Response.builder()
+                    .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName("test")
                                 .lastName("test")
@@ -296,6 +333,7 @@ public class C100RespondentSolicitorServiceTest {
                         .c7ResponseSubmitted(No)
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
+                            .permissionFromCourt(No)
                                 .noConsentReason("test")
                                 .build())
                         .keepDetailsPrivate(KeepDetailsPrivate
@@ -323,6 +361,11 @@ public class C100RespondentSolicitorServiceTest {
                         .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
+                        .consent(Consent.builder()
+                                     .permissionFromCourt(Yes)
+                                     .consentToTheApplication(Yes)
+                                     .build())
+                        .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .build())
                 .canYouProvideEmailAddress(Yes)
                 .isEmailAddressConfidential(No)
@@ -352,6 +395,7 @@ public class C100RespondentSolicitorServiceTest {
                 .sendSignUpLink("test")
                 .phoneNumber("1234567890")
                 .response(Response.builder()
+                        .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName("test")
                                 .lastName("test")
@@ -359,6 +403,7 @@ public class C100RespondentSolicitorServiceTest {
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
                                 .noConsentReason("test")
+                                .permissionFromCourt(Yes)
                                 .build())
                         .c7ResponseSubmitted(No)
                         .keepDetailsPrivate(KeepDetailsPrivate
@@ -555,6 +600,7 @@ public class C100RespondentSolicitorServiceTest {
                 .email("abc@xyz.com")
                 .phoneNumber("1234567890")
                 .response(Response.builder()
+                    .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName(null)
                                 .lastName(null)
@@ -564,6 +610,7 @@ public class C100RespondentSolicitorServiceTest {
                         .c7ResponseSubmitted(No)
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
+                            .permissionFromCourt(No)
                                 .noConsentReason("test")
                                 .build())
                         .keepDetailsPrivate(KeepDetailsPrivate
@@ -619,6 +666,7 @@ public class C100RespondentSolicitorServiceTest {
                 .email("abc@xyz.com")
                 .phoneNumber("1234567890")
                 .response(Response.builder()
+                    .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName(null)
                                 .lastName(null)
@@ -629,6 +677,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
+                            .permissionFromCourt(No)
                                 .noConsentReason("test")
                                 .build())
                         .c7ResponseSubmitted(No)
@@ -810,6 +859,11 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(eq(allegationsOfHarmData),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
     }
 
     @Test
@@ -872,19 +926,63 @@ public class C100RespondentSolicitorServiceTest {
                 .respondents(List.of(wrappedRespondents, wrappedRespondents))
                 .build();
 
+        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .eventId("c100ResSolConsentingToApplicationA")
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .build();
+            .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        List<String> errorList = new ArrayList<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
+        Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
+            callbackRequest, errorList, authToken
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void validateActiveRespondentResponseWelsh() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .build())
+            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         List<String> errorList = new ArrayList<>();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-                callbackRequest, errorList, authToken
+            callbackRequest, errorList, authToken
         );
 
         assertTrue(response.containsKey("respondents"));
@@ -911,6 +1009,11 @@ public class C100RespondentSolicitorServiceTest {
 
         List<String> errorList = new ArrayList<>();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest, errorList, authToken
         );
@@ -930,6 +1033,8 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(Mockito.any())).thenReturn(true);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -978,6 +1083,9 @@ public class C100RespondentSolicitorServiceTest {
                 .documentCreatedOn(new Date())
                 .build();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
         when(documentGenService.generateSingleDocument(
                 Mockito.anyString(),
                 Mockito.any(CaseData.class),
@@ -987,6 +1095,10 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
                 .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
@@ -1000,6 +1112,60 @@ public class C100RespondentSolicitorServiceTest {
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
+    @Test
+    public void submitC7ResponseForActiveRespondentWelshTest() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document);
+
+        Document document2 = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("solicitorC1AFinalTemplate")
+            .documentCreatedOn(new Date())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        when(documentGenService.generateSingleDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document2);
+        UserDetails userDetails = UserDetails.builder().forename("test")
+            .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            authToken, callbackRequest
+        );
+        Assertions.assertTrue(response.containsKey("respondentAc8"));
+    }
 
     @Test
     public void submitC7ResponseForActiveRespondentTestB() throws Exception {
@@ -1055,6 +1221,9 @@ public class C100RespondentSolicitorServiceTest {
 
             when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
+            DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+            when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                     .CallbackRequest.builder()
                     .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1062,6 +1231,7 @@ public class C100RespondentSolicitorServiceTest {
                             .data(stringObjectMap)
                             .build())
                     .build();
+
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
 
             callbackRequest.setEventId(event);
@@ -1099,6 +1269,9 @@ public class C100RespondentSolicitorServiceTest {
                 ).build())
                 .build();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
         when(documentGenService.generateSingleDocument(
                 Mockito.anyString(),
                 Mockito.any(CaseData.class),
@@ -1115,6 +1288,10 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
         );
@@ -1198,6 +1375,7 @@ public class C100RespondentSolicitorServiceTest {
                         .c7ResponseSubmitted(No)
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
+                            .permissionFromCourt(No)
                                 .noConsentReason("test")
                                 .build())
                         .keepDetailsPrivate(KeepDetailsPrivate
@@ -1257,6 +1435,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
+                            .permissionFromCourt(No)
                                 .noConsentReason("test")
                                 .build())
                         .c7ResponseSubmitted(No)
@@ -1656,6 +1835,8 @@ public class C100RespondentSolicitorServiceTest {
                 false
         )).thenReturn(document);
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -1764,6 +1945,9 @@ public class C100RespondentSolicitorServiceTest {
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
                 false
         )).thenReturn(document);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -2051,6 +2235,7 @@ public class C100RespondentSolicitorServiceTest {
                 .sendSignUpLink("test")
                 .phoneNumber("1234567890")
                 .response(Response.builder()
+                    .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                         .citizenDetails(CitizenDetails.builder()
                                 .firstName("test")
                                 .lastName("test")
@@ -2058,6 +2243,7 @@ public class C100RespondentSolicitorServiceTest {
                         .consent(Consent.builder()
                                 .consentToTheApplication(No)
                                 .noConsentReason("test")
+                                .permissionFromCourt(Yes)
                                 .build())
                         .c7ResponseSubmitted(No)
                         .keepDetailsPrivate(KeepDetailsPrivate
@@ -2100,4 +2286,98 @@ public class C100RespondentSolicitorServiceTest {
                 .value(respondent2).build();
         assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest1, wrappedRespondents2));
     }
+
+    @Test
+    public void testC1ADocumentQuarantine() throws Exception {
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .restrictedDetails("test details")
+            .uploaderRole(LEGAL_PROFESSIONAL)
+            .build();
+
+        when(documentGenService.generateSingleDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document);
+
+
+        String[] events = {"c100ResSolAllegationsOfHarmA", "c100ResSolAllegationsOfHarmB",
+            "c100ResSolAllegationsOfHarmC", "c100ResSolAllegationsOfHarmD"};
+
+        for (String event : events) {
+
+            Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent).build();
+            Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent2).build();
+            List<Element<PartyDetails>> respondentList = new ArrayList<>();
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+
+            CaseData caseData = CaseData.builder().respondents(respondentList).id(1)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .documentManagementDetails(
+                    DocumentManagementDetails.builder()
+                        .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),quarantineLegalDoc)))
+                        .build()
+                ).reviewDocuments(ReviewDocuments.builder()
+                                     .reviewDocsDynamicList(DynamicList.builder().value(
+                                         DynamicListElement.builder()
+                                             .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                     ).build()).build())
+                .respondentSolicitorData(RespondentSolicitorData.builder()
+                                             .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                             .build())
+                .build();
+
+            Map<String, Object> stringObjectMap = new HashMap<>();
+            reviewDocumentService.getReviewedDocumentDetailsNew(caseData, stringObjectMap);
+
+            when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+            CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                 .id(123L)
+                                 .data(stringObjectMap)
+                                 .build())
+                .build();
+            callbackRequest.setEventId(event);
+
+
+            doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
+            doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
+            doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(),any());
+            doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());
+            doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(),any(),any(),any());
+
+            RespChildAbuseBehaviour respChildAbuseBehaviour = RespChildAbuseBehaviour.builder().typeOfAbuse(
+                ChildAbuseEnum.emotionalAbuse.getDisplayedValue()).build();
+            List<Element<RespChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+            childAbuseBehaviourList.add(element(respChildAbuseBehaviour));
+
+            when(respondentAllegationOfHarmService.updateChildAbusesForDocmosis(any())).thenReturn(childAbuseBehaviourList);
+            UserDetails userDetails = UserDetails.builder().forename("test")
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+            when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+            Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                authToken, callbackRequest
+            );
+
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList
+                = (List<Element<QuarantineLegalDoc>>) response.get("legalProfQuarantineDocsList");
+            assertNotNull(legalProfQuarantineDocsList);
+            assertEquals(1,legalProfQuarantineDocsList.size());
+            Assert.assertEquals("respondentC1AApplication", legalProfQuarantineDocsList.get(0).getValue().getCategoryId());
+
+        }
+    }
+
 }

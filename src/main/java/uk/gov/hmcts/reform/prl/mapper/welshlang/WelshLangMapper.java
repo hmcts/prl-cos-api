@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+@Slf4j
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
@@ -254,6 +257,14 @@ public class WelshLangMapper {
          */
         welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
         welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
+
+        /**
+         * Welsh - citizen language mapping
+         */
+        welshMap.put(LanguageRequirementsEnum.speakwelsh.getDisplayedValue(), "Rwy’n dymuno siarad Cymraeg");
+        welshMap.put(LanguageRequirementsEnum.readandwritewelsh.getDisplayedValue(), "Rwy’n dymuno darllen ac ysgrifennu yn Gymraeg ");
+        welshMap.put(LanguageRequirementsEnum.languageinterpreter.getDisplayedValue(),"Mae arnaf angen cyfieithydd mewn iaith benodol");
+        welshMap.put(LanguageRequirementsEnum.nointerpreter.getDisplayedValue(), "Nac oes, nid oes gennyf unrhyw ofynion o ran iaith ar hyn o bryd");
 
         /**
          * Respondent - Can you provide a contact number?.
