@@ -1111,12 +1111,12 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
-        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication().getDisplayedValue());
+        dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt().getDisplayedValue());
+        dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
         dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam().getDisplayedValue());
-        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam().getDisplayedValue());
+        dataMap.put("attendedMiam", getValueForYesOrNoEnum(response.getMiam().getAttendedMiam()));
+        dataMap.put("willingToAttendMiam", getValueForYesOrNoEnum(response.getMiam().getWillingToAttendMiam()));
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put(
             "currentOrPastProceedingsForChildren",
@@ -1143,7 +1143,7 @@ public class C100RespondentSolicitorService {
             );
             dataMap.put(
                 "reasonForJurisdiction",
-                response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl().getDisplayedValue()
+                getValueForYesOrNoEnum(response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl())
             );
             dataMap.put(
                 "reasonForJurisdictionDetails",
@@ -1151,7 +1151,7 @@ public class C100RespondentSolicitorService {
             );
             dataMap.put(
                 "requestToAuthority",
-                response.getCitizenInternationalElements().getAnotherCountryAskedInformation().getDisplayedValue()
+                getValueForYesOrNoEnum(response.getCitizenInternationalElements().getAnotherCountryAskedInformation())
             );
             dataMap.put(
                 "requestToAuthorityDetails",
@@ -1169,6 +1169,14 @@ public class C100RespondentSolicitorService {
             dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
                 .getResponseToAllegationsOfHarmYesOrNoResponse().getDisplayedValue());
         }
+    }
+
+    private String getValueForYesOrNoEnum(YesOrNo yesOrNo) {
+
+        if (null != yesOrNo) {
+            return yesOrNo.getDisplayedValue();
+        }
+        return null;
     }
 
     private void populatePartyDetails(Element<PartyDetails> solicitorRepresentedRespondent, Response response, Map<String, Object> dataMap) {
