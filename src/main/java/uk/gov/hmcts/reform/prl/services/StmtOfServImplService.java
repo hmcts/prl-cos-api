@@ -312,6 +312,9 @@ public class StmtOfServImplService {
                                              .printDocs(packDocs)
                                              .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                             .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                   caseData.getRespondents(),
+                                                                   caseData.getRespondentsFL401()))
                                              .build()));
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));

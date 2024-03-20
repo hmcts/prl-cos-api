@@ -45,8 +45,6 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -291,7 +289,6 @@ public class ServiceOfApplicationService {
     private String citizenUrl;
 
     private final CoreCaseDataService coreCaseDataService;
-    private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -441,7 +438,8 @@ public class ServiceOfApplicationService {
 
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                          .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
@@ -903,7 +901,8 @@ public class ServiceOfApplicationService {
         log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+            String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
             List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
             caseData.getApplicants().forEach(selectedApplicant -> {
                 if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
@@ -989,10 +988,11 @@ public class ServiceOfApplicationService {
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendGovNotifyEmail(
-            LanguagePreference.getLanguagePreference(caseData),
+            LanguagePreference.getPreferenceLanguage(caseData),
             party.getValue().getEmail(),
             EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
-            buildCitizenEmailVars(caseData, party.getValue())
+            serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
+                                                                   party.getValue())
         );
         //Generate cover letter without access code for applicant who has access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
@@ -1005,18 +1005,9 @@ public class ServiceOfApplicationService {
             .servedParty(SERVED_PARTY_APPLICANT)
             .docs(wrapElements(packsWithCoverLetter))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                           .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .partyIds(String.valueOf(party.getId()))
-            .build();
-    }
-
-    private EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
-                                                    PartyDetails party) {
-        return CitizenEmailVars.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .applicantName(party.getLabelForDynamicList())
             .build();
     }
 
@@ -1033,10 +1024,9 @@ public class ServiceOfApplicationService {
                                                                                                             coverLetterTemplate))));
         packsWithCoverLetter.addAll(packDocs);
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData, documentLanguage);
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
-        dynamicData.put(DASH_BOARD_LINK, citizenUrl + CITIZEN_DASHBOARD);
+        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
 
         EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService
@@ -1085,7 +1075,8 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .personalServiceBy(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().toString())
             .build();
 
@@ -2367,7 +2358,8 @@ public class ServiceOfApplicationService {
         log.info("Inside generatePacks for confidential check C100 method");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                       CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                       caseData);
@@ -2487,7 +2479,8 @@ public class ServiceOfApplicationService {
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2497,7 +2490,8 @@ public class ServiceOfApplicationService {
                           : wrapElements(caseData.getApplicants().get(0).getId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -2591,7 +2585,8 @@ public class ServiceOfApplicationService {
         log.info("Inside generatePacksForConfidentialCheck FL401 Method");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                        CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                        caseData);
@@ -2833,7 +2828,8 @@ public class ServiceOfApplicationService {
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification));
         }
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
@@ -3040,7 +3036,8 @@ public class ServiceOfApplicationService {
         }
         log.info("Reject reason list empty, adding first reject reason");
 
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication().getRejectionReason())
             .dateRejected(formatter)
