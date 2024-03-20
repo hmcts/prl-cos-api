@@ -55,7 +55,7 @@ public class RoleAssignmentService {
                                      String eventName,
                                      boolean replaceExisting,
                                      String roleName) {
-        if (environment.equals("non-preview")) {
+        if (!environment.equals("preview")) {
 
             log.info("Role Assignment called from event - {}", eventName);
             String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
