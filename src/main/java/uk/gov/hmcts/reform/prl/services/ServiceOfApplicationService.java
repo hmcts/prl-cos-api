@@ -2773,23 +2773,6 @@ public class ServiceOfApplicationService {
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         String whoIsResponsible = COURT;
         if (unServedApplicantPack != null || unServedRespondentPack != null) {
-            /*if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null
-                && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-                unServedApplicantPack.getPersonalServiceBy())) {
-                whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())) ?
-                    PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
-            } else if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null
-                && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-                unServedRespondentPack.getPersonalServiceBy())) {
-                log.info(
-                    "Debu unServedRespondentPack.getPersonalServiceBy(){}",
-                    unServedRespondentPack.getPersonalServiceBy()
-                );
-                whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())) ?
-                    PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
-            } else*/
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy()))
@@ -2819,10 +2802,6 @@ public class ServiceOfApplicationService {
                     }
                 }
                 if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null) {
-                    log.info(
-                        "*************** unServedRespondentPack.getPersonalServiceBy(){}",
-                        unServedRespondentPack.getPersonalServiceBy()
-                    );
                     whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
                         .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
                         ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
