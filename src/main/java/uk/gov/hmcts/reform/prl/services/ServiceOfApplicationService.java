@@ -163,9 +163,8 @@ public class ServiceOfApplicationService {
 
     public static final String POST = "post";
     public static final String COURT = "Court";
-    public static final String COURT_ADMIN = "Court - court admin";
-    public static final String COURT_BAILIFF = "Court - court bailiff";
-
+    public static final String PERSONAL_SERVICE_SERVED_BY_CA = "Court - court admin";
+    public static final String PERSONAL_SERVICE_SERVED_BY_BAILIFF = "Court - court bailiff";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
@@ -473,7 +472,7 @@ public class ServiceOfApplicationService {
                                                     caseDataMap);
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication()
-                        .getSoaCitizenServingRespondentsOptionsCA()) ? COURT_BAILIFF : COURT_ADMIN;
+                        .getSoaCitizenServingRespondentsOptionsCA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -484,7 +483,7 @@ public class ServiceOfApplicationService {
         } else {
             whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication()
-                .getSoaCitizenServingRespondentsOptionsDA()) ? COURT_BAILIFF : COURT_ADMIN;
+                .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                 .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
                 getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
@@ -554,7 +553,8 @@ public class ServiceOfApplicationService {
                 handleNotificationsCaSolicitorPersonalCourtAdminBailiff(caseData, authorization, emailNotificationDetails,
                                                                         c100StaticDocs, caseDataMap);
                 whoIsResponsibleForServing = SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA()) ? COURT_BAILIFF :     COURT_ADMIN;
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
+                    ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             }
         } else if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
@@ -795,9 +795,9 @@ public class ServiceOfApplicationService {
             sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(caseData, authorization, emailNotificationDetails,
                                                                      staticDocs, caseDataMap
             );
-            //whoIsResponsibleForServing = COURT;
             whoIsResponsibleForServing = SoaSolicitorServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA()) ? COURT_BAILIFF : COURT_ADMIN;
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
+                ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
 
         } else {
             log.error("#SOA TO DO...Generate packs to be served by unrepresented applicant.."
@@ -2774,27 +2774,23 @@ public class ServiceOfApplicationService {
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         String whoIsResponsible = COURT;
         if (unServedApplicantPack != null || unServedRespondentPack != null) {
-            //            if(unServedApplicantPack != null){
-            //            whoIsResponsible = SoaCitizenServingRespondentsEnum
-            //            .getValue(unServedApplicantPack.getPersonalServiceBy()).getDisplayedValue();
-            //            }
-            if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null
+            /*if (unServedApplicantPack != null  && unServedApplicantPack.getPersonalServiceBy() != null
                 && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())
-                    .getDisplayedValue().equals("Court admin") ? COURT_ADMIN : COURT_BAILIFF;
-            }
-            if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null
+                whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
+                    .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())) ?
+                    PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+            } else if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null
                 && !SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedRespondentPack.getPersonalServiceBy())) {
                 log.info(
                     "Debu unServedRespondentPack.getPersonalServiceBy(){}",
                     unServedRespondentPack.getPersonalServiceBy()
                 );
-                whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy())
-                    .getDisplayedValue().equals("Court admin") ? COURT_ADMIN : COURT_BAILIFF;
-            }
-
+                whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
+                    .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy())) ?
+                    PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+            } else*/
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy()))
@@ -2817,7 +2813,20 @@ public class ServiceOfApplicationService {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
-                    //whoIsResponsible = SoaCitizenServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()).getDisplayedValue();
+                    if (unServedApplicantPack.getPersonalServiceBy() != null) {
+                        whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
+                            .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()))
+                            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+                    }
+                }
+                if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null) {
+                    log.info(
+                        "*************** unServedRespondentPack.getPersonalServiceBy(){}",
+                        unServedRespondentPack.getPersonalServiceBy()
+                    );
+                    whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
+                        .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()))
+                        ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
