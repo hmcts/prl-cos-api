@@ -140,8 +140,22 @@ public class CitizenPartyDetailsMapper {
                 existingPartyDetails,
                 citizenProvidedPartyDetails
             );
+        } else if(CaseEvent.CITIZEN_CASE_UPDATE.equals(caseEvent)) {
+            return updateCitizenData(
+                existingPartyDetails,
+                citizenProvidedPartyDetails
+            );
         }
         return existingPartyDetails;
+    }
+
+    private PartyDetails updateCitizenData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .citizenFlags(citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                          .build())
+            .build();
     }
 
     private CaseData updatingPartyDetailsDa(CaseData caseData,

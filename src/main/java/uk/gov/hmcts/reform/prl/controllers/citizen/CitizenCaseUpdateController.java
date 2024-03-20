@@ -47,7 +47,7 @@ public class CitizenCaseUpdateController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
-                log.info("*** event received from citizen" + eventId);
+                log.info("*** event received from citizen " + eventId);
                 log.info("*** printing case data" + objectMapper.writeValueAsString(
                     citizenUpdatedCaseData));
             } catch (JsonProcessingException e) {
