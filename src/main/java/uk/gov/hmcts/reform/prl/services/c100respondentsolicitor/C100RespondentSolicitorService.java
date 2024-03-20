@@ -1172,11 +1172,7 @@ public class C100RespondentSolicitorService {
     }
 
     private String getValueForYesOrNoEnum(YesOrNo yesOrNo) {
-
-        if (null != yesOrNo) {
-            return yesOrNo.getDisplayedValue();
-        }
-        return null;
+        return null != yesOrNo ? yesOrNo.getDisplayedValue() : null;
     }
 
     private void populatePartyDetails(Element<PartyDetails> solicitorRepresentedRespondent, Response response, Map<String, Object> dataMap) {
