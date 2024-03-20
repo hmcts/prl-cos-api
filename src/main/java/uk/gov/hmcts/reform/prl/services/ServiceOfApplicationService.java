@@ -135,6 +135,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -185,6 +186,8 @@ public class ServiceOfApplicationService {
     public static final String WEL = "wel";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
+    public static final String AUTHORIZATION = "authorization";
+    public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -906,8 +909,12 @@ public class ServiceOfApplicationService {
                 isNotFirstApplicant.set(true);
                 if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, selectedApplicant, docs,
-                                                            PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
+                        Map<String, String> fieldsMap = new HashMap<>();
+                        fieldsMap.put(AUTHORIZATION, authorization);
+                        fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
+                        sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, selectedApplicant, docs,
+                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                            fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   selectedApplicant, PRL_LET_ENG_AP7);
@@ -953,14 +960,17 @@ public class ServiceOfApplicationService {
             if (ContactPreferences.digital.equals(caseData.getApplicants().get(i)
                                                       .getValue().getContactPreferences())) {
                 //Notify applicants via email, if dashboard access then via gov notify email else via send grid
+                Map<String, String> fieldsMap = new HashMap<>();
+                fieldsMap.put(AUTHORIZATION, authorization);
+                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP8);
                 sendEmailToApplicantLipPersonalC100(
                     caseData,
-                    authorization,
                     emailNotificationDetails,
                     caseData.getApplicants().get(i),
                     0 == i ? packDocs : packDocsWithoutC9,
-                    PRL_LET_ENG_AP8,
-                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP
+                    SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                    fieldsMap,
+                    EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT
                 );
             } else {
                 //Post packs to applicants
@@ -983,13 +993,14 @@ public class ServiceOfApplicationService {
                                                                        CaseData caseData,
                                                                        List<Document> packDocs,
                                                                        Element<PartyDetails> party,
-                                                                       String template) {
+                                                                       String template,
+                                                                       EmailTemplateNames emailTemplate) {
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendGovNotifyEmail(
             LanguagePreference.getPreferenceLanguage(caseData),
             party.getValue().getEmail(),
-            EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT,
+            emailTemplate,
             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
                                                                    party.getValue())
         );
@@ -1081,27 +1092,28 @@ public class ServiceOfApplicationService {
     }
 
     private void sendEmailToApplicantLipPersonalC100(CaseData caseData,
-                                                     String authorization,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      Element<PartyDetails> selectedApplicant,
                                                      List<Document> docs,
-                                                     String coverLetterTemplate,
-                                                     SendgridEmailTemplateNames emailTemplate) {
+                                                     SendgridEmailTemplateNames emailTemplate,
+                                                     Map<String, String> fieldMap,
+                                                     EmailTemplateNames notifyTemplate) {
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
             log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
-            emailNotification = sendEmailToUnrepresentedApplicant(authorization,
+            emailNotification = sendEmailToUnrepresentedApplicant(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
                                                                   selectedApplicant,
-                                                                  coverLetterTemplate);
+                                                                  fieldMap.get(COVER_LETTER_TEMPLATE),
+                                                                  notifyTemplate);
         } else {
             log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
-            emailNotification = sendSoaPacksToPartyViaEmail(authorization,
+            emailNotification = sendSoaPacksToPartyViaEmail(fieldMap.get(AUTHORIZATION),
                                                             caseData,
                                                             docs,
                                                             selectedApplicant,
-                                                            coverLetterTemplate,
+                                                            fieldMap.get(COVER_LETTER_TEMPLATE),
                                                             emailTemplate);
         }
 
@@ -1426,7 +1438,7 @@ public class ServiceOfApplicationService {
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         emailService.send(
                             selectedApplicant.getValue().getEmail(),
-                            EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                            CA_APPLICANT_SERVICE_APPLICATION,
                             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
                                                                                    selectedApplicant.getValue()),
                             LanguagePreference.english
@@ -2526,7 +2538,7 @@ public class ServiceOfApplicationService {
                                                          String template) {
         Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
-        if (!isAccessEnabled(party)) {
+        if (!isAccessEnabled(party) && CaseUtils.isCaseCreatedByCitizen(caseData)) {
             caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
@@ -2873,8 +2885,12 @@ public class ServiceOfApplicationService {
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                     if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
-                        sendEmailToApplicantLipPersonalC100(caseData, authorization, emailNotificationDetails, applicant, documents,
-                                                            PRL_LET_ENG_AP7, SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL);
+                        Map<String, String> fieldsMap = new HashMap<>();
+                        fieldsMap.put(AUTHORIZATION, authorization);
+                        fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
+                        sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
+                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                            fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   applicant, PRL_LET_ENG_AP7);
@@ -3119,7 +3135,8 @@ public class ServiceOfApplicationService {
                         caseData,
                         finalDocs,
                         selectedApplicant,
-                        Templates.AP6_LETTER
+                        Templates.AP6_LETTER,
+                        CA_APPLICANT_SERVICE_APPLICATION
                     )));
                 } else if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())
                     && YesOrNo.Yes.equals(selectedApplicant.getValue().getCanYouProvideEmailAddress())) {
