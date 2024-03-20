@@ -56,7 +56,9 @@ public class RoleAssignmentService {
                                      boolean replaceExisting,
                                      String roleName) throws Exception {
        try {
-           if(launchDarklyClient.isFeatureEnabledForEnv("skip-role-assinment-in-preview")) {
+           Boolean flag = launchDarklyClient.isFeatureEnabledForEnv("skip-role-assinment-in-preview");
+           log.info("value for launchdarklyclient skip-role-assinment-in-preview " + flag);
+           if(flag) {
            log.info("Role Assignment called from event - {}", eventName);
            String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
            String roleCategory = RoleCategory.JUDICIAL.name();

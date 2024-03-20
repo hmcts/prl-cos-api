@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.config.launchdarkly;
 
 import com.launchdarkly.sdk.LDUser;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class LaunchDarklyClient {
     public static final LDUser PRL_COS_USER = new LDUser.Builder("prl-cos-api")
         .anonymous(true)
@@ -43,7 +45,7 @@ public class LaunchDarklyClient {
             .firstName("PRIVATE LAW")
             .custom("environment", environment)
             .build();
-
+        log.info("Display Environment accordingly" + environment);
         return internalClient.boolVariation(feature, user, false);
     }
 
