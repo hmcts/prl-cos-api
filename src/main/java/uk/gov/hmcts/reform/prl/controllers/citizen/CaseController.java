@@ -86,6 +86,12 @@ public class CaseController {
     ) throws JsonProcessingException {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
+            try {
+                log.info("*** printing case data" + objectMapper.writeValueAsString(
+                    caseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             String cosApis2sToken = authTokenGenerator.generate();
             caseDetails = caseService.updateCase(
                 caseData,
@@ -115,6 +121,12 @@ public class CaseController {
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
+            try {
+                log.info("*** printing case data" + objectMapper.writeValueAsString(
+                    updateCaseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 caseId,
