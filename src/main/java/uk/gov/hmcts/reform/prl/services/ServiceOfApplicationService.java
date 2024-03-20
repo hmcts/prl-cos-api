@@ -2814,7 +2814,7 @@ public class ServiceOfApplicationService {
                                                              unServedApplicantPack, bulkPrintDetails);
                     if (unServedApplicantPack.getPersonalServiceBy() != null) {
                         whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                            .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()))
+                            .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
                             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                     }
                 }
@@ -2824,7 +2824,7 @@ public class ServiceOfApplicationService {
                         unServedRespondentPack.getPersonalServiceBy()
                     );
                     whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                        .equals(SoaSolicitorServingRespondentsEnum.getValue(unServedApplicantPack.getPersonalServiceBy()))
+                        .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
                         ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
