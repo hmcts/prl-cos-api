@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
-import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -806,40 +805,13 @@ public class HearingDataService {
             int numberOfApplicantSolicitors = applicantSolicitorNames.size();
             int numberOfRespondentSolicitors = respondentSolicitorNames.size();
 
-            if (caseData.getSelectedOrder() != null
-                && ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getSelectedOrder()), caseData)) {
-                log.info("Inside 1st condition {}", caseData.getSelectedOrder());
-                populateC100ApplicantsAndSolicitorsNamesForDaOrderForCaCase(tempPartyNamesMap, numberOfApplicant, applicantNames,
-                                                                            numberOfApplicantSolicitors, applicantSolicitorNames);
-                populateC100RespondentsAndSolicitorsNamesForDaOrderForCaCase(tempPartyNamesMap, numberOfRespondents, respondentNames);
-            } else {
-                //applicants & applicant solicitors
-                populateC100ApplicantsAndSolicitorsNames(tempPartyNamesMap, numberOfApplicant, applicantNames,
-                                                         numberOfApplicantSolicitors, applicantSolicitorNames);
+            //applicants & applicant solicitors
+            populateC100ApplicantsAndSolicitorsNames(tempPartyNamesMap, numberOfApplicant, applicantNames,
+                                                     numberOfApplicantSolicitors, applicantSolicitorNames);
 
-                //respondents & respondent solicitors
-                populateC100RespondentsAndSolicitorsNames(tempPartyNamesMap, numberOfRespondents, respondentNames,
-                                                          numberOfRespondentSolicitors, respondentSolicitorNames);
-            }
-
-            if (caseData.getCreateSelectOrderOptions() != null
-                && ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()), caseData)) {
-                log.info("Inside 2nd condition {}", caseData.getCreateSelectOrderOptions());
-                populateC100ApplicantsAndSolicitorsNamesForDaOrderForCaCase(tempPartyNamesMap, numberOfApplicant, applicantNames,
-                                                                            numberOfApplicantSolicitors, applicantSolicitorNames);
-                populateC100RespondentsAndSolicitorsNamesForDaOrderForCaCase(tempPartyNamesMap, numberOfRespondents, respondentNames);
-            } else {
-                //applicants & applicant solicitors
-                populateC100ApplicantsAndSolicitorsNames(tempPartyNamesMap, numberOfApplicant, applicantNames,
-                                                         numberOfApplicantSolicitors, applicantSolicitorNames);
-
-                //respondents & respondent solicitors
-                populateC100RespondentsAndSolicitorsNames(tempPartyNamesMap, numberOfRespondents, respondentNames,
-                                                          numberOfRespondentSolicitors, respondentSolicitorNames);
-            }
-            log.info("getCreateSelectOrderOptions ===>>>>  {}", caseData.getCreateSelectOrderOptions());
-
-
+            //respondents & respondent solicitors
+            populateC100RespondentsAndSolicitorsNames(tempPartyNamesMap, numberOfRespondents, respondentNames,
+                                                      numberOfRespondentSolicitors, respondentSolicitorNames);
 
             log.info("applicantNames =======>>> {}", applicantNames);
             log.info("respondentNames =======>>> {}", respondentNames);
@@ -916,24 +888,6 @@ public class HearingDataService {
         }
     }
 
-    private void populateC100ApplicantsAndSolicitorsNamesForDaOrderForCaCase(Map<String, Object> tempPartyNamesMap,
-                                                          int numberOfApplicant,
-                                                          List<String> applicantNames,
-                                                          int numberOfApplicantSolicitors,
-                                                          List<String> applicantSolicitorNames) {
-
-
-        //applicants
-        if (0 < numberOfApplicant) {
-            tempPartyNamesMap.put("applicantName", concat(applicantNames.get(0), " (Applicant)"));
-        }
-
-        //applicant solicitors
-        if (0 < numberOfApplicantSolicitors) {
-            tempPartyNamesMap.put("applicantSolicitor", concat(applicantSolicitorNames.get(0), " (Applicant solicitor)"));
-        }
-    }
-
     private void populateC100RespondentsAndSolicitorsNames(Map<String, Object> tempPartyNamesMap,
                                                            int numberOfRespondents,
                                                            List<String> respondentNames,
@@ -971,15 +925,6 @@ public class HearingDataService {
         }
         if (4 < numberOfRespondentSolicitors) {
             tempPartyNamesMap.put("respondentSolicitor5", concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)"));
-        }
-    }
-
-    private void populateC100RespondentsAndSolicitorsNamesForDaOrderForCaCase(Map<String, Object> tempPartyNamesMap,
-                                                           int numberOfRespondents,
-                                                           List<String> respondentNames) {
-        //respondents
-        if (0 < numberOfRespondents) {
-            tempPartyNamesMap.put("respondentName", concat(respondentNames.get(0), " (Respondent)"));
         }
     }
 }
