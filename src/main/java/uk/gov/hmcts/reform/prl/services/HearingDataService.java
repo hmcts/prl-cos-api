@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
-import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -812,18 +809,8 @@ public class HearingDataService {
             //respondents & respondent solicitors
             populateC100RespondentsAndSolicitorsNames(tempPartyNamesMap, numberOfRespondents, respondentNames,
                                                       numberOfRespondentSolicitors, respondentSolicitorNames);
-
-            log.info("applicantNames =======>>> {}", applicantNames);
-            log.info("respondentNames =======>>> {}", respondentNames);
-            log.info("applicantSolicitorNames =======>>> {}", applicantSolicitorNames);
-            log.info("respondentSolicitorNames =======>>> {}", respondentSolicitorNames);
         }
 
-        try {
-            log.info("tempPartyNamesMap ======>  {}", AppObjectMapper.getObjectMapper().writeValueAsString(tempPartyNamesMap));
-        } catch (JsonProcessingException e) {
-            throw new ManageOrderRuntimeException(e.getMessage(), e);
-        }
         //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
         tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
     }
@@ -851,8 +838,6 @@ public class HearingDataService {
                                                           List<String> applicantNames,
                                                           int numberOfApplicantSolicitors,
                                                           List<String> applicantSolicitorNames) {
-
-
         //applicants
         if (0 < numberOfApplicant) {
             tempPartyNamesMap.put("applicantName1", concat(applicantNames.get(0), " (Applicant1)"));
