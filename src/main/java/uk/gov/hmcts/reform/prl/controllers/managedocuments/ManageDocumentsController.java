@@ -48,6 +48,10 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
 
+
+    @org.springframework.beans.factory.annotation.Value("${amRoleAssignment.api.url}")
+    private String linkkkk;
+
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
                                         ManageDocumentsService manageDocumentsService,
@@ -124,6 +128,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
         log.info("JJJJJJJJ== >{}", result);
+        log.info("================= >");
+        log.info("*****************== >");
+        log.info("=======LINKKKKKKK======= > {}",linkkkk);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
