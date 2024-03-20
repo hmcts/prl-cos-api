@@ -929,7 +929,7 @@ public class C100RespondentSolicitorService {
                         quarantineLegalDocList.add(getQuarantineLegalDocuments(
                             updatedUserDetails,
                             proceedings.getValue().getUploadRelevantOrder(),
-                            "previousOrdersSubmitted",
+                            "ordersFromOtherProceedings",
                             "Orders from other proceedings"
                         ));
                         proceedings.getValue().toBuilder().uploadRelevantOrder(null);
