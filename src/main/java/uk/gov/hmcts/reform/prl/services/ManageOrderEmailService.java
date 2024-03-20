@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -411,7 +411,7 @@ public class ManageOrderEmailService {
     private void handlePersonalServiceNotifications(String authorisation, CaseData caseData,
                                                     List<Document> orderDocuments,
                                                     Map<String, Object> dynamicDataForEmail,
-                                                    SoaSolicitorServingRespondentsEnum respondentOption) {
+                                                    OrdersServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
@@ -438,16 +438,16 @@ public class ManageOrderEmailService {
     }
 
     private void sendPersonalServiceNotifications(String solicitorEmail,
-                                                  SoaSolicitorServingRespondentsEnum respondentOption,
+                                                  OrdersServingRespondentsEnum respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
         Object> dynamicDataForEmail) {
-        if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+        if (null != solicitorEmail && OrdersServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
-        } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
-            || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
+        } else if (null != solicitorEmail && (OrdersServingRespondentsEnum.courtAdmin.equals(respondentOption)
+            || OrdersServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
             );
