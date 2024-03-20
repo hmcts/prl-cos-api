@@ -245,7 +245,7 @@ public class StmtOfServImplService {
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
-            .equals(SoaCitizenServingRespondentsEnum.getValue(unServedRespondentPack.getPersonalServiceBy()))
+            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
