@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -48,6 +49,8 @@ public class Message extends MessageMetaData {
     //PRL-3454 - send & reply message enhancements
     private InternalExternalMessageEnum internalOrExternalMessage;
     private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
+    private DynamicMultiSelectList externalMessageWhoToSendTo;
+
     //added for reply as there is no "Other" option
     private InternalMessageReplyToEnum internalMessageReplyTo;
     private MessageAboutEnum messageAbout;

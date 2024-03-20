@@ -24,12 +24,13 @@ public class SendOrReplyMessage {
     private String messageReplyTable;
     private Message sendMessageObject;
     private Message replyMessageObject;
+    private DynamicList sendMessageAdditionalDocumentsList;
 
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
             "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
-            "replyMessageObject", "messageReplyTable", "chooseSendOrReply"
+            "replyMessageObject", "messageReplyTable", "chooseSendOrReply","sendMessageAdditionalDocumentsList"
         };
     }
 
