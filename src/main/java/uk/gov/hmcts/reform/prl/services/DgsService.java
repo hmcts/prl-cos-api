@@ -66,8 +66,6 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-
-        log.info("tempCaseDetails:  =======>>>>>>  {}", AppObjectMapper.getObjectMapper().writeValueAsString(tempCaseDetails));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
