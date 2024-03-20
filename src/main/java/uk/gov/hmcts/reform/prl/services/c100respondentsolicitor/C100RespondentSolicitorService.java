@@ -1339,7 +1339,7 @@ public class C100RespondentSolicitorService {
         }
         Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (documentLanguage.isGenWelsh()) {
+        if (documentLanguage.isGenEng()) {
             Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
