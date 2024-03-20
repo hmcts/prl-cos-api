@@ -10,9 +10,12 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -74,6 +78,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -592,6 +597,9 @@ public class ManageOrderService {
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
+    private final RoleAssignmentApi roleAssignmentApi;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final LaunchDarklyClient launchDarklyClient;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1833,7 +1841,7 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -1922,7 +1930,7 @@ public class ManageOrderService {
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -2323,19 +2331,45 @@ public class ManageOrderService {
     public String getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
-        List<String> roles = userDetails.getRoles();
-        if (roles.contains(Roles.JUDGE.getValue()) || roles.contains(Roles.LEGAL_ADVISER.getValue())) {
-            loggedInUserType = UserRoles.JUDGE.name();
-        } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
-            loggedInUserType = UserRoles.COURT_ADMIN.name();
-        } else if (roles.contains(Roles.SOLICITOR.getValue())) {
-            loggedInUserType = UserRoles.SOLICITOR.name();
-        } else if (roles.contains(Roles.CITIZEN.getValue())) {
-            loggedInUserType = UserRoles.CITIZEN.name();
-        } else if (roles.contains(Roles.SYSTEM_UPDATE.getValue())) {
-            loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+            //This would check for roles from AM for Judge/Legal advisor/Court admin
+            //if it doesn't find then it will check for idam roles for rest of the users
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorisation,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).collect(
+                Collectors.toList());
+            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
+                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                loggedInUserType = UserRoles.JUDGE.name();
+            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                loggedInUserType = UserRoles.COURT_ADMIN.name();
+            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType = UserRoles.SOLICITOR.name();
+            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType = UserRoles.CITIZEN.name();
+            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+            } else {
+                loggedInUserType = "";
+            }
         } else {
-            loggedInUserType = "";
+            if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
+                loggedInUserType = UserRoles.JUDGE.name();
+            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
+                loggedInUserType = UserRoles.COURT_ADMIN.name();
+            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType = UserRoles.SOLICITOR.name();
+            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType = UserRoles.CITIZEN.name();
+            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+            } else {
+                loggedInUserType = "";
+            }
         }
 
         return loggedInUserType;
@@ -2416,7 +2450,6 @@ public class ManageOrderService {
     }
 
     private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
-        log.info("---- Legal rep present ----{}", email);
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
             log.info("---- Legal rep present ----");
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
@@ -2527,7 +2560,7 @@ public class ManageOrderService {
                     judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
             } catch (Exception e) {
-                log.error("User details not found for personal code {}", personalCodes);
+                log.error("User details not found for personal code {}", personalCodes, e);
             }
         }
         return judgeFullName;

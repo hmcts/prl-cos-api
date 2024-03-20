@@ -272,7 +272,7 @@ public class PrlAppsConstants {
         + "a. The ((applicant / respondent / both)) must notify the court by "
         + "4pm ((date that the deadline has been set)) whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
-        + "b. If the ((applicant / respondent)) does not intend to appoint their own qulaified leagl "
+        + "b. If the ((applicant / respondent)) does not intend to appoint their own qualified legal "
         + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
         + "must complete form EX740 and return it to the court by 4pm on ((date that the deadline has been set))";
     public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
@@ -718,7 +718,7 @@ public class PrlAppsConstants {
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
 
-    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
+    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List without notice";
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
