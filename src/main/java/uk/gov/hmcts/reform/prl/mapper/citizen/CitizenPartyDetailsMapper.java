@@ -140,7 +140,7 @@ public class CitizenPartyDetailsMapper {
                 existingPartyDetails,
                 citizenProvidedPartyDetails
             );
-        } else if(CaseEvent.CITIZEN_CASE_UPDATE.equals(caseEvent)) {
+        } else if (CaseEvent.CITIZEN_CASE_UPDATE.equals(caseEvent)) {
             return updateCitizenData(
                 existingPartyDetails,
                 citizenProvidedPartyDetails
