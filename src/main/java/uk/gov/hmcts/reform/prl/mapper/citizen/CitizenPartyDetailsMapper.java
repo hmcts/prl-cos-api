@@ -126,6 +126,30 @@ public class CitizenPartyDetailsMapper {
         return caseData;
     }
 
+    private CaseData updatingPartyDetailsDa(CaseData caseData,
+                                            PartyDetails citizenProvidedPartyDetails,
+                                            PartyEnum partyType,
+                                            CaseEvent caseEvent) {
+        log.info("Inside updatingPartyDetailsDa");
+        PartyDetails partyDetails;
+        if (PartyEnum.applicant.equals(partyType)) {
+            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                  caseData.getApplicantsFL401(),
+                                                                  caseEvent);
+                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+            }
+        } else {
+            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                                                                  caseData.getRespondentsFL401(),
+                                                                  caseEvent);
+                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+            }
+        }
+        return caseData;
+    }
+
     private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
                                                                    PartyDetails existingPartyDetails,
                                                                    CaseEvent caseEvent) {
@@ -150,13 +174,86 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case EVENT_RESPONDENT_MIAM -> {
+                return updateCitizenMiamDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case LEGAL_REPRESENTATION -> {
+                return updateCitizenLegalRepresentaionDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case EVENT_RESPONDENT_SAFETY_CONCERNS -> {
+                return updateCitizenSafetyConcernDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case EVENT_INTERNATIONAL_ELEMENT -> {
+                return updateCitizenInternationalElementDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case CITIZEN_REMOVE_LEGAL_REPRESENTATIVE -> {
+                return updateCitizenRemoveLegalRepresentativeFlag(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             default -> {
+                //For citizen-case-update
                 return updateCitizenResponseDataForOtherEvents(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
             }
         }
+    }
+
+    private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .isRemoveLegalRepresentativeRequested(citizenProvidedPartyDetails.getIsRemoveLegalRepresentativeRequested())
+            .build();
+    }
+
+    private PartyDetails updateCitizenInternationalElementDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .citizenInternationalElements(citizenProvidedPartyDetails.getResponse().getCitizenInternationalElements())
+                          .build())
+            .build();
+    }
+
+    private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .safetyConcerns(citizenProvidedPartyDetails.getResponse().getSafetyConcerns())
+                          .build())
+            .build();
+    }
+
+    private PartyDetails updateCitizenLegalRepresentaionDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
+                          .build())
+            .build();
+    }
+
+    private PartyDetails updateCitizenMiamDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .miam(citizenProvidedPartyDetails.getResponse().getMiam())
+                          .build())
+            .build();
     }
 
     private PartyDetails updateCitizenConsentDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
@@ -172,34 +269,13 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
-                          .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
-                          .citizenFlags(citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                          .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
+                                                            ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
+                                                            : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
+                          .citizenFlags(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                          ? citizenProvidedPartyDetails.getResponse().getCitizenFlags() : existingPartyDetails.getResponse().getCitizenFlags())
                           .build())
             .build();
-    }
-
-    private CaseData updatingPartyDetailsDa(CaseData caseData,
-                                                   PartyDetails citizenProvidedPartyDetails,
-                                                   PartyEnum partyType,
-                                                   CaseEvent caseEvent) {
-        log.info("Inside updatingPartyDetailsDa");
-        PartyDetails partyDetails;
-        if (PartyEnum.applicant.equals(partyType)) {
-            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
-                                                                  caseData.getApplicantsFL401(),
-                                                                  caseEvent);
-                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-            }
-        } else {
-            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
-                                                                  caseData.getRespondentsFL401(),
-                                                                  caseEvent);
-                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
-            }
-        }
-        return caseData;
     }
 
     private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
