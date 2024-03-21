@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -68,7 +69,7 @@ public class AllTabServiceImpl implements AllTabsService {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             return mapAndSubmitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    startAllTabsUpdateDataContent.authorisation(),
                     caseId,
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
@@ -104,7 +105,8 @@ public class AllTabServiceImpl implements AllTabsService {
             allTabsUpdateEventRequestData,
             allTabsUpdateStartEventResponse,
             allTabsUpdateStartEventResponse.getCaseDetails().getData(),
-            allTabsUpdateCaseData
+            allTabsUpdateCaseData,
+            null
         );
     }
 
@@ -132,7 +134,8 @@ public class AllTabServiceImpl implements AllTabsService {
             allTabsUpdateEventRequestData,
             allTabsUpdateStartEventResponse,
             allTabsUpdateStartEventResponse.getCaseDetails().getData(),
-            allTabsUpdateCaseData
+            allTabsUpdateCaseData,
+            null
         );
     }
 
@@ -254,17 +257,17 @@ public class AllTabServiceImpl implements AllTabsService {
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
                                                                             String eventId,
                                                                             String authorisation) {
-        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
             CaseEvent.fromValue(eventId),
-            userInfo.getUid()
+            userDetails.getId()
         );
         StartEventResponse allTabsUpdateStartEventResponse =
             ccdCoreCaseDataService.startUpdate(
                 authorisation,
                 allTabsUpdateEventRequestData,
                 caseId,
-                !userInfo.getRoles().contains(CITIZEN_ROLE)
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
         CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
             allTabsUpdateStartEventResponse,
@@ -275,7 +278,8 @@ public class AllTabServiceImpl implements AllTabsService {
             allTabsUpdateEventRequestData,
             allTabsUpdateStartEventResponse,
             allTabsUpdateStartEventResponse.getCaseDetails().getData(),
-            allTabsUpdateCaseData
+            allTabsUpdateCaseData,
+            userDetails
         );
     }
 
@@ -284,7 +288,8 @@ public class AllTabServiceImpl implements AllTabsService {
                                                         String caseId,
                                                         StartEventResponse startEventResponse,
                                                         EventRequestData eventRequestData,
-                                                        Map<String, Object> combinedFieldsMap) {
+                                                        Map<String, Object> combinedFieldsMap,
+                                                        UserDetails userDetails) {
         UserInfo userInfo = idamClient.getUserInfo(authorisation);
         return ccdCoreCaseDataService.submitUpdate(
             authorisation,
@@ -294,7 +299,7 @@ public class AllTabServiceImpl implements AllTabsService {
                 combinedFieldsMap
             ),
             caseId,
-            !userInfo.getRoles().contains(CITIZEN_ROLE)
+            !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
     }
 

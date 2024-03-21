@@ -52,11 +52,12 @@ public class CitizenCaseUpdateService {
         );
         log.info("*************** Going to update party details received from Citizen");
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             caseId,
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
-            citizenUpdatePartyDataContent.updatedCaseDataMap()
+            citizenUpdatePartyDataContent.updatedCaseDataMap(),
+            startAllTabsUpdateDataContent.userDetails()
         );
 
         if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
