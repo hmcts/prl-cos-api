@@ -3163,7 +3163,9 @@ public class ManageOrderService {
             performingUser = getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                log.info("caseData.getManageOrdersOptions()-----> {}",caseData.getManageOrdersOptions());
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser);
             }
 
