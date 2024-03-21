@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -25,5 +26,6 @@ public interface AllTabsService {
                                                  String caseId,
                                                  StartEventResponse startEventResponse,
                                                  EventRequestData eventRequestData,
-                                                 Map<String, Object> combinedFieldsMap);
+                                                 Map<String, Object> combinedFieldsMap,
+                                                 UserDetails userDetails);
 }
