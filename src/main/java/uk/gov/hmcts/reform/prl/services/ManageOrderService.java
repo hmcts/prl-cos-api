@@ -2783,7 +2783,7 @@ public class ManageOrderService {
                                        String eventId) {
 
         String isHearingTaskNeeded = NO;
-        log.info("isHEar77777777");
+        log.info("setIsHearingTaskNeeded--->");
         // If rejected by judge, then isHearingTaskNeeded should be always 'No'.
         if (null != isOrderApproved && isOrderApproved.equals(NO)) {
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
@@ -2800,12 +2800,12 @@ public class ManageOrderService {
 
         //In case if no hearings at all, then default value for isHearingTaskNeeded should be null
         if (CollectionUtils.isEmpty(ordersHearingDetails)) {
-            log.info("ordersHearingDetails EMPPPTY");
+            log.info("ordersHearingDetails---empty");
             isHearingTaskNeeded = null;
         } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
-            log.info("ordersHearingDetails hearingList {}",hearingList);
+            log.info("ordersHearingDetails---hearingList--> {}",hearingList);
             for (HearingData hearing : hearingList) {
                 if (hearing.getHearingDateConfirmOptionEnum() != null
                     && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
@@ -2843,7 +2843,6 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-        log.info("1111111");
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
@@ -2852,21 +2851,18 @@ public class ManageOrderService {
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
 
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            log.info("2222");
             boolean isSdoOrder = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions());
             if (isSdoOrder) {
                 List<Element<HearingData>> sdoHearings = buildSdoHearingsListFromStandardDirectionOrder(caseData.getStandardDirectionOrder());
                 setHearingSelectedInfoForTask(sdoHearings, caseDataUpdated);
                 setIsHearingTaskNeeded(sdoHearings,caseDataUpdated,null,amendOrderCheckEnum,eventId);
             } else {
-                log.info("333333");
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
             }
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
-            log.info("44444444");
             boolean isSdoOrder = false;
             Object dynamicList = caseData.getDraftOrdersDynamicList();
             DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
@@ -2878,7 +2874,6 @@ public class ManageOrderService {
             }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                log.info("55555");
                 setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(),
@@ -2886,7 +2881,6 @@ public class ManageOrderService {
             } else {
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
-                log.info("66666");
                 if (null != caseData.getDraftOrderCollection()) {
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
