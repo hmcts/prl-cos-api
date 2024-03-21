@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.Respondent
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -97,6 +98,10 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final CourtFinderService courtLocatorService;
+    private final DocumentLanguageService documentLanguageService;
+
+    public static final String ENGLISH_EMAIL = "english";
+    public static final String WELSH_EMAIL = "welsh";
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
@@ -335,7 +340,7 @@ public class ManageOrderEmailService {
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
-        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
@@ -443,6 +448,7 @@ public class ManageOrderEmailService {
         Object> dynamicDataForEmail) {
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
+            log.info("CA personal service email notifications: sendPersonalServiceNotifications");
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
@@ -563,6 +569,9 @@ public class ManageOrderEmailService {
 
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            dynamicData.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+            dynamicData.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         }
         return dynamicData;
     }
