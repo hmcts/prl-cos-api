@@ -201,30 +201,32 @@ public class EditAndApproveDraftOrderController {
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
+                if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+                    Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
+                        .getSolicitorOrdersHearingDetails()
+                        .stream()
+                        .filter(
+                            e -> e.getValue().getHearingJudgeNameAndEmail() != null
+                        )
+                        .findFirst();
 
-                Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
-                    .getSolicitorOrdersHearingDetails()
-                    .stream()
-                    .filter(
-                        e -> e.getValue().getHearingJudgeNameAndEmail() != null
-                    )
-                    .findFirst();
-                JudicialUser judicialUser = null;
-                if (hearingDataElement.isPresent()) {
-                    judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
+                    JudicialUser judicialUser = null;
+                    if (hearingDataElement.isPresent()) {
+                        judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
+                    }
+
+                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                        .judicialUser(judicialUser)
+                        .build();
+                    roleAssignmentService.createRoleAssignment(
+                        authorisation,
+                        callbackRequest.getCaseDetails(),
+                        roleAssignmentDto,
+                        DRAFT_AN_ORDER.getName(),
+                        false,
+                        HEARING_JUDGE_ROLE
+                    );
                 }
-
-                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                    .judicialUser(judicialUser)
-                    .build();
-                roleAssignmentService.createRoleAssignment(
-                    authorisation,
-                    callbackRequest.getCaseDetails(),
-                    roleAssignmentDto,
-                    DRAFT_AN_ORDER.getName(),
-                    false,
-                    HEARING_JUDGE_ROLE
-                );
 
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -436,7 +438,7 @@ public class EditAndApproveDraftOrderController {
                         draftOrder
                     );
                 } catch (Exception e) {
-                    log.error("Failed to send email to solicitor : {}", e.getMessage());
+                    log.error("Failed to send email to solicitor :", e);
                 }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                                        .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
