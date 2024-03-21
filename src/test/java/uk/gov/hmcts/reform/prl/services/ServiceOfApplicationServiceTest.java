@@ -1679,13 +1679,13 @@ public class ServiceOfApplicationServiceTest {
             .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
@@ -2562,13 +2562,13 @@ public class ServiceOfApplicationServiceTest {
             .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
@@ -3075,7 +3075,7 @@ public class ServiceOfApplicationServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
 
@@ -3148,7 +3148,7 @@ public class ServiceOfApplicationServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .user(User.builder().idamId("12334566").build())
             .build();
 

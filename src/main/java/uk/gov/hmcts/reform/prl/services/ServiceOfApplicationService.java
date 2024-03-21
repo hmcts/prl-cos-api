@@ -908,7 +908,7 @@ public class ServiceOfApplicationService {
                 }
                 isNotFirstApplicant.set(true);
                 if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
@@ -957,7 +957,7 @@ public class ServiceOfApplicationService {
         List<Document> packDocsWithoutC9 = packDocs.stream()
             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
         for (int i = 0; i < caseData.getApplicants().size(); i++) {
-            if (ContactPreferences.digital.equals(caseData.getApplicants().get(i)
+            if (ContactPreferences.email.equals(caseData.getApplicants().get(i)
                                                       .getValue().getContactPreferences())) {
                 //Notify applicants via email, if dashboard access then via gov notify email else via send grid
                 Map<String, String> fieldsMap = new HashMap<>();
@@ -1435,7 +1435,7 @@ public class ServiceOfApplicationService {
 
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         emailService.send(
                             selectedApplicant.getValue().getEmail(),
                             CA_APPLICANT_SERVICE_APPLICATION,
@@ -1457,7 +1457,7 @@ public class ServiceOfApplicationService {
                                                             SERVED_PARTY_APPLICANT);
                     }
                 } else {
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
@@ -2884,7 +2884,7 @@ public class ServiceOfApplicationService {
             List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
-                    if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
@@ -3138,7 +3138,7 @@ public class ServiceOfApplicationService {
                         Templates.AP6_LETTER,
                         CA_APPLICANT_SERVICE_APPLICATION
                     )));
-                } else if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())
+                } else if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())
                     && YesOrNo.Yes.equals(selectedApplicant.getValue().getCanYouProvideEmailAddress())) {
                     //Email packs to applicants
                     Document ap6Letter = generateAccessCodeLetter(authorization,
