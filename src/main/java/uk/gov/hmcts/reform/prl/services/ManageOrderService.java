@@ -2895,7 +2895,7 @@ public class ManageOrderService {
             }
         }
         log.info("caseDataUpdated=WA_IS_ORDER_APPROVED= {}",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
-        log.info("caseDataUpdated=WA_WHO_APPROVED_THE_ORDER= {}",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        log.info("caseDataUpdated=WA_WHO_APPROVED_THE_ORDER= {}",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
         log.info("caseDataUpdated=WA_IS_MULTIPLE_HEARING_SELECTED= {}",caseDataUpdated.get(WA_IS_MULTIPLE_HEARING_SELECTED));
         log.info("caseDataUpdated=WA_HEARING_OPTION_SELECTED= {}",caseDataUpdated.get(WA_HEARING_OPTION_SELECTED));
         log.info("caseDataUpdated=WA_IS_HEARING_TASK_NEEDED= {}",caseDataUpdated.get(WA_IS_HEARING_TASK_NEEDED));
