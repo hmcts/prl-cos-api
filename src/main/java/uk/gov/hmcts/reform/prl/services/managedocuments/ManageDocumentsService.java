@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -35,15 +37,20 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -79,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderEmailService.THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -99,12 +107,17 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
 
+    private final SendgridService sendgridService;
+
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
+
+    @Value("${citizen.url}")
+    private String citizenUrl;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -185,15 +198,15 @@ public class ManageDocumentsService {
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            updatedUserDetails
+            updatedUserDetails,
+            authorization
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                          UserDetails userDetails) {
-
+                                          UserDetails userDetails, String authorization) {
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
         boolean isWaTaskSetForFirstDocumentIteration = false;
@@ -205,12 +218,13 @@ public class ManageDocumentsService {
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
-                moveDocumentsToRespectiveCategoriesNew(
+                moveDocumentsToRespectiveCategoriesNew1(
                     quarantineLegalDoc,
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole
+                    userRole,
+                    authorization
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -277,17 +291,97 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            log.info("filename" + finalConfidentialDocument);
+            log.info("filename" + finalConfidentialDocument.fileName);
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
+        }
+    }
 
-            /* if() {
-                Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                dynamicData.put("name", party.getValue().getLabelForDynamicList());
-                dynamicData.put("dashBoardLink", citizenDashboardUrl);
-                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
-                                     SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+    public void moveDocumentsToRespectiveCategoriesNew1(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
+                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole,
+                                                       String authorization) {
+        String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
+
+        if (restrcitedKey != null) {
+            //This will be executed only during review documents
+            if (!userRole.equals(COURT_ADMIN)
+                && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
+                String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+                Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
+                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
+                quarantineLegalDoc = setQuarantineDocumentForUploader(
+                    ManageDocuments.builder()
+                        .document(updatedConfidentialDocument)
+                        .build(),
+                    loggedInUserType,
+                    quarantineLegalDoc
                 );
-            }*/
+
+            }
+
+            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
+                quarantineLegalDoc,
+                userDetails
+            );
+            //This will be executed only during manage documents
+            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
+                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
+                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                    .build();
+            }
+
+            moveToConfidentialOrRestricted(
+                caseDataUpdated,
+                CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
+                    ? caseData.getReviewDocuments().getConfidentialDocuments()
+                    : caseData.getReviewDocuments().getRestrictedDocuments(),
+                finalConfidentialDocument,
+                restrcitedKey
+            );
+        } else {
+            // Remove these attributes for Non Confidential documents
+            log.info("inside else movefile");
+            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                .isConfidential(null)
+                .isRestricted(null)
+                .restrictedDetails(null)
+                .build();
+
+            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
+                quarantineLegalDoc,
+                userDetails
+            );
+            List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
+            existingCaseDocuments.add(element(finalConfidentialDocument));
+            log.info("filename" + finalConfidentialDocument.fileName);
+            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
+            if (finalConfidentialDocument.getDocument().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", "tom bennet");
+                dynamicData.put("dashBoardLink", citizenUrl);
+                sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
+                                     SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
+                );
+            }
+        }
+    }
+
+    private void sendEmailViaSendGrid(String authorisation,
+                                      Map<String, Object> dynamicDataForEmail,
+                                      String emailAddress,
+                                      SendgridEmailTemplateNames sendgridEmailTemplateName) {
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                sendgridEmailTemplateName,
+                authorisation,
+                SendgridEmailConfig.builder()
+                    .toEmailAddress(emailAddress)
+                    .dynamicTemplateData(dynamicDataForEmail)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
+            );
+        } catch (IOException e) {
+            log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                      emailAddress, e.getMessage(), e);
         }
     }
 
@@ -434,7 +528,7 @@ public class ManageDocumentsService {
     }
 
     public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
-                                                           QuarantineLegalDoc quarantineLegalDoc) {
+                                                          QuarantineLegalDoc quarantineLegalDoc) {
 
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
@@ -617,24 +711,24 @@ public class ManageDocumentsService {
 
         return switch (userRole) {
             case SOLICITOR -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
             );
             case CAFCASS -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
             );
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
             );
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
             );
             case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
@@ -795,3 +889,4 @@ public class ManageDocumentsService {
         }
     }
 }
+
