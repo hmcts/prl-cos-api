@@ -119,9 +119,12 @@ public class SendgridService {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
         Mail mail = new Mail();
+        long attachDocsStartTime = System.currentTimeMillis();
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
+        log.info("*** Time taken to attach docs to mail - {} ms",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
