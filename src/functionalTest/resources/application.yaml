@@ -17,6 +17,7 @@ case:
       uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
 
 prl:
+  environment: ${APP_ENV:preview}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
@@ -120,6 +121,7 @@ uk:
             CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
             CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC: facea2fa-e635-4542-abd4-33f8f0ec7dab
             CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
+            CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED: d1602761-dc82-4d17-99a8-675514049bfc
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
             LIST_ON_NOTICE_EMAIL_NOTIFICATION: 21ede4dc-cce4-4198-b63e-cd0f775299d5
           welsh:
@@ -236,8 +238,8 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1902.preview.platform.hmcts.net/}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-demo.service.core-compute-demo.internal}
+    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1906.preview.platform.hmcts.net/}
 
 auth:
   idam:

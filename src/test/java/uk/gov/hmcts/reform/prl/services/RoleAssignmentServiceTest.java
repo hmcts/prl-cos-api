@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
@@ -60,6 +63,7 @@ public class RoleAssignmentServiceTest {
 
         Map<String, Object> dataMap = new HashMap<>();
         caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
+        roleAssignmentService.setEnvironment("aat");
     }
 
     @Test
@@ -72,7 +76,21 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        when(objectMapper.convertValue(legalAdviserList, DynamicList.class)).thenReturn(legalAdviserList);
+        when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
+            .forename("first")
+            .id("1234")
+            .surname("test").build()));
+        roleAssignmentService.createRoleAssignment(
+            auth,
+            caseDetails,
+            RoleAssignmentDto.builder().legalAdviserList(legalAdviserList).build(),
+            "TEST EVENT",
+            true,
+            "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -85,10 +103,21 @@ public class RoleAssignmentServiceTest {
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
+        when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
+            .id("1234")
+            .forename("first")
+            .surname("test").build()));
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(
+            auth,
+            caseDetails,
+            RoleAssignmentDto.builder().judgeEmail("test1@test.com").build(),
+            "TEST EVENT",
+            true,
+            "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -104,7 +133,10 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder()
+                .judicialUser(JudicialUser.builder().build()).build(),
+            "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -117,14 +149,17 @@ public class RoleAssignmentServiceTest {
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
 
-        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
-            .builder()
-            .value(DynamicListElement.builder().code("(test)").build())
-            .build());
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(
+            DynamicList
+                .builder()
+                .value(DynamicListElement.builder().code("(test)").build())
+                .build());
         when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -140,7 +175,9 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -156,7 +193,9 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -169,14 +208,17 @@ public class RoleAssignmentServiceTest {
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
-        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
-            .builder()
-            .value(DynamicListElement.builder().code("(test)").build())
-            .build());
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(
+            DynamicList
+                .builder()
+                .value(DynamicListElement.builder().code("(test)").build())
+                .build());
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -188,14 +230,17 @@ public class RoleAssignmentServiceTest {
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
-        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
-            .builder()
-            .value(DynamicListElement.builder().code("(test)").build())
-            .build());
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(
+            DynamicList
+                .builder()
+                .value(DynamicListElement.builder().code("(test)").build())
+                .build());
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -208,14 +253,17 @@ public class RoleAssignmentServiceTest {
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
-        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
-            .builder()
-            .value(DynamicListElement.builder().code("(test)").build())
-            .build());
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(
+            DynamicList
+                .builder()
+                .value(DynamicListElement.builder().code("(test)").build())
+                .build());
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
+                                                   "TEST EVENT", true, "Judge"
+        );
         assertEquals("1", userDetails.getId());
     }
 
@@ -253,5 +301,32 @@ public class RoleAssignmentServiceTest {
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
         boolean bool = roleAssignmentService.validateIfUserHasRightRoles(auth, callbackRequest);
         assertEquals(false, bool);
+    }
+
+    @Test
+    public void testFetchIdamAmRoles() {
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        String emailId = "test@email.com";
+        when(userService.getUserByEmailId(auth,emailId)).thenReturn(List.of(userDetails));
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("test");
+        roleAssignmentResponse.setRoleCategory("test");
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+
+        when(roleAssignmentApi.getRoleAssignments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails.toBuilder().data(stringObjectMap).build()).build();
+        Map<String, String> rolesResponse = roleAssignmentService.fetchIdamAmRoles(auth, emailId);
+        Assert.assertFalse(rolesResponse.isEmpty());
     }
 }

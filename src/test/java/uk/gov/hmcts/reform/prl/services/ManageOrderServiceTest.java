@@ -11,9 +11,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -50,7 +53,9 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -87,6 +92,8 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -171,6 +178,15 @@ public class ManageOrderServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private RoleAssignmentApi roleAssignmentApi;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
     private LocalDateTime now;
     @Mock
     private HearingService hearingService;
@@ -180,6 +196,7 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2376,6 +2393,90 @@ public class ManageOrderServiceTest {
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+
+    @Test
+    public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "hearing-centre-admin");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.COURT_ADMIN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeSolicitorFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-solicitor");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        assertEquals(UserRoles.JUDGE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-systemupdate");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForCitizenFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
+    }
+
+
     @Test
     public void testServeOrderCaWithRecipients() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -4198,10 +4299,19 @@ public class ManageOrderServiceTest {
         hearingDataList.add(element(hearingdata));
         manageOrders.setOrdersHearingDetails(hearingDataList);
         manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid, draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .draftOrderCollection(draftOrderCollection)
             .manageOrders(manageOrders).build();
+
         //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setHearingOptionDetailsForTask(
@@ -5005,4 +5115,152 @@ public class ManageOrderServiceTest {
             (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId())
         );
     }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYesForSdo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .sdoDetails(SdoDetails.builder().sdoUrgentHearingDetails(hearingdata).build())
+            .otherDetails(OtherDraftOrderDetails.builder().approvedBy("test").dateCreated(LocalDateTime.now()).build())
+            .manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid, draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .draftOrderCollection(draftOrderCollection)
+            .draftOrdersDynamicList(ElementUtils.asDynamicList(
+                draftOrderCollection,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+            ))
+            .manageOrders(manageOrders).build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(
+            caseData,
+            caseDataUpdated,
+            Event.EDIT_AND_APPROVE_ORDER.getId(),
+            "JUDGE"
+        );
+        assertEquals(
+            HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+            caseDataUpdated.get("hearingOptionSelected")
+        );
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes", caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE", caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNoForSdo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .sdoDetails(SdoDetails.builder()
+                            .sdoSecondHearingDetails(hearingdata)
+                            .sdoUrgentHearingDetails(hearingdata)
+                            .sdoFhdraHearingDetails(hearingdata)
+                            .sdoPermissionHearingDetails(hearingdata)
+                            .sdoDraHearingDetails(hearingdata)
+                            .sdoSettlementHearingDetails(hearingdata)
+                            .sdoDirectionsForFactFindingHearingDetails(hearingdata)
+                            .build())
+            .otherDetails(OtherDraftOrderDetails.builder().approvedBy("test").dateCreated(LocalDateTime.now()).build())
+            .manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid, draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData,
+                                                          caseDataUpdated,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          "JUDGE");
+        assertEquals(
+            "multipleOptionSelected",
+            caseDataUpdated.get("hearingOptionSelected")
+        );
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes", caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE", caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourneyForSdo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoSecondHearingDetails(hearingdata)
+                                        .sdoUrgentHearingDetails(hearingdata)
+                                        .sdoFhdraHearingDetails(hearingdata)
+                                        .sdoPermissionHearingDetails(hearingdata)
+                                        .sdoDraHearingDetails(hearingdata)
+                                        .sdoSettlementHearingDetails(hearingdata)
+                                        .sdoDirectionsForFactFindingHearingDetails(hearingdata)
+                                        .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData,
+                                                          caseDataUpdated,
+                                                          Event.MANAGE_ORDERS.getId(),
+                                                          "JUDGE");
+        assertEquals(
+            "multipleOptionSelected",
+            caseDataUpdated.get("hearingOptionSelected")
+        );
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertNull(caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertNull(caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
 }

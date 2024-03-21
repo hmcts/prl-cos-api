@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -393,7 +394,7 @@ public class ServiceOfApplicationService {
                                                                      PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY
                                                                  )));
                     } catch (IOException e) {
-                        log.error("Failed to serve email to Local Authority");
+                        log.error("Failed to serve email to Local Authority", e);
                     }
                 }
             }
@@ -918,8 +919,7 @@ public class ServiceOfApplicationService {
             }
             responsibleForService = getResponsibleForService(caseData);
             if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                soaWaMap.put("isOccupationOrderSelected", caseData.getTypeOfApplicationOrders().getOrderType().contains(
-                    FL401OrderTypeEnum.occupationOrder) ? YES : NO);
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
             }
             soaWaMap.put("isC8CheckNeeded", isC8CheckNeeded);
         } else if (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)) {
@@ -928,9 +928,19 @@ public class ServiceOfApplicationService {
             responsibleForService = (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
                 && caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() != null)
                 ? caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() : null;
+            if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
+            }
         }
         soaWaMap.put("responsibleForService", responsibleForService);
         return soaWaMap;
+    }
+
+    private String isOccupationOrderSelected(TypeOfApplicationOrders typeOfApplicationOrders) {
+        return null != typeOfApplicationOrders
+            && null != typeOfApplicationOrders.getOrderType()
+            && typeOfApplicationOrders.getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder) ? YES : NO;
     }
 
     private String getResponsibleForService(CaseData caseData) {
@@ -1219,7 +1229,7 @@ public class ServiceOfApplicationService {
                             SERVED_PARTY_RESPONDENT
                         )));
                     } catch (Exception e) {
-                        log.error("Failed to send email to respondent solicitor {}", e.getMessage());
+                        log.error("Failed to send email to respondent solicitor {}", e);
                     }
                 } else {
                     CaseInvite caseInvite = getCaseInvite(selectedRespondent.getId(),caseInvites);
@@ -1254,7 +1264,7 @@ public class ServiceOfApplicationService {
                                                  SERVED_PARTY_APPLICANT
                                              )));
         } catch (Exception e) {
-            log.error("Failed to send notification to applicant {}", e.getMessage());
+            log.error("Failed to send notification to applicant {}", e);
         }
     }
 
@@ -1414,7 +1424,7 @@ public class ServiceOfApplicationService {
                                                                                            name
                                                            ));
         } catch (Exception e) {
-            log.error("Failed to generate cover sheet {}", e.getMessage());
+            log.error("Failed to generate cover sheet {}", e);
         }
         return null;
     }
@@ -2504,7 +2514,7 @@ public class ServiceOfApplicationService {
                         ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
                         PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
-                log.error("Failed to serve application via email notification to La {}", e.getMessage());
+                log.error("Failed to serve application via email notification to La {}", e);
             }
         }
     }
@@ -2742,8 +2752,11 @@ public class ServiceOfApplicationService {
 
             if (null != caseData.getOrderCollection()) {
                 c6aOrderIds = caseData.getOrderCollection().stream()
-                    .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
-                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                    .filter(element -> element.getValue() != null && (element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString())
+                        || element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue())
+                    ))
                     .map(s -> s.getId().toString()).toList();
             }
 
