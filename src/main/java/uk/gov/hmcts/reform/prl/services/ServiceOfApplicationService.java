@@ -132,6 +132,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -1938,15 +1939,10 @@ public class ServiceOfApplicationService {
     }
 
     public boolean isCaApplicantRepresented(CaseData caseData) {
-        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-
-        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
-            List<PartyDetails> applicantsRepBySolicitor = applicantsWrapped.get()
-                .stream()
-                .map(Element::getValue).filter(CaseUtils::hasLegalRepresentation).toList();
-            return !applicantsRepBySolicitor.isEmpty();
-        }
-        return false;
+        return nullSafeCollection(caseData.getApplicants())
+            .stream()
+            .map(Element::getValue)
+            .anyMatch(CaseUtils::hasLegalRepresentation);
     }
 
     private boolean isDaApplicantRepresented(CaseData caseData) {
