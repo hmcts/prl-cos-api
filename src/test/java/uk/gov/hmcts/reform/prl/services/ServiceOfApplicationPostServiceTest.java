@@ -184,7 +184,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         assertNotNull(serviceOfApplicationPostService
                          .sendPostNotificationToParty(caseData,
-                                                      AUTH, partyDetails, documentList, SERVED_PARTY_OTHER));
+                                                      AUTH, partyDetailsElement, documentList, SERVED_PARTY_OTHER));
 
     }
 
@@ -266,7 +266,7 @@ public class ServiceOfApplicationPostServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetterGeneratedDocInfo(caseData,
+                          .getCoverSheets(caseData,
                                                        AUTH, address, "test name"));
 
     }
@@ -349,7 +349,7 @@ public class ServiceOfApplicationPostServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetterGeneratedDocInfo(caseData,
+                          .getCoverSheets(caseData,
                                                           AUTH, address, "test name"));
 
     }
@@ -428,11 +428,13 @@ public class ServiceOfApplicationPostServiceTest {
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(Mockito.anyString(), Mockito.anyString(),
                                                 Mockito.anyString(), Mockito.anyString(),
-                                                Mockito.any(List.class))).thenReturn(uploadResponse);
+                                                Mockito.anyList())).thenReturn(uploadResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100"));
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100", caseData));
 
 
     }
@@ -515,7 +517,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401"));
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
 
     }
@@ -557,7 +559,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                                           AUTH, address, "test name"));
 
     }
@@ -582,7 +584,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                           AUTH, address, "test name"));
 
     }
@@ -606,7 +608,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertTrue(serviceOfApplicationPostService
-                          .getCoverLetter(caseData,
+                          .getCoverSheets(caseData,
                                           AUTH, address, "test name").isEmpty());
 
     }
@@ -766,9 +768,9 @@ public class ServiceOfApplicationPostServiceTest {
     public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
-        GeneratedDocumentInfo generatedDocumentInfo = serviceOfApplicationPostService
-            .getCoverLetterGeneratedDocInfo(caseData,AUTH,address,"test name");
-        assertEquals(null, generatedDocumentInfo);
+        List<Document> coversheets = serviceOfApplicationPostService
+            .getCoverSheets(caseData,AUTH,address,"test name");
+        assertEquals(0, coversheets.size());
     }
 
     @Test
@@ -815,7 +817,7 @@ public class ServiceOfApplicationPostServiceTest {
         CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
-                                                                        partyDetails, documentList, "test name");
+                                                                        element(partyDetails), documentList, "test name");
         assertNotNull(bulkPrintOrderDetail);
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
@@ -863,7 +865,7 @@ public class ServiceOfApplicationPostServiceTest {
         CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
-                                                                        partyDetails, documentList, "test name");
+                                                                        element(partyDetails), documentList, "test name");
         assertNotNull(bulkPrintOrderDetail);
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());

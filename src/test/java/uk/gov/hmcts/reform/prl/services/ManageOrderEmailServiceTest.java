@@ -949,7 +949,7 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData,"testAuth", address.getPostalAddress(),"Test"))
+        when(serviceOfApplicationPostService.getCoverSheets(caseData,"testAuth", address.getPostalAddress(),"Test"))
             .thenThrow(new RuntimeException());
 
         Map<String, Object> dataMap = new HashMap<>();
@@ -1319,11 +1319,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -1369,11 +1364,6 @@ public class ManageOrderEmailServiceTest {
                               .cafcassEmailId("test").build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -1438,11 +1428,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -1660,7 +1645,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, otherPerson.getAddress(),
                                                             otherPerson.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
@@ -1697,7 +1682,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, respondent.getAddress(),
                                                             respondent.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
@@ -1758,7 +1743,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -2574,14 +2559,9 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
         UUID bulkPrintId = UUID.randomUUID();
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(bulkPrintId);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -2651,14 +2631,9 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
         UUID bulkPrintId = UUID.randomUUID();
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(bulkPrintId);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -2716,13 +2691,8 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         Map<String, Object> dataMap = new HashMap<>();
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
