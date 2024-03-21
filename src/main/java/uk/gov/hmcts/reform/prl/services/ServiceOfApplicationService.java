@@ -1941,12 +1941,9 @@ public class ServiceOfApplicationService {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
-            List<PartyDetails> applicants = applicantsWrapped.get()
+            List<PartyDetails> applicantsRepBySolicitor = applicantsWrapped.get()
                 .stream()
-                .map(Element::getValue).toList();
-            List<PartyDetails> applicantsRepBySolicitor = applicants.stream()
-                .filter(CaseUtils::hasLegalRepresentation).toList();
-
+                .map(Element::getValue).filter(CaseUtils::hasLegalRepresentation).toList();
             return !applicantsRepBySolicitor.isEmpty();
         }
         return false;
