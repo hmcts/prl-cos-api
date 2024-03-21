@@ -142,7 +142,7 @@ public class StmtOfServImplService {
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
                 );
-                caseDataUpdateMap.put("unServedRespondentPack", null);
+                caseDataUpdateMap.put("personalServiceUnServedRespondentPack", null);
             }
             elementList.add(element(recipient));
         }
@@ -216,7 +216,7 @@ public class StmtOfServImplService {
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
-            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedRespondentPack(null).build())
+            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().personalServiceUnServedRespondentPack(null).build())
             .build();
     }
 
@@ -242,7 +242,7 @@ public class StmtOfServImplService {
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
-        SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
@@ -294,28 +294,7 @@ public class StmtOfServImplService {
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            List<Element<Document>> packDocs = new ArrayList<>();
-            caseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
-                                                                                     Templates.PRL_LET_ENG_RE5
-                    )));
-                }
-            });
-            packDocs.addAll(unServedRespondentPack.getPackDocument());
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty("Applicant Lip")
-                                             .bulkPrintId("Respondent will be served personally by Applicant LIP")
-                                             .printedDocs(String.join(",", packDocs.stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                             .partyIds(getPartyIds(caseTypeOfApplication,
-                                                                   caseData.getRespondents(),
-                                                                   caseData.getRespondentsFL401()))
-                                             .build()));
+            handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails, caseTypeOfApplication);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -325,6 +304,45 @@ public class StmtOfServImplService {
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private void handlePersonalServiceByUnrepresentedApplicantLip(CaseData caseData, String authorization, SoaPack unServedRespondentPack, List<Element<BulkPrintDetails>> bulkPrintDetails, String caseTypeOfApplication) {
+        List<Element<Document>> packDocs = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getRespondents().forEach(respondent -> {
+                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                          caseData, respondent,
+                                                                                                          Templates.PRL_LET_ENG_RE5
+                    )));
+                }
+            });
+        } else {
+            if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())) {
+                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                      caseData,
+                                                                                                      element(caseData.getRespondentsFL401().getPartyId(),
+                                                                                                              caseData.getRespondentsFL401()),
+                                                                                                      Templates.PRL_LET_ENG_RE5
+                )));
+            }
+        }
+
+        packDocs.addAll(unServedRespondentPack.getPackDocument());
+        bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                         .servedParty("Applicant Lip")
+                                         .bulkPrintId("Respondent will be served personally by Applicant LIP")
+                                         .printedDocs(String.join(",", packDocs.stream()
+                                             .map(Element::getValue)
+                                             .map(Document::getDocumentFileName).toList()))
+                                         .printDocs(packDocs)
+                                         .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+                                                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                         .partyIds(getPartyIds(
+                                             caseTypeOfApplication,
+                                             caseData.getRespondents(),
+                                             caseData.getRespondentsFL401()))
+                                         .build()));
     }
 
     private String getPartyIds(String caseTypeOfApplication,
