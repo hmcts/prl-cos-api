@@ -580,6 +580,7 @@
           }
         }
       ],
+      "isApplicantRepresented" : null,
       "newOrdersRestrainingDocument": null,
       "setOutReasonsBelow": null,
       "allegationsOfHarmRevisedDATable": [
@@ -4075,8 +4076,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "No",
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -4114,8 +4113,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "Yes",
-            "representativeLastName": "Solicitor Jr",
-            "representativeFirstName": "Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -4153,8 +4150,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "Yes",
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Sr Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -5203,7 +5198,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant1@example.net",
             "gender": "male",
@@ -5646,7 +5641,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitor@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
@@ -5669,8 +5663,6 @@
             "isAddressConfidential": "No",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -5696,7 +5688,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant2@example.net",
             "gender": "male",
@@ -6139,7 +6131,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitorjr@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
@@ -6162,8 +6153,6 @@
             "isAddressConfidential": "Yes",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor Jr",
-            "representativeFirstName": "Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -6189,7 +6178,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant3@example.net",
             "gender": "female",
@@ -6632,7 +6621,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitorsr@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
@@ -6655,8 +6643,6 @@
             "isAddressConfidential": "Yes",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Sr Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -7202,8 +7188,6 @@
             "isAddressConfidential": null,
             "isCurrentAddressKnown": "No",
             "relationshipToChildren": null,
-            "representativeLastName": null,
-            "representativeFirstName": null,
             "canYouProvidePhoneNumber": "No",
             "applicantPreferredContact": [
 
