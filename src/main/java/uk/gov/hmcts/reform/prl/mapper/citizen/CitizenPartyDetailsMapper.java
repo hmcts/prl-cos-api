@@ -153,7 +153,8 @@ public class CitizenPartyDetailsMapper {
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
-            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
+                .equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
                     citizenUpdatedCaseData.getPartyDetails(),
                     caseData.getApplicantsFL401(),
@@ -164,7 +165,8 @@ public class CitizenPartyDetailsMapper {
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
-            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
+                .equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
                     citizenUpdatedCaseData.getPartyDetails(),
                     caseData.getRespondentsFL401(),
