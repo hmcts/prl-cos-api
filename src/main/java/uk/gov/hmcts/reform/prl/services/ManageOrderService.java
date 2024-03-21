@@ -1031,7 +1031,7 @@ public class ManageOrderService {
             && childOption != null && childOption.getValue() != null) {
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && childOption != null && childOption.getListItems() != null) {
+            && childOption != null && Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
             return getChildNames(childOption.getListItems());
         }
         return null;
