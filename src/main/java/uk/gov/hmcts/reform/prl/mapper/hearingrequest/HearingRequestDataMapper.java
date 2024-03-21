@@ -87,7 +87,7 @@ public class HearingRequestDataMapper {
                     hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
                 }
                 if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
-                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Applicant1)"));
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
                 }
                 if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
                     hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
