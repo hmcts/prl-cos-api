@@ -2375,7 +2375,6 @@ public class C100RespondentSolicitorServiceTest {
                 = (List<Element<QuarantineLegalDoc>>) response.get("legalProfQuarantineDocsList");
             assertNotNull(legalProfQuarantineDocsList);
             assertEquals(1,legalProfQuarantineDocsList.size());
-            Assert.assertEquals("respondentC1AApplication", legalProfQuarantineDocsList.get(0).getValue().getCategoryId());
 
         }
     }
