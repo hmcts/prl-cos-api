@@ -61,7 +61,12 @@ public class CitizenCaseUpdateController {
                 citizenUpdatedCaseData,
                 accessCode
             );
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("{} is not successful for the case {}", eventId, caseId);
+                throw new RuntimeException("Citizen party update failed for this transaction");
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
