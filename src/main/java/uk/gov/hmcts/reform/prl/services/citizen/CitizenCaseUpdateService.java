@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.LINK_CITIZEN;
 
@@ -46,40 +46,40 @@ public class CitizenCaseUpdateService {
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
 
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent;
-        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
+        Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
 
         if (LINK_CITIZEN.equals(caseEvent)) {
-            citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(
+            citizenUpdatePartyDataContent = Optional.of(new CitizenUpdatePartyDataContent(
                 caseService.getCaseDataMapToLinkCitizen(
                     accessCode,
                     dbCaseData,
                     startAllTabsUpdateDataContent.userDetails()
                 ),
                 dbCaseData
-            );
+            ));
 
         } else {
-            citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
-                citizenUpdatedCaseData,
-                dbCaseData,
-                partyType,
+            citizenUpdatePartyDataContent = Optional.ofNullable(citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+                dbCaseData, citizenUpdatedCaseData,
                 caseEvent
-            );
+            ));
         }
-        log.info("*************** Going to update party details received from Citizen");
-        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            citizenUpdatePartyDataContent.updatedCaseDataMap(),
-            startAllTabsUpdateDataContent.userDetails()
-        );
+        CaseDetails caseDetails = null;
+        if (citizenUpdatePartyDataContent.isPresent()) {
+            log.info("*************** Going to update party details received from Citizen");
+            caseDetails = allTabService.submitUpdateForSpecificUserEvent(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                citizenUpdatePartyDataContent.get().updatedCaseDataMap(),
+                startAllTabsUpdateDataContent.userDetails()
+            );
 
-        if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
-            log.info("*************** Going to refresh all tabs after updating citizen party details");
-            return allTabService.updateAllTabsIncludingConfTab(caseId);
+            if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
+                log.info("*************** Going to refresh all tabs after updating citizen party details");
+                return allTabService.updateAllTabsIncludingConfTab(caseId);
+            }
         }
 
         return caseDetails;

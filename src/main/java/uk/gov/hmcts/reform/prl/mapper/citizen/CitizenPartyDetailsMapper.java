@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
@@ -42,113 +43,139 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(UpdateCaseData citizenUpdatedCaseData,
-                                                                CaseData dbCaseData,
-                                                                PartyEnum partyType,
+    public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
+                                                                UpdateCaseData citizenUpdatedCaseData,
                                                                 CaseEvent caseEvent) {
         log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
-
-        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+        log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for party type:: " + citizenUpdatedCaseData.getPartyType());
+        Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
-            dbCaseData = updatingPartyDetailsCa(dbCaseData, citizenUpdatedCaseData.getPartyDetails(), partyType, caseEvent);
+            citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsCa(
+                dbCaseData,
+                citizenUpdatedCaseData,
+                caseEvent
+            ));
         } else {
-            dbCaseData = updatingPartyDetailsDa(dbCaseData, citizenUpdatedCaseData.getPartyDetails(), partyType, caseEvent);
+            citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsDa(
+                dbCaseData,
+                citizenUpdatedCaseData,
+                caseEvent
+            ));
         }
 
-        if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
-            generateAnswersForNoc(dbCaseData, caseDataMapToBeUpdated);
-            //check if anything needs to do for citizen flags
-        }
-
-        putUpdatedApplicantRespondentDetailsInMap(dbCaseData, caseDataMapToBeUpdated);
-        log.info("Updated caseDataMap =>" + caseDataMapToBeUpdated);
-        log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
-        return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, dbCaseData);
-    }
-
-    private void generateAnswersForNoc(CaseData caseData, Map<String, Object> caseDataMapToBeUpdated) {
-        if (caseDataMapToBeUpdated != null) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
-                caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
-            } else {
-                caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-                caseDataMapToBeUpdated.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+        if (citizenUpdatePartyDataContent.isPresent()) {
+            if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+                generateAnswersForNoc(citizenUpdatePartyDataContent.get());
+                //check if anything needs to do for citizen flags like RA amend journey
             }
+
+            log.info("Updated caseDataMap =>" + citizenUpdatePartyDataContent.get().updatedCaseDataMap());
+            log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
+        } else {
+            log.error("{} is not successful for the case {}", caseEvent.getValue(), dbCaseData.getId());
+            throw new RuntimeException("Citizen party update failed for this transaction");
+        }
+        return citizenUpdatePartyDataContent.get();
+    }
+
+    private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent) {
+        CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                caseData,
+                CARESPONDENT
+            ));
+            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                caseData,
+                CAAPPLICANT
+            ));
+        } else {
+            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                caseData,
+                DARESPONDENT
+            ));
+            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                caseData,
+                DAAPPLICANT
+            ));
         }
     }
 
-    private void putUpdatedApplicantRespondentDetailsInMap(CaseData caseData, Map<String, Object> caseDataMapToBeUpdated) {
-        if (caseDataMapToBeUpdated != null) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
-                caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
-            } else {
-                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-            }
-        }
-    }
-
-    private CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails citizenProvidedPartyDetails,
-                                                   PartyEnum partyType, CaseEvent caseEvent) {
+    private CitizenUpdatePartyDataContent updatingPartyDetailsCa(CaseData caseData,
+                                                                 UpdateCaseData citizenUpdatedCaseData,
+                                                                 CaseEvent caseEvent) {
         log.info("Inside updatingPartyDetailsCa");
-        if (PartyEnum.applicant.equals(partyType)) {
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+        if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    citizenProvidedPartyDetails.getUser().getIdamId()
+                    citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
+            caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             caseData = caseData.toBuilder().applicants(applicants).build();
-        } else if (PartyEnum.respondent.equals(partyType)) {
+            return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
+        } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
-                    citizenProvidedPartyDetails.getUser().getIdamId()
+                    citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
                 ))
                 .findFirst()
                 .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
+                    PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
                     respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
+
+            caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
+            caseData = caseData.toBuilder().respondents(respondents).build();
+            return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         }
-        return caseData;
+        return null;
     }
 
-    private CaseData updatingPartyDetailsDa(CaseData caseData,
-                                            PartyDetails citizenProvidedPartyDetails,
-                                            PartyEnum partyType,
+    private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
+                                                                 UpdateCaseData citizenUpdatedCaseData,
                                             CaseEvent caseEvent) {
         log.info("Inside updatingPartyDetailsDa");
         PartyDetails partyDetails;
-        if (PartyEnum.applicant.equals(partyType)) {
-            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
-                                                                  caseData.getApplicantsFL401(),
-                                                                  caseEvent);
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+        if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(
+                    citizenUpdatedCaseData.getPartyDetails(),
+                    caseData.getApplicantsFL401(),
+                    caseEvent
+                );
+                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
-            if (citizenProvidedPartyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                partyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenProvidedPartyDetails,
-                                                                  caseData.getRespondentsFL401(),
-                                                                  caseEvent);
+            if (citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                partyDetails = getUpdatedPartyDetailsBasedOnEvent(
+                    citizenUpdatedCaseData.getPartyDetails(),
+                    caseData.getRespondentsFL401(),
+                    caseEvent
+                );
+                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         }
-        return caseData;
+        return null;
     }
 
     private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
@@ -283,26 +310,26 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private CitizenFlags updateCitizenFlags(CitizenFlags existingCitizenFlgs, CitizenFlags updatedCitizenFlags) {
-        return existingCitizenFlgs.toBuilder()
+    private CitizenFlags updateCitizenFlags(CitizenFlags existingCitizenFlags, CitizenFlags updatedCitizenFlags) {
+        return existingCitizenFlags.toBuilder()
             .isApplicationViewed(isNotEmpty(updatedCitizenFlags.getIsApplicationViewed())
                                      ? updatedCitizenFlags.getIsApplicationViewed()
-                                     : existingCitizenFlgs.getIsApplicationViewed())
+                                     : existingCitizenFlags.getIsApplicationViewed())
             .isAllDocumentsViewed(isNotEmpty(updatedCitizenFlags.getIsAllDocumentsViewed())
                                       ? updatedCitizenFlags.getIsAllDocumentsViewed()
-                                      : existingCitizenFlgs.getIsAllDocumentsViewed())
+                                      : existingCitizenFlags.getIsAllDocumentsViewed())
             .isAllegationOfHarmViewed(isNotEmpty(updatedCitizenFlags.getIsAllegationOfHarmViewed())
                                       ? updatedCitizenFlags.getIsAllegationOfHarmViewed()
-                                      : existingCitizenFlgs.getIsAllegationOfHarmViewed())
+                                      : existingCitizenFlags.getIsAllegationOfHarmViewed())
             .isResponseInitiated(isNotEmpty(updatedCitizenFlags.getIsResponseInitiated())
                                           ? updatedCitizenFlags.getIsResponseInitiated()
-                                          : existingCitizenFlgs.getIsResponseInitiated())
+                                          : existingCitizenFlags.getIsResponseInitiated())
             .isApplicationToBeServed(isNotEmpty(updatedCitizenFlags.getIsApplicationToBeServed())
                                      ? updatedCitizenFlags.getIsApplicationToBeServed()
-                                     : existingCitizenFlgs.getIsApplicationToBeServed())
+                                     : existingCitizenFlags.getIsApplicationToBeServed())
             .isStatementOfServiceProvided(isNotEmpty(updatedCitizenFlags.getIsStatementOfServiceProvided())
                                          ? updatedCitizenFlags.getIsStatementOfServiceProvided()
-                                         : existingCitizenFlgs.getIsStatementOfServiceProvided())
+                                         : existingCitizenFlags.getIsStatementOfServiceProvided())
             .build();
     }
 
