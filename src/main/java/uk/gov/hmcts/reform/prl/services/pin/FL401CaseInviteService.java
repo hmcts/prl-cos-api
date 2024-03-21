@@ -67,7 +67,6 @@ public class FL401CaseInviteService implements CaseInviteService {
             CaseInvite caseInvite = generateCaseInvite(partyDetails, No);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails, caseData);
-            log.info("Case invite generated and sent" + caseInvite);
         }
         return caseInvites;
     }
@@ -80,7 +79,6 @@ public class FL401CaseInviteService implements CaseInviteService {
             CaseInvite caseInvite = generateCaseInvite(partyDetails, Yes);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails, caseData);
-            log.info("Case invite generated and sent" + caseInvite);
         }
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
