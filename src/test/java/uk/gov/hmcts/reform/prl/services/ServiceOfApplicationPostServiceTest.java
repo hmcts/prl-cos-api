@@ -267,7 +267,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
                           .getCoverSheets(caseData,
-                                                       AUTH, address, "test name"));
+                                                       AUTH, address, "test name", ));
 
     }
 
@@ -350,7 +350,7 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         assertNotNull(serviceOfApplicationPostService
                           .getCoverSheets(caseData,
-                                                          AUTH, address, "test name"));
+                                                          AUTH, address, "test name", ));
 
     }
 
@@ -560,7 +560,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
                           .getCoverSheets(caseData,
-                                                          AUTH, address, "test name"));
+                                                          AUTH, address, "test name", ));
 
     }
 
@@ -585,7 +585,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
                           .getCoverSheets(caseData,
-                                          AUTH, address, "test name"));
+                                          AUTH, address, "test name", ));
 
     }
 
@@ -609,7 +609,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertTrue(serviceOfApplicationPostService
                           .getCoverSheets(caseData,
-                                          AUTH, address, "test name").isEmpty());
+                                          AUTH, address, "test name", ).isEmpty());
 
     }
 
@@ -769,7 +769,7 @@ public class ServiceOfApplicationPostServiceTest {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
         List<Document> coversheets = serviceOfApplicationPostService
-            .getCoverSheets(caseData,AUTH,address,"test name");
+            .getCoverSheets(caseData,AUTH,address,"test name", );
         assertEquals(0, coversheets.size());
     }
 
