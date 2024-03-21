@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -658,6 +659,24 @@ public class HearingDataService {
                             caseHearing.get().getHearingTypeValue()
                         ))
                         .build();
+                }
+            }
+            //Populate C100 names
+            log.info("hearingData.getApplicantName1 : {}", hearingData.getApplicantName1());
+            log.info("hearingData.getRespondentName1 : {}", hearingData.getRespondentName1());
+            log.info("hearingData.getApplicantSolicitor1 : {}", hearingData.getApplicantSolicitor1());
+            if (getPartyNameList(caseData.getApplicants()).size() > 0 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
+                caseData)) {
+                if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                }
+                if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                }
+                if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                                                              " (Applicant solicitor)"));
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
