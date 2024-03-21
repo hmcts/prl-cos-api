@@ -31,8 +31,8 @@ public enum OrdersServingRespondentsEnum {
     }
 
     @JsonCreator
-    public static SoaSolicitorServingRespondentsEnum getValue(String key) {
-        return SoaSolicitorServingRespondentsEnum.valueOf(key);
+    public static OrdersServingRespondentsEnum getValue(String key) {
+        return OrdersServingRespondentsEnum.valueOf(key);
     }
 }
 

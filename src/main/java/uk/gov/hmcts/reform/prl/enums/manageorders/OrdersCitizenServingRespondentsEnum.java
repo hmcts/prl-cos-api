@@ -32,7 +32,7 @@ public enum OrdersCitizenServingRespondentsEnum {
     }
 
     @JsonCreator
-    public static SoaCitizenServingRespondentsEnum getValue(String key) {
-        return SoaCitizenServingRespondentsEnum.valueOf(key);
+    public static OrdersCitizenServingRespondentsEnum getValue(String key) {
+        return OrdersCitizenServingRespondentsEnum.valueOf(key);
     }
 }
