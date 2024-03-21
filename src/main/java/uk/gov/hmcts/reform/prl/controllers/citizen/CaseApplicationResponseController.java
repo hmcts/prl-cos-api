@@ -80,7 +80,7 @@ public class CaseApplicationResponseController {
 
         if (caseDetailsReturn != null) {
             log.info("generateC7FinalDocument:: sending notification to applicant solicitor");
-            citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
+           // citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
                 CaseData.class
