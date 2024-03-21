@@ -358,9 +358,6 @@ public class CaseService {
         );
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
-            UUID partyId = null;
-            YesOrNo isApplicant = YesOrNo.Yes;
-
             String systemUpdateUserId = systemUserService.getUserId(anonymousUserToken);
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                 CaseEvent.LINK_CITIZEN,
@@ -378,22 +375,8 @@ public class CaseService {
                 startEventResponse,
                 objectMapper
             );
-            Map<String, Object> caseDataUpdated = new HashMap<>();
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            String userId = userDetails.getId();
-            String emailId = userDetails.getEmail();
-
-            for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
-                if (accessCode.equals(invite.getValue().getAccessCode())) {
-                    partyId = invite.getValue().getPartyId();
-                    isApplicant = invite.getValue().getIsApplicant();
-                    invite.getValue().setHasLinked(YES);
-                    invite.getValue().setInvitedUserId(userId);
-                }
-            }
-            caseDataUpdated.put(CASE_INVITES, caseData.getCaseInvites());
-
-            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
+            Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
             caseRepository.linkDefendant(
                 authorisation,
                 anonymousUserToken,
@@ -403,6 +386,31 @@ public class CaseService {
                 caseDataUpdated
             );
         }
+    }
+
+    public Map<String, Object> getCaseDataMapToLinkCitizen(String accessCode,
+                           CaseData caseData,
+                           UserDetails userDetails) {
+        UUID partyId = null;
+        YesOrNo isApplicant = YesOrNo.Yes;
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        String userId = userDetails.getId();
+        String emailId = userDetails.getEmail();
+
+        for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
+            if (accessCode.equals(invite.getValue().getAccessCode())) {
+                partyId = invite.getValue().getPartyId();
+                isApplicant = invite.getValue().getIsApplicant();
+                invite.getValue().setHasLinked(YES);
+                invite.getValue().setInvitedUserId(userId);
+            }
+        }
+        caseDataUpdated.put(CASE_INVITES, caseData.getCaseInvites());
+
+        processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
+
+        return caseDataUpdated;
     }
 
     private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
