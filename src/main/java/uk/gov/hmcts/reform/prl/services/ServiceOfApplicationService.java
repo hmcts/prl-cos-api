@@ -2835,7 +2835,7 @@ public class ServiceOfApplicationService {
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
             .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        if (caseData.getFinalServedApplicationDetailsList() != null) {
+        if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
             finalServedApplicationDetailsList = new ArrayList<>();

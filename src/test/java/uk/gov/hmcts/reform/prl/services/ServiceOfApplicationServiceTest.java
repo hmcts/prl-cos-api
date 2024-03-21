@@ -68,6 +68,7 @@ import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -78,6 +79,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -546,7 +548,9 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .packDocument(List.of(element(Document.builder()
                                                                                                     .documentFileName("").build())))
@@ -569,8 +573,11 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testsendNotificationsForUnServedLaPack() {
+        List<Element<ServedApplicationDetails>> servedApplDetailsList = new ArrayList<>();
+        servedApplDetailsList.add(element(ServedApplicationDetails.builder().servedAt(testString).build()));
         CaseData caseData = CaseData.builder().id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .finalServedApplicationDetailsList(servedApplDetailsList)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -597,18 +604,50 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedRespondentPacks() {
+    public void testsendNotificationsForUnServedRespondentPackSolicitor() {
+        List<Element<ServedApplicationDetails>> servedApplDetailsList = new ArrayList<>();
+        servedApplDetailsList.add(element(ServedApplicationDetails.builder().servedAt(testString).build()));
+        List<Element<PartyDetails>> applicants = parties;
+        applicants = applicants.stream().map(applicant -> applicant.getValue().toBuilder()
+            .solicitorEmail(testString)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build()).map(ElementUtils::element).toList();
         CaseData caseData = CaseData.builder().id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .finalServedApplicationDetailsList(servedApplDetailsList)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                          .partyIds(List.of(element("test12345")))
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
+                                      .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+    }
+
+    @Test
+    public void testsendNotificationsForUnServedRespondentPacks() {
+        parties = parties.stream()
+            .peek(party -> party.getValue().setContactPreferences(ContactPreferences.digital))
+            .collect(Collectors.toList());
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(parties)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
                                       .unServedRespondentPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.No)
+                                      .unServedCafcassCymruPack(SoaPack.builder()
+                                                                    .partyIds(List.of(element(TEST_UUID)))
+                                                                    .build())
+                                      .applicationServedYesNo(No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
