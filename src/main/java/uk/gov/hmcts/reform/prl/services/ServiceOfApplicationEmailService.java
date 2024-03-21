@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -47,7 +48,6 @@ public class ServiceOfApplicationEmailService {
 
     private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
 
-
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails,
                                                                               List<Document> docs, String servedParty) throws IOException {
@@ -59,25 +59,18 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         sendGovNotifyEmail(
             LanguagePreference.english,
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
             buildCafcassEmail(caseData)
         );
-        emailService.sendSoa(
-            email,
-            EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
-            buildCafcassEmail(caseData),
-            LanguagePreference.english
-        );
         return EmailNotificationDetails.builder()
             .emailAddress(email)
             .servedParty(servedParty)
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
-            .timeStamp(currentDate).build();
+            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseData caseData) {
@@ -122,13 +115,13 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter
-                                   .ofPattern("dd MMM yyyy HH:mm:ss")
-                                   .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime))
+                    .build();
             }
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
         }
+        log.error("there is a failure in sending email for party {}", servedParty);
         return null;
     }
 
@@ -156,9 +149,7 @@ public class ServiceOfApplicationEmailService {
                     .servedParty(servedParty)
                     .docs(wrapElements(docs))
                     .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                    .timeStamp(DateTimeFormatter
-                                   .ofPattern("dd MMM yyyy HH:mm:ss")
-                                   .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+                    .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime)).build();
             }
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
