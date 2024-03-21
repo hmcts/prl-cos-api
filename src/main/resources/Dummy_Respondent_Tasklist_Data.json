@@ -446,13 +446,6 @@
   "respOrdersUndertakingInPlaceEndDate": "2023-02-01",
   "respPreviousAbductionThreatsDetails": "yes many",
   "respWhichChildrenAreRiskSexualAbuse": null,
-  "responseToAllegationsOfHarmDocument": {
-    "category_id": null,
-    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9a0b5ed6-eec0-4380-8513-dcf16eb64122",
-    "document_filename": "response_to_applicant_aoh.pdf",
-    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9a0b5ed6-eec0-4380-8513-dcf16eb64122/binary",
-    "document_creation_date": null
-  },
   "factorsAffectingAbilityToParticipate": "Yes",
   "respAllChildrenAreRiskEmotionalAbuse": null,
   "respAllChildrenAreRiskFinancialAbuse": null,
