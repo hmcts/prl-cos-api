@@ -1192,7 +1192,7 @@ public class C100RespondentSolicitorService {
             dataMap.put("dob", solicitorRepresentedRespondent.getValue().getDateOfBirth());
         }
         if (null != solicitorRepresentedRespondent.getValue().getGender()) {
-            dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+            dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         }
     }
 
@@ -1338,6 +1338,7 @@ public class C100RespondentSolicitorService {
 
         }
         Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
+        log.info("intial data map {}", dataMap);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             Document document = documentGenService.generateSingleDocument(
@@ -1374,11 +1375,11 @@ public class C100RespondentSolicitorService {
                 );
                 caseDataUpdated.put("draftC1ADoc", documentForC1A);
             }
-
+            log.info("intial data map -1 {}", dataMap);
             if (documentLanguage.isGenWelsh()) {
 
                 dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,getChildAbuses(solicitorRepresentedRespondent));
-
+                log.info("intial data map -2 {}", dataMap);
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
