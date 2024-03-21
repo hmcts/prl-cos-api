@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.LINK_CITIZEN;
+
 
 @Slf4j
 @Service
@@ -26,6 +28,8 @@ public class CitizenCaseUpdateService {
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
+    private final CaseService caseService;
+
     public static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
         CaseEvent.KEEP_DETAILS_PRIVATE);
@@ -33,7 +37,8 @@ public class CitizenCaseUpdateService {
     public CaseDetails updateCitizenPartyDetails(String authorisation,
                                                  String caseId,
                                                  String eventId,
-                                                 UpdateCaseData citizenUpdatedCaseData) {
+                                                 UpdateCaseData citizenUpdatedCaseData,
+                                                 String accessCode) {
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("*************** eventId received from " + caseEvent.getValue());
 
@@ -41,15 +46,27 @@ public class CitizenCaseUpdateService {
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
 
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = null;
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent;
         PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
 
-        citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
-            citizenUpdatedCaseData,
-            dbCaseData,
-            partyType,
-            caseEvent
-        );
+        if (LINK_CITIZEN.equals(caseEvent)) {
+            citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(
+                caseService.getCaseDataMapToLinkCitizen(
+                    accessCode,
+                    dbCaseData,
+                    startAllTabsUpdateDataContent.userDetails()
+                ),
+                dbCaseData
+            );
+
+        } else {
+            citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+                citizenUpdatedCaseData,
+                dbCaseData,
+                partyType,
+                caseEvent
+            );
+        }
         log.info("*************** Going to update party details received from Citizen");
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),

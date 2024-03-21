@@ -43,7 +43,8 @@ public class CitizenCaseUpdateController {
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader("accessCode") String accessCode
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
@@ -57,7 +58,8 @@ public class CitizenCaseUpdateController {
                 authorisation,
                 caseId,
                 eventId,
-                citizenUpdatedCaseData
+                citizenUpdatedCaseData,
+                accessCode
             );
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
