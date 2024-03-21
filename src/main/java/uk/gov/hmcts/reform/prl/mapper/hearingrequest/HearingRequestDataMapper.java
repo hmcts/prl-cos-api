@@ -76,6 +76,10 @@ public class HearingRequestDataMapper {
                 isHearingDynamicListItemsNullifyReq,
                 numberOfRespondentSolicitors
             );
+            if (numberOfApplicant > 0) {
+                hearingData.setApplicantName1(getPartyNameList(caseData.getApplicants()).get(0));
+            }
+
         }
     }
 
