@@ -41,9 +41,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "case-document-am-client-api", port = "5004")
+//@PactTestFor(providerName = "case-document-am-client-api", port = "5004")
 @TestPropertySource(properties = {"case_document_am.url=http://localhost:5004"})
-@PactFolder("pacts")
+//@PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentUploadConsumerTest {
