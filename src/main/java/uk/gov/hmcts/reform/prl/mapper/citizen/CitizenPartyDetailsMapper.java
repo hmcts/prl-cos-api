@@ -163,9 +163,9 @@ public class CitizenPartyDetailsMapper {
                     respondents.set(respondents.indexOf(party), updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                        reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
+                       /* reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
                                                         finalCaseData, respondents.indexOf(party), authorisation
-                        );
+                        );*/
                     }
                 });
 
@@ -177,7 +177,7 @@ public class CitizenPartyDetailsMapper {
         return null;
     }
 
-    private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
+    /*private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
                                                  Element<PartyDetails> updatedPartyElement,
                                                  CaseData caseData,
                                                  int respondentIndex,
@@ -202,7 +202,7 @@ public class CitizenPartyDetailsMapper {
                       caseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList());
             throw new CoreCaseDataStoreException(e.getMessage(), e);
         }
-    }
+    }*/
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  UpdateCaseData citizenUpdatedCaseData,
