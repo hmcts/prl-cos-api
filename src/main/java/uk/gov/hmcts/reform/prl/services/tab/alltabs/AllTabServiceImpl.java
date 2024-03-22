@@ -290,7 +290,6 @@ public class AllTabServiceImpl implements AllTabsService {
                                                         EventRequestData eventRequestData,
                                                         Map<String, Object> combinedFieldsMap,
                                                         UserDetails userDetails) {
-        UserInfo userInfo = idamClient.getUserInfo(authorisation);
         return ccdCoreCaseDataService.submitUpdate(
             authorisation,
             eventRequestData,
