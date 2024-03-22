@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -11,11 +12,14 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.config.CacheConfiguration.USER_DETAILS_CACHE;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
     private final IdamClient idamClient;
 
+    @Cacheable(value = USER_DETAILS_CACHE)
     public UserDetails getUserDetails(String authorisation) {
         return idamClient.getUserDetails(authorisation);
     }

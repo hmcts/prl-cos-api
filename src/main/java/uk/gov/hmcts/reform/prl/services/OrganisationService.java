@@ -4,6 +4,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import javax.ws.rs.NotFoundException;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.config.CacheConfiguration.ORGANISATION_CACHE;
 
 @Service
 @Slf4j
@@ -98,6 +100,7 @@ public class OrganisationService {
         return respondent;
     }
 
+    @Cacheable(value = ORGANISATION_CACHE)
     public Organisations getOrganisationDetails(String userToken, String organisationID) {
         log.trace("Fetching organisation details for organisation id: {}", organisationID);
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);

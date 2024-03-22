@@ -51,7 +51,7 @@ spring:
   main:
     allow-circular-references: true
   cache:
-    cache-names: systemUserCache
+    cache-names: systemUserCache,userDetailsCache,organisationCache
     caffeine:
       spec: expireAfterAccess=3600s
 
