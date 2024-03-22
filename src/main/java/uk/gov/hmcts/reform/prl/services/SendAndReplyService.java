@@ -70,6 +70,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OR_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -394,7 +395,8 @@ public class SendAndReplyService {
                                            .applicationsList(getOtherApplicationsList(caseData))
                                            .submittedDocumentsList(documentCategoryList)
                                            .externalMessageWhoToSendTo(DynamicMultiSelectList.builder()
-                                                                           .listItems(getRecipientList(caseData))
+                                                                           .listItems(
+                                                                               getExternalMessageRecipientEligibleList(caseData))
                                                                            .build())
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
@@ -410,7 +412,7 @@ public class SendAndReplyService {
             .build();
     }
 
-    private List<DynamicMultiselectListElement> getRecipientList(CaseData caseData) {
+    private List<DynamicMultiselectListElement> getExternalMessageRecipientEligibleList(CaseData caseData) {
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
@@ -425,6 +427,8 @@ public class SendAndReplyService {
             applicantRespondentList.addAll(respondentList);
         }
         applicantRespondentList.add(DynamicMultiselectListElement.builder().code("OTHER").label(OTHER).build());
+        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("cafcassOrCafcassCymru").label(CAFCASS_OR_CAFCASS_CYMRU).build());
+
         return applicantRespondentList;
     }
 
