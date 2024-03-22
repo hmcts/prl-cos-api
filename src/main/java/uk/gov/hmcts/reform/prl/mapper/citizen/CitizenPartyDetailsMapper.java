@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
@@ -358,15 +360,19 @@ public class CitizenPartyDetailsMapper {
 
         boolean isPhoneNoNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber());
 
+        boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
+
+        boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
+
         return existingPartyDetails.toBuilder()
-            .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
             .email(isEmailNeedsToUpdate
                        ? citizenProvidedPartyDetails.getEmail() : existingPartyDetails.getEmail())
-            .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
             //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
-            .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : YesOrNo.No)
+            .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
                                                    ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
@@ -375,9 +381,40 @@ public class CitizenPartyDetailsMapper {
             .lastName(citizenProvidedPartyDetails.getLastName())
             .previousName(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPreviousName())
                               ? citizenProvidedPartyDetails.getPreviousName() : existingPartyDetails.getPreviousName())
+            .dateOfBirth(isDateOfBirthNeedsToUpdate
+                             ? citizenProvidedPartyDetails.getDateOfBirth() : existingPartyDetails.getDateOfBirth())
+            .isDateOfBirthKnown(isDateOfBirthNeedsToUpdate
+                                    ? YesOrNo.Yes : existingPartyDetails.getIsDateOfBirthKnown())
+            .placeOfBirth(isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
+                              ? citizenProvidedPartyDetails.getPlaceOfBirth() : existingPartyDetails.getPlaceOfBirth())
+            .isPlaceOfBirthKnown(isPlaceOfBirthNeedsToUpdate
+                                     ? YesOrNo.Yes : existingPartyDetails.getIsPlaceOfBirthKnown())
             .response(existingPartyDetails.getResponse().toBuilder()
-                          .citizenDetails(citizenProvidedPartyDetails.getResponse().getCitizenDetails())
+                          .citizenDetails(mapResponseCitizenDetails(citizenProvidedPartyDetails))
                           .build())
+            .build();
+    }
+
+    private CitizenDetails mapResponseCitizenDetails(PartyDetails citizenProvidedPartyDetails) {
+        return CitizenDetails.builder()
+            .firstName(citizenProvidedPartyDetails.getFirstName())
+            .lastName(citizenProvidedPartyDetails.getLastName())
+            .dateOfBirth(isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth())
+                             ? citizenProvidedPartyDetails.getDateOfBirth() : null)
+            .placeOfBirth(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth())
+                              ? citizenProvidedPartyDetails.getPlaceOfBirth() : null)
+            .previousName(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPreviousName())
+                              ? citizenProvidedPartyDetails.getPreviousName() : null)
+            .contact(Contact.builder()
+                         .email(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getEmail())
+                             ? citizenProvidedPartyDetails.getEmail() : null)
+                         .phoneNumber(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber())
+                                          ? citizenProvidedPartyDetails.getPhoneNumber() : null)
+                         .build())
+            .address(isNotEmpty(citizenProvidedPartyDetails.getAddress())
+                         && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1())
+                         ? citizenProvidedPartyDetails.getAddress() : null)
+            //.addressHistory(AddressHistory.builder().build())
             .build();
     }
 
