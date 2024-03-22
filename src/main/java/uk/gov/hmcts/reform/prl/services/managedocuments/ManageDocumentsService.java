@@ -204,7 +204,7 @@ public class ManageDocumentsService {
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
-                moveDocumentsToRespectiveCategoriesNew1(
+                moveDocumentsToRespectiveCategoriesNew(
                     quarantineLegalDoc,
                     userDetails,
                     updatedCaseData,
