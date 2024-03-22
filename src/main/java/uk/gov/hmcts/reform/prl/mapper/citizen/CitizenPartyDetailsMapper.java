@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -67,38 +68,44 @@ public class CitizenPartyDetailsMapper {
 
         if (citizenUpdatePartyDataContent.isPresent()) {
             if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
-                generateAnswersForNoc(citizenUpdatePartyDataContent.get());
+                generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
             log.info("Updated caseDataMap =>" + citizenUpdatePartyDataContent.get().updatedCaseDataMap());
             log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
         } else {
             log.error("{} is not successful for the case {}", caseEvent.getValue(), dbCaseData.getId());
-            throw new RuntimeException("Citizen party update failed for this transaction");
+            throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
         }
         return citizenUpdatePartyDataContent.get();
     }
 
-    private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent) {
+    private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
         CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
-                caseData,
-                CARESPONDENT
-            ));
-            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
-                caseData,
-                CAAPPLICANT
-            ));
+            if (PartyEnum.respondent.equals(partyType)) {
+                citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                    caseData,
+                    CARESPONDENT
+                ));
+            } else {
+                citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                    caseData,
+                    CAAPPLICANT
+                ));
+            }
         } else {
-            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
-                caseData,
-                DARESPONDENT
-            ));
-            citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
-                caseData,
-                DAAPPLICANT
-            ));
+            if (PartyEnum.respondent.equals(partyType)) {
+                citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                    caseData,
+                    DARESPONDENT
+                ));
+            } else {
+                citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
+                    caseData,
+                    DAAPPLICANT
+                ));
+            }
         }
     }
 
