@@ -40,6 +40,7 @@ public class DgsService {
                                                   Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
+            log.info("templateName is: {}", templateName);
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(dataMap).build()
