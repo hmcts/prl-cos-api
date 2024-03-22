@@ -248,6 +248,12 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case CONTACT_PREFERENCE -> {
+                return updateCitizenContactPreferenceDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             default -> {
                 //For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseDataForOtherEvents(
@@ -256,6 +262,14 @@ public class CitizenPartyDetailsMapper {
                 );
             }
         }
+    }
+
+    private PartyDetails updateCitizenContactPreferenceDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        //Need to revisit later
+        return existingPartyDetails.toBuilder()
+            .contactPreferences(isNotEmpty(citizenProvidedPartyDetails.getContactPreferences())
+            ? citizenProvidedPartyDetails.getContactPreferences() : existingPartyDetails.getContactPreferences())
+            .build();
     }
 
     private PartyDetails updateCitizenHearingNeedsDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
@@ -319,18 +333,12 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
                                                             : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
-                          .citizenFlags(isCitizenFlagsPresent
-                                            ? updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
-                                                 citizenProvidedPartyDetails.getResponse().getCitizenFlags())
-                                            : existingPartyDetails.getResponse().getCitizenFlags()
-                          )
                           .build())
             .build();
     }
