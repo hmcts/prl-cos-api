@@ -200,7 +200,7 @@ public class CitizenPartyDetailsMapper {
         } catch (Exception e) {
             log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
                       caseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList());
-            throw new CoreCaseDataStoreException("Failed to generate C8 document for respondent", e);
+            throw new CoreCaseDataStoreException(e.getMessage(), e);
         }
     }
 
