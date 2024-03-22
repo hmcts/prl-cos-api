@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -18,6 +21,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
@@ -33,6 +38,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -45,10 +52,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final ObjectMapper objectMapper;
+    private final C100RespondentSolicitorService c100RespondentSolicitorService;
+
+    private final UpdatePartyDetailsService updatePartyDetailsService;
+
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 UpdateCaseData citizenUpdatedCaseData,
-                                                                CaseEvent caseEvent) {
+                                                                CaseEvent caseEvent,
+                                                                String authorisation) {
         log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
         log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for party type:: " + citizenUpdatedCaseData.getPartyType());
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
@@ -56,7 +69,8 @@ public class CitizenPartyDetailsMapper {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsCa(
                 dbCaseData,
                 citizenUpdatedCaseData,
-                caseEvent
+                caseEvent,
+                authorisation
             ));
         } else {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsDa(
@@ -67,7 +81,7 @@ public class CitizenPartyDetailsMapper {
         }
 
         if (citizenUpdatePartyDataContent.isPresent()) {
-            if (CaseEvent.CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+            if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
@@ -111,7 +125,8 @@ public class CitizenPartyDetailsMapper {
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsCa(CaseData caseData,
                                                                  UpdateCaseData citizenUpdatedCaseData,
-                                                                 CaseEvent caseEvent) {
+                                                                 CaseEvent caseEvent,
+                                                                 String authorisation) {
         log.info("Inside updatingPartyDetailsCa");
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -133,6 +148,7 @@ public class CitizenPartyDetailsMapper {
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
+            CaseData finalCaseData = caseData;
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -143,15 +159,49 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
-                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
+                    Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
+                    respondents.set(respondents.indexOf(party), updatedPartyElement);
+
+                    if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
+                                                        finalCaseData, respondents.indexOf(party), authorisation
+                        );
+                    }
                 });
-            caseData = caseData.toBuilder().respondents(respondents).build();
 
             caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
             caseData = caseData.toBuilder().respondents(respondents).build();
+
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         }
         return null;
+    }
+
+    private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
+                                                 Element<PartyDetails> updatedPartyElement,
+                                                 CaseData caseData,
+                                                 int respondentIndex,
+                                                 String authorisation) {
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
+                                                                                    .data(caseData.toMap(objectMapper))
+                                                                                    .build()).build();
+        Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
+            callbackRequest,
+            updatedPartyElement
+        );
+        try {
+            updatePartyDetailsService.populateC8Documents(authorisation,
+                                                          caseDataMapToBeUpdated, caseData, dataMap,
+                                                          updatePartyDetailsService
+                                                              .checkIfConfidentialityDetailsChangedRespondent(
+                                                                  callbackRequest,updatedPartyElement
+                                                              ),
+                                respondentIndex,updatedPartyElement);
+        } catch (Exception e) {
+            log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
+                      caseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList());
+            throw new CoreCaseDataStoreException("Failed to generate C8 document for respondent");
+        }
     }
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
@@ -219,7 +269,7 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case LEGAL_REPRESENTATION -> {
-                return updateCitizenLegalRepresentaionDetails(
+                return updateCitizenLegalRepresentationDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
@@ -248,7 +298,7 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            case CONTACT_PREFERENCE -> {
+            case CITIZEN_CONTACT_PREFERENCE -> {
                 return updateCitizenContactPreferenceDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
@@ -305,7 +355,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenLegalRepresentaionDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenLegalRepresentationDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()

@@ -347,7 +347,7 @@ public class UpdatePartyDetailsService {
 
 
 
-    private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+    public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
         if (partyIndex >= 0) {
