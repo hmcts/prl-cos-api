@@ -617,7 +617,7 @@ public class CaseService {
             ));
         }
 
-        Collections.sort(citizenDocuments, comparing(CitizenDocuments::getUploadedDate));
+        Collections.sort(citizenDocuments, comparing(CitizenDocuments::getUploadedDate).reversed());
 
         return citizenDocuments;
     }
