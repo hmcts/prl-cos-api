@@ -39,6 +39,7 @@ public class CitizenCaseUpdateService {
                                                  String eventId,
                                                  UpdateCaseData citizenUpdatedCaseData,
                                                  String accessCode) {
+        CaseDetails caseDetails = null;
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("*************** eventId received from " + caseEvent.getValue());
 
@@ -64,7 +65,7 @@ public class CitizenCaseUpdateService {
                 caseEvent
             ));
         }
-        CaseDetails caseDetails = null;
+
         if (citizenUpdatePartyDataContent.isPresent()) {
             log.info("*************** Going to update party details received from Citizen");
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
