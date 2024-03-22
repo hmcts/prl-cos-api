@@ -51,7 +51,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
 
-    public static final String C7_FINAL_RESPONDENT = "c7FinalEng";
+    public static final String C7_FINAL_ENGLISH = "c7FinalEng";
 
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
@@ -656,8 +656,12 @@ public class PrlAppsConstants {
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
+    public static final String SOLICITOR_C7_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C7_WELSH_DRAFT";
+    public static final String SOLICITOR_C7_WELSH_FINAL_DOCUMENT = "SOLICITOR_C7_WELSH_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
     public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
+    public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
+    public static final String SOLICITOR_C1A_WELSH_FINAL_DOCUMENT = "SOLICITOR_C1A_WELSH_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
@@ -959,6 +963,6 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
-    public static final String CITIZEN = "Citizen";
-    public static final String SUCCESS = "Success";
+    public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
+
 }
