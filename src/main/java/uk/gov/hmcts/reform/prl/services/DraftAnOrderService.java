@@ -95,7 +95,6 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_PROHIBITION;
@@ -116,7 +115,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -205,7 +203,6 @@ public class DraftAnOrderService {
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
-    private final CoreCaseDataService coreCaseDataService;
     private final RoleAssignmentService roleAssignmentService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
@@ -2456,15 +2453,5 @@ public class DraftAnOrderService {
             caseDataUpdated.remove(errorsField);
             return false;
         }
-    }
-
-    public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            callbackRequest.getCaseDetails().getId(),
-            "internal-update-all-tabs",
-            caseDataUpdated
-        );
     }
 }
