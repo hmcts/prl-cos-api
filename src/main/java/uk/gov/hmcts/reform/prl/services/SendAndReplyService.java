@@ -54,7 +54,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -756,12 +755,15 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
-            .sendMessageExternalAttachDocuments(getAttachedDocsForExternalMessage(authorization,
-                                                                                  caseData.getSendOrReplyMessage().getSendMessageExternalAttachDocumentsList()))
+            .sendMessageExternalAttachDocuments(getAttachedDocsForExternalMessage(
+                authorization,
+                caseData.getSendOrReplyMessage().getSendMessageExternalAttachDocumentsList()
+            ))
             .build();
     }
 
-    private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization, List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList) {
+    private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
+                                                                      List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList) {
         if (isNotEmpty(sendMessageExternalAttachDocumentsList)) {
             return sendMessageExternalAttachDocumentsList.stream()
                 .map(Element::getValue)

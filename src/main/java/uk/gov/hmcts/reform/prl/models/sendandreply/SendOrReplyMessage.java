@@ -30,7 +30,8 @@ public class SendOrReplyMessage {
         return new String[]{
             "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
-            "replyMessageObject", "messageReplyTable", "chooseSendOrReply","sendMessageAdditionalDocumentsList","sendMessageExternalAttachDocumentsList"
+            "replyMessageObject", "messageReplyTable", "chooseSendOrReply",
+            "sendMessageAdditionalDocumentsList", "sendMessageExternalAttachDocumentsList"
         };
     }
 
