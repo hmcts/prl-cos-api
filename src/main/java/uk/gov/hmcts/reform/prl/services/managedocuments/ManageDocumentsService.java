@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -39,13 +38,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
-import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -102,17 +99,12 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
 
-    private final SendgridService sendgridService;
-
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
-
-    @Value("${citizen.url}")
-    private String citizenUrl;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -344,14 +336,14 @@ public class ManageDocumentsService {
             existingCaseDocuments.add(element(finalConfidentialDocument));
             log.info("filename" + finalConfidentialDocument.fileName);
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-            if (finalConfidentialDocument.getDocument().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
+            /*if (finalConfidentialDocument.getDocument().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", "tom bennet");
                 dynamicData.put("dashBoardLink", citizenUrl);
                 /*sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
                                      SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
                 );*/
-            }
+            //}
         }
     }
 
