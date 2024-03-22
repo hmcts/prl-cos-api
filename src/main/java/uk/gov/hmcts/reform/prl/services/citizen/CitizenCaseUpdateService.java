@@ -26,8 +26,6 @@ public class CitizenCaseUpdateService {
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
-    private final CaseService caseService;
-
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
         CaseEvent.KEEP_DETAILS_PRIVATE);
@@ -47,7 +45,8 @@ public class CitizenCaseUpdateService {
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
             citizenPartyDetailsMapper.mapUpdatedPartyDetails(
             dbCaseData, citizenUpdatedCaseData,
-            caseEvent
+            caseEvent,
+            startAllTabsUpdateDataContent.authorisation()
         ));
 
         if (citizenUpdatePartyDataContent.isPresent()) {
