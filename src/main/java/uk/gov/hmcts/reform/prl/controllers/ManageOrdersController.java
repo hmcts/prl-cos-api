@@ -199,6 +199,8 @@ public class ManageOrdersController {
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
+            log.info("caseDataaaaaaaaaaaa --> {}",caseData.getManageOrders());
+
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
