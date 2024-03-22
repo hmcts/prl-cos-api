@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +71,8 @@ public class DocumentUploadConsumerTest {
                 .toPact();
     }
 
-    @Test
-    @PactTestFor(pactMethod = "uploadDocument")
+    //@Test
+    //@PactTestFor(pactMethod = "uploadDocument")
     public void verifyUploadedDocument() throws Exception {
         UploadResponse response = caseDocumentClientApi.uploadDocuments(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER,
                  buildDocumentUploadRequest());

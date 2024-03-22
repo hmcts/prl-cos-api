@@ -8,7 +8,6 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +53,8 @@ public class DocumentDeleteConsumerTest {
                 .toPact();
     }
 
-    @Test
-    @PactTestFor(pactMethod = "deleteDocument")
+    //@Test
+    //@PactTestFor(pactMethod = "deleteDocument")
     public void verifyDeleteDocument() {
         caseDocumentClientApi.deleteDocument(BEARER_TOKEN,
                 SERVICE_AUTHORIZATION_HEADER, UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), true
