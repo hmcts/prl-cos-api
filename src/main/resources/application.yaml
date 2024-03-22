@@ -50,6 +50,10 @@ spring:
       max-request-size: 1024MB
   main:
     allow-circular-references: true
+  cache:
+    cache-names: systemUserCache
+    caffeine:
+      spec: expireAfterAccess=3600s
 
 azure:
   application-insights:
