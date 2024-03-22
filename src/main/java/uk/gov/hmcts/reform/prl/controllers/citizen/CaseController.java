@@ -96,7 +96,6 @@ public class CaseController {
                 accessCode
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
         } else {
