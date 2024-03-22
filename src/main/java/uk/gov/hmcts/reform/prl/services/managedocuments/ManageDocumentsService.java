@@ -193,6 +193,7 @@ public class ManageDocumentsService {
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
                                           UserDetails userDetails) {
+
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
         boolean isWaTaskSetForFirstDocumentIteration = false;
@@ -263,64 +264,6 @@ public class ManageDocumentsService {
             );
         } else {
             // Remove these attributes for Non Confidential documents
-            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                .isConfidential(null)
-                .isRestricted(null)
-                .restrictedDetails(null)
-                .build();
-
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
-            existingCaseDocuments.add(element(finalConfidentialDocument));
-            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-        }
-    }
-
-    public void moveDocumentsToRespectiveCategoriesNew1(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
-        String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
-
-        if (restrcitedKey != null) {
-            //This will be executed only during review documents
-            if (!userRole.equals(COURT_ADMIN)
-                && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-                Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
-                quarantineLegalDoc = setQuarantineDocumentForUploader(
-                    ManageDocuments.builder()
-                        .document(updatedConfidentialDocument)
-                        .build(),
-                    loggedInUserType,
-                    quarantineLegalDoc
-                );
-
-            }
-
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            //This will be executed only during manage documents
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
-            }
-
-            moveToConfidentialOrRestricted(
-                caseDataUpdated,
-                CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
-                    ? caseData.getReviewDocuments().getConfidentialDocuments()
-                    : caseData.getReviewDocuments().getRestrictedDocuments(),
-                finalConfidentialDocument,
-                restrcitedKey
-            );
-        } else {
-            // Remove these attributes for Non Confidential documents
             log.info("inside else movefile");
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
                 .isConfidential(null)
@@ -334,38 +277,19 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            log.info("filename" + finalConfidentialDocument.fileName);
+            log.info("filename" + finalConfidentialDocument);
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-            /*if (finalConfidentialDocument.getDocument().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
-                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                dynamicData.put("name", "tom bennet");
-                dynamicData.put("dashBoardLink", citizenUrl);
-                /*sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
-                                     SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
-                );*/
-            //}
+
+            /* if() {
+                Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+                dynamicData.put("name", party.getValue().getLabelForDynamicList());
+                dynamicData.put("dashBoardLink", citizenDashboardUrl);
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
+                                     SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+                );
+            }*/
         }
     }
-
-    /*private void sendEmailViaSendGrid(String authorisation,
-                                      Map<String, Object> dynamicDataForEmail,
-                                      String emailAddress,
-                                      SendgridEmailTemplateNames sendgridEmailTemplateName) {
-        try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                sendgridEmailTemplateName,
-                authorisation,
-                SendgridEmailConfig.builder()
-                    .toEmailAddress(emailAddress)
-                    .dynamicTemplateData(dynamicDataForEmail)
-                    .languagePreference(LanguagePreference.english)
-                    .build()
-            );
-        } catch (IOException e) {
-            log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                      emailAddress, e.getMessage(), e);
-        }
-    }*/
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
