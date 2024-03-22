@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTE
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@SuppressWarnings({"java:S107"})
+@SuppressWarnings({"java:S107","java:S5665"})
 public class ListWithoutNoticeController extends AbstractCallbackController {
     public static final String LISTING_INSTRUCTIONS_SENT_TO_ADMIN = "Listing instructions sent to admin";
     public static final String LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION = "listWithoutNoticeHearingInstruction";
@@ -75,8 +75,9 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
     public static final String CONFIRMATION_BODY_PREFIX_CA = """
         ### What happens next
-        Admin will be notified to list the case without notice
-        The hearing instructions will be saved in case notes""";
+        Admin will be notified to list the case without notice.\n
+        The hearing instructions will be saved in case notes.
+        """;
 
     public static final String CONFIRMATION_BODY_PREFIX_DA = """
         ### What happens next
