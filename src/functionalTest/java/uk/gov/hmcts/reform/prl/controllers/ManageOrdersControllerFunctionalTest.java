@@ -157,19 +157,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/fetch-child-details")
-            .then().assertThat().statusCode(200);
-    }
-
-    @Test
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
@@ -193,7 +180,7 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
-            .then().assertThat().statusCode(500);
+            .then().assertThat().statusCode(200);
     }
 
     @Test

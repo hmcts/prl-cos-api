@@ -189,7 +189,7 @@ public class ManageOrdersController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        log.info("CCALLLLL --> ",result);
+        log.info("CCALLLLL --> {}",result);
         log.info("1111111");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
