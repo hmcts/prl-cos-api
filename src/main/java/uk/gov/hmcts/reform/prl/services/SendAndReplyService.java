@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -51,6 +54,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -407,7 +411,13 @@ public class SendAndReplyService {
                                                caseReference
                                            ))
                                            .build())
-                    .sendMessageAdditionalDocumentsList(getCategoriesAndDocuments(authorization, caseReference))
+                    .sendMessageExternalAttachDocumentsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                                                                                .submittedDocsRefList(
+                                                                                    getCategoriesAndDocuments(
+                                                                                        authorization,
+                                                                                        caseReference
+                                                                                    ))
+                                                                                .build())))
                     .build())
             .build();
     }
@@ -711,7 +721,8 @@ public class SendAndReplyService {
         return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
-                        .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
+                        .equals(message.getInternalMessageWhoToSendTo()) || InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? CLOSED : OPEN)
             .dateSent(formatDateTime(DATE_TIME_PATTERN, dateTime.now()))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
@@ -732,6 +743,8 @@ public class SendAndReplyService {
             .selectedFutureHearingValue(getValueLabel(message.getFutureHearingsList()))
             .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
+            .externalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
@@ -743,8 +756,25 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
+            .sendMessageExternalAttachDocuments(getAttachedDocsForExternalMessage(authorization,
+                                                                                  caseData.getSendOrReplyMessage().getSendMessageExternalAttachDocumentsList()))
             .build();
     }
+
+    private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization, List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList) {
+        if (isNotEmpty(sendMessageExternalAttachDocumentsList)) {
+            return sendMessageExternalAttachDocumentsList.stream()
+                .map(Element::getValue)
+                .map(replyDocument -> element(getSelectedDocument(
+                    authorization,
+                    replyDocument.getSubmittedDocsRefList()
+                )))
+                .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
 
     private String getValueCode(DynamicList dynamicListObj) {
         if (dynamicListObj != null) {
