@@ -105,6 +105,7 @@ public class CitizenCoreCaseDataService {
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return ccdCoreCaseDataService.submitUpdate(
                 authorisation,
