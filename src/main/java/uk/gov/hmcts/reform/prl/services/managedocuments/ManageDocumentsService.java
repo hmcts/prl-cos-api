@@ -278,7 +278,6 @@ public class ManageDocumentsService {
             );
         } else {
             // Remove these attributes for Non Confidential documents
-            log.info("inside else movefile");
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
                 .isConfidential(null)
                 .isRestricted(null)
@@ -291,7 +290,6 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            log.info("filename" + finalConfidentialDocument.fileName);
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
