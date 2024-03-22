@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.LINK_CITIZEN;
-
 
 @Slf4j
 @Service
@@ -30,15 +28,14 @@ public class CitizenCaseUpdateService {
 
     private final CaseService caseService;
 
-    public static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
+    protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
         CaseEvent.KEEP_DETAILS_PRIVATE);
 
     public CaseDetails updateCitizenPartyDetails(String authorisation,
                                                  String caseId,
                                                  String eventId,
-                                                 UpdateCaseData citizenUpdatedCaseData,
-                                                 String accessCode) {
+                                                 UpdateCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("*************** eventId received from " + caseEvent.getValue());
@@ -47,24 +44,11 @@ public class CitizenCaseUpdateService {
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
 
-        Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
-
-        if (LINK_CITIZEN.equals(caseEvent)) {
-            citizenUpdatePartyDataContent = Optional.of(new CitizenUpdatePartyDataContent(
-                caseService.getCaseDataMapToLinkCitizen(
-                    accessCode,
-                    dbCaseData,
-                    startAllTabsUpdateDataContent.userDetails()
-                ),
-                dbCaseData
-            ));
-
-        } else {
-            citizenUpdatePartyDataContent = Optional.ofNullable(citizenPartyDetailsMapper.mapUpdatedPartyDetails(
-                dbCaseData, citizenUpdatedCaseData,
-                caseEvent
-            ));
-        }
+        Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
+            citizenPartyDetailsMapper.mapUpdatedPartyDetails(
+            dbCaseData, citizenUpdatedCaseData,
+            caseEvent
+        ));
 
         if (citizenUpdatePartyDataContent.isPresent()) {
             log.info("*************** Going to update party details received from Citizen");
