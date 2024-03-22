@@ -68,6 +68,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -81,6 +82,7 @@ public class UpdatePartyDetailsService {
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
