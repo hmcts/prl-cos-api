@@ -198,15 +198,14 @@ public class ManageDocumentsService {
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            updatedUserDetails,
-            authorization
+            updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                          UserDetails userDetails, String authorization) {
+                                          UserDetails userDetails) {
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
         boolean isWaTaskSetForFirstDocumentIteration = false;
@@ -223,8 +222,7 @@ public class ManageDocumentsService {
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole,
-                    authorization
+                    userRole
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -295,8 +293,7 @@ public class ManageDocumentsService {
     }
 
     public void moveDocumentsToRespectiveCategoriesNew1(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole,
-                                                        String authorization) {
+                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrcitedKey != null) {
@@ -356,9 +353,9 @@ public class ManageDocumentsService {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", "tom bennet");
                 dynamicData.put("dashBoardLink", citizenUrl);
-                sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
+                /*sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
                                      SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
-                );
+                );*/
             }
         }
     }
