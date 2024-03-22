@@ -195,6 +195,7 @@ idam:
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
+  environment: ${APP_ENV:preview}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}

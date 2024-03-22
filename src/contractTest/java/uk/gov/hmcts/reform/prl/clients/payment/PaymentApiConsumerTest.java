@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
@@ -36,9 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-//@PactTestFor(providerName = "payment_api", port = "5002")
+@PactTestFor(providerName = "payment_api", port = "5002")
 @TestPropertySource(properties = {"payments.api.url=http://localhost:5002"})
-//@PactFolder("pacts")
+@PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class PaymentApiConsumerTest {

@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -25,9 +26,9 @@ import java.util.UUID;
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-//@PactTestFor(providerName = "case-document-am-client-api", port = "5003")
+@PactTestFor(providerName = "case-document-am-client-api", port = "5003")
 @TestPropertySource(properties = {"case_document_am.url=http://localhost:5003"})
-//@PactFolder("pacts")
+@PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentDeleteConsumerTest {

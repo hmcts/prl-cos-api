@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.http.HttpStatus;
@@ -40,9 +41,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-//@PactTestFor(providerName = "case-document-am-client-api", port = "5004")
+@PactTestFor(providerName = "case-document-am-client-api", port = "5004")
 @TestPropertySource(properties = {"case_document_am.url=http://localhost:5004"})
-//@PactFolder("pacts")
+@PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentUploadConsumerTest {
