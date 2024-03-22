@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -161,9 +163,8 @@ public class CitizenPartyDetailsMapper {
                     respondents.set(respondents.indexOf(party), updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                       /* reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                                                        finalCaseData, respondents.indexOf(party), authorisation
-                        );*/
+                        reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
+                                                        finalCaseData, respondents.indexOf(party), authorisation);
                     }
                 });
 
@@ -175,14 +176,15 @@ public class CitizenPartyDetailsMapper {
         return null;
     }
 
-    /*private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
+    private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
                                                  Element<PartyDetails> updatedPartyElement,
                                                  CaseData caseData,
                                                  int respondentIndex,
                                                  String authorisation) {
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
-                                                                                    .data(caseData.toMap(objectMapper))
-                                                                                    .build()).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .data(caseData.toMap(objectMapper))
+                             .build()).build();
         Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
             callbackRequest,
             updatedPartyElement
@@ -200,7 +202,7 @@ public class CitizenPartyDetailsMapper {
                       caseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList());
             throw new CoreCaseDataStoreException(e.getMessage(), e);
         }
-    }*/
+    }
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  UpdateCaseData citizenUpdatedCaseData,
