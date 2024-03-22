@@ -136,7 +136,7 @@ public class RequestUpdateCallbackService {
             );
             log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
-            allTabService.updateAllTabsIncludingConfTabRefactored(
+            allTabService.mapAndSubmitAllTabsUpdate(
                 systemAuthorisation,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 allTabsUpdateStartEventResponse,
