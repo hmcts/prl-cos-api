@@ -786,4 +786,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
+
+    private final List<Element<Document>> dssUploadedDocuments;
+    private final List<Element<Document>> dssUploadedAdditionalDocuments;
+    @JsonProperty("edgeCaseTypeOfApplication")
+    private final String edgeCaseTypeOfApplication;
 }
