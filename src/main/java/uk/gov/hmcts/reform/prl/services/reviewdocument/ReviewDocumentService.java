@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -55,10 +54,7 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
 
-    private final CoreCaseDataService coreCaseDataService;
     private final AllTabServiceImpl allTabService;
-    private final CaseDocumentClient caseDocumentClient;
-    private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
 

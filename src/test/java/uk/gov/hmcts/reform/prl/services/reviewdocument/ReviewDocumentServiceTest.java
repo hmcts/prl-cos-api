@@ -740,7 +740,7 @@ public class ReviewDocumentServiceTest {
                                            .cafcassQuarantineDocsList(new ArrayList<>())
                                            .citizenQuarantineDocsList(new ArrayList<>())
                                            .build()).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());

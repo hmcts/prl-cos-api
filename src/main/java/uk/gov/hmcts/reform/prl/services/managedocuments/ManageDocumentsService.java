@@ -224,7 +224,7 @@ public class ManageDocumentsService {
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
-        if (restrcitedKey != null) {
+        if (restrictedKey != null) {
             //This will be executed only during review documents
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
