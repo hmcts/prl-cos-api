@@ -240,7 +240,7 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             default -> {
-                //For citizen-case-update for other currentOrPreviousProceedings
+                //For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseDataForOtherEvents(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
