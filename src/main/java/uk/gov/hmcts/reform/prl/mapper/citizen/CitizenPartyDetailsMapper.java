@@ -68,7 +68,6 @@ public class CitizenPartyDetailsMapper {
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
-
             log.info("Updated caseDataMap =>" + citizenUpdatePartyDataContent.get().updatedCaseDataMap());
             log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
         } else {
@@ -234,14 +233,29 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case SUPPORT_YOU_DURING_CASE -> {
+                return updateCitizenHearingNeedsDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             default -> {
-                //For citizen-case-update
+                //For citizen-case-update for other currentOrPreviousProceedings
                 return updateCitizenResponseDataForOtherEvents(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
             }
         }
+    }
+
+    private PartyDetails updateCitizenHearingNeedsDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .supportYouNeed(citizenProvidedPartyDetails.getResponse().getSupportYouNeed())
+                          .build())
+            .build();
     }
 
     private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
