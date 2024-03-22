@@ -307,6 +307,8 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache', version: versions.springBoot
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.8'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.4'
@@ -589,9 +591,10 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
-  "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
+  "**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
+  '**uk/gov/hmcts/reform/prl/services/SystemUserService.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
 ]
 
 sonarqube {
