@@ -10,8 +10,12 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +42,6 @@ public class FL401CaseInviteServiceTest {
     private CaseData caseDataWithRespondentsAllWithRepresentation;
 
     private CaseData caseDataNoRespondents;
-
 
     @Before
     public void init() {
@@ -159,5 +162,70 @@ public class FL401CaseInviteServiceTest {
             .getCaseInviteEmail());
     }
 
+    @Test
+    public void testToGenerateCaseInviteAndSendToFl401Applicant() {
 
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("Respondent")
+            .lastName("One")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondentOne@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("Applicant")
+            .lastName("One")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("applicant@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("test")
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .build();
+        when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
+
+        List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
+            .generateAndSendCaseInviteForDaApplicant(caseData, applicant);
+        assertEquals(2, partyCaseInvites.size());
+        assertEquals(YesOrNo.Yes, partyCaseInvites.get(0).getValue().getIsApplicant());
+
+    }
+
+    @Test
+    public void testToGenerateCaseInviteAndSendToFl401Respondent() {
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("Respondent")
+            .lastName("One")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("Applicant")
+            .lastName("One")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("applicant@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("test")
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .build();
+
+        List<Element<CaseInvite>> partyCaseInvites = fl401CaseInviteService
+            .generateAndSendCaseInviteForDaRespondent(caseData, respondent);
+        assertEquals(1, partyCaseInvites.size());
+        assertEquals(YesOrNo.No, partyCaseInvites.get(0).getValue().getIsApplicant());
+
+    }
 }

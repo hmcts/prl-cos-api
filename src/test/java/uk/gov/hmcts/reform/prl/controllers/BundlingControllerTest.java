@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -83,7 +84,11 @@ public class BundlingControllerTest {
     @Mock
     private AboutToStartOrSubmitCallbackResponse response;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
     private CaseData c100CaseData;
 
     @Before
@@ -180,6 +185,7 @@ public class BundlingControllerTest {
                     .documentUrl("Url").build()).build())
             .applicantName("ApplicantFirstNameAndLastName")
             .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test

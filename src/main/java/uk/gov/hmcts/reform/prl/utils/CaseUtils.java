@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -11,31 +14,44 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -45,8 +61,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -54,6 +72,10 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
+
+    private static final String BY_EMAIL = "By email";
+    private static final String BY_EMAIL_AND_POST = "By email and post";
+    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -72,10 +94,11 @@ public class CaseUtils {
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
 
-        if ((State.SUBMITTED_PAID.equals(state))) {
+        if ((State.SUBMITTED_PAID.equals(state)) && caseDataBuilder.build().getDateSubmitted() == null) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         }
+
         return caseDataBuilder.build();
     }
 
@@ -84,14 +107,16 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        log.info("final order {}", caseData.getSelectTypeOfOrder());
         return caseData.getSelectTypeOfOrder();
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
-        log.info("Manage order CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
+        log.info("CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
+
 
 
     public static String getOrderSelectionType(CaseData caseData) {
@@ -119,6 +144,25 @@ public class CaseUtils {
         return noOfDaysRemaining;
     }
 
+    /*
+    Below method checks for Both if the case is created by
+    citizen or the main applicant in the case is not represented.
+    * **/
+    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+        log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+            return true;
+        }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("Applicant 1 {}", caseData.getApplicants().get(0));
+        }
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
+    }
+
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         if (courtVenue.isPresent()) {
@@ -138,7 +182,6 @@ public class CaseUtils {
     }
 
     public static YesOrNo cafcassFlag(String regionId) {
-        log.info("regionId ===> " + regionId);
         YesOrNo cafcassFlag = YesOrNo.No; //wales
         if (regionId != null) {
             int intRegionId = Integer.parseInt(regionId);
@@ -161,7 +204,7 @@ public class CaseUtils {
     }
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
-        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.isNotEmpty(partyDetails.getSolicitorEmail());
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
@@ -204,7 +247,7 @@ public class CaseUtils {
                 ));
         } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
             && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
-            && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            && !caseData.getRespondentsFL401().getPartyId().equals(excludeId)) {
             respondentMap.put(
                 caseData.getRespondentsFL401().getEmail(),
                 caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
@@ -215,7 +258,8 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getOthersToNotify()).stream()
+        return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                                      ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
             .map(Element::getValue)
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
@@ -284,6 +328,15 @@ public class CaseUtils {
         return false;
     }
 
+    public static boolean isC8PresentCheckDraftAndFinal(CaseData caseData) {
+        log.info("Confidential check is happening");
+        if (caseData.getC8DraftDocument() != null || caseData.getC8WelshDraftDocument() != null
+            || caseData.getC8Document() != null || caseData.getC8WelshDocument() != null) {
+            return true;
+        }
+        return false;
+    }
+
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
                                                             List<DynamicListElement> dynamicListElementList,
                                                             List<String> categoriesToExclude) {
@@ -306,6 +359,12 @@ public class CaseUtils {
         });
     }
 
+    /**
+     * Please do not use this method as it was created for external user and it has dependency on idam roles.
+     * We are depending on AM roles for internal users
+     * @param userDetails It takes User Details as input and returns roles for users
+     * @return string
+     */
     public static String getUserRole(UserDetails userDetails) {
         if (null == userDetails || isEmpty(userDetails.getRoles())) {
             throw new IllegalStateException("Unexpected user");
@@ -315,11 +374,13 @@ public class CaseUtils {
         if (roles.contains(SOLICITOR_ROLE)) {
             return SOLICITOR;
         } else if (roles.contains(COURT_ADMIN_ROLE)) {
-            return COURT_STAFF;
+            return COURT_ADMIN;
         } else if (roles.contains(JUDGE_ROLE)) {
-            return PrlAppsConstants.COURT_STAFF;
+            return COURT_STAFF;
         } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
-            return PrlAppsConstants.COURT_STAFF;
+            return COURT_STAFF;
+        } else if (roles.contains(CAFCASS)) {
+            return CAFCASS;
         }
 
         return CAFCASS;
@@ -329,5 +390,231 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
+    }
+
+    public static Document convertDocType(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder().documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .build();
+    }
+
+    public static boolean unServedPacksPresent(CaseData caseData) {
+        if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
+            && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
+            && caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
+            && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedLaPack() != null
+            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
+        return localDateTime.format(formatter);
+    }
+
+    public static String getPartyFromPartyId(String partyId, CaseData caseData) {
+        String partyName = "";
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+            partyName = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
+            if (partyName.isBlank()) {
+                partyName = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
+            }
+            return partyName;
+        } else {
+            if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
+                partyName = caseData.getApplicantsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getApplicantsFL401().getRepresentativeFullName();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
+                partyName = caseData.getRespondentsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getRespondentsFL401().getRepresentativeFullName();
+            }
+            return partyName;
+        }
+    }
+
+    private static String returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
+        for (Element<PartyDetails> party : partyDetails) {
+            if (partyId.equalsIgnoreCase(String.valueOf(party.getId()))) {
+                return party.getValue().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(party.getValue().getSolicitorPartyId()))) {
+                return party.getValue().getRepresentativeFullName();
+            }
+        }
+        return "";
+    }
+
+    public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
+        ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
+        return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+    }
+
+    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+        return party != null && party.getUser() != null
+            && party.getUser().getIdamId() != null;
+    }
+
+    public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
+        return nullSafeCollection(dynamicMultiselectListElements).stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","));
+    }
+
+    public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
+        log.info("Sate from callbackRequest " + callbackRequest.getCaseDetails().getState());
+        State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
+        if (null != state) {
+            log.info("Sate " + state.getLabel());
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
+        }
+    }
+
+    public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantList = parties.stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .toList();
+        }
+        return applicantList;
+    }
+
+    public static List<String> getApplicantSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return applicantSolicitorList;
+    }
+
+    public static List<String> getRespondentSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> respondentSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            respondentSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return respondentSolicitorList;
+    }
+
+    public static String getFL401SolicitorName(PartyDetails party) {
+        if (null != party
+            && isNotBlank(party.getRepresentativeFirstName())
+            && isNotBlank(party.getRepresentativeLastName())) {
+            return concat(party.getRepresentativeFirstName(),
+                          concat(" ", party.getRepresentativeLastName()));
+        }
+        return null;
+    }
+
+    public static String getApplicant(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                 caseData.getApplicantsFL401().getLastName()
+            );
+        }
+        return null;
+    }
+
+    public static String getApplicantReference(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return caseData.getApplicantsFL401().getSolicitorReference();
+        }
+        return null;
+    }
+
+    public static String getRespondent(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
+            );
+        }
+        return null;
+    }
+
+    public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
+        return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
+    }
+
+    public static boolean isCaseWithoutNotice(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            return true;
+        } else if (null != caseData.getOrderWithoutGivingNoticeToRespondent()) {
+            return YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        }
+        return false;
+    }
+
+    public static String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        String temp = null;
+        if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
+            temp = BY_EMAIL;
+        }
+        if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
+            if (null != temp) {
+                temp = BY_EMAIL_AND_POST;
+            } else {
+                temp = BY_POST;
+            }
+        }
+        return temp;
+    }
+
+    public static List<Element<PartyDetails>> getOthersToNotifyInCase(CaseData caseData) {
+        return TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+    }
+
+    public static boolean isApplyOrderWithoutGivingNoticeToRespondent(CaseData caseData) {
+        boolean applyOrderWithoutGivingNoticeToRespondent = ObjectUtils.isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        return applyOrderWithoutGivingNoticeToRespondent;
+    }
+
+    public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        Address currentAddress = currentParty.getAddress();
+        Address previousAddress = updatedParty.getAddress();
+        return currentAddress != null
+            && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
+            || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
+            || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
+            || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
+            || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
+            || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
+            || (currentParty.getIsAddressConfidential() != null
+            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+    }
+
+    public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
 }

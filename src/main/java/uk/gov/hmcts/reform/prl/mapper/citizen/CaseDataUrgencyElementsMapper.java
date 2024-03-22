@@ -21,7 +21,7 @@ public class CaseDataUrgencyElementsMapper {
     private static final String CASE_URGENCY_TIME = "Case Urgency Time - ";
     private static final String CASE_URGENCY_REASONS = " Case Urgency Reasons - ";
 
-    public static void updateUrgencyElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateUrgencyElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                       C100RebuildUrgencyElements c100RebuildUrgencyElements) {
         caseDataBuilder
                 .isCaseUrgent(c100RebuildUrgencyElements.getUrgentHearingRequired())

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
@@ -13,12 +14,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -26,10 +27,10 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HOME_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HomeChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -170,7 +171,7 @@ public class HomeChecker implements EventChecker {
             List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             boolean mandatoryFields = false;
             for (ChildrenLiveAtAddress child : childrenLiveAtAddress) {
                 Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
@@ -226,5 +227,10 @@ public class HomeChecker implements EventChecker {
         return allNonEmpty(
             address.getAddressLine1()
         );
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 }

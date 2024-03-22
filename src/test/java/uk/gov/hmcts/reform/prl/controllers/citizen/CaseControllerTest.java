@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -353,7 +354,7 @@ public class CaseControllerTest {
         String accessCode = "e3ceb507";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, caseId, accessCode);
+        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, accessCode, caseId);
         caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
@@ -506,5 +507,34 @@ public class CaseControllerTest {
         caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testFetchIdamAmRoles() throws IOException {
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+
+        Map<String, String> roles = caseController.fetchIdamAmRoles(
+            authToken, emailId);
+        Assert.assertFalse(roles.isEmpty());
+    }
+
+    @Test
+    public void testFetchIdamAmRolesFails() throws IOException {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+
+        Map<String, String> roles = caseController.fetchIdamAmRoles(
+            authToken, emailId);
     }
 }

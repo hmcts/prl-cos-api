@@ -61,6 +61,7 @@ public class FL401SubmitApplicationControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-submit-application");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", token);
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -77,6 +78,7 @@ public class FL401SubmitApplicationControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(baseUrl + "/fl401-submit-application-notification");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "Bearer Testtoken");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

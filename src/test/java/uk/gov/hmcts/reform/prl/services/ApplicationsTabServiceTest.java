@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -24,22 +25,28 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
@@ -64,6 +71,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -82,9 +90,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.OrderRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.RevisedChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.time.LocalDate;
@@ -97,9 +110,11 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
@@ -114,6 +129,12 @@ public class ApplicationsTabServiceTest {
     ApplicationsTabService applicationsTabService;
 
     @Mock
+    ApplicationsTabServiceHelper applicationsTabServiceHelper;
+
+    @Mock
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Mock
     ObjectMapper objectMapper;
 
     CaseData caseDataWithParties;
@@ -122,6 +143,8 @@ public class ApplicationsTabServiceTest {
     List<Element<PartyDetails>> partyList;
     PartyDetails partyDetails;
     Order order;
+    OrderRevised orderRevised;
+    AllegationsOfHarmRevisedOrders allegationsOfHarmRevisedOrders;
     AllegationsOfHarmOrders allegationsOfHarmOrders;
     AllegationsOfHarmOrders emptyAllegationOfHarmOrder;
 
@@ -225,8 +248,9 @@ public class ApplicationsTabServiceTest {
                                  MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
                              .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
                                                                                        .miamUrgencyReasonChecklistEnum_Value_1))
-                             .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
-                                                                                           .MIAMChildProtectionConcernChecklistEnum_value_1))
+                             .miamChildProtectionConcernList(Collections.singletonList(
+                                 MiamChildProtectionConcernChecklistEnum
+                                     .MIAMChildProtectionConcernChecklistEnum_value_1))
                              .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
                              .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
                              .build())
@@ -320,13 +344,13 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
-        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
+        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant.toBuilder().gender("Male").build()).build();
         List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
         Applicant emptyApplicant = Applicant.builder().build();
         Element<Applicant> emptyApplicantElement = Element.<Applicant>builder().value(emptyApplicant).build();
@@ -494,6 +518,10 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testUpdateTab() {
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
             .thenReturn(OtherPersonInTheCase.builder().build());
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
@@ -505,6 +533,80 @@ public class ApplicationsTabServiceTest {
             .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
+
+    @Test
+    public void testUpdateTabWithAllegationOfHarmRevised() {
+
+        orderRevised = OrderRevised.builder()
+            .dateIssued(LocalDate.of(1990, 8, 1))
+            .endDate(LocalDate.of(1991, 8, 1))
+            .orderCurrent(YesOrNo.Yes)
+            .courtName("Court name")
+            .build();
+
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+            .newOrdersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(orderRevised)
+            .newOrdersOccupation(YesOrNo.Yes)
+            .occupationOrder(orderRevised)
+            .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageProtectionOrder(orderRevised)
+            .newOrdersRestraining(YesOrNo.Yes)
+            .restrainingOrder(orderRevised)
+            .newOrdersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(orderRevised)
+            .newOrdersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(orderRevised)
+            .build();
+
+        DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder().typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .newAbuseNatureDescription("des").newBehavioursApplicantHelpSoughtWho("sought").newBehavioursApplicantSoughtHelp(
+                YesOrNo.Yes).build();
+
+        Element<DomesticAbuseBehaviours> domesticAbuseBehavioursElement = Element
+            .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
+
+        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test").typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+            .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+            .newAbductionChildHasPassport(Yes).build();
+        CaseData caseData = caseDataWithParties.toBuilder().taskListVersion(TASK_LIST_VERSION_V2)
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .childPassportDetails(ChildPassportDetails.builder().newChildPassportPossession(
+                                             List
+                                                 .of(NewPassportPossessionEnum.father)).build())
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
+                                         .domesticBehaviours(List.of(domesticAbuseBehavioursElement))
+                                         .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+                                         .allChildrenAreRiskPhysicalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskPsychologicalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskEmotionalAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskFinancialAbuse(YesOrNo.Yes)
+                                         .allChildrenAreRiskSexualAbuse(YesOrNo.Yes)
+                                         .childPhysicalAbuse(childAbuse)
+                                         .childPsychologicalAbuse(childAbuse)
+                                         .childEmotionalAbuse(childAbuse)
+                                         .childFinancialAbuse(childAbuse)
+                                         .childSexualAbuse(childAbuse).build()).build();
+
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+            .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+            .thenReturn(revisedChildAbductionDetails);
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
+        Mockito.lenient().when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(YesOrNo.Yes);
+        Mockito.lenient().when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
+        assertNotNull(applicationsTabService.updateTab(caseData));
     }
 
     private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {
@@ -531,14 +633,24 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAtAddressLessThan5YearsWithDontKnow("dontKnow")
+            .doTheyHaveLegalRepresentation("dontKnow")
             .email("test@test.com")
             .build();
 
-        Element<Respondent> respondentElement = Element.<Respondent>builder().value(respondent).build();
-        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(respondentElement);
+        Element<Respondent> expectedRespondent = Element.<Respondent>builder().value(
+            respondent
+                .toBuilder()
+                .gender("Male")
+                .isAtAddressLessThan5YearsWithDontKnow("Don't know")
+                .doTheyHaveLegalRepresentation("Don't know")
+                .build())
+            .build();
+
+        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(expectedRespondent);
         Respondent emptyRespondent = Respondent.builder().build();
         Element<Respondent> emptyRespondentElement = Element.<Respondent>builder().value(emptyRespondent).build();
         List<Element<Respondent>> emptyRespondentList = Collections.singletonList(emptyRespondentElement);
@@ -906,14 +1018,17 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
+        List<Element<OtherPersonRelationshipToChild>> expectedRelationship = List.of(Element.<OtherPersonRelationshipToChild>builder().value(
+            OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build());
+
         Element<OtherPersonInTheCase> otherPersonElement = Element.<OtherPersonInTheCase>builder()
-            .value(otherPerson).build();
+            .value(otherPerson.toBuilder().gender("Male").relationshipToChild(expectedRelationship).build()).build();
         List<Element<OtherPersonInTheCase>> expectedList = Collections.singletonList(otherPersonElement);
         OtherPersonInTheCase emptyOtherPerson = OtherPersonInTheCase.builder().build();
         Element<OtherPersonInTheCase> emptyOtherElement = Element.<OtherPersonInTheCase>builder()
@@ -949,8 +1064,8 @@ public class ApplicationsTabServiceTest {
         );
 
         when(objectMapper.convertValue(Fl401TypeOfApplication.builder().ordersApplyingFor(FL401OrderTypeEnum.occupationOrder.getDisplayedValue())
-            .isLinkedToChildArrangementApplication(
-            Yes).caCaseNumber("123").build(), Map.class)).thenReturn(expected);
+                                           .isLinkedToChildArrangementApplication(
+                                               Yes).caCaseNumber("123").build(), Map.class)).thenReturn(expected);
 
         Map<String, Object> result = applicationsTabService.getFL401TypeOfApplicationTable(caseData);
         assertEquals(expected, result);
@@ -965,7 +1080,7 @@ public class ApplicationsTabServiceTest {
             .build();
         Map<String, Object> expected = Map.of("ordersApplyingFor", FL401OrderTypeEnum.occupationOrder);
         when(objectMapper.convertValue(Fl401TypeOfApplication.builder().ordersApplyingFor(FL401OrderTypeEnum.occupationOrder.getDisplayedValue())
-                .build(), Map.class)).thenReturn(expected);
+                                           .build(), Map.class)).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFL401TypeOfApplicationTable(caseData);
         assertEquals(expected, result);
 
@@ -981,11 +1096,21 @@ public class ApplicationsTabServiceTest {
                 LocalDate.of(2021, 11, 30)).build()).anyOtherDtailsForWithoutNoticeOrder(
             OtherDetailsOfWithoutNoticeOrder.builder().otherDetails("otherDetails").build()).build();
 
-        Map<String, Object> expected = Map.of("orderWithoutGivingNotice","Yes", "reasonForOrderWithoutGivingNotice",
-            "There is risk of significant harm to the applicant or a relevant child, attributable to conduct of the respondent, "
-                + "if the order is not made immediately",
-            "futherDetails","details", "isRespondentAlreadyInBailCondition","yes",
-            "bailConditionEndDate","2021-11-30", "anyOtherDtailsForWithoutNoticeOrder","otherDetails");
+        Map<String, Object> expected = Map.of("orderWithoutGivingNotice",
+                                              "Yes",
+                                              "reasonForOrderWithoutGivingNotice",
+                                              "There is risk of significant harm to the applicant or a relevant child, "
+                                                  + "attributable to conduct of the respondent, "
+                                                  + "if the order is not made immediately",
+                                              "futherDetails",
+                                              "details",
+                                              "isRespondentAlreadyInBailCondition",
+                                              "yes",
+                                              "bailConditionEndDate",
+                                              "2021-11-30",
+                                              "anyOtherDtailsForWithoutNoticeOrder",
+                                              "otherDetails"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         assertEquals(expected, applicationsTabService.getWithoutNoticeOrder(caseData));
     }
@@ -994,29 +1119,43 @@ public class ApplicationsTabServiceTest {
     public void testGetFl401ApplicantsTable() {
 
         CaseData caseData = CaseData.builder()
-                .id(12345L)
-                .applicantCaseName("TestCaseName")
-                .applicantsFL401(PartyDetails.builder()
-                    .firstName("testUser")
-                    .lastName("last test")
-                    .solicitorEmail("testing@courtadmin.com")
-                    .canYouProvideEmailAddress(YesOrNo.Yes)
-                    .isEmailAddressConfidential(YesOrNo.Yes)
-                    .isPhoneNumberConfidential(YesOrNo.No)
-                    .isAddressConfidential(YesOrNo.Yes)
-                    .build())
-                .build();
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("testUser")
+                                 .lastName("last test")
+                                 .gender(Gender.male)
+                                 .solicitorEmail("testing@courtadmin.com")
+                                 .canYouProvideEmailAddress(YesOrNo.Yes)
+                                 .isEmailAddressConfidential(YesOrNo.Yes)
+                                 .isPhoneNumberConfidential(YesOrNo.No)
+                                 .isAddressConfidential(YesOrNo.Yes)
+                                 .build())
+            .build();
 
-        Map<String, Object> expected =   Map.of("isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-            "isEmailAddressConfidential",
-            THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                   "isAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL);
+        FL401Applicant expectedApplicant = FL401Applicant.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .gender("Male")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        Map<String, Object> expected = Map.of("isPhoneNumberConfidential", THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isAddressConfidential", THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "gender", "Male"
+        );
+        when(objectMapper.convertValue(applicationsTabService.maskFl401ConfidentialDetails(caseData.getApplicantsFL401()), FL401Applicant.class))
+            .thenReturn(expectedApplicant);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401ApplicantsTable(caseData);
         assertEquals(expected, result);
 
     }
-
 
 
     @Test
@@ -1033,7 +1172,12 @@ public class ApplicationsTabServiceTest {
             .applicantsFL401(partyDetails)
             .build();
 
-        Map<String, Object> expected =   Map.of("representativeFirstName","testUser", "representativeLastName","test test");
+        Map<String, Object> expected = Map.of(
+            "representativeFirstName",
+            "testUser",
+            "representativeLastName",
+            "test test"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401ApplicantsSolictorDetailsTable(caseDataWithParties);
         assertEquals(expected, result);
@@ -1058,9 +1202,17 @@ public class ApplicationsTabServiceTest {
             .respondentsFL401(partyDetails)
             .build();
 
-        Map<String, Object> expected =   Map.of("firstName","testUser", "lastName","test test","isPhoneNumberConfidential",
-            THIS_INFORMATION_IS_CONFIDENTIAL, "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                               "isAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL);
+        Map<String, Object> expected = Map.of("firstName",
+                                              "testUser",
+                                              "lastName",
+                                              "test test",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);
@@ -1072,7 +1224,8 @@ public class ApplicationsTabServiceTest {
 
         RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
             .otherReasonApplicantWantToStopFromRespondentDoing("Test data")
-            .applicantWantToStopFromRespondentDoingToChild(Collections.singletonList(applicantStopFromRespondentDoingToChildEnum_Value_1))
+            .applicantWantToStopFromRespondentDoingToChild(Collections.singletonList(
+                applicantStopFromRespondentDoingToChildEnum_Value_1))
             .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1)).build();
 
         caseDataWithParties = CaseData.builder()
@@ -1081,12 +1234,17 @@ public class ApplicationsTabServiceTest {
             .respondentBehaviourData(respondentBehaviour)
             .build();
 
-        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
-            "applicantWantToStopFromRespondentDoingToChild",
-            "Being violent or threatening towards their child or children","isPhoneNumberConfidential",
-            THIS_INFORMATION_IS_CONFIDENTIAL,
-            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                               "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentBehaviourTable(caseDataWithParties);
         assertEquals(expected, result);
@@ -1107,11 +1265,15 @@ public class ApplicationsTabServiceTest {
             .respondentBehaviourData(respondentBehaviour)
             .build();
 
-        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
                                               "isPhoneNumberConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL,
-                                              "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                              "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentBehaviourTable(caseDataWithParties);
         assertEquals(expected, result);
@@ -1129,16 +1291,23 @@ public class ApplicationsTabServiceTest {
                                            .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
                                            .build())
             .respondentRelationDateInfoObject(RespondentRelationDateInfo.builder().applicantRelationshipDate(LocalDate.now())
-                .relationStartAndEndComplexType(
-                RelationshipDateComplex.builder().relationshipDateComplexEndDate(LocalDate.now()).relationshipDateComplexEndDate(LocalDate.now())
-                    .build()).build())
+                                                  .relationStartAndEndComplexType(
+                                                      RelationshipDateComplex.builder().relationshipDateComplexEndDate(
+                                                              LocalDate.now()).relationshipDateComplexEndDate(LocalDate.now())
+                                                          .build()).build())
             .build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
-            "applicantWantToStopFromRespondentDoingToChild",
-            "Being violent or threatening towards their child or children","isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                               "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RelationshipToRespondentTable(caseData);
         assertEquals(expected, result);
@@ -1166,20 +1335,26 @@ public class ApplicationsTabServiceTest {
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
-            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName("wer")
-                    .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
             .landlords(Landlord.builder().landlordName("test")
-                    .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
-                Address.builder().addressLine1("123").build()).build())
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
-                                                "Test data",
-            "applicantWantToStopFromRespondentDoingToChild","Being violent or threatening towards their child or children",
-            "isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL, "isEmailAddressConfidential",
-            THIS_INFORMATION_IS_CONFIDENTIAL,
-                                               "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
@@ -1205,7 +1380,8 @@ public class ApplicationsTabServiceTest {
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
-            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName("wer")
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
                            .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
             .landlords(Landlord.builder().landlordName("test")
                            .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
@@ -1213,14 +1389,17 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
-                                                "Test data",
-                                                "applicantWantToStopFromRespondentDoingToChild",
-                                                "Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "isEmailAddressConfidential",
-                                                THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
@@ -1248,7 +1427,8 @@ public class ApplicationsTabServiceTest {
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
-            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName("wer")
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName(
+                    "wer")
                            .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
             .landlords(Landlord.builder().landlordName(null)
                            .mortgageNamedAfterList(null).address(
@@ -1256,16 +1436,18 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
-                                                "Test data",
-                                                "applicantWantToStopFromRespondentDoingToChild",
-                                                "Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential",
-                                                THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "isEmailAddressConfidential",
-                                                THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "applicantWantToStopFromRespondentDoing",
-                                                "Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of(
+            "otherReasonApplicantWantToStopFromRespondentDoing",
+            "Test data",
+            "applicantWantToStopFromRespondentDoingToChild",
+            "Being violent or threatening towards their child or children",
+            "isPhoneNumberConfidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+            "isEmailAddressConfidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+            "applicantWantToStopFromRespondentDoing",
+            "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
@@ -1302,16 +1484,18 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
-                                                "Test data",
-                                                "applicantWantToStopFromRespondentDoingToChild",
-                                                "Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential",
-                                                THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "isEmailAddressConfidential",
-                                                THIS_INFORMATION_IS_CONFIDENTIAL,
-                                                "applicantWantToStopFromRespondentDoing",
-                                                "Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of(
+            "otherReasonApplicantWantToStopFromRespondentDoing",
+            "Test data",
+            "applicantWantToStopFromRespondentDoingToChild",
+            "Being violent or threatening towards their child or children",
+            "isPhoneNumberConfidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+            "isEmailAddressConfidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+            "applicantWantToStopFromRespondentDoing",
+            "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
@@ -1337,11 +1521,17 @@ public class ApplicationsTabServiceTest {
             .build();
 
 
-        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
-            "applicantWantToStopFromRespondentDoingToChild",
-            "Being violent or threatening towards their child or children","isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
-                                               "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                              "Test data",
+                                              "applicantWantToStopFromRespondentDoingToChild",
+                                              "Being violent or threatening towards their child or children",
+                                              "isPhoneNumberConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "applicantWantToStopFromRespondentDoing",
+                                              "Being violent or threatening towards them"
+        );
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getApplicantsFamilyDetails(caseData);
         assertEquals(expected, result);
@@ -1354,7 +1544,7 @@ public class ApplicationsTabServiceTest {
                 FL401OtherProceedingDetails.builder().hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build())
             .build();
 
-        Map<String, Object> expected =   Map.of(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS,"Yes");
+        Map<String, Object> expected = Map.of(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS, "Yes");
         Map<String, Object> result = applicationsTabService.getFL401OtherProceedingsTable(caseData);
         assertEquals(expected, result);
     }
@@ -1378,7 +1568,8 @@ public class ApplicationsTabServiceTest {
                                              .fl401OtherProceedings(listOfProceedings)
                                              .build())
             .build();
-        List<Element<Fl401OtherProceedingsDetails>> result = applicationsTabService.getFl401OtherProceedingsDetailsTable(caseData);
+        List<Element<Fl401OtherProceedingsDetails>> result = applicationsTabService.getFl401OtherProceedingsDetailsTable(
+            caseData);
         assertFalse(result.isEmpty());
     }
 
@@ -1397,11 +1588,12 @@ public class ApplicationsTabServiceTest {
 
         CaseData caseData = CaseData.builder()
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
-                .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes)
-                //.fl401OtherProceedings(listOfProceedings)
-                .build())
+                                             .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes)
+                                             //.fl401OtherProceedings(listOfProceedings)
+                                             .build())
             .build();
-        List<Element<Fl401OtherProceedingsDetails>> result = applicationsTabService.getFl401OtherProceedingsDetailsTable(caseData);
+        List<Element<Fl401OtherProceedingsDetails>> result = applicationsTabService.getFl401OtherProceedingsDetailsTable(
+            caseData);
         assertFalse(result.isEmpty());
     }
 
@@ -1414,11 +1606,12 @@ public class ApplicationsTabServiceTest {
             .build();
 
         List<String> expected = List.of(
-              "welshLanguageRequirementsTable","homeDetailsTable","applicantFamilyTable","internationalElementTable",
-                                        "respondentBehaviourTable","relationshipToRespondentTable","otherProceedingsTable","fl401ApplicantTable",
-                                        "fl401OtherProceedingsDetailsTable","declarationTable","fl401SolicitorDetailsTable",
+            "welshLanguageRequirementsTable", "homeDetailsTable", "applicantFamilyTable", "internationalElementTable",
+            "respondentBehaviourTable", "relationshipToRespondentTable", "otherProceedingsTable", "fl401ApplicantTable",
+            "fl401OtherProceedingsDetailsTable", "declarationTable", "fl401SolicitorDetailsTable",
             "fl401TypeOfApplicationTable",
-                                        "attendingTheHearingTable","withoutNoticeOrderTable","fl401RespondentTable","isHomeEntered");
+            "attendingTheHearingTable", "withoutNoticeOrderTable", "fl401RespondentTable", "isHomeEntered"
+        );
         Map<String, Object> result = applicationsTabService.updateTab(caseData);
         assertTrue(expected.containsAll(result.keySet()));
     }
@@ -1448,6 +1641,10 @@ public class ApplicationsTabServiceTest {
                 ChildAbductionDetails.builder().build());
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
             .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }

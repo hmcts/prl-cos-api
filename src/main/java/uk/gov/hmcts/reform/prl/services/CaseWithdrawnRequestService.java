@@ -11,6 +11,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -29,16 +33,19 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class CaseWithdrawnRequestService {
 
     private final UserService userService;
-    private final SolicitorEmailService solicitorEmailService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
+    private final EventService eventPublisher;
     private final ObjectMapper objectMapper;
     public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn";
-    public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = "### What happens next \n\n This case will now display as “withdrawn” in "
-        + "your case list.";
+    public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = """
+        ### What happens next
+
+        This case will now display as “withdrawn” in your case list.""";
 
     public static final String APPLICATION_WITHDRAWN_REQUEST_LABEL = "# Requested Application Withdrawal";
-    public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = "### What happens next \n\n The court will consider your "
-        + "withdrawal request.";
+    public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = """
+        ### What happens next
+
+        The court will consider your withdrawal request.""";
 
     public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled";
 
@@ -74,30 +81,53 @@ public class CaseWithdrawnRequestService {
     }
 
     private void sendWithdrawEmails(CaseDetails caseDetails, CaseData caseData, UserDetails userDetails) {
+        SolicitorNotificationEmailEvent solicitorWithdrawNotification = SolicitorNotificationEmailEvent.builder()
+            .caseDetailsModel(caseDetails)
+            .userDetails(userDetails)
+            .build();
+        CaseWorkerNotificationEmailEvent localCourtWithDrawNotification = CaseWorkerNotificationEmailEvent.builder()
+            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.notifyCaseWithdrawalToLocalCourt.getDisplayedValue())
+            .caseDetailsModel(caseDetails)
+            .build();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+            solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
+                .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawC100.getDisplayedValue())
+                .build();
             Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
             if (localCourtAdmin.isPresent()) {
                 Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
                     .findFirst();
+
                 if (localCourtAdminEmail.isPresent()) {
                     String email = localCourtAdminEmail.get().getEmail();
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                    localCourtWithDrawNotification = localCourtWithDrawNotification.toBuilder().courtEmailAddress(email).build();
                 }
             }
         } else {
-            solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                caseDetails,
-                caseData.getCourtEmailAddress());
+            solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
+                .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawFL401.getDisplayedValue())
+                .build();
+            localCourtWithDrawNotification = localCourtWithDrawNotification.toBuilder()
+                .courtEmailAddress(caseData.getCourtEmailAddress()).build();
         }
+        eventPublisher.publishEvent(solicitorWithdrawNotification);
+        eventPublisher.publishEvent(localCourtWithDrawNotification);
     }
 
     private void sendWithdrawEmailsBeforeIssuedState(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
+        SolicitorNotificationEmailEvent solicitorWithdrawNotification = SolicitorNotificationEmailEvent.builder()
+            .caseDetailsModel(caseDetails)
+            .userDetails(userDetails)
+            .build();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+            solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
+                .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawC100BeforeIssue.getDisplayedValue())
+                .build();
         } else {
-            solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+            solicitorWithdrawNotification = solicitorWithdrawNotification.toBuilder()
+                .typeOfEvent(SolicitorEmailNotificationEventEnum.withdrawFL401BeforeIssue.getDisplayedValue())
+                .build();
         }
+        eventPublisher.publishEvent(solicitorWithdrawNotification);
     }
 }

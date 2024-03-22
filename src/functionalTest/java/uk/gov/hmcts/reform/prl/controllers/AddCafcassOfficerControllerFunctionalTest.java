@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +34,11 @@ public class AddCafcassOfficerControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
 
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @Before
     public void setUp() {
@@ -45,6 +52,8 @@ public class AddCafcassOfficerControllerFunctionalTest {
     public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/add-cafcass-officer/about-to-submit")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))

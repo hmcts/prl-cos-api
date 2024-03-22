@@ -21,6 +21,9 @@ public class AuthorisationService {
     @Value("${private-law.authorised-services}")
     private String s2sAuthorisedServices;
 
+    @Value("${idam.s2s-auth.microservice}")
+    private String s2sServiceForSolicitor;
+
     private final IdamClient idamClient;
 
     private UserInfo userInfo;
@@ -34,7 +37,6 @@ public class AuthorisationService {
                 return true;
             }
         } catch (Exception ex) {
-            //do nothing
             log.error("S2S token is not authorised");
         }
         return false;
@@ -47,7 +49,6 @@ public class AuthorisationService {
                 return true;
             }
         } catch (Exception ex) {
-            //do nothing
             log.error("User token is invalid");
         }
         return false;
@@ -55,5 +56,10 @@ public class AuthorisationService {
 
     public UserInfo getUserInfo() {
         return this.userInfo;
+    }
+
+    public boolean isAuthorized(String authorisation, String s2sToken) {
+        return Boolean.TRUE.equals(authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authoriseService(s2sToken));
     }
 }

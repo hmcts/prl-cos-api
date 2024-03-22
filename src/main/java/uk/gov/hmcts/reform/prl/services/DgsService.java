@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 @Slf4j
 @Service
 @ConditionalOnProperty(prefix = "prl-dgs-api", name = "url")
@@ -26,6 +29,9 @@ import java.util.Map;
 public class DgsService {
 
     private final DgsApiClient dgsApiClient;
+    private final AllegationOfHarmRevisedService allegationOfHarmService;
+    private final HearingDataService hearingDataService;
+
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
@@ -42,12 +48,20 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
-        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+
+        CaseData caseData = caseDetails.getCaseData();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+        }
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
@@ -87,7 +101,11 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
-        Map<String, Object> tempCaseDetails = new HashMap<>();
+
+        CaseData caseData = caseDetails.getCaseData();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
+        }
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
@@ -104,8 +122,12 @@ public class DgsService {
             }
         });
         caseDataMap.put("case_data", caseDataValues);
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
