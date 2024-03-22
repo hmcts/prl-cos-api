@@ -383,12 +383,18 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
                                                             : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
+                          .citizenFlags(isCitizenFlagsPresent
+                                            ? updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
+                                                                 citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                                            : existingPartyDetails.getResponse().getCitizenFlags()
+                          )
                           .build())
             .build();
     }
