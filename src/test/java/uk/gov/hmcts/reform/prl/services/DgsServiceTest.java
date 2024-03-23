@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,6 +52,8 @@ public class DgsServiceTest {
     private CaseData caseData;
     private CaseDetails caseDetails;
     private GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest;
+
+    private DocumentRequest documentRequest;
 
     @Before
     public void setUp() {
@@ -82,6 +86,15 @@ public class DgsServiceTest {
             .build();
         when(dgsApiClient.generateDocument(Mockito.anyString(), Mockito.any(GenerateDocumentRequest.class)))
             .thenReturn(generatedDocumentInfo);
+
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("POSITION_STATEMENTS")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
     }
 
     @Test
@@ -184,5 +197,29 @@ public class DgsServiceTest {
             .build();
 
         assertEquals(dgsService.generateDocument(authToken, caseDetails1, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
+    }
+
+    @Test
+    public void testGenerateCitizenDocument() throws Exception {
+        //Given
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        //When
+        doReturn(generatedDocumentInfo).when(dgsApiClient).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(GenerateDocumentRequest.class)
+        );
+
+        //Action
+        GeneratedDocumentInfo response = dgsService.generateCitizenDocument(" ", documentRequest, " ");
+
+        //Then
+        assertNotNull(response);
+        assertNotNull(response.getBinaryUrl());
+        assertNotNull(response.getHashToken());
     }
 }

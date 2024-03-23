@@ -7,6 +7,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.templates.Templates;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -36,6 +38,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -53,6 +56,7 @@ public class StmtOfServImplService {
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL = "Respondent has been served personally by Court through email";
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final ServiceOfApplicationService serviceOfApplicationService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -93,13 +97,11 @@ public class StmtOfServImplService {
         for (StmtOfServiceAddRecipient recipient : recipients) {
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
                 if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
-                    List<PartyDetails> respondents = caseData
+                    List<String> respondentNamesList = caseData
                         .getRespondents()
                         .stream()
                         .map(Element::getValue)
-                        .toList();
-                    List<String> respondentNamesList = respondents.stream()
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
+                        .map(PartyDetails::getLabelForDynamicList)
                         .toList();
                     String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
@@ -135,7 +137,7 @@ public class StmtOfServImplService {
                 .equals(caseData.getStatementOfService()
                             .getStmtOfServiceWhatWasServed())
             ) {
-                caseData = cleanupRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
+                caseData = cleanupAndServeRespondentPacksPersonalService(caseData, authorisation);
                 caseDataUpdateMap.put(
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
@@ -203,19 +205,14 @@ public class StmtOfServImplService {
         return Collections.emptyList();
     }
 
-    private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {
+    private CaseData cleanupAndServeRespondentPacksPersonalService(CaseData caseData, String authorisation) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         }
-        finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksCaOrBailiffPersonalService(
-            emailNotificationDetails,
-            bulkPrintDetails,
-            caseData.getServiceOfApplication().getUnServedRespondentPack(),
-            authorisation,
-            CaseUtils.getCaseTypeOfApplication(caseData)
+        finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksPersonalService(
+            caseData,
+            authorisation
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
@@ -244,12 +241,12 @@ public class StmtOfServImplService {
         return respondentListItems;
     }
 
-    public ServedApplicationDetails checkAndServeRespondentPacksCaOrBailiffPersonalService(
-        List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                           List<Element<BulkPrintDetails>> bulkPrintDetails,
-                           SoaPack unServedRespondentPack,
-                           String authorization, String casTypeOfApplication) {
-        if (FL401_CASE_TYPE.equalsIgnoreCase(casTypeOfApplication)) {
+    public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
+        SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
@@ -260,8 +257,8 @@ public class StmtOfServImplService {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
-                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
-                                      C9_DOCUMENT_FILENAME)).toList())
+                                  .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                                  .toList())
                 .build();
         }
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
@@ -275,6 +272,9 @@ public class StmtOfServImplService {
                                                          .map(Document::getDocumentFileName).toList()))
                                                      .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                                     .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                                     .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                           caseData.getRespondents(),
+                                                                           caseData.getRespondentsFL401()))
                                                      .build()));
         } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
@@ -288,6 +288,33 @@ public class StmtOfServImplService {
                                              .printDocs(unServedRespondentPack.getPackDocument())
                                              .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                             .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                   caseData.getRespondents(),
+                                                                   caseData.getRespondentsFL401()))
+                                             .build()));
+        } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
+            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            List<Element<Document>> packDocs = new ArrayList<>();
+            caseData.getRespondents().forEach(respondent -> {
+                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
+                                                                                     Templates.PRL_LET_ENG_RE5
+                    )));
+                }
+            });
+            packDocs.addAll(unServedRespondentPack.getPackDocument());
+            bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                             .servedParty("Applicant Lip")
+                                             .bulkPrintId("Respondent will be served personally by Applicant LIP")
+                                             .printedDocs(String.join(",", packDocs.stream()
+                                                 .map(Element::getValue)
+                                                 .map(Document::getDocumentFileName).toList()))
+                                             .printDocs(packDocs)
+                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                   caseData.getRespondents(),
+                                                                   caseData.getRespondentsFL401()))
                                              .build()));
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
@@ -298,5 +325,17 @@ public class StmtOfServImplService {
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private String getPartyIds(String caseTypeOfApplication,
+                               List<Element<PartyDetails>> parties,
+                               PartyDetails fl401Party) {
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            return String.valueOf(fl401Party.getPartyId());
+        }
+        return String.join(COMMA,
+                           CaseUtils.getPartyIdList(parties).stream()
+                               .map(Element::getValue)
+                               .toList());
     }
 }
