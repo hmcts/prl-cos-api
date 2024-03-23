@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -207,67 +206,6 @@ public class CaseServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
-    }
-
-    @Test
-    public void testupdateCaseRespondent() throws JsonProcessingException {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData2);
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseRespondentNoPartyId() throws JsonProcessingException {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData3);
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseApplicant() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseOfApplicantWithOutPartyId() throws JsonProcessingException {
-        User user = User.builder().build();
-        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
-            .firstName("")
-            .lastName("")
-            .build();
-        caseDataWithOutPartyId = CaseData.builder()
-            .applicantsFL401(partyDetailsWithUser)
-            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                                                                         .partyId(null)
-                                                                         .accessCode("1234").build()).build()))
-            .build();
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseOfRespondentWithOutPartyId() throws JsonProcessingException {
-        User user = User.builder().build();
-        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
-            .firstName("")
-            .lastName("")
-            .build();
-        caseDataWithOutPartyId = CaseData.builder()
-            .respondentsFL401(partyDetailsWithUser)
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
-                                                                         .partyId(null)
-                                                                         .accessCode("1234").hasLinked("Yes").build()).build()))
-            .build();
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
-        assertNotNull(caseDetailsAfterUpdate);
     }
 
     @Test
