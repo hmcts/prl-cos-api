@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -30,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -657,6 +661,24 @@ public class HearingDataService {
                         .build();
                 }
             }
+            //Populate C100 names
+            log.info("hearingData.getApplicantName1 : {}", hearingData.getApplicantName1());
+            log.info("hearingData.getRespondentName1 : {}", hearingData.getRespondentName1());
+            log.info("hearingData.getApplicantSolicitor1 : {}", hearingData.getApplicantSolicitor1());
+            if (getPartyNameList(caseData.getApplicants()).size() > 0 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(caseData.getCreateSelectOrderOptions()),
+                caseData)) {
+                if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                }
+                if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                }
+                if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                                                              " (Applicant solicitor)"));
+                }
+            }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
                 .value(hearingData).build();
         }).toList();
@@ -794,8 +816,11 @@ public class HearingDataService {
         } else {
             log.info("Populating party names for C100");
             List<String> applicantNames = getPartyNameList(caseData.getApplicants());
+            log.info("applicantNames: {}", applicantNames);
             List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+            log.info("respondentNames: {}", respondentNames);
             List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+            log.info("applicantSolicitorNames: {}", applicantSolicitorNames);
             List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
             int numberOfApplicant = applicantNames.size();
             int numberOfRespondents = respondentNames.size();
@@ -812,6 +837,11 @@ public class HearingDataService {
         }
 
         //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
+        try {
+            log.info("tempPartyNamesForDocGen: {}", AppObjectMapper.getObjectMapper().writeValueAsString(tempPartyNamesMap));
+        } catch (JsonProcessingException e) {
+            throw new ManageOrderRuntimeException(e.getMessage(), e);
+        }
         tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
     }
 
