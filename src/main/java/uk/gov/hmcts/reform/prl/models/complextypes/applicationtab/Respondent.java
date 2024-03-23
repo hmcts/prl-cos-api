@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -42,7 +43,6 @@ public class Respondent {
     private final YesOrNo isAddressConfidential;
     private final YesOrNo isEmailAddressConfidential;
     private final YesOrNo isPhoneNumberConfidential;
-
-
+    private final ContactPreferences contactPreferences;
 }
 
