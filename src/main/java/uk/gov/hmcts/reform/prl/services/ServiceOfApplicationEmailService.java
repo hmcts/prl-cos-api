@@ -100,6 +100,7 @@ public class ServiceOfApplicationEmailService {
                                                       SendgridEmailTemplateNames template,
                                                       Map<String, Object> dynamicData,
                                                                           String servedParty) {
+        log.info("sendSoaPacksToPartyViaEmail--SENDGRID-->");
         try {
             boolean emailSentSuccessfully = sendgridService.sendEmailUsingTemplateWithAttachments(
                 template,
