@@ -238,14 +238,14 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
 
-        String requestBodyRevised = requestBody
-            .replace("1705065178030549", caseDetails.getId().toString());
+        //String requestBodyRevised = requestBody
+        //    .replace("1711105989241323", caseDetails.getId().toString());
 
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBodyRevised)
+                            .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content()
