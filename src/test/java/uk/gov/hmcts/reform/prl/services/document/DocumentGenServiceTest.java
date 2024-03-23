@@ -3786,8 +3786,8 @@ public class DocumentGenServiceTest {
         assertNotNull(caseDetailsUpdated.getData());
 
     }
-  
-   @Test
+
+    @Test
     public void testCitizenCoverLetterTemplateEnglish() {
         ReflectionTestUtils.setField(documentGenService, "docCoverSheetServeOrderTemplate", "citizen_cover_letter_en");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, false);
