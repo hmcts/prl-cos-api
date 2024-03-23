@@ -1,12 +1,8 @@
 package uk.gov.hmcts.reform.prl.repositories;
 
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-
-import java.util.Map;
 
 public interface CaseRepository {
 
