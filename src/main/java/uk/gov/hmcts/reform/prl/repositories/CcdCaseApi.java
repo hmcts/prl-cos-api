@@ -32,40 +32,6 @@ public class CcdCaseApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String userAuthorisation, String systemUserToken, String caseId,
-                                  EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
-        UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
-        this.grantAccessToCase(userDetails.getId(), systemUserToken, caseId);
-        this.linkCitizen(systemUserToken, caseId, eventRequestData, startEventResponse, caseDataUpdated);
-    }
-
-    private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
-        caseAccessApi.grantAccessToCase(
-            anonymousUserToken,
-            authTokenGenerator.generate(),
-            idamClient.getUserDetails(anonymousUserToken).getId(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            new UserId(citizenId)
-        );
-    }
-
-    private CaseDetails linkCitizen(
-        String systemUserToken,
-        String caseId,
-        EventRequestData eventRequestData,
-        StartEventResponse startEventResponse,
-        Map<String, Object> caseDataUpdated) {
-        return citizenCoreCaseDataService.linkDefendant(
-            systemUserToken,
-            Long.valueOf(caseId),
-            eventRequestData,
-            startEventResponse,
-            caseDataUpdated
-        );
-    }
-
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
         return citizenCoreCaseDataService.updateCase(
             authorisation,

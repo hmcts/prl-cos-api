@@ -276,12 +276,6 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testValidateAccessCode() {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(null);
-        assertNotNull(caseService.validateAccessCode("","","",""));
-    }
-
-    @Test
     public void testRetrieveCases() {
         assertNotNull(caseService.retrieveCases("",""));
     }
@@ -647,35 +641,6 @@ public class CaseServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",updateCaseData);
         assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testValidateAccessCodeForInvalidCase() {
-
-        when(caseService.getCase(authToken, caseId)).thenReturn(null);
-
-        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
-
-        assertEquals(INVALID, isValid);
-    }
-
-    @Test
-    public void testValidateAccessCodeForEmptyCaseInvites() {
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .caseInvites(null).build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234567891234567L)
-            .data(stringObjectMap)
-            .build();
-        when(coreCaseDataApi.getCase(authToken, s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
-
-        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
-
-        assertEquals(INVALID, isValid);
     }
 
     @Test

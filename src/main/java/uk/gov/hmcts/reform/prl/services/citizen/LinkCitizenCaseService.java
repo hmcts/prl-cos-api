@@ -56,11 +56,7 @@ public class LinkCitizenCaseService {
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
-        String anonymousUserToken = systemUserService.getSysUserToken();
-        CaseData dbCaseData = objectMapper.convertValue(
-            ccdCoreCaseDataService.findCaseById(anonymousUserToken, caseId).getData(),
-            CaseData.class
-        );
+        CaseData dbCaseData = findAndGetCase(caseId);
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
@@ -89,6 +85,14 @@ public class LinkCitizenCaseService {
             ));
         }
         return caseDetails;
+    }
+
+    private CaseData findAndGetCase(String caseId) {
+        String anonymousUserToken = systemUserService.getSysUserToken();
+        return objectMapper.convertValue(
+            ccdCoreCaseDataService.findCaseById(anonymousUserToken, caseId).getData(),
+            CaseData.class
+        );
     }
 
     public Map<String, Object> getCaseDataMapToLinkCitizen(String accessCode,
@@ -185,5 +189,13 @@ public class LinkCitizenCaseService {
             }
         }
         return accessCodeStatus;
+    }
+
+    public String validateAccessCode(String caseId, String accessCode) {
+        CaseData caseData = findAndGetCase(caseId);
+        if (null == caseData) {
+            return INVALID;
+        }
+        return findAccessCodeStatus(accessCode, caseData);
     }
 }

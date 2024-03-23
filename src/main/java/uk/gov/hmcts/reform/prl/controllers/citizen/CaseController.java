@@ -173,31 +173,6 @@ public class CaseController {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
-    @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                  @RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
-    }
-
-    @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                     @RequestHeader(value = "caseId", required = true)
-                                         String caseId,
-                                     @RequestHeader(value = "accessCode", required = true)
-                                         String accessCode) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            String cosApis2sToken = authTokenGenerator.generate();
-            return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @PostMapping("/case/create")
     @Operation(description = "Call CCD to create case")
     @ApiResponses(value = {
