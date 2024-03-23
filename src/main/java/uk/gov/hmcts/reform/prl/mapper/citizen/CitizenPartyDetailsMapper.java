@@ -148,7 +148,7 @@ public class CitizenPartyDetailsMapper {
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
-            CaseData finalCaseData = caseData;
+            CaseData oldCaseData = caseData;
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -164,7 +164,7 @@ public class CitizenPartyDetailsMapper {
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                                                        finalCaseData, respondents.indexOf(party), authorisation);
+                                                        oldCaseData, respondents.indexOf(party), respondents, authorisation);
                     }
                 });
 
@@ -180,11 +180,19 @@ public class CitizenPartyDetailsMapper {
                                                  Element<PartyDetails> updatedPartyElement,
                                                  CaseData caseData,
                                                  int respondentIndex,
+                                                 List<Element<PartyDetails>> updatedRespondents,
                                                  String authorisation) {
+        CaseData updatedCaseData = caseData.toBuilder()
+            .respondents(updatedRespondents)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
+            .caseDetailsBefore(CaseDetails.builder()
                              .data(caseData.toMap(objectMapper))
-                             .build()).build();
+                             .build())
+            .caseDetails(CaseDetails.builder()
+                             .data(updatedCaseData.toMap(objectMapper))
+                             .build())
+            .build();
         Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
             callbackRequest,
             updatedPartyElement
