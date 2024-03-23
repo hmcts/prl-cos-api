@@ -18,8 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -65,6 +68,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -158,9 +162,6 @@ public class ServiceOfApplicationServiceTest {
     private LaunchDarklyClient launchDarklyClient;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private UserService userService;
 
     @Mock
@@ -180,6 +181,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+    private AllTabServiceImpl allTabService;
 
     private final String authorization = "authToken";
     private final String testString = "test";
@@ -465,6 +467,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
             callbackRequest
@@ -499,6 +504,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
             callbackRequest
@@ -529,6 +537,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
@@ -2372,6 +2383,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
@@ -2411,6 +2425,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -2451,6 +2468,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
@@ -2490,6 +2510,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -2904,6 +2927,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -3608,6 +3634,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -3646,6 +3675,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
