@@ -147,8 +147,6 @@ public class ManageOrdersControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-
-    //================
     @Test
     public void createCcdTestCase() throws Exception {
 
@@ -167,8 +165,6 @@ public class ManageOrdersControllerFunctionalTest {
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
-
-
     }
 
     @Test
@@ -367,7 +363,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1702636092071141", caseDetails.getId().toString());
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -385,8 +381,6 @@ public class ManageOrdersControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
-
-    ////////////
 
     /**
      * Court Admin manageOrders journey - creates the order with one hearing with manager approval required.
