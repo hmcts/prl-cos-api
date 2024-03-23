@@ -181,6 +181,8 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    @Mock
     private AllTabServiceImpl allTabService;
 
     private final String authorization = "authToken";
