@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -30,6 +31,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequestMapping("/citizen")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenCaseUpdateController {
     private final ObjectMapper objectMapper;
@@ -37,7 +39,7 @@ public class CitizenCaseUpdateController {
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
-    @PostMapping(value = "{caseId}/{eventId}/citizen-update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
     public CaseData updatePartyDetailsFromCitizen(
         @NotNull @Valid @RequestBody UpdateCaseData citizenUpdatedCaseData,
