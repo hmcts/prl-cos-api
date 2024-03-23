@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/hmcts/prl-cos-api.svg?branch=master)](https://travis-ci.org/hmcts/prl-cos-api)
 
-### Notes
+## Notes - combined branch for SOA, Manage docs, Orders combined
+
+Round 1 -  Contact Pref + SOA
+
+Round 2 - Merge Citizen doc management into combined branch
 
 This is manage order changes base branch
 
