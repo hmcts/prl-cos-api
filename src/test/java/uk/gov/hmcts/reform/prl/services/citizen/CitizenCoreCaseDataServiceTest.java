@@ -18,9 +18,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
@@ -107,42 +105,6 @@ public class CitizenCoreCaseDataServiceTest {
             "serviceAuth",
             "12345L"
         )).thenReturn(caseDetails);
-    }
-
-    @Test
-    public void linkCitizenAccountAndUpdateCaseData() throws Exception {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
-            .build();
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-
-        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(
-            bearerToken,
-            12345L,
-            eventRequestData,
-            startEventResponse,
-            caseDataUpdated
-        );
-
-        Assert.assertEquals(caseDetails, updatedDetails);
     }
 
     @Test

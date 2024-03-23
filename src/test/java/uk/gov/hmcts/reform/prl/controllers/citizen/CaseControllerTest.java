@@ -46,7 +46,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -332,57 +331,6 @@ public class CaseControllerTest {
         when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
         caseDataList1 = caseController.retrieveCases(role, userId, authToken, servAuthToken);
         assertNotNull(caseDataList1);
-
-    }
-
-    @Test
-    public void testCitizenLinkDefendantToClaim() {
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build();
-
-        String caseId = "1234567891234567";
-        String accessCode = "e3ceb507";
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, accessCode, caseId);
-        caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
-        assertNotNull(caseData);
-
-    }
-
-    @Test
-    public void testCitizenValidateAccessCode() {
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build();
-
-        String caseId = "1234567891234567L";
-        String accessCode = "e3ceb507";
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("Valid");
-
-        String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
-        assertNotNull(data);
 
     }
 

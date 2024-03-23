@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,19 @@ public class LinkCitizenCaseController {
             } else {
                 throw (new RuntimeException(CASE_LINKING_FAILED));
             }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the data")
+    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                     @RequestHeader(value = "caseId") String caseId,
+                                     @RequestHeader(value = "accessCode") String accessCode) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return linkCitizenCaseService.validateAccessCode(caseId, accessCode);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
