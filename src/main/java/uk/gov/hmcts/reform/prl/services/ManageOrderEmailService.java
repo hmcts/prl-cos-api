@@ -610,8 +610,6 @@ public class ManageOrderEmailService {
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
                                                   List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        log.info("555555555 {}",caseData.getManageOrders());
-        log.info("6666666666 {}",caseData.getManageOrders().getServeOrderDynamicList());
         caseData.getManageOrders().getServeOrderDynamicList().getValue()
             .forEach(element -> nullSafeCollection(caseData.getOrderCollection())
                 .forEach(orderDetailsElement -> {
