@@ -332,7 +332,6 @@ public class ManageOrderEmailService {
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
-        log.info("1222222222");
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
@@ -344,7 +343,6 @@ public class ManageOrderEmailService {
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
-                log.info("33333333");
                 log.info("*** CA non personal service email notifications ***");
                 handleNonPersonalServiceNotifications(
                     authorisation,
@@ -355,7 +353,6 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
-                log.info("44444444");
                 log.info("*** CA personal service email notifications ***");
                 handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                    manageOrders.getServingRespondentsOptionsCA());
