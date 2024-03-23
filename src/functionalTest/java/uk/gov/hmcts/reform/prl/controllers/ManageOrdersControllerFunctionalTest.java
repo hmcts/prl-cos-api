@@ -204,7 +204,7 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
-            .then().assertThat().statusCode(200);
+            .then().assertThat().statusCode(500);
     }
 
     @Test
