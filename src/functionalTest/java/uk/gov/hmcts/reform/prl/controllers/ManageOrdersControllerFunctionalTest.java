@@ -496,7 +496,6 @@ public class ManageOrdersControllerFunctionalTest {
 
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails.getId().toString());
-
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -525,7 +524,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
-
 
     @Test
     public void givenBody_ServeOrderForPersonalServiceWithCourtBailiffOptionSelected() throws Exception {
@@ -621,7 +619,6 @@ public class ManageOrdersControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
-
 
     /**
      * Court Admin manageOrders journey - creates the sdo order with one hearing with no approval required.
