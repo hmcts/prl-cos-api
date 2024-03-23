@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class LinkCitizenCaseController {
 
     @PostMapping(value = "/link-case-to-account", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                       @RequestHeader("caseId") String caseId,
                                       @RequestHeader("accessCode") String accessCode) {
@@ -59,7 +60,7 @@ public class LinkCitizenCaseController {
 
     @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId") String caseId,
                                      @RequestHeader(value = "accessCode") String accessCode) {
