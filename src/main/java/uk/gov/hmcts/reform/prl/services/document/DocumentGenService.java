@@ -86,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -273,6 +274,10 @@ public class DocumentGenService {
     protected String respC8FilenameWelsh;
 
     private final Time dateTime;
+    @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
+    protected String docCoverSheetServeOrderTemplate;
+    @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
+    protected String docCoverSheetWelshServeOrderTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -284,6 +289,9 @@ public class DocumentGenService {
     private final CaseService caseService;
     private final DgsApiClient dgsApiClient;
     private final ObjectMapper objectMapper;
+
+    private final DgsApiClient dgsApiClient;
+
     private final AuthTokenGenerator authTokenGenerator;
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
@@ -907,6 +915,9 @@ public class DocumentGenService {
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
                 break;
+            case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
+                template = findDocCoverSheetTemplateForServeOrder(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -957,6 +968,11 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
+        //Need to replace EMPTY_STRING with received welsh template
+        return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -1264,7 +1280,6 @@ public class DocumentGenService {
     }
 
     private boolean checkFileFormat(String fileName) {
-        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
