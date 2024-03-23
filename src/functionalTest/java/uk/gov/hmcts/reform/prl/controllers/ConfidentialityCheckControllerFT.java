@@ -269,14 +269,14 @@ public class ConfidentialityCheckControllerFT {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
 
-        String requestBodyRevised = requestBody
-            .replace("1687443551969082", caseDetails.getId().toString());
+        //String requestBodyRevised = requestBody
+        //    .replace("1687443551969082", caseDetails.getId().toString());
 
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBodyRevised)
+                                            .content(requestBody)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
