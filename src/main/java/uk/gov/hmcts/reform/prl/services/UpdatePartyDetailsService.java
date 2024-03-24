@@ -299,6 +299,8 @@ public class UpdatePartyDetailsService {
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
+        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
@@ -307,30 +309,28 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(callbackRequest,respondent),
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;
         }
     }
 
-    public Boolean checkIfConfidentialityDetailsChangedRespondent(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
-        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
-        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+    public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
-                    .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                            && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.isPhoneNumberChanged(respondent.getValue(),resp1.getValue())
-                            || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                            .getLabelForDynamicList()))).toList();
+                .filter(resp1 -> resp1.getId().equals(respondent.getId())
+                    && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
+                    .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
-                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
-                    || (CaseUtils.isPhoneNumberChanged(respondent.getValue(),respondentDetailsFL401))
+                || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
+                || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
                 .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
@@ -342,7 +342,7 @@ public class UpdatePartyDetailsService {
             return true;
         }
         log.info("respondent data not changed");
-        return  false;
+        return false;
     }
 
 
