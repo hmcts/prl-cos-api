@@ -42,7 +42,9 @@ public class LinkCitizenCaseController {
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                       @RequestHeader("caseId") String caseId,
                                       @RequestHeader("accessCode") String accessCode) {
+        log.info("linkCitizenToCase API has been invoked");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("linkCitizenToCase API has been authorised");
             Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
                 authorisation,
                 caseId,
@@ -64,7 +66,9 @@ public class LinkCitizenCaseController {
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId") String caseId,
                                      @RequestHeader(value = "accessCode") String accessCode) {
+        log.info("validateAccessCode API has been authorised");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("validateAccessCode API has been authorised");
             return linkCitizenCaseService.validateAccessCode(caseId, accessCode);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
