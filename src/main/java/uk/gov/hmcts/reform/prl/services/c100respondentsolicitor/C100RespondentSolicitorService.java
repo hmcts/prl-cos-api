@@ -1040,6 +1040,10 @@ public class C100RespondentSolicitorService {
             dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
+            log.info("res---getRespondentAllegationsOfHarmData-> {}", response.getRespondentAllegationsOfHarmData());
+
+            log.info("res---getSafetyConcerns--> {}", response.getSafetyConcerns());
+
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
                     && isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate())
                     && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentiality());
