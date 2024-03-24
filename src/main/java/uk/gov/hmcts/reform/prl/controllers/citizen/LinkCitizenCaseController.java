@@ -40,37 +40,9 @@ public class LinkCitizenCaseController {
     @PostMapping(value = "/link-case-to-account")
     @Operation(description = "Linking case to citizen account with access code")
     public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                      @RequestHeader("caseId") String caseId,
-                                      @RequestHeader("accessCode") String accessCode) {
-        log.info("linkCitizenToCase API has been invoked");
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("linkCitizenToCase API has been authorised");
-            Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
-                authorisation,
-                caseId,
-                accessCode
-            );
-            if (caseDetails.isPresent()) {
-                return CaseUtils.getCaseData(caseDetails.get(), objectMapper);
-            } else {
-                throw (new RuntimeException(CASE_LINKING_FAILED));
-            }
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(value = "/link-case-to-account-1")
-    @Operation(description = "Linking case to citizen account with access code")
-    public CaseData linkCitizenToCase1(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                        @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
-        log.info("linkCitizenToCase API has been invoked");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("linkCitizenToCase API has been authorised");
-            log.info("accessCodeRequest.getCaseId() is::" + accessCodeRequest.getCaseId());
-            log.info("accessCodeRequest.getAccessCode() is::" + accessCodeRequest.getAccessCode());
             Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
                 authorisation,
                 accessCodeRequest.getCaseId(),
@@ -89,28 +61,9 @@ public class LinkCitizenCaseController {
     @PostMapping(value = "/validate-access-code")
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                     @RequestHeader(value = "caseId") String caseId,
-                                     @RequestHeader(value = "accessCode") String accessCode) {
-        log.info("validateAccessCode API has been authorised");
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("validateAccessCode API has been authorised");
-            return linkCitizenCaseService.validateAccessCode(caseId, accessCode);
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(value = "/validate-access-code-1")
-    @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode1(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                       @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
-        log.info("validateAccessCode1 API has been authorised");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("validateAccessCode1 API has been authorised");
-            log.info("accessCodeRequest.getCaseId() is::" + accessCodeRequest.getCaseId());
-            log.info("accessCodeRequest.getAccessCode() is::" + accessCodeRequest.getAccessCode());
             return linkCitizenCaseService.validateAccessCode(
                 accessCodeRequest.getCaseId(),
                 accessCodeRequest.getAccessCode()
