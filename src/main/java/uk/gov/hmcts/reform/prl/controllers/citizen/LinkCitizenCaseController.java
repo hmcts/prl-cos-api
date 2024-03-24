@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +21,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Optional;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
@@ -36,7 +33,7 @@ public class LinkCitizenCaseController {
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
-    @PostMapping(value = "/link-case-to-account", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "/link-case-to-account")
     @Operation(description = "Linking case to citizen account with access code")
     public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
@@ -60,7 +57,7 @@ public class LinkCitizenCaseController {
         }
     }
 
-    @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
+    @PostMapping(value = "/validate-access-code")
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
