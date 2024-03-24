@@ -141,6 +141,9 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
+
+                    log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
+                                 + updatedPartyDetails.getResponse().getLegalRepresentation());
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
@@ -159,6 +162,8 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
+                    log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
+                                 + updatedPartyDetails.getResponse().getLegalRepresentation());
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     respondents.set(respondents.indexOf(party), updatedPartyElement);
 
@@ -364,6 +369,20 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenLegalRepresentationDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        log.info("verifying citizen provided input citizenProvidedPartyDetails.getResponse().getLegalRepresentation()::"
+                     + citizenProvidedPartyDetails.getResponse().getLegalRepresentation());
+
+        log.info("verifying updated output before -> existingPartyDetails.getResponse().getLegalRepresentation()::"
+                     + existingPartyDetails.getResponse().getLegalRepresentation());
+        PartyDetails xyz = existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
+                          .build())
+            .build();
+
+        log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
+                     + xyz.getResponse().getLegalRepresentation());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
