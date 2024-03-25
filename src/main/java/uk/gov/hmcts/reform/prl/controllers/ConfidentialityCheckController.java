@@ -104,7 +104,8 @@ public class ConfidentialityCheckController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedNew(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        @RequestBody CallbackRequest callbackRequest) {
+
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("inside new confidential check submitted event");
 
