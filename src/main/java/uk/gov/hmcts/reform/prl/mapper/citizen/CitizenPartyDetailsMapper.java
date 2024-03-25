@@ -166,11 +166,13 @@ public class CitizenPartyDetailsMapper {
                                                                                           party.getValue(),
                                                                                           caseEvent);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
-                    respondents.set(respondents.indexOf(party), updatedPartyElement);
+                    int updatedRespondentPartyIndex = respondents.indexOf(party);
+                    log.info("updatedRespondentPartyIndex ==> " + updatedRespondentPartyIndex);
+                    respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                                                        oldCaseData, respondents.indexOf(party), authorisation);
+                                                        oldCaseData, updatedRespondentPartyIndex, authorisation);
                     }
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
