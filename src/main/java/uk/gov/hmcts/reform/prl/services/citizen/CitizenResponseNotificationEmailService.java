@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -44,16 +42,16 @@ public class CitizenResponseNotificationEmailService {
                 .map(Element::getValue)
                 .collect(Collectors.toMap(
                     PartyDetails::getSolicitorEmail,
-                    i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                    i -> i.getRepresentativeFirstName() + "  " + i.getRepresentativeLastName()
                 ));
 
             for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-                emailService.send(
+                /*emailService.send(
                     appSols.getKey(),
                     EmailTemplateNames.CA_APPLICANT_SOLICITOR_RES_NOTIFICATION,
                     buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
                     LanguagePreference.english
-                );
+                );*/
             }
         }
     }

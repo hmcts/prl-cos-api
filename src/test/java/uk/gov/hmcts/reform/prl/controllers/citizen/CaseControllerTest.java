@@ -23,8 +23,8 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -77,12 +78,15 @@ public class CaseControllerTest {
     @Mock
     HearingService hearingService;
 
+    @Mock
+    AllTabServiceImpl allTabsService;
+
     private CaseData caseData;
     Address address;
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
-    private UpdateCaseData updateCaseData;
+    private CitizenUpdatedCaseData citizenUpdatedCaseData;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
@@ -201,7 +205,7 @@ public class CaseControllerTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.applicant)
@@ -232,9 +236,11 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        when(caseService.updateCaseDetails(authToken, caseId, eventId, citizenUpdatedCaseData)).thenReturn(caseDetails);
+        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
+
         CaseData caseData1 = caseController.caseUpdate(
-            updateCaseData,
+            citizenUpdatedCaseData,
             eventId,
             caseId,
             authToken,
@@ -266,7 +272,7 @@ public class CaseControllerTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.applicant)
@@ -288,9 +294,9 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        when(caseService.updateCaseDetails(authToken, caseId, eventId, citizenUpdatedCaseData)).thenReturn(caseDetails);
         CaseData caseData1 = caseController.caseUpdate(
-            updateCaseData,
+            citizenUpdatedCaseData,
             eventId,
             caseId,
             "authToken",

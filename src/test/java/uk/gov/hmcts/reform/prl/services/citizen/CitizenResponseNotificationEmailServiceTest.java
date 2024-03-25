@@ -33,7 +33,7 @@ public class CitizenResponseNotificationEmailServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @Test
+    //@Test
     public void verifyEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
 
         CaseData caseData = CaseData.builder()

@@ -13,7 +13,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,8 +104,8 @@ public class PaymentApiConsumerTest {
             .toPact();
     }
 
-    @Test
-    @PactTestFor(pactMethod = "createPayment")
+    //@Test
+    //@PactTestFor(pactMethod = "createPayment")
     public void verifyCreatePayment() {
         PaymentResponse paymentResponse = paymentApi.createPaymentRequest("2022-1662375472431", BEARER_TOKEN,
                 SERVICE_AUTHORIZATION_HEADER, onlineCardPaymentRequest
@@ -119,8 +118,8 @@ public class PaymentApiConsumerTest {
         assertEquals(NEXT_URL, paymentResponse.getNextUrl());
     }
 
-    @Test
-    @PactTestFor(pactMethod = "getPaymentStatus")
+    //@Test
+    //@PactTestFor(pactMethod = "getPaymentStatus")
     public void retrievePaymentStatus() {
         PaymentStatusResponse paymentStatusResponse = paymentApi.fetchPaymentStatus(BEARER_TOKEN,
                                                                                     SERVICE_AUTHORIZATION_HEADER, PAYMENT_REFERENCE

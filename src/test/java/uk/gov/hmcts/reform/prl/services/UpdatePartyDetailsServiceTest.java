@@ -76,6 +76,9 @@ public class UpdatePartyDetailsServiceTest {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
+
     @InjectMocks
     UpdatePartyDetailsService updatePartyDetailsService;
 

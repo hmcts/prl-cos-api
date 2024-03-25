@@ -47,4 +47,6 @@ spring:
         prl.welsh-court-mapping: WELSH_COURT_MAPPING
         prl.courtadmin-swansea-testuser: IDAM_COURT_ADMIN_USERNAME
         prl.courtadmin-swansea-testuser-password: IDAM_COURT_ADMIN_PASSWORD
+        prl.cafcass-svc-username: CAFCASS_USERNAME
+        prl.cafcass-svc-password: CAFCASS_PASSWORD
         prl.hearing-statuses-to-filter: HEARING_STATUSES_TO_FILTER
