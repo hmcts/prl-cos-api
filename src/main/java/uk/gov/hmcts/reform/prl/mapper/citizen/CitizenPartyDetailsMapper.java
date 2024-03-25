@@ -186,34 +186,36 @@ public class CitizenPartyDetailsMapper {
                                                  CaseData oldCaseData,
                                                  int respondentIndex,
                                                  String authorisation) {
-        Map<String, Object> dataMapForC8Dcoument = new HashMap<>();
-        dataMapForC8Dcoument.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
-        dataMapForC8Dcoument.put(CASE_DATA_ID, oldCaseData.getId());
-        dataMapForC8Dcoument.put(ISSUE_DATE_FIELD, oldCaseData.getIssueDate());
-        dataMapForC8Dcoument.put(COURT_SEAL_FIELD,
+        log.info("inside reGenerateRespondentC8Documents for respondentIndex " + respondentIndex);
+        Map<String, Object> dataMapForC8Document = new HashMap<>();
+        dataMapForC8Document.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
+        dataMapForC8Document.put(CASE_DATA_ID, oldCaseData.getId());
+        dataMapForC8Document.put(ISSUE_DATE_FIELD, oldCaseData.getIssueDate());
+        dataMapForC8Document.put(COURT_SEAL_FIELD,
                                  oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
                                      : oldCaseData.getCourtSeal());
         if (oldCaseData.getTaskListVersion() != null
             && TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(oldCaseData.getTaskListVersion()))) {
             List<Element<ChildDetailsRevised>> listOfChildren = oldCaseData.getNewChildDetails();
-            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+            dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         } else {
             List<Element<Child>> listOfChildren = oldCaseData.getChildren();
-            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+            dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         }
-        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Dcoument);
+        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Document);
 
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
-                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Dcoument,
+                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Document,
                                                           updatePartyDetailsService
                                                               .checkIfConfidentialityDetailsChangedRespondent(
                                                                   oldCaseData, updatedPartyElement
                                                               ),
                                                           respondentIndex, updatedPartyElement
             );
+            log.info("exit reGenerateRespondentC8Documents & caseDataMapToBeUpdated " + caseDataMapToBeUpdated);
         } catch (Exception e) {
             log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
                       oldCaseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList()
