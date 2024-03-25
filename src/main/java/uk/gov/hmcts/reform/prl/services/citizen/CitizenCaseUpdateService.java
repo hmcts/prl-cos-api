@@ -68,4 +68,18 @@ public class CitizenCaseUpdateService {
 
         return caseDetails;
     }
+
+    public CaseDetails deleteApplication(String caseId, String authToken) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.DELETE_APPLICATION.getValue(), authToken);
+
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            startAllTabsUpdateDataContent.caseDataMap(),
+            startAllTabsUpdateDataContent.userDetails()
+        );
+    }
 }

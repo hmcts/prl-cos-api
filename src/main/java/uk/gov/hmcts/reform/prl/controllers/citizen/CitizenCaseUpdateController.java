@@ -72,4 +72,28 @@ public class CitizenCaseUpdateController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(value = "/{caseId}/delete-application")
+    @Operation(description = "Processing citizen updates")
+    public CaseData deleteApplicationCitizen(
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("*** Inside deleteApplicationCitizen");
+            CaseDetails caseDetails = citizenCaseUpdateService.deleteApplication(
+                caseId,
+                authorisation
+            );
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("deleteApplicationCitizen is not successful for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Citizen delete application failed for this transaction");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
