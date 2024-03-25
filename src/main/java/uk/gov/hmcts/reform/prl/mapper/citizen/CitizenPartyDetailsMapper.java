@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +57,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-    private final ObjectMapper objectMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
 
     private final UpdatePartyDetailsService updatePartyDetailsService;
@@ -148,8 +146,6 @@ public class CitizenPartyDetailsMapper {
                                                                                           party.getValue(),
                                                                                           caseEvent);
 
-                    log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
-                                 + updatedPartyDetails.getResponse().getLegalRepresentation());
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
@@ -168,8 +164,6 @@ public class CitizenPartyDetailsMapper {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
                                                                                           caseEvent);
-                    log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
-                                 + updatedPartyDetails.getResponse().getLegalRepresentation());
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     respondents.set(respondents.indexOf(party), updatedPartyElement);
 
@@ -191,28 +185,28 @@ public class CitizenPartyDetailsMapper {
                                                  CaseData oldCaseData,
                                                  int respondentIndex,
                                                  String authorisation) {
-        Map<String, Object> dataMapForC8Dcoument = new HashMap<>();
-        dataMapForC8Dcoument.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
-        dataMapForC8Dcoument.put(CASE_DATA_ID, oldCaseData.getId());
-        dataMapForC8Dcoument.put(ISSUE_DATE_FIELD, oldCaseData.getIssueDate());
-        dataMapForC8Dcoument.put(COURT_SEAL_FIELD,
+        Map<String, Object> dataMapForC8Document = new HashMap<>();
+        dataMapForC8Document.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
+        dataMapForC8Document.put(CASE_DATA_ID, oldCaseData.getId());
+        dataMapForC8Document.put(ISSUE_DATE_FIELD, oldCaseData.getIssueDate());
+        dataMapForC8Document.put(COURT_SEAL_FIELD,
                                  oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
                                      : oldCaseData.getCourtSeal());
         if (oldCaseData.getTaskListVersion() != null
-            && TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(oldCaseData.getTaskListVersion()))) {
+            && TASK_LIST_VERSION_V2.equalsIgnoreCase(oldCaseData.getTaskListVersion())) {
             List<Element<ChildDetailsRevised>> listOfChildren = oldCaseData.getNewChildDetails();
-            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+            dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         } else {
             List<Element<Child>> listOfChildren = oldCaseData.getChildren();
-            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+            dataMapForC8Document.put(CHILDREN, listOfChildren);
 
         }
-        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Dcoument);
+        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Document);
 
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
-                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Dcoument,
+                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Document,
                                                           updatePartyDetailsService
                                                               .checkIfConfidentialityDetailsChangedRespondent(
                                                                   oldCaseData, updatedPartyElement
@@ -327,7 +321,13 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            case DELETE_CASE -> {
+            case CITIZEN_INTERNAL_FLAG_UPDATES -> {
+                return updateCitizenResponseDataForFlagUpdates(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
+            case DELETE_APPLICATION -> {
                 log.info("Case has been marked for deletion by the applicant");
                 return existingPartyDetails;
             }
@@ -383,20 +383,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenLegalRepresentationDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        log.info("verifying citizen provided input citizenProvidedPartyDetails.getResponse().getLegalRepresentation()::"
-                     + citizenProvidedPartyDetails.getResponse().getLegalRepresentation());
-
-        log.info("verifying updated output before -> existingPartyDetails.getResponse().getLegalRepresentation()::"
-                     + existingPartyDetails.getResponse().getLegalRepresentation());
-        PartyDetails xyz = existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
-                          .toBuilder()
-                          .legalRepresentation(citizenProvidedPartyDetails.getResponse().getLegalRepresentation())
-                          .build())
-            .build();
-
-        log.info("verifying updated output after -> existingPartyDetails.getResponse().getLegalRepresentation()::"
-                     + xyz.getResponse().getLegalRepresentation());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
@@ -424,16 +410,26 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .currentOrPreviousProceedings(isNotEmpty(citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings())
                                                             ? citizenProvidedPartyDetails.getResponse().getCurrentOrPreviousProceedings()
                                                             : existingPartyDetails.getResponse().getCurrentOrPreviousProceedings())
+                          .build())
+            .build();
+    }
+
+    private PartyDetails updateCitizenResponseDataForFlagUpdates(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        boolean isCitizenFlagsPresent = isNotEmpty(citizenProvidedPartyDetails.getResponse().getCitizenFlags());
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
                           .citizenFlags(isCitizenFlagsPresent
-                                            ? updateCitizenFlags(existingPartyDetails.getResponse().getCitizenFlags(),
-                                                                 citizenProvidedPartyDetails.getResponse().getCitizenFlags())
+                                            ? updateCitizenFlags(
+                                            existingPartyDetails.getResponse().getCitizenFlags(),
+                                            citizenProvidedPartyDetails.getResponse().getCitizenFlags()
+                                        )
                                             : existingPartyDetails.getResponse().getCitizenFlags()
                           )
                           .build())
@@ -449,17 +445,17 @@ public class CitizenPartyDetailsMapper {
                                       ? updatedCitizenFlags.getIsAllDocumentsViewed()
                                       : existingCitizenFlags.getIsAllDocumentsViewed())
             .isAllegationOfHarmViewed(isNotEmpty(updatedCitizenFlags.getIsAllegationOfHarmViewed())
-                                      ? updatedCitizenFlags.getIsAllegationOfHarmViewed()
-                                      : existingCitizenFlags.getIsAllegationOfHarmViewed())
+                                          ? updatedCitizenFlags.getIsAllegationOfHarmViewed()
+                                          : existingCitizenFlags.getIsAllegationOfHarmViewed())
             .isResponseInitiated(isNotEmpty(updatedCitizenFlags.getIsResponseInitiated())
-                                          ? updatedCitizenFlags.getIsResponseInitiated()
-                                          : existingCitizenFlags.getIsResponseInitiated())
+                                     ? updatedCitizenFlags.getIsResponseInitiated()
+                                     : existingCitizenFlags.getIsResponseInitiated())
             .isApplicationToBeServed(isNotEmpty(updatedCitizenFlags.getIsApplicationToBeServed())
-                                     ? updatedCitizenFlags.getIsApplicationToBeServed()
-                                     : existingCitizenFlags.getIsApplicationToBeServed())
+                                         ? updatedCitizenFlags.getIsApplicationToBeServed()
+                                         : existingCitizenFlags.getIsApplicationToBeServed())
             .isStatementOfServiceProvided(isNotEmpty(updatedCitizenFlags.getIsStatementOfServiceProvided())
-                                         ? updatedCitizenFlags.getIsStatementOfServiceProvided()
-                                         : existingCitizenFlags.getIsStatementOfServiceProvided())
+                                              ? updatedCitizenFlags.getIsStatementOfServiceProvided()
+                                              : existingCitizenFlags.getIsStatementOfServiceProvided())
             .build();
     }
 
