@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.pitest.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -92,29 +94,37 @@ public class ResubmitApplicationController {
             log.debug(" ----> caseData.getCourtName() --> " + caseData.getCourtName());
             log.debug(" ----> caseData.getCourtId() --> " + caseData.getCourtId());
 
-            Court closestChildArrangementsCourt = courtFinderService
-                .getNearestFamilyCourt(caseData);
-            if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+            if (StringUtils.isBlank(caseData.getCourtId())) {
 
-                log.debug(" ----> caseData.getCourtId() is not null --> " + caseData.getCourtId());
-                log.debug(" ----> caseData.getCourtId() inside if  --> " + caseData.getCourtId());
-                caseData = caseData.toBuilder()
-                    .courtName(closestChildArrangementsCourt.getCourtName())
-                    .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
-                    .build();
-                caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(
-                    COURT_ID_FIELD,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
-                caseDataUpdated.put(
-                    COURT_CODE_FROM_FACT,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
+                Court closestChildArrangementsCourt = courtFinderService
+                    .getNearestFamilyCourt(caseData);
 
-                log.debug(" ----> caseData.COURT_ID_FIELD() inside if  --> " + caseDataUpdated.get(COURT_ID_FIELD));
-                log.debug(" ----> after update caseData.COURT_NAME_FIELD() --> " + caseDataUpdated.get(COURT_NAME_FIELD));
-                log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() --> " + caseDataUpdated.get(COURT_CODE_FROM_FACT));
+                log.debug(" ----> closestChildArrangementsCourt --> " + closestChildArrangementsCourt.getCourtName());
+
+                if (closestChildArrangementsCourt != null) {
+
+                    log.debug(" ----> caseData.getCourtId() is not null --> " + caseData.getCourtId());
+                    log.debug(" ----> caseData.getCourtId() inside if  --> " + caseData.getCourtId());
+                    caseData = caseData.toBuilder()
+                        .courtName(closestChildArrangementsCourt.getCourtName())
+                        .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                        .build();
+                    caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+                    caseDataUpdated.put(
+                        COURT_ID_FIELD,
+                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                    );
+                    caseDataUpdated.put(
+                        COURT_CODE_FROM_FACT,
+                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                    );
+
+                    log.debug(" ----> caseData.COURT_ID_FIELD() inside if  --> " + caseDataUpdated.get(COURT_ID_FIELD));
+                    log.debug(" ----> after update caseData.COURT_NAME_FIELD() --> " + caseDataUpdated.get(
+                        COURT_NAME_FIELD));
+                    log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() --> " + caseDataUpdated.get(
+                        COURT_CODE_FROM_FACT));
+                }
             }
 
             log.debug(" ----> caseData.COURT_ID_FIELD() outside after update court  --> "
