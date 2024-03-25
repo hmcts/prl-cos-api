@@ -1031,7 +1031,7 @@ public class ManageOrderService {
             && childOption != null && childOption.getValue() != null) {
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && childOption != null && childOption.getListItems() != null) {
+            && childOption != null && Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
             return getChildNames(childOption.getListItems());
         }
         return null;
@@ -2289,20 +2289,26 @@ public class ManageOrderService {
             .typeOfChildArrangementsOrder(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder
                                               .equals(CreateSelectOrderOptionsEnum.getValue(flagSelectedOrderId))
                                               ? getChildArrangementOrder(caseData) : "")
-            .childrenList((Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
-                              ? dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                         .getChildOption())
-                              : dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
-                                                                      .getChildOption()))
+            .childrenList(getChildrenListForNewOrder(caseData))
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
+    }
+
+    private String getChildrenListForNewOrder(CaseData caseData) {
+        if (Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
+            return dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                         .getChildOption());
+        } else if (Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
+            return dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
+                                                                      .getChildOption());
+        }
+        return null;
     }
 
     private String getChildArrangementOrder(CaseData caseData) {
