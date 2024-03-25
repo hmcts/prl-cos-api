@@ -114,7 +114,7 @@ public class ResubmitApplicationController {
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
-            log.debug(" eventsForCase----> "+eventsForCase);
+            log.debug(" eventsForCase----> " + eventsForCase.toString());
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
 
