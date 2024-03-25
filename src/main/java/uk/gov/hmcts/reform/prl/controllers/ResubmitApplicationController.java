@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.pitest.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -99,9 +98,12 @@ public class ResubmitApplicationController {
                 Court closestChildArrangementsCourt = courtFinderService
                     .getNearestFamilyCourt(caseData);
 
-                log.debug(" ----> closestChildArrangementsCourt --> " + closestChildArrangementsCourt.getCourtName());
+                log.debug(" ----> closestChildArrangementsCourt --> " + closestChildArrangementsCourt);
 
                 if (closestChildArrangementsCourt != null) {
+
+                    log.debug(" ----> closestChildArrangementsCourt --> "
+                                  + closestChildArrangementsCourt.getCourtName());
 
                     log.debug(" ----> caseData.getCourtId() is not null --> " + caseData.getCourtId());
                     log.debug(" ----> caseData.getCourtId() inside if  --> " + caseData.getCourtId());
