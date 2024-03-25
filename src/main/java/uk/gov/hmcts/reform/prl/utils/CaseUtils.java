@@ -619,13 +619,30 @@ public class CaseUtils {
     }
 
     public static boolean isThereAnyNewConfidentialDataPresent(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !((ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
-            && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential()))
-            &&
-            (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
-                && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()))
-            &&
-            (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
-                && currentParty.getIsPhoneNumberConfidential().equals(updatedParty.getIsPhoneNumberConfidential())));
+        return !(isEmailConfidentialOptionChanged(currentParty, updatedParty)
+            && isAddressConfidentialOptionChanged(currentParty, updatedParty)
+            && isPhoneConfidentialOptionChanged(currentParty, updatedParty));
     }
+
+    private static boolean isEmailConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return ((ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
+            && ObjectUtils.isEmpty(updatedParty.getIsEmailAddressConfidential()))
+            || (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
+            && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential())));
+    }
+
+    private static boolean isAddressConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return ((ObjectUtils.isEmpty(currentParty.getIsAddressConfidential())
+            && ObjectUtils.isEmpty(updatedParty.getIsAddressConfidential()))
+            || (ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
+            && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+    }
+
+    private static boolean isPhoneConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return ((ObjectUtils.isEmpty(currentParty.getIsPhoneNumberConfidential())
+            && ObjectUtils.isEmpty(updatedParty.getIsPhoneNumberConfidential()))
+            || (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
+            && currentParty.getIsPhoneNumberConfidential().equals(updatedParty.getIsPhoneNumberConfidential())));
+    }
+
 }
