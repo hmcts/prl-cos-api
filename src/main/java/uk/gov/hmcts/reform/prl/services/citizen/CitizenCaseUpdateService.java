@@ -83,6 +83,23 @@ public class CitizenCaseUpdateService {
         return caseDetails;
     }
 
+    public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(), authToken);
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+        caseDataMapToBeUpdated.put("c100RebuildData", citizenUpdatedCaseData.getC100RebuildData());
+        //TODO: Add case state update - now shall we run all tabs update - is it needed?
+
+        return allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMapToBeUpdated,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+    }
+
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.DELETE_APPLICATION.getValue(), authToken);
