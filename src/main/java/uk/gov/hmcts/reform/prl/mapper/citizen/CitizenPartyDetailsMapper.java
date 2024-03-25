@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -16,6 +14,8 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
@@ -36,8 +36,14 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -146,8 +152,8 @@ public class CitizenPartyDetailsMapper {
                                  + updatedPartyDetails.getResponse().getLegalRepresentation());
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
-            caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             caseData = caseData.toBuilder().applicants(applicants).build();
+            caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
@@ -169,12 +175,11 @@ public class CitizenPartyDetailsMapper {
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                                                        oldCaseData, respondents.indexOf(party), respondents, authorisation);
+                                                        oldCaseData, respondents.indexOf(party), authorisation);
                     }
                 });
-
-            caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
             caseData = caseData.toBuilder().respondents(respondents).build();
+            caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
 
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         }
@@ -183,36 +188,41 @@ public class CitizenPartyDetailsMapper {
 
     private void reGenerateRespondentC8Documents(Map<String, Object> caseDataMapToBeUpdated,
                                                  Element<PartyDetails> updatedPartyElement,
-                                                 CaseData caseData,
+                                                 CaseData oldCaseData,
                                                  int respondentIndex,
-                                                 List<Element<PartyDetails>> updatedRespondents,
                                                  String authorisation) {
-        CaseData updatedCaseData = caseData.toBuilder()
-            .respondents(updatedRespondents)
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder()
-                             .data(caseData.toMap(objectMapper))
-                             .build())
-            .caseDetails(CaseDetails.builder()
-                             .data(updatedCaseData.toMap(objectMapper))
-                             .build())
-            .build();
-        Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
-            callbackRequest,
-            updatedPartyElement
-        );
+        Map<String, Object> dataMapForC8Dcoument = new HashMap<>();
+        dataMapForC8Dcoument.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
+        dataMapForC8Dcoument.put(CASE_DATA_ID, oldCaseData.getId());
+        dataMapForC8Dcoument.put(ISSUE_DATE_FIELD, oldCaseData.getIssueDate());
+        dataMapForC8Dcoument.put(COURT_SEAL_FIELD,
+                                 oldCaseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]"
+                                     : oldCaseData.getCourtSeal());
+        if (oldCaseData.getTaskListVersion() != null
+            && TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(oldCaseData.getTaskListVersion()))) {
+            List<Element<ChildDetailsRevised>> listOfChildren = oldCaseData.getNewChildDetails();
+            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+
+        } else {
+            List<Element<Child>> listOfChildren = oldCaseData.getChildren();
+            dataMapForC8Dcoument.put(CHILDREN, listOfChildren);
+
+        }
+        c100RespondentSolicitorService.checkIfConfidentialDataPresent(updatedPartyElement, dataMapForC8Dcoument);
+
         try {
             updatePartyDetailsService.populateC8Documents(authorisation,
-                                                          caseDataMapToBeUpdated, caseData, dataMap,
+                                                          caseDataMapToBeUpdated, oldCaseData, dataMapForC8Dcoument,
                                                           updatePartyDetailsService
                                                               .checkIfConfidentialityDetailsChangedRespondent(
-                                                                  callbackRequest,updatedPartyElement
+                                                                  oldCaseData, updatedPartyElement
                                                               ),
-                                respondentIndex,updatedPartyElement);
+                                                          respondentIndex, updatedPartyElement
+            );
         } catch (Exception e) {
             log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
-                      caseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList());
+                      oldCaseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList()
+            );
             throw new CoreCaseDataStoreException(e.getMessage(), e);
         }
     }
@@ -231,8 +241,8 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent
                 );
-                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
@@ -243,8 +253,8 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent
                 );
-                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         }
