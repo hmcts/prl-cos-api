@@ -2757,7 +2757,6 @@ public class ServiceOfApplicationService {
     }
 
     public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
-        log.info("555555555");
         //Suppressed java:S6541 , suppression will be removed after refactoring in the IP sprint.
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -2771,7 +2770,6 @@ public class ServiceOfApplicationService {
                 || (unServedRespondentPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedRespondentPack.getPersonalServiceBy()))) {
-                log.info("applicantLegalRepresentative---->");
                 EmailNotificationDetails emailNotification = sendNotificationForApplicantLegalRepPersonalService(caseData,
                     authorization, unServedApplicantPack, unServedRespondentPack);
                 if (emailNotification != null) {
@@ -2786,7 +2784,6 @@ public class ServiceOfApplicationService {
                                                                emailNotificationDetails, bulkPrintDetails);
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
-                log.info("Neitherrrr---->");
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
@@ -2895,7 +2892,6 @@ public class ServiceOfApplicationService {
             List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
-                    log.info(" !!!hasLegalRepresentation---->");
                     log.info(" getContactPreferences---->{}",applicant.getValue().getContactPreferences());
                     if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())) {
                         Map<String, String> fieldsMap = new HashMap<>();
@@ -3012,18 +3008,15 @@ public class ServiceOfApplicationService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> processConfidentialityCheck(String authorisation, CallbackRequest callbackRequest) {
-        log.info("222222222");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         final ResponseEntity<SubmittedCallbackResponse> response;
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
-            log.info("333333");
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
         } else {
-            log.info("3333 Elseee");
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
             caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
@@ -3078,7 +3071,6 @@ public class ServiceOfApplicationService {
 
     private ResponseEntity<SubmittedCallbackResponse> servePacksWithConfidentialDetails(String authorisation, CaseData caseData,
                                                                                         Map<String, Object> caseDataMap) {
-        log.info("4444444");
         final ResponseEntity<SubmittedCallbackResponse> response;
         String confirmationHeader;
         String confirmationBody;
