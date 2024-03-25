@@ -127,7 +127,7 @@ public class CitizenCaseUpdateController {
         }
     }
 
-    @PostMapping(value = "{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "/{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Withdraw a case submitted by citizen")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success"),
