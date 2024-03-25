@@ -1028,7 +1028,7 @@ public class ServiceOfApplicationService {
                                                                  Element<PartyDetails> party,
                                                                  String coverLetterTemplate,
                                                                  SendgridEmailTemplateNames emailTemplate) {
-        log.info(" sendSoaPacksToPartyViaEmail---GOV->");
+        log.info(" sendSoaPacksToPartyViaEmail---SEndGrid->");
         //Generate access code if party does not have access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization,
                                                                                                             caseData,
@@ -1040,6 +1040,7 @@ public class ServiceOfApplicationService {
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
+        log.info("Dynamic datata --> {}",dynamicData);
 
         EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
@@ -1103,6 +1104,7 @@ public class ServiceOfApplicationService {
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
             log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
+            log.info("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
             emailNotification = sendEmailToUnrepresentedApplicant(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
@@ -1111,6 +1113,7 @@ public class ServiceOfApplicationService {
                                                                   notifyTemplate);
         } else {
             log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
+            log.info("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
             emailNotification = sendSoaPacksToPartyViaEmail(fieldMap.get(AUTHORIZATION),
                                                             caseData,
                                                             docs,
@@ -1530,6 +1533,7 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isAccessEnabled(Element<PartyDetails> party) {
+        log.info("isAccessEnabled method {}",party.getValue());
         return party.getValue() != null && party.getValue().getUser() != null
             && party.getValue().getUser().getIdamId() != null;
     }
