@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -236,13 +237,13 @@ public class ConfidentialityTabService {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential()) && isNotEmpty(applicant.getAddress())) {
                 addressSet = true;
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential()) && isNotEmpty(applicant.getEmail())) {
                 emailSet = true;
             }
-            if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential()) && isNotEmpty(applicant.getPhoneNumber())) {
                 phoneSet = true;
             }
             if (addressSet || emailSet || phoneSet) {
