@@ -31,15 +31,14 @@ public class SendOrReplyMessage {
         return new String[]{
             "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
-            "replyMessageObject", "messageReplyTable", "chooseSendOrReply",
-            "sendMessageAdditionalDocumentsList", "externalMessageAttachDocsList"
+            "replyMessageObject", "messageReplyTable", "chooseSendOrReply", "externalMessageAttachDocsList"
         };
     }
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
             "messageContent",
-            "messageMetaData", "messageReplyDynamicList", "messageReplyTable"
+            "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList"
         };
     }
 }

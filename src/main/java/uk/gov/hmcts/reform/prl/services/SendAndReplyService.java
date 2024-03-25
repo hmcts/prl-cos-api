@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -728,6 +729,7 @@ public class SendAndReplyService {
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
+            .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -1092,8 +1094,10 @@ public class SendAndReplyService {
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
-            .internalMessageWhoToSendTo(null != message.getInternalMessageWhoToSendTo()
-                                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
+            .internalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+                                            ? getExternalSentTo(message.getExternalMessageWhoToSendTo())
+                                            : (null != message.getInternalMessageWhoToSendTo()
+                ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null))
             .internalOrExternalMessage(null != message.getInternalOrExternalMessage()
                                            ? message.getInternalOrExternalMessage().getDisplayedValue() : null)
             .messageAbout(null != message.getMessageAbout()
@@ -1101,6 +1105,7 @@ public class SendAndReplyService {
             .judgeName(message.getJudgeName())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getSelectedCtscEmail())
+            .externalMessageAttachDocs(message.getExternalMessageAttachDocs())
             .selectedApplicationValue(message.getSelectedApplicationValue())
             .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
@@ -1112,6 +1117,15 @@ public class SendAndReplyService {
             .updatedTime(message.getUpdatedTime())
             .build();
     }
+
+    private String getExternalSentTo(DynamicMultiSelectList externalMessageWhoToSendTo) {
+        Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(externalMessageWhoToSendTo);
+        return externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+            .getValue().stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","))).orElse("");
+    }
+
 
     public CaseData resetSendAndReplyDynamicLists(CaseData caseData) {
         Message sendMessageObject = null;
