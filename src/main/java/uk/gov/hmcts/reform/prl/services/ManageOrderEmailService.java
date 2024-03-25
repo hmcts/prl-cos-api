@@ -881,7 +881,7 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else {
-                    log.info("Contact preference set as post or none set");
+                    log.info("Contact preference set as post or no contact preference is set");
                     serveOrdersToApplicantAddress(
                         caseData,
                         authorisation,
