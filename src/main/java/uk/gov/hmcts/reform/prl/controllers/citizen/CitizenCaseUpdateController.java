@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -78,12 +80,14 @@ public class CitizenCaseUpdateController {
     public CaseData deleteApplicationCitizen(
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @Valid @NotNull @RequestBody CaseData caseData
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside deleteApplicationCitizen");
             CaseDetails caseDetails = citizenCaseUpdateService.deleteApplication(
                 caseId,
+                caseData,
                 authorisation
             );
             if (caseDetails != null) {
@@ -91,6 +95,33 @@ public class CitizenCaseUpdateController {
             } else {
                 log.error("deleteApplicationCitizen is not successful for the case {}", caseId);
                 throw new CoreCaseDataStoreException("Citizen delete application failed for this transaction");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Withdraw a case submitted by citizen")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData withdrawCase(
+        @Valid @NotNull @RequestBody CaseData caseData,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        CaseDetails caseDetails = null;
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            caseDetails = citizenCaseUpdateService.withdrawCase(caseData, caseId, authorisation);
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("withdrawCase is not successful for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Citizen withdraw application failed for this transaction");
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

@@ -225,7 +225,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","citizen-case-submit","123");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","citizen-case-submit");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -273,8 +273,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+                                                                CITIZEN_CASE_SUBMIT.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -304,57 +304,12 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
-
-    @Test
-    public void shouldWithdrawCase() {
-        //Given
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .withDrawApplicationData(
-                WithdrawApplication.builder()
-                    .withDrawApplication(YesOrNo.Yes)
-                    .withDrawApplicationReason("Case withdrawn").build())
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        CaseDetails caseDetails = mock(CaseDetails.class);
-        EventRequestData eventRequestData = EventRequestData.builder().build();
-        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
-        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_CASE_WITHDRAW, userDetails.getId())).thenReturn(eventRequestData);        //When
-        when(coreCaseDataService.startUpdate(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.anyString(),
-            Mockito.anyBoolean()
-        )).thenReturn(
-            StartEventResponse.builder().caseDetails(mock(CaseDetails.class)).build());
-        CaseDataContent caseDataContent = CaseDataContent.builder().build();
-        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
-            .thenReturn(caseDataContent);
-        when(coreCaseDataService.submitUpdate(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.anyString(),
-            Mockito.anyBoolean()
-        )).thenReturn(caseDetails);
-        CaseDetails actualCaseDetails =  caseService.withdrawCase(caseData, caseId, authToken);
-        //Then
-        assertNotNull(actualCaseDetails);
-    }
-
 
     @Test
     public void testUpdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
@@ -611,8 +566,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -645,8 +600,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -674,8 +629,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -705,8 +660,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
