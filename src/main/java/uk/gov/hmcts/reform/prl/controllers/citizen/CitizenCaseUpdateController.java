@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -43,8 +44,7 @@ public class CitizenCaseUpdateController {
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestHeader("accessCode") String accessCode
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
@@ -58,10 +58,14 @@ public class CitizenCaseUpdateController {
                 authorisation,
                 caseId,
                 eventId,
-                citizenUpdatedCaseData,
-                accessCode
+                citizenUpdatedCaseData
             );
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("{} is not successful for the case {}", eventId, caseId);
+                throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -38,7 +38,8 @@ public enum CaseEvent {
     CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
-    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    CITIZEN_CONTACT_PREFERENCE("citizenContactPreference");
 
     private final String value;
 
