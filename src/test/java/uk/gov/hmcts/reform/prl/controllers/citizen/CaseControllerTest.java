@@ -163,8 +163,7 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
-                                    "testAccessCode"
+        when(caseService.updateCase(caseData, authToken, caseId, eventId
         )).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(
             caseData,
@@ -387,44 +386,6 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
-    }
-
-    @Test
-    public void shouldWithdrawCase() {
-        //Given
-        String caseId = "1234567891234567";
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .state(State.CASE_WITHDRAWN)
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
-
-        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Mockito.when(caseService.withdrawCase(caseData, caseId, authToken)).thenReturn(caseDetails);
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
-        //When
-        CaseData actualCaseData = caseController.withdrawCase(caseData, caseId, authToken, servAuthToken);
-
-        //Then
-        assertThat(actualCaseData.getState()).isEqualTo(caseData.getState());
-    }
-
-    @Test
-    public void withdrawCaseFailsWhenAuthFails() throws JsonProcessingException {
-
-        expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Invalid Client");
-
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
-        //When
-        caseController.withdrawCase(caseData, "1234567891234567", authToken, servAuthToken);
-
-        throw new RuntimeException("Invalid Client");
     }
 
     @Test
