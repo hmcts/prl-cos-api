@@ -117,9 +117,12 @@ public class ResubmitApplicationController {
                 log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() --> " + caseDataUpdated.get(COURT_CODE_FROM_FACT));
             }
 
-            log.debug(" ----> caseData.COURT_ID_FIELD() outside after update court  --> " + caseDataUpdated.get(COURT_ID_FIELD));
-            log.debug(" ----> after update caseData.COURT_NAME_FIELD() outside after update court --> " + caseDataUpdated.get(COURT_NAME_FIELD));
-            log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() outside after update court --> " + caseDataUpdated.get(COURT_CODE_FROM_FACT));
+            log.debug(" ----> caseData.COURT_ID_FIELD() outside after update court  --> "
+                          + caseDataUpdated.get(COURT_ID_FIELD));
+            log.debug(" ----> after update caseData.COURT_NAME_FIELD() outside after update court --> "
+                          + caseDataUpdated.get(COURT_NAME_FIELD));
+            log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() outside after update court --> "
+                          + caseDataUpdated.get(COURT_CODE_FROM_FACT));
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
