@@ -24,15 +24,15 @@ public class SendOrReplyMessage {
     private String messageReplyTable;
     private Message sendMessageObject;
     private Message replyMessageObject;
-    @JsonProperty("sendMessageExternalAttachDocumentsList")
-    private List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList;
+    @JsonProperty("externalMessageAttachDocsList")
+    private List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList;
 
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
             "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
             "replyMessageObject", "messageReplyTable", "chooseSendOrReply",
-            "sendMessageAdditionalDocumentsList", "sendMessageExternalAttachDocumentsList"
+            "sendMessageAdditionalDocumentsList", "externalMessageAttachDocsList"
         };
     }
 

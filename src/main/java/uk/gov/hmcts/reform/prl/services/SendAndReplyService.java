@@ -410,7 +410,7 @@ public class SendAndReplyService {
                                                caseReference
                                            ))
                                            .build())
-                    .sendMessageExternalAttachDocumentsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
                                                                                 .submittedDocsRefList(
                                                                                     getCategoriesAndDocuments(
                                                                                         authorization,
@@ -755,17 +755,17 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
-            .sendMessageExternalAttachDocuments(getAttachedDocsForExternalMessage(
+            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
                 authorization,
-                caseData.getSendOrReplyMessage().getSendMessageExternalAttachDocumentsList()
+                caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
             ))
             .build();
     }
 
     private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
-                                                                      List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList) {
-        if (isNotEmpty(sendMessageExternalAttachDocumentsList)) {
-            return sendMessageExternalAttachDocumentsList.stream()
+                                                                      List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList) {
+        if (isNotEmpty(externalMessageAttachDocsList)) {
+            return externalMessageAttachDocsList.stream()
                 .map(Element::getValue)
                 .map(replyDocument -> element(getSelectedDocument(
                     authorization,

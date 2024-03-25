@@ -68,7 +68,7 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Element<Document>> sendMessageExternalAttachDocuments;
+    private List<Element<Document>> externalMessageAttachDocs;
 
     public JudicialUser getSendReplyJudgeName() {
         if (sendReplyJudgeName == null
