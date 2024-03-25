@@ -383,10 +383,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && (caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
-                || (caseData.getAllegationOfHarmRevised() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             } else {
@@ -434,10 +434,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && (caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
-                || (caseData.getAllegationOfHarmRevised() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
@@ -1404,10 +1404,10 @@ public class DocumentGenService {
             manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
 
             caseData = moveCitizenDocumentsToQuarantineTab(
-                    quarantineLegalDocs,
-                    caseData,
-                    caseDataUpdated
-                );
+                quarantineLegalDocs,
+                caseData,
+                caseDataUpdated
+            );
 
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
 
@@ -1451,9 +1451,9 @@ public class DocumentGenService {
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
-                                                                  DocumentRequest documentRequest,
-                                                                  DocumentCategory category,
-                                                                  UserDetails userDetails) {
+                                                            DocumentRequest documentRequest,
+                                                            DocumentCategory category,
+                                                            UserDetails userDetails) {
         return QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(document.toBuilder()
                                            .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))

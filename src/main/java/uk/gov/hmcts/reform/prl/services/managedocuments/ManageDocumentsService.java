@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -36,12 +35,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -49,7 +46,6 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -105,7 +101,7 @@ public class ManageDocumentsService {
     private final CoreCaseDataService coreCaseDataService;
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
-    private final SendgridService sendgridService;
+    private final ManageDocumentsEmailService manageDocumentEmailService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -365,16 +361,13 @@ public class ManageDocumentsService {
                                       String emailAddress,
                                       SendgridEmailTemplateNames sendgridEmailTemplateName) {
         try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                sendgridEmailTemplateName,
-                authorisation,
-                SendgridEmailConfig.builder()
-                    .toEmailAddress(emailAddress)
-                    .dynamicTemplateData(dynamicDataForEmail)
-                    .languagePreference(LanguagePreference.english)
-                    .build()
-            );
-        } catch (IOException e) {
+            manageDocumentEmailService
+                .sendEmailUsingTemplateWithAttachments(
+                    authorisation, "anshika.nigam1@hmcts.net",
+                    SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
+                    dynamicDataForEmail,
+                    null);
+        } catch (Exception e) {
             log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
                       emailAddress, e.getMessage(), e);
         }
