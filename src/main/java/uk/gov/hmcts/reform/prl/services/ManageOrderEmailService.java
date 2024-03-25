@@ -763,30 +763,17 @@ public class ManageOrderEmailService {
                                          dynamicDataForEmail,
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
-                } else if (ContactPreferences.post.equals(partyData.getContactPreferences())
-                    && isPartyProvidedWithEmail(partyData)) {
-                    log.info("*** sending post option selected ***");
-                    serveOrdersToApplicantAddress(
-                        caseData,
-                        authorisation,
-                        orderDocuments,
-                        bulkPrintOrderDetails,
-                        partyDataOptional.get()
-                    );
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                     && null != partyData.getAddress()) {
-                    log.info("Contact preference set as email");
+                    log.info("*** email option selected ***");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(caseData,
                                                                                    partyData.getLabelForDynamicList()
                                                      ),
                                                      caseData
                     );
-                } else if (isPartyProvidedWithEmail(partyData)) {
-                    log.info("*** sending email without preference selected ***");
-                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else {
-                    log.info("inside calling serveOrdersToApplicantAddress start");
+                    log.info("*** post or no option selected ***");
                     serveOrdersToApplicantAddress(
                         caseData,
                         authorisation,
