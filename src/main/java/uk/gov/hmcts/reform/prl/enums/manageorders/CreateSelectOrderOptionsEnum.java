@@ -75,6 +75,12 @@ public enum CreateSelectOrderOptionsEnum {
             .findFirst().orElse("");
     }
 
+    public static CreateSelectOrderOptionsEnum getIdFromValue(String value) {
+        return Arrays.stream(CreateSelectOrderOptionsEnum.values())
+            .filter(i -> i.getDisplayedValue().equals(value))
+            .findFirst().orElse(null);
+    }
+
     public static String getDisplayedValueFromEnumString(String enteredValue) {
         return Arrays.stream(CreateSelectOrderOptionsEnum.values())
             .map(i -> CreateSelectOrderOptionsEnum.valueOf(enteredValue))

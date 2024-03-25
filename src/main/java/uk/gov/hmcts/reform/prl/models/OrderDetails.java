@@ -76,7 +76,7 @@ public class OrderDetails {
 
         return String.format(
             "%s - %s",
-            this.orderType,
+            this.orderTypeId,
             this.getOtherDetails().getOrderCreatedDate()
         );
     }

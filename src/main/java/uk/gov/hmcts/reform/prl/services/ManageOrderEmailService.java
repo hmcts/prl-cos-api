@@ -248,7 +248,7 @@ public class ManageOrderEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
@@ -266,7 +266,7 @@ public class ManageOrderEmailService {
                 ));
                 return temp;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
@@ -275,7 +275,7 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
             .map(PartyDetails::getEmail)
-            .collect(Collectors.toList());
+            .toList();
     }
 
 
@@ -297,7 +297,7 @@ public class ManageOrderEmailService {
             otherEmails = manageOrders.getOtherEmailAddress()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         cafcassEmails.addAll(otherEmails);

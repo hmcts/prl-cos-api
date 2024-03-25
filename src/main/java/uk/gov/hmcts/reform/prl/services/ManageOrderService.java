@@ -899,6 +899,22 @@ public class ManageOrderService {
         return selectedOrder;
     }
 
+    public String getSelectedOrderIdForUpload(CaseData caseData) {
+        String selectedOrder;
+        if (caseData.getChildArrangementOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getChildArrangementOrders());
+        } else if (caseData.getDomesticAbuseOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getDomesticAbuseOrders());
+        } else if (caseData.getFcOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getFcOrders());
+        } else if (caseData.getOtherOrdersOption() != null && caseData.getNameOfOrder() != null) {
+            selectedOrder = caseData.getOtherOrdersOption() + " : " + caseData.getNameOfOrder();
+        } else {
+            selectedOrder = "";
+        }
+        return selectedOrder;
+    }
+
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
         if (caseData.getManageOrdersOptions() != null) {
@@ -925,7 +941,7 @@ public class ManageOrderService {
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
         } else {
-            flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+            flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
         }
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
@@ -963,8 +979,8 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
-        newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                   .orderTypeId(flagSelectedOrderId)
+        newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
+                                   .orderTypeId(flagSelectedOrder)
                                    .orderDocument(caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
@@ -1074,14 +1090,13 @@ public class ManageOrderService {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+                .map(Element::getValue).toList();
 
             List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
-                .collect(Collectors.toList());
+                .toList();
             return String.join("\n", applicantSolicitorNames);
         } else {
             PartyDetails applicantFl401 = caseData.getApplicantsFL401();
@@ -1095,14 +1110,13 @@ public class ManageOrderService {
                 .getRespondents()
                 .stream()
                 .map(Element::getValue)
-                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation()))
-                .collect(Collectors.toList());
+                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation())).toList();
             if (respondents.isEmpty()) {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
                 .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
-                .collect(Collectors.toList());
+                .toList();
             return String.join("\n", respondentSolicitorNames);
         } else {
             PartyDetails respondentFl401 = caseData.getRespondentsFL401();
@@ -1166,8 +1180,8 @@ public class ManageOrderService {
                                             List<Element<OrderDetails>> newOrderDetails) {
         String currentOrderId;
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
+            .stream().map(DynamicMultiselectListElement::getCode).toList();
+        List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).toList();
 
         currentOrderId = selectedOrderIds
             .stream()
@@ -1321,13 +1335,6 @@ public class ManageOrderService {
         return null;
     }
 
-    public String getApplicantReference(CaseData caseData) {
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return caseData.getApplicantsFL401().getSolicitorReference();
-        }
-        return null;
-    }
-
     public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
         if (null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
@@ -1343,13 +1350,14 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
-        String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+        String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(flagSelectedOrderId)
+            .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrder))
+            .orderTypeId(flagSelectedOrder)
             .orderDocument(caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
@@ -1438,7 +1446,7 @@ public class ManageOrderService {
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
@@ -1734,12 +1742,12 @@ public class ManageOrderService {
         String organisationsName = null;
         if (null != postalInformation) {
             orgNameList.addAll(postalInformation.stream()
-                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList()));
+                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).toList());
         }
 
         if (null != emailInformation) {
             orgNameList.addAll(emailInformation.stream()
-                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).collect(Collectors.toList()));
+                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).toList());
         }
 
         if (!orgNameList.isEmpty()) {
@@ -1765,12 +1773,7 @@ public class ManageOrderService {
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
-            .orderDocument(order.getValue().getOrderDocument())
-            .orderType(order.getValue().getOrderType())
-            .typeOfOrder(order.getValue().getTypeOfOrder())
             .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
-            .dateCreated(order.getValue().getDateCreated())
-            .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
 
@@ -1794,11 +1797,11 @@ public class ManageOrderService {
             .getAppointedGuardianName()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> nameList = appointedGuardianFullNameList.stream()
             .map(AppointedGuardianFullName::getGuardianFullName)
-            .collect(Collectors.toList());
+            .toList();
 
         nameList.forEach(name -> {
             AppointedGuardianFullName appointedGuardianFullName
@@ -2004,7 +2007,7 @@ public class ManageOrderService {
             .stream()
             .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
-            .collect(Collectors.toList());
+            .toList();
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .ordersHearingDetails(filteredHearingDataList).build()).build();
@@ -2275,8 +2278,8 @@ public class ManageOrderService {
     private OrderDetails getNewOrderDetails(String flagSelectedOrderId, String flagSelectedOrder,
                                             CaseData caseData, SelectTypeOfOrderEnum typeOfOrder,
                                             ServeOrderData serveOrderData) {
-        return OrderDetails.builder().orderType(flagSelectedOrder)
-            .orderTypeId(flagSelectedOrderId)
+        return OrderDetails.builder().orderType(flagSelectedOrderId)
+            .orderTypeId(flagSelectedOrder)
             .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                       ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
             .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
@@ -2480,10 +2483,10 @@ public class ManageOrderService {
                         return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
-                }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
+                }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
             }).map(this::getDynamicListElements)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
 
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
@@ -3347,7 +3350,7 @@ public class ManageOrderService {
                                                  Boolean isRespondent) {
         List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
-            .collect(Collectors.toList());
+            .toList();
         for (Element<PartyDetails> party : selectedPartyList) {
             if ((isRespondent
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
