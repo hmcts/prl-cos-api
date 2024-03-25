@@ -89,6 +89,10 @@ public class ResubmitApplicationController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
+
+            log.debug(" ----> caseData.getCourtName() --> " + caseData.getCourtName());
+            log.debug(" ----> caseData.getCourtId() --> " + caseData.getCourtId());
+            log.debug(" ----> caseData.getCourtId() --> " + caseData.getCourtId());
             Court closestChildArrangementsCourt = courtFinderService
                 .getNearestFamilyCourt(caseData);
             if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
@@ -109,6 +113,8 @@ public class ResubmitApplicationController {
 
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+
+            log.debug(" eventsForCase----> "+eventsForCase);
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
 
