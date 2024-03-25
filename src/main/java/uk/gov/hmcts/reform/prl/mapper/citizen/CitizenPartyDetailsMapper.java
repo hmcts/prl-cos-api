@@ -149,8 +149,8 @@ public class CitizenPartyDetailsMapper {
                                                                                           caseEvent);
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
-            caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             caseData = caseData.toBuilder().applicants(applicants).build();
+            caseDataMapToBeUpdated.put(C100_APPLICANTS, caseData.getApplicants());
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
@@ -173,9 +173,8 @@ public class CitizenPartyDetailsMapper {
                                                         oldCaseData, respondents.indexOf(party), authorisation);
                     }
                 });
-
-            caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
             caseData = caseData.toBuilder().respondents(respondents).build();
+            caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
 
             return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
         }
@@ -237,8 +236,8 @@ public class CitizenPartyDetailsMapper {
                     caseData.getApplicantsFL401(),
                     caseEvent
                 );
-                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         } else {
@@ -249,8 +248,8 @@ public class CitizenPartyDetailsMapper {
                     caseData.getRespondentsFL401(),
                     caseEvent
                 );
-                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                 return new CitizenUpdatePartyDataContent(caseDataMapToBeUpdated, caseData);
             }
         }
