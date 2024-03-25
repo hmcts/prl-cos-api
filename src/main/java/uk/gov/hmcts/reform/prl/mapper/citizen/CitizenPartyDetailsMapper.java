@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.KEEP_DETAILS_PRIVATE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -523,11 +524,11 @@ public class CitizenPartyDetailsMapper {
                               .build())
                 .isPhoneNumberConfidential(
                     citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                        ConfidentialityListEnum.phoneNumber) ? Yes : existingPartyDetails.getIsPhoneNumberConfidential())
+                        ConfidentialityListEnum.phoneNumber) ? Yes : No)
                 .isAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.address) ? Yes : existingPartyDetails.getIsAddressConfidential())
+                    ConfidentialityListEnum.address) ? Yes : No)
                 .isEmailAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.email) ? Yes : existingPartyDetails.getIsEmailAddressConfidential()).build();
+                    ConfidentialityListEnum.email) ? Yes : No).build();
         }
         return existingPartyDetails;
     }
