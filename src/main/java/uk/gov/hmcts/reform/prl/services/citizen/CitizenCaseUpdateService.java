@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import static java.util.Optional.ofNullable;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
@@ -101,12 +101,20 @@ public class CitizenCaseUpdateService {
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.DELETE_APPLICATION.getValue(), authToken);
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         caseDataMapToBeUpdated.put("c100RebuildData", citizenUpdatedCaseData.getC100RebuildData());
         caseDataMapToBeUpdated.put(STATE, READY_FOR_DELETION_STATE);
-        caseDataMapToBeUpdated.put(CASE_STATUS, CaseStatus.builder().state(State.READY_FOR_DELETION.getLabel()).build());
+        caseDataMapToBeUpdated.put(
+            CASE_STATUS,
+            CaseStatus.builder().state(State.READY_FOR_DELETION.getLabel()).build()
+        );
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.DELETE_APPLICATION.getValue(),
+                authToken
+            );
         //TODO: Add case state update - now shall we run all tabs update - is it needed?
 
         return allTabService.submitUpdateForSpecificUserEvent(
@@ -133,10 +141,13 @@ public class CitizenCaseUpdateService {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             caseDataMapToBeUpdated.put(WITHDRAW_APPLICATION_DATA, withDrawApplicationData);
             caseDataMapToBeUpdated.put(STATE, WITHDRAWN_STATE);
-            caseDataMapToBeUpdated.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
+            caseDataMapToBeUpdated.put(
+                CASE_STATUS,
+                CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build()
+            );
         }
 
-        return allTabService.submitUpdateForSpecificUserEvent(
+        allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
             startAllTabsUpdateDataContent.startEventResponse(),
@@ -144,5 +155,8 @@ public class CitizenCaseUpdateService {
             caseDataMapToBeUpdated,
             startAllTabsUpdateDataContent.userDetails()
         );
+
+        //TODO: Do we need all tabs service update
+        return allTabService.updateAllTabsIncludingConfTab(caseId);
     }
 }
