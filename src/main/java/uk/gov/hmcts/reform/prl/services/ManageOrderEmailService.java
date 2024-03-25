@@ -502,7 +502,9 @@ public class ManageOrderEmailService {
                                                        List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
+        log.info("*** recipient options *** {}", recipientsOptions);
         if (recipientsOptions != null) {
+            log.info("*** recipient options not null *** ");
 
             //applicants
             sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
@@ -754,8 +756,10 @@ public class ManageOrderEmailService {
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
+            log.info("*** party details *** {} ", partyDataOptional);
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
+                log.info("*** party data *** {} ", partyData);
                 if (isSolicitorEmailExists(partyData)) {
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(authorisation,
@@ -764,6 +768,7 @@ public class ManageOrderEmailService {
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (isPartyProvidedWithEmail(partyData)) {
+                    log.info("*** sending email without option selected *** {} ");
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
