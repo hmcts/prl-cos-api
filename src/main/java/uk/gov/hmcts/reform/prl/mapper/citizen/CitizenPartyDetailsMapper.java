@@ -529,7 +529,14 @@ public class CitizenPartyDetailsMapper {
                     ConfidentialityListEnum.address) ? Yes : No)
                 .isEmailAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
                     ConfidentialityListEnum.email) ? Yes : No).build();
+        } else {
+            return existingPartyDetails.toBuilder()
+                .response(existingPartyDetails.getResponse().toBuilder()
+                              .keepDetailsPrivate(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate())
+                              .build())
+                .isPhoneNumberConfidential(No)
+                .isAddressConfidential(No)
+                .isEmailAddressConfidential(No).build();
         }
-        return existingPartyDetails;
     }
 }
