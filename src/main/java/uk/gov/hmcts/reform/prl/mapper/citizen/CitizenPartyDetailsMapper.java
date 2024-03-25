@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CONFIRM_YOUR_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.KEEP_DETAILS_PRIVATE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -165,11 +166,13 @@ public class CitizenPartyDetailsMapper {
                                                                                           party.getValue(),
                                                                                           caseEvent);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
-                    respondents.set(respondents.indexOf(party), updatedPartyElement);
+                    int updatedRespondentPartyIndex = respondents.indexOf(party);
+                    log.info("updatedRespondentPartyIndex ==> " + updatedRespondentPartyIndex);
+                    respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
                         reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                                                        oldCaseData, respondents.indexOf(party), authorisation);
+                                                        oldCaseData, updatedRespondentPartyIndex, authorisation);
                     }
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
@@ -185,6 +188,7 @@ public class CitizenPartyDetailsMapper {
                                                  CaseData oldCaseData,
                                                  int respondentIndex,
                                                  String authorisation) {
+        log.info("inside reGenerateRespondentC8Documents for respondentIndex " + respondentIndex);
         Map<String, Object> dataMapForC8Document = new HashMap<>();
         dataMapForC8Document.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
         dataMapForC8Document.put(CASE_DATA_ID, oldCaseData.getId());
@@ -213,6 +217,7 @@ public class CitizenPartyDetailsMapper {
                                                               ),
                                                           respondentIndex, updatedPartyElement
             );
+            log.info("exit reGenerateRespondentC8Documents & caseDataMapToBeUpdated " + caseDataMapToBeUpdated);
         } catch (Exception e) {
             log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
                       oldCaseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList()
@@ -534,11 +539,11 @@ public class CitizenPartyDetailsMapper {
                               .build())
                 .isPhoneNumberConfidential(
                     citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                        ConfidentialityListEnum.phoneNumber) ? Yes : existingPartyDetails.getIsPhoneNumberConfidential())
+                        ConfidentialityListEnum.phoneNumber) ? Yes : No)
                 .isAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.address) ? Yes : existingPartyDetails.getIsAddressConfidential())
+                    ConfidentialityListEnum.address) ? Yes : No)
                 .isEmailAddressConfidential(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList().contains(
-                    ConfidentialityListEnum.email) ? Yes : existingPartyDetails.getIsEmailAddressConfidential()).build();
+                    ConfidentialityListEnum.email) ? Yes : No).build();
         }
         return existingPartyDetails;
     }
