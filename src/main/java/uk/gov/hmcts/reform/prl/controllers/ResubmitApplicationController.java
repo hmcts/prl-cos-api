@@ -89,13 +89,15 @@ public class ResubmitApplicationController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
-
             log.debug(" ----> caseData.getCourtName() --> " + caseData.getCourtName());
             log.debug(" ----> caseData.getCourtId() --> " + caseData.getCourtId());
-            log.debug(" ----> caseData.getCourtId() --> " + caseData.getCourtId());
+
             Court closestChildArrangementsCourt = courtFinderService
                 .getNearestFamilyCourt(caseData);
             if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+
+                log.debug(" ----> caseData.getCourtId() is not null --> " + caseData.getCourtId());
+                log.debug(" ----> caseData.getCourtId() inside if  --> " + caseData.getCourtId());
                 caseData = caseData.toBuilder()
                     .courtName(closestChildArrangementsCourt.getCourtName())
                     .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
@@ -109,12 +111,20 @@ public class ResubmitApplicationController {
                     COURT_CODE_FROM_FACT,
                     String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
                 );
+
+                log.debug(" ----> caseData.COURT_ID_FIELD() inside if  --> " + caseDataUpdated.get(COURT_ID_FIELD));
+                log.debug(" ----> after update caseData.COURT_NAME_FIELD() --> " + caseDataUpdated.get(COURT_NAME_FIELD));
+                log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() --> " + caseDataUpdated.get(COURT_CODE_FROM_FACT));
             }
 
+            log.debug(" ----> caseData.COURT_ID_FIELD() outside after update court  --> " + caseDataUpdated.get(COURT_ID_FIELD));
+            log.debug(" ----> after update caseData.COURT_NAME_FIELD() outside after update court --> " + caseDataUpdated.get(COURT_NAME_FIELD));
+            log.debug(" ----> after update caseData.COURT_CODE_FROM_FACT() outside after update court --> " + caseDataUpdated.get(COURT_CODE_FROM_FACT));
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
             log.debug(" eventsForCase----> " + eventsForCase.toString());
+
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
 
