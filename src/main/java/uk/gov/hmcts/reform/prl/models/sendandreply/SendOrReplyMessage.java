@@ -24,6 +24,7 @@ public class SendOrReplyMessage {
     private String messageReplyTable;
     private Message sendMessageObject;
     private Message replyMessageObject;
+    @JsonProperty("sendMessageExternalAttachDocumentsList")
     private List<Element<SendAndReplyDynamicDoc>> sendMessageExternalAttachDocumentsList;
 
     public static String[] temporaryFieldsAboutToStart() {
