@@ -1533,7 +1533,7 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isAccessEnabled(Element<PartyDetails> party) {
-        log.info("isAccessEnabled method {}",party.getValue());
+        log.info("isAccessEnabled method {}",party.getValue().getUser());
         return party.getValue() != null && party.getValue().getUser() != null
             && party.getValue().getUser().getIdamId() != null;
     }
