@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -81,7 +82,6 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 
 @Slf4j
@@ -260,9 +260,10 @@ public class TaskListService {
     }
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
@@ -288,7 +289,13 @@ public class TaskListService {
             }
         }
 
-        tabService.updateAllTabsIncludingConfTab(caseData);
+        tabService.mapAndSubmitAllTabsUpdate(
+            startAllTabsUpdateDataContent.systemAuthorisation(),
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseData
+        );
 
         if (!isCourtStaff) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
