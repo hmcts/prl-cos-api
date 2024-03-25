@@ -318,6 +318,7 @@ public class UpdatePartyDetailsService {
 
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
+        log.info("inside checkIfConfidentialityDetailsChangedRespondent");
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
                 .filter(resp1 -> resp1.getId().equals(respondent.getId())
@@ -350,6 +351,7 @@ public class UpdatePartyDetailsService {
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
+        log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
