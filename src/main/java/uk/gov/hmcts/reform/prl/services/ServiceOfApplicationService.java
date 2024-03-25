@@ -2907,7 +2907,7 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
-                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL_BOTH,
                                                             fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
