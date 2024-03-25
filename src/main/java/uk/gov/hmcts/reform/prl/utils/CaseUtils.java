@@ -617,4 +617,15 @@ public class CaseUtils {
             || (currentParty.getIsEmailAddressConfidential() != null
             && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
+
+    public static boolean isThereAnyNewConfidentialDataPresent(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !((ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
+            && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential()))
+            &&
+            (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
+                && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()))
+            &&
+            (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
+                && currentParty.getIsPhoneNumberConfidential().equals(updatedParty.getIsPhoneNumberConfidential())));
+    }
 }

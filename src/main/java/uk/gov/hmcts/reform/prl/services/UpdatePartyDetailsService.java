@@ -326,14 +326,16 @@ public class UpdatePartyDetailsService {
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
                     || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                    .getLabelForDynamicList()))).toList();
+                    .getLabelForDynamicList())
+                    || CaseUtils.isThereAnyNewConfidentialDataPresent(respondent.getValue(), resp1.getValue()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
-                .getLabelForDynamicList())) {
+                .getLabelForDynamicList())
+                || CaseUtils.isThereAnyNewConfidentialDataPresent(respondent.getValue(), respondentDetailsFL401)) {
                 log.info("respondent data changed for fl401");
                 return true;
             }
