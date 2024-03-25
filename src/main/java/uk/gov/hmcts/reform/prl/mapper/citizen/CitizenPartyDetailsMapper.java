@@ -317,6 +317,10 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case DELETE_CASE -> {
+                log.info("Case has been marked for deletion by the applicant");
+                return existingPartyDetails;
+            }
             default -> {
                 //For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseDataForOtherEvents(
