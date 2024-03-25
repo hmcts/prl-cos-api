@@ -755,7 +755,7 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
-            .sendMessageExternalAttachDocuments(getAttachedDocsForExternalMessage(
+            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
                 authorization,
                 caseData.getSendOrReplyMessage().getSendMessageExternalAttachDocumentsList()
             ))
