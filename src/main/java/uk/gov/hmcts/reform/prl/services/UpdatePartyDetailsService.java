@@ -326,16 +326,14 @@ public class UpdatePartyDetailsService {
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
                     || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                    .getLabelForDynamicList())
-                    || CaseUtils.isThereAnyNewConfidentialDataPresent(respondent.getValue(), resp1.getValue()))).toList();
+                    .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
-                .getLabelForDynamicList())
-                || CaseUtils.isThereAnyNewConfidentialDataPresent(respondent.getValue(), respondentDetailsFL401)) {
+                .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
                 return true;
             }
@@ -416,8 +414,7 @@ public class UpdatePartyDetailsService {
         Document c8FinalWelshDocument;
         String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
-            if ((isDetailsChanged
-                || CollectionUtils.isEmpty(c8Documents))) {
+            if (isDetailsChanged) {
                 String fileName = C_8_OF + partyName
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");
