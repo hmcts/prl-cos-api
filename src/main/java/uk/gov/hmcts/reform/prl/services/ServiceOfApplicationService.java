@@ -103,7 +103,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
@@ -1699,7 +1698,7 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.E -> docs.addAll(generatePackE(caseData, staticDocs));
             case PrlAppsConstants.F -> docs.addAll(generatePackF(caseData, staticDocs));
             case PrlAppsConstants.H -> docs.addAll(generatePackH(caseData, staticDocs));
-            case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData));
+            case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData, staticDocs));
             case PrlAppsConstants.J -> docs.addAll(generatePackJ(caseData, staticDocs));
             case PrlAppsConstants.K -> docs.addAll(generatePackK(caseData, staticDocs));
             case PrlAppsConstants.L -> docs.addAll(generatePackL(caseData, staticDocs));
@@ -1816,14 +1815,24 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
+                            || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_WELSH_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME)))
+                        .toList());
         docs.addAll(getSoaSelectedOrders(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
-    private List<Document> generatePackI(CaseData caseData) {
+    private List<Document> generatePackI(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
+                        || d.getDocumentFileName().equalsIgnoreCase(C9_DOCUMENT_FILENAME)))
+                        .toList());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -2423,16 +2432,21 @@ public class ServiceOfApplicationService {
                                                       caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString());
         } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-            List<Document> packHDocs = new ArrayList<>();
+            List<Document> packIDocs = new ArrayList<>();
             caseData.getRespondents().forEach(respondent ->
-                                                  packHDocs.add(generateAccessCodeLetter(
+                                                  packIDocs.add(generateAccessCodeLetter(
                                                       authorization,
                                                       caseData, respondent, null, PRL_LET_ENG_C100_RE6
                                                   ))
             );
-            packHDocs.addAll(getNotificationPack(caseData, HI, c100StaticDocs));
+            List<Document> packHDocs = new ArrayList<>(getNotificationPack(
+                caseData,
+                PrlAppsConstants.H,
+                c100StaticDocs
+            ));
+            packIDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.I, c100StaticDocs));
             final SoaPack unservedRespondentPack = SoaPack.builder()
-                .packDocument(wrapElements(packHDocs))
+                .packDocument(wrapElements(packIDocs))
                 .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
@@ -2440,7 +2454,7 @@ public class ServiceOfApplicationService {
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
-                .packDocument(wrapElements(getNotificationPack(caseData, HI, c100StaticDocs)))
+                .packDocument(wrapElements(packHDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
@@ -2869,10 +2883,13 @@ public class ServiceOfApplicationService {
                 false
             );
         } else {
+            List<Document> docs = new ArrayList<>();
+            removeDuplicatesAndGetConsolidatedDocs(unwrapElements(unServedApplicantPack.getPackDocument()),
+                                                   unwrapElements(unServedRespondentPack.getPackDocument()), docs);
             emailNotification = sendEmailCaPersonalApplicantLegalRep(
                 caseData,
                 authorization,
-                unwrapElements(unServedRespondentPack.getPackDocument())
+                docs
             );
         }
         return emailNotification;
