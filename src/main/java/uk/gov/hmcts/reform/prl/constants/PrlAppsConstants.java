@@ -753,6 +753,8 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+    public static final String CAFCASS_OR_CAFCASS_CYMRU = "CAFCASS or CAFCASS Cymru";
+
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
     public static final String COMMA = ",";
@@ -958,4 +960,6 @@ public class PrlAppsConstants {
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
 
     public static final String HEARINGS_TYPE = "hearingsType";
+
+    public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
 }
