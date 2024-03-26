@@ -39,7 +39,8 @@ public class CitizenCaseUpdateService {
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
-        CaseEvent.KEEP_DETAILS_PRIVATE);
+        CaseEvent.KEEP_DETAILS_PRIVATE
+    );
 
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     public static final String CASE_STATUS = "caseStatus";
@@ -58,10 +59,10 @@ public class CitizenCaseUpdateService {
 
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
             citizenPartyDetailsMapper.mapUpdatedPartyDetails(
-            dbCaseData, citizenUpdatedCaseData,
-            caseEvent,
-            startAllTabsUpdateDataContent.authorisation()
-        ));
+                dbCaseData, citizenUpdatedCaseData,
+                caseEvent,
+                startAllTabsUpdateDataContent.authorisation()
+            ));
 
         if (citizenUpdatePartyDataContent.isPresent()) {
             log.info("*************** Going to update party details received from Citizen");
@@ -85,9 +86,12 @@ public class CitizenCaseUpdateService {
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(), authToken);
-        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        caseDataMapToBeUpdated.put("c100RebuildData", citizenUpdatedCaseData.getC100RebuildData());
+            allTabService.getStartUpdateForSpecificUserEvent(
+                caseId,
+                CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
+                authToken
+            );
+        Map<String, Object> caseDataMapToBeUpdated = getC100RebuildCaseDataMap(citizenUpdatedCaseData);
         //TODO: Add case state update - now shall we run all tabs update - is it needed?
 
         return allTabService.submitUpdateForSpecificUserEvent(
@@ -101,8 +105,7 @@ public class CitizenCaseUpdateService {
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
-        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        caseDataMapToBeUpdated.put("c100RebuildData", citizenUpdatedCaseData.getC100RebuildData());
+        Map<String, Object> caseDataMapToBeUpdated = getC100RebuildCaseDataMap(citizenUpdatedCaseData);
         caseDataMapToBeUpdated.put(STATE, READY_FOR_DELETION_STATE);
         caseDataMapToBeUpdated.put(
             CASE_STATUS,
@@ -125,6 +128,93 @@ public class CitizenCaseUpdateService {
             caseDataMapToBeUpdated,
             startAllTabsUpdateDataContent.userDetails()
         );
+    }
+
+    private static Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) {
+        Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
+        if (citizenUpdatedCaseData != null) {
+            caseDataMapToBeUpdated.put(
+                "c100RebuildInternationalElements",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildInternationalElements()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildReasonableAdjustments",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildReasonableAdjustments()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildTypeOfOrder",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildTypeOfOrder()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildHearingWithoutNotice",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildHearingWithoutNotice()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildHearingUrgency",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildHearingUrgency()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildOtherProceedings",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildOtherProceedings()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildReturnUrl",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildReturnUrl()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildMaim",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildChildDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildChildDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildApplicantDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildApplicantDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildOtherChildrenDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildOtherChildrenDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildRespondentDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildRespondentDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildOtherPersonsDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildOtherPersonsDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildSafetyConcerns",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildSafetyConcerns()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildScreeningQuestions",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildScreeningQuestions()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildHelpWithFeesDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildHelpWithFeesDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildStatementOfTruth",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildStatementOfTruth()
+            );
+            caseDataMapToBeUpdated.put(
+                "helpWithFeesReferenceNumber",
+                citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildChildPostCode",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildChildPostCode()
+            );
+            caseDataMapToBeUpdated.put(
+                "c100RebuildConsentOrderDetails",
+                citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
+            );
+        }
+        return caseDataMapToBeUpdated;
     }
 
     public CaseDetails withdrawCase(CaseData oldCaseData, String caseId, String authToken) {
