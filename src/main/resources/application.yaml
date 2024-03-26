@@ -57,9 +57,9 @@ azure:
 
 logging:
   level:
-    org.springframework.web: DEBUG
-    uk.gov.hmcts.reform.prl: DEBUG
-    au.com.dius.pact: DEBUG
+    org.springframework.web: INFO
+    uk.gov.hmcts.reform.prl: INFO
+    au.com.dius.pact: INFO
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
