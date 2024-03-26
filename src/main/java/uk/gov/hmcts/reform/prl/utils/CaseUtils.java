@@ -603,7 +603,8 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
-            || !isAddressConfidentialityRemainsSame(currentParty, updatedParty))
+            || !isConfidentialityRemainsSame(currentParty.getIsAddressConfidential(),
+                                             updatedParty.getIsAddressConfidential()))
             && StringUtils.isNotEmpty(currentAddress.getAddressLine1());
         log.info("checkIfAddressIsChanged ===>" + flag);
         return flag;
@@ -611,7 +612,8 @@ public class CaseUtils {
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
-            || !isEmailConfidentialityRemainsSame(currentParty, updatedParty))
+            || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
+                                             updatedParty.getIsEmailAddressConfidential()))
             && StringUtils.isNotEmpty(currentParty.getEmail());
         log.info("isEmailAddressChanged ===>" + flag);
         return flag;
@@ -619,34 +621,14 @@ public class CaseUtils {
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
-            || !isPhoneNumberConfidentialityRemainsSame(currentParty, updatedParty))
+            || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
+                                             updatedParty.getIsPhoneNumberConfidential()))
             && StringUtils.isNotEmpty(currentParty.getPhoneNumber());
         log.info("isPhoneNumberChanged ===>" + flag);
         return flag;
     }
 
-    private static boolean isEmailConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = checkForConfidentialDataChange(currentParty.getIsEmailAddressConfidential(),
-                                                      updatedParty.getIsAddressConfidential());
-        log.info("isEmailConfidentialityRemainsSame ===>" + flag);
-        return flag;
-    }
-
-    private static boolean isAddressConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = checkForConfidentialDataChange(currentParty.getIsAddressConfidential(),
-                                                      updatedParty.getIsAddressConfidential());
-        log.info("isAddressConfidentialityRemainsSame ===>" + flag);
-        return flag;
-    }
-
-    private static boolean isPhoneNumberConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = checkForConfidentialDataChange(currentParty.getIsPhoneNumberConfidential(),
-                                                      updatedParty.getIsPhoneNumberConfidential());
-        log.info("isPhoneNumberConfidentialityRemainsSame ===>" + flag);
-        return flag;
-    }
-
-    private static boolean checkForConfidentialDataChange(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+    private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
         log.info("newConfidentiality ==> " + newConfidentiality);
         log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
