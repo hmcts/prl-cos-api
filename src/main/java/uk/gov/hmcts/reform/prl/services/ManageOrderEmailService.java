@@ -958,7 +958,6 @@ public class ManageOrderEmailService {
         //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
 
-        log.info("list of documents are: {}", documents);
         return bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
