@@ -61,7 +61,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseService {
     public static final String YES = "Yes";
     public static final String CASE_STATUS = "caseStatus";
-
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;

@@ -76,7 +76,7 @@ public class CitizenCaseUpdateController {
     }
 
     @PostMapping(value = "/{caseId}/save-c100-draft-application")
-    @Operation(description = "Processing citizen updates")
+    @Operation(description = "Processing c100 draft save and come back later updates")
     public CaseData saveDraftCitizenApplication(
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -100,6 +100,38 @@ public class CitizenCaseUpdateController {
             } else {
                 log.error("saveDraftCitizenApplication is not successful for the case {}", caseId);
                 throw new CoreCaseDataStoreException("Citizen save c100 draft application failed for this transaction");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    //TODO: Work in progress
+    @PostMapping(value = "/{caseId}/submit-c100-application")
+    @Operation(description = "Processing c100 case submission updates")
+    public CaseData submitC100Application(
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @Valid @NotNull @RequestBody CaseData caseData
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("*** Inside submitC100Application");
+            try {
+                log.info("submitC100Application caseData start json ===>" + objectMapper.writeValueAsString(caseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
+            CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
+                caseId,
+                caseData,
+                authorisation
+            );
+            if (caseDetails != null) {
+                return CaseUtils.getCaseData(caseDetails, objectMapper);
+            } else {
+                log.error("submitC100Application is not successful for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Citizen submit c100  application failed for this transaction");
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
