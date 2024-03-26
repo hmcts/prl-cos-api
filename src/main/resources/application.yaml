@@ -153,6 +153,7 @@ uk:
             CA_HELP_WITH_FEES: c188d173-b90f-48f1-a432-745f7ef93734
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
             SOA_UNREPRESENTED_APPLICANT_SERVED_BY_COURT: da651406-76b8-40d9-ab8d-df7764ff4f75
+            SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT: ecd29f4d-70c9-415f-9be8-7cae22156ba1
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
