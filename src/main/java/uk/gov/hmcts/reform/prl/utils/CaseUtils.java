@@ -593,6 +593,8 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        log.info("inside checkIfAddressIsChanged old {} , new {}",
+                 updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = updatedParty.getAddress();
         boolean flag = currentAddress != null
@@ -611,6 +613,7 @@ public class CaseUtils {
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
                                              updatedParty.getIsEmailAddressConfidential()))
@@ -620,6 +623,7 @@ public class CaseUtils {
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
                                              updatedParty.getIsPhoneNumberConfidential()))
@@ -629,6 +633,7 @@ public class CaseUtils {
     }
 
     private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+        log.info("inside isConfidentialityRemainsSame");
         log.info("newConfidentiality ==> " + newConfidentiality);
         log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
