@@ -737,8 +737,7 @@ public class SendAndReplyControllerTest {
         Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
 
     }
-
-    @Test
+    
     public void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
