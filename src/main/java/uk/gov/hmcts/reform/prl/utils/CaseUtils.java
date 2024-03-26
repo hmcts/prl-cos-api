@@ -594,7 +594,7 @@ public class CaseUtils {
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = updatedParty.getAddress();
-        return currentAddress != null
+        boolean flag = currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
             || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
@@ -604,39 +604,51 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
             || !isAddressConfidentialityRemainsSame(currentParty, updatedParty))
             && StringUtils.isNotEmpty(currentAddress.getAddressLine1());
+        log.info("checkIfAddressIsChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+        boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isEmailConfidentialityRemainsSame(currentParty, updatedParty))
             && StringUtils.isNotEmpty(currentParty.getEmail());
+        log.info("isEmailAddressChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+        boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isPhoneNumberConfidentialityRemainsSame(currentParty, updatedParty))
             && StringUtils.isNotEmpty(currentParty.getPhoneNumber());
+        log.info("isPhoneNumberChanged ===>" + flag);
+        return flag;
     }
 
     private static boolean isEmailConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        return (ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
+        boolean flag = (ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsEmailAddressConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
             && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        log.info("isEmailConfidentialityRemainsSame ===>" + flag);
+        return flag;
     }
 
     private static boolean isAddressConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        return ((ObjectUtils.isEmpty(currentParty.getIsAddressConfidential())
+        boolean flag = ((ObjectUtils.isEmpty(currentParty.getIsAddressConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsAddressConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
             && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+        log.info("isAddressConfidentialityRemainsSame ===>" + flag);
+        return flag;
     }
 
     private static boolean isPhoneNumberConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        return ((ObjectUtils.isEmpty(currentParty.getIsPhoneNumberConfidential())
+        boolean flag = ((ObjectUtils.isEmpty(currentParty.getIsPhoneNumberConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsPhoneNumberConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
             && currentParty.getIsPhoneNumberConfidential().equals(updatedParty.getIsPhoneNumberConfidential())));
+        log.info("isPhoneNumberConfidentialityRemainsSame ===>" + flag);
+        return flag;
     }
 
 }
