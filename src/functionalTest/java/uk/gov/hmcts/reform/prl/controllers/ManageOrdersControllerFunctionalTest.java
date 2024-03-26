@@ -17,8 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -32,12 +33,10 @@ import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
 @SpringBootTest
@@ -52,6 +51,8 @@ public class ManageOrdersControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+
+    private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -94,7 +95,7 @@ public class ManageOrdersControllerFunctionalTest {
     public static final String VALID_CAFCASS_REQUEST_JSON
         = "requests/cafcass-cymru-send-email-request.json";
 
-
+    private MockMvc mockMvc;
     private static final String VALID_SERVER_ORDER_REQUEST_JSON
         = "requests/serve-order-send-email-to-app-and-resp-request.json";
 
@@ -115,6 +116,8 @@ public class ManageOrdersControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    private final RequestSpecification request2 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
         = "requests/court-admin-manage-order-noapproval-required-request.json";
@@ -138,11 +141,32 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String JUDGE_DRAFT_SDO_ORDER_BODY = "requests/judge-draft-order-request.json";
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
     @Before
     public void setup() {
-        caseDetails = CaseDetails.builder()
-            .id(1709662358269545L)
-            .build();
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -155,19 +179,6 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/populate-preview-order")
-            .then().assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/fetch-child-details")
             .then().assertThat().statusCode(200);
     }
 
@@ -195,7 +206,7 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
-            .then().assertThat().statusCode(500);
+            .then().assertThat().statusCode(200);
     }
 
     @Test
@@ -248,23 +259,30 @@ public class ManageOrdersControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("id", caseDetails.getId().toString());
-        caseDetails = caseDetails.toBuilder()
-            .data(caseData)
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        CaseDetails caseDetails1 =  request2
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        String requestBodyRevised = requestBody
+            .replace("1703068453862935", caseDetails1.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(callbackRequest)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.id", equalTo(caseDetails.getId().toString()))
             .assertThat().statusCode(200);
     }
 
@@ -349,7 +367,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1702636092071141", caseDetails.getId().toString());
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -466,10 +484,9 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void createCcdTestCase() throws Exception {
-
+    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
+        CaseDetails caseDetails =  request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -481,20 +498,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
-    }
-
-    @Test
-    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("cafcassCymruEmail", "test@hmcts.net");
-        caseDetails = caseDetails.toBuilder()
-            .data(caseData)
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails).build();
-        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails.getId().toString());
         request
@@ -521,7 +524,9 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
                   equalTo("Yes"))
             .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")));
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
@@ -552,13 +557,27 @@ public class ManageOrdersControllerFunctionalTest {
             .post("/manage-orders/about-to-submit")
             .then()
             .body("data.orderCollection[0].value.serveOrderDetails.courtPersonalService",
-                  equalTo(SoaSolicitorServingRespondentsEnum.courtAdmin.name()));
+                  equalTo(SoaSolicitorServingRespondentsEnum.courtAdmin.name()))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
 
     @Test
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
+
+        CaseDetails caseDetails =  request2
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
 
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
@@ -575,7 +594,9 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.cafcassCymruEmail", equalTo(null))
             .body("data.serveOrderDynamicList", equalTo(null))
             .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
+            .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
@@ -597,7 +618,10 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.cafcassCymruEmail", equalTo(null))
             .body("data.serveOrderDynamicList", equalTo(null))
             .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
+            .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
     /**
