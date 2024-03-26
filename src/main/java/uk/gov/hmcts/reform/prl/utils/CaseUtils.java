@@ -647,6 +647,8 @@ public class CaseUtils {
     }
 
     private static boolean checkForConfidentialDataChange(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+        log.info("newConfidentiality ==> " + newConfidentiality);
+        log.info("oldConfidentiality ==> " + oldConfidentiality);
         if (ObjectUtils.isEmpty(oldConfidentiality)
             && ObjectUtils.isEmpty(newConfidentiality)) {
             return true;
