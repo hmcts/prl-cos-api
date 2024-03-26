@@ -1001,7 +1001,9 @@ public class ServiceOfApplicationService {
             party.getValue().getEmail(),
             emailTemplate,
             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
-                                                                   party.getValue())
+                                                                   party.getValue(),
+                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? true : null
+            )
         );
         //Generate cover letter without access code for applicant who has access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
@@ -1450,7 +1452,9 @@ public class ServiceOfApplicationService {
                             selectedApplicant.getValue().getEmail(),
                             CA_APPLICANT_SERVICE_APPLICATION,
                             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
-                                                                                   selectedApplicant.getValue()),
+                                                                                   selectedApplicant.getValue(),
+                                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? true : null
+                            ),
                             LanguagePreference.english
                         );
                         emailNotificationDetails.add(element(EmailNotificationDetails.builder()
