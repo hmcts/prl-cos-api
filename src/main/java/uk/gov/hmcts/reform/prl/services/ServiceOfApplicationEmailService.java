@@ -175,6 +175,7 @@ public class ServiceOfApplicationEmailService {
                                    String email,
                                    EmailTemplateNames template,
                                    EmailTemplateVars emailTemplateVars) {
+        log.info("sendGovNotifyEmailllll");
         //send gov notify email
         emailService.sendSoa(email,
                              template,
