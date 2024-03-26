@@ -145,8 +145,8 @@ public class CaseService {
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .taskListVersion(TASK_LIST_VERSION_V2)
                                           .build());
-
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            return partyLevelCaseFlagsService.generateAndStoreCaseFlags(caseId);
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
