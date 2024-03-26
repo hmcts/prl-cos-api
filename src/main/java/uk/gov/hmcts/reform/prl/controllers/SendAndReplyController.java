@@ -340,7 +340,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         //reset dynamic list fields
-        caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+        //caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
 
