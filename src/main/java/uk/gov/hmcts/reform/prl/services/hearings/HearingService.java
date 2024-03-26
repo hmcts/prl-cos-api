@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
@@ -212,6 +213,15 @@ public class HearingService {
             log.error("Error in getting hearings ", e);
         }
         return Collections.emptyList();
+    }
+
+    public CaseDetails createAutomatedHearing(String userToken, CaseDetails caseDetails) {
+        try {
+            return hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseDetails);
+        } catch (Exception e) {
+            log.error("Error in createAutomatedHearing", e);
+        }
+        return null;
     }
 
 }

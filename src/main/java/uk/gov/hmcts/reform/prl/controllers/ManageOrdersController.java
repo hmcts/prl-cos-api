@@ -205,6 +205,10 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
+            //Automated Hearing Request Call
+            CaseDetails caseDetails = hearingService.createAutomatedHearing(authorisation, callbackRequest.getCaseDetails());
+            log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}",caseDetails);
+            //log
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
