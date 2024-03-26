@@ -43,6 +43,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
+
     private final ObjectMapper objectMapper;
     private final HearingService hearingService;
     private final CaseService caseService;
@@ -50,6 +51,7 @@ public class CaseController {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -97,6 +99,7 @@ public class CaseController {
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
         } else {
@@ -127,20 +130,6 @@ public class CaseController {
         }
     }
 
-    @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
-    public List<CaseData> retrieveCases(
-        @PathVariable("role") String role,
-        @PathVariable("userId") String userId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
     public List<CitizenCaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -161,11 +150,21 @@ public class CaseController {
 
     @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                  @RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+    public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                      @RequestHeader("caseId") String caseId,
+                                      @RequestHeader("accessCode") String accessCode) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+            if (caseDetails != null) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseData.toBuilder().id(caseDetails.getId()).build();
+            } else {
+                throw (new RuntimeException(CASE_LINKING_FAILED));
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)

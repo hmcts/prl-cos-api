@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -46,7 +47,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -125,6 +125,7 @@ public class CaseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
+            .c100RebuildData(C100RebuildData.builder().c100RebuildApplicantDetails("").build())
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
@@ -299,43 +300,6 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenRetrieveCases() {
-
-        List<CaseData> caseDataList = new ArrayList<>();
-
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-
-        caseDataList.add(CaseData.builder()
-                             .id(1234567891234567L)
-                             .applicantCaseName("test")
-                             .build());
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-
-        List<CaseDetails> caseDetails = new ArrayList<>();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        caseDetails.add(CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build());
-
-        String userId = "12345";
-        String role = "test role";
-
-        List<CaseData> caseDataList1 = new ArrayList<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
-        caseDataList1 = caseController.retrieveCases(role, userId, authToken, servAuthToken);
-        assertNotNull(caseDataList1);
-
-    }
-
-    @Test
     public void testCitizenLinkDefendantToClaim() {
 
         caseData = CaseData.builder()
@@ -351,10 +315,10 @@ public class CaseControllerTest {
             1234567891234567L).data(stringObjectMap).build();
 
         String caseId = "1234567891234567";
-        String accessCode = "e3ceb507";
+        String accessCode = "e3c507";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, accessCode, caseId);
+        when(caseService.linkCitizenToCase(any(), any(), any(), any())).thenReturn(caseDetails);
         caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
