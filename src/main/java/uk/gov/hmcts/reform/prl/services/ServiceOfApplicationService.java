@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -54,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDeta
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -95,7 +97,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
@@ -104,7 +105,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.M;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
@@ -154,7 +154,6 @@ public class ServiceOfApplicationService {
     public static final String REJECTION_REASON = "rejectionReason";
     public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
     public static final String CONFIDENTIAL_CHECK_FAILED = "confidentialCheckFailed";
-    public static final String INTERNAL_UPDATE_ALL_TABS = "internal-update-all-tabs";
     public static final String APPLICANTS = "applicants";
     public static final String CASE_INVITES = "caseInvites";
 
@@ -282,14 +281,13 @@ public class ServiceOfApplicationService {
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
+    private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
     private final EmailService emailService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
-
-    private final CoreCaseDataService coreCaseDataService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -1206,18 +1204,28 @@ public class ServiceOfApplicationService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+            callbackRequest.getCaseDetails().getId()));
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
-            return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
+            return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
         }
-        return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
+        return processNonConfidentialSoa(
+            authorisation,
+            caseData,
+            caseDataMap,
+            startAllTabsUpdateDataContent,
+            String.valueOf(callbackRequest.getCaseDetails().getId())
+        );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
-                                                                                Map<String, Object> caseDataMap) throws Exception {
+                                                                                Map<String, Object> caseDataMap,
+                                                                                StartAllTabsUpdateDataContent updatedCaseDataContent,
+                                                                                String caseId) throws Exception {
         log.info("Confidential details are NOT present");
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         String confirmationBody = "";
@@ -1277,12 +1285,12 @@ public class ServiceOfApplicationService {
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap);
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            INTERNAL_UPDATE_ALL_TABS,
-            caseDataMap
+        allTabService.submitAllTabsUpdate(
+                updatedCaseDataContent.systemAuthorisation(),
+                caseId,
+                updatedCaseDataContent.startEventResponse(),
+                updatedCaseDataContent.eventRequestData(),
+                caseDataMap
         );
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationHeader)
@@ -1290,7 +1298,8 @@ public class ServiceOfApplicationService {
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, CallbackRequest callbackRequest,
-                                                                                    CaseData caseData) {
+                                                                                    CaseData caseData,
+                                                                                    StartAllTabsUpdateDataContent updatedCaseDataContent) {
         Map<String, Object> caseDataMap;
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
@@ -1298,12 +1307,12 @@ public class ServiceOfApplicationService {
 
         cleanUpSoaSelections(caseDataMap);
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            INTERNAL_UPDATE_ALL_TABS,
-            caseDataMap
+        allTabService.submitAllTabsUpdate(
+                updatedCaseDataContent.systemAuthorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                updatedCaseDataContent.startEventResponse(),
+                updatedCaseDataContent.eventRequestData(),
+                caseDataMap
         );
         String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
@@ -3024,8 +3033,11 @@ public class ServiceOfApplicationService {
 
     public ResponseEntity<SubmittedCallbackResponse> processConfidentialityCheck(String authorisation, CallbackRequest callbackRequest) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+            callbackRequest.getCaseDetails().getId()));
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
         final ResponseEntity<SubmittedCallbackResponse> response;
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
@@ -3043,11 +3055,11 @@ public class ServiceOfApplicationService {
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            INTERNAL_UPDATE_ALL_TABS,
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.systemAuthorisation(),
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
             caseDataMap
         );
         return response;
