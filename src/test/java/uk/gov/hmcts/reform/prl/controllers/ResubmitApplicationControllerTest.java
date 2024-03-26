@@ -49,6 +49,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -108,6 +111,7 @@ public class ResubmitApplicationControllerTest {
     private CaseData caseData;
     private CaseData caseDataSubmitted;
     private CaseData caseDataIssued;
+    private CaseData caseDataWithOutCourt;
 
     private CaseData caseDataGateKeeping;
     private AllegationOfHarm allegationOfHarm;
@@ -130,6 +134,13 @@ public class ResubmitApplicationControllerTest {
             .courtName("testcourt")
             .courtId("123")
             .build();
+
+        caseDataWithOutCourt = CaseData.builder()
+            .id(12345L)
+            .state(State.JUDICIAL_REVIEW)
+            .allegationOfHarm(allegationOfHarm)
+            .build();
+
         caseDataSubmitted = CaseData.builder()
             .id(12345L)
             .state(State.SUBMITTED_PAID)
@@ -170,6 +181,7 @@ public class ResubmitApplicationControllerTest {
             .courtName("testcourt")
             .countyLocationCode(123)
             .build();
+
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
@@ -222,6 +234,87 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
+        verify(allTabService).getAllTabsFields(caseDataGateKeeping);
+
+    }
+
+    @Test
+    public void whenLastEventWasGatkepping_andCourtNameIsProvided() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+            .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
+                               DOCUMENT_FIELD_C1A, "test",
+                               DOCUMENT_FIELD_FINAL, "test"
+            ));
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+
+        assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
+        assertFalse(response.getData().containsKey(COURT_NAME_FIELD));
+        verify(allTabService).getAllTabsFields(caseDataGateKeeping);
+
+    }
+
+    @Test
+    public void whenLastEventWasGatkepping_andCourtNameIsNull() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        CaseData caseDataWithCourtName = caseDataWithOutCourt.toBuilder()
+            .courtName("testcourt")
+            .courtId("123")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataWithOutCourt);
+        when(caseEventService.findEventsForCase(String.valueOf(caseDataWithOutCourt.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseDataWithOutCourt)).thenReturn(court);
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(caseDataWithCourtName);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(caseDataIssued);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+            .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
+                               DOCUMENT_FIELD_C1A, "test",
+                               DOCUMENT_FIELD_FINAL, "test"
+            ));
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
+
+        assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
+        assertTrue(response.getData().containsKey(COURT_NAME_FIELD));
+        assertEquals(response.getData().get(COURT_NAME_FIELD), "testcourt");
+        assertTrue(response.getData().containsKey(COURT_ID_FIELD));
+        assertEquals(response.getData().get(COURT_ID_FIELD), "123");
+        assertTrue(response.getData().containsKey(COURT_CODE_FROM_FACT));
+        assertEquals(response.getData().get(COURT_CODE_FROM_FACT), "123");
         verify(allTabService).getAllTabsFields(caseDataGateKeeping);
 
     }
