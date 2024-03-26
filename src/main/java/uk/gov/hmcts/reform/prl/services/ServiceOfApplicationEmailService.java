@@ -162,12 +162,13 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
-                                                   PartyDetails party) {
+                                                   PartyDetails party, boolean c1aExists) {
         return CitizenEmailVars.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .caseLink(citizenUrl)
             .applicantName(party.getLabelForDynamicList())
+            .doesC1aExist(c1aExists)
             .build();
     }
 
