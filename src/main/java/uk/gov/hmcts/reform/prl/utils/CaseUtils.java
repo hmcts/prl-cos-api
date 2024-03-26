@@ -602,43 +602,37 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
-            || (currentParty.getIsAddressConfidential() != null
-            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+            || !isAddressConfidentialityRemainsSame(currentParty, updatedParty))
+            && StringUtils.isNotEmpty(currentAddress.getAddressLine1());
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        return (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || !isEmailConfidentialityRemainsSame(currentParty, updatedParty))
+            && StringUtils.isNotEmpty(currentParty.getEmail());
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        return (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || !isPhoneNumberConfidentialityRemainsSame(currentParty, updatedParty))
+            && StringUtils.isNotEmpty(currentParty.getPhoneNumber());
     }
 
-    public static boolean isThereAnyNewConfidentialDataPresent(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !(isEmailConfidentialOptionChanged(currentParty, updatedParty)
-            && isAddressConfidentialOptionChanged(currentParty, updatedParty)
-            && isPhoneConfidentialOptionChanged(currentParty, updatedParty));
-    }
-
-    private static boolean isEmailConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return ((ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
+    private static boolean isEmailConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
+        return (ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsEmailAddressConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
-            && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential())));
+            && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
 
-    private static boolean isAddressConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+    private static boolean isAddressConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
         return ((ObjectUtils.isEmpty(currentParty.getIsAddressConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsAddressConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
             && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
     }
 
-    private static boolean isPhoneConfidentialOptionChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+    private static boolean isPhoneNumberConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
         return ((ObjectUtils.isEmpty(currentParty.getIsPhoneNumberConfidential())
             && ObjectUtils.isEmpty(updatedParty.getIsPhoneNumberConfidential()))
             || (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
