@@ -2907,7 +2907,10 @@ public class ServiceOfApplicationService {
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                     log.info(" getContactPreferences---->{}",applicant.getValue().getContactPreferences());
-                    if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
+                    log.info(" party.getValue().getEmail()---->{}", applicant.getValue().getEmail());
+
+                    //if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
+                    if (true) {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
