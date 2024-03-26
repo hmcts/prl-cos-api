@@ -136,6 +136,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -913,7 +914,7 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, selectedApplicant, docs,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
+                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   selectedApplicant, PRL_LET_ENG_AP7);
@@ -1001,7 +1002,9 @@ public class ServiceOfApplicationService {
             party.getValue().getEmail(),
             emailTemplate,
             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
-                                                                   party.getValue())
+                                                                   party.getValue(),
+                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? true : null
+            )
         );
         //Generate cover letter without access code for applicant who has access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(authorization, caseData,
@@ -1450,7 +1453,9 @@ public class ServiceOfApplicationService {
                             selectedApplicant.getValue().getEmail(),
                             CA_APPLICANT_SERVICE_APPLICATION,
                             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
-                                                                                   selectedApplicant.getValue()),
+                                                                                   selectedApplicant.getValue(),
+                                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? true : null
+                            ),
                             LanguagePreference.english
                         );
                         emailNotificationDetails.add(element(EmailNotificationDetails.builder()
@@ -2919,7 +2924,7 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
+                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   applicant, PRL_LET_ENG_AP7);
