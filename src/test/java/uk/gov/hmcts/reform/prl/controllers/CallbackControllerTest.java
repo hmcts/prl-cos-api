@@ -726,7 +726,6 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
@@ -734,7 +733,7 @@ public class CallbackControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         callbackController.updateApplication(authToken, s2sToken, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
+        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
     }
 
     @Test
@@ -1210,7 +1209,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, callbackRequest);
+            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
     }
 
@@ -1244,8 +1243,9 @@ public class CallbackControllerTest {
                                         .build()))
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, callbackRequest);
+            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarantineDocsList"));
     }
 
@@ -2911,6 +2911,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(callbackRequest.getCaseDetails());
         ResponseEntity<SubmittedCallbackResponse> responseEntity =  callbackController
             .transferCourtConfirmation(authToken, callbackRequest);
         Assertions.assertNotNull(responseEntity);
