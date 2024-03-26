@@ -16,18 +16,21 @@ public class CitizenEmailVars extends EmailTemplateVars {
     private final String applicantName;
     private final String respondentName;
     private final String caseLink;
+    private final boolean doesC1aExist;
 
     @Builder
     public CitizenEmailVars(String caseReference,
                             String caseName,
                             String applicantName,
                             String respondentName,
-                            String caseLink) {
+                            String caseLink,
+                            boolean doesC1aExist) {
 
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
         this.respondentName = respondentName;
         this.caseLink = caseLink;
+        this.doesC1aExist = doesC1aExist;
     }
 }
