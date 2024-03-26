@@ -74,7 +74,6 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OR_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -84,7 +83,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -436,8 +434,6 @@ public class SendAndReplyService {
         if (CollectionUtils.isNotEmpty(respondentList)) {
             applicantRespondentList.addAll(respondentList);
         }
-        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("OTHER").label(OTHER).build());
-        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("cafcassOrCafcassCymru").label(CAFCASS_OR_CAFCASS_CYMRU).build());
 
         return applicantRespondentList;
     }
