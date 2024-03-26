@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
@@ -24,10 +26,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -39,8 +44,10 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -58,6 +65,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -66,6 +74,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OR_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -75,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -128,6 +138,8 @@ public class SendAndReplyService {
     private final HearingService hearingService;
 
     private final CaseDocumentClient caseDocumentClient;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -386,6 +398,10 @@ public class SendAndReplyService {
                                            ))
                                            .applicationsList(getOtherApplicationsList(caseData))
                                            .submittedDocumentsList(documentCategoryList)
+                                           .externalMessageWhoToSendTo(DynamicMultiSelectList.builder()
+                                                                           .listItems(
+                                                                               getExternalMessageRecipientEligibleList(caseData))
+                                                                           .build())
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
@@ -395,8 +411,35 @@ public class SendAndReplyService {
                                                caseReference
                                            ))
                                            .build())
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                                                                                .submittedDocsRefList(
+                                                                                    getCategoriesAndDocuments(
+                                                                                        authorization,
+                                                                                        caseReference
+                                                                                    ))
+                                                                                .build())))
                     .build())
             .build();
+    }
+
+    private List<DynamicMultiselectListElement> getExternalMessageRecipientEligibleList(CaseData caseData) {
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        if (CollectionUtils.isNotEmpty(applicantList)) {
+            applicantRespondentList.addAll(applicantList);
+        }
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        if (CollectionUtils.isNotEmpty(respondentList)) {
+            applicantRespondentList.addAll(respondentList);
+        }
+        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("OTHER").label(OTHER).build());
+        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("cafcassOrCafcassCymru").label(CAFCASS_OR_CAFCASS_CYMRU).build());
+
+        return applicantRespondentList;
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
@@ -678,13 +721,20 @@ public class SendAndReplyService {
         return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
-                        .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
+                        .equals(message.getInternalMessageWhoToSendTo()) || InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? CLOSED : OPEN)
             .dateSent(formatDateTime(DATE_TIME_PATTERN, dateTime.now()))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
+            .internalOrExternalSentTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+                                          ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
+                (REPLY.equals(caseData.getChooseSendOrReply())
+                    ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
+                    : message.getInternalMessageWhoToSendTo())))
+            .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -699,6 +749,8 @@ public class SendAndReplyService {
             .selectedFutureHearingValue(getValueLabel(message.getFutureHearingsList()))
             .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
+            .externalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
@@ -710,8 +762,28 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
+            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
+                authorization,
+                caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
+            ))
             .build();
     }
+
+    private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
+                                                                      List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList) {
+        if (isNotEmpty(externalMessageAttachDocsList)) {
+            return externalMessageAttachDocsList.stream()
+                .map(Element::getValue)
+                .map(replyDocument -> element(getSelectedDocument(
+                    authorization,
+                    replyDocument.getSubmittedDocsRefList()
+                )))
+                .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
 
     private String getValueCode(DynamicList dynamicListObj) {
         if (dynamicListObj != null) {
@@ -1047,6 +1119,20 @@ public class SendAndReplyService {
             .updatedTime(message.getUpdatedTime())
             .build();
     }
+
+    private String getExternalSentTo(DynamicMultiSelectList externalMessageWhoToSendTo) {
+        log.info("external messages sent to {}",externalMessageWhoToSendTo);
+        Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(externalMessageWhoToSendTo);
+        log.info("external message sent to string {}",externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+            .getValue().stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","))).orElse(""));
+        return externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+            .getValue().stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","))).orElse("");
+    }
+
 
     public CaseData resetSendAndReplyDynamicLists(CaseData caseData) {
         Message sendMessageObject = null;
