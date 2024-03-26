@@ -7,6 +7,7 @@ import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -24,4 +25,10 @@ public class CitizenDocuments {
     private Document document;
     private Document documentWelsh;
 
+    // Attributes for SOA
+    private List<Document> applicantSoaPack; // if personal service - CA/CB -> Either applicant pack //
+    //private List<Document> unservedRespondentPack; // if personal service - CA/CB -> Either applicant pack //
+    private List<Document> respondentSoaPack;
+    private String servedParty;
+    private String wasCafcassServed;
 }
