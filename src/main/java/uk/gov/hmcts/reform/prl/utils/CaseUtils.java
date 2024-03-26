@@ -596,7 +596,8 @@ public class CaseUtils {
         log.info("inside checkIfAddressIsChanged old {} , new {}",
                  updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
-        Address previousAddress = updatedParty.getAddress();
+        Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress()) ?
+            updatedParty.getAddress() : Address.builder().build();
         boolean flag = currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
@@ -607,7 +608,8 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
             || !isConfidentialityRemainsSame(currentParty.getIsAddressConfidential(),
                                              updatedParty.getIsAddressConfidential()))
-            && StringUtils.isNotEmpty(currentAddress.getAddressLine1());
+            && (StringUtils.isNotEmpty(currentAddress.getAddressLine1())
+                || StringUtils.isNotEmpty(previousAddress.getAddressLine1()));
         log.info("checkIfAddressIsChanged ===>" + flag);
         return flag;
     }
@@ -617,7 +619,8 @@ public class CaseUtils {
         boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
             || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
                                              updatedParty.getIsEmailAddressConfidential()))
-            && StringUtils.isNotEmpty(currentParty.getEmail());
+            && (StringUtils.isNotEmpty(currentParty.getEmail())
+                || StringUtils.isNotEmpty(updatedParty.getEmail()));
         log.info("isEmailAddressChanged ===>" + flag);
         return flag;
     }
@@ -627,7 +630,8 @@ public class CaseUtils {
         boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
                                              updatedParty.getIsPhoneNumberConfidential()))
-            && StringUtils.isNotEmpty(currentParty.getPhoneNumber());
+            && (StringUtils.isNotEmpty(currentParty.getPhoneNumber())
+                || StringUtils.isNotEmpty(updatedParty.getPhoneNumber()));
         log.info("isPhoneNumberChanged ===>" + flag);
         return flag;
     }
