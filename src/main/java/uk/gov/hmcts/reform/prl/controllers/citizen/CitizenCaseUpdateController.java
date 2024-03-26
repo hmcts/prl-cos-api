@@ -84,7 +84,12 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** Inside deleteApplicationCitizen");
+            log.info("*** Inside saveDraftCitizenApplication");
+            try {
+                log.info("saveDraftCitizenApplication caseData start json ===>" + objectMapper.writeValueAsString(caseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
                 caseId,
                 caseData,
@@ -93,8 +98,8 @@ public class CitizenCaseUpdateController {
             if (caseDetails != null) {
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
-                log.error("deleteApplicationCitizen is not successful for the case {}", caseId);
-                throw new CoreCaseDataStoreException("Citizen delete application failed for this transaction");
+                log.error("saveDraftCitizenApplication is not successful for the case {}", caseId);
+                throw new CoreCaseDataStoreException("Citizen save c100 draft application failed for this transaction");
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -111,6 +116,11 @@ public class CitizenCaseUpdateController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside deleteApplicationCitizen");
+            try {
+                log.info("deleteApplicationCitizen caseData start json ===>" + objectMapper.writeValueAsString(caseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             CaseDetails caseDetails = citizenCaseUpdateService.deleteApplication(
                 caseId,
                 caseData,
