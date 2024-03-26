@@ -2707,7 +2707,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    @Ignore
     public void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
         //Given
         PartyDetails applicant = PartyDetails.builder()
@@ -2808,7 +2807,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    @Ignore
     public void testServeOrderDocsToUnrepresentedApplicantViaPostFL401() throws Exception {
         //Given
         PartyDetails applicant = PartyDetails.builder()
@@ -2874,7 +2872,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    @Ignore
     public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401() throws Exception {
         //Given
         PartyDetails applicant = PartyDetails.builder()
@@ -2909,7 +2906,6 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    @Ignore
     public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
         //Given
         PartyDetails applicant = PartyDetails.builder()

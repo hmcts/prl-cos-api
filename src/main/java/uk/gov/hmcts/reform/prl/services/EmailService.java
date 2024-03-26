@@ -54,14 +54,9 @@ public class EmailService {
         final String reference = templateVars.getCaseReference();
         onBeforeLog(templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
-        log.info("sendSoa.....{}",launchDarklyClient.isFeatureEnabled("soa-gov-notify"));
+
         try {
             if (launchDarklyClient.isFeatureEnabled("soa-gov-notify")) {
-                log.info("sendSoa....templateId.{}",templateId);
-                log.info("sendSoa....email {}",email);
-                log.info("sendSoa....tempVars. {}",toMap(templateVars));
-                log.info("sendSoa....reference.{}",reference);
-
 
                 SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                           reference
@@ -69,7 +64,6 @@ public class EmailService {
                 onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
             }
         } catch (NotificationClientException exception) {
-            log.info("Expceptionnnn....");
             throw new IllegalArgumentException(exception);
         }
     }
