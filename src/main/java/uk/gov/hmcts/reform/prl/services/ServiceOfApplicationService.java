@@ -136,7 +136,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
-import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION_ENG_AND_WELSH;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -994,7 +993,7 @@ public class ServiceOfApplicationService {
                                                                        Element<PartyDetails> party,
                                                                        String template,
                                                                        EmailTemplateNames emailTemplate) {
-        log.info(" sendEmailToUnrepresentedApplicant---GOV->");
+        log.info(" sendEmailToUnrepresentedApplicant---GOV->{}",LanguagePreference.getPreferenceLanguage(caseData));
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendGovNotifyEmail(
@@ -2907,13 +2906,9 @@ public class ServiceOfApplicationService {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
-                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                        log.info("is wleshh {}",documentLanguage.isGenWelsh());
-                        log.info("is English {}",documentLanguage.isGenEng());
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
-                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL_BOTH,
-                                                            fieldsMap, documentLanguage.isGenWelsh()
-                                                                ? CA_APPLICANT_SERVICE_APPLICATION_ENG_AND_WELSH : CA_APPLICANT_SERVICE_APPLICATION);
+                                                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                            fieldsMap, CA_APPLICANT_SERVICE_APPLICATION);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   applicant, PRL_LET_ENG_AP7);
