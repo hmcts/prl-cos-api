@@ -596,8 +596,8 @@ public class CaseUtils {
         log.info("inside checkIfAddressIsChanged old {} , new {}",
                  updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
-        Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress()) ?
-            updatedParty.getAddress() : Address.builder().build();
+        Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
+            ? updatedParty.getAddress() : Address.builder().build();
         boolean flag = currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
