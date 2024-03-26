@@ -63,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -625,30 +626,36 @@ public class CaseUtils {
     }
 
     private static boolean isEmailConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = (ObjectUtils.isEmpty(currentParty.getIsEmailAddressConfidential())
-            && ObjectUtils.isEmpty(updatedParty.getIsEmailAddressConfidential()))
-            || (ObjectUtils.isNotEmpty(currentParty.getIsEmailAddressConfidential())
-            && currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        boolean flag = checkForConfidentialDataChange(currentParty.getIsEmailAddressConfidential(),
+                                                      updatedParty.getIsAddressConfidential());
         log.info("isEmailConfidentialityRemainsSame ===>" + flag);
         return flag;
     }
 
     private static boolean isAddressConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = ((ObjectUtils.isEmpty(currentParty.getIsAddressConfidential())
-            && ObjectUtils.isEmpty(updatedParty.getIsAddressConfidential()))
-            || (ObjectUtils.isNotEmpty(currentParty.getIsAddressConfidential())
-            && currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+        boolean flag = checkForConfidentialDataChange(currentParty.getIsAddressConfidential(),
+                                                      updatedParty.getIsAddressConfidential());
         log.info("isAddressConfidentialityRemainsSame ===>" + flag);
         return flag;
     }
 
     private static boolean isPhoneNumberConfidentialityRemainsSame(PartyDetails currentParty, PartyDetails updatedParty) {
-        boolean flag = ((ObjectUtils.isEmpty(currentParty.getIsPhoneNumberConfidential())
-            && ObjectUtils.isEmpty(updatedParty.getIsPhoneNumberConfidential()))
-            || (ObjectUtils.isNotEmpty(currentParty.getIsPhoneNumberConfidential())
-            && currentParty.getIsPhoneNumberConfidential().equals(updatedParty.getIsPhoneNumberConfidential())));
+        boolean flag = checkForConfidentialDataChange(currentParty.getIsPhoneNumberConfidential(),
+                                                      updatedParty.getIsPhoneNumberConfidential());
         log.info("isPhoneNumberConfidentialityRemainsSame ===>" + flag);
         return flag;
+    }
+
+    private static boolean checkForConfidentialDataChange(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+        if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isEmpty(newConfidentiality)) {
+            return true;
+        } else if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isNotEmpty(newConfidentiality)) {
+            return No.equals(newConfidentiality);
+        } else {
+            return newConfidentiality.equals(oldConfidentiality);
+        }
     }
 
 }
