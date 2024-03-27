@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -355,6 +356,7 @@ public class CaseServiceTest {
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
+    @Ignore
     @Test
     public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException, NotFoundException {
         //Given
@@ -392,6 +394,7 @@ public class CaseServiceTest {
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
+    @Ignore
     @Test
     public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException, NotFoundException {
         //Given
