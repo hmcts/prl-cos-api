@@ -1001,7 +1001,7 @@ public class ServiceOfApplicationService {
             emailTemplate,
             serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
                                                                    party.getValue(),
-                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? true : null
+                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? "Yes" : null
             )
         );
         //Generate cover letter without access code for applicant who has access to dashboard
@@ -2851,7 +2851,7 @@ public class ServiceOfApplicationService {
             );
         } else {
             List<Document> docs = new ArrayList<>();
-            removeDuplicatesAndGetConsolidatedDocs(unwrapElements(unServedApplicantPack.getPackDocument()),
+            removeDuplicatesAndGetConsolidatedDocs(unwrapElements(null != unServedApplicantPack ? unServedApplicantPack.getPackDocument() : null),
                                                    unwrapElements(unServedRespondentPack.getPackDocument()), docs);
             emailNotification = sendEmailCaPersonalApplicantLegalRep(
                 caseData,

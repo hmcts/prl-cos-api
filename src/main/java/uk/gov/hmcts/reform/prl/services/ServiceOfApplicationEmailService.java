@@ -160,7 +160,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
-                                                   PartyDetails party, boolean c1aExists) {
+                                                   PartyDetails party, String c1aExists) {
         return CitizenEmailVars.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
