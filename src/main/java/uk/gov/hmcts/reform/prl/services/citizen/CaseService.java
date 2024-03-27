@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecip
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -60,7 +63,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
     public static final String YES = "Yes";
-    public static final String CASE_STATUS = "caseStatus";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -68,6 +70,8 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final RoleAssignmentService roleAssignmentService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final HearingService hearingService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
@@ -322,5 +326,21 @@ public class CaseService {
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
+    }
+
+    public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
+        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData = caseData.toBuilder().noOfDaysRemainingToSubmitCase(
+            CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder().caseData(caseData).build();
+        if ("Yes".equalsIgnoreCase(hearingNeeded)) {
+            caseDataWithHearingResponse =
+                caseDataWithHearingResponse.toBuilder().hearings(
+                    hearingService.getHearings(authorisation, caseId)).build();
+        }
+
+        return caseDataWithHearingResponse;
     }
 }

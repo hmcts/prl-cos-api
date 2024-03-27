@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -58,8 +59,8 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        CaseDetails caseDetails = null;
-        if (isAuthorized(userToken, s2sToken)) {
+        CaseDetails caseDetails;
+        if (authorisationService.isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
@@ -69,9 +70,19 @@ public class CaseController {
         }
     }
 
-    private boolean isAuthorized(String authorisation, String s2sToken) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+    @GetMapping(path = "/retrieve-case-and-hearing/{caseId}/{hearingNeeded}", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the data")
+    public CaseDataWithHearingResponse retrieveCaseWithHearing(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("hearingNeeded") String hearingNeeded,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return caseService.getCaseWithHearing(authorisation, caseId, hearingNeeded);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -84,8 +95,8 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) throws JsonProcessingException {
-        if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails;
             try {
                 log.info("*** event received from citizen " + eventId);
                 log.info("*** printing case data " + objectMapper.writeValueAsString(
@@ -117,8 +128,8 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails;
             try {
                 log.info("*** event received from citizen " + eventId);
                 log.info("*** printing case data" + objectMapper.writeValueAsString(
@@ -145,7 +156,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -158,7 +169,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         List<CaseData> caseDataList;
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -180,9 +191,9 @@ public class CaseController {
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
-        CaseDetails caseDetails = null;
+        CaseDetails caseDetails;
 
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.createCase(caseData, authorisation);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
@@ -203,7 +214,7 @@ public class CaseController {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @PathVariable("caseId") String caseId) {
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return hearingService.getHearings(authorisation, caseId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
