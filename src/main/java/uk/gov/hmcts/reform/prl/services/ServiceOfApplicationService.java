@@ -992,7 +992,7 @@ public class ServiceOfApplicationService {
                                                                        Element<PartyDetails> party,
                                                                        String template,
                                                                        EmailTemplateNames emailTemplate) {
-        log.info(" sendEmailToUnrepresentedApplicant---GOV->{}",LanguagePreference.getPreferenceLanguage(caseData));
+        log.info(" sendEmailToUnrepresentedApplicant---GOVV->{}",LanguagePreference.getPreferenceLanguage(caseData));
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendGovNotifyEmail(
