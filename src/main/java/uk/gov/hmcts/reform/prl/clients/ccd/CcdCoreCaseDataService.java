@@ -116,6 +116,18 @@ public class CcdCoreCaseDataService {
             .build();
     }
 
+    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification2(StartEventResponse startEventResponse) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(startEventResponse.getCaseDetails().getData())
+            .securityClassification(startEventResponse.getCaseDetails().getSecurityClassification())
+            .securityClassification(Classification.RESTRICTED)
+            .build();
+    }
+
     public StartEventResponse startSubmitCreate(
         String authorisation,
         String s2sToken,
