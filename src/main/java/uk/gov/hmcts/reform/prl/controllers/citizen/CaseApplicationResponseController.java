@@ -34,8 +34,10 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -112,6 +114,27 @@ public class CaseApplicationResponseController {
                 respondent -> YesOrNo.Yes.equals(
                     respondent.getValue().getCurrentRespondent()))
             .findFirst();
+        if (currentRespondent.isPresent()) {
+            if (Yes != currentRespondent.get().getValue().getResponse().getC7ResponseSubmitted()) {
+                log.info("setting c7 responsesubmitted");
+                Element<PartyDetails> respondent = currentRespondent.get();
+                respondent.getValue().setResponse(currentRespondent.get()
+                    .getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build());
+
+                List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
+                respondents.stream()
+                    .filter(party -> Objects.equals(
+                        party.getId(),
+                        respondent.getId()
+                    ))
+                    .findFirst()
+                    .ifPresent(party ->
+                        respondents.set(respondents.indexOf(party), element(party.getId(), respondent.getValue()))
+                    );
+                caseData = caseData.toBuilder().respondents(respondents).build();
+                log.info("c7 response added successfully");
+            }
+        }
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseDetails caseDetailsReturn = null;
