@@ -7,11 +7,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -23,11 +25,11 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +78,10 @@ public class Fl401ListOnNoticeServiceTest {
     EmailService emailService;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
+    AllTabServiceImpl allTabService;
+
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
     @Mock
     private ListOnNoticeService listOnNoticeService;
@@ -177,6 +182,8 @@ public class Fl401ListOnNoticeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put(FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED, "test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .state(State.JUDICIAL_REVIEW.getValue())
@@ -206,6 +213,8 @@ public class Fl401ListOnNoticeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put(FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED, "test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .state(State.JUDICIAL_REVIEW.getValue())
@@ -242,6 +251,8 @@ public class Fl401ListOnNoticeServiceTest {
             .build();
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         when(dgsService.generateDocument(
             anyString(),
             anyString(),
@@ -271,6 +282,8 @@ public class Fl401ListOnNoticeServiceTest {
                                  .address(Address.builder().build()).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
