@@ -63,9 +63,10 @@ public class LinkCitizenCaseController {
 
     @PostMapping(value = "/link-case-to-account-with-hearing")
     @Operation(description = "Linking case to citizen account with access code")
-    public CaseDataWithHearingResponse linkCitizenToCaseWithHearing(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                                         @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
+    public CaseDataWithHearingResponse linkCitizenToCaseWithHearing(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
             Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
