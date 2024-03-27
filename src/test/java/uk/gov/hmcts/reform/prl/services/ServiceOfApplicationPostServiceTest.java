@@ -870,5 +870,4 @@ public class ServiceOfApplicationPostServiceTest {
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
     }
-
 }
