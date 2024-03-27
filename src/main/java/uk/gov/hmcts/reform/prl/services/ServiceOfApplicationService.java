@@ -137,6 +137,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A_EXIST;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -2860,8 +2861,7 @@ public class ServiceOfApplicationService {
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                     log.info(" getContactPreferences---->{}",applicant.getValue().getContactPreferences());
-                    log.info(" party.getValue().getEmail()---->{}", applicant.getValue().getEmail());
-
+                    doesC1aExists(caseData);
                     //if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                     if (true) {
                         Map<String, String> fieldsMap = new HashMap<>();
@@ -2869,7 +2869,10 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
+                                                            fieldsMap,
+                                                            doesC1aExists(caseData).equals(Yes)
+                                                                ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A_EXIST);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   applicant, PRL_LET_ENG_AP7);
@@ -3056,8 +3059,6 @@ public class ServiceOfApplicationService {
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
 
-        log.info("unServedApplicantPack---> {}",unServedApplicantPack);
-        log.info("=======================");
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
