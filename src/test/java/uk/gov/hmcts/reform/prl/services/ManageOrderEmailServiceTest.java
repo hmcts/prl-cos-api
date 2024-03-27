@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -79,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 @Slf4j
 public class ManageOrderEmailServiceTest {
-    private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
     private static final String URGENT_CASE = "Urgent ";
 
@@ -1376,7 +1374,6 @@ public class ManageOrderEmailServiceTest {
                                                                                                Mockito.any());
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefPost() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -2514,7 +2511,6 @@ public class ManageOrderEmailServiceTest {
         );
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddress() throws Exception {
 
@@ -2732,7 +2728,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -2831,7 +2827,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -2897,7 +2893,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -2931,7 +2927,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
 
         Map<String, Object> caseDataMap = new HashMap<>();
