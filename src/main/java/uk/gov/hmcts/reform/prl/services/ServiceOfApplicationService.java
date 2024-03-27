@@ -1688,27 +1688,26 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackJ(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
-        // Annex Z to be excluded
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C1A_BLANK_DOCUMENT_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C1A_BLANK_DOCUMENT_WELSH_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME)).toList());
+                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_WELSH_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
+                        )).toList());
+        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
     private List<Document> generatePackK(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
-        // Annex Y to be excluded
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
+                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY))
+                        ).toList());
+        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
