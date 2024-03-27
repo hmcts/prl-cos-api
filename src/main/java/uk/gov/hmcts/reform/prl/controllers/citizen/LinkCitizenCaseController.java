@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -34,6 +36,7 @@ public class LinkCitizenCaseController {
     private final ObjectMapper objectMapper;
     private final LinkCitizenCaseService linkCitizenCaseService;
     private final AuthorisationService authorisationService;
+    private final HearingService hearingService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
@@ -50,6 +53,33 @@ public class LinkCitizenCaseController {
             );
             if (caseDetails.isPresent()) {
                 return CaseUtils.getCaseData(caseDetails.get(), objectMapper);
+            } else {
+                throw (new RuntimeException(CASE_LINKING_FAILED));
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "/link-case-to-account-with-hearing")
+    @Operation(description = "Linking case to citizen account with access code")
+    public CaseDataWithHearingResponse linkCitizenToCaseWithHearing(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                         @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
+            Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
+                authorisation,
+                accessCodeRequest.getCaseId(),
+                accessCodeRequest.getAccessCode()
+            );
+            if (caseDetails.isPresent()) {
+                caseDataWithHearingResponse = caseDataWithHearingResponse
+                    .toBuilder()
+                    .caseData(CaseUtils.getCaseData(caseDetails.get(), objectMapper))
+                    .hearings(hearingService.getHearings(authorisation, accessCodeRequest.getCaseId()))
+                    .build();
+                return caseDataWithHearingResponse;
             } else {
                 throw (new RuntimeException(CASE_LINKING_FAILED));
             }
