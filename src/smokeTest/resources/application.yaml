@@ -49,6 +49,7 @@ spring:
       max-file-size: 30MB
       max-request-size: 30MB
   main:
+    allow-bean-definition-overriding: true
     allow-circular-references: true
 
 azure:

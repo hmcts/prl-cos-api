@@ -45,6 +45,7 @@ spring:
   application:
     name: Prl cos api
   main:
+    allow-bean-definition-overriding: true
     allow-circular-references: true
 
 azure:
