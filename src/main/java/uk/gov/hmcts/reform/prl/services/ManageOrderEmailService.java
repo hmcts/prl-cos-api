@@ -79,6 +79,7 @@ public class ManageOrderEmailService {
     public static final String NAME = "name";
     public static final String THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION =
         "There is a failure in sending email to solicitor on {} with exception {}";
+    public static final String DASH_BOARD_LINK = "dashBoardLink";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -448,10 +449,9 @@ public class ManageOrderEmailService {
             caseData.getApplicants().forEach(party -> {
                 if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
-                    log.info("Contact preference set as email" + party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     dynamicData.put("name",party.getValue().getLabelForDynamicList());
-                    dynamicData.put("dashBoardLink",citizenDashboardUrl);
+                    dynamicData.put(DASH_BOARD_LINK, citizenDashboardUrl);
                     sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
                     );
@@ -590,7 +590,7 @@ public class ManageOrderEmailService {
                                          String authorisation, List<Document> orderDocuments) {
 
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId() + ORDERS);
+        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + "/" + caseData.getId() + ORDERS);
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
@@ -643,7 +643,7 @@ public class ManageOrderEmailService {
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("dashBoardLink", manageCaseUrl + URL_STRING + caseData.getId() + ORDERS);
+        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + URL_STRING + caseData.getId() + ORDERS);
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
@@ -875,7 +875,6 @@ public class ManageOrderEmailService {
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
-                    log.info("Contact preference set as email");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(caseData,
                                                                                    partyData.getLabelForDynamicList()
@@ -916,7 +915,6 @@ public class ManageOrderEmailService {
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
-                    log.info("Contact preference set as email");
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else {
                     try {
