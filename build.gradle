@@ -54,7 +54,7 @@ def versions = [
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '5.7.5',
+  springSecurityCrypto         : '6.2.3',
   springSecurityRsa            : '1.0.11.RELEASE',
   springBoot                   : '3.1.3',
   springCloud                  : '4.0.4',
@@ -173,7 +173,7 @@ allprojects {
       }
 
       //CVE-2023-34034
-      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.7.5'
+      dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: '6.2.3'
 
 
     }
@@ -340,10 +340,10 @@ dependencies {
   implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.7.5'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.2.3'
 //  implementation group: 'org.springframework.security', name: 'spring-security-config'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.7.5'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.2.3'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
