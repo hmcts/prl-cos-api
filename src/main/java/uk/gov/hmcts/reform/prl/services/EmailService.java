@@ -57,7 +57,6 @@ public class EmailService {
 
         try {
             if (launchDarklyClient.isFeatureEnabled("soa-gov-notify")) {
-
                 SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                           reference
                 );
