@@ -78,8 +78,13 @@ public class LinkCitizenCaseController {
                 caseDataWithHearingResponse = caseDataWithHearingResponse
                     .toBuilder()
                     .caseData(CaseUtils.getCaseData(caseDetails.get(), objectMapper))
-                    .hearings(hearingService.getHearings(authorisation, accessCodeRequest.getCaseId()))
                     .build();
+
+                if ("Yes".equalsIgnoreCase(accessCodeRequest.getHearingNeeded())) {
+                    caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
+                        .hearings(hearingService.getHearings(authorisation, accessCodeRequest.getCaseId()))
+                        .build();
+                }
                 return caseDataWithHearingResponse;
             } else {
                 throw (new RuntimeException(CASE_LINKING_FAILED));
