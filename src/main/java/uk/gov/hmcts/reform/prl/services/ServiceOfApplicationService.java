@@ -997,7 +997,6 @@ public class ServiceOfApplicationService {
                                                                        Element<PartyDetails> party,
                                                                        String template,
                                                                        EmailTemplateNames emailTemplate) {
-        log.info(" sendEmailToUnrepresentedApplicant---GOVV->{}",LanguagePreference.getPreferenceLanguage(caseData));
 
         //Send a gov notify email
         serviceOfApplicationEmailService.sendGovNotifyEmail(
@@ -1031,7 +1030,6 @@ public class ServiceOfApplicationService {
                                                                  Element<PartyDetails> party,
                                                                  String coverLetterTemplate,
                                                                  SendgridEmailTemplateNames emailTemplate) {
-        log.info(" sendSoaPacksToPartyViaEmail---SEndGrid->");
         //Generate access code if party does not have access to dashboard
         List<Document> packsWithCoverLetter = new ArrayList<>(List.of((generateCoverLetterBasedOnCaseAccess(
             authorization,
@@ -1045,7 +1043,6 @@ public class ServiceOfApplicationService {
         dynamicData.put("name", party.getValue().getLabelForDynamicList());
         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
         populateLanguageMap(caseData, dynamicData);
-        log.info("Dynamic datata --> {}",dynamicData);
 
         return serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
@@ -1102,7 +1099,6 @@ public class ServiceOfApplicationService {
         EmailNotificationDetails emailNotification;
         if (isAccessEnabled(selectedApplicant)) {
             log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
-            log.info("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
             emailNotification = sendEmailToUnrepresentedApplicant(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
                                                                   docs,
@@ -1111,7 +1107,6 @@ public class ServiceOfApplicationService {
                                                                   notifyTemplate);
         } else {
             log.debug("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
-            log.info("Applicant does not access to dashboard -> send packs via sendgrid email for {}", selectedApplicant.getId());
             emailNotification = sendSoaPacksToPartyViaEmail(fieldMap.get(AUTHORIZATION),
                                                             caseData,
                                                             docs,
@@ -1505,7 +1500,6 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isAccessEnabled(Element<PartyDetails> party) {
-        log.info("isAccessEnabled method {}",party.getValue().getUser());
         return party.getValue() != null && party.getValue().getUser() != null
             && party.getValue().getUser().getIdamId() != null;
     }
@@ -2766,7 +2760,6 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                log.info("unrepresentedApplicant---->");
                 sendNotificationForApplicantLipPersonalService(caseData, authorization, unServedApplicantPack,
                                                                emailNotificationDetails, bulkPrintDetails);
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
@@ -2876,7 +2869,6 @@ public class ServiceOfApplicationService {
                                                                                          SoaPack unServedApplicantPack,
                                                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        log.info("sendNotificationForApplicantLipPersonalService---->");
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<Document>> packDocs = unServedApplicantPack.getPackDocument();
             List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
@@ -3080,7 +3072,6 @@ public class ServiceOfApplicationService {
         );
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
-
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
