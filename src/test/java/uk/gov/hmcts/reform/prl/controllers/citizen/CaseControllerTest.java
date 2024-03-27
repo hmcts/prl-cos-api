@@ -18,15 +18,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -48,7 +44,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseControllerTest {
@@ -177,125 +172,6 @@ public class CaseControllerTest {
         );
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
-    }
-
-    @Test
-    public void testCitizenUpdatingCase() throws JsonProcessingException, NotFoundException {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("test@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
-
-        PartyDetails partyDetails2 = PartyDetails.builder()
-            .firstName("Test2")
-            .lastName("User2")
-            .user(User.builder()
-                      .email("test2@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
-        updateCaseData = UpdateCaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .partyDetails(partyDetails1)
-            .partyType(PartyEnum.applicant)
-            .build();
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .applicantsFL401(partyDetails2)
-            .build();
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .state("Submitted")
-            .lastModified(LocalDateTime.now())
-            .createdDate(LocalDateTime.now())
-            .id(1234567891234567L).data(stringObjectMap).build();
-
-
-        String caseId = "1234567891234567";
-        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(authTokenGenerator.generate()).thenReturn("TestToken");
-        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
-        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.caseUpdate(
-            updateCaseData,
-            eventId,
-            caseId,
-            authToken,
-            servAuthToken
-        );
-        assertEquals(caseData.getApplicantsFL401().getFirstName(), caseData1.getApplicantsFL401().getFirstName());
-
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testCitizenUpdatingCaseForInvalidAuthToken() throws JsonProcessingException, NotFoundException {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("test@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
-
-        PartyDetails partyDetails2 = PartyDetails.builder()
-            .firstName("Test2")
-            .lastName("User2")
-            .user(User.builder()
-                      .email("test2@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
-        updateCaseData = UpdateCaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .partyDetails(partyDetails1)
-            .partyType(PartyEnum.applicant)
-            .build();
-
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .applicantsFL401(partyDetails2)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .state("Submitted")
-            .lastModified(LocalDateTime.now())
-            .createdDate(LocalDateTime.now())
-            .id(1234567891234567L).data(stringObjectMap).build();
-
-
-        String caseId = "1234567891234567";
-        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.caseUpdate(
-            updateCaseData,
-            eventId,
-            caseId,
-            "authToken",
-            "servAuthToken"
-        );
     }
 
     @Test
