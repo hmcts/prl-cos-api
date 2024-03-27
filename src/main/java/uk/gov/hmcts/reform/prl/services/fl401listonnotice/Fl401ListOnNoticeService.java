@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -18,11 +19,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,12 +37,10 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_LIST_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_HEARING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REJECT_WITHOUT_NOTICE_REASONS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -61,13 +60,13 @@ public class Fl401ListOnNoticeService {
 
     private final EmailService emailService;
 
-    private final CoreCaseDataService coreCaseDataService;
-
     private final ListOnNoticeService listOnNoticeService;
 
     private final DgsService dgsService;
 
     private final BulkPrintService bulkPrintService;
+
+    private final AllTabServiceImpl allTabService;
 
     public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = """
         ### What happens next
@@ -197,13 +196,15 @@ public class Fl401ListOnNoticeService {
         }
 
         cleanUpListOnNoticeFields(caseDataUpdated);
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-all-tabs",
-            caseDataUpdated
-        );
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
+
+        //update all tabs
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+                                          String.valueOf(caseData.getId()),
+                                          startAllTabsUpdateDataContent.startEventResponse(),
+                                          startAllTabsUpdateDataContent.eventRequestData(),
+                                          caseDataUpdated);
 
         return ok(SubmittedCallbackResponse.builder()
                        .confirmationHeader(CONFIRMATION_HEADER)
