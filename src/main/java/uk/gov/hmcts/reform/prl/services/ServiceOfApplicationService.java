@@ -2881,6 +2881,7 @@ public class ServiceOfApplicationService {
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
                     log.info(" getContactPreferences---->{}",applicant.getValue().getContactPreferences());
+                    log.info("doesC1aExists(caseData)--->{}",doesC1aExists(caseData));
                     doesC1aExists(caseData);
                     //if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                     if (true) {
@@ -2890,7 +2891,7 @@ public class ServiceOfApplicationService {
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
                                                             fieldsMap,
-                                                            doesC1aExists(caseData).equals(Yes)
+                                                            doesC1aExists(caseData).equals(No)
                                                                 ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
                                                                 : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A_EXIST);
                     } else {
