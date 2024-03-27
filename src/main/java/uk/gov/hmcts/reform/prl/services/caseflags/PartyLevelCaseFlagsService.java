@@ -55,7 +55,7 @@ public class PartyLevelCaseFlagsService {
             );
         CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
         Map<String, Object> raPartyFlags = generatePartyCaseFlags(startEventResponseData);
-        CaseDataContent caseDataContent = null;
+        CaseDataContent caseDataContent;
         caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
             raPartyFlags
