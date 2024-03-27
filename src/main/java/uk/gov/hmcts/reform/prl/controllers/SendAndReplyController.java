@@ -338,14 +338,16 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                   @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("external sent to {}",caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo());
-        log.info("external sent to value {}",caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo().getValue());
+        log.info("external sent to {}",caseData.getSendOrReplyMessage().getExternalMessageTo());
+        log.info("external sent to value {}",caseData.getSendOrReplyMessage().getExternalMessageTo().getValue());
 
 
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        log.info("external sent to after clearing  {}",caseData.getSendOrReplyMessage().getExternalMessageTo());
+        log.info("external sent to value  after clearing {}",caseData.getSendOrReplyMessage().getExternalMessageTo().getValue());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }

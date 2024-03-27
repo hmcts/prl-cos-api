@@ -416,6 +416,10 @@ public class SendAndReplyService {
                                                                                         caseReference
                                                                                     ))
                                                                                 .build())))
+                    .externalMessageTo(DynamicMultiSelectList.builder()
+                                           .listItems(
+                                               getExternalMessageRecipientEligibleList(caseData))
+                                           .build())
                     .build())
             .build();
     }
@@ -726,11 +730,11 @@ public class SendAndReplyService {
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
             .internalOrExternalSentTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-                                          ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
+                                          ? getExternalSentTo(caseData.getSendOrReplyMessage().getExternalMessageTo()) : String.valueOf(
                 (REPLY.equals(caseData.getChooseSendOrReply())
                     ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                     : message.getInternalMessageWhoToSendTo())))
-            .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
+            .externalMessageWhoToSendTo(caseData.getSendOrReplyMessage().getExternalMessageTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -746,7 +750,7 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .externalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(
-                message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
+                message.getInternalOrExternalMessage()) ? caseData.getSendOrReplyMessage().getExternalMessageTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
