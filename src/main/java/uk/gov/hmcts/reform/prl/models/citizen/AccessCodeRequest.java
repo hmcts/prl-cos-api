@@ -14,4 +14,5 @@ import lombok.NoArgsConstructor;
 public class AccessCodeRequest {
     private String caseId;
     private String accessCode;
+    private String hearingNeeded;
 }
