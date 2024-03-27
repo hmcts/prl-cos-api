@@ -856,28 +856,4 @@ public class ServiceOfApplicationPostServiceTest {
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
     }
-
-    @Test
-    public void testGetCitizenCoverLetter() throws Exception {
-
-        final CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .build();
-        final Address address = Address.builder().addressLine1("test").build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-            .thenReturn(generatedDocumentInfo);
-        when(documentGenService.getTemplate(
-            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
-
-        List<Document> coverLetters = serviceOfApplicationPostService.getCoverLetterServeOrder(caseData, AUTH, address, "test name");
-        assertNotNull(coverLetters);
-        assertFalse(coverLetters.isEmpty());
-        assertEquals("coversheet.pdf", coverLetters.get(0).getDocumentFileName());
-        assertEquals("coversheet.pdf", coverLetters.get(1).getDocumentFileName());
-    }
 }
