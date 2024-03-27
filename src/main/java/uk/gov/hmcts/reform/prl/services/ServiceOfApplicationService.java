@@ -913,7 +913,10 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, selectedApplicant, docs,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
+                                                            fieldsMap,
+                                                            doesC1aExists(caseData).equals(Yes)
+                                                                ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   selectedApplicant, PRL_LET_ENG_AP7);
