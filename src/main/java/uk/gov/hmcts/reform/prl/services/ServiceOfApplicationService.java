@@ -137,6 +137,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -912,7 +913,10 @@ public class ServiceOfApplicationService {
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, selectedApplicant, docs,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
+                                                            fieldsMap,
+                                                            doesC1aExists(caseData).equals(Yes)
+                                                                ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A);
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   selectedApplicant, PRL_LET_ENG_AP7);
@@ -2870,13 +2874,19 @@ public class ServiceOfApplicationService {
             List<Document> documents = removeCoverLettersFromThePacks(unwrapElements(packDocs));
             caseData.getApplicants().forEach(applicant -> {
                 if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
+                    log.info(" getContactPreferences---->{}",applicant.getValue().getContactPreferences());
+                    log.info("doesC1aExists(caseData)--->{}",doesC1aExists(caseData));
                     if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
                         sendEmailToApplicantLipPersonalC100(caseData, emailNotificationDetails, applicant, documents,
                                                             SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                            fieldsMap, SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT);
+                                                            fieldsMap,
+                                                            doesC1aExists(caseData).equals(Yes)
+                                                                ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A
+                        );
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   applicant, PRL_LET_ENG_AP7);
