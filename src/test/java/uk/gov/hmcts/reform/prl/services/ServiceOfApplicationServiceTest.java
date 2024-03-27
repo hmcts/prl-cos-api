@@ -117,7 +117,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ServiceOfApplicationServiceTest {
 
     @InjectMocks
