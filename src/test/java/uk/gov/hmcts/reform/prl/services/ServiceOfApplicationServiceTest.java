@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2580,7 +2579,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("documentURL", document.getDocumentURL());
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigital() {
 
@@ -3165,7 +3163,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenScenario3() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -4076,7 +4073,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(NO, resultMap.get("isOccupationOrderSelected"));
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
 
@@ -4123,10 +4119,11 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(partyElementList)
             .respondents(partyElementList)
             .caseInvites(caseInviteList)
+            .c1ADocument(Document.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .specialArrangementsLetter(Document.builder().build())
                                                 .pd36qLetter(Document.builder().build())
