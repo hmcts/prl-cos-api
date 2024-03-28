@@ -442,6 +442,7 @@ public class ManageOrderEmailService {
             .equals(respondentOption)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
+                log.info("handleC100PersonalServiceNotifications: dynamicDataForEmail {}",dynamicDataForEmail);
                 sendPersonalServiceNotifications(
                     party.getValue(),
                     respondentOption,
