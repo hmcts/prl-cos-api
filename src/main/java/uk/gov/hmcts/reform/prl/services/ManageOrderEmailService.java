@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -354,8 +355,10 @@ public class ManageOrderEmailService {
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service email notifications ***");
+                log.info("*** Personal service option selected: Unrepresented Applicant {}",manageOrders.getServingOptionsForNonLegalRep());
                 handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                   manageOrders.getServingRespondentsOptionsCA());
+                                                   manageOrders.getServingRespondentsOptionsCA(),
+                                                   manageOrders.getServingOptionsForNonLegalRep());
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
@@ -382,7 +385,8 @@ public class ManageOrderEmailService {
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
             handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                               manageOrders.getServingRespondentsOptionsDA());
+                                               manageOrders.getServingRespondentsOptionsDA(),
+                                               manageOrders.getServingOptionsForNonLegalRep());
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
                 manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
@@ -411,9 +415,12 @@ public class ManageOrderEmailService {
     private void handlePersonalServiceNotifications(String authorisation, CaseData caseData,
                                                     List<Document> orderDocuments,
                                                     Map<String, Object> dynamicDataForEmail,
-                                                    SoaSolicitorServingRespondentsEnum respondentOption) {
+                                                    SoaSolicitorServingRespondentsEnum respondentOption,
+                                                    SoaCitizenServingRespondentsEnum citizenRespondentOption) {
+        log.info("*** handlePersonalServiceNotifications: citizenRespondentOption: {}",citizenRespondentOption);
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            log.info("*** handlePersonalServiceNotifications: c100: {}",citizenRespondentOption);
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
                 sendPersonalServiceNotifications(
@@ -421,10 +428,12 @@ public class ManageOrderEmailService {
                     respondentOption,
                     authorisation,
                     orderDocuments,
-                    dynamicDataForEmail
+                    dynamicDataForEmail,
+                    citizenRespondentOption
                 );
             });
         } else {
+            log.info("*** handlePersonalServiceNotifications: other: {}",citizenRespondentOption);
             String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendPersonalServiceNotifications(
@@ -432,7 +441,8 @@ public class ManageOrderEmailService {
                 respondentOption,
                 authorisation,
                 orderDocuments,
-                dynamicDataForEmail
+                dynamicDataForEmail,
+                citizenRespondentOption
             );
         }
     }
@@ -440,7 +450,11 @@ public class ManageOrderEmailService {
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   SoaSolicitorServingRespondentsEnum respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
-        Object> dynamicDataForEmail) {
+        Object> dynamicDataForEmail, SoaCitizenServingRespondentsEnum citizenRespondentOption) {
+        log.info("*** sendPersonalServiceNotifications: respondentOption: {}",respondentOption);
+        log.info("*** sendPersonalServiceNotifications: solicitorEmail: {}",solicitorEmail);
+        log.info("*** sendPersonalServiceNotifications: citizenRespondentOption: {} {}",citizenRespondentOption,
+                 SoaCitizenServingRespondentsEnum.unrepresentedApplicant);
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
@@ -450,6 +464,12 @@ public class ManageOrderEmailService {
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
+            );
+        } else if (null != solicitorEmail && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+            .equals(citizenRespondentOption)) {
+            log.info("*** sendPersonalServiceNotifications: unrepresentedApplicant: {}", citizenRespondentOption);
+            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
         }
     }
