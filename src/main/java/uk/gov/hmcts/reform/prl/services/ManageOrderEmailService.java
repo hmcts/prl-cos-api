@@ -417,8 +417,10 @@ public class ManageOrderEmailService {
                                                     Map<String, Object> dynamicDataForEmail,
                                                     SoaSolicitorServingRespondentsEnum respondentOption,
                                                     SoaCitizenServingRespondentsEnum citizenRespondentOption) {
+        log.info("*** handlePersonalServiceNotifications: citizenRespondentOption: {}",citizenRespondentOption);
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            log.info("*** handlePersonalServiceNotifications: c100: {}",citizenRespondentOption);
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
                 sendPersonalServiceNotifications(
@@ -431,6 +433,7 @@ public class ManageOrderEmailService {
                 );
             });
         } else {
+            log.info("*** handlePersonalServiceNotifications: other: {}",citizenRespondentOption);
             String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendPersonalServiceNotifications(
@@ -448,6 +451,7 @@ public class ManageOrderEmailService {
                                                   SoaSolicitorServingRespondentsEnum respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
         Object> dynamicDataForEmail, SoaCitizenServingRespondentsEnum citizenRespondentOption) {
+        log.info("*** sendPersonalServiceNotifications: citizenRespondentOption: {}",citizenRespondentOption);
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
@@ -460,7 +464,7 @@ public class ManageOrderEmailService {
             );
         } else if (null != solicitorEmail && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(citizenRespondentOption)) {
-            log.info("*** sendPersonalServiceNotifications: unrepresentedApplicant {}",citizenRespondentOption);
+            log.info("*** sendPersonalServiceNotifications: unrepresentedApplicant: {}",citizenRespondentOption);
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
