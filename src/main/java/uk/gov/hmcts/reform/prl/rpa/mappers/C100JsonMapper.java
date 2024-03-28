@@ -15,7 +15,12 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_ARRANGEMENT_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_SEQUENCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
