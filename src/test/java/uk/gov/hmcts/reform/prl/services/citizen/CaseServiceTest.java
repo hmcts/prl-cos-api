@@ -12,16 +12,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
@@ -32,22 +29,22 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -64,19 +61,17 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -124,6 +119,9 @@ public class CaseServiceTest {
 
     @Mock
     CcdCoreCaseDataService coreCaseDataService;
+
+    @Mock
+    HearingService hearingService;
 
     @Mock
     SystemUserService systemUserService;
@@ -243,75 +241,8 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testupdateCaseRespondent() throws JsonProcessingException {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData2);
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseRespondentNoPartyId() throws JsonProcessingException {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData3);
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseApplicant() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseOfApplicantWithOutPartyId() throws JsonProcessingException {
-        User user = User.builder().build();
-        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
-            .firstName("")
-            .lastName("")
-            .build();
-        caseDataWithOutPartyId = CaseData.builder()
-            .applicantsFL401(partyDetailsWithUser)
-            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                                                                         .partyId(null)
-                                                                         .accessCode("1234").build()).build()))
-            .build();
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseOfRespondentWithOutPartyId() throws JsonProcessingException {
-        User user = User.builder().build();
-        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
-            .firstName("")
-            .lastName("")
-            .build();
-        caseDataWithOutPartyId = CaseData.builder()
-            .respondentsFL401(partyDetailsWithUser)
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
-                                                                         .partyId(null)
-                                                                         .accessCode("1234").hasLinked("Yes").build()).build()))
-            .build();
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
     public void testGetCase() {
         assertNotNull(caseService.getCase("",""));
-    }
-
-    @Test
-    public void testValidateAccessCode() {
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(null);
-        assertNotNull(caseService.validateAccessCode("","","",""));
     }
 
     @Test
@@ -326,7 +257,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","citizen-case-submit","123");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","citizen-case-submit");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -374,8 +305,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+                                                                CITIZEN_CASE_SUBMIT.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -405,8 +336,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -903,8 +834,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -937,8 +868,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -966,8 +897,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -997,8 +928,8 @@ public class CaseServiceTest {
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
-            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -1420,5 +1351,23 @@ public class CaseServiceTest {
         );
 
         assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void getCaseWithHearing() {
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "yes");
+        assertNotNull(caseDataWithHearingResponse.getHearings());
+    }
+
+    @Test
+    public void getCaseWithHearingHearingNotNeeded() {
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "dud");
+        assertNull(caseDataWithHearingResponse.getHearings());
     }
 }

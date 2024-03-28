@@ -1032,7 +1032,6 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> populateDataMap(CallbackRequest callbackRequest, Element<PartyDetails> solicitorRepresentedRespondent) {
         Map<String, Object> dataMap = new HashMap<>();
-        boolean isConfidentialDataPresent = false;
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
@@ -1062,6 +1061,14 @@ public class C100RespondentSolicitorService {
                 );
             }
         }
+        checkIfConfidentialDataPresent(solicitorRepresentedRespondent, dataMap);
+        return dataMap;
+    }
+
+    public void checkIfConfidentialDataPresent(Element<PartyDetails> solicitorRepresentedRespondent,
+                                                Map<String, Object> dataMap) {
+        log.info("inside isConfidentialDataPresent");
+        boolean isConfidentialDataPresent = false;
         if (null != solicitorRepresentedRespondent
             && null != solicitorRepresentedRespondent.getValue()) {
             if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
@@ -1075,29 +1082,30 @@ public class C100RespondentSolicitorService {
                     && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate().getConfidentiality());
 
             isConfidentialDataPresent = populateEmailConfidentiality(
-                    solicitorRepresentedRespondent,
+                solicitorRepresentedRespondent,
                     isConfidentialSetByCitizen,
-                    dataMap,
-                    isConfidentialDataPresent,
+                dataMap,
+                isConfidentialDataPresent,
                     response
             );
             isConfidentialDataPresent = populatePhoneNumberConfidentiality(
-                    solicitorRepresentedRespondent,
+                solicitorRepresentedRespondent,
                     isConfidentialSetByCitizen,
-                    dataMap,
-                    isConfidentialDataPresent,
+                dataMap,
+                isConfidentialDataPresent,
                     response
             );
             isConfidentialDataPresent = populateAddressConfidentiality(
-                    solicitorRepresentedRespondent,
+                solicitorRepresentedRespondent,
                     isConfidentialSetByCitizen,
-                    dataMap,
-                    isConfidentialDataPresent,
+                dataMap,
+                isConfidentialDataPresent,
                     response
             );
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
+            log.info("exit isConfidentialDataPresent ==> " + isConfidentialDataPresent);
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
