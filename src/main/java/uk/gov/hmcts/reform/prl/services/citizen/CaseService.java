@@ -791,6 +791,12 @@ public class CaseService {
                 caseNotesMap
         );
 
+        try {
+            log.info("CaseDataContent ===>" + objectMapper.writeValueAsString(caseDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         coreCaseDataService.submitUpdate(
                 authToken,
                 eventRequestData,
