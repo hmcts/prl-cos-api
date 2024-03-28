@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,12 +13,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
@@ -31,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -53,10 +50,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
     public static final String YES = "Yes";
-    public static final String CASE_INVITES = "caseInvites";
-    public static final String CASE_STATUS = "caseStatus";
-    public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
-    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -69,7 +62,7 @@ public class CaseService {
     private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
     private final LaunchDarklyClient launchDarklyClient;
-    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final CcdCoreCaseDataService ccdccdCoreCaseDataService;
     private final HearingService hearingService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
@@ -103,59 +96,6 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
-    public CaseDetails updateCaseDetails(String authToken,
-                                                String caseId,
-                                                String eventId,
-                                                CitizenUpdatedCaseData citizenUpdatedCaseData) {
-        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
-        StartEventResponse startEventResponse =
-            coreCaseDataService.startUpdate(
-                authToken,
-                eventRequestData,
-                caseId,
-                false
-            );
-
-        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
-        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
-        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
-            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
-            handleCitizenStatementOfService(caseData, partyDetails, partyType);
-        }
-        if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
-                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
-            } else {
-                caseData = getFlCaseData(caseData, partyDetails, partyType);
-            }
-            caseData = generateAnswersForNoc(caseData);
-            if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
-                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            }
-            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
-                caseData));
-            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                caseDataMap
-            );
-            return coreCaseDataService.submitUpdate(
-                authToken,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                false
-            );
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
         ObjectMapper mapper = new ObjectMapper();
@@ -186,139 +126,6 @@ public class CaseService {
         }
 
         return caseName;
-    }
-
-    private CaseData handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
-        CitizenSos citizenSos = partyDetails.getCitizenSosObject();
-        StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
-            .citizenPartiesServedList(getPartyNames(citizenSos.getPartiesServed(), caseData, partyType))
-            .citizenPartiesServedDate(citizenSos.getPartiesServedDate())
-            .citizenSosDocs(getSosDocs(
-                citizenSos.getCitizenSosDocs(),
-                caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList()
-            ))
-            .build();
-        if (caseData.getStatementOfService().getStmtOfServiceAddRecipient() != null) {
-            List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
-            List<Element<StmtOfServiceAddRecipient>> mutableList = new ArrayList<>(sosList);
-            mutableList.add(element(sosObject));
-            caseData.setStatementOfService(StatementOfService.builder()
-                                               .stmtOfServiceAddRecipient(mutableList)
-                                               .build());
-        } else {
-            caseData
-                .setStatementOfService(StatementOfService.builder()
-                                           .stmtOfServiceAddRecipient(List.of(element(sosObject)))
-                                           .build());
-        }
-        return caseData;
-    }
-
-    private String getPartyNames(String parties, CaseData caseData, PartyEnum partyType) {
-        List<String> servedParties = new ArrayList<>();
-        if (parties != null) {
-            for (String partyId : parties.split(",")) {
-                if (PartyEnum.applicant.equals(partyType)) {
-                    servedParties.add(getPartyNameById(partyId, caseData.getApplicants()));
-                } else if (PartyEnum.respondent.equals(partyType)) {
-                    servedParties.add(getPartyNameById(partyId, caseData.getRespondents()));
-                }
-            }
-        }
-        return servedParties.toString();
-    }
-
-    private String getPartyNameById(String partyId, List<Element<PartyDetails>> parties) {
-        for (Element<PartyDetails> party : parties) {
-            if (party.getId().toString().equalsIgnoreCase(partyId)) {
-                return party.getValue().getLabelForDynamicList();
-            }
-        }
-        return "";
-    }
-
-    private List<Document> getSosDocs(List<String> docIdList, List<Element<UploadedDocuments>> citizenDocs) {
-        List<Document> docs = new ArrayList<>();
-        if (citizenDocs != null) {
-            citizenDocs.forEach(doc -> {
-                if (docIdList.contains(doc.getId().toString())) {
-                    docs.add(doc.getValue().getCitizenDocument());
-                }
-            });
-        }
-        return docs;
-    }
-
-    private CaseData generateAnswersForNoc(CaseData caseData) {
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-        if (isNotEmpty(caseDataMap)) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
-                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
-            } else {
-                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
-            }
-        }
-        caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
-        return caseData;
-    }
-
-    private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
-        if (PartyEnum.applicant.equals(partyType)) {
-            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-            }
-        } else {
-            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
-            }
-        }
-        return caseData;
-    }
-
-    private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
-        if (PartyEnum.applicant.equals(partyType)) {
-            List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
-            applicants.stream()
-                .filter(party -> Objects.equals(
-                    party.getValue().getUser().getIdamId(),
-                    partyDetails.getUser().getIdamId()
-                ))
-                .findFirst()
-                .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
-                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
-                }
-                );
-            caseData = caseData.toBuilder().applicants(applicants).build();
-        } else if (PartyEnum.respondent.equals(partyType)) {
-            List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
-            respondents.stream()
-                .filter(party -> Objects.equals(
-                    party.getValue().getUser().getIdamId(),
-                    partyDetails.getUser().getIdamId()
-                ))
-                .findFirst()
-                .ifPresent(party -> {
-                    PartyDetails updatedPartyDetails = getUpdatedPartyDetails(partyDetails);
-                    respondents.set(respondents.indexOf(party), element(party.getId(), updatedPartyDetails));
-                        }
-                );
-            caseData = caseData.toBuilder().respondents(respondents).build();
-        }
-        return caseData;
-    }
-
-    private static PartyDetails getUpdatedPartyDetails(PartyDetails partyDetails) {
-        PartyDetails updatedPartyDetails = partyDetails.toBuilder().canYouProvideEmailAddress(
-            StringUtils.isNotEmpty(partyDetails.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-            .isCurrentAddressKnown(partyDetails.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-            .canYouProvidePhoneNumber(StringUtils.isNotEmpty(partyDetails.getPhoneNumber()) ? YesOrNo.Yes :
-                                          YesOrNo.No)
-            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
-            .build();
-        return updatedPartyDetails;
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
@@ -358,143 +165,6 @@ public class CaseService {
         return result;
     }
 
-    public void linkCitizenToCase(String authorisation, String s2sToken, String caseId, String accessCode) {
-        String anonymousUserToken = systemUserService.getSysUserToken();
-        CaseData currentCaseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
-            CaseData.class
-        );
-
-        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
-            UUID partyId = null;
-            YesOrNo isApplicant = YesOrNo.Yes;
-
-            String systemUpdateUserId = systemUserService.getUserId(anonymousUserToken);
-            EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-                CaseEvent.LINK_CITIZEN,
-                systemUpdateUserId
-            );
-            StartEventResponse startEventResponse =
-                coreCaseDataService.startUpdate(
-                    anonymousUserToken,
-                    eventRequestData,
-                    caseId,
-                    true
-                );
-
-            CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
-                startEventResponse,
-                objectMapper
-            );
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            String userId = userDetails.getId();
-            String emailId = userDetails.getEmail();
-
-            for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
-                if (accessCode.equals(invite.getValue().getAccessCode())) {
-                    partyId = invite.getValue().getPartyId();
-                    isApplicant = invite.getValue().getIsApplicant();
-                    invite.getValue().setHasLinked(YES);
-                    invite.getValue().setInvitedUserId(userId);
-                }
-            }
-            caseDataUpdated.put(CASE_INVITES, caseData.getCaseInvites());
-
-            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
-            caseRepository.linkDefendant(
-                authorisation,
-                anonymousUserToken,
-                caseId,
-                eventRequestData,
-                startEventResponse,
-                caseDataUpdated
-            );
-        }
-    }
-
-    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
-                                           YesOrNo isApplicant, Map<String, Object> caseDataUpdated) {
-        //Assumption is for C100 case PartyDetails will be part of list
-        // and will always contain the partyId
-        // whereas FL401 will have only one party details without any partyId
-        if (partyId != null) {
-            getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId, caseDataUpdated);
-        } else {
-            if (YesOrNo.Yes.equals(isApplicant)) {
-                User user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
-                caseData.getApplicantsFL401().setUser(user);
-                caseDataUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-            } else {
-                User user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
-                    .idamId(userId).build();
-                caseData.getRespondentsFL401().setUser(user);
-                caseDataUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
-
-            }
-        }
-    }
-
-    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, String userId,
-                                           String emailId, Map<String, Object> caseDataUpdated) {
-        if (YesOrNo.Yes.equals(isApplicant)) {
-            for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
-                if (partyId.equals(partyDetails.getId())) {
-                    User user = partyDetails.getValue().getUser().toBuilder().email(emailId)
-                        .idamId(userId).build();
-                    partyDetails.getValue().setUser(user);
-                }
-            }
-
-            caseDataUpdated.put(C100_APPLICANTS, caseData.getApplicants());
-        } else {
-            for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
-                if (partyId.equals(partyDetails.getId())) {
-                    User user = partyDetails.getValue().getUser().toBuilder().email(emailId)
-                        .idamId(userId).build();
-                    partyDetails.getValue().setUser(user);
-                }
-            }
-            caseDataUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
-        }
-    }
-
-    public String validateAccessCode(String authorisation, String s2sToken, String caseId, String accessCode) {
-        CaseData caseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
-            CaseData.class
-        );
-        if (null == caseData) {
-            return INVALID;
-        }
-        return findAccessCodeStatus(accessCode, caseData);
-    }
-
-    private String findAccessCodeStatus(String accessCode, CaseData caseData) {
-        String accessCodeStatus = INVALID;
-        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
-            || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && !launchDarklyClient.isFeatureEnabled(CITIZEN_ALLOW_DA_JOURNEY))) {
-            return accessCodeStatus;
-        }
-        List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
-            .stream()
-            .map(Element::getValue)
-            .filter(x -> accessCode.equals(x.getAccessCode()))
-            .toList();
-
-        if (!matchingCaseInvite.isEmpty()) {
-            accessCodeStatus = VALID;
-            for (CaseInvite caseInvite : matchingCaseInvite) {
-                if (YES.equals(caseInvite.getHasLinked())) {
-                    accessCodeStatus = LINKED;
-                }
-            }
-        }
-        return accessCodeStatus;
-    }
-
     public CaseDetails getCase(String authToken, String caseId) {
         return caseRepository.getCase(authToken, caseId);
     }
@@ -509,7 +179,7 @@ public class CaseService {
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
         CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
-        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseDetails caseDetails = ccdccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = caseData.toBuilder().noOfDaysRemainingToSubmitCase(
             CaseUtils.getRemainingDaysSubmitCase(caseData)).build();

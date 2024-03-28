@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -64,7 +64,7 @@ public class CitizenPartyDetailsMapper {
 
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
-                                                                UpdateCaseData citizenUpdatedCaseData,
+                                                                CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                 CaseEvent caseEvent,
                                                                 String authorisation) {
         log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
@@ -129,7 +129,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsCa(CaseData caseData,
-                                                                 UpdateCaseData citizenUpdatedCaseData,
+                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                  CaseEvent caseEvent,
                                                                  String authorisation) {
         log.info("Inside updatingPartyDetailsCa");
@@ -227,7 +227,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
-                                                                 UpdateCaseData citizenUpdatedCaseData,
+                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
                                             CaseEvent caseEvent) {
         log.info("Inside updatingPartyDetailsDa");
         PartyDetails partyDetails;
