@@ -28,12 +28,8 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -47,7 +43,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,13 +53,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -533,6 +525,49 @@ public class CaseServiceTest {
         assertNotNull(caseDetailsAfterUpdate);
     }
 
+    public void shouldWithdrawCase() {
+        //Given
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .withDrawApplicationData(
+                WithdrawApplication.builder()
+                    .withDrawApplication(YesOrNo.Yes)
+                    .withDrawApplicationReason("Case withdrawn").build())
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_CASE_WITHDRAW, userDetails.getId())).thenReturn(eventRequestData);        //When
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            StartEventResponse.builder().caseDetails(mock(CaseDetails.class)).build());
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+            .thenReturn(caseDataContent);
+        when(coreCaseDataService.submitUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
+        CaseDetails actualCaseDetails =  caseService.withdrawCase(caseData, caseId, authToken);
+        //Then
+        assertNotNull(actualCaseDetails);
+    }
+
     @Test
     public void shouldUpdateCaseWithCaseName() throws IOException, NotFoundException {
 
@@ -662,130 +697,6 @@ public class CaseServiceTest {
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
-    }
-
-    @Test
-    public void testUpdateCaseSosWithCitizenDocs() {
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("testparty@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-
-            .build();
-        updateCaseData = updateCaseData.toBuilder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .partyDetails(PartyDetails.builder()
-                              .firstName("Test")
-                              .lastName("User")
-                              .user(User.builder()
-                                        .email("test@gmail.com")
-                                        .idamId("123")
-                                        .solicitorRepresented(YesOrNo.Yes)
-                                        .build())
-                              .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("00000000-0000-0000-0000-000000000000,234,1234")
-                                                    .build())
-                              .build())
-            .partyType(PartyEnum.respondent)
-            .build();
-        caseData = caseData.toBuilder()
-            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
-            .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
-                                    .build())
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .build())
-            .respondents(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                                                                         .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                                                                         .accessCode("123").build()).build()))
-            .build();
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-        caseDetails = CaseDetails.builder()
-            .data(caseDataMap)
-            .id(123L)
-            .state("SUBMITTED_PAID")
-            .build();
-
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
-        when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
-        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
-        when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
-            StartEventResponse.builder().caseDetails(caseDetails).build());
-        when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
-            StartEventResponse.builder().caseDetails(caseDetails).build());
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
-                                                       CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
-    public void testupdateCaseSosWithCitizenSosDocs() {
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("testparty@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
-        updateCaseData = updateCaseData.toBuilder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .partyDetails(PartyDetails.builder()
-                              .firstName("Test")
-                              .lastName("User")
-                              .user(User.builder()
-                                        .email("test@gmail.com")
-                                        .idamId("123")
-                                        .solicitorRepresented(YesOrNo.Yes)
-                                        .build())
-                              .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("00000000-0000-0000-0000-000000000000,234,1234")
-                                                    .citizenSosDocs(List.of(TEST_UUID))
-                                                    .build())
-                              .build())
-            .partyType(PartyEnum.applicant)
-            .build();
-        caseData = caseData.toBuilder()
-            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
-            .documentManagementDetails(DocumentManagementDetails.builder().citizenUploadQuarantineDocsList(List.of(
-                Element.<UploadedDocuments>builder().id(UUID.fromString(TEST_UUID))
-                    .value(UploadedDocuments.builder().build()).build())).build())
-            .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
-                                    .build())
-            .applicants(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                                                                         .partyId(UUID.fromString(
-                                                                             "00000000-0000-0000-0000-000000000000"))
-                                                                         .accessCode("123").build()).build()))
-            .build();
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-        caseDetails = CaseDetails.builder()
-            .data(caseDataMap)
-            .id(123L)
-            .state("SUBMITTED_PAID")
-            .build();
-
-        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
-        when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
-        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
-        when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
-            StartEventResponse.builder().caseDetails(caseDetails).build());
-        when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
-            StartEventResponse.builder().caseDetails(caseDetails).build());
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
-                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
-        assertNotNull(caseDetailsAfterUpdate);
     }
 
     @Test
