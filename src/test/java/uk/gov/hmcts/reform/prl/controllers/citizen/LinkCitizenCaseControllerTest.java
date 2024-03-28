@@ -109,6 +109,20 @@ public class LinkCitizenCaseControllerTest {
         Assert.assertEquals(hearings, caseData.getHearings());
     }
 
+    @Test
+    public void testLinkCitizenToCaseWithHearingButNoHearingNeeded() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(linkCitizenCaseService.linkCitizenToCase(authToken,
+            accessCodeRequest.getCaseId(),
+            accessCodeRequest.getAccessCode())).thenReturn(Optional.ofNullable(caseDetails));
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+        when(hearingService.getHearings(authToken, accessCodeRequest.getCaseId())).thenReturn(hearings);
+
+        CaseDataWithHearingResponse caseData = linkCitizenCaseController
+            .linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequest);
+        Assert.assertNull(caseData.getHearings());
+    }
+
     @Test(expected = RuntimeException.class)
     public void testLinkCitizenToCaseWithhearingsCantLink() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
