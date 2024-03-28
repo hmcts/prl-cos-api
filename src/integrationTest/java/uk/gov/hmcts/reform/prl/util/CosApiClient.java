@@ -14,7 +14,7 @@ public interface CosApiClient {
     String welcome();
 
     @Operation(description = "Retrieve service's swagger specs")
-    @GetMapping("/v2/api-docs")
+    @GetMapping("/v3/api-docs")
     byte[] apiDocs();
 
     @Operation(description = "Temporary endpoint for testing gov UK notifications integration")

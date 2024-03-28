@@ -282,7 +282,6 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
-    private final AllTabServiceImpl allTabService;
     private final DgsService dgsService;
 
     @Value("${citizen.url}")
