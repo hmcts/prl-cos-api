@@ -61,6 +61,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -224,6 +225,7 @@ public class ManageDocumentsService {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrictedKey != null) {
+            //This will be executed only during review documents
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
@@ -243,6 +245,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc,
                 userDetails
             );
+            //This will be executed only during manage documents
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 finalConfidentialDocument = finalConfidentialDocument.toBuilder()
                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
@@ -287,11 +290,8 @@ public class ManageDocumentsService {
         return finalQuarantineDocument.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
-            .notes(quarantineLegalDoc.getNotes())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
-            //move document into confidential category/folder
-            .notes(quarantineLegalDoc.getNotes())
             //PRL-4320 - Manage documents redesign
             .isConfidential(quarantineLegalDoc.getIsConfidential())
             .isRestricted(quarantineLegalDoc.getIsRestricted())
@@ -318,11 +318,8 @@ public class ManageDocumentsService {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .notes(manageDocument.getDocumentDetails())
             .categoryId(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_CATEGORY_ID : manageDocument.getDocumentCategories().getValueCode())
             .categoryName(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_LABEL : manageDocument.getDocumentCategories().getValueLabel())
-            //move document into confidential category/folder
-            .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
             .isConfidential(manageDocument.getIsConfidential())
             .isRestricted(manageDocument.getIsRestricted())
@@ -344,6 +341,7 @@ public class ManageDocumentsService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
@@ -352,11 +350,10 @@ public class ManageDocumentsService {
         }
     }
 
-    public void moveDocumentsToQuarantineTab(
-        QuarantineLegalDoc quarantineLegalDoc,
-        CaseData caseData,
-        Map<String, Object> caseDataUpdated,
-        String userRole) {
+    public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
+                                             CaseData caseData,
+                                             Map<String, Object> caseDataUpdated,
+                                             String userRole) {
         List<Element<QuarantineLegalDoc>> existingQuarantineDocuments = getQuarantineDocs(caseData, userRole, false);
         existingQuarantineDocuments.add(element(quarantineLegalDoc));
         updateQuarantineDocs(caseDataUpdated, existingQuarantineDocuments, userRole, false);
@@ -487,6 +484,7 @@ public class ManageDocumentsService {
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
+            case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
             default -> null;
         };
     }
@@ -500,6 +498,7 @@ public class ManageDocumentsService {
             case COURT_STAFF ->
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
+            case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
             default -> null;
         };
     }
@@ -532,6 +531,8 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
         } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        } else if (CITIZEN.equals(userRole)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CITIZEN");
         }
     }
 
@@ -575,6 +576,13 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
             }
+            case CITIZEN -> {
+                if (isDocumentTab) {
+                    caseDataUpdated.put("citizenUploadedDocListDocTab", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("citizenQuarantineDocsList", quarantineDocs);
+                }
+            }
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
@@ -611,6 +619,11 @@ public class ManageDocumentsService {
                 isDocumentTab,
                 caseData.getReviewDocuments().getBulkScannedDocListDocTab(),
                 caseData.getReviewDocuments().getBulkScannedDocListConfTab()//not in use
+            );
+            case CITIZEN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };
