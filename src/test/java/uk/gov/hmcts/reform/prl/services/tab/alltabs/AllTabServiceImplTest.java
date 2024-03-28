@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -185,5 +188,18 @@ public class AllTabServiceImplTest {
                 startEventResponse,
                 EventRequestData.builder().build(), nocCaseData);
         verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testGetStartUpdateForSpecificUserEven() {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, eventName);
+        assertNotNull(startAllTabsUpdateDataContent);
+    }
+
+    @Test
+    public void testSubmitUpdateForSpecificUserEvent() {
+        CaseDetails caseDetails1 = allTabService.submitUpdateForSpecificUserEvent(authToken, caseId, startEventResponse,
+            EventRequestData.builder().build(), new HashMap<>(), UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build());
+        assertNotNull(caseDetails1);
     }
 }

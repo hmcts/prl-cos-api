@@ -147,7 +147,7 @@ public class ManageOrdersControllerTest {
     private HearingService hearingService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -1502,7 +1502,7 @@ public class ManageOrdersControllerTest {
     }
 
 
-    //@Test
+    @Test
     public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
         applicant = PartyDetails.builder()
