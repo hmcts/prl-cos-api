@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -17,12 +16,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
@@ -32,8 +32,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LinkCitizenCaseControllerFunctionalTest {
 
-    private final String userToken = "Bearer testToken";
-    private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -49,7 +47,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+    private static final String CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY = "requests/create-case-with-access-coderequest.json";
 
     private static CaseDetails caseDetails;
 
@@ -57,19 +55,21 @@ public class LinkCitizenCaseControllerFunctionalTest {
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
+    private MockMvc mockMvc;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    private static final String CITIEN_REQUEST_BODY
+    private static final String CITIZEN_REQUEST_BODY
         = "requests/link-citizen-case-access-code.json";
 
+
     @Test
-    @Ignore
     public void createCcdTestCase() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
         caseDetails =  request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -88,17 +88,22 @@ public class LinkCitizenCaseControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_linkCaseToAccount_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(CITIEN_REQUEST_BODY);
-        request1
+        String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY);
+        String requestBodyRevised = requestBody
+            .replace("1711626009844770", caseDetails.getId().toString());
+        CaseData caseDataResp = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/citizen/link-case-to-account")
             .then()
+            .body("caseInvites[0].id", equalTo("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
+                  "caseInvites[0].value.accessCode", equalTo("FVJKGHF"))
+            .body("caseInvites[0].value.hasLinked", equalTo("Yes"))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(CaseData.class);
 
     }
 
