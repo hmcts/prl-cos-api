@@ -19,4 +19,7 @@ public class CitizenDocumentsManagement {
 
     @JsonProperty("citizenOrders")
     public List<CitizenDocuments> citizenOrders;
+
+    @JsonProperty("citizenApplicationPacks")
+    public List<CitizenDocuments> citizenApplicationPacks;
 }
