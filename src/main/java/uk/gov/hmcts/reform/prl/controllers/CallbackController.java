@@ -136,6 +136,7 @@ public class CallbackController {
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
+    public static final String TASK_LIST_VERSION = "taskListVersion";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
@@ -329,9 +330,9 @@ public class CallbackController {
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
                 //Update version V2 here to get latest data refreshed in tabs
                 if (launchDarklyClient.isFeatureEnabled("task-list-v3")) {
-                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V3);
+                    caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
                 } else if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
-                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                    caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V2);
                 }
             } else {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
@@ -610,7 +611,6 @@ public class CallbackController {
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
             }
-
             // Updating the case name for FL401
             if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
                 caseDataUpdated.put(APPLICANT_CASE_NAME, caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
@@ -619,13 +619,7 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                    if (launchDarklyClient.isFeatureEnabled("task-list-v3")) {
-                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V3);
-                    } else if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
-                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
-                    }
-                }
+                setTaskListVersion(caseDataUpdated);
             }
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             // Saving the logged-in Solicitor and Org details for the docs..
@@ -636,6 +630,16 @@ public class CallbackController {
             )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void setTaskListVersion(Map<String, Object> caseDataUpdated) {
+        if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+            if (launchDarklyClient.isFeatureEnabled("task-list-v3")) {
+                caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
+            } else if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V2);
+            }
         }
     }
 
