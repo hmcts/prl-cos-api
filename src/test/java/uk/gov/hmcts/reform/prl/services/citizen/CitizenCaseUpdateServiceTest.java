@@ -108,22 +108,36 @@ public class CitizenCaseUpdateServiceTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
-                .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                    .builder()
-                    .confidentialityCheckRejectReason(
-                        "pack contain confidential info")
-                    .build()))
-                .unServedApplicantPack(SoaPack.builder().build())
-                .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
-                .applicationServedYesNo(YesOrNo.Yes)
-                .build()).build();
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
+                                      .applicationServedYesNo(YesOrNo.Yes)
+                                      .build()).build();
 
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseDetails,
+                                                                                                        caseData,
+                                                                                                        null
+        );
 
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
-        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken)).thenReturn(startAllTabsUpdateDataContent);
-        Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate", CitizenUpdatedCaseData.builder().build()));
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(
+            caseDetails,
+            caseData
+        );
+        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken)).thenReturn(
+            startAllTabsUpdateDataContent);
+        Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(
+            authToken,
+            caseId,
+            "citizenCreate",
+            CitizenUpdatedCaseData.builder().build()
+        ));
     }
 }
