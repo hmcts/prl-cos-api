@@ -71,7 +71,6 @@ public class DocumentUtils {
         }
     }
 
-
     public static String populateAttributeNameFromCategoryId(String categoryId, String userRole) {
         if (BULK_SCAN.equals(userRole)) {
             return "url";

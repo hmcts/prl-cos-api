@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,9 +44,6 @@ public class HearingsManagementController {
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
     private final AllTabServiceImpl allTabsService;
-
-    @Value("${citizen.url}")
-    private String hearingDetailsUrl;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
@@ -110,7 +106,7 @@ public class HearingsManagementController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }
