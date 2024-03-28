@@ -122,10 +122,12 @@ public class CaseService {
                 .build();
 
             CaseData updatedCaseData = caseDataMapper
-                .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
-                                          .courtName(C100_DEFAULT_COURT_NAME)
-                                          .taskListVersion(TASK_LIST_VERSION_V2)
-                                          .build());
+                .buildUpdatedCaseData(caseData);
+            updatedCaseData = updatedCaseData.toBuilder()
+                .userInfo(wrapElements(userInfo))
+                .courtName(C100_DEFAULT_COURT_NAME)
+                .taskListVersion(TASK_LIST_VERSION_V2)
+                .build();
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
