@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -73,7 +72,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -349,7 +347,6 @@ public class ApplicationsTabServiceTest {
             .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
@@ -374,7 +371,6 @@ public class ApplicationsTabServiceTest {
             .gender("Male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
         CaseData caseData = CaseData.builder()
@@ -415,7 +411,6 @@ public class ApplicationsTabServiceTest {
             .gender(Gender.male.getDisplayedValue())
             .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
             .isAddressConfidential(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .email(THIS_INFORMATION_IS_CONFIDENTIAL)
@@ -633,7 +628,6 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    @Ignore("Ignoring temporarily")
     public void testRespondentTableMapper() {
         Respondent respondent = Respondent.builder()
             .firstName("First name")
@@ -1190,7 +1184,6 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    //@Ignore("Ignoring temporarily")
     public void testGetFl401RespondentTable() {
 
         partyDetails = PartyDetails.builder()
@@ -1220,20 +1213,7 @@ public class ApplicationsTabServiceTest {
                                               "isAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL
         );
-
-
-        FL401Respondent expectedRespondent = FL401Respondent.builder()
-            .firstName("testUser")
-            .lastName("last test")
-            .solicitorEmail("testing@courtadmin.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(FL401Respondent.class))).thenReturn(expectedRespondent);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
-
-        //when(applicationsTabService.maskFl401ConfidentialDetails(caseDataWithParties.getRespondentsFL401())).thenReturn(partyDetails);
-        //when(objectMapper.convertValue(partyDetails, FL401Respondent.class)).thenReturn(expectedRespondent);
-
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);
     }
@@ -1667,30 +1647,6 @@ public class ApplicationsTabServiceTest {
             .thenReturn(Respondent.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocC100Respondent() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .build();
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocFL401Respondent() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("FL401")
-            .build();
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocNegativeScenario() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("FL400")
-            .build();
-        assertEquals(0,applicationsTabService.updateCitizenPartiesTab(caseData).size());
     }
 
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {
