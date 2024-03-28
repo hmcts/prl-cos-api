@@ -159,10 +159,8 @@ public class CaseDocumentController {
             caseService.updateCase(
                 caseData,
                 authorisation,
-                s2sToken,
-                caseId,
-                CITIZEN_UPLOADED_DOCUMENT,
-                null
+                    caseId,
+                CITIZEN_UPLOADED_DOCUMENT
             );
 
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
@@ -330,10 +328,8 @@ public class CaseDocumentController {
         caseService.updateCase(
             caseData,
             authorisation,
-            s2sToken,
-            caseId,
-            CITIZEN_UPLOADED_DOCUMENT,
-            null
+                caseId,
+            CITIZEN_UPLOADED_DOCUMENT
         );
         return "SUCCESS";
     }

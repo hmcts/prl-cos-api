@@ -5,12 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-
-import java.util.Map;
 
 @Slf4j
 @Service("caseRepository")
@@ -18,19 +14,6 @@ import java.util.Map;
 public class CcdCaseRepository implements CaseRepository {
     @Autowired
     CcdCaseApi ccdCaseApi;
-
-    @Override
-    public void linkDefendant(String userAuthorisation, String systemUserToken, String caseId,
-                              EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
-        ccdCaseApi.linkCitizenToCase(
-            userAuthorisation,
-            systemUserToken,
-            caseId,
-            eventRequestData,
-            startEventResponse,
-            caseDataUpdated
-        );
-    }
 
     @Override
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {

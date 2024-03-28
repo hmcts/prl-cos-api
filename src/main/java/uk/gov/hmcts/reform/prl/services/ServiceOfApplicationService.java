@@ -1044,7 +1044,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 caseId,
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -1069,7 +1069,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -2614,7 +2614,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),

@@ -105,6 +105,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
     public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
+    public static final String READY_FOR_DELETION_STATE = State.READY_FOR_DELETION.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();

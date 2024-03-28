@@ -497,7 +497,7 @@ public class TestingSupportServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
 
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);

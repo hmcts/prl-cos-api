@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
@@ -51,6 +54,7 @@ public class AllTabServiceImpl implements AllTabsService {
     private final ObjectMapper objectMapper;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
+    private final IdamClient idamClient;
 
     /**
      * This method updates all tabs based on latest case data from DB.
@@ -64,7 +68,7 @@ public class AllTabServiceImpl implements AllTabsService {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             return mapAndSubmitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    startAllTabsUpdateDataContent.authorisation(),
                     caseId,
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
@@ -100,7 +104,8 @@ public class AllTabServiceImpl implements AllTabsService {
             allTabsUpdateEventRequestData,
             allTabsUpdateStartEventResponse,
             allTabsUpdateStartEventResponse.getCaseDetails().getData(),
-            allTabsUpdateCaseData
+            allTabsUpdateCaseData,
+            null
         );
     }
 
@@ -128,7 +133,8 @@ public class AllTabServiceImpl implements AllTabsService {
             allTabsUpdateEventRequestData,
             allTabsUpdateStartEventResponse,
             allTabsUpdateStartEventResponse.getCaseDetails().getData(),
-            allTabsUpdateCaseData
+            allTabsUpdateCaseData,
+            null
         );
     }
 
@@ -244,6 +250,55 @@ public class AllTabServiceImpl implements AllTabsService {
         if (CollectionUtils.isNotEmpty(caseInvites)) {
             caseDataUpdatedMap.put("caseInvites", caseInvites);
         }
+    }
+
+    @Override
+    public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
+                                                                            String eventId,
+                                                                            String authorisation) {
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.fromValue(eventId),
+            userDetails.getId()
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                authorisation,
+                allTabsUpdateEventRequestData,
+                caseId,
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            authorisation,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData,
+            userDetails
+        );
+    }
+
+    @Override
+    public CaseDetails submitUpdateForSpecificUserEvent(String authorisation,
+                                                        String caseId,
+                                                        StartEventResponse startEventResponse,
+                                                        EventRequestData eventRequestData,
+                                                        Map<String, Object> combinedFieldsMap,
+                                                        UserDetails userDetails) {
+        return ccdCoreCaseDataService.submitUpdate(
+            authorisation,
+            eventRequestData,
+            ccdCoreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                combinedFieldsMap
+            ),
+            caseId,
+            !userDetails.getRoles().contains(CITIZEN_ROLE)
+        );
     }
 
 }

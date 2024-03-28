@@ -85,7 +85,7 @@ public class EditReturnedOrderController {
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
+                startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),

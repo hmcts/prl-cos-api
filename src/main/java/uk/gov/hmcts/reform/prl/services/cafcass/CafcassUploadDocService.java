@@ -86,7 +86,7 @@ public class CafcassUploadDocService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
 
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(caseId),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
