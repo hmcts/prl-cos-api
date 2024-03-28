@@ -24,7 +24,9 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -34,6 +36,7 @@ import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -52,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -86,6 +90,9 @@ public class CaseServiceTest {
 
     @Mock
     CcdCoreCaseDataService coreCaseDataService;
+
+    @Mock
+    HearingService hearingService;
 
     @Mock
     SystemUserService systemUserService;
@@ -438,5 +445,23 @@ public class CaseServiceTest {
         Mockito.when(roleAssignmentService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
         Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, emailId);
         Assert.assertFalse(roles.isEmpty());
+    }
+
+    @Test
+    public void getCaseWithHearing() {
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "yes");
+        assertNotNull(caseDataWithHearingResponse.getHearings());
+    }
+
+    @Test
+    public void getCaseWithHearingHearingNotNeeded() {
+        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "dud");
+        assertNull(caseDataWithHearingResponse.getHearings());
     }
 }
