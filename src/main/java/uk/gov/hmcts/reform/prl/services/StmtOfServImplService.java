@@ -270,8 +270,8 @@ public class StmtOfServImplService {
                                                          .getPackDocument().stream()
                                                          .map(Element::getValue)
                                                          .map(Document::getDocumentFileName).toList()))
-                                                     .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                                    .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                                     .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                    .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                                      .partyIds(getPartyIds(caseTypeOfApplication,
                                                                            caseData.getRespondents(),
                                                                            caseData.getRespondentsFL401()))
@@ -286,8 +286,8 @@ public class StmtOfServImplService {
                                                  .map(Element::getValue)
                                                  .map(Document::getDocumentFileName).toList()))
                                              .printDocs(unServedRespondentPack.getPackDocument())
-                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                              .partyIds(getPartyIds(caseTypeOfApplication,
                                                                    caseData.getRespondents(),
                                                                    caseData.getRespondentsFL401()))
@@ -310,8 +310,8 @@ public class StmtOfServImplService {
                                                  .map(Element::getValue)
                                                  .map(Document::getDocumentFileName).toList()))
                                              .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                              .partyIds(getPartyIds(caseTypeOfApplication,
                                                                    caseData.getRespondents(),
                                                                    caseData.getRespondentsFL401()))

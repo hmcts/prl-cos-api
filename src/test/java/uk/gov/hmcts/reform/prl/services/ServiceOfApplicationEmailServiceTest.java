@@ -198,7 +198,7 @@ public class ServiceOfApplicationEmailServiceTest {
         EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
                                                                                                          .id(123L)
                                                                                                          .build(),
-                                                                                 PartyDetails.builder().build());
+                                                                                 PartyDetails.builder().build(), "Yes");
         assertEquals("123", emailTemplateVars.getCaseReference());
     }
 }
