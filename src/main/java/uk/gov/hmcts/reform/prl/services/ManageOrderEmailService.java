@@ -561,11 +561,17 @@ public class ManageOrderEmailService {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
-        } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
+        } else if((SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
-            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                 SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
-            );
+            if (null != solicitorEmail) {
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                     SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
+                );
+            } else {
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                     SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                );
+            }
         }
     }
 
