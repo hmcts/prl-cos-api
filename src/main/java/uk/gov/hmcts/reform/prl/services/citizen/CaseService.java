@@ -12,10 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
@@ -23,11 +21,8 @@ import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -55,16 +50,9 @@ public class CaseService {
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final CaseDataMapper caseDataMapper;
-
-    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-    private final CaseSummaryTabService caseSummaryTab;
-    private final ConfidentialDetailsMapper confidentialDetailsMapper;
-    private final ApplicationsTabService applicationsTabService;
     private final RoleAssignmentService roleAssignmentService;
-    private final LaunchDarklyClient launchDarklyClient;
-    private final CcdCoreCaseDataService ccdccdCoreCaseDataService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
-    private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -179,7 +167,7 @@ public class CaseService {
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
         CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
-        CaseDetails caseDetails = ccdccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = caseData.toBuilder().noOfDaysRemainingToSubmitCase(
             CaseUtils.getRemainingDaysSubmitCase(caseData)).build();

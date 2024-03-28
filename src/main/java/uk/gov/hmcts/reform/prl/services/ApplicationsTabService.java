@@ -111,12 +111,9 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -202,19 +199,6 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
-        }
-        return applicationTab;
-    }
-
-    public Map<String, Object> updateCitizenPartiesTab(CaseData caseData) {
-
-        Map<String, Object> applicationTab = new HashMap<>();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put(C100_APPLICANT_TABLE, getApplicantsTable(caseData));
-            applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put(FL401_APPLICANT_TABLE, getFl401ApplicantsTable(caseData));
-            applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
         }
         return applicationTab;
     }
@@ -458,13 +442,12 @@ public class ApplicationsTabService implements TabService {
             applicants.add(Element.<Applicant>builder().value(Applicant.builder().build()).build());
             return applicants;
         }
+
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
-                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue())
-                           .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                           .build())
+                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
                 .build();
             applicants.add(applicantElement);
         }
@@ -524,29 +507,18 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> currentRespondent : currentRespondents) {
             Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
-            Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId())
-                .value(respondent.toBuilder()
-                           .gender(
-                               respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(
-                                   respondent.getGender()).getDisplayedValue() : null)
-                           .canYouProvideEmailAddress(
-                               StringUtils.isNotEmpty(
-                                   respondent.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                           .isCurrentAddressKnown(respondent.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-                           .canYouProvidePhoneNumber(StringUtils.isNotEmpty(respondent.getPhoneNumber()) ? YesOrNo.Yes : YesOrNo.No)
-                           .isAtAddressLessThan5YearsWithDontKnow(
-                               respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
-                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
-                                   respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
-                           .doTheyHaveLegalRepresentation(
-                               respondent.getDoTheyHaveLegalRepresentation() != null
-                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
-                                   respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
-                           .build()).build();
 
+            Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId()).value(respondent.toBuilder()
+                .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
+                .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
+                .doTheyHaveLegalRepresentation(respondent.getDoTheyHaveLegalRepresentation() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
+                .build()).build();
             respondents.add(respondentElement);
         }
-
         return respondents;
     }
 
@@ -1178,9 +1150,7 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
         FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue())
-                         .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                         .build());
+        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
@@ -1198,14 +1168,8 @@ public class ApplicationsTabService implements TabService {
             return Collections.emptyMap();
         }
         PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
-        FL401Respondent fl401Respondent = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
-        return toMap(fl401Respondent.toBuilder()
-                         .canYouProvideEmailAddress(
-                             StringUtils.isNotEmpty(
-                                 fl401Respondent.getEmail()) ? YesOrNo.Yes : YesOrNo.No)
-                         .isCurrentAddressKnown(fl401Respondent.getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
-                         .canYouProvidePhoneNumber(StringUtils.isNotEmpty(fl401Respondent.getPhoneNumber()) ? YesOrNo.Yes : YesOrNo.No)
-                         .build());
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
+        return toMap(a);
     }
 
     public Map<String, Object> getFl401RespondentBehaviourTable(CaseData caseData) {
