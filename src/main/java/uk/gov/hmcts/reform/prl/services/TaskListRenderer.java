@@ -85,6 +85,11 @@ public class TaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
+    public static final String ADD_REQUIRED_DETAILS = "Add required details";
+    public static final String MIAM_DETAILS = "MIAM details";
+    public static final String VIEW_PDF_APPLICATION = "View PDF application";
+    public static final String SUBMIT1 = "Submit";
+    public static final String SUBMIT_AND_PAY_TEXT = "Submit and pay";
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -125,11 +130,11 @@ public class TaskListRenderer {
             .withTask(tasks.get(CHILD_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS));
 
-        TaskSection  requiredDetails = newSection("Add required details")
+        TaskSection  requiredDetails = newSection(ADD_REQUIRED_DETAILS)
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
 
-        final TaskSection miamDetails = newSection("MIAM details")
+        final TaskSection miamDetails = newSection(MIAM_DETAILS)
             .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
             .withTask(tasks.get(MIAM));
 
@@ -142,16 +147,16 @@ public class TaskListRenderer {
             .withTask(tasks.get(LITIGATION_CAPACITY))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection pdfApplication = newSection(VIEW_PDF_APPLICATION)
             .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         final TaskSection submit;
 
         if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
-            submit = newSection("Submit")
+            submit = newSection(SUBMIT1)
                 .withTask(tasks.get(SUBMIT));
         } else {
-            submit = newSection("Submit and pay")
+            submit = newSection(SUBMIT_AND_PAY_TEXT)
                 .withTask(tasks.get(SUBMIT_AND_PAY));
         }
 
@@ -203,10 +208,10 @@ public class TaskListRenderer {
                         .errors(Collections.singletonList(EventErrorsEnum.OTHER_PEOPLE_REVISED_ERROR.getError()))
                         .build()));
 
-        final TaskSection requiredDetails = newSection("Add required details")
+        final TaskSection requiredDetails = newSection(ADD_REQUIRED_DETAILS)
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
-        final TaskSection miamDetails = newSection("MIAM details")
+        final TaskSection miamDetails = newSection(MIAM_DETAILS)
                 .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
                 .withTask(tasks.get(MIAM));
 
@@ -218,16 +223,16 @@ public class TaskListRenderer {
                 .withTask(tasks.get(LITIGATION_CAPACITY))
                 .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection pdfApplication = newSection(VIEW_PDF_APPLICATION)
                 .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         final TaskSection submit;
 
         if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
-            submit = newSection("Submit")
+            submit = newSection(SUBMIT1)
                     .withTask(tasks.get(SUBMIT));
         } else {
-            submit = newSection("Submit and pay")
+            submit = newSection(SUBMIT_AND_PAY_TEXT)
                     .withTask(tasks.get(SUBMIT_AND_PAY));
         }
 
@@ -282,10 +287,10 @@ public class TaskListRenderer {
                                     .errors(Collections.singletonList(EventErrorsEnum.OTHER_PEOPLE_REVISED_ERROR.getError()))
                                     .build()));
 
-        final TaskSection requiredDetails = newSection("Add required details")
+        final TaskSection requiredDetails = newSection(ADD_REQUIRED_DETAILS)
             .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
-        final TaskSection miamDetails = newSection("MIAM details")
+        final TaskSection miamDetails = newSection(MIAM_DETAILS)
             .withInfo("Mediation Information and Assessment Meeting (MIAM)"
                           + " section is optional for final submission, "
                           + "if a consent order is uploaded and mandatory otherwise.")
@@ -299,16 +304,16 @@ public class TaskListRenderer {
             .withTask(tasks.get(LITIGATION_CAPACITY))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection pdfApplication = newSection(VIEW_PDF_APPLICATION)
             .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         final TaskSection submit;
 
         if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
-            submit = newSection("Submit")
+            submit = newSection(SUBMIT1)
                 .withTask(tasks.get(SUBMIT));
         } else {
-            submit = newSection("Submit and pay")
+            submit = newSection(SUBMIT_AND_PAY_TEXT)
                 .withTask(tasks.get(SUBMIT_AND_PAY));
         }
 
