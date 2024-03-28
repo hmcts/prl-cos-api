@@ -598,7 +598,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/clients/ccd/records/CitizenUpdatePartyDataContent.java',
   '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
   '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
-  '**uk/gov/hmcts/reform/prl/services/ConfidentialityTabService.java',
 ]
 
 sonarqube {
