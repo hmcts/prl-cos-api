@@ -118,7 +118,7 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
+  
     @PostMapping(value = "{caseId}/{eventId}/case-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Updating casedata")
     public CaseData caseUpdate(
