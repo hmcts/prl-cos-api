@@ -453,8 +453,6 @@ public class ManageOrderEmailService {
         Object> dynamicDataForEmail, SoaCitizenServingRespondentsEnum citizenRespondentOption) {
         log.info("*** sendPersonalServiceNotifications: respondentOption: {}",respondentOption);
         log.info("*** sendPersonalServiceNotifications: solicitorEmail: {}",solicitorEmail);
-        log.info("*** sendPersonalServiceNotifications: citizenRespondentOption: {} {} {}",citizenRespondentOption,
-                 citizenRespondentOption.getClass(), SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getClass());
         log.info("*** sendPersonalServiceNotifications: citizenRespondentOption: {} {}",citizenRespondentOption,
                  SoaCitizenServingRespondentsEnum.unrepresentedApplicant);
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
