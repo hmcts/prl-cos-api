@@ -8,8 +8,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import javax.json.JsonObject;
 import java.util.stream.Collectors;
+import javax.json.JsonObject;
+
 
 @Component
 public class MiamPolicyUpgradeMapper {

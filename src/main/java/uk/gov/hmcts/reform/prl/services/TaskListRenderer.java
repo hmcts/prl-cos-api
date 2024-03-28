@@ -27,9 +27,48 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
-import static uk.gov.hmcts.reform.prl.enums.Event.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_ADDITIONAL_INFORMATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_APPLICATION_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_PEOPLE_TO_THE_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
+import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
+import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_RESUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
@@ -247,9 +286,9 @@ public class TaskListRenderer {
             .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
         final TaskSection miamDetails = newSection("MIAM details")
-            .withInfo("Mediation Information and Assessment Meeting (MIAM)" +
-                          " section is optional for final submission, " +
-                          "if a consent order is uploaded and mandatory otherwise.")
+            .withInfo("Mediation Information and Assessment Meeting (MIAM)"
+                          + " section is optional for final submission, "
+                          + "if a consent order is uploaded and mandatory otherwise.")
             .withTask(tasks.get(MIAM_POLICY_UPGRADE));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
