@@ -58,8 +58,6 @@ public class LinkCitizenCaseService {
         Optional<CaseDetails> caseDetails = Optional.empty();
         CaseData dbCaseData = findAndGetCase(caseId);
 
-        log.info("CASEDATAAAAA ......>{}",dbCaseData);
-
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData))) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
@@ -172,7 +170,6 @@ public class LinkCitizenCaseService {
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
         String accessCodeStatus = INVALID;
-        log.info("CASEeee INVITEEE {}",caseData.getCaseInvites());
         if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
             return accessCodeStatus;
         }
