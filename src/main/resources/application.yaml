@@ -650,7 +650,7 @@ courts:
 
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 
 postcodelookup:
   api:
