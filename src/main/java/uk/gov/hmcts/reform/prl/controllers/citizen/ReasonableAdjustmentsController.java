@@ -98,7 +98,7 @@ public class ReasonableAdjustmentsController {
         }
     }
 
-    @PostMapping(value = "{caseId}/{eventId}/language-support-notes", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "{caseId}/language-support-notes", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update party flags for citizen")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Updated party flags for citizen"),
@@ -111,7 +111,7 @@ public class ReasonableAdjustmentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        log.info("Inside updateCitizenRAflags controller {}");
+        log.info("Inside updateCitizenRAflags controller");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return caseService.addLanguageSupportCaseNotes(
                 caseId,
