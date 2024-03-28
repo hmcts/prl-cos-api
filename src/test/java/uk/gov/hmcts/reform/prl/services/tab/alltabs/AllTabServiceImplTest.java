@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -48,6 +49,9 @@ public class AllTabServiceImplTest {
 
     @Mock
     ApplicationsTabService applicationsTabService;
+
+    @Mock
+    IdamClient idamClient;
 
     @Mock
     ConfidentialityTabService confidentialityTabService;
@@ -191,8 +195,20 @@ public class AllTabServiceImplTest {
     }
 
     @Test
-    public void testGetStartUpdateForSpecificUserEven() {
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, eventName);
+    public void testGetStartUpdateForSpecificUserEvent() {
+        when(idamClient.getUserDetails(authToken)).thenReturn(UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).id("123").build());
+        when(ccdCoreCaseDataService.startUpdate(authToken, null, caseId, true))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventName, authToken);
+        assertNotNull(startAllTabsUpdateDataContent);
+    }
+
+    @Test
+    public void testGetStartUpdateForSpecificUserEventCitizen() {
+        when(idamClient.getUserDetails(authToken)).thenReturn(UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).id("123").build());
+        when(ccdCoreCaseDataService.startUpdate(authToken, null, caseId, false))
+            .thenReturn(StartEventResponse.builder().caseDetails(caseDetails).build());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventName, authToken);
         assertNotNull(startAllTabsUpdateDataContent);
     }
 
@@ -200,6 +216,13 @@ public class AllTabServiceImplTest {
     public void testSubmitUpdateForSpecificUserEvent() {
         CaseDetails caseDetails1 = allTabService.submitUpdateForSpecificUserEvent(authToken, caseId, startEventResponse,
             EventRequestData.builder().build(), new HashMap<>(), UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build());
+        assertNotNull(caseDetails1);
+    }
+
+    @Test
+    public void testSubmitUpdateForSpecificUserEventCitizen() {
+        CaseDetails caseDetails1 = allTabService.submitUpdateForSpecificUserEvent(authToken, caseId, startEventResponse,
+            EventRequestData.builder().build(), new HashMap<>(), UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build());
         assertNotNull(caseDetails1);
     }
 }
