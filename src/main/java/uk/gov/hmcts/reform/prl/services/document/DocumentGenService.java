@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -85,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -275,24 +277,31 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
 
-    private final Time dateTime;
+    @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
+    protected String docCoverSheetServeOrderTemplate;
+    @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
+    protected String docCoverSheetWelshServeOrderTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final OrganisationService organisationService;
     private final UploadDocumentService uploadService;
     private final CaseDocumentClient caseDocumentClient;
+    private final IdamClient idamClient;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-    private final CaseService caseService;
+
     private final DgsApiClient dgsApiClient;
-    private final ObjectMapper objectMapper;
+
     private final AuthTokenGenerator authTokenGenerator;
-    private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
+    private final ManageDocumentsService manageDocumentsService;
+    private final CaseService caseService;
+    private final ObjectMapper objectMapper;
+
+    private final Time dateTime;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
-
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -365,10 +374,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && (caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
-                || (caseData.getAllegationOfHarmRevised() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             } else {
@@ -416,10 +425,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && (caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
-                || (caseData.getAllegationOfHarmRevised() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
@@ -534,6 +543,24 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+        StringBuilder fileNameBuilder = new StringBuilder();
+
+        if (null != documentRequest.getPartyName()) {
+            fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        if (null != documentRequest.getCategoryId()) {
+            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
+        fileNameBuilder.append(UNDERSCORE);
+        fileNameBuilder.append(SUBMITTED_PDF);
+
+        return fileNameBuilder.toString().toLowerCase();
+    }
+
     private String getCitizenUploadedStatementFileName(GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                        Integer fileIndex) {
         String fileName = "";
@@ -602,24 +629,6 @@ public class DocumentGenService {
             }
         }
         return fileName.toLowerCase();
-    }
-
-    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
-        StringBuilder fileNameBuilder = new StringBuilder();
-
-        if (null != documentRequest.getPartyName()) {
-            fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
-            fileNameBuilder.append(UNDERSCORE);
-        }
-        if (null != documentRequest.getCategoryId()) {
-            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
-            fileNameBuilder.append(UNDERSCORE);
-        }
-        fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
-        fileNameBuilder.append(UNDERSCORE);
-        fileNameBuilder.append(SUBMITTED_PDF);
-
-        return fileNameBuilder.toString().toLowerCase();
     }
 
     private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation,
@@ -709,28 +718,6 @@ public class DocumentGenService {
         }
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         return generatedDocumentInfo;
-    }
-
-    public DocumentResponse generateAndUploadDocument(String authorisation,
-                                                      DocumentRequest documentRequest) throws DocumentGenerationException {
-        //generate file name
-        String fileName = getCitizenUploadedStatementFileName(documentRequest);
-        log.info("fileName {}", fileName);
-
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
-            authorisation,
-            documentRequest,
-            prlCitizenUploadTemplate
-        );
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
-            return DocumentResponse.builder()
-                .status(SUCCESS)
-                .document(generateDocumentField(fileName, generatedDocumentInfo))
-                .build();
-        }
-
-        return null;
     }
 
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
@@ -912,6 +899,9 @@ public class DocumentGenService {
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
                 break;
+            case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
+                template = findDocCoverSheetTemplateForServeOrder(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -970,6 +960,11 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
+        //Need to replace EMPTY_STRING with received welsh template
+        return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -1277,7 +1272,6 @@ public class DocumentGenService {
     }
 
     private boolean checkFileFormat(String fileName) {
-        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
@@ -1328,6 +1322,28 @@ public class DocumentGenService {
         return document;
     }
 
+    public DocumentResponse generateAndUploadDocument(String authorisation,
+                                                      DocumentRequest documentRequest) throws DocumentGenerationException {
+        //generate file name
+        String fileName = getCitizenUploadedStatementFileName(documentRequest);
+        log.info("fileName {}", fileName);
+
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+            authorisation,
+            documentRequest,
+            prlCitizenUploadTemplate
+        );
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
+        if (null != generatedDocumentInfo) {
+            return DocumentResponse.builder()
+                .status(SUCCESS)
+                .document(generateDocumentField(fileName, generatedDocumentInfo))
+                .build();
+        }
+
+        return null;
+    }
+
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
         //Get case data from caseId
         String caseId = documentRequest.getCaseId();
@@ -1349,21 +1365,30 @@ public class DocumentGenService {
 
             //move all documents to citizen quarantine
             List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
-                .map(document -> getCitizenQuarantineDocument(document,
-                                                              documentRequest,
-                                                              category,
-                                                              userDetails))
+                .map(document -> getCitizenQuarantineDocument(
+                    document,
+                    documentRequest,
+                    category,
+                    userDetails
+                ))
                 .toList();
 
             manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
 
             caseData = moveCitizenDocumentsToQuarantineTab(
-                    quarantineLegalDocs,
-                    caseData,
-                    caseDataUpdated
-                );
+                quarantineLegalDocs,
+                caseData,
+                caseDataUpdated
+            );
 
-            return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
+            return caseService.updateCase(
+                caseData,
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId,
+                CITIZEN_CASE_UPDATE.getValue(),
+                null
+            );
 
         }
         return null;
@@ -1374,10 +1399,12 @@ public class DocumentGenService {
                                                          Map<String, Object> caseDataUpdated) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
             //invoke common manage docs
-            manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,
-                                                                caseData,
-                                                                caseDataUpdated,
-                                                                CITIZEN);
+            manageDocumentsService.moveDocumentsToQuarantineTab(
+                quarantineLegalDoc,
+                caseData,
+                caseDataUpdated,
+                CITIZEN
+            );
             caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
         return caseData;
@@ -1394,20 +1421,22 @@ public class DocumentGenService {
                 .restrictedDetails(null)
                 .build();
             //invoke common manage docs
-            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
-                                                                          userDetails,
-                                                                          caseData,
-                                                                          caseDataUpdated,
-                                                                          CITIZEN);
+            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                quarantineLegalDoc,
+                userDetails,
+                caseData,
+                caseDataUpdated,
+                CITIZEN
+            );
             caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
         return caseData;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
-                                                                  DocumentRequest documentRequest,
-                                                                  DocumentCategory category,
-                                                                  UserDetails userDetails) {
+                                                            DocumentRequest documentRequest,
+                                                            DocumentCategory category,
+                                                            UserDetails userDetails) {
         return QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(document.toBuilder()
                                            .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))
@@ -1424,4 +1453,5 @@ public class DocumentGenService {
             .uploaderRole(CITIZEN)
             .build();
     }
+
 }
