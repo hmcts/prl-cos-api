@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -51,12 +50,9 @@ public class CaseService {
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final CaseDataMapper caseDataMapper;
-
-    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final RoleAssignmentService roleAssignmentService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
-    private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -119,7 +115,6 @@ public class CaseService {
 
         return caseName;
     }
-
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
 

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +16,14 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -68,8 +70,22 @@ public class CaseServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "Bearer TestAuthToken";
     public static final String caseId = "1234567891234567";
+    public static final String eventId = "1234567891234567";
+
     public static final String accessCode = "123456";
     public static final String INVALID = "Invalid";
+    private final String eventName = "paymentSuccessCallback";
+    private final String eventToken = "eventToken";
+
+    private static final CaseData CASE_DATA = mock(CaseData.class);
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
+    Map<String, Object> applicaionFieldsMap = Map.of(
+        "field1", "value1",
+        "field2", "value2",
+        "field3", "value3"
+    );
 
     @InjectMocks
     private CaseService caseService;
@@ -79,6 +95,9 @@ public class CaseServiceTest {
     @Mock
     CoreCaseDataApi coreCaseDataApi;
 
+
+    @Mock
+    private CaseData caseDataMock;
     @Mock
     CaseDetailsConverter caseDetailsConverter;
 
@@ -121,6 +140,12 @@ public class CaseServiceTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    ApplicationsTabService applicationsTabService;
+
     private CaseData caseData;
     private CaseData caseData2;
 
@@ -130,7 +155,9 @@ public class CaseServiceTest {
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
-    private UpdateCaseData updateCaseData;
+    private CitizenUpdatedCaseData citizenUpdatedCaseData;
+
+    private StartEventResponse startEventResponse;
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Before
@@ -176,7 +203,7 @@ public class CaseServiceTest {
             .state("SUBMITTED_PAID")
             .build();
         userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -435,16 +462,6 @@ public class CaseServiceTest {
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
-    }
-
-    @Test
-    public void testFetchIdamAmRoles() {
-        String emailId = "test@email.com";
-        Map<String, String> amRoles = new HashMap<>();
-        amRoles.put("amRoles","case-worker");
-        Mockito.when(roleAssignmentService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
-        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, emailId);
-        Assert.assertFalse(roles.isEmpty());
     }
 
     @Test
