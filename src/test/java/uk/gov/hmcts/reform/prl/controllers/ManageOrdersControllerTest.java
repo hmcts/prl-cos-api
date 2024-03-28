@@ -1024,7 +1024,6 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    @Ignore
     public void testSubmitAmanageorderEmailValidation() throws Exception {
 
         Map<String, Object> summaryTabFields = Map.of(
