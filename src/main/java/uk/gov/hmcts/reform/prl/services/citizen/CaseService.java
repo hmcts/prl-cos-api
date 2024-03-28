@@ -51,13 +51,16 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -553,6 +556,32 @@ public class CaseService {
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
                                                       CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
+        List<String> unReturnedCategoriesForUI = List.of(
+            "safeguardingLetter",
+            "section37Report",
+            "section7Report",
+            "16aRiskAssessment",
+            "guardianReport",
+            "specialGuardianshipReport",
+            "otherDocs",
+            "sec37Report",
+            "localAuthorityOtherDoc",
+            "emailsToCourtToRequestHearingsAdjourned",
+            "publicFundingCertificates",
+            "noticesOfActingDischarge",
+            "requestForFASFormsToBeChanged",
+            "witnessAvailability",
+            "lettersOfComplaint",
+            "SPIPReferralRequests",
+            "homeOfficeDWPResponses",
+            "internalCorrespondence",
+            "importantInfoAboutAddressAndContact",
+            "privacyNotice",
+            "specialMeasures",
+            "anyOtherDoc",
+            "noticeOfHearing",
+            "caseSummary"
+        );
 
         if (null != caseData.getReviewDocuments()) {
             //add solicitor uploaded docs
@@ -564,19 +593,31 @@ public class CaseService {
             //add citizen uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()));
 
+            citizenDocuments = citizenDocuments.stream().filter(citizenDocuments1 -> !unReturnedCategoriesForUI.contains(
+                    citizenDocuments1.getCategoryId()))
+                .collect(Collectors.toList());
+
             //confidential docs uploaded by citizen
-            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getReviewDocuments().getConfidentialDocuments(),
-                                                                   userDetails));
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(
+                caseData.getReviewDocuments().getConfidentialDocuments(),
+                userDetails
+            ));
             //restricted docs uploaded by citizen
-            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getReviewDocuments().getRestrictedDocuments(),
-                                                                   userDetails));
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(
+                caseData.getReviewDocuments().getRestrictedDocuments(),
+                userDetails
+            ));
         }
 
         //add citizen uploaded docs pending review
         if (null != caseData.getDocumentManagementDetails()) {
-            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
-                                                                   userDetails));
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                userDetails
+            ));
         }
+
+        Collections.sort(citizenDocuments, comparing(CitizenDocuments::getUploadedDate).reversed());
 
         return citizenDocuments;
     }

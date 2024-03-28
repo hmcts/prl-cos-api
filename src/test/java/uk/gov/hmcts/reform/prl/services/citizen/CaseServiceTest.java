@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -972,6 +973,7 @@ public class CaseServiceTest {
             .uploadedBy("test")
             .uploaderRole(CITIZEN)
             .uploadedByIdamId("00000000-0000-0000-0000-000000000000")
+            .documentUploadedDate(LocalDateTime.now())
             .build();
         caseData = caseData.toBuilder()
             .reviewDocuments(ReviewDocuments.builder()

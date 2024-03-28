@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,8 +19,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
@@ -33,13 +35,11 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -54,7 +54,8 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
 
-    private final CoreCaseDataService coreCaseDataService;
+    private final AllTabServiceImpl allTabService;
+    private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -395,21 +396,26 @@ public class ReviewDocumentService {
             .uploaderRole(BULK_SCAN);
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(String authorisation, CaseData caseData) {
+    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
-            coreCaseDataService.triggerEventWithAuthorisation(
-                authorisation,
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
-                    ? "c100-all-docs-reviewed" : "fl401-all-docs-reviewed",
-                null
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(
+                    caseData.getId()),
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? "c100-all-docs-reviewed" : "fl401-all-docs-reviewed"
             );
+            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.systemAuthorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated
+            );
+
         }
         if (YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
