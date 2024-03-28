@@ -1186,8 +1186,9 @@ public class C100RespondentSolicitorService {
                 .contains(ConfidentialityListEnum.email))) {
             dataMap.put(EMAIL, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getContact()
-                && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
+        } else if (null != response.getCitizenDetails()
+            && null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
             dataMap.put(EMAIL, response.getCitizenDetails().getContact().getEmail());
         } else {
             dataMap.put(EMAIL, solicitorRepresentedRespondent.getValue().getEmail());
