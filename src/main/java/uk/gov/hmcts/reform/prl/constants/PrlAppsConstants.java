@@ -53,6 +53,12 @@ public class PrlAppsConstants {
 
     public static final String C7_FINAL_RESPONDENT = "c7FinalEng";
 
+    public static final String DRAFT_APPLICATION_DOCUMENT_FIELD = "submitAndPayDownloadApplicationLink";
+
+    public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
+
+    public static final String C7_FINAL_ENGLISH = "c7FinalEng";
+
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
