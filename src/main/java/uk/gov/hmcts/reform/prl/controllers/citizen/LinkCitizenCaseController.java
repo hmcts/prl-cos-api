@@ -45,6 +45,7 @@ public class LinkCitizenCaseController {
     public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                        @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
+        log.info("link-case-to-account Startttttt...");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Optional<CaseDetails> caseDetails = linkCitizenCaseService.linkCitizenToCase(
                 authorisation,
