@@ -45,7 +45,7 @@ public class PartiesListGenerator {
                     .collect(
                     Collectors.toMap(
                         party -> party.getId().toString(),
-                        party -> party.getValue().getRepresentativeFirstName() + " " + party.getValue().getRepresentativeLastName()
+                        party -> party.getValue().getRepresentativeFullNameForCaseFlags()
                     ));
 
                 for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
@@ -77,7 +77,7 @@ public class PartiesListGenerator {
                     .collect(
                         Collectors.toMap(
                             party -> party.getId().toString(),
-                            party -> party.getValue().getRepresentativeFirstName() + " " + party.getValue().getRepresentativeLastName()
+                            party -> party.getValue().getRepresentativeFullNameForCaseFlags()
                         ));
 
                 for (Map.Entry<String, String> appSols : respondentSolicitors.entrySet()) {
