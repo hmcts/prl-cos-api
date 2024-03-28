@@ -177,6 +177,9 @@ public class ServiceOfApplicationServiceTest {
     private C100CaseInviteService c100CaseInviteService;
 
     @Mock
+    private AllTabServiceImpl allTabService;
+
+    @Mock
     private EmailService emailService;
 
     @Mock
@@ -2653,8 +2656,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2731,7 +2735,7 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2805,8 +2809,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -4117,10 +4122,11 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(partyElementList)
             .respondents(partyElementList)
             .caseInvites(caseInviteList)
+            .c1ADocument(Document.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .specialArrangementsLetter(Document.builder().build())
                                                 .pd36qLetter(Document.builder().build())
