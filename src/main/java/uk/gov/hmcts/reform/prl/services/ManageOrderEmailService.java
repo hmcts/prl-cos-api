@@ -573,6 +573,7 @@ public class ManageOrderEmailService {
                 );
             } else {
                 log.info("*** courtAdmin/courtBailiff: Sending email to applicant LiP");
+                dynamicDataForEmail.put("name", party.getLabelForDynamicList());
                 sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getEmail(),
                                      SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
                 );
