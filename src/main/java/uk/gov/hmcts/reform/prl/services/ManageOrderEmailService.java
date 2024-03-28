@@ -464,9 +464,9 @@ public class ManageOrderEmailService {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
             );
-        } else if (null != solicitorEmail && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.
-            equals(citizenRespondentOption)) {
-            log.info("*** sendPersonalServiceNotifications: unrepresentedApplicant: {}",citizenRespondentOption);
+        } else if (null != solicitorEmail && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(citizenRespondentOption)) {
+            log.info("*** sendPersonalServiceNotifications: unrepresentedApplicant: {}", citizenRespondentOption);
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
