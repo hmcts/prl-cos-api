@@ -627,8 +627,6 @@ public class ManageOrderEmailService {
     private void handleNonPersonalServiceNotifications(String authorisation, CaseData caseData, ManageOrders manageOrders,
                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                        List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
-        log.info("CA non-personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
-                 dynamicDataForEmail);
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         if (recipientsOptions != null) {
 
@@ -880,16 +878,12 @@ public class ManageOrderEmailService {
                                                            Map<String, Object> dynamicDataForEmail,
                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                            List<Document> orderDocuments) {
-        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info(
-                        "CA non-personal service email notifications: sendEmailToApplicantOrSolicitor: dynamicDataForEmail: {}",
-                        dynamicDataForEmail);
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
@@ -898,12 +892,7 @@ public class ManageOrderEmailService {
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
-                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
-                                                     buildApplicantRespondentEmail(caseData,
-                                                                                   partyData.getLabelForDynamicList()
-                                                     ),
-                                                     caseData
-                    );
+                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else {
                     log.info("Contact preference set as post or no contact preference is set");
                     serveOrdersToApplicantAddress(
@@ -931,9 +920,6 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info(
-                        "CA non-personal service email notifications: sendEmailToSolicitorOrPostToRespondent: dynamicDataForEmail: {}",
-                        dynamicDataForEmail);
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
                                          dynamicDataForEmail,
