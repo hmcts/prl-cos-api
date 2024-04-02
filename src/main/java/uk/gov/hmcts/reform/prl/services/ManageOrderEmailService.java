@@ -889,8 +889,6 @@ public class ManageOrderEmailService {
                                          dynamicDataForEmail,
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
-                } else if (isPartyProvidedWithEmail(partyData)) {
-                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
@@ -900,7 +898,7 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else {
-                    log.info("inside calling serveOrdersToApplicantAddress start");
+                    log.info("Contact preference set as post or no contact preference is set");
                     serveOrdersToApplicantAddress(
                         caseData,
                         authorisation,
