@@ -414,8 +414,7 @@ public class UpdatePartyDetailsService {
         Document c8FinalWelshDocument;
         String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
-            if ((isDetailsChanged
-                || CollectionUtils.isEmpty(c8Documents))) {
+            if (isDetailsChanged) {
                 String fileName = C_8_OF + partyName
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");
