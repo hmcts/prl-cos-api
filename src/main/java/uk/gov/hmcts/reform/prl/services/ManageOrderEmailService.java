@@ -100,9 +100,7 @@ public class ManageOrderEmailService {
     private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
     private final Time dateTime;
-    private final CourtFinderService courtLocatorService;
     private final DocumentLanguageService documentLanguageService;
-
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
 
@@ -348,9 +346,6 @@ public class ManageOrderEmailService {
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
-        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
@@ -447,10 +442,8 @@ public class ManageOrderEmailService {
             .equals(respondentOption)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
-                         dynamicDataForEmail);
                 sendPersonalServiceNotifications(
-                    party.getValue().getSolicitorEmail(),
+                    party.getValue(),
                     respondentOption,
                     authorisation,
                     orderDocuments,
@@ -497,7 +490,7 @@ public class ManageOrderEmailService {
             log.info("===== DA Serving represented applicant ====");
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendPersonalServiceNotifications(
-                caseData.getApplicantsFL401().getSolicitorEmail(),
+                caseData.getApplicantsFL401(),
                 servingOptions,
                 authorisation,
                 orderDocuments,
@@ -559,22 +552,32 @@ public class ManageOrderEmailService {
     }
 
 
-    private void sendPersonalServiceNotifications(String solicitorEmail,
+    private void sendPersonalServiceNotifications(PartyDetails party,
                                                   String respondentOption,
-                                                  String authorisation, List<Document> orderDocuments, Map<String,
-        Object> dynamicDataForEmail) {
+                                                  String authorisation,
+                                                  List<Document> orderDocuments,
+                                                  Map<String, Object> dynamicDataForEmail) {
         log.info("CA personal service email notifications: sendPersonalServiceNotifications: {}",respondentOption);
-        if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.getId()
+        if (null != party.getSolicitorEmail() && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.getId()
             .equals(respondentOption)) {
-            log.info("CA personal service email notifications: sendPersonalServiceNotifications");
-            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+            log.info("*** applicantLegalRepresentative: Sending email to applicant LR ");
+            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getSolicitorEmail(),
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
-        } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
+        } else if ((SoaSolicitorServingRespondentsEnum.courtAdmin.getId().equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.getId().equals(respondentOption))) {
-            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                 SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
-            );
+            if (null != party.getSolicitorEmail()) {
+                log.info("*** courtAdmin/courtBailiff: Sending email to applicant LR");
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getSolicitorEmail(),
+                                     SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
+                );
+            } else {
+                log.info("*** courtAdmin/courtBailiff: Sending email to applicant LiP");
+                dynamicDataForEmail.put("name", party.getLabelForDynamicList());
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getEmail(),
+                                     SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                );
+            }
         }
     }
 
