@@ -1,0 +1,40 @@
+{
+  "partyDetails": {
+      "firstName": "test",
+      "lastName": "data",
+      "email": "citizen@email.com",
+      "phoneNumber": "07442772347",
+      "placeOfBirth": "Harrow",
+      "dateOfBirth": "1997-12-12",
+      "user": {
+        "email": null,
+        "idamId": "12345",
+        "solicitorRepresented": null
+      },
+    "response": {
+      "keepDetailsPrivate": {
+        "otherPeopleKnowYourContactDetails": "yes",
+        "confidentiality": "Yes",
+        "confidentialityList": [
+          "phoneNumber"
+        ]
+      },
+      "consent": {
+        "consentToTheApplication": "Yes",
+        "noConsentReason": "string",
+        "applicationReceivedDate": "2023-01-23",
+        "permissionFromCourt": "Yes",
+        "courtOrderDetails": "Court Order details test"
+      },
+      "currentOrPreviousProceedings": {
+        "haveChildrenBeenInvolvedInCourtCase": "Yes",
+        "courtOrderMadeForProtection": "Yes",
+        "proceedingsList": [
+
+        ]
+      }
+    }
+  },
+  "partyType": "applicant",
+  "caseTypeOfApplication": "C100"
+}
