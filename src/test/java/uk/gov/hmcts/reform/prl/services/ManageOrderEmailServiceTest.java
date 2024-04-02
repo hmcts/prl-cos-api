@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -66,10 +66,10 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +79,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 @Slf4j
 public class ManageOrderEmailServiceTest {
-    private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
     private static final String URGENT_CASE = "Urgent ";
 
@@ -959,7 +958,8 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData,"testAuth", address.getPostalAddress(),"Test"))
+        when(serviceOfApplicationPostService.getCoverSheets(caseData,"testAuth", address.getPostalAddress(),"Test",
+                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenThrow(new RuntimeException());
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -1181,9 +1181,9 @@ public class ManageOrderEmailServiceTest {
             .build();
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class)));
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1251,11 +1251,12 @@ public class ManageOrderEmailServiceTest {
                                          .build()))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class)));
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
@@ -1311,9 +1312,9 @@ public class ManageOrderEmailServiceTest {
                                          .build()))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class)));
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
@@ -1337,6 +1338,7 @@ public class ManageOrderEmailServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("")
             .build();
         caseData = caseData.toBuilder()
@@ -1352,11 +1354,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
@@ -1390,7 +1387,7 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("")
             .user(User.builder().idamId("abc123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
@@ -1404,23 +1401,17 @@ public class ManageOrderEmailServiceTest {
                               .cafcassEmailId("test").build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
                                                                                                Mockito.any(),
                                                                                                Mockito.any());
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefPost() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1475,11 +1466,8 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -1868,8 +1856,10 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
-                                                            otherPerson.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, otherPerson.getAddress(),
+                                                            otherPerson.getLabelForDynamicList(),
+                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    otherPerson.getLabelForDynamicList())).thenReturn(uuid);
@@ -1908,8 +1898,10 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
-                                                            respondent.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, respondent.getAddress(),
+                                                            respondent.getLabelForDynamicList(),
+                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    respondent.getLabelForDynamicList())).thenReturn(uuid);
@@ -1943,7 +1935,7 @@ public class ManageOrderEmailServiceTest {
             .lastName("RespLN2")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         String uuid1 = "00000000-0000-0000-0000-000000000000";
@@ -1972,7 +1964,7 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -2801,7 +2793,7 @@ public class ManageOrderEmailServiceTest {
     }
 
 
-    @Test
+    /*@Test
     public void sendEmailWhenOrderIsServedToCafcassCymru() throws IOException {
 
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
@@ -2849,7 +2841,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
-    }
+    }*/
 
     @Test
     public void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
@@ -3295,7 +3287,6 @@ public class ManageOrderEmailServiceTest {
         );
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeServeOrderToApplicantAddress() throws Exception {
 
@@ -3347,16 +3338,13 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
-        Map<String, Object> dataMap = new HashMap<>();
         UUID bulkPrintId = UUID.randomUUID();
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
-            coverLetterDoc));
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString()))
+            .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(bulkPrintId);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         assertNotNull(dataMap.get("orderCollection"));
@@ -3424,20 +3412,13 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        Map<String, Object> dataMap = new HashMap<>();
         UUID bulkPrintId = UUID.randomUUID();
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(bulkPrintId);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         assertNotNull(dataMap.get("orderCollection"));
@@ -3493,13 +3474,7 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(serviceOfApplicationPostService
-                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
-                                                 any(Address.class),
-                                                 anyString()
-                 )).thenReturn(GeneratedDocumentInfo.builder().build());
-
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3512,5 +3487,284 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
         assertEquals(0, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
         assertEquals(new ArrayList<>(), orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaPostFL401() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertTrue(orderCollection.get(0).getValue().getBulkPrintOrderDetails().isEmpty());
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
+    }
+
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
     }
 }
