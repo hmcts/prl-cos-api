@@ -341,7 +341,7 @@ public class ManageOrderEmailService {
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
-        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
@@ -442,7 +442,6 @@ public class ManageOrderEmailService {
             .equals(respondentOption)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                log.info("handleC100PersonalServiceNotifications: dynamicDataForEmail {}",dynamicDataForEmail);
                 sendPersonalServiceNotifications(
                     party.getValue(),
                     respondentOption,
@@ -558,6 +557,7 @@ public class ManageOrderEmailService {
                                                   String authorisation,
                                                   List<Document> orderDocuments,
                                                   Map<String, Object> dynamicDataForEmail) {
+        log.info("CA personal service email notifications: sendPersonalServiceNotifications: {}",respondentOption);
         if (null != party.getSolicitorEmail() && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.getId()
             .equals(respondentOption)) {
             log.info("*** applicantLegalRepresentative: Sending email to applicant LR ");
@@ -627,6 +627,8 @@ public class ManageOrderEmailService {
     private void handleNonPersonalServiceNotifications(String authorisation, CaseData caseData, ManageOrders manageOrders,
                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                        List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
+        log.info("CA non-personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
+                 dynamicDataForEmail);
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         if (recipientsOptions != null) {
 
@@ -885,14 +887,15 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info(
+                        "CA non-personal service email notifications: sendEmailToApplicantOrSolicitor: dynamicDataForEmail: {}",
+                        dynamicDataForEmail);
                     dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
                                          dynamicDataForEmail,
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
-                } else if (isPartyProvidedWithEmail(partyData)) {
-                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
@@ -902,7 +905,7 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else {
-                    log.info("inside calling serveOrdersToApplicantAddress start");
+                    log.info("Contact preference set as post or no contact preference is set");
                     serveOrdersToApplicantAddress(
                         caseData,
                         authorisation,
@@ -928,6 +931,9 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info(
+                        "CA non-personal service email notifications: sendEmailToSolicitorOrPostToRespondent: dynamicDataForEmail: {}",
+                        dynamicDataForEmail);
                     sendEmailViaSendGrid(authorisation,
                                          orderDocuments,
                                          dynamicDataForEmail,
