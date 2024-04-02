@@ -110,7 +110,11 @@ public class CitizenCaseUpdateService {
         );
     }
 
-    public CaseDetails submitCitizenC100Application(String authToken, String caseId, String eventId, CaseData citizenUpdatedCaseData) throws JsonProcessingException {
+    public CaseDetails submitCitizenC100Application(String authToken,
+                                                    String caseId,
+                                                    String eventId,
+                                                    CaseData citizenUpdatedCaseData)
+            throws JsonProcessingException {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
