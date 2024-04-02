@@ -51,6 +51,10 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
 
+    public static final String DRAFT_APPLICATION_DOCUMENT_FIELD = "submitAndPayDownloadApplicationLink";
+
+    public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
+
     public static final String C7_FINAL_ENGLISH = "c7FinalEng";
 
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
@@ -753,6 +757,8 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+    public static final String CAFCASS_OR_CAFCASS_CYMRU = "CAFCASS or CAFCASS Cymru";
+
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
     public static final String COMMA = ",";
