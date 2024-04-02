@@ -663,11 +663,6 @@ public class HearingDataService {
                         .build();
                 }
             }
-            //Populate C100 names
-            log.info("hearingData.getApplicantName1 : {}", hearingData.getApplicantName1());
-            log.info("hearingData.getRespondentName1 : {}", hearingData.getRespondentName1());
-            log.info("hearingData.getApplicantSolicitor1 : {}", hearingData.getApplicantSolicitor1());
-
             String order = Objects.nonNull(orderType) ? String.valueOf(orderType) : String.valueOf(caseData.getCreateSelectOrderOptions());
             boolean isDaOrderForCaCase = ManageOrdersUtils.isDaOrderSelectedForCaCase(order, caseData);
 
