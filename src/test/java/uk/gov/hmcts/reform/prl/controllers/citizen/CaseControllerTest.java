@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -114,8 +115,8 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
-        assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
+        UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
+        assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
 
     }
 
