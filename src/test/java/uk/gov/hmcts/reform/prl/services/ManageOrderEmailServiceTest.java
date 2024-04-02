@@ -70,6 +70,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -870,8 +871,10 @@ public class ManageOrderEmailServiceTest {
             .courtName(court.getCourtName())
             .caseLink("/dummyURL")
             .build();
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
@@ -1180,13 +1183,13 @@ public class ManageOrderEmailServiceTest {
             .build();
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                                anyString(),
-                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class)));
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1248,15 +1251,15 @@ public class ManageOrderEmailServiceTest {
                                                     .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue()).build())
                                          .build()))
             .build();
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                                anyString(),
-                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
+
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
     }
 
@@ -1309,15 +1312,14 @@ public class ManageOrderEmailServiceTest {
                                                     .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue()).build())
                                          .build()))
             .build();
-
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                                anyString(),
-                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class)));
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1337,6 +1339,7 @@ public class ManageOrderEmailServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("")
             .build();
         caseData = caseData.toBuilder()
@@ -1405,7 +1408,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
                                                                                                Mockito.any(),
                                                                                                Mockito.any());
     }
@@ -1440,7 +1443,7 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("")
             .user(User.builder().idamId("abc123").build())
-            .contactPreferences(ContactPreferences.post)
+            .contactPreferences(ContactPreferences.email)
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
             .orderTypeId("abc")
@@ -1522,6 +1525,62 @@ public class ManageOrderEmailServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedFl401Welsh() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("test@gmail.com")
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                               .applicantLegalRepresentative)
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                                                       .serveByPostOrEmail(DeliveryByEnum.post)
+                                                                       .emailInformation(EmailInformation.builder()
+                                                                                             .emailAddress("test").build())
+                                                                       .postalInformation(PostalInformation.builder()
+                                                                                              .postalAddress(Address.builder().build())
+                                                                                              .build())
+                                                                       .build())))
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(sendgridService,Mockito.times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
@@ -1579,6 +1638,58 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNullWelsh() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("test@gmail.com")
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                               .applicantLegalRepresentative)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                              .serveOtherPartiesDA(null)
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
+                                                                       .emailInformation(EmailInformation.builder()
+                                                                                             .emailAddress("test").build())
+                                                                       .build())))
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+    }
+
+    @Test
     public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1629,6 +1740,58 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOtherWelsh() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("test@gmail.com")
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                              .serveOtherPartiesDA(List.of())
+                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                               .applicantLegalRepresentative)
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
+                                                                       .emailInformation(EmailInformation.builder()
+                                                                                             .emailAddress("test").build())
+                                                                       .build())))
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+    }
+
+    @Test
     public void testSendEmailWhenOrderServed() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1670,6 +1833,7 @@ public class ManageOrderEmailServiceTest {
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
@@ -1695,8 +1859,10 @@ public class ManageOrderEmailServiceTest {
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    otherPerson.getLabelForDynamicList())).thenReturn(uuid);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
@@ -1738,6 +1904,7 @@ public class ManageOrderEmailServiceTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
@@ -1795,6 +1962,7 @@ public class ManageOrderEmailServiceTest {
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -1886,8 +2054,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -1911,6 +2077,8 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
@@ -2018,8 +2186,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2042,6 +2208,9 @@ public class ManageOrderEmailServiceTest {
             .courtName(court.getCourtName())
             .caseLink("/dummyURL")
             .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
@@ -2125,8 +2294,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .manageOrders(manageOrders)
             .build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2137,6 +2304,106 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void sendEmailWhenOrderIsServedEmailOptionIsEmptyWelsh() throws IOException {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code(TEST_UUID)
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                             .applicantLegalRepresentative)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("FL401")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .applicantsFL401(PartyDetails.builder()
+                                 .lastName("test")
+                                 .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .email("test@ree.com").build())
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder()
+                                  .lastName("test")
+                                  .firstName("test1")
+                                  .email("test@sdsc.com").build())
+            .children(listOfChildren)
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -2219,8 +2486,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .manageOrders(manageOrders)
             .build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2231,6 +2496,104 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedWelsh() throws IOException {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code(TEST_UUID)
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                             .courtBailiff)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("FL401")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .applicantsFL401(PartyDetails.builder()
+                                 .lastName("test")
+                                 .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .email("test@ree.com").build())
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder()
+                                  .lastName("test")
+                                  .firstName("test1")
+                                  .email("test@sdsc.com").build())
+            .children(listOfChildren)
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -2313,8 +2676,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .manageOrders(manageOrders)
             .build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2325,6 +2686,104 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void sendServeOrderEmailWhenCourtAdminOptionSelectedWelsh() throws IOException {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code(TEST_UUID)
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                             .courtAdmin)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("FL401")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .applicantsFL401(PartyDetails.builder()
+                                 .lastName("test")
+                                 .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .email("test@ree.com").build())
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder()
+                                  .lastName("test")
+                                  .firstName("test1")
+                                  .email("test@sdsc.com").build())
+            .children(listOfChildren)
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -2373,9 +2832,63 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }*/
+
+    @Test
+    public void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
+
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code("00000000-0000-0000-0000-000000000000")
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .cafcassCymruServedOptions(YesOrNo.Yes)
+            .otherParties(dynamicMultiSelectList)
+            .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+            .cafcassCymruEmail("test@cafcasscymru.com")
+            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
 
 
 
@@ -2458,8 +2971,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .manageOrders(manageOrders)
             .build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2470,6 +2981,105 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100CaseWelsh() throws IOException {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code(TEST_UUID)
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+                                             .courtBailiff)
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .applicantsFL401(PartyDetails.builder()
+                                 .lastName("test")
+                                 .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .email("test@ree.com").build())
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder()
+                                  .lastName("test")
+                                  .firstName("test1")
+                                  .email("test@sdsc.com").build())
+            .children(listOfChildren)
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -2553,8 +3163,6 @@ public class ManageOrderEmailServiceTest {
             .courtName("testcourt")
             .manageOrders(manageOrders)
             .build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
@@ -2565,6 +3173,109 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        );
+    }
+
+    @Test
+    public void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100CaseWelsh() throws IOException {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code(TEST_UUID)
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
+                                             .courtAdmin)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .applicantsFL401(PartyDetails.builder()
+                                 .lastName("test")
+                                 .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .email("test@ree.com").build())
+            .respondents(listOfRespondents)
+            .respondentsFL401(PartyDetails.builder()
+                                  .lastName("test")
+                                  .firstName("test1")
+                                  .email("test@sdsc.com").build())
+            .children(listOfChildren)
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
@@ -2628,7 +3339,6 @@ public class ManageOrderEmailServiceTest {
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString()))
             .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(bulkPrintId);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
@@ -2761,7 +3471,6 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(
             coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
@@ -2800,9 +3509,9 @@ public class ManageOrderEmailServiceTest {
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
@@ -2974,9 +3683,9 @@ public class ManageOrderEmailServiceTest {
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
@@ -3010,9 +3719,9 @@ public class ManageOrderEmailServiceTest {
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
