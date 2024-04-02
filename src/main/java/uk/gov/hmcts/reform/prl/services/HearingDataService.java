@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -42,6 +45,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -623,7 +627,8 @@ public class HearingDataService {
         }).toList();
     }
 
-    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData,
+                                                                       CreateSelectOrderOptionsEnum orderType) {
         boolean[] hearingFetchedOnce = {false};
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -658,9 +663,15 @@ public class HearingDataService {
                         .build();
                 }
             }
-            if (getPartyNameList(caseData.getApplicants()).size() > 0 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
-                String.valueOf(caseData.getCreateSelectOrderOptions()),
-                caseData)) {
+            //Populate C100 names
+            log.info("hearingData.getApplicantName1 : {}", hearingData.getApplicantName1());
+            log.info("hearingData.getRespondentName1 : {}", hearingData.getRespondentName1());
+            log.info("hearingData.getApplicantSolicitor1 : {}", hearingData.getApplicantSolicitor1());
+
+            String order = Objects.nonNull(orderType) ? String.valueOf(orderType) : String.valueOf(caseData.getCreateSelectOrderOptions());
+            boolean isDaOrderForCaCase = ManageOrdersUtils.isDaOrderSelectedForCaCase(order, caseData);
+
+            if (getPartyNameList(caseData.getApplicants()).size() > 0 && isDaOrderForCaCase) {
                 if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
                     hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
                 }

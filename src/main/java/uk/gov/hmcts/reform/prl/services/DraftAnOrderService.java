@@ -1250,7 +1250,7 @@ public class DraftAnOrderService {
 
     private CreateSelectOrderOptionsEnum getOrderType(CallbackRequest callbackRequest, CaseData caseData) {
         CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-        if (ObjectUtils.isEmpty(orderType) && CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
+        if (ObjectUtils.isEmpty(orderType) && !Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             DraftOrder draftOrder;
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 draftOrder = getSelectedDraftOrderDetails(
@@ -1987,7 +1987,7 @@ public class DraftAnOrderService {
 
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
-                hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
+                hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData, orderType));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
