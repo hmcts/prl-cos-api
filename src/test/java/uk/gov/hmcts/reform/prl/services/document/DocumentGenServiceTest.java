@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -114,8 +115,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
@@ -550,7 +551,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
 
     }
 
@@ -561,7 +562,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
     }
 
@@ -584,8 +585,8 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(authToken, c100CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_FIELD));
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
@@ -3615,6 +3616,24 @@ public class DocumentGenServiceTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetServeOrderTemplate", "citizen_cover_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_en", template);
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetWelshServeOrderTemplate", "citizen_cover_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_wel", template);
     }
 }
 

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -49,6 +50,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -62,6 +64,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -69,6 +73,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class CaseUtils {
+
+    public static final String EUROPE_LONDON = "Europe/London";
+
     private CaseUtils() {
 
     }
@@ -95,7 +102,7 @@ public class CaseUtils {
             .lastModifiedDate(caseDetails.getLastModified());
 
         if ((State.SUBMITTED_PAID.equals(state)) && caseDataBuilder.build().getDateSubmitted() == null) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON));
             caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         }
 
@@ -128,17 +135,15 @@ public class CaseUtils {
         } else {
             orderSelectionType = "";
         }
-
         return orderSelectionType;
-
     }
 
     public static Long getRemainingDaysSubmitCase(CaseData caseData) {
         Long noOfDaysRemaining = null;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
             && State.AWAITING_SUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            Long noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON));
+            long noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
@@ -154,10 +159,6 @@ public class CaseUtils {
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
             return true;
         }
-        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            log.info("Applicant 1 {}", caseData.getApplicants().get(0));
-        }
-        log.info("case created by {}", caseData.getCaseCreatedBy());
 
         return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
             0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
@@ -322,19 +323,21 @@ public class CaseUtils {
 
     public static boolean isC8Present(CaseData caseData) {
         log.info("Confidential check is happening");
+        boolean isC8PresentInCase = false;
         if (caseData.getC8Document() != null || caseData.getC8FormDocumentsUploaded() != null) {
-            return true;
+            isC8PresentInCase = true;
         }
-        return false;
+        return isC8PresentInCase;
     }
 
     public static boolean isC8PresentCheckDraftAndFinal(CaseData caseData) {
         log.info("Confidential check is happening");
+        boolean isC8Present = false;
         if (caseData.getC8DraftDocument() != null || caseData.getC8WelshDraftDocument() != null
             || caseData.getC8Document() != null || caseData.getC8WelshDocument() != null) {
-            return true;
+            isC8Present = true;
         }
-        return false;
+        return isC8Present;
     }
 
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
@@ -381,6 +384,8 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(CAFCASS)) {
             return CAFCASS;
+        } else if (roles.contains(BULK_SCAN)) {
+            return BULK_SCAN;
         }
 
         return CAFCASS;
@@ -400,6 +405,7 @@ public class CaseUtils {
     }
 
     public static boolean unServedPacksPresent(CaseData caseData) {
+        boolean arePacksPresent = false;
         if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
             && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
@@ -408,9 +414,9 @@ public class CaseUtils {
             && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedLaPack() != null
             && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
-            return true;
+            arePacksPresent = true;
         }
-        return false;
+        return arePacksPresent;
     }
 
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
@@ -456,7 +462,7 @@ public class CaseUtils {
 
     public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
         ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
-        return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+        return givenZonedTime.withZoneSameInstant(ZoneId.of(EUROPE_LONDON)).toLocalDateTime();
     }
 
     public static Boolean isCitizenAccessEnabled(PartyDetails party) {
@@ -586,9 +592,8 @@ public class CaseUtils {
     }
 
     public static boolean isApplyOrderWithoutGivingNoticeToRespondent(CaseData caseData) {
-        boolean applyOrderWithoutGivingNoticeToRespondent = ObjectUtils.isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+        return ObjectUtils.isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
             && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
-        return applyOrderWithoutGivingNoticeToRespondent;
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
@@ -616,5 +621,18 @@ public class CaseUtils {
         return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || (currentParty.getIsEmailAddressConfidential() != null
             && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static String getLanguageRequirements(CaseData caseData) {
+        if (YesOrNo.Yes.equals(caseData.getWelshLanguageRequirement())) {
+            if ((welsh.equals(caseData.getWelshLanguageRequirementApplication())
+                && Yes.equals(caseData.getWelshLanguageRequirementApplicationNeedEnglish()))
+                || (english.equals(caseData.getWelshLanguageRequirementApplication())
+                && Yes.equals(caseData.getLanguageRequirementApplicationNeedWelsh()))) {
+                return "Both";
+            }
+            return LanguagePreference.getLanguagePreference(caseData).getDisplayedValue();
+        }
+        return "English";
     }
 }
