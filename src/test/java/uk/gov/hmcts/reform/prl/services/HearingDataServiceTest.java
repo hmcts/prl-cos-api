@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -1167,7 +1168,9 @@ public class HearingDataServiceTest {
                                                                       .build()))
                                       .build())).build();
         when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
-        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData,
+                                                                          CreateSelectOrderOptionsEnum.occupation
+        ));
     }
 
     @Test
@@ -1206,7 +1209,8 @@ public class HearingDataServiceTest {
                                                                       .build()))
                                       .build())).build();
         when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
-        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData,
+                                                                          CreateSelectOrderOptionsEnum.occupation));
     }
 
     @Test
