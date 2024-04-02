@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -206,9 +208,24 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
             //Automated Hearing Request Call
-            CaseDetails caseDetails = hearingService.createAutomatedHearing(authorisation, callbackRequest.getCaseDetails());
-            log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}",caseDetails);
-            //log
+            log.info("Automated Hearing Request Call - Start");
+            log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", callbackRequest.getCaseDetails());
+            HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+            boolean isOption3Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                .equals(hearingData.getHearingDateConfirmOptionEnum());
+            boolean isOption4Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                && HearingDateConfirmOptionEnum.dateToBeFixed
+                .equals(hearingData.getHearingDateConfirmOptionEnum());
+            log.info("option 3 and 4 selected: caseDetails: {} {}", isOption3Selected, isOption4Selected);
+            if (isOption3Selected || isOption4Selected) {
+                CaseDetails caseDetails = hearingService.createAutomatedHearing(
+                    authorisation,
+                    callbackRequest.getCaseDetails()
+                );
+                log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", caseDetails);
+            }
+            log.info("Automated Hearing Request Call - End");
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
