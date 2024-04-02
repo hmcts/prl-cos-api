@@ -106,15 +106,15 @@ public class CitizenCaseUpdateController {
         }
     }
 
-    //TODO: Work in progress
-    @PostMapping(value = "/{caseId}/submit-c100-application")
+    @PostMapping(value = "/{caseId}/{eventId}/submit-c100-application")
     @Operation(description = "Processing c100 case submission updates")
     public CaseData submitC100Application(
         @PathVariable("caseId") String caseId,
+        @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside submitC100Application");
             try {
@@ -122,10 +122,11 @@ public class CitizenCaseUpdateController {
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
+            CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
+                authorisation,
                 caseId,
-                caseData,
-                authorisation
+                eventId,
+                caseData
             );
             if (caseDetails != null) {
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -182,9 +183,8 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        CaseDetails caseDetails = null;
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            caseDetails = citizenCaseUpdateService.withdrawCase(caseData, caseId, authorisation);
+            CaseDetails caseDetails = citizenCaseUpdateService.withdrawCase(caseData, caseId, authorisation);
             if (caseDetails != null) {
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
