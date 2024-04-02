@@ -566,6 +566,7 @@ public class ManageOrderEmailService {
         log.info("CA personal service email notifications: sendPersonalServiceNotifications: {}",respondentOption);
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.getId()
             .equals(respondentOption)) {
+            log.info("CA personal service email notifications: sendPersonalServiceNotifications");
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                  SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
             );
@@ -686,6 +687,9 @@ public class ManageOrderEmailService {
 
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            dynamicData.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+            dynamicData.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         }
         return dynamicData;
     }
