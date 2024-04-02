@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -32,7 +35,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertEquals;
+import static uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService.INVALID;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class LinkCitizenCaseServiceTest {
@@ -60,6 +67,9 @@ public class LinkCitizenCaseServiceTest {
 
     @Mock
     CaseAccessApi caseAccessApi;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -175,5 +185,51 @@ public class LinkCitizenCaseServiceTest {
 
         String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
         Assert.assertEquals("Invalid", returnedCaseStatus);
+    }
+
+    @Test
+    @Ignore
+    public void testValidateAccessCodeForToggleInvalidEmptyCaseInvites() {
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantCaseName("test")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234567891234567L)
+            .data(stringObjectMap)
+            .build();
+        when(ccdCoreCaseDataService.findCaseById(anyString(), anyString())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")).thenReturn(false);
+
+        String isValid = linkCitizenCaseService.validateAccessCode(caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    @Ignore
+    public void testValidateAccessCodeForToggleInvalidWithCaseInvites() {
+        List<CaseInvite> caseInvites = new ArrayList<>();
+        caseInvites.add(CaseInvite.builder().partyId(testUuid).build());
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantCaseName("test")
+            .caseInvites(wrapElements(caseInvites)).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234567891234567L)
+            .data(stringObjectMap)
+            .build();
+        when(ccdCoreCaseDataService.findCaseById(anyString(), anyString())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")).thenReturn(false);
+
+        String isValid = linkCitizenCaseService.validateAccessCode(caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
     }
 }
