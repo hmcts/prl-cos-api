@@ -1338,6 +1338,7 @@ public class ManageOrderEmailServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("")
             .build();
         caseData = caseData.toBuilder()
@@ -1406,7 +1407,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
                                                                                                Mockito.any(),
                                                                                                Mockito.any());
     }
