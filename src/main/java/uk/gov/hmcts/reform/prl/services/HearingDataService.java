@@ -661,10 +661,6 @@ public class HearingDataService {
                         .build();
                 }
             }
-            //Populate C100 names
-            log.info("hearingData.getApplicantName1 : {}", hearingData.getApplicantName1());
-            log.info("hearingData.getRespondentName1 : {}", hearingData.getRespondentName1());
-            log.info("hearingData.getApplicantSolicitor1 : {}", hearingData.getApplicantSolicitor1());
             if (getPartyNameList(caseData.getApplicants()).size() > 0 && ManageOrdersUtils.isDaOrderSelectedForCaCase(
                 String.valueOf(caseData.getCreateSelectOrderOptions()),
                 caseData)) {
@@ -816,11 +812,8 @@ public class HearingDataService {
         } else {
             log.info("Populating party names for C100");
             List<String> applicantNames = getPartyNameList(caseData.getApplicants());
-            log.info("applicantNames: {}", applicantNames);
             List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-            log.info("respondentNames: {}", respondentNames);
             List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-            log.info("applicantSolicitorNames: {}", applicantSolicitorNames);
             List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
             int numberOfApplicant = applicantNames.size();
             int numberOfRespondents = respondentNames.size();
@@ -837,11 +830,6 @@ public class HearingDataService {
         }
 
         //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
-        try {
-            log.info("tempPartyNamesForDocGen: {}", AppObjectMapper.getObjectMapper().writeValueAsString(tempPartyNamesMap));
-        } catch (JsonProcessingException e) {
-            throw new ManageOrderRuntimeException(e.getMessage(), e);
-        }
         tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
     }
 
