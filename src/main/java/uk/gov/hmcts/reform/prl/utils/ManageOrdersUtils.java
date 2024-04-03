@@ -322,18 +322,22 @@ public class ManageOrdersUtils {
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-            || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_C100);
+                || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
+                    errorList.add("This order is not available to be created");
+                }
+                if (!Arrays.stream(VALID_ORDER_IDS_FOR_C100)
+                        .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    errorList.add(ORDER_NOT_AVAILABLE_C100);
+                }
+
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                    .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
-
         return !errorList.isEmpty();
     }
 

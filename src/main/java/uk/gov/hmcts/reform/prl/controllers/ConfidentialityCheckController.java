@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,12 +56,6 @@ public class ConfidentialityCheckController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
-
-            log.info(
-                "Object utils caseData.getServiceOfApplication() {}",
-                ObjectUtils.isEmpty(caseData.getServiceOfApplication().getUnServedApplicantPack())
-            );
 
             if (CaseUtils.unServedPacksPresent(caseData)) {
                 log.info("Packs present to serve");
@@ -111,6 +104,7 @@ public class ConfidentialityCheckController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("inside new confidential check submitted event");
 
