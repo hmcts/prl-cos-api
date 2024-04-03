@@ -4753,7 +4753,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
             TEST_UUID));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, true);
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(name);
         assertTrue(name.contains(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
@@ -4772,7 +4772,7 @@ public class DraftAnOrderServiceTest {
             .build();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, Event.DRAFT_AN_ORDER.getId());
         assertNotNull(name);
         assertTrue(name.contains(CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
@@ -4795,9 +4795,47 @@ public class DraftAnOrderServiceTest {
             caseData)).thenReturn(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue());
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, Event.DRAFT_AN_ORDER.getId());
         assertNotNull(name);
         assertTrue(name.contains(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue()));
+        assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
+            PrlAppsConstants.D_MMM_YYYY_HH_MM,
+            Locale.ENGLISH
+        ))));
+    }
+
+    @Test
+    public void testOrderNameForWaFieldInReturnOrderJourney() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .orderTypeId(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
+            .manageOrderHearingDetails(List.of(element(HearingData.builder()
+
+                                                           .confirmedHearingDates(DynamicList.builder().build()).build())))
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy("test title")
+                              .dateCreated(nowTime)
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
+            .value(draftOrder).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
+            TEST_UUID));
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, EDIT_RETURNED_ORDER.getId());
+        assertNotNull(name);
+        assertTrue(name.contains(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
             PrlAppsConstants.D_MMM_YYYY_HH_MM,
             Locale.ENGLISH
