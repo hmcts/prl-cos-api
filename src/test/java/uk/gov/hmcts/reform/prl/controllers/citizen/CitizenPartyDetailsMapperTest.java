@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
@@ -125,7 +126,7 @@ public class CitizenPartyDetailsMapperTest {
         partyDetails = PartyDetails.builder()
             .representativeFirstName("testUser")
             .representativeLastName("test test")
-            .response(Response.builder().build())
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .user(User.builder()
                       .email("test@gmail.com")
                       .idamId("123")
@@ -145,7 +146,7 @@ public class CitizenPartyDetailsMapperTest {
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
                               .lastName("User")
-                              .response(Response.builder().build())
+                              .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
                               .user(User.builder()
                                         .email("test@gmail.com")
                                         .idamId("123")
