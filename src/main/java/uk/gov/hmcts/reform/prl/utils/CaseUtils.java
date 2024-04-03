@@ -49,6 +49,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -381,6 +382,8 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(CAFCASS)) {
             return CAFCASS;
+        } else if (roles.contains(BULK_SCAN)) {
+            return BULK_SCAN;
         }
 
         return CAFCASS;
