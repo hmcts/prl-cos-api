@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -131,6 +132,72 @@ public class LinkCitizenCaseServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCasePartyIdNull() {
+        PartyDetails applicant = PartyDetails.builder().partyId(null)
+             .user(User.builder()
+                       .email("test@gmail.com")
+                       .idamId("123")
+                       .solicitorRepresented(YesOrNo.Yes)
+                       .build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseData caseData1 = CaseData.builder()
+            .applicantsFL401(applicant)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(null)
+                                                                         .accessCode(accessCode).build()).build()))
+            .build();
+        UserDetails userDetails1 = UserDetails.builder().id("123").build();
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails1);
+        when(objectMapper.convertValue(caseDetails1.getData(), CaseData.class)).thenReturn(caseData1);
+
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData1, null);
+        when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails1);
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCaseNotRepresentbySolicitor() {
+        PartyDetails applicant = PartyDetails.builder().partyId(null)
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.No)
+                      .build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseData caseData1 = CaseData.builder()
+            .respondentsFL401(applicant)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(null)
+                                                                         .accessCode(accessCode).build()).build()))
+            .build();
+        UserDetails userDetails1 = UserDetails.builder().id("123").email("test@gmail.com").build();
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails1);
+        when(objectMapper.convertValue(caseDetails1.getData(), CaseData.class)).thenReturn(caseData1);
+
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData1, null);
+        when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails1);
         when(authTokenGenerator.generate()).thenReturn(authToken);
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);

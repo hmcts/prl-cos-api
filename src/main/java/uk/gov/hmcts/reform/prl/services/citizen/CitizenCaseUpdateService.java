@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -143,6 +145,7 @@ public class CitizenCaseUpdateService {
         ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
         Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(objectMapper);
+        Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
 
         allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
