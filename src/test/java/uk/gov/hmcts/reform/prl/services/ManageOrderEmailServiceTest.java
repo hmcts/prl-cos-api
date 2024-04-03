@@ -1342,6 +1342,7 @@ public class ManageOrderEmailServiceTest {
         applicant = applicant.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
+            .contactPreferences(ContactPreferences.email)
             .representativeFirstName("")
             .contactPreferences(ContactPreferences.email)
             .solicitorEmail("")
