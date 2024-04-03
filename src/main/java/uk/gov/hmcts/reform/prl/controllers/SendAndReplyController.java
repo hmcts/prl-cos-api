@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
@@ -278,8 +279,16 @@ public class SendAndReplyController extends AbstractCallbackController {
                 List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
                     .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
 
+                log.info("----> caseData.getExternalMessageWhoToSendTo() {}", caseData.getSendOrReplyMessage()
+                    .getSendMessageObject().getExternalMessageWhoToSendTo());
+
+                log.info("----> caseData.getExternalMessageWhoToSendTo().getValue() {}", caseData.getSendOrReplyMessage()
+                    .getSendMessageObject().getExternalMessageWhoToSendTo().getValue());
+
                 List<DynamicMultiselectListElement> selectedApplicantRespondents = new ArrayList<DynamicMultiselectListElement>();
 
+                log.info("----> caseData.getApplicants() {}", caseData.getApplicants());
+                log.info("----> caseData.getRespondents() {}", caseData.getRespondents());
                 if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
                     selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondents(
                                                             caseData.getApplicants(),
@@ -323,6 +332,16 @@ public class SendAndReplyController extends AbstractCallbackController {
                         applicantsRespondentInCase
                     );
                     if (party.isPresent()) {
+                        PartyDetails partyDetails = party.get().getValue();
+                        if (partyDetails.getSolicitorEmail() != null) {
+                            log.info("----> partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
+
+                        } else if (partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
+                            log.info("----> partyDetails.getContactPreferences() {}",
+                                     partyDetails.getContactPreferences().getDisplayedValue());
+                            log.info("----> partyDetails.getContactPreferences() {}",
+                                     partyDetails.getAddress());
+                        }
                         try {
                             log.info("----> selected party list {}", party);
 
