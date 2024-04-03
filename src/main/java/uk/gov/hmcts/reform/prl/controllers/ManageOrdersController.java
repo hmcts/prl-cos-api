@@ -197,16 +197,6 @@ public class ManageOrdersController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-
-            //SNI-4330 fix
-            //update caseSummaryTab with latest state
-            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-            allTabService.submitAllTabsUpdate(
-                    startAllTabsUpdateDataContent.systemAuthorisation(),
-                    String.valueOf(callbackRequest.getCaseDetails().getId()),
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    startAllTabsUpdateDataContent.eventRequestData(),
-                    caseDataUpdated);
             //Automated Hearing Request Call
             log.info("Automated Hearing Request Call - Start");
             log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", callbackRequest.getCaseDetails());
@@ -226,6 +216,16 @@ public class ManageOrdersController {
                 log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", caseDetails);
             }
             log.info("Automated Hearing Request Call - End");
+
+            //SNI-4330 fix
+            //update caseSummaryTab with latest state
+            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -288,7 +288,9 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
+            log.info("saveOrderDetails: cleanUpSelectedManageOrderOptions: Start");
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            log.info("saveOrderDetails: cleanUpSelectedManageOrderOptions: End");
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
