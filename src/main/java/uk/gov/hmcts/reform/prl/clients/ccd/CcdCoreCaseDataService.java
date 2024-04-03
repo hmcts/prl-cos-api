@@ -123,7 +123,6 @@ public class CcdCoreCaseDataService {
                        .id(startEventResponse.getEventId())
                        .build())
             .data(startEventResponse.getCaseDetails().getData())
-            .securityClassification(startEventResponse.getCaseDetails().getSecurityClassification())
             .securityClassification(Classification.RESTRICTED)
             .build();
     }
