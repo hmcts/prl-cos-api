@@ -1121,9 +1121,9 @@ public class SendAndReplyService {
     }
 
     private String getExternalSentTo(DynamicMultiSelectList externalMessageWhoToSendTo) {
-        log.info("external messages sent to {}",externalMessageWhoToSendTo);
+        log.info("external messages sent to>>>>>1124 {}",externalMessageWhoToSendTo);
         Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(externalMessageWhoToSendTo);
-        log.info("external message sent to string {}",externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+        log.info("external message sent to string>>>>>1126 {}",externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
             .getValue().stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","))).orElse(""));
