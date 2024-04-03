@@ -272,6 +272,10 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
+            log.info("----> caseData {}", caseData);
+
+            log.info("----> caseData.getSendOrReplyMessage() {}", caseData.getSendOrReplyMessage());
+
             if (caseData.getSendOrReplyMessage() != null
                 && caseData.getSendOrReplyMessage().getSendMessageObject() != null
                 && caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
@@ -287,8 +291,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
                 List<DynamicMultiselectListElement> selectedApplicantRespondents = new ArrayList<DynamicMultiselectListElement>();
 
-                log.info("----> caseData.getApplicants() {}", caseData.getApplicants());
-                log.info("----> caseData.getRespondents() {}", caseData.getRespondents());
+                //log.info("----> caseData.getApplicants() {}", caseData.getApplicants());
+                //log.info("----> caseData.getRespondents() {}", caseData.getRespondents());
                 if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
                     selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondents(
                                                             caseData.getApplicants(),
@@ -325,7 +329,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                   .id(caseData.getRespondentsFL401().getPartyId())
                                                                   .value(caseData.getRespondentsFL401()).build()));
                 }
-                log.info("----> applicantsRespondentInCase {}", applicantsRespondentInCase);
+                //log.info("----> applicantsRespondentInCase {}", applicantsRespondentInCase);
                 selectedApplicantRespondents.forEach(applicant -> {
                     Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                         applicant.getCode(),
