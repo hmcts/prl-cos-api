@@ -49,6 +49,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -182,7 +183,6 @@ public class CaseUtils {
     }
 
     public static YesOrNo cafcassFlag(String regionId) {
-        log.info("regionId ===> " + regionId);
         YesOrNo cafcassFlag = YesOrNo.No; //wales
         if (regionId != null) {
             int intRegionId = Integer.parseInt(regionId);
@@ -360,6 +360,12 @@ public class CaseUtils {
         });
     }
 
+    /**
+     * Please do not use this method as it was created for external user and it has dependency on idam roles.
+     * We are depending on AM roles for internal users
+     * @param userDetails It takes User Details as input and returns roles for users
+     * @return string
+     */
     public static String getUserRole(UserDetails userDetails) {
         if (null == userDetails || isEmpty(userDetails.getRoles())) {
             throw new IllegalStateException("Unexpected user");
@@ -374,6 +380,10 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
             return COURT_STAFF;
+        } else if (roles.contains(CAFCASS)) {
+            return CAFCASS;
+        } else if (roles.contains(BULK_SCAN)) {
+            return BULK_SCAN;
         }
 
         return CAFCASS;
