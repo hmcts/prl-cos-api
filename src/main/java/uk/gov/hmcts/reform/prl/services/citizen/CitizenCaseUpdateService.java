@@ -91,7 +91,8 @@ public class CitizenCaseUpdateService {
         return caseDetails;
     }
 
-    public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
+    public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
+            throws JsonProcessingException {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
@@ -152,7 +153,8 @@ public class CitizenCaseUpdateService {
         return allTabService.updateAllTabsIncludingConfTab(caseId);
     }
 
-    public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken) {
+    public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
+            throws JsonProcessingException {
         Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
         caseDataMapToBeUpdated.put(STATE, READY_FOR_DELETION_STATE);
         caseDataMapToBeUpdated.put(
