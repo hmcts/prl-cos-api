@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -267,6 +271,67 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
+            if (caseData.getSendOrReplyMessage() != null
+                && caseData.getSendOrReplyMessage().getSendMessageObject() != null
+                && caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
+
+                List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
+                    .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
+
+                List<DynamicMultiselectListElement> selectedApplicantRespondents = new ArrayList<DynamicMultiselectListElement>();
+
+                if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+                    selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondents(
+                                                            caseData.getApplicants(),
+                                                            dynamicMultiselectListElementList
+                                                        )
+                    );
+                    selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondents(
+                                                            caseData.getRespondents(),
+                                                            dynamicMultiselectListElementList
+                                                        )
+                    );
+                } else {
+                    selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondentsForFL401(
+                                                            caseData.getApplicantsFL401(),
+                                                            dynamicMultiselectListElementList
+                                                        )
+                    );
+                    selectedApplicantRespondents.addAll(SendAndReplyService.getSelectedApplicantsOrRespondentsForFL401(
+                                                            caseData.getRespondentsFL401(),
+                                                            dynamicMultiselectListElementList
+                                                        )
+                    );
+                }
+                log.info("----> selectedApplicantRespondents {}", selectedApplicantRespondents);
+                List<Element<PartyDetails>> applicantsRespondentInCase = new ArrayList<Element<PartyDetails>>();
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    applicantsRespondentInCase.addAll(caseData.getApplicants());
+                    applicantsRespondentInCase.addAll(caseData.getRespondents());
+                } else {
+                    applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                                  .id(caseData.getApplicantsFL401().getPartyId())
+                                                                  .value(caseData.getApplicantsFL401()).build()));
+                    applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                                  .id(caseData.getRespondentsFL401().getPartyId())
+                                                                  .value(caseData.getRespondentsFL401()).build()));
+                }
+                log.info("----> applicantsRespondentInCase {}", applicantsRespondentInCase);
+                selectedApplicantRespondents.forEach(applicant -> {
+                    Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                        applicant.getCode(),
+                        applicantsRespondentInCase
+                    );
+                    if (party.isPresent()) {
+                        try {
+                            log.info("----> selected party list {}", party);
+
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+            }
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND

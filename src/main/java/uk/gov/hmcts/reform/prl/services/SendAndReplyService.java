@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -1260,5 +1261,18 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                   List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
+                                                                                         List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
+            element.getCode())).collect(Collectors.toList());
     }
 }
