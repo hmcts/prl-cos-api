@@ -127,7 +127,6 @@ public class TestingSupportService {
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             boolean adminCreateApplication = false;
-            log.info("Executing for case event {}", callbackRequest.getEventId());
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())
                 || (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation);
@@ -281,14 +280,12 @@ public class TestingSupportService {
         if (!isCourtStaff) {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
-                log.info("File picked {}", VALID_C100_DRAFT_INPUT_JSON);
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
             }
         } else {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
-                log.info("File picked {}", VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
             }
