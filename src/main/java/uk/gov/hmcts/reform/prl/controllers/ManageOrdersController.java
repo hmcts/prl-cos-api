@@ -199,22 +199,19 @@ public class ManageOrdersController {
             }
             //Automated Hearing Request Call
             log.info("Automated Hearing Request Call - Start");
-            log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", callbackRequest.getCaseDetails());
-            HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
-            boolean isOption3Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
-                .equals(hearingData.getHearingDateConfirmOptionEnum());
-            boolean isOption4Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                && HearingDateConfirmOptionEnum.dateToBeFixed
-                .equals(hearingData.getHearingDateConfirmOptionEnum());
-            log.info("option 3 and 4 selected: caseDetails: {} {}", isOption3Selected, isOption4Selected);
-            if (isOption3Selected || isOption4Selected) {
-                CaseDetails caseDetails = hearingService.createAutomatedHearing(
-                    authorisation,
-                    callbackRequest.getCaseDetails()
-                );
-                log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", caseDetails);
-            }
+            caseData.getManageOrders().getOrdersHearingDetails().stream()
+                .map(Element::getValue)
+                .forEach(hearingData -> {
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum()) ||
+                        HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        CaseDetails caseDetails = hearingService.createAutomatedHearing(
+                            authorisation,
+                            callbackRequest.getCaseDetails()
+                        );
+                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", caseDetails);
+                    }
+
+                });
             log.info("Automated Hearing Request Call - End");
 
             //SNI-4330 fix
