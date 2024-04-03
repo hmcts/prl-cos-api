@@ -62,7 +62,7 @@ public class SolicitorEmailService {
                 .build();
 
         } catch (NotFoundException e) {
-            log.error("Cannot send email");
+            log.error("Cannot send email", e);
         }
         return null;
     }

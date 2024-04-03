@@ -14,7 +14,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -77,6 +80,9 @@ public class TestingSupportServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    private final String authorization = "authToken";
+
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
     @Mock
@@ -482,10 +488,10 @@ public class TestingSupportServiceTest {
                 .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
         caseDetails = CaseDetails.builder()
-                .id(12345678L)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                .data(caseDataMap)
-                .build();
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
         callbackRequest = CallbackRequest.builder()
                 .caseDetails(caseDetails)
                 .eventId(TS_ADMIN_APPLICATION_NOC.getId())
@@ -494,6 +500,12 @@ public class TestingSupportServiceTest {
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(taskListService.updateTaskList(callbackRequest, auth)).thenReturn(aboutToStartOrSubmitCallbackResponse);
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
