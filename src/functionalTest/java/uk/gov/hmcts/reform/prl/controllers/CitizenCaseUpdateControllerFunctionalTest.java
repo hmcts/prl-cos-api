@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -53,6 +55,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     public static final String updatePartyDetailsEndPoint = "/citizen/{caseId}/{eventId}/update-party-details";
 
+    public static final String saveDraftCitizenApplicationEndPoint = "/citizen/{caseId}/save-c100-draft-application";
+
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -66,6 +70,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private final RequestSpecification request2 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
     private MockMvc mockMvc;
 
     @Before
@@ -76,6 +82,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private static final String CITIZEN_UPDATE_CASE_REQUEST_BODY
         = "requests/citizen-update-case.json";
+
+    private static final String SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY = "requests/save-c100-draft-citizen.json";
 
 
     @Test
@@ -359,5 +367,51 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .as(CaseData.class);
     }
 
+    @Test
+    public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
+        CaseData createNewCase = request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(createNewCase.getId());
+
+        String requestBody = ResourceLoader.loadJson(SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody.replace("1712061560509233", String.valueOf(createNewCase.getId()));
+
+        CaseData saveedCaseData = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID,String.valueOf(createNewCase.getId()))
+            .post(saveDraftCitizenApplicationEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(saveedCaseData);
+
+        JSONObject createCaseMiamResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildMaim());
+        JSONObject savedMiamResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildMaim());
+
+        Assert.assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
+        Assert.assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
+
+        JSONObject createCaseHwfResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
+        JSONObject savedHwfResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
+
+        Assert.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
+        Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
+
+    }
 }
