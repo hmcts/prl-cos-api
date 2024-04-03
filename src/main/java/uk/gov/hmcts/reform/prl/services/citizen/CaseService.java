@@ -566,7 +566,9 @@ public class CaseService {
                                                               CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
         String partyId = findPartyId(caseData, userDetails);
-        citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyId));
+        if (partyId != null) {
+            citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyId));
+        }
         return citizenDocuments;
 
     }
