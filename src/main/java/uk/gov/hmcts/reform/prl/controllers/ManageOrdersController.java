@@ -203,11 +203,12 @@ public class ManageOrdersController {
                 .forEach(hearingData -> {
                     if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        log.info("Automated Hearing Request: Inside");
+                        log.info("Automated Hearing Request: Inside: Start");
                         CaseDetails caseDetails = hearingService.createAutomatedHearing(
                             authorisation,
                             callbackRequest.getCaseDetails()
                         );
+                        log.info("Automated Hearing Request: Inside: End");
                         log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", caseDetails);
                     }
 
