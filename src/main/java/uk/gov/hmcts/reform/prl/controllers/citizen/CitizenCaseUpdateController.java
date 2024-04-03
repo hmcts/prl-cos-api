@@ -82,7 +82,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside saveDraftCitizenApplication");
             try {
@@ -146,7 +146,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside deleteApplicationCitizen");
             try {
