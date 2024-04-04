@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -56,7 +57,6 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +80,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
@@ -565,103 +567,146 @@ public class CaseService {
     private List<CitizenDocuments> getCitizenApplicationPacks(UserDetails userDetails,
                                                               CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
-        String partyId = findPartyId(caseData, userDetails);
-        if (partyId != null) {
-            citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyId));
-        }
-        return citizenDocuments;
 
+        switch (caseData.getState()) {
+            case PREPARE_FOR_HEARING_CONDUCT_HEARING:
+            case DECISION_OUTCOME: {
+                HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
+
+                if (partyIdAndType != null) {
+                    citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
+                }
+                return citizenDocuments;
+            }
+            default:
+                return null;
+        }
     }
 
-    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, String partyId) {
-        List<CitizenDocuments> citizenDocuments = new ArrayList<>();
-        LocalDateTime uploadedDateTime = null;
-        if (null != caseData.getFinalServedApplicationDetailsList()) {
-            Optional<EmailNotificationDetails> emailNotificationDetails = caseData.getFinalServedApplicationDetailsList().stream()
-                .map(Element::getValue)
-                .filter(e -> e.getModeOfService().equals("By email"))
-                .map(ServedApplicationDetails::getEmailNotificationDetails)
-                .flatMap(Collection::stream)
-                .toList()
-                .stream().map(
-                    Element::getValue
-                )
-                .filter(emailNotificationDetails1 ->
-                            emailNotificationDetails1.getPartyIds() != null && emailNotificationDetails1.getPartyIds().contains(
-                                partyId))
-                .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
-                .findFirst();
-            if (emailNotificationDetails.isPresent()) {
-                EmailNotificationDetails emailNotificationDetails1 = emailNotificationDetails.get();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-                uploadedDateTime = LocalDateTime.parse(
-                    emailNotificationDetails1.getTimeStamp(),
-                    formatter
-                );
-                citizenDocuments.add(
-                    CitizenDocuments.builder()
-                        .partyId(emailNotificationDetails1.getPartyIds())
-                        .servedParty(emailNotificationDetails1.getServedParty())
-                        .uploadedDate(uploadedDateTime)
+    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, HashMap<String, String> partyIdAndType) {
+        final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
+
+        caseData.getFinalServedApplicationDetailsList().stream()
+            .map(Element::getValue)
+            .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
+            .forEach(servedApplicationDetails -> {
+                if (citizenDocuments[0].size() == 0) {
+                    if (servedApplicationDetails.getModeOfService().equals("By email")) {
+                        citizenDocuments[0].add(retreiveApplicationPackFromEmailNotifications(
+                            servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
+                            partyIdAndType
+                        ));
+                    } else {
+                        citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
+                            servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
+                            partyIdAndType
+                        ));
+                    }
+                }
+            });
+        return citizenDocuments[0];
+    }
+
+    private CitizenDocuments retreiveApplicationPackFromEmailNotifications(
+        List<Element<EmailNotificationDetails>> emailNotificationDetailsList,
+        ServiceOfApplication serviceOfApplication, HashMap<String, String> partyIdAndType) {
+        final CitizenDocuments[] citizenDocuments = {null};
+
+        String partyId = partyIdAndType.entrySet().stream()
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(null);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+
+        emailNotificationDetailsList.stream()
+            .map(Element::getValue)
+            .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
+            .filter(emailNotificationDetails -> emailNotificationDetails.getPartyIds().contains(partyId))
+            .findFirst()
+            .ifPresent(
+                emailNotificationDetails -> {
+                    citizenDocuments[0] = CitizenDocuments.builder()
+                        .partyId(emailNotificationDetails.getPartyIds())
+                        .servedParty(emailNotificationDetails.getServedParty())
+                        .uploadedDate(LocalDateTime.parse(
+                            emailNotificationDetails.getTimeStamp(),
+                            formatter
+                        ))
                         .applicantSoaPack(
-                            emailNotificationDetails1.getDocs().stream()
+                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                                ? emailNotificationDetails.getDocs().stream()
                                 .map(Element::getValue)
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toList()) : null
                         )
-                        .respondentSoaPack(caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument().stream()
-                                               .map(Element::getValue)
-                                               .collect(Collectors.toList()))
-
-                        .build()
-                );
-            }
-
-            Optional<BulkPrintDetails> bulkPrintNotificationDetails = caseData.getFinalServedApplicationDetailsList().stream()
-                .map(Element::getValue)
-                .filter(e -> e.getModeOfService().equals("By post"))
-                .map(ServedApplicationDetails::getBulkPrintDetails)
-                .flatMap(Collection::stream)
-                .toList()
-                .stream().map(
-                    Element::getValue
-                )
-                .filter(emailNotificationDetails1 ->
-                            emailNotificationDetails1.getPartyIds() != null
-                                && emailNotificationDetails1.getPartyIds().contains(partyId))
-                .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
-                .findFirst();
-
-            if (bulkPrintNotificationDetails.isPresent()) {
-                BulkPrintDetails bulkPrintNotificationDetails1 = bulkPrintNotificationDetails.get();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-                LocalDateTime dateTime = LocalDateTime.parse(
-                    bulkPrintNotificationDetails1.getTimeStamp(),
-                    formatter
-                );
-                if (uploadedDateTime.isBefore(dateTime)) {
-                    citizenDocuments = new ArrayList<>();
-                    citizenDocuments.add(
-                        CitizenDocuments.builder()
-                            .partyId(bulkPrintNotificationDetails1.getPartyIds())
-                            .servedParty(bulkPrintNotificationDetails1.getServedParty())
-                            .uploadedDate(dateTime)
-                            .applicantSoaPack(
-                                bulkPrintNotificationDetails1.getPrintDocs().stream()
+                        .respondentSoaPack(
+                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                                ? (
+                                emailNotificationDetails.getDocs().stream()
                                     .map(Element::getValue)
                                     .collect(Collectors.toList())
-                            )
-                            .respondentSoaPack(caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument().stream()
-                                                   .map(Element::getValue)
-                                                   .collect(Collectors.toList()))
-
-                            .build()
-                    );
+                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                        )
+                        .build();
                 }
+            );
+        return citizenDocuments[0];
+    }
 
-            }
+    private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
+        return null != serviceOfApplication.getUnServedRespondentPack()
+            ? serviceOfApplication.getUnServedRespondentPack()
+            .getPackDocument().stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList()) : null;
+    }
 
-        }
-        return citizenDocuments;
+
+    private CitizenDocuments retreiveApplicationPackFromBulkPrintDetails(
+        List<Element<BulkPrintDetails>> bulkPrintDetailsList,
+        ServiceOfApplication serviceOfApplication, HashMap<String, String> partyIdAndType) {
+
+        final CitizenDocuments[] citizenDocuments = {null};
+
+        String partyId = partyIdAndType.entrySet().stream()
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(null);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+
+        bulkPrintDetailsList.stream()
+            .map(Element::getValue)
+            .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
+            .filter(bulkPrintDetails -> bulkPrintDetails.getPartyIds().contains(partyId))
+            .findFirst()
+            .ifPresent(
+                bulkPrintDetails -> {
+                    citizenDocuments[0] = CitizenDocuments.builder()
+                        .partyId(bulkPrintDetails.getPartyIds())
+                        .servedParty(bulkPrintDetails.getServedParty())
+                        .uploadedDate(LocalDateTime.parse(
+                            bulkPrintDetails.getTimeStamp(),
+                            formatter
+                        ))
+                        .applicantSoaPack(
+                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                                ? bulkPrintDetails.getPrintDocs().stream()
+                                .map(Element::getValue)
+                                .collect(Collectors.toList()) : null
+                        )
+                        .respondentSoaPack(
+                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                                ? (
+                                bulkPrintDetails.getPrintDocs().stream()
+                                    .map(Element::getValue)
+                                    .collect(Collectors.toList())
+                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                        )
+                        .build();
+                }
+            );
+        return citizenDocuments[0];
     }
 
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
@@ -778,9 +823,17 @@ public class CaseService {
 
     private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails, CaseData caseData) {
 
-        String partyId = findPartyId(caseData, userDetails);
-        log.info("*** partyId from idamId {}", partyId);
-        return new ArrayList<>(getCitizenOrdersForParty(caseData, partyId));
+        HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
+        if (partyIdAndType != null) {
+            String partyId = partyIdAndType.entrySet().stream()
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+
+            log.info("*** partyId from idamId {}", partyId);
+            return new ArrayList<>(getCitizenOrdersForParty(caseData, partyId));
+        }
+        return null;
     }
 
     private List<CitizenDocuments> getCitizenOrdersForParty(CaseData caseData,
@@ -810,30 +863,41 @@ public class CaseService {
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
 
-    private String findPartyId(CaseData caseData,
-                               UserDetails userDetails) {
+    private HashMap findPartyIdAndType(CaseData caseData,
+                                       UserDetails userDetails) {
+        HashMap<String, String> partyIdAndTypeMap = new HashMap<>();
         log.info("*** Inside find partyId method ***");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("*** C100 case type");
             Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
             if (applicantOptional.isPresent()) {
-                return String.valueOf(applicantOptional.get().getId());
+                partyIdAndTypeMap.put(String.valueOf(applicantOptional.get().getId()), SERVED_PARTY_APPLICANT);
+                return partyIdAndTypeMap;
             }
 
             Optional<Element<PartyDetails>> respondentOptional = getParty(caseData.getRespondents(), userDetails);
             if (respondentOptional.isPresent()) {
-                return String.valueOf(respondentOptional.get().getId());
+                partyIdAndTypeMap.put(String.valueOf(respondentOptional.get().getId()), SERVED_PARTY_RESPONDENT);
+                return partyIdAndTypeMap;
             }
 
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("*** FL401 case type");
             if (null != caseData.getApplicantsFL401().getUser()
                 && userDetails.getId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                return String.valueOf(caseData.getApplicantsFL401().getPartyId());
+                partyIdAndTypeMap.put(
+                    String.valueOf(caseData.getApplicantsFL401().getPartyId()),
+                    SERVED_PARTY_APPLICANT
+                );
+                return partyIdAndTypeMap;
             }
             if (null != caseData.getRespondentsFL401().getUser()
                 && userDetails.getId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                return String.valueOf(caseData.getRespondentsFL401().getPartyId());
+                partyIdAndTypeMap.put(
+                    String.valueOf(caseData.getRespondentsFL401().getPartyId()),
+                    SERVED_PARTY_RESPONDENT
+                );
+                return partyIdAndTypeMap;
             }
         }
 
