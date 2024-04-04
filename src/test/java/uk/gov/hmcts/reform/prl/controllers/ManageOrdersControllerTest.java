@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -86,7 +87,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
@@ -3629,5 +3632,51 @@ public class ManageOrdersControllerTest {
                 .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
                                 RuntimeException.class, "Invalid Client");
 
+    }
+
+    @Test
+    public void testCreateAutomatedHearingManagementRequest() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
+                             .build())
+            .build();
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseDatas = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
+                              .markedToServeEmailNotification(Yes).build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(12345L)
+            .draftOrderCollection(draftOrderCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseDatas);
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()))).thenReturn(startAllTabsUpdateDataContent);
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
+            = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+        verify(manageOrderEmailService, times(1))
+            .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
     }
 }
