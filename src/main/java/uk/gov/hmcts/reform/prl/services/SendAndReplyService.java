@@ -1280,8 +1280,8 @@ public class SendAndReplyService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        if(null != message && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-            && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())){
+        if (null != message && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+            && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
             if (recipientEmailAddresses.length > 0) {
                 final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
