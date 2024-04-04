@@ -222,7 +222,6 @@ public class HearingService {
             log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
             response = hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseDetails);
         } catch (Exception e) {
-            //throw (new RuntimeException(e));
             log.error("Error in createAutomatedHearing", e);
         }
         return response;
