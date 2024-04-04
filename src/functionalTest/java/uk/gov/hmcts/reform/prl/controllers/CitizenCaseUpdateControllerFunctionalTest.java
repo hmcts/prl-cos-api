@@ -57,6 +57,9 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     public static final String saveDraftCitizenApplicationEndPoint = "/citizen/{caseId}/save-c100-draft-application";
 
+    public static final String deleteApplicationCitizenEndPoint = "/citizen/{caseId}/delete-application";
+
+    public static final String withDrawCaseCitizenEndPoint = "/citizen/{caseId}/withdraw";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -84,6 +87,12 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         = "requests/citizen-update-case.json";
 
     private static final String SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY = "requests/save-c100-draft-citizen.json";
+
+    private static final String DELETE_APPLICATION_CITIZEN_REQUEST_BODY = "requests/delete-aplication-citizen.json";
+
+    private static final String WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY = "requests/withdraw-aplication-citizen.json";
+
+    private static final String SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY = "requests/submitted-aplication-ready-for-withdraw.json";
 
 
     @Test
@@ -412,6 +421,81 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
         Assert.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
         Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
+
+    }
+
+
+    @Test
+    public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
+
+        CaseData createNewCase = request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(createNewCase.getId());
+
+        String requestBody = ResourceLoader.loadJson(DELETE_APPLICATION_CITIZEN_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody.replace("1712061560509233", String.valueOf(createNewCase.getId()));
+
+        CaseData deletedApplicationCaseData = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID, createNewCase.getId())
+            .post(deleteApplicationCitizenEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(deletedApplicationCaseData);
+
+    }
+
+    @Test
+    public void givenRequestBody_withdrawCase_then200Response() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY);
+        CaseDetails caseDetails =  request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+
+        String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
+
+        CaseData withDrawCase = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody1)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID,String.valueOf(caseDetails.getId()))
+            .post(withDrawCaseCitizenEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(withDrawCase);
 
     }
 }
