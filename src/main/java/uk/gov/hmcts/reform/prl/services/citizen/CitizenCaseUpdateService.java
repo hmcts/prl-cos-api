@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -141,7 +142,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(new ObjectMapper());
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+        Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(objectMapper);
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
 
         allTabService.submitUpdateForSpecificUserEvent(
