@@ -104,6 +104,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@SuppressWarnings({"java:S1607"})
 public class CaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
