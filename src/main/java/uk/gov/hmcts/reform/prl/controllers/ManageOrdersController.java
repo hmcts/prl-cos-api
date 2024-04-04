@@ -203,7 +203,7 @@ public class ManageOrdersController {
                 .forEach(hearingData -> {
                     if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        log.info("Automated Hearing Request: Inside: Start");
+                        log.info("Automated Hearing Request: Inside: Start - Option3:{} Option4:{}", hearingData.getHearingDateConfirmOptionEnum(), hearingData.getHearingDateConfirmOptionEnum());
                         CaseDetails caseDetails = hearingService.createAutomatedHearing(
                             authorisation,
                             callbackRequest.getCaseDetails()

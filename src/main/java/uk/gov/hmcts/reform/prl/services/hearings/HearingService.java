@@ -217,7 +217,7 @@ public class HearingService {
 
     public CaseDetails createAutomatedHearing(String userToken, CaseDetails caseDetails) {
         try {
-            log.info("Automated Hearing Request: createAutomatedHearing");
+            log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
             return hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseDetails);
         } catch (Exception e) {
             log.error("Error in createAutomatedHearing", e);
