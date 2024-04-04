@@ -176,7 +176,11 @@ public class CaseServiceTest {
 
     private ServedApplicationDetails servedApplicationDetails;
 
+    private ServedApplicationDetails servedApplicationDetailsEmailOnly;
+
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList1;
 
     @Before
     public void setup() {
@@ -266,7 +270,7 @@ public class CaseServiceTest {
                                              .map(Element::getValue)
                                              .map(Document::getDocumentFileName).toList()))
                                          .printDocs(unServedRespondentPack.getPackDocument())
-                                         .partyIds("1111")
+                                         .partyIds("00000000-0000-0000-0000-000000000000")
                                          .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                                                         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                          .build()));
@@ -277,6 +281,7 @@ public class CaseServiceTest {
                                                  .emailAddress(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL)
                                                  .servedParty(PRL_COURT_ADMIN)
                                                  .docs(unServedRespondentPack.getPackDocument())
+                                                 .partyIds("00000000-0000-0000-0000-000000000000")
                                                  .attachedDocs(String.join(",", unServedRespondentPack
                                                      .getPackDocument().stream()
                                                      .map(Element::getValue)
@@ -291,8 +296,16 @@ public class CaseServiceTest {
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
+        servedApplicationDetailsEmailOnly = ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy("FullName")
+            .emailNotificationDetails(emailNotificationDetails)
+            .servedAt(formatter)
+            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, null))
+            .whoIsResponsible(COURT)
+            .build();
 
         finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+        finalServedApplicationDetailsList1 = List.of(element(servedApplicationDetailsEmailOnly));
     }
 
     @Test
@@ -1042,7 +1055,6 @@ public class CaseServiceTest {
             .uploadedByIdamId("00000000-0000-0000-0000-000000000000")
             .documentUploadedDate(LocalDateTime.now())
             .build();
-
         caseData = caseData.toBuilder()
             .reviewDocuments(ReviewDocuments.builder()
                                  .legalProfUploadDocListDocTab(List.of(element(quarantineLegalDoc)))
@@ -1158,7 +1170,10 @@ public class CaseServiceTest {
             .orderCollection(List.of(element(orderDetails)))
             .applicants(List.of(element(testUuid, partyDetails)))
             .state(State.DECISION_OUTCOME)
-            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1178,7 +1193,6 @@ public class CaseServiceTest {
 
     @Test
     public void testGetCitizenRespondentOrdersC100() {
-
         //Given
         ServedParties servedParties = ServedParties.builder()
             .partyId("00000000-0000-0000-0000-000000000000")
@@ -1200,7 +1214,7 @@ public class CaseServiceTest {
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .respondents(List.of(element(testUuid, partyDetails)))
-            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1242,6 +1256,9 @@ public class CaseServiceTest {
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(partyDetails)
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
