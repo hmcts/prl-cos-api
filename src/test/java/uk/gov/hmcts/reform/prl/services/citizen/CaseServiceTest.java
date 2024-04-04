@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -39,12 +40,17 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -62,6 +68,10 @@ import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -79,16 +89,21 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class CaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -159,6 +174,14 @@ public class CaseServiceTest {
     private UpdateCaseData updateCaseData;
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+    private ServedApplicationDetails servedApplicationDetails;
+
+    private ServedApplicationDetails servedApplicationDetailsEmailOnly;
+
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList1;
+
     @Before
     public void setup() {
         partyDetails = PartyDetails.builder()
@@ -227,6 +250,62 @@ public class CaseServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
+
+
+        CaseData caseData1 = CaseData.builder().id(12345L).serviceOfApplication(ServiceOfApplication.builder()
+                                                                                    .unServedRespondentPack(SoaPack.builder().packDocument(
+                                                                                        List.of(element(Document.builder().documentBinaryUrl(
+                                                                                            "abc").documentFileName("ddd").build()))).build())
+                                                                                    .build()).build();
+
+        SoaPack unServedRespondentPack = caseData1.getServiceOfApplication().getUnServedRespondentPack();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                         .servedParty(PRL_COURT_ADMIN)
+                                         .bulkPrintId(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST)
+                                         .printedDocs(String.join(",", unServedRespondentPack
+                                             .getPackDocument().stream()
+                                             .map(Element::getValue)
+                                             .map(Document::getDocumentFileName).toList()))
+                                         .printDocs(unServedRespondentPack.getPackDocument())
+                                         .partyIds("00000000-0000-0000-0000-000000000000")
+                                         .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                         .build()));
+
+
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder()
+                                                 .emailAddress(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL)
+                                                 .servedParty(PRL_COURT_ADMIN)
+                                                 .docs(unServedRespondentPack.getPackDocument())
+                                                 .partyIds("00000000-0000-0000-0000-000000000000")
+                                                 .attachedDocs(String.join(",", unServedRespondentPack
+                                                     .getPackDocument().stream()
+                                                     .map(Element::getValue)
+                                                     .map(Document::getDocumentFileName).toList()))
+                                                 .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                                 .build()));
+
+        servedApplicationDetails = ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy("FullName")
+            .servedAt(formatter)
+            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .whoIsResponsible(COURT)
+            .bulkPrintDetails(bulkPrintDetails).build();
+        servedApplicationDetailsEmailOnly = ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy("FullName")
+            .emailNotificationDetails(emailNotificationDetails)
+            .servedAt(formatter)
+            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, null))
+            .whoIsResponsible(COURT)
+            .build();
+
+        finalServedApplicationDetailsList = List.of(element(servedApplicationDetails));
+        finalServedApplicationDetailsList1 = List.of(element(servedApplicationDetailsEmailOnly));
     }
 
     @Test
@@ -358,7 +437,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
         //When
@@ -389,7 +468,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
 
         //When
@@ -725,7 +804,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
@@ -759,7 +838,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
@@ -788,7 +867,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
@@ -819,7 +898,7 @@ public class CaseServiceTest {
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
@@ -988,6 +1067,8 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder()
                                            .citizenQuarantineDocsList(List.of(element(quarantineLegalDoc)))
                                            .build())
+            .state(State.DECISION_OUTCOME)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1013,7 +1094,7 @@ public class CaseServiceTest {
     @Test
     public void testEmptyCitizenDocumentsWhenNoDocs() {
         //Given
-        caseData = caseData.toBuilder().build();
+        caseData = caseData.toBuilder().state(State.DECISION_OUTCOME).build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
             .roles(List.of(Roles.CITIZEN.getValue())).build();
@@ -1048,6 +1129,7 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder()
                                            .citizenQuarantineDocsList(List.of(element(otherPartyDoc)))
                                            .build())
+            .state(State.DECISION_OUTCOME)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1087,6 +1169,11 @@ public class CaseServiceTest {
             .caseTypeOfApplication("C100")
             .orderCollection(List.of(element(orderDetails)))
             .applicants(List.of(element(testUuid, partyDetails)))
+            .state(State.DECISION_OUTCOME)
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1124,8 +1211,10 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
+            .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .respondents(List.of(element(testUuid, partyDetails)))
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1164,8 +1253,13 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
+            .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(partyDetails)
+            .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
+                List.of(element(Document.builder().documentBinaryUrl(
+                    "abc").documentFileName("ddd").build()))).build()).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
@@ -1207,6 +1301,8 @@ public class CaseServiceTest {
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(PartyDetails.builder().build())
             .respondentsFL401(partyDetails)
+            .state(State.DECISION_OUTCOME)
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
