@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +45,7 @@ public class CitizenCaseUpdateService {
 
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    private final ObjectMapper objectMapper;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -142,8 +142,6 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        ObjectMapper objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule());
         Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(objectMapper);
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         try {
