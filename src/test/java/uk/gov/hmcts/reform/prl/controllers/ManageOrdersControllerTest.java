@@ -189,13 +189,17 @@ public class ManageOrdersControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
+                                                            Mockito.anyString(),
+                                                            Mockito.any(),
+                                                            Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
 
-        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingService.getHearings(Mockito.anyString(),
+                                        Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -235,7 +239,8 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(List.of(element(HearingData.builder()
-                                                                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                                        .hearingDateConfirmOptionEnum(
+                                                                            HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                                         .build())))
                               .markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
