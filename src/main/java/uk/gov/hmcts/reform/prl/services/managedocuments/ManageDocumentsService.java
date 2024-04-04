@@ -62,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -729,7 +730,7 @@ public class ManageDocumentsService {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
             } else if (roles.contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType.add(UserRoles.CITIZEN.name());
+                loggedInUserType.add(CITIZEN_ROLE);
             } else if (roleAssignmentServiceResponse != null) {
                 List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                     .stream()
@@ -769,7 +770,7 @@ public class ManageDocumentsService {
             loggedInUserType.add(LEGAL_PROFESSIONAL);
             loggedInUserType.add(SOLICITOR_ROLE);
         } else if (roles.contains(Roles.CITIZEN.getValue())) {
-            loggedInUserType.add(UserRoles.CITIZEN.name());
+            loggedInUserType.add(CITIZEN_ROLE);
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType.add(BULK_SCAN);
         } else {
