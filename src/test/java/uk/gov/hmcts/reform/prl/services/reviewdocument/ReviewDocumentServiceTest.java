@@ -130,6 +130,7 @@ public class ReviewDocumentServiceTest {
 
         objectMapper.registerModule(new JavaTimeModule());
 
+
         element = Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(QuarantineLegalDoc.builder()
                        .categoryId("MIAMCertificate")
