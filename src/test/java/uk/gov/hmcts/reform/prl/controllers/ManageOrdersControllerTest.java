@@ -12,6 +12,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -34,7 +36,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -87,9 +88,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
@@ -170,6 +169,9 @@ public class ManageOrdersControllerTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
+    @Mock
+    HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
+
 
 
     @Before
@@ -231,7 +233,11 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                                                                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                                        .build())))
+                              .markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
             .build();
         Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
@@ -3645,23 +3651,7 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        CaseData caseDatas = CaseData.builder()
-            .manageOrders(ManageOrders.builder()
-                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
-                              .markedToServeEmailNotification(Yes).build())
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .id(12345L)
-            .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .build();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseDatas);
-        when(allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()))).thenReturn(startAllTabsUpdateDataContent);
+
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         Map<String, Object> summaryTabFields = Map.of(
@@ -3669,6 +3659,9 @@ public class ManageOrdersControllerTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
+        ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
+        when(hearingService.createAutomatedHearing(authToken, callbackRequest.getCaseDetails())).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.sendEmailNotificationOnClosingOrder(
