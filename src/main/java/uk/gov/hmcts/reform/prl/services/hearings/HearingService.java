@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -215,14 +216,16 @@ public class HearingService {
         return Collections.emptyList();
     }
 
-    public CaseDetails createAutomatedHearing(String userToken, CaseDetails caseDetails) {
+    public ResponseEntity<Object> createAutomatedHearing(String userToken, CaseDetails caseDetails) {
+        ResponseEntity<Object> response = null;
         try {
             log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
-            return hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseDetails);
+            response = hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseDetails);
         } catch (Exception e) {
+            //throw (new RuntimeException(e));
             log.error("Error in createAutomatedHearing", e);
         }
-        return null;
+        return response;
     }
 
 }

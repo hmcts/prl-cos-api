@@ -7,11 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
@@ -32,6 +36,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,6 +73,11 @@ public class HearingServiceTest {
     private Hearings hearings;
 
     Map<String, String> refDataCategoryValueMap = new HashMap<>();
+    @Mock
+    CoreCaseDataApi coreCaseDataApi;
+    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    private CaseDetails caseDetails;
 
     @Before
     public void init() {
@@ -91,14 +101,14 @@ public class HearingServiceTest {
             .caseHearings(Collections.singletonList(caseHearing))
             .build();
         when(hearingApiClient.getHearingDetails(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenReturn(hearings);
         when(hearingApiClient.getHearingsByListOfCaseIds(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenReturn(List.of(hearings));
 
         refDataCategoryValueMap.put("ABA5-FFH", "Full/Final hearing");
@@ -111,10 +121,10 @@ public class HearingServiceTest {
         refDataCategoryValueMap.put("ABA5-FRI", "Issues Resolution Hearing");
 
         when(refDataService.getRefDataCategoryValueMap(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any(),
+            any()
         )).thenReturn(refDataCategoryValueMap);
 
         ReflectionTestUtils.setField(
@@ -124,6 +134,11 @@ public class HearingServiceTest {
 
         ReflectionTestUtils.setField(
             hearingService, "hearingTypeCategoryId", "HearingType");
+
+        caseDetails = coreCaseDataApi.submitForCitizen(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER, "UserID",
+                                                                   "jurisdictionId", "caseType",
+                                                                   true, buildCaseDataContent()
+        );
 
     }
 
@@ -154,9 +169,9 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
@@ -169,10 +184,10 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestExceptionForRefData() {
         when(refDataService.getRefDataCategoryValueMap(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
         Hearings response =
             hearingService.getHearings(auth, caseReferenceNumber);
@@ -189,9 +204,9 @@ public class HearingServiceTest {
         NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("2030006118")
             .hearingDateTime(LocalDateTime.now().plusDays(5)).build();
         when(hearingApiClient.getNextHearingDate(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenReturn(nextHearingDetails);
 
         NextHearingDetails response =
@@ -204,9 +219,9 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getNextHearingDate exception .")
     public void getNextHearingDateTestException() {
         when(hearingApiClient.getNextHearingDate(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
         NextHearingDetails response =
             hearingService.getNextHearingDate(auth, caseReferenceNumber);
@@ -236,9 +251,9 @@ public class HearingServiceTest {
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
 
         when(hearingApiClient.getCaseLinkedData(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
 
         List<CaseLinkedData> response =
@@ -251,9 +266,9 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getFutureHearings success.")
     public void getFutureHearingsTestSuccess() {
         when(hearingApiClient.getFutureHearings(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenReturn(hearings);
         Hearings response =
             hearingService.getFutureHearings(auth, caseReferenceNumber);
@@ -265,9 +280,9 @@ public class HearingServiceTest {
     @DisplayName("test case for HearingService getFutureHearings exception .")
     public void getFutureHearingsTestException() {
         when(hearingApiClient.getFutureHearings(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
 
         Hearings response =
@@ -294,9 +309,9 @@ public class HearingServiceTest {
     public void getHearingsByListOfCaseIdsTestException() {
 
         when(hearingApiClient.getHearingsByListOfCaseIds(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenThrow(new RuntimeException());
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
@@ -305,6 +320,45 @@ public class HearingServiceTest {
         List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
 
         Assert.assertTrue(hearingsResp.isEmpty());
+    }
+
+    @Test
+    @DisplayName("test case for Automated Hearing Management.")
+    public void createAutomatedHearingManagementTestSuccess() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ResponseEntity<Object> response=new ResponseEntity<>(HttpStatus.OK);
+        when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
+        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
+
+        Assert.assertEquals(
+            HttpStatus.OK, automatedHearingsResponse.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("test case for Automated Hearing Management.")
+    public void createAutomatedHearingManagementTestBadRequest() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ResponseEntity<Object> response=new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
+        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
+
+        Assert.assertEquals(
+            HttpStatus.BAD_REQUEST, automatedHearingsResponse.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("test case for Automated Hearing Management.")
+    public void createAutomatedHearingManagementTestException() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
+        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, null);
+        Assert.assertNull(automatedHearingsResponse);
+    }
+
+    private CaseDataContent buildCaseDataContent() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseTypeOfApplication", "C100");
+        return CaseDataContent.builder().data(caseData).eventToken("EventToken").caseReference("CaseReference").build();
     }
 }
 

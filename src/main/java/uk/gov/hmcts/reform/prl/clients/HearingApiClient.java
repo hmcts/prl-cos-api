@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,7 +61,7 @@ public interface HearingApiClient {
     );
 
     @PostMapping(value = "/automated-hearing", consumes = "application/json")
-    CaseDetails createAutomatedHearing(
+    ResponseEntity<Object> createAutomatedHearing(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody CaseDetails caseDetails
