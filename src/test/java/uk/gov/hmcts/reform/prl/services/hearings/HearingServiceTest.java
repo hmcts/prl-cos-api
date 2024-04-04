@@ -326,7 +326,7 @@ public class HearingServiceTest {
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        ResponseEntity<Object> response=new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
         when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
         ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
 
@@ -338,7 +338,7 @@ public class HearingServiceTest {
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        ResponseEntity<Object> response=new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
         ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
 
