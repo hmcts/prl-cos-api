@@ -117,6 +117,8 @@ public class CitizenCaseUpdateController {
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside submitC100Application");
+            log.info("*** Inside submitC100Application, case id got: {}", caseId);
+            log.info("*** Inside submitC100Application, event id got: {}", eventId);
             try {
                 log.info("submitC100Application caseData start json ===>" + objectMapper.writeValueAsString(caseData));
             } catch (JsonProcessingException e) {
@@ -129,6 +131,7 @@ public class CitizenCaseUpdateController {
                 caseData
             );
             if (caseDetails != null) {
+                log.error("submitC100Application is successful for the case {}", caseId);
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
                 log.error("submitC100Application is not successful for the case {}", caseId);
