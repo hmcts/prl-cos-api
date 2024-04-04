@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 //TO BE DELETED - NOT IN USE
 @Ignore
+@SuppressWarnings({"java:S1607"})
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDataMapperTest {
 

@@ -569,8 +569,7 @@ public class CaseService {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         switch (caseData.getState()) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING:
-            case DECISION_OUTCOME: {
+            case PREPARE_FOR_HEARING_CONDUCT_HEARING, DECISION_OUTCOME: {
                 HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
                 if (partyIdAndType != null) {
@@ -590,7 +589,7 @@ public class CaseService {
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].size() == 0) {
+                if (citizenDocuments[0].isEmpty()) {
                     if (servedApplicationDetails.getModeOfService().equals("By email")) {
                         citizenDocuments[0].add(retreiveApplicationPackFromEmailNotifications(
                             servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
@@ -625,30 +624,28 @@ public class CaseService {
             .filter(emailNotificationDetails -> emailNotificationDetails.getPartyIds().contains(partyId))
             .findFirst()
             .ifPresent(
-                emailNotificationDetails -> {
-                    citizenDocuments[0] = CitizenDocuments.builder()
-                        .partyId(emailNotificationDetails.getPartyIds())
-                        .servedParty(emailNotificationDetails.getServedParty())
-                        .uploadedDate(LocalDateTime.parse(
-                            emailNotificationDetails.getTimeStamp(),
-                            formatter
-                        ))
-                        .applicantSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
-                                ? emailNotificationDetails.getDocs().stream()
+                emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                    .partyId(emailNotificationDetails.getPartyIds())
+                    .servedParty(emailNotificationDetails.getServedParty())
+                    .uploadedDate(LocalDateTime.parse(
+                        emailNotificationDetails.getTimeStamp(),
+                        formatter
+                    ))
+                    .applicantSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                            ? emailNotificationDetails.getDocs().stream()
+                            .map(Element::getValue)
+                            .toList() : null
+                    )
+                    .respondentSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                            ? (
+                            emailNotificationDetails.getDocs().stream()
                                 .map(Element::getValue)
-                                .collect(Collectors.toList()) : null
-                        )
-                        .respondentSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
-                                ? (
-                                emailNotificationDetails.getDocs().stream()
-                                    .map(Element::getValue)
-                                    .collect(Collectors.toList())
-                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
-                        )
-                        .build();
-                }
+                                .toList()
+                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                    )
+                    .build()
             );
         return citizenDocuments[0];
     }
@@ -658,7 +655,7 @@ public class CaseService {
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList()) : null;
+            .toList() : null;
     }
 
 
@@ -681,30 +678,28 @@ public class CaseService {
             .filter(bulkPrintDetails -> bulkPrintDetails.getPartyIds().contains(partyId))
             .findFirst()
             .ifPresent(
-                bulkPrintDetails -> {
-                    citizenDocuments[0] = CitizenDocuments.builder()
-                        .partyId(bulkPrintDetails.getPartyIds())
-                        .servedParty(bulkPrintDetails.getServedParty())
-                        .uploadedDate(LocalDateTime.parse(
-                            bulkPrintDetails.getTimeStamp(),
-                            formatter
-                        ))
-                        .applicantSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
-                                ? bulkPrintDetails.getPrintDocs().stream()
+                bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                    .partyId(bulkPrintDetails.getPartyIds())
+                    .servedParty(bulkPrintDetails.getServedParty())
+                    .uploadedDate(LocalDateTime.parse(
+                        bulkPrintDetails.getTimeStamp(),
+                        formatter
+                    ))
+                    .applicantSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                            ? bulkPrintDetails.getPrintDocs().stream()
+                            .map(Element::getValue)
+                            .toList() : null
+                    )
+                    .respondentSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                            ? (
+                            bulkPrintDetails.getPrintDocs().stream()
                                 .map(Element::getValue)
-                                .collect(Collectors.toList()) : null
-                        )
-                        .respondentSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
-                                ? (
-                                bulkPrintDetails.getPrintDocs().stream()
-                                    .map(Element::getValue)
-                                    .collect(Collectors.toList())
-                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
-                        )
-                        .build();
-                }
+                                .toList()
+                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                    )
+                    .build()
             );
         return citizenDocuments[0];
     }
@@ -863,7 +858,7 @@ public class CaseService {
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
 
-    private HashMap findPartyIdAndType(CaseData caseData,
+    private HashMap<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
         HashMap<String, String> partyIdAndTypeMap = new HashMap<>();
         log.info("*** Inside find partyId method ***");

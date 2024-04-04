@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_F
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@SuppressWarnings({"java:S1607"})
 public class ReviewDocumentServiceTest {
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";

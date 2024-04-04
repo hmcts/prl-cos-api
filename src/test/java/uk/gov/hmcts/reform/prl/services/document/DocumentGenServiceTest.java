@@ -161,6 +161,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@SuppressWarnings({"java:S1607"})
 public class DocumentGenServiceTest {
 
     @Mock
