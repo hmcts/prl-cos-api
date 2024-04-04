@@ -146,8 +146,12 @@ public class CitizenCaseUpdateService {
                 .registerModule(new JavaTimeModule());
         Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(objectMapper);
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-
-        allTabService.submitUpdateForSpecificUserEvent(
+        try {
+            log.info("caseDataMapToBeUpdated to be stored ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
@@ -156,7 +160,13 @@ public class CitizenCaseUpdateService {
                 startAllTabsUpdateDataContent.userDetails()
         );
 
-        return allTabService.updateAllTabsIncludingConfTab(caseId);
+        log.info("Submit event executed {}", eventId);
+        try {
+            log.info("caseDetails updated ===>" + objectMapper.writeValueAsString(caseDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        return caseDetails;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
