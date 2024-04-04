@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -51,6 +53,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -75,6 +78,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OR_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -1263,16 +1267,95 @@ public class SendAndReplyService {
         }
     }
 
-    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
-                                                                                   List<DynamicMultiselectListElement> value) {
-        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
-            element.getCode()))).collect(
-            Collectors.toList());
-    }
+    public void sendNotificationToExternalParties(CaseData caseData) {
 
-    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
-                                                                                         List<DynamicMultiselectListElement> value) {
-        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
-            element.getCode())).collect(Collectors.toList());
+        log.info("----> caseData {}", caseData);
+
+        log.info("----> caseData.getSendOrReplyMessage() {}", caseData.getSendOrReplyMessage());
+
+        if (caseData.getSendOrReplyMessage() != null
+            && caseData.getSendOrReplyMessage().getSendMessageObject() != null
+            && caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
+
+            List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
+                .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
+
+            log.info("----> caseData.getExternalMessageWhoToSendTo() {}", caseData.getSendOrReplyMessage()
+                .getSendMessageObject().getExternalMessageWhoToSendTo());
+
+            log.info("----> caseData.getExternalMessageWhoToSendTo().getValue() {}", caseData.getSendOrReplyMessage()
+                .getSendMessageObject().getExternalMessageWhoToSendTo().getValue());
+
+            List<DynamicMultiselectListElement> selectedApplicantRespondents = new ArrayList<DynamicMultiselectListElement>();
+
+            //log.info("----> caseData.getApplicants() {}", caseData.getApplicants());
+            //log.info("----> caseData.getRespondents() {}", caseData.getRespondents());
+            if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+                selectedApplicantRespondents.addAll(CaseUtils.getSelectedApplicantsOrRespondentsForC100(
+                                                        caseData.getApplicants(),
+                                                        dynamicMultiselectListElementList
+                                                    )
+                );
+                selectedApplicantRespondents.addAll(CaseUtils.getSelectedApplicantsOrRespondentsForC100(
+                                                        caseData.getRespondents(),
+                                                        dynamicMultiselectListElementList
+                                                    )
+                );
+            } else {
+                selectedApplicantRespondents.addAll(CaseUtils.getSelectedApplicantsOrRespondentsForFL401(
+                                                        caseData.getApplicantsFL401(),
+                                                        dynamicMultiselectListElementList
+                                                    )
+                );
+                selectedApplicantRespondents.addAll(CaseUtils.getSelectedApplicantsOrRespondentsForFL401(
+                                                        caseData.getRespondentsFL401(),
+                                                        dynamicMultiselectListElementList
+                                                    )
+                );
+            }
+            log.info("----> selectedApplicantRespondents {}", selectedApplicantRespondents);
+            List<Element<PartyDetails>> applicantsRespondentInCase = new ArrayList<Element<PartyDetails>>();
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                applicantsRespondentInCase.addAll(caseData.getApplicants());
+                applicantsRespondentInCase.addAll(caseData.getRespondents());
+            } else {
+                applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                              .id(caseData.getApplicantsFL401().getPartyId())
+                                                              .value(caseData.getApplicantsFL401()).build()));
+                applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                              .id(caseData.getRespondentsFL401().getPartyId())
+                                                              .value(caseData.getRespondentsFL401()).build()));
+            }
+            //log.info("----> applicantsRespondentInCase {}", applicantsRespondentInCase);
+            selectedApplicantRespondents.forEach(applicant -> {
+                Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                    applicant.getCode(),
+                    applicantsRespondentInCase
+                );
+                if (party.isPresent()) {
+                    PartyDetails partyDetails = party.get().getValue();
+                    if (YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
+                        log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
+
+                    } else if (partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
+                        log.info("----> Else if partyDetails.getContactPreferences() {}",
+                                 partyDetails.getContactPreferences().getDisplayedValue());
+                        log.info("----> Else if partyDetails.getContactPreferences() {}",
+                                 partyDetails.getAddress());
+                    } else {
+                        log.info("----> Else partyDetails.getContactPreferences() {}",
+                                 partyDetails.getAddress());
+                    }
+                    try {
+                        log.info("----> selected party list {}", party);
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            );
+        }
+        log.info("----> end method call");
     }
 }
