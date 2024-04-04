@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,6 +107,8 @@ public class SendAndReplyService {
     private final EmailService emailService;
 
     private final UserService userService;
+
+    private final ServiceOfApplicationService serviceOfApplicationService;
 
     private final ObjectMapper objectMapper;
 
@@ -1259,6 +1262,38 @@ public class SendAndReplyService {
             }
 
             return message != null ? message.getSelectedApplicationCode() : null;
+        }
+    }
+
+    public void sendNotificationEmailToExternalParty(CaseData caseData) {
+        //get the latest message
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+
+        // Respondent pack
+        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = serviceOfApplicationService.getSelectedApplicantsOrRespondents(
+            caseData.getRespondents(),
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+        );
+        try {
+            String s1 = objectMapper.writeValueAsString(selectedApplicantsOrRespondents);
+            log.info("selectedRespondents 1279 >>>>>>> : {}", s1);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if(null != message && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+            && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())){
+            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+            if (recipientEmailAddresses.length > 0) {
+                final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
+                for (String recipientEmailAddress : recipientEmailAddresses) {
+                    emailService.send(
+                        recipientEmailAddress,
+                        EmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+                        emailTemplateVars,
+                        LanguagePreference.getPreferenceLanguage(caseData)
+                    );
+                }
+            }
         }
     }
 }

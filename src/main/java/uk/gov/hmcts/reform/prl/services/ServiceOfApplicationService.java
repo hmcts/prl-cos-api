@@ -1336,7 +1336,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
+    public List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
                                                                                    List<DynamicMultiselectListElement> value) {
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
