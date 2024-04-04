@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -1111,7 +1110,7 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         List<String>  loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
-        assertEquals(UserRoles.CITIZEN.name(), loggedInUserTypeList.get(0));
+        assertEquals(CITIZEN_ROLE, loggedInUserTypeList.get(0));
     }
 
     @Test
