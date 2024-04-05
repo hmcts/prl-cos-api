@@ -12,7 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -81,7 +81,7 @@ public class CitizenCaseUpdateControllerTest {
                                                                 any(),
                                                                 any(), any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        CaseData caseData = citizenCaseUpdateController.updatePartyDetailsFromCitizen(UpdateCaseData.builder().build(), any(), any(),
+        CaseData caseData = citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(),
                                                                                       authToken, s2sToken);
         Assert.assertEquals(1223, caseData.getId());
     }
@@ -93,7 +93,7 @@ public class CitizenCaseUpdateControllerTest {
                                                                 any(),
                                                                 any(), any())).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(UpdateCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
     }
 
     @Test(expected = RuntimeException.class)
@@ -103,14 +103,14 @@ public class CitizenCaseUpdateControllerTest {
                                                                 any(),
                                                                 any(), any())).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(UpdateCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
     }
 
     @Test(expected = RuntimeException.class)
     public void testUpdatePartyDetailsFromCitizenJsonException() throws JsonProcessingException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
-        citizenCaseUpdateController.updatePartyDetailsFromCitizen(UpdateCaseData.builder().build(), any(), any(), authToken, s2sToken);
+        citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(), authToken, s2sToken);
     }
 
     @Test

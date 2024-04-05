@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
@@ -81,11 +81,11 @@ public class CitizenCaseUpdateServiceTest {
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authToken)).thenReturn(startAllTabsUpdateDataContent);
-        when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, UpdateCaseData.builder().build(),
-                                                              CaseEvent.CONFIRM_YOUR_DETAILS, authToken)).thenReturn(citizenUpdatePartyDataContent);
+        when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
+            CaseEvent.CONFIRM_YOUR_DETAILS, authToken)).thenReturn(citizenUpdatePartyDataContent);
         when(allTabService.updateAllTabsIncludingConfTab(caseId)).thenReturn(CaseDetails.builder().build());
         Assert.assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "confirmYourDetails",
-                                                                                UpdateCaseData.builder().build()));
+            CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
@@ -111,12 +111,12 @@ public class CitizenCaseUpdateServiceTest {
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken)).thenReturn(startAllTabsUpdateDataContent);
-        when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, UpdateCaseData.builder().build(),
+        when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
                                                               CITIZEN_CASE_CREATE, authToken)).thenReturn(citizenUpdatePartyDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
         Assert.assertNotNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
-                                                                                UpdateCaseData.builder().build()));
+                                                                                CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
@@ -141,8 +141,10 @@ public class CitizenCaseUpdateServiceTest {
                                                                                                         caseDetails, caseData, null);
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
-        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken)).thenReturn(startAllTabsUpdateDataContent);
-        Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate", UpdateCaseData.builder().build()));
+        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken))
+            .thenReturn(startAllTabsUpdateDataContent);
+        Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
+                                                                             CitizenUpdatedCaseData.builder().build()));
     }
 
     @Test
@@ -171,7 +173,7 @@ public class CitizenCaseUpdateServiceTest {
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenSaveC100DraftInternal", authToken))
             .thenReturn(startAllTabsUpdateDataContent);
-        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, UpdateCaseData.builder().build(),
+        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
                                                               CITIZEN_CASE_CREATE, authToken)).thenReturn(citizenUpdatePartyDataContent);*/
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
@@ -205,7 +207,7 @@ public class CitizenCaseUpdateServiceTest {
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "deleteApplication", authToken)).thenReturn(startAllTabsUpdateDataContent);
-        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, UpdateCaseData.builder().build(),
+        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
                                                               CITIZEN_CASE_CREATE, authToken)).thenReturn(citizenUpdatePartyDataContent);*/
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
@@ -275,7 +277,7 @@ public class CitizenCaseUpdateServiceTest {
 
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCaseWithdraw", authToken)).thenReturn(startAllTabsUpdateDataContent);
-        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, UpdateCaseData.builder().build(),
+        /*when(citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData, CitizenUpdatedCaseData.builder().build(),
                                                               CITIZEN_CASE_CREATE, authToken)).thenReturn(citizenUpdatePartyDataContent);*/
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
