@@ -159,7 +159,7 @@ public class CitizenCaseUpdateControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(citizenCaseUpdateService.submitCitizenC100Application(any(),any(),
+        when(citizenCaseUpdateService.submitCitizenC100ApplicationNew(any(),any(),
                                                                   any(),
                                                                   any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
