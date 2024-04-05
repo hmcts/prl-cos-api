@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -34,7 +33,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -215,7 +214,6 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSubmitApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
 
@@ -234,7 +232,7 @@ public class CitizenCaseUpdateServiceTest {
                                       .applicationServedYesNo(YesOrNo.Yes)
 
                                       .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(objectMapper);
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
@@ -243,12 +241,11 @@ public class CitizenCaseUpdateServiceTest {
                                                                                                         UserDetails.builder().build()
         );
         when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any())).thenReturn(CaseData.builder().build());
-        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenSaveC100DraftInternal", authToken))
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
-        when(caseData.toMap(objectMapper)).thenReturn(caseDetails);
-        doNothing().when(caseDetails.remove("state"));
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails);
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             caseId,
