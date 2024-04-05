@@ -20,6 +20,7 @@ public enum LanguagePreference {
 
     private final String displayedValue;
 
+    //NOT IN USE - TO BE DELETED
     public static LanguagePreference getLanguagePreference(CaseData caseData) {
         boolean preferredLanguageIsWelsh = Optional.ofNullable(caseData.getLanguagePreferenceWelsh())
             .map(YesOrNo.Yes::equals)
@@ -28,8 +29,12 @@ public enum LanguagePreference {
         return preferredLanguageIsWelsh ? LanguagePreference.welsh : LanguagePreference.english;
     }
 
+    /**
+     * If Welsh language selected then Welsh else English(default).
+     */
     public static LanguagePreference getPreferenceLanguage(CaseData caseData) {
         return YesOrNo.Yes.equals(caseData.getWelshLanguageRequirement())
-            && welsh.equals(caseData.getWelshLanguageRequirementApplication()) ? LanguagePreference.welsh : LanguagePreference.english;
+            ? LanguagePreference.welsh
+            : LanguagePreference.english;
     }
 }
