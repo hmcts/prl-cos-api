@@ -87,7 +87,6 @@ public class CaseControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
     @Test
     public void createCaseInCcd() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
@@ -102,7 +101,6 @@ public class CaseControllerFunctionalTest {
                 .assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
     public void testRetrieveCitizenCases() {
         request
