@@ -644,7 +644,7 @@ public class ReviewDocumentServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
 
@@ -669,7 +669,7 @@ public class ReviewDocumentServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                      EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+                      EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
@@ -690,7 +690,7 @@ public class ReviewDocumentServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);

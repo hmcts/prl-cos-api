@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
@@ -53,7 +52,6 @@ public class ReasonableAdjustmentsControllerTest {
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
-    private UpdateCaseData updateCaseData;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
