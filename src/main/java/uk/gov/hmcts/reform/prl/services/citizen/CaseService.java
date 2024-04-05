@@ -11,16 +11,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
@@ -28,32 +30,24 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -61,11 +55,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -162,8 +151,7 @@ public class CaseService {
                                                    Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        List<CaseDetails> caseDetails = new ArrayList<>(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
             .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
@@ -194,10 +182,6 @@ public class CaseService {
         return caseRepository.createCase(authToken, caseData);
     }
 
-    public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
-        return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
-    }
-
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
         CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
@@ -210,7 +194,7 @@ public class CaseService {
                 caseDataWithHearingResponse.toBuilder().hearings(
                     hearingService.getHearings(authorisation, caseId)).build();
         }
-      return caseDataWithHearingResponse;
+        return caseDataWithHearingResponse;
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
@@ -269,13 +253,13 @@ public class CaseService {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
             caseEvent,
             userDetails.getId()
         );
 
         StartEventResponse startEventResponse =
-            coreCaseDataService.startUpdate(
+            ccdCoreCaseDataService.startUpdate(
                 authToken,
                 eventRequestData,
                 caseId,
@@ -289,7 +273,7 @@ public class CaseService {
             caseData
         );
 
-        if (!partyDetailsMeta.isPresent()
+        if (partyDetailsMeta.isEmpty()
             || null == partyDetailsMeta.get().getPartyDetails()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
         }
@@ -301,7 +285,7 @@ public class CaseService {
             partyDetailsMeta.get().getPartyIndex()
         );
 
-        if (!partyExternalCaseFlagField.isPresent() || !updatedCaseData.containsKey(partyExternalCaseFlagField.get()) || ObjectUtils.isEmpty(
+        if (partyExternalCaseFlagField.isEmpty() || !updatedCaseData.containsKey(partyExternalCaseFlagField.get()) || ObjectUtils.isEmpty(
             updatedCaseData.get(
                 partyExternalCaseFlagField.get()))) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
@@ -332,7 +316,7 @@ public class CaseService {
         Map<String, Object> externalCaseFlagMap = new HashMap<>();
         externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
 
-        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+        CaseDataContent caseDataContent = ccdCoreCaseDataService.createCaseDataContent(
             startEventResponse,
             externalCaseFlagMap
         );
@@ -343,7 +327,7 @@ public class CaseService {
             log.info("error");
         }
 
-        coreCaseDataService.submitUpdate(
+        ccdCoreCaseDataService.submitUpdate(
             authToken,
             eventRequestData,
             caseDataContent,
