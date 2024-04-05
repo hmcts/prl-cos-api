@@ -25,6 +25,14 @@ import uk.gov.hmcts.reform.prl.services.CaseApplicationResponseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -53,10 +61,14 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("document generation request received for {} C7", documentRequest.isWelsh());
-        caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData,
-                                                                      documentRequest.isWelsh());
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C7_DRAFT_HINT,
+            false
+        );
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
@@ -73,13 +85,81 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
 
-        CaseDetails caseDetailsReturn = caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails,
-            authorisation, partyId, caseId, s2sToken);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        log.info(" Generating C7 Final document for respondent ");
+        Optional<Element<PartyDetails>> currentRespondent
+            = caseData.getRespondents()
+            .stream()
+            .filter(
+                respondent -> YesOrNo.Yes.equals(
+                    respondent.getValue().getCurrentRespondent()))
+            .findFirst();
+        if (currentRespondent.isPresent()
+            && Yes != currentRespondent.get().getValue().getResponse().getC7ResponseSubmitted()) {
+            Element<PartyDetails> respondent = currentRespondent.get();
+            respondent.getValue().setResponse(currentRespondent.get()
+                                                  .getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build());
+
+            List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
+            respondents.stream()
+                .filter(party -> Objects.equals(
+                    party.getId(),
+                    respondent.getId()
+                ))
+                .findFirst()
+                .ifPresent(party ->
+                               respondents.set(
+                                   respondents.indexOf(party),
+                                   element(party.getId(), respondent.getValue())
+                               )
+                );
+            caseData = caseData.toBuilder().respondents(respondents).build();
+        }
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseDetails caseDetailsReturn = null;
+
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C7_FINAL_ENGLISH,
+            false
+        );
+
+        updateCurrentRespondent(caseData, null, partyId);
+        if (document != null) {
+            String partyName = caseData.getRespondents()
+                .stream()
+                .filter(element -> element.getId()
+                    .toString()
+                    .equalsIgnoreCase(partyId))
+                .map(Element::getValue)
+                .findFirst()
+                .map(PartyDetails::getLabelForDynamicList)
+                .orElse("");
+
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            caseData = generateOtherC1aAndC8Documents(
+                authorisation,
+                caseData,
+                currentRespondent,
+                callbackRequest,
+                document,
+                partyName,
+                userDetails
+            );
+            log.info("C1A and C8 Final document generated successfully for respondent ");
+
+            caseDetailsReturn = caseService.updateCase(
+                caseData,
+                authorisation,
+                    caseId,
+                REVIEW_AND_SUBMIT
+            );
+        }
 
         if (caseDetailsReturn != null) {
-            log.info("generateC7FinalDocument:: sending notification to applicant solicitor");
             citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
