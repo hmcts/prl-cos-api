@@ -313,7 +313,7 @@ public class CitizenPartyDetailsMapperTest {
     public void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
         setUpDa();
         CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper.mapUpdatedPartyDetails(caseData,updateCaseData,
-                                                                                                     CaseEvent.EVENT_RESPONDENT_SAFETY_CONCERNS,
+                                                                                                     CaseEvent.EVENT_RESPONDENT_AOH,
                                                                                                                        authToken);
         assertNotNull(citizenUpdatePartyDataContent);
     }

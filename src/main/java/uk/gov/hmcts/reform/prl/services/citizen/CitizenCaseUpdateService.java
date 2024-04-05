@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -46,6 +47,8 @@ public class CitizenCaseUpdateService {
 
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    private final CaseDataMapper caseDataMapper;
+    private final ObjectMapper objectMapper;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -142,12 +145,16 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
         Map<String, Object> caseDataMapToBeUpdated = caseDataToSubmit.toMap(objectMapper);
+        // Do not remove the next line as it will overwrite the case state change
+        caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-
-        allTabService.submitUpdateForSpecificUserEvent(
+        try {
+            log.info("caseDataMapToBeUpdated to be stored ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
@@ -156,7 +163,13 @@ public class CitizenCaseUpdateService {
                 startAllTabsUpdateDataContent.userDetails()
         );
 
-        return allTabService.updateAllTabsIncludingConfTab(caseId);
+        log.info("Submit event executed {}", eventId);
+        try {
+            log.info("caseDetails updated ===>" + objectMapper.writeValueAsString(caseDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        return caseDetails;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
