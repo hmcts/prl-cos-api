@@ -140,7 +140,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.87.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.108.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -374,7 +374,7 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
     force = true
   }
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.84.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.108.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
