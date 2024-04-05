@@ -463,7 +463,7 @@ public class ReviewDocumentService {
             );
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
+                startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(caseData.getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
