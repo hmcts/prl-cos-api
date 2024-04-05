@@ -61,7 +61,6 @@ public class CitizenCaseUpdateService {
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        log.info("*************** eventId received from " + caseEvent.getValue());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
@@ -75,7 +74,6 @@ public class CitizenCaseUpdateService {
             ));
 
         if (citizenUpdatePartyDataContent.isPresent()) {
-            log.info("*************** Going to update party details received from Citizen");
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -86,7 +84,6 @@ public class CitizenCaseUpdateService {
             );
 
             if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
-                log.info("*************** Going to refresh all tabs after updating citizen party details");
                 return allTabService.updateAllTabsIncludingConfTab(caseId);
             }
         }
@@ -146,11 +143,6 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        try {
-            log.info("caseDataMapToBeUpdated to be stored ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -160,12 +152,6 @@ public class CitizenCaseUpdateService {
                 startAllTabsUpdateDataContent.userDetails()
         );
 
-        log.info("Submit event executed {}", eventId);
-        try {
-            log.info("caseDetails updated ===>" + objectMapper.writeValueAsString(caseDetails));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         return caseDetails;
     }
 

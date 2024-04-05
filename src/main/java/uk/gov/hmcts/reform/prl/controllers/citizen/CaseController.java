@@ -95,15 +95,7 @@ public class CaseController {
         @RequestHeader("accessCode") String accessCode
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails;
-            try {
-                log.info("*** event received from citizen " + eventId);
-                log.info("*** printing case data " + objectMapper.writeValueAsString(
-                    caseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
-            caseDetails = caseService.updateCase(
+            CaseDetails caseDetails = caseService.updateCase(
                 caseData,
                 authorisation,
                 caseId,

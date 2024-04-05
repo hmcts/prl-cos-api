@@ -97,8 +97,6 @@ public class CitizenPartyDetailsMapper {
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                 CaseEvent caseEvent,
                                                                 String authorisation) {
-        log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
-        log.info("Start CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for party type:: " + citizenUpdatedCaseData.getPartyType());
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsCa(
@@ -120,10 +118,8 @@ public class CitizenPartyDetailsMapper {
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
-            log.info("Updated caseDataMap =>" + citizenUpdatePartyDataContent.get().updatedCaseDataMap());
-            log.info("Exit CitizenPartyDetailsMapper:mapUpdatedPartyDetails() for event " + caseEvent.getValue());
         } else {
-            log.error("{} is not successful for the case {}", caseEvent.getValue(), dbCaseData.getId());
+            log.error("{} event has failed for the case {}", caseEvent.getValue(), dbCaseData.getId());
             throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
         }
         return citizenUpdatePartyDataContent.get();
@@ -162,7 +158,6 @@ public class CitizenPartyDetailsMapper {
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                  CaseEvent caseEvent,
                                                                  String authorisation) {
-        log.info("Inside updatingPartyDetailsCa");
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
@@ -197,7 +192,6 @@ public class CitizenPartyDetailsMapper {
                                                                                           caseEvent);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
-                    log.info("updatedRespondentPartyIndex ==> " + updatedRespondentPartyIndex);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
 
                     if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
@@ -218,7 +212,6 @@ public class CitizenPartyDetailsMapper {
                                                  CaseData oldCaseData,
                                                  int respondentIndex,
                                                  String authorisation) {
-        log.info("inside reGenerateRespondentC8Documents for respondentIndex " + respondentIndex);
         Map<String, Object> dataMapForC8Document = new HashMap<>();
         dataMapForC8Document.put(COURT_NAME_FIELD, oldCaseData.getCourtName());
         dataMapForC8Document.put(CASE_DATA_ID, oldCaseData.getId());
@@ -247,10 +240,9 @@ public class CitizenPartyDetailsMapper {
                                                               ),
                                                           respondentIndex, updatedPartyElement
             );
-            log.info("exit reGenerateRespondentC8Documents & caseDataMapToBeUpdated " + caseDataMapToBeUpdated);
         } catch (Exception e) {
-            log.error("Failed to generate C8 document for Case id - {} & Party name - {}",
-                      oldCaseData.getId(), updatedPartyElement.getValue().getLabelForDynamicList()
+            log.error("Failed to generate C8 document for Case id - {}",
+                      oldCaseData.getId()
             );
             throw new CoreCaseDataStoreException(e.getMessage(), e);
         }
@@ -259,7 +251,6 @@ public class CitizenPartyDetailsMapper {
     private CitizenUpdatePartyDataContent updatingPartyDetailsDa(CaseData caseData,
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
                                             CaseEvent caseEvent) {
-        log.info("Inside updatingPartyDetailsDa");
         PartyDetails partyDetails;
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
@@ -293,8 +284,6 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
                                                                    PartyDetails existingPartyDetails,
                                                                    CaseEvent caseEvent) {
-        log.info("Inside getUpdatedPartyDetailsBasedOnEvent for event " + caseEvent.getValue());
-
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
                 return updateCitizenPersonalDetails(
@@ -491,7 +480,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        log.info("Updating parties personal details");
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 
@@ -558,7 +546,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        log.info("Updating parties confidential details");
         if (null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()
             && Yes.equals(citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate().getConfidentiality())
