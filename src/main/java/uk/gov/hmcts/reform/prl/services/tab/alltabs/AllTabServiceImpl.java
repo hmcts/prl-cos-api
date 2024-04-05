@@ -256,6 +256,8 @@ public class AllTabServiceImpl implements AllTabsService {
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
                                                                             String eventId,
                                                                             String authorisation) {
+        log.info("event Id we got is:: {}", eventId);
+        log.info("event is now:: {}", CaseEvent.fromValue(eventId));
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
             CaseEvent.fromValue(eventId),

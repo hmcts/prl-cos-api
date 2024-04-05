@@ -131,7 +131,7 @@ public class CitizenCaseUpdateController {
                 caseData
             );
             if (caseDetails != null) {
-                log.error("submitC100Application is successful for the case {}", caseId);
+                log.info("submitC100Application is successful for the case {}", caseId);
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
                 log.error("submitC100Application is not successful for the case {}", caseId);
