@@ -124,7 +124,7 @@ public class CitizenCaseUpdateController {
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100ApplicationNew(
+            CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
                 caseId,
                 eventId,
