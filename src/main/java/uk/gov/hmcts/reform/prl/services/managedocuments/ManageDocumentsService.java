@@ -648,7 +648,7 @@ public class ManageDocumentsService {
                 startAllTabsUpdateDataContent.caseDataMap(),
                 startAllTabsUpdateDataContent.caseData());
         //update all tabs
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
