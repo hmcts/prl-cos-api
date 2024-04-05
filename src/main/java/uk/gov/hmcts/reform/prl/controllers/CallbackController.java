@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -293,6 +294,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("We are here, having fun");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -346,7 +348,11 @@ public class CallbackController {
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
             caseDataUpdated.put("caseFlags", Flags.builder().build());
-
+            try {
+                log.info("caseDataUpdated to be returned ===>" + objectMapper.writeValueAsString(caseDataUpdated));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
