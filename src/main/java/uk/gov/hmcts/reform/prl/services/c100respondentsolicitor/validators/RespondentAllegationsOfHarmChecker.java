@@ -216,12 +216,6 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     public boolean isSectionsFinished(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
                                       boolean resPreviousOrders) {
 
-        log.debug("validateOrders  :{} ",validateOrders(respondentAllegationsOfHarmData));
-        log.debug("previousOrders  :{} ",resPreviousOrders);
-        log.debug("validateAbductionSection(caseData)  :{} ",validateAbductionSection(respondentAllegationsOfHarmData));
-        log.debug("validateSubstanceAbuse(caseData)  :{} ",validateSubstanceAbuse(respondentAllegationsOfHarmData));
-        log.debug("validateOtherConcerns(caseData)  :{} ",validateOtherConcerns(respondentAllegationsOfHarmData));
-        log.debug("validateChildContact(caseData)  :{} ",validateChildContact(respondentAllegationsOfHarmData));
         boolean isFinished;
         isFinished =  validateOrders(respondentAllegationsOfHarmData)
                 && resPreviousOrders

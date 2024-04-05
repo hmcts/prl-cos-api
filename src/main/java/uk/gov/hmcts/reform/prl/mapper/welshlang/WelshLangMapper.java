@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-@Slf4j
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
