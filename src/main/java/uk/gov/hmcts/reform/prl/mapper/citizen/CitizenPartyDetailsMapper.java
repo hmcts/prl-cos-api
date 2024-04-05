@@ -326,7 +326,7 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            case EVENT_RESPONDENT_SAFETY_CONCERNS -> {
+            case EVENT_RESPONDENT_AOH -> {
                 return updateCitizenSafetyConcernDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
