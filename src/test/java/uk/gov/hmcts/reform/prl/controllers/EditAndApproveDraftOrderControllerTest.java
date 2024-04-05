@@ -1271,7 +1271,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
@@ -1535,7 +1535,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
@@ -1585,7 +1585,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
