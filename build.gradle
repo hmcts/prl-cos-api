@@ -60,7 +60,7 @@ def versions = [
   springCloud                  : '4.0.4',
   tomcat                       : '9.0.80',
   unirest                      : '1.4.9',
-  ccdCaseDocumentAmClient      : '1.7.3',
+  ccdCaseDocumentAmClient      : '1.59',
   pdfbox                       : '2.0.31',
   springFramework    : '6.1.5'
 ]
