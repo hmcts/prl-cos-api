@@ -143,7 +143,7 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
+        return allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
@@ -151,8 +151,6 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
-
-        return caseDetails;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
