@@ -362,12 +362,16 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            default -> {
+            case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
                 //For citizen-case-update - currentOrPreviousProceedings
-                return updateCitizenResponseDataForOtherEvents(
+                return updateCitizenResponseForProceedings(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
+            }
+            default -> {
+                //return existing party details - no event
+                return existingPartyDetails;
             }
         }
     }
@@ -441,7 +445,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenResponseForProceedings(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
