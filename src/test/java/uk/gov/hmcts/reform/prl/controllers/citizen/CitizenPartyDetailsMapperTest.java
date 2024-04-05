@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -52,7 +52,7 @@ public class CitizenPartyDetailsMapperTest {
     public static final String authToken = "Bearer TestAuthToken";
     private CaseData caseData;
 
-    private UpdateCaseData updateCaseData;
+    private CitizenUpdatedCaseData updateCaseData;
     private C100RebuildData c100RebuildData;
     PartyDetails partyDetails;
     @Mock
@@ -98,7 +98,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildData(c100RebuildData)
             .build();
 
-        updateCaseData = UpdateCaseData.builder()
+        updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -141,7 +141,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildData(c100RebuildData)
             .build();
 
-        updateCaseData = UpdateCaseData.builder()
+        updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -172,7 +172,7 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsDaRespondent() throws Exception {
         setUpDa();
-        updateCaseData = UpdateCaseData.builder()
+        updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -221,7 +221,7 @@ public class CitizenPartyDetailsMapperTest {
     @Test
     public void testMapUpdatedPartyDetailsDa13() throws Exception {
         setUpDa();
-        updateCaseData = UpdateCaseData.builder()
+        updateCaseData = CitizenUpdatedCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
