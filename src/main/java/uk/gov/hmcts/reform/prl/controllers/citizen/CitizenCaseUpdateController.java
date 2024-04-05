@@ -82,7 +82,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside saveDraftCitizenApplication");
             try {
@@ -117,6 +117,8 @@ public class CitizenCaseUpdateController {
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside submitC100Application");
+            log.info("*** Inside submitC100Application, case id got: {}", caseId);
+            log.info("*** Inside submitC100Application, event id got: {}", eventId);
             try {
                 log.info("submitC100Application caseData start json ===>" + objectMapper.writeValueAsString(caseData));
             } catch (JsonProcessingException e) {
@@ -129,6 +131,7 @@ public class CitizenCaseUpdateController {
                 caseData
             );
             if (caseDetails != null) {
+                log.info("submitC100Application is successful for the case {}", caseId);
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
                 log.error("submitC100Application is not successful for the case {}", caseId);
@@ -146,7 +149,7 @@ public class CitizenCaseUpdateController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Inside deleteApplicationCitizen");
             try {

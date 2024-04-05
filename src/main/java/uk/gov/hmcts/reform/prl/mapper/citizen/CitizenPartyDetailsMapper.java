@@ -326,7 +326,7 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            case EVENT_RESPONDENT_SAFETY_CONCERNS -> {
+            case EVENT_RESPONDENT_AOH -> {
                 return updateCitizenSafetyConcernDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
@@ -586,7 +586,7 @@ public class CitizenPartyDetailsMapper {
         }
     }
 
-    public Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) {
+    public Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) throws JsonProcessingException {
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (citizenUpdatedCaseData != null) {
             caseDataMapToBeUpdated.put(
@@ -668,6 +668,10 @@ public class CitizenPartyDetailsMapper {
             caseDataMapToBeUpdated.put(
                 "c100RebuildConsentOrderDetails",
                 citizenUpdatedCaseData.getC100RebuildData().getC100RebuildConsentOrderDetails()
+            );
+            caseDataMapToBeUpdated.put(
+                "applicantCaseName",
+                buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
         }
         return caseDataMapToBeUpdated;
@@ -766,6 +770,39 @@ public class CitizenPartyDetailsMapper {
                                                     c100RebuildChildDetailsElements);
         }
 
+        caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+
         return caseDataBuilder.build();
+    }
+
+    public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+        if (null != c100RebuildData) {
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                c100RebuildApplicantDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+            }
+
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                c100RebuildRespondentDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            }
+        }
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+    }
+
+
+    private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                 C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+        String caseName = null;
+        if (null != c100RebuildApplicantDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+        }
+
+        return caseName;
     }
 }

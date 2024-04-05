@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -53,6 +55,11 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     public static final String updatePartyDetailsEndPoint = "/citizen/{caseId}/{eventId}/update-party-details";
 
+    public static final String saveDraftCitizenApplicationEndPoint = "/citizen/{caseId}/save-c100-draft-application";
+
+    public static final String deleteApplicationCitizenEndPoint = "/citizen/{caseId}/delete-application";
+
+    public static final String withDrawCaseCitizenEndPoint = "/citizen/{caseId}/withdraw";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -66,6 +73,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private final RequestSpecification request2 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
     private MockMvc mockMvc;
 
     @Before
@@ -76,6 +85,14 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private static final String CITIZEN_UPDATE_CASE_REQUEST_BODY
         = "requests/citizen-update-case.json";
+
+    private static final String SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY = "requests/save-c100-draft-citizen.json";
+
+    private static final String DELETE_APPLICATION_CITIZEN_REQUEST_BODY = "requests/delete-aplication-citizen.json";
+
+    private static final String WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY = "requests/withdraw-aplication-citizen.json";
+
+    private static final String SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY = "requests/submitted-aplication-ready-for-withdraw.json";
 
 
     @Test
@@ -208,7 +225,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_updateCitizenParty_Event_citizenSafetyConcerns_then200Response() throws Exception {
+    public void givenRequestBody_updateCitizenParty_Event_citizenAoH_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         request1
@@ -218,7 +235,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"citizenSafetyConcerns")
+            .pathParam(EVENT_ID,"citizenRespondentAoH")
             .post(updatePartyDetailsEndPoint)
             .then()
             .body("applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourDetails", equalTo("behaviour was not acceptable"),
@@ -359,5 +376,126 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .as(CaseData.class);
     }
 
+    @Test
+    public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
+        CaseData createNewCase = request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(createNewCase.getId());
+
+        String requestBody = ResourceLoader.loadJson(SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody.replace("1712061560509233", String.valueOf(createNewCase.getId()));
+
+        CaseData saveedCaseData = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID,String.valueOf(createNewCase.getId()))
+            .post(saveDraftCitizenApplicationEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(saveedCaseData);
+
+        JSONObject createCaseMiamResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildMaim());
+        JSONObject savedMiamResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildMaim());
+
+        Assert.assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
+        Assert.assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
+
+        JSONObject createCaseHwfResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
+        JSONObject savedHwfResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
+
+        Assert.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
+        Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
+
+    }
+
+
+    @Test
+    public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
+
+        CaseData createNewCase = request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(createNewCase.getId());
+
+        String requestBody = ResourceLoader.loadJson(DELETE_APPLICATION_CITIZEN_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody.replace("1712061560509233", String.valueOf(createNewCase.getId()));
+
+        CaseData deletedApplicationCaseData = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID, createNewCase.getId())
+            .post(deleteApplicationCitizenEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(createNewCase);
+        Assert.assertNotNull(deletedApplicationCaseData);
+
+    }
+
+    @Test
+    public void givenRequestBody_withdrawCase_then200Response() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY);
+        CaseDetails caseDetails =  request1
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+
+        String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
+
+        CaseData withDrawCase = request2
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody1)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam(CASE_ID,String.valueOf(caseDetails.getId()))
+            .post(withDrawCaseCitizenEndPoint)
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(withDrawCase);
+
+    }
 }
