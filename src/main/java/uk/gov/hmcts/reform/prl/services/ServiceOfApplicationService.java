@@ -1271,7 +1271,7 @@ public class ServiceOfApplicationService {
         cleanUpSoaSelections(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 caseId,
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -1293,7 +1293,7 @@ public class ServiceOfApplicationService {
         cleanUpSoaSelections(caseDataMap);
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -3011,7 +3011,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(REJECTION_REASON, null);
 
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
