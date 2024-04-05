@@ -104,7 +104,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}",e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -115,10 +115,8 @@ public class UpdatePartyDetailsService {
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-            if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                                                         ElementUtils.unwrapElements(applicantList.get()).get(0));
-            }
+            applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
+                    ElementUtils.unwrapElements(elements).get(0)));
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -407,7 +405,7 @@ public class UpdatePartyDetailsService {
     private List<Element<ResponseDocuments>> getOrCreateC8DocumentList(String authorisation, CaseData caseData,
                                                                        Map<String, Object> dataMap,
                                                                        List<Element<ResponseDocuments>> c8Documents,
-                                                                       Boolean isDetailsChanged,
+                                                                       boolean isDetailsChanged,
                                                                        Element<PartyDetails> respondent)
         throws  Exception {
         Document c8FinalDocument;

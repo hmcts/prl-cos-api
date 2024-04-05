@@ -58,9 +58,8 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        CaseDetails caseDetails;
         if (authorisationService.isAuthorized(userToken, s2sToken)) {
-            caseDetails = caseService.getCase(userToken, caseId);
+            CaseDetails caseDetails = caseService.getCase(userToken, caseId);
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
@@ -152,10 +151,8 @@ public class CaseController {
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
-        CaseDetails caseDetails;
-
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.createCase(caseData, authorisation);
+            CaseDetails caseDetails = caseService.createCase(caseData, authorisation);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
