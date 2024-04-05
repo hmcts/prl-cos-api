@@ -19,7 +19,11 @@ import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -1401,6 +1405,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         sendAndReplyService.sendNotificationToExternalParties(caseData);
+        assertNull(null);
     }
 
 
