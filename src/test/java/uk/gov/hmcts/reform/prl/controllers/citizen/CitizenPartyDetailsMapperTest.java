@@ -373,6 +373,14 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    public void testMapUpdatedPartyDetailsEventCurrentProceedings() throws IOException {
+        setUpDa();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
+            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS, authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
     public void testBuildUpdatedCaseData() throws IOException {
         mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()

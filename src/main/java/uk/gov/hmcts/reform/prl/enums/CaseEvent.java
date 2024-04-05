@@ -14,6 +14,7 @@ public enum CaseEvent {
     CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
     DELETE_APPLICATION("deleteApplication"),
     CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
+    CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS("citizenCurrentOrPreviousProceeding"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
     EVENT_RESPONDENT_AOH("citizenRespondentAoH"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
