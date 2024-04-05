@@ -225,7 +225,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_updateCitizenParty_Event_citizenSafetyConcerns_then200Response() throws Exception {
+    public void givenRequestBody_updateCitizenParty_Event_citizenAoH_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         request1
@@ -235,7 +235,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"citizenSafetyConcerns")
+            .pathParam(EVENT_ID,"citizenRespondentAoH")
             .post(updatePartyDetailsEndPoint)
             .then()
             .body("applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourDetails", equalTo("behaviour was not acceptable"),

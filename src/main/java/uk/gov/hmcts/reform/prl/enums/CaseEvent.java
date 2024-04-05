@@ -15,7 +15,7 @@ public enum CaseEvent {
     DELETE_APPLICATION("deleteApplication"),
     CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
-    EVENT_RESPONDENT_SAFETY_CONCERNS("citizenSafetyConcerns"),
+    EVENT_RESPONDENT_AOH("citizenRespondentAoH"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
