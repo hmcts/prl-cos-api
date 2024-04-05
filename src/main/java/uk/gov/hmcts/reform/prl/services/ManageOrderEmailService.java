@@ -434,7 +434,7 @@ public class ManageOrderEmailService {
                 );
             });
         } else {
-            log.info("***** Send notifications to C100 applicants *****");
+            log.info("*** Send email/post notifications to applicants ***");
             caseData.getApplicants().forEach(party -> sendNotificationsToParty(
                 caseData,
                 party,
@@ -454,10 +454,10 @@ public class ManageOrderEmailService {
                                           List<Document> orderDocuments,
                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                           SendgridEmailTemplateNames sengGridTemplate) {
-        log.info("***** Send email/post notifications to party *****");
+        log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue())) {
-            log.info("=== Send email to party {}", party.getId());
+            log.info("*** Send orders to party via email using send grid {}", party.getId());
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
@@ -469,6 +469,7 @@ public class ManageOrderEmailService {
                 sengGridTemplate
             );
         } else {
+            log.info("*** Send orders to party via post using bulk print {}", party.getId());
             sendOrdersToPartyAddressViaPost(
                 caseData,
                 authorisation,
@@ -502,20 +503,16 @@ public class ManageOrderEmailService {
         } else {
             //PRL-5206 unrepresented applicant option - unrepresentedApplicant
             log.info("===== DA Serving unrepresented applicant ====");
-            log.debug("===== DA unrepresented applicant contact preference ==== {}", caseData.getApplicantsFL401().getContactPreferences());
-            if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())
-                && isPartyProvidedWithEmail(caseData.getApplicantsFL401())) {
-                log.info("===== DA serving unrepresented applicant via email ====");
-            } else {
-                log.info("===== DA serving unrepresented applicant via post ====");
-                sendOrdersToPartyAddressViaPost(
-                    caseData,
-                    authorisation,
-                    orderDocuments,
-                    bulkPrintOrderDetails,
-                    element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401())
-                );
-            }
+            sendNotificationsToParty(
+                caseData,
+                element(caseData.getApplicantsFL401().getPartyId(),
+                        caseData.getApplicantsFL401()),
+                authorisation,
+                dynamicDataForEmail,
+                orderDocuments,
+                bulkPrintOrderDetails,
+                SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP
+            );
         }
     }
 
@@ -752,7 +749,6 @@ public class ManageOrderEmailService {
                                                  List<Document> orderDocuments,
                                                  List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                  Element<PartyDetails> partyElement) {
-        log.info("=== Send orders to party address using bulk print for {}", partyElement.getId());
         if ((isNotEmpty(partyElement.getValue())
             && isNotEmpty(partyElement.getValue().getAddress()))
             && isNotEmpty(partyElement.getValue().getAddress().getAddressLine1())) {
@@ -784,6 +780,7 @@ public class ManageOrderEmailService {
                                           CaseData caseData,
                                           List<Document> orderDocuments,
                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        log.info("*** Send orders to other people via post using bulk print ***");
         otherParties.getValue()
             .stream()
             .map(DynamicMultiselectListElement::getCode)
@@ -857,6 +854,7 @@ public class ManageOrderEmailService {
                         SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
                     );
                 } else {
+                    log.info("*** Send email/post notifications to parties ***");
                     sendNotificationsToParty(
                         caseData,
                         partyDataOptional.get(),
