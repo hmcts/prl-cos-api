@@ -967,7 +967,6 @@ public class C100RespondentSolicitorService {
             );
             quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
         }
-        log.info("after submit -->");
         return dataMap;
     }
 
@@ -1067,7 +1066,6 @@ public class C100RespondentSolicitorService {
 
     public void checkIfConfidentialDataPresent(Element<PartyDetails> solicitorRepresentedRespondent,
                                                 Map<String, Object> dataMap) {
-        log.info("inside isConfidentialDataPresent");
         boolean isConfidentialDataPresent = false;
         if (null != solicitorRepresentedRespondent
             && null != solicitorRepresentedRespondent.getValue()) {
@@ -1105,7 +1103,6 @@ public class C100RespondentSolicitorService {
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
-            log.info("exit isConfidentialDataPresent ==> " + isConfidentialDataPresent);
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
@@ -1394,7 +1391,6 @@ public class C100RespondentSolicitorService {
             caseDataUpdated.put("draftC7WelshResponseDoc", document);
         }
 
-        log.info("viewDraftDocs--->");
         return caseDataUpdated;
     }
 

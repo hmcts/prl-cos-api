@@ -79,7 +79,6 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info(" Generating C7 draft document for respondent ");
 
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -87,7 +86,6 @@ public class CaseApplicationResponseController {
             DOCUMENT_C7_DRAFT_HINT,
             false
         );
-        log.info("C7 draft document generated successfully for respondent ");
         return document;
     }
 
