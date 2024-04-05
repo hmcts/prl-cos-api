@@ -41,7 +41,7 @@ def versions = [
   jacksonDatatypeJsr           : '2.16.0',
   jsonAssert                   : '1.2.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '4.13.1',
+  junit                        : '4.13.2',
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.30',
   pact                         : '4.1.11',
