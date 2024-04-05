@@ -171,57 +171,6 @@ public class CitizenCaseUpdateService {
         return caseDetails;
     }
 
-    public CaseDetails submitCitizenC100ApplicationNew(String authToken,
-                                                    String caseId,
-                                                    String eventId,
-                                                    CaseData citizenUpdatedCaseData)
-            throws JsonProcessingException {
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificUserEvent(
-                        caseId,
-                        CaseEvent.fromValue(eventId).getValue(),
-                        authToken
-                );
-
-        UserDetails userDetails = startAllTabsUpdateDataContent.userDetails();
-        UserInfo userInfo = UserInfo
-                .builder()
-                .idamId(userDetails.getId())
-                .firstName(userDetails.getForename())
-                .lastName(userDetails.getSurname().orElse(null))
-                .emailAddress(userDetails.getEmail())
-                .build();
-
-        citizenUpdatedCaseData = caseDataMapper
-                .buildUpdatedCaseData(citizenUpdatedCaseData.toBuilder().userInfo(wrapElements(userInfo))
-                        .courtName(C100_DEFAULT_COURT_NAME)
-                        .taskListVersion(TASK_LIST_VERSION_V2)
-                        .build());
-        Map<String, Object> caseDataMapToBeUpdated = citizenUpdatedCaseData.toMap(objectMapper);
-        Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        try {
-            log.info("caseDataMapToBeUpdated to be stored ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataMapToBeUpdated,
-                startAllTabsUpdateDataContent.userDetails()
-        );
-
-        log.info("Submit event executed {}", eventId);
-        try {
-            log.info("caseDetails updated ===>" + objectMapper.writeValueAsString(caseDetails));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        return caseDetails;
-    }
-
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
             throws JsonProcessingException {
         Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
