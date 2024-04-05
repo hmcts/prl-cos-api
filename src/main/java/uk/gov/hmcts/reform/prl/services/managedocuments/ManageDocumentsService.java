@@ -634,7 +634,7 @@ public class ManageDocumentsService {
                 startAllTabsUpdateDataContent.caseDataMap(),
                 startAllTabsUpdateDataContent.caseData());
         //update all tabs
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
@@ -717,8 +717,6 @@ public class ManageDocumentsService {
                 loggedInUserType.add(SOLICITOR_ROLE);
             } else if (roles.contains(Roles.CITIZEN.getValue())) {
                 loggedInUserType.add(UserRoles.CITIZEN.name());
-            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
-                loggedInUserType.add(BULK_SCAN);
             } else if (roleAssignmentServiceResponse != null) {
                 List<String> amRoles = roleAssignmentServiceResponse.getRoleAssignmentResponse()
                     .stream()
@@ -735,6 +733,8 @@ public class ManageDocumentsService {
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
                 }
+            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+                loggedInUserType.add(BULK_SCAN);
             }
         } else {
             checkExistingIdamRoleConfig(roles, loggedInUserType);
