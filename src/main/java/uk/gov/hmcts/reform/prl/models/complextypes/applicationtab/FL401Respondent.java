@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class FL401Respondent {
 

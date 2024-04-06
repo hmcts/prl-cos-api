@@ -177,6 +177,7 @@ send-grid:
           SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
           SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-7908952eaa5f4ed18624464eb1f2fad6}
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
@@ -190,6 +191,7 @@ send-grid:
           SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
           SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -452,10 +454,18 @@ document:
       prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
       prl_solicitor_c7_final_filename: C7_Response.pdf
+      prl_solicitor_c7_welsh_draft_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_welsh_draft_filename: Draft_C7_response_Welsh.pdf
+      prl_solicitor_c7_welsh_final_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_welsh_final_filename: Final_C7_response_Welsh.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
       prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
       prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_welsh_draft_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_welsh_draft_filename: Draft_C1A_allegation_of_harm_Welsh.pdf
+      prl_solicitor_c1a_welsh_final_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_welsh_final_filename: Final_C1A_allegation_of_harm_Welsh.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
