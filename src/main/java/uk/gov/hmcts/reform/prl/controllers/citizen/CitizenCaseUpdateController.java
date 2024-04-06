@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
@@ -44,20 +44,13 @@ public class CitizenCaseUpdateController {
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
     public CaseData updatePartyDetailsFromCitizen(
-        @NotNull @Valid @RequestBody UpdateCaseData citizenUpdatedCaseData,
+        @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            try {
-                log.info("*** event received from citizen " + eventId);
-                log.info("*** printing case data" + objectMapper.writeValueAsString(
-                    citizenUpdatedCaseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             CaseDetails caseDetails = citizenCaseUpdateService.updateCitizenPartyDetails(
                 authorisation,
                 caseId,
@@ -67,7 +60,7 @@ public class CitizenCaseUpdateController {
             if (caseDetails != null) {
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
-                log.error("{} is not successful for the case {}", eventId, caseId);
+                log.error("{} event has failed for the case {}", eventId, caseId);
                 throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
             }
         } else {
@@ -84,12 +77,6 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** Inside saveDraftCitizenApplication");
-            try {
-                log.info("saveDraftCitizenApplication caseData start json ===>" + objectMapper.writeValueAsString(caseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
                 caseId,
                 caseData,
@@ -98,7 +85,7 @@ public class CitizenCaseUpdateController {
             if (caseDetails != null) {
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
-                log.error("saveDraftCitizenApplication is not successful for the case {}", caseId);
+                log.error("saveDraftCitizenApplication has failed for the case {}", caseId);
                 throw new CoreCaseDataStoreException("Citizen save c100 draft application failed for this transaction");
             }
         } else {
@@ -116,14 +103,6 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** Inside submitC100Application");
-            log.info("*** Inside submitC100Application, case id got: {}", caseId);
-            log.info("*** Inside submitC100Application, event id got: {}", eventId);
-            try {
-                log.info("submitC100Application caseData start json ===>" + objectMapper.writeValueAsString(caseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
                 caseId,
@@ -134,7 +113,7 @@ public class CitizenCaseUpdateController {
                 log.info("submitC100Application is successful for the case {}", caseId);
                 return CaseUtils.getCaseData(caseDetails, objectMapper);
             } else {
-                log.error("submitC100Application is not successful for the case {}", caseId);
+                log.error("submitC100Application has failed for the case {}", caseId);
                 throw new CoreCaseDataStoreException("Citizen submit c100  application failed for this transaction");
             }
         } else {
@@ -151,12 +130,6 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("*** Inside deleteApplicationCitizen");
-            try {
-                log.info("deleteApplicationCitizen caseData start json ===>" + objectMapper.writeValueAsString(caseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             CaseDetails caseDetails = citizenCaseUpdateService.deleteApplication(
                 caseId,
                 caseData,
