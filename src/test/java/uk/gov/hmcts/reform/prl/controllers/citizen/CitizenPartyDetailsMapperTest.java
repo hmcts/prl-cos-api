@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,13 +41,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class CitizenPartyDetailsMapperTest {
-
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @InjectMocks
     private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     public static final String authToken = "Bearer TestAuthToken";
@@ -64,9 +58,11 @@ public class CitizenPartyDetailsMapperTest {
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
 
+    @Mock
+    ObjectMapper objectMapper;
+
     @Before
     public void setUpCA() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -120,7 +116,6 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     public void setUpDa() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -385,7 +380,6 @@ public class CitizenPartyDetailsMapperTest {
 
     @Test
     public void testBuildUpdatedCaseData() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))

@@ -92,7 +92,7 @@ public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
