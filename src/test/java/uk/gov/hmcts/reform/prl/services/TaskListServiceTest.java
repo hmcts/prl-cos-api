@@ -587,7 +587,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
@@ -637,7 +637,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
@@ -674,7 +674,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
@@ -712,7 +712,7 @@ public class TaskListServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData);
+                                                                                                        stringObjectMap, caseData, null);
         when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);

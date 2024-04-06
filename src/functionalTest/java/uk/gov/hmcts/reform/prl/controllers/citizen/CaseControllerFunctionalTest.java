@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,17 +21,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
-
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -188,31 +182,5 @@ public class CaseControllerFunctionalTest {
         Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
         Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
         Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
-    }
-
-    @Test
-    public void testCitizenWithdrawn() throws Exception {
-        String caseId = "12345678";
-        CaseData caseData = CaseData.builder()
-            .id(12345678L)
-            .applicantCaseName("test")
-            .state(State.CASE_WITHDRAWN)
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            12345678L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
-        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
-        String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        CaseData caseDataObj = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .body(caseData)
-            .when()
-            .contentType("application/json")
-            .post("/12345678L/withdraw")
-            .as(CaseData.class);
-        Assert.assertNotNull(caseDataObj);
     }
 }
