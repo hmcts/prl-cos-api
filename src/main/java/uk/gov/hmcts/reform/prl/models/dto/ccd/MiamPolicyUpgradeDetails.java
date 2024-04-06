@@ -1,10 +1,16 @@
-package uk.gov.hmcts.reform.prl.models.dto;
+package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
