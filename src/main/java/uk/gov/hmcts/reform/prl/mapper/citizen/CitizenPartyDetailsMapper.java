@@ -92,6 +92,7 @@ public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private ObjectMapper objectMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -398,11 +399,31 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        try {
+            log.info("existingPartyDetails received from DB ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+
+            log.info("citizenProvidedPartyDetails received ===>" + objectMapper.writeValueAsString(
+                citizenProvidedPartyDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        PartyDetails partyDetails = existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
+                          .build())
+            .build();
+
+        try {
+            log.info("partyDetails final expectation to be updated in DB ===>" + objectMapper.writeValueAsString(
+                partyDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
-                          .safetyConcerns(citizenProvidedPartyDetails.getResponse().getSafetyConcerns())
                           .build())
             .build();
     }
