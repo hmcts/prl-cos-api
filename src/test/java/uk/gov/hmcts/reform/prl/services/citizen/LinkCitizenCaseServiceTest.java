@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -28,12 +29,14 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class LinkCitizenCaseServiceTest {
@@ -61,6 +64,9 @@ public class LinkCitizenCaseServiceTest {
 
     @Mock
     CaseAccessApi caseAccessApi;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -90,15 +96,15 @@ public class LinkCitizenCaseServiceTest {
         caseData = CaseData.builder()
             .applicants(applicantList)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                .partyId(testUuid)
-                .accessCode(accessCode).build()).build()))
+                                                                         .partyId(testUuid)
+                                                                         .accessCode(accessCode).build()).build()))
             .build();
         caseDataAlreadyLinked = CaseData.builder()
             .applicants(applicantList)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
-                .partyId(testUuid)
-                    .hasLinked("Yes")
-                .accessCode(accessCode).build()).build()))
+                                                                         .partyId(testUuid)
+                                                                         .hasLinked("Yes")
+                                                                         .accessCode(accessCode).build()).build()))
             .build();
         caseDataEmptyCaseInvites = CaseData.builder()
             .applicants(applicantList)
@@ -119,7 +125,9 @@ public class LinkCitizenCaseServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(authToken);
@@ -129,13 +137,63 @@ public class LinkCitizenCaseServiceTest {
     }
 
     @Test
+    public void testLinkCitizenToCaseAlreadyLinked() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataAlreadyLinked);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCaseInvalidCodeDueToEmpty() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmptyCaseInvites);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCaseInvalidCodeDueToNull() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNullCaseInvites);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testValidateAccessCode() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNullCaseInvites);
+
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        Assert.assertEquals("Invalid", returnedCaseStatus);
+    }
+
+    @Test
+    public void testValidateAccessCodeNull() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(null);
+
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        Assert.assertEquals("Invalid", returnedCaseStatus);
+    }
+
+    @Test
     public void testLinkCitizenToCasePartyIdNull() {
         PartyDetails applicant = PartyDetails.builder().partyId(null)
-             .user(User.builder()
-                       .email("test@gmail.com")
-                       .idamId("123")
-                       .solicitorRepresented(YesOrNo.Yes)
-                       .build()).build();
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build()).build();
         CaseDetails caseDetails1 = CaseDetails.builder().build();
         CaseData caseData1 = CaseData.builder()
             .applicantsFL401(applicant)
@@ -195,52 +253,34 @@ public class LinkCitizenCaseServiceTest {
     }
 
     @Test
-    public void testLinkCitizenToCaseAlreadyLinked() {
+    public void testLinkCitizenToCaseRespondent() {
+        PartyDetails applicant = PartyDetails.builder().partyId(testUuid)
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.No)
+                      .build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseData caseData1 = CaseData.builder()
+            .respondents(Arrays.asList(element(applicant)))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(testUuid)
+                                                                         .accessCode(accessCode).build()).build()))
+            .build();
         when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataAlreadyLinked);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails1);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData1);
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData1, null);
+        when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn(authToken);
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
-    }
-
-    @Test
-    public void testLinkCitizenToCaseInvalidCodeDueToEmpty() {
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmptyCaseInvites);
-
-        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
-        Assert.assertNotNull(returnedCaseDetails);
-    }
-
-    @Test
-    public void testLinkCitizenToCaseInvalidCodeDueToNull() {
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNullCaseInvites);
-
-        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
-        Assert.assertNotNull(returnedCaseDetails);
-    }
-
-    @Test
-    public void testValidateAccessCode() {
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNullCaseInvites);
-
-        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
-        Assert.assertEquals("Invalid", returnedCaseStatus);
-    }
-
-    @Test
-    public void testValidateAccessCodeNull() {
-        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
-        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(null);
-
-        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
-        Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 }

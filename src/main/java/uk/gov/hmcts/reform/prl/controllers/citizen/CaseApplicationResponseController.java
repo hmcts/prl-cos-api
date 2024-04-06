@@ -79,16 +79,13 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info(" Generating C7 draft document for respondent ");
 
-        Document document = documentGenService.generateSingleDocument(
+        return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             DOCUMENT_C7_DRAFT_HINT,
             false
         );
-        log.info("C7 draft document generated successfully for respondent ");
-        return document;
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
@@ -114,26 +111,26 @@ public class CaseApplicationResponseController {
                 respondent -> YesOrNo.Yes.equals(
                     respondent.getValue().getCurrentRespondent()))
             .findFirst();
-        if (currentRespondent.isPresent()) {
-            if (Yes != currentRespondent.get().getValue().getResponse().getC7ResponseSubmitted()) {
-                log.info("setting c7 responsesubmitted");
-                Element<PartyDetails> respondent = currentRespondent.get();
-                respondent.getValue().setResponse(currentRespondent.get()
-                    .getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build());
+        if (currentRespondent.isPresent()
+            && Yes != currentRespondent.get().getValue().getResponse().getC7ResponseSubmitted()) {
+            Element<PartyDetails> respondent = currentRespondent.get();
+            respondent.getValue().setResponse(currentRespondent.get()
+                                                  .getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build());
 
-                List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
-                respondents.stream()
-                    .filter(party -> Objects.equals(
-                        party.getId(),
-                        respondent.getId()
-                    ))
-                    .findFirst()
-                    .ifPresent(party ->
-                        respondents.set(respondents.indexOf(party), element(party.getId(), respondent.getValue()))
-                    );
-                caseData = caseData.toBuilder().respondents(respondents).build();
-                log.info("c7 response added successfully");
-            }
+            List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
+            respondents.stream()
+                .filter(party -> Objects.equals(
+                    party.getId(),
+                    respondent.getId()
+                ))
+                .findFirst()
+                .ifPresent(party ->
+                               respondents.set(
+                                   respondents.indexOf(party),
+                                   element(party.getId(), respondent.getValue())
+                               )
+                );
+            caseData = caseData.toBuilder().respondents(respondents).build();
         }
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -146,7 +143,6 @@ public class CaseApplicationResponseController {
             false
         );
 
-        log.info("C7 Final document generated successfully for respondent ");
         updateCurrentRespondent(caseData, null, partyId);
         if (document != null) {
             String partyName = caseData.getRespondents()
@@ -180,10 +176,6 @@ public class CaseApplicationResponseController {
         }
 
         if (caseDetailsReturn != null) {
-            /**
-             * send notification to Applicant solicitor for respondent's response
-             */
-            log.info("generateC7FinalDocument:: sending notification to applicant solicitor");
             citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
