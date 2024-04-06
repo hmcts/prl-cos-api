@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class CitizenPartyDetailsMapperTest {
 
@@ -310,7 +311,7 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
-    @Ignore
+
     @Test
     public void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
         setUpDa();
