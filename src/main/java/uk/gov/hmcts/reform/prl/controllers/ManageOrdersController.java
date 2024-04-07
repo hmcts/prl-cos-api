@@ -186,7 +186,7 @@ public class ManageOrdersController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+                    = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
@@ -202,12 +202,11 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.systemAuthorisation(),
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataUpdated
-            );
+                    startAllTabsUpdateDataContent.systemAuthorisation(),
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
