@@ -573,6 +573,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     public Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) throws JsonProcessingException {
+        log.info("saveDraftCitizenApplication-AAAAAAA->{}", citizenUpdatedCaseData);
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (citizenUpdatedCaseData != null) {
             caseDataMapToBeUpdated.put(

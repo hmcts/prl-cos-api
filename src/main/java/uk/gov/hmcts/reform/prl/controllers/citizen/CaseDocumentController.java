@@ -96,7 +96,6 @@ public class CaseDocumentController {
     public ResponseEntity<Object> generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        log.info("generate-citizen-statement-documenttttttttt---->");
         fileIndex = 0;
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -304,7 +303,6 @@ public class CaseDocumentController {
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
                                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                  @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        log.info("delete-citizen-statement-documentttttttt---->");
         List<Element<UploadedDocuments>> tempUploadedDocumentsList;
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
         String caseId = deleteDocumentRequest.getValues().get("caseId");
