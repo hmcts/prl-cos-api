@@ -108,6 +108,7 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Submittttt c1000000 Controlllerrrr");
             CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
                 caseId,

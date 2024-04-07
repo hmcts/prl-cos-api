@@ -117,6 +117,7 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
             throws JsonProcessingException {
+        log.info("Submittttt c1000000");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
