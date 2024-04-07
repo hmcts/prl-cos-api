@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -1121,12 +1122,16 @@ public class ManageOrderService {
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            //Automated Hearing Request Call
+            createAutomatedHearingManagement(authorisation, caseData);
             return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             } else {
+                //Automated Hearing Request Call
+                createAutomatedHearingManagement(authorisation, caseData);
                 return setFinalOrderCollection(authorisation, caseData, userDetails);
             }
         }
@@ -3371,5 +3376,31 @@ public class ManageOrderService {
     private boolean checkIfAddressIsPresent(Address address) {
         return null != address
             && null != address.getAddressLine1();
+    }
+
+    private void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+        log.info("Automated Hearing Management Call - Start");
+        if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            caseData.getManageOrders().getOrdersHearingDetails().stream()
+                .map(Element::getValue)
+                .forEach(hearingData -> {
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        log.info(
+                            "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
+                            hearingData.getHearingDateConfirmOptionEnum()
+                        );
+                        ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
+                            authorisation,
+                            caseData
+                        );
+                        log.info("Automated Hearing Request: Inside: End");
+                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
+                    }
+                });
+        } else {
+            log.info("Automated Hearing Management: ordersHearingDetails is empty");
+        }
+        log.info("Automated Hearing Management Call - End");
     }
 }

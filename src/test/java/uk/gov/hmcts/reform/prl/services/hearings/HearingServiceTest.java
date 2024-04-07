@@ -15,8 +15,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -32,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -75,9 +79,11 @@ public class HearingServiceTest {
     Map<String, String> refDataCategoryValueMap = new HashMap<>();
     @Mock
     CoreCaseDataApi coreCaseDataApi;
-    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
-    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
-    private CaseDetails caseDetails;
+    CaseData caseData;
+    private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+    PartyDetails applicant;
+    PartyDetails respondent;
 
     @Before
     public void init() {
@@ -135,10 +141,23 @@ public class HearingServiceTest {
         ReflectionTestUtils.setField(
             hearingService, "hearingTypeCategoryId", "HearingType");
 
-        caseDetails = coreCaseDataApi.submitForCitizen(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER, "UserID",
-                                                                   "jurisdictionId", "caseType",
-                                                                   true, buildCaseDataContent()
-        );
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder()
+            .id(uuid)
+            .value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(uuid)
+            .value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            //.orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
 
     }
 
@@ -327,8 +346,8 @@ public class HearingServiceTest {
     public void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
-        when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
-        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
+        when(hearingService.createAutomatedHearing(auth, caseData)).thenReturn(response);
+        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseData);
 
         Assert.assertEquals(
             HttpStatus.OK, automatedHearingsResponse.getStatusCode());
@@ -339,8 +358,8 @@ public class HearingServiceTest {
     public void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        when(hearingService.createAutomatedHearing(auth, caseDetails)).thenReturn(response);
-        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseDetails);
+        when(hearingService.createAutomatedHearing(auth, caseData)).thenReturn(response);
+        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, caseData);
 
         Assert.assertEquals(
             HttpStatus.BAD_REQUEST, automatedHearingsResponse.getStatusCode());

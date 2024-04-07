@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -198,25 +196,7 @@ public class ManageOrdersController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             //Automated Hearing Request Call
-            log.info("Automated Hearing Management Call - Start");
-            caseData.getManageOrders().getOrdersHearingDetails().stream()
-                .map(Element::getValue)
-                .forEach(hearingData -> {
-                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        log.info("Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
-                                 hearingData.getHearingDateConfirmOptionEnum()
-                        );
-                        ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
-                            authorisation,
-                            callbackRequest.getCaseDetails()
-                        );
-                        log.info("Automated Hearing Request: Inside: End");
-                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
-                    }
-
-                });
-            log.info("Automated Hearing Request Call - End");
+            //createAutomatedHearingManagement(authorisation, callbackRequest, caseData);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
@@ -233,6 +213,28 @@ public class ManageOrdersController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    /*private void createAutomatedHearingManagement(String authorisation, CallbackRequest callbackRequest, CaseData caseData) {
+        log.info("Automated Hearing Management Call - Start");
+        caseData.getManageOrders().getOrdersHearingDetails().stream()
+            .map(Element::getValue)
+            .forEach(hearingData -> {
+                if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                    log.info("Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
+                             hearingData.getHearingDateConfirmOptionEnum()
+                    );
+                    ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
+                        authorisation,
+                        callbackRequest.getCaseDetails()
+                    );
+                    log.info("Automated Hearing Request: Inside: End");
+                    log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
+                }
+
+            });
+        log.info("Automated Hearing Request Call - End");
+    }*/
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
