@@ -169,9 +169,7 @@ public class TaskListService {
                 SUBMIT_AND_PAY,
                 SUBMIT
             ));
-        }
-
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
                     CASE_NAME,
                     TYPE_OF_APPLICATION,

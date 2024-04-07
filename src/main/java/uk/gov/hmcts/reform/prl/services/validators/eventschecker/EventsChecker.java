@@ -64,7 +64,7 @@ public class EventsChecker extends PartyChecker {
         eventStatus.put(CHILD_DETAILS_REVISED, this.getChildDetailsRevisedChecker());
         eventStatus.put(RESPONDENT_DETAILS, this.getRespondentsChecker());
         eventStatus.put(MIAM, this.getMiamChecker());
-        eventStatus.put(MIAM_POLICY_UPGRADE, this.getMiamChecker());
+        eventStatus.put(MIAM_POLICY_UPGRADE, this.getMiamPolicyUpgradeChecker());
         eventStatus.put(ALLEGATIONS_OF_HARM, this.getAllegationsOfHarmChecker());
         eventStatus.put(ALLEGATIONS_OF_HARM_REVISED, this.getAllegationsOfHarmRevisedChecker());
         eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, this.getOtherPeopleInTheCaseChecker());
