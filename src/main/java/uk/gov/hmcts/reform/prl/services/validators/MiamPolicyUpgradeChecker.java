@@ -57,7 +57,9 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         return false;
     }
 
-    private static boolean inspectChildInvolvedInMiamNoFlow(CaseData caseData, Optional<YesOrNo> applicantAttendedMiam, boolean finished, Optional<YesOrNo> claimingExemptionMiam) {
+    private static boolean inspectChildInvolvedInMiamNoFlow(CaseData caseData,
+                                                            Optional<YesOrNo> applicantAttendedMiam,
+                                                            boolean finished, Optional<YesOrNo> claimingExemptionMiam) {
         if (applicantAttendedMiam.isPresent()) {
             if (Yes.equals(applicantAttendedMiam.get())) {
                 finished = hasProvidedMiamCertificate(caseData);
