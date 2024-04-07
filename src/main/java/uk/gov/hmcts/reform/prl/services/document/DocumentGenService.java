@@ -996,7 +996,7 @@ public class DocumentGenService {
         //Need to replace EMPTY_STRING with received welsh template
         return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
     }
-    
+
     private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
         return !isWelsh ? solicitorC7DraftTemplate : solicitorC7WelshDraftTemplate;
     }
@@ -1430,10 +1430,8 @@ public class DocumentGenService {
             return caseService.updateCase(
                 caseData,
                 authorisation,
-                authTokenGenerator.generate(),
                 caseId,
-                CITIZEN_CASE_UPDATE.getValue(),
-                null
+                CITIZEN_CASE_UPDATE.getValue()
             );
 
         }
