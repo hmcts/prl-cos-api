@@ -3646,7 +3646,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testCreateAutomatedHearingManagementRequest() throws Exception {
+    public void testSendEmailNotificationOnClosingOrder() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -3656,7 +3656,10 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
+                                                StartEventResponse.builder().build(), stringObjectMap, caseData);
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()))).thenReturn(startAllTabsUpdateDataContent);
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         Map<String, Object> summaryTabFields = Map.of(
@@ -3664,7 +3667,6 @@ public class ManageOrdersControllerTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-
         /*ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
         when(hearingService.createAutomatedHearing(authToken, callbackRequest.getCaseDetails())).thenReturn(response);*/
 
