@@ -118,8 +118,6 @@ public class SendAndReplyService {
 
     private final UserService userService;
 
-    private final ServiceOfApplicationService serviceOfApplicationService;
-
     private final ObjectMapper objectMapper;
 
     private final ElementUtils elementUtils;
