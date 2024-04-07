@@ -58,6 +58,7 @@ public class CaseService {
                                   String caseId, String eventId) throws JsonProcessingException {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
+            log.info("Case controlerrrrrrr--22222->");
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
                 .builder()

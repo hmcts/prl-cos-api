@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapp
 
 
 @Component
+@Slf4j
 public class CaseDataMapper {
 
     private CaseDataMapper() {
@@ -48,6 +50,7 @@ public class CaseDataMapper {
     public static final String HYPHEN_SEPARATOR = " - ";
 
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
+        log.info("Case controlerrrrrrr--33333-> {}",caseData);
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
