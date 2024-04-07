@@ -1404,7 +1404,7 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        sendAndReplyService.sendNotificationToExternalParties(caseData);
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
         assertNull(null);
     }
 

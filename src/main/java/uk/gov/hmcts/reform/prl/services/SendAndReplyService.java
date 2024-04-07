@@ -44,6 +44,8 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -55,7 +57,9 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1268,7 +1272,7 @@ public class SendAndReplyService {
         }
     }
 
-    public void sendNotificationToExternalParties(CaseData caseData) {
+    public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
         try {
             //get the latest message
             Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
@@ -1282,35 +1286,23 @@ public class SendAndReplyService {
             //Get list of Applicant & Respondent in Case
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
 
-            selectedApplicantsOrRespondents.forEach(applicant -> {
+            selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
-                    applicant.getCode(),
+                    applicantOrRespondent.getCode(),
                     applicantAndRespondentInCase
                 );
 
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
-
-                    if (isSolicitorRepresentative(partyDetails)) {
+                    if (partyDetails.getContactPreferences().equals(ContactPreferences.email) || isSolicitorRepresentative(partyDetails)) {
                         log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
-                        final EmailTemplateVars emailTemplateVars = buildNotificationEmailTemplate(
-                            caseData,
-                            partyDetails
-                        );
-                        sendEmailNotification(caseData, partyDetails, emailTemplateVars);
-                    } else if (partyDetails.getContactPreferences().equals(ContactPreferences.email)) {
-                        log.info(
-                            "----> Else if partyDetails.getContactPreferences() {}",
-                            partyDetails.getContactPreferences().getDisplayedValue()
-                        );
-                        log.info("----> Else if partyDetails.getEmail() {}", partyDetails.getEmail());
-                        final EmailTemplateVars emailTemplateVars = buildNotificationEmailTemplate(
-                            caseData,
-                            partyDetails
-                        );
-                        sendEmailNotification(caseData, partyDetails, emailTemplateVars);
+                        try {
+                            sendEmailNotification(caseData, partyDetails, authorisation);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     } else {
-                        log.info("----> Else partyDetails.getContactPreferences() {}", partyDetails.getAddress());
+                        log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
                     }
                 }
             });
@@ -1321,16 +1313,6 @@ public class SendAndReplyService {
 
     private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
         return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
-    }
-
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, EmailTemplateVars emailTemplateVars) {
-        String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
-        emailService.send(
-            emailAddress,
-            EmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
-            emailTemplateVars,
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );
     }
 
     private List<Element<PartyDetails>> getApplicantAndRespondentList(CaseData caseData) {
@@ -1347,12 +1329,32 @@ public class SendAndReplyService {
         return applicantRespondentList;
     }
 
-    private EmailTemplateVars buildNotificationEmailTemplate(CaseData caseData, PartyDetails partyDetails) {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorisation) throws IOException {
+        String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        String caseLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
-        return SendAndReplyNotificationEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName()).caseLink(
-            caseLink).messageSubject(message.getMessageSubject()).messageContent(message.getMessageContent()).build();
+        log.info("message 1331 >>>> : {} ", objectMapper.writeValueAsString(message));
+        sendgridService.sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            authorisation,
+            SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails))
+                .listOfAttachments(new ArrayList<Document>() {
+                })
+                .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
+                .build());
     }
+
+
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails) {
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
+        dynamicData.put("dashBoardLink", dashboardLink);
+        dynamicData.put("subject", message.getMessageSubject());
+        dynamicData.put("content", message.getMessageContent());
+        dynamicData.put("attachmentType", "pdf");
+        dynamicData.put("disposition", "attachment");
+        return dynamicData;
+    }
+
 }
