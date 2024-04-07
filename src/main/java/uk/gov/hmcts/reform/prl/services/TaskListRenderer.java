@@ -133,7 +133,6 @@ public class TaskListRenderer {
         TaskSection  requiredDetails = newSection(ADD_REQUIRED_DETAILS)
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
-
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
             .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
             .withTask(tasks.get(MIAM));
@@ -292,8 +291,8 @@ public class TaskListRenderer {
 
         final TaskSection miamDetails = newSection(MIAM_DETAILS)
             .withInfo("Mediation Information and Assessment Meeting (MIAM)"
-                          + " section is optional for final submission, "
-                          + "if a consent order is uploaded and mandatory otherwise.")
+                          + " section is optional for final submission,"
+                          + " if a consent order is uploaded and mandatory otherwise.")
             .withTask(tasks.get(MIAM_POLICY_UPGRADE));
 
         final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)

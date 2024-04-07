@@ -110,8 +110,7 @@ public enum Event {
                 LITIGATION_CAPACITY,
                 WELSH_LANGUAGE_REQUIREMENTS
             );
-        }
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return List.of(
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
