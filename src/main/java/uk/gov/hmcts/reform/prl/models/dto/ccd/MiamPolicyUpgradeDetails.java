@@ -4,12 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.*;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -19,20 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MiamPolicyUpgradeDetails {
-    private YesOrNo childInvolvedInMIAM;
+    private YesOrNo childInvolvedInMiam;
     private YesOrNo applicantAttendedMiam;
     private YesOrNo claimingExemptionMiam;
     private List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist;
     private List<MiamDomesticAbuseChecklistEnum> miamDomesticAbuseChecklist;
-    //  miamDomesticAbuseEvidenceOptions;
-    //  miamDomesticAbuseEvidenceDocument;
-    //  miamDomesticAbuseNoEvidenceReason;
+    private YesOrNo miamDomesticAbuseEvidenceOptions;
+    private List<Document> miamDomesticAbuseEvidenceDocument;
+    private String miamDomesticAbuseNoEvidenceReason;
     private List<MiamUrgencyReasonChecklistEnum> miamPolicyUpgradeUrgencyReasonChecklist;
     private List<MiamPreviousAttendanceChecklistEnum> miamPolicyUpgradePreviousAttendanceChecklist;
-    //    evidenceFromDisputeResolutionProvider;
-    //    typeOfMiamAttendanceEvidence;
+    private Document evidenceFromDisputeResolutionProvider;
+    private List<TypeOfMiamAttendanceEvidenceEnum> typeOfMiamAttendanceEvidence;
     private Document miamCertificateDocument;
-    //    miamAttendanceDetails;
+    private String miamAttendanceDetails;
+    private List<MiamChildProtectionConcernChecklistEnum> miamPolicyUpgradeOtherGroundsChecklist;
+    private String applicantUnableToMiamReason1;
+    private String applicantUnableToMiamReason2;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
