@@ -721,8 +721,10 @@ public class CitizenPartyDetailsMapper {
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+            log.info("c100RebuildData.getC100RebuildRespondentDetails()---->{}",c100RebuildData.getC100RebuildRespondentDetails());
             C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            log.info("c100RebuildRespondentDetailsElements....> {}",c100RebuildRespondentDetailsElements);
             updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements, c100RebuildChildDetailsElements);
         }
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -27,6 +28,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataRespondentDetailsElementsMapper {
 
     private CaseDataRespondentDetailsElementsMapper() {
@@ -47,6 +49,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     private static List<Element<PartyDetails>> buildRespondentDetails(C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
+        log.info("respondentDetailsList------> {}",respondentDetailsList);
 
         return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
             buildPartyDetails(respondentDetails)).build()).toList();
@@ -54,7 +57,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
-
+        log.info("BBBBBB {}",respondentDetails);
         return PartyDetails
             .builder()
             .firstName(respondentDetails.getFirstName())
