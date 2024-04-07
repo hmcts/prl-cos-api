@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -64,6 +65,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -148,7 +150,7 @@ public class ManageOrdersControllerTest {
     private HearingService hearingService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -167,8 +169,8 @@ public class ManageOrdersControllerTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
-    @Mock
-    HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
+    @MockBean
+    private SystemUserService systemUserService;
 
 
 
@@ -187,17 +189,13 @@ public class ManageOrdersControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
-                                                            Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
 
-        when(hearingService.getHearings(Mockito.anyString(),
-                                        Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -235,12 +233,7 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
-            .manageOrders(ManageOrders.builder()
-                              .ordersHearingDetails(List.of(element(HearingData.builder()
-                                                                        .hearingDateConfirmOptionEnum(
-                                                                            HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-                                                                        .build())))
-                              .markedToServeEmailNotification(Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
             .build();
         Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
@@ -249,7 +242,8 @@ public class ManageOrdersControllerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMaps,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
@@ -1053,7 +1047,7 @@ public class ManageOrdersControllerTest {
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), stringObjectMap, caseData);
+                                                StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate("12345")).thenReturn(startAllTabsUpdateDataContent);
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
@@ -1159,7 +1153,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
-
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1169,8 +1164,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
@@ -1271,7 +1264,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
-
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1281,8 +1275,6 @@ public class ManageOrdersControllerTest {
                 .data(stringObjectMap)
                 .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
@@ -1383,6 +1375,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1392,8 +1386,6 @@ public class ManageOrdersControllerTest {
                 .data(stringObjectMap)
                 .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
@@ -1517,7 +1509,8 @@ public class ManageOrdersControllerTest {
     }
 
 
-    //@Test
+    @Test
+    @Ignore
     public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
         applicant = PartyDetails.builder()
@@ -1611,7 +1604,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
             .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
@@ -1895,6 +1888,8 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
@@ -1906,8 +1901,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
@@ -1946,6 +1939,8 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
@@ -1957,8 +1952,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
@@ -1997,6 +1990,8 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
@@ -2008,8 +2003,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
@@ -2790,6 +2783,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -2799,8 +2794,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(),Mockito.any(),Mockito.anyString()))
             .thenReturn(hearingElementList);
@@ -2910,6 +2903,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -2919,8 +2914,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setHearingDataForSdo(any(),any(), anyString()))
             .thenReturn(caseData);
@@ -3295,6 +3288,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -3304,8 +3299,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
@@ -3407,6 +3400,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -3416,8 +3411,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
@@ -3656,10 +3649,7 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), stringObjectMap, caseData);
-        when(allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()))).thenReturn(startAllTabsUpdateDataContent);
+
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         Map<String, Object> summaryTabFields = Map.of(
