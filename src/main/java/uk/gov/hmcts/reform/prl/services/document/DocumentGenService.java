@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
@@ -308,6 +310,7 @@ public class DocumentGenService {
     private final IdamClient idamClient;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final AllTabServiceImpl allTabService;
 
     private final DgsApiClient dgsApiClient;
 
@@ -1391,17 +1394,14 @@ public class DocumentGenService {
     }
 
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
-        //Get case data from caseId
+
         String caseId = documentRequest.getCaseId();
-        CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
 
-        if (null == caseDetails) {
-            log.info("Retrieved caseDetails is null for caseId {}", caseId);
-            return null;
-        }
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificEvent(String.valueOf(caseId), CITIZEN_CASE_UPDATE.getValue());
+        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (isNotBlank(documentRequest.getCategoryId())
@@ -1419,28 +1419,35 @@ public class DocumentGenService {
                 ))
                 .toList();
 
-            manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
-
-            caseData = moveCitizenDocumentsToQuarantineTab(
-                quarantineLegalDocs,
-                caseData,
-                caseDataUpdated
+            manageDocumentsService.setFlagsForWaTask(
+                updatedCaseData,
+                updatedCaseDataMap,
+                CITIZEN,
+                quarantineLegalDocs.get(0)
             );
 
-            return caseService.updateCase(
-                caseData,
-                authorisation,
+            updatedCaseDataMap = moveCitizenDocumentsToQuarantineTab(
+                quarantineLegalDocs,
+                updatedCaseData,
+                updatedCaseDataMap
+            );
+
+            //update all tabs
+            return allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
                 caseId,
-                CITIZEN_CASE_UPDATE.getValue()
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                updatedCaseDataMap
             );
 
         }
         return null;
     }
 
-    private CaseData moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                         CaseData caseData,
-                                                         Map<String, Object> caseDataUpdated) {
+    private Map<String, Object> moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+                                                                    CaseData caseData,
+                                                                    Map<String, Object> caseDataUpdated) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
             //invoke common manage docs
             manageDocumentsService.moveDocumentsToQuarantineTab(
@@ -1449,9 +1456,8 @@ public class DocumentGenService {
                 caseDataUpdated,
                 CITIZEN
             );
-            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
-        return caseData;
+        return caseDataUpdated;
     }
 
     private CaseData moveCitizenDocumentsToCaseDocumentsTab(List<QuarantineLegalDoc> quarantineLegalDocs,
