@@ -158,10 +158,8 @@ public class CaseApplicationResponseService {
         caseDetailsReturn = caseService.updateCase(
             caseData,
             authorisation,
-            s2sToken,
             caseId,
-            REVIEW_AND_SUBMIT,
-            null
+            REVIEW_AND_SUBMIT
         );
 
         return caseDetailsReturn;

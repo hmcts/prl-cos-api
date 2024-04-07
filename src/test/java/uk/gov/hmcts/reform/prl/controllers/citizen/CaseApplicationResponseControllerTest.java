@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -122,8 +121,7 @@ public class CaseApplicationResponseControllerTest {
         when(caseApplicationResponseService.generateC7DraftDocument(authToken, caseData, false))
             .thenReturn(Document.builder().build());
         Document document = caseApplicationResponseController
-            .generateC7DraftDocument(caseId, partyId, authToken, DocumentRequest
-                .builder().isWelsh(false).build(), servAuthToken);
+            .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(document);
     }
 
