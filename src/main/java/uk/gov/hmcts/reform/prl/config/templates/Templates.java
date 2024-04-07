@@ -9,9 +9,48 @@ public class Templates {
     public static String SAFETY_PROTECTION_ENG = "PRL-ENG-SAFETY-PROTECTION.docx";
     public static String FL416_ENG = "PRL-ENG-FL416.docx";
     public static String PRIVACY_NOTICE_ENG = "PRL-PRIVACY-NOTICE-DOCUMENT.docx";
-
+    public static String AP6_LETTER = "PRL-LET-ENG-C100-AP6.docx";
+    public static String PRL_LET_ENG_AP2 = "PRL-LET-ENG-FL401-AP2.docx";
+    public static String PRL_LET_ENG_AP8 = "PRL-LET-ENG-C100-AP8.docx";
+    public static String PRL_LET_ENG_AP7 = "PRL-LET-ENG-C100-AP7.docx";
+    public static String PRL_LET_ENG_RE5 = "PRL-LET-ENG-C100-RE5.docx";
+    public static String PRL_LET_ENG_FL401_RE1 = "PRL-LET-ENG-FL401-RE1.docx";
+    public static String PRL_LET_ENG_FL401_RE2 = "PRL-LET-ENG-FL401-RE2.docx";
+    public static String PRL_LET_ENG_FL401_RE3 = "PRL-LET-ENG-FL401-RE3.docx";
+    public static String PRL_LET_ENG_FL401_RE4 = "PRL-LET-ENG-FL401-RE4.docx";
+    public static String PRL_LET_ENG_C100_RE6 = "PRL-LET-ENG-C100-RE6.docx";
 
     //Emails
+
+    public static String NEW_ORDER_TITLE = "<b>A new order has been issued</b>";
+
+    public static String FINAL_ORDER_TITLE = "<b>Final court order issued for this case</b>";
+
+    public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY =
+            "<br>"
+            + "A new order has been issued for this case and is attached to this email.<br>";
+
+    public static String RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY =
+            "<br>"
+                    + "A final court order has been issued for this case and is attached to this email.<br>";
+
+    public static String EMAIL_START = ""
+            + "<br>"
+            + "<br>"
+            + "Case name: %s <br>"
+            + "Case number: %s<br>"
+            + "<br>"
+            + "<br>"
+            + "Dear %s,<br>";
+
+    public static String EMAIL_END =
+            "<br>"
+                    + "If you have access to the Private Law digital service, you can view the order with this link:<br>"
+                    + "<br>"
+                    + "%s<br>"
+                    + "<br>"
+                    + "HM Courts and Tribunals Service (HMCTS) <br>"
+                    + "<br>";
     public static String EMAIL_BODY = ""
         + "\n"
         + "\n"

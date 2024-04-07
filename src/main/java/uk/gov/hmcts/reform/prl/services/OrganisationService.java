@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
 
 import static java.util.Optional.ofNullable;
@@ -26,10 +25,8 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrganisationService {
-
-    @Autowired
+    public static final String ACTIVE = "Active";
     private final OrganisationApi organisationApi;
-
     private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
@@ -43,7 +40,7 @@ public class OrganisationService {
                 .map(eachItem -> Element.<PartyDetails>builder()
                     .value(getApplicantWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
-                .collect(Collectors.toList());
+                .toList();
             caseData = caseData.toBuilder()
                 .applicants(applicants)
                 .build();
@@ -62,7 +59,7 @@ public class OrganisationService {
                 .map(eachItem -> Element.<PartyDetails>builder()
                     .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
-                .collect(Collectors.toList());
+                .toList();
 
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
@@ -85,13 +82,15 @@ public class OrganisationService {
                     log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 } catch (Exception e) {
                     log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 }
             }
@@ -128,13 +127,15 @@ public class OrganisationService {
                     log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 } catch (Exception e) {
                     log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 }
             }
@@ -155,6 +156,17 @@ public class OrganisationService {
         return caseData;
     }
 
+    public CaseData getRespondentOrganisationDetailsForFL401(CaseData caseData) {
+        if (Optional.ofNullable(caseData.getRespondentsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails respondentWithOrg = getRespondentWithOrg(caseData.getRespondentsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .respondentsFL401(respondentWithOrg)
+                .build();
+        }
+        return caseData;
+    }
+
     public Optional<Organisations> findUserOrganisation(String authorization) {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
@@ -163,4 +175,12 @@ public class OrganisationService {
             return Optional.empty();
         }
     }
+
+    public List<Organisations> getAllActiveOrganisations(String userToken) {
+        log.trace("Fetching all active organisation details");
+        Object orgObject = organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
+        log.info("Fetching all active organisation details ==> " + orgObject);
+        return (List<Organisations>) orgObject;
+    }
+
 }

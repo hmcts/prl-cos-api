@@ -17,6 +17,7 @@ case:
       uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
 
 prl:
+  environment: ${APP_ENV:preview}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
@@ -53,6 +54,8 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  main:
+    allow-circular-references: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -112,7 +115,7 @@ uk:
       email:
         templates:
           english:
-            SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
+            SOLICITOR: ac3af68e-17e4-4e6c-9c7c-641403b461a4
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
@@ -155,7 +158,9 @@ uk:
             CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
             CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC: facea2fa-e635-4542-abd4-33f8f0ec7dab
             CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
+            CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED: d1602761-dc82-4d17-99a8-675514049bfc
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
+            LIST_ON_NOTICE_EMAIL_NOTIFICATION: 21ede4dc-cce4-4198-b63e-cd0f775299d5
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -171,6 +176,27 @@ notify:
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  notification:
+    email:
+      templates:
+        english:
+          SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
+          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
+          SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
+        welsh:
+          SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
+          SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
+          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -226,6 +252,9 @@ idam:
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
     password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
+  judge:
+    username: ${JUDGE_USER_NAME:xxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxx}
 
 test-url: ${TEST_URL:http://localhost:4044}
 
@@ -326,6 +355,8 @@ document:
       c100_c1a_welsh_template_v2: FL-PRL-APP-WEL-C1A-01119-V2.docx
       c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
+      c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
+      c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -347,6 +378,10 @@ document:
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
+      fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename: C8Document.pdf
+      fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename_welsh: C8Document.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
@@ -384,6 +419,8 @@ document:
       prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_blank_welsh_draft_filename: welsh_blank_order_fl404b_draft.pdf
+      prl_fl404b_blank_welsh_final_filename: welsh_blank_order_fl404b_final.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
@@ -510,6 +547,10 @@ judicialUsers:
 commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
+
+amRoleAssignment:
+  api:
+    url: ${AM_ROLE_ASSIGNMENT_API_URL:http://am-role-assignment-service-aat.service.core-compute-aat.internal}
 
 sendandreply:
   service-code: ABA5

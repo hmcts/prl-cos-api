@@ -5,12 +5,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -21,6 +23,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,9 +100,9 @@ public class HearingRequestDataMapperTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgeNameAndEmail(judicialUser)
@@ -107,8 +110,32 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .applicantHearingChannel1(dynamicList1)
+            .applicantSolicitorHearingChannel1(dynamicList1)
+            .applicantHearingChannel2(dynamicList3)
+            .applicantSolicitorHearingChannel2(null)
+            .respondentHearingChannel1(dynamicList1)
+            .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("appF")
+            .firstName("appL")
+            .representativeFirstName("appSolF")
+            .representativeLastName("appSolL")
+            .build();
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("respF")
+            .firstName("respL")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("respSolF")
+            .representativeLastName("respSolL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant), element(applicant), element(applicant), element(applicant), element(applicant)))
+            .respondents(List.of(element(respondent), element(respondent), element(respondent), element(respondent), element(respondent)))
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
     }
 
@@ -162,9 +189,9 @@ public class HearingRequestDataMapperTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgeNameAndEmail(judicialUser)
@@ -173,7 +200,10 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertNotNull(hearingData);
     }
 
@@ -240,9 +270,9 @@ public class HearingRequestDataMapperTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgeNameAndEmail(judicialUser)
@@ -250,11 +280,20 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .representativeFirstName("testF")
+            .representativeLastName("testL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
         assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 

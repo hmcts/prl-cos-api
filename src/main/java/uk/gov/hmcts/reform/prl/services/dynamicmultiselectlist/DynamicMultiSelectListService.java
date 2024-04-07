@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,10 +43,8 @@ public class DynamicMultiSelectListService {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
-            orders.forEach(order -> {
-                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
-                                  .label(order.getValue().getLabelForDynamicList()).build());
-            });
+            orders.forEach(order -> listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
+                              .label(order.getValue().getLabelForDynamicList()).build()));
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
@@ -187,7 +186,7 @@ public class DynamicMultiSelectListService {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getValue()) {
             dynamicMultiSelectList.getValue().forEach(value ->
-                                                          strList.add(value.getLabel().split("\\(")[0])
+                                                          strList.add(value.getLabel().split("\\(")[0].trim())
             );
         }
         if (!strList.isEmpty()) {
@@ -203,6 +202,7 @@ public class DynamicMultiSelectListService {
                 .add(Element.<ServedParties>builder().value(ServedParties.builder()
                                                                 .partyId(value.getCode())
                                                                 .partyName(value.getLabel())
+                                                                .servedDateTime(LocalDateTime.now())
                                                                 .build()).build())
             );
         }
@@ -214,7 +214,7 @@ public class DynamicMultiSelectListService {
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
             dynamicMultiSelectList.getListItems().forEach(value -> {
                 if (null != value.getLabel()) {
-                    strList.add(value.getLabel().split("\\(")[0]);
+                    strList.add(value.getLabel().split("\\(")[0].trim());
                 }
             });
         }
@@ -377,5 +377,12 @@ public class DynamicMultiSelectListService {
                           .code(String.valueOf(id))
                           .label(label.toString())
                           .build());
+    }
+
+    public DynamicMultiSelectList getEmptyDynMultiSelectList() {
+        return  DynamicMultiSelectList.builder()
+            .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
+            .build();
     }
 }

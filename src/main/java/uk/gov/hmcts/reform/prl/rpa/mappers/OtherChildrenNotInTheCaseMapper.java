@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
@@ -29,7 +28,7 @@ public class OtherChildrenNotInTheCaseMapper {
         }
         List<OtherChildrenNotInTheCase> childList = elementList.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return childList.stream().map(child -> new NullAwareJsonObjectBuilder()
             .add("firstName", child.getFirstName())
             .add("lastName", child.getLastName())

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -86,6 +87,9 @@ public class RequestUpdateCallbackServiceTest {
     @Mock
     private CourtFinderService courtFinderService;
 
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
 
@@ -103,13 +107,17 @@ public class RequestUpdateCallbackServiceTest {
         startEventResponse = StartEventResponse.builder().eventId(eventName)
             .caseDetails(caseDetails)
             .token(eventToken).build();
+        when(coreCaseDataService.findCaseById(
+            Mockito.anyString(),
+            Mockito.anyString()
+        )).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate(
             Mockito.anyString(),
             Mockito.any(),
             Mockito.anyString(),
             Mockito.anyBoolean()
-        )).thenReturn(
-            startEventResponse);
+        )).thenReturn(startEventResponse);
+        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any(), any())).thenCallRealMethod();
     }
 
     @Test(expected = NullPointerException.class)
@@ -165,7 +173,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
@@ -195,7 +203,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
@@ -231,7 +239,7 @@ public class RequestUpdateCallbackServiceTest {
             .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventFailureName
         ))

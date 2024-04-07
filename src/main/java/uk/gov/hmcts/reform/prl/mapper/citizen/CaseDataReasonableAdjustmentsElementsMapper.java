@@ -60,20 +60,20 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
     private static final String CLOSE_BRACKET = ")";
     private static final String COLON = ": ";
 
-    public static void updateReasonableAdjustmentsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateReasonableAdjustmentsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                       C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
         List<String> specialArrangementList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getSpecialArrangements())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> disabilityRequirementsList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getDisabilityRequirements())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> languageList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getLanguageNeeds())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> communicationHelps = nonNull(c100RebuildReasonableAdjustmentsElements.getCommunicationHelp())
                 ? Arrays.stream(c100RebuildReasonableAdjustmentsElements.getCommunicationHelp())
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .toList() : Collections.emptyList();
 
         YesOrNo isWelshRequired = isWelshRequired(languageList);
 
@@ -112,7 +112,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     .party(List.of(applicant)).otherAssistance(needInterpreterInCertainLanguageDetails).build();
             return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private static YesOrNo buildInterpreterNeeded(List<String> languageList) {
@@ -187,7 +187,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildHelpTravellingMovingBuildingSupport(String[] travellingCourt,
                                                                    C100RebuildReasonableAdjustmentsElements c100RaElements) {
-        return Arrays.stream(travellingCourt).collect(Collectors.toList()).stream()
+        return Arrays.stream(travellingCourt).toList().stream()
                 .map(element -> buildTravellingCourtElement(element,
                         c100RaElements.getParkingSpaceSubField(),
                         c100RaElements.getDifferentTypeChairSubField(),
@@ -210,7 +210,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildFeelComfortableSupport(String[] feelComfortable,
                                                       C100RebuildReasonableAdjustmentsElements c100RaElements) {
-        return Arrays.stream(feelComfortable).collect(Collectors.toList()).stream()
+        return Arrays.stream(feelComfortable).toList().stream()
                 .map(element -> buildFeelComfortableElement(element,
                         c100RaElements.getAppropriateLightingSubField(),
                         c100RaElements.getFeelComfortableOtherSubField()))
@@ -230,7 +230,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildExtraSupport(String[] supportCourt, C100RebuildReasonableAdjustmentsElements
             c100RaElements) {
-        return Arrays.stream(supportCourt).collect(Collectors.toList()).stream()
+        return Arrays.stream(supportCourt).toList().stream()
                 .map(element -> buildSupportCourtElement(element,
                         c100RaElements.getSupportWorkerCarerSubField(),
                         c100RaElements.getFriendFamilyMemberSubField(),
@@ -257,7 +257,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildCommunicationHelp(String[] communicationHelp, C100RebuildReasonableAdjustmentsElements
             c100RaElements) {
-        return Arrays.stream(communicationHelp).collect(Collectors.toList()).stream()
+        return Arrays.stream(communicationHelp).toList().stream()
                 .map(element -> buildCommunicationHelpElement(element,
                         c100RaElements.getSignLanguageInterpreterDetails(),
                         c100RaElements.getCommunicationHelpOtherDetails()))
@@ -277,7 +277,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildDocumentInformation(String[] documentInformation, C100RebuildReasonableAdjustmentsElements
             c100RaElements) {
-        return Arrays.stream(documentInformation).collect(Collectors.toList()).stream()
+        return Arrays.stream(documentInformation).toList().stream()
                 .map(element -> buildDocumentInformationElement(element,
                         c100RaElements.getSpecifiedColorDocumentsDetails(), c100RaElements.getLargePrintDocumentsDetails(),
                         c100RaElements.getOtherDetails()))

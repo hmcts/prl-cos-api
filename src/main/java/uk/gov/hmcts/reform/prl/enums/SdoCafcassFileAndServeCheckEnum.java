@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoCafcassFileAndServeCheckEnum {
     @JsonProperty("other")
-    other("other", "Other direction for safeguarding next steps (Cafcass)");
+    other("other", "Other direction for safeguarding next steps Cafcass");
 
     private final String id;
     private final String displayedValue;

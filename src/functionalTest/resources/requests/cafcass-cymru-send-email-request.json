@@ -1,0 +1,425 @@
+{
+  "case_details": {
+    "id": "1703068453862935",
+    "jurisdiction": "PRIVATELAW",
+    "case_type": "PRLAPPS",
+    "created_on": "2023-12-20T10:34:13.804091",
+    "last_modified_on": "2023-12-20T14:57:00.936309939",
+    "last_state_modified_on": "2023-12-20T10:34:13.804091",
+    "state": "JUDICIAL_REVIEW",
+    "security_classification": "PUBLIC",
+    "case_data": {
+      "manageOrderHeader1": null,
+      "caseTypeOfApplication": "C100",
+      "applicantOrRespondentCaseName": "C100 test case",
+      "manageOrdersOptions": "servedSavedOrders",
+      "performingUser": null,
+      "performingAction": null,
+      "judgeLaReviewRequired": null,
+      "markedToServeEmailNotification": "Yes",
+      "applicants": [
+        {
+          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+          "value": {
+            "firstName": "test",
+            "lastName": "data",
+            "previousName": null,
+            "dateOfBirth": "1989-11-30",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "placeOfBirth": "London",
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "",
+              "County": "",
+              "Country": "",
+              "PostCode": "RH117RQ"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": "No",
+            "isAtAddressLessThan5Years": "No",
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": "4635635636",
+            "isPhoneNumberConfidential": "No",
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": null,
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "isPlaceOfBirthKnown": null,
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": "repFirstName",
+            "representativeLastName": "repLastName",
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "doTheyHaveLegalRepresentation": null,
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "respondents": [
+        {
+          "id": "29959b30-f49e-483b-a963-d53a88a93209",
+          "value": {
+            "firstName": "Ball",
+            "lastName": "Lowe",
+            "previousName": null,
+            "dateOfBirth": null,
+            "isDateOfBirthUnknown": null,
+            "gender": "female",
+            "otherGender": null,
+            "placeOfBirth": null,
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "London",
+              "County": "",
+              "Country": "",
+              "PostCode": "N14 5AL"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": null,
+            "isAtAddressLessThan5Years": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": null,
+            "isPhoneNumberConfidential": null,
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": "No",
+            "isCurrentAddressKnown": "Yes",
+            "canYouProvidePhoneNumber": "No",
+            "isPlaceOfBirthKnown": "No",
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
+            "doTheyHaveLegalRepresentation": "no",
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "orderCollection": [
+        {
+          "id": "87e63f63-c0d8-4593-bfbb-565799a8a63f",
+          "value": {
+            "orderType": "Blank order or directions (C21)",
+            "childOption": {
+              "value": [
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                }
+              ],
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "dateCreated": "2023-12-20T12:33:52.544576",
+            "orderTypeId": "blankOrderOrDirections",
+            "typeOfOrder": "Final",
+            "childrenList": "Simon Anderson, Lilly Anderson",
+            "otherDetails": {
+              "status": "Created by Admin",
+              "createdBy": "test",
+              "orderMadeDate": "20 Dec 2023",
+              "orderRecipients": "",
+              "orderServedDate": "20 Dec 2023",
+              "orderCreatedDate": "20 Dec 2023"
+            },
+            "c21OrderOptions": "c21WithdrawApplication",
+            "isOrderUploaded": "No",
+            "orderClosesCase": "No",
+            "serveOrderDetails": {
+              "otherParties": "",
+              "cafcassServed": "No",
+              "servedParties": [
+                {
+                  "id": "a18e39d8-e14e-4aca-be4a-cb59a7da365e",
+                  "value": {
+                    "partyId": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                    "partyName": "Jeremy Anderson (Applicant 2)"
+                  }
+                },
+                {
+                  "id": "1c28e1d8-c180-4e1c-82e0-11b4e4d6a678",
+                  "value": {
+                    "partyId": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                    "partyName": "Martina Graham (Applicant 3)"
+                  }
+                },
+                {
+                  "id": "195e5baf-b1d8-460c-b448-fd3005ad01ec",
+                  "value": {
+                    "partyId": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                    "partyName": "Simon Anderson (Child 2)"
+                  }
+                },
+                {
+                  "id": "fa9a91d5-2358-4a4f-b870-3fd2a39bfded",
+                  "value": {
+                    "partyId": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                    "partyName": "Lilly Anderson (Child 3)"
+                  }
+                }
+              ],
+              "cafcassCymruEmail": "test@hmcts.net",
+              "recipientsOptions": "Jeremy Anderson, Martina Graham",
+              "serveOnRespondent": "No",
+              "cafcassCymruServed": "Yes",
+              "otherPartiesServed": "No",
+              "cafcassOrCymruNeedToProvideReport": "No",
+              "orderEndsInvolvementOfCafcassOrCymru": "No"
+            },
+            "bulkPrintOrderDetails": [
+
+            ],
+            "isTheOrderAboutAllChildren": "No",
+            "isWithdrawnRequestApproved": "",
+            "typeOfChildArrangementsOrder": ""
+          }
+        },
+        {
+          "id": "6ee844b8-8bae-4968-b5d7-6239bdf049ed",
+          "value": {
+            "orderType": "Blank order or directions (C21)",
+            "childOption": {
+              "value": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                }
+              ],
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "dateCreated": "2023-12-20T10:46:28.750875",
+            "orderTypeId": "blankOrderOrDirections",
+            "typeOfOrder": "General",
+            "childrenList": "Joe Doe, Lilly Anderson",
+            "otherDetails": {
+              "status": "Created by Admin",
+              "createdBy": "judge",
+              "orderMadeDate": "20 Dec 2023",
+              "orderRecipients": "",
+              "orderServedDate": "20 Dec 2023",
+              "orderCreatedDate": "20 Dec 2023"
+            },
+            "c21OrderOptions": "c21ApplicationRefused",
+            "isOrderUploaded": "No",
+            "serveOrderDetails": {
+              "otherParties": "",
+              "cafcassServed": "No",
+              "servedParties": [
+                {
+                  "id": "e948e39b-4e70-4430-bf7c-83d98e1b7afc",
+                  "value": {
+                    "partyId": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+                    "partyName": "Jeremy Anderson (Applicant 2)"
+                  }
+                },
+                {
+                  "id": "0590fbac-530a-4950-98a5-2b58111cf90b",
+                  "value": {
+                    "partyId": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+                    "partyName": "Martina Graham (Applicant 3)"
+                  }
+                },
+                {
+                  "id": "94f31f9d-61ab-49b0-889e-58710f07ab1b",
+                  "value": {
+                    "partyId": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                    "partyName": "Simon Anderson (Child 2)"
+                  }
+                },
+                {
+                  "id": "6c1032b2-d715-4ea7-8024-d8f559ab22cf",
+                  "value": {
+                    "partyId": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                    "partyName": "Lilly Anderson (Child 3)"
+                  }
+                }
+              ],
+              "cafcassCymruEmail": "test@hmcts.net",
+              "recipientsOptions": "Jeremy Anderson, Martina Graham",
+              "serveOnRespondent": "No",
+              "cafcassCymruServed": "Yes",
+              "otherPartiesServed": "No",
+              "cafcassOrCymruNeedToProvideReport": "No",
+              "orderEndsInvolvementOfCafcassOrCymru": "No"
+            },
+            "bulkPrintOrderDetails": [
+
+            ],
+            "isTheOrderAboutAllChildren": "No",
+            "isWithdrawnRequestApproved": "",
+            "typeOfChildArrangementsOrder": ""
+          }
+        }
+      ],
+      "serveOrderDynamicList": {
+        "value": [
+          {
+            "code": "87e63f63-c0d8-4593-bfbb-565799a8a63f",
+            "label": "Blank order or directions (C21) - 20 Dec 2023"
+          },
+          {
+            "code": "6ee844b8-8bae-4968-b5d7-6239bdf049ed",
+            "label": "Blank order or directions (C21) - 20 Dec 2023"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "87e63f63-c0d8-4593-bfbb-565799a8a63f",
+            "label": "Blank order or directions (C21) - 20 Dec 2023"
+          },
+          {
+            "code": "6ee844b8-8bae-4968-b5d7-6239bdf049ed",
+            "label": "Blank order or directions (C21) - 20 Dec 2023"
+          }
+        ]
+      },
+      "serveOrderAdditionalDocuments": [
+      ],
+      "serveToRespondentOptions": "Yes",
+      "recipientsOptions": {
+        "value": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          },
+          {
+            "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+            "label": "Martina Graham (Applicant 3)"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          },
+          {
+            "code": "0016cff5-17f0-42af-bea4-0b04ca74c9ec",
+            "label": "Jeremy Anderson (Applicant 2)"
+          },
+          {
+            "code": "7e9028ba-534c-42bb-bb04-e67b6551b4bd",
+            "label": "Martina Graham (Applicant 3)"
+          },
+          {
+            "code": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+            "label": "Mary Richards (Respondent 1)"
+          },
+          {
+            "code": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+            "label": "Elise Lynn (Respondent 2)"
+          },
+          {
+            "code": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+            "label": "David Carman (Respondent 3)"
+          }
+        ]
+      },
+      "otherParties": {
+        "value": [
+        ],
+        "list_items": [
+          {
+            "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
+            "label": "Sam Nolan"
+          }
+        ]
+      },
+      "cafcassCymruServedOptions": "Yes",
+      "cafcassCymruEmail": "test@hmcts.net",
+      "serveOtherPartiesCA": [
+      ]
+    },
+    "event": {
+      "id": "manageOrders",
+      "summary": "",
+      "description": ""
+    },
+    "event_token": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJzcnBsMWpudWZvM3Nkb3V0a3Zrajkzcm8yYSIsInN1YiI6IjFkNGM5MGRjLWRhZTAtNDBlMi1hY2IwLWFiNGE1NDhhNDRjZSIsImlhdCI6MTcwMzA4NjA3NywiY2FzZS1pZCI6IjUiLCJldmVudC1pZCI6Im1hbmFnZU9yZGVycyIsImNhc2UtdHlwZS1pZCI6IlBSTEFQUFMiLCJqdXJpc2RpY3Rpb24taWQiOiJQUklWQVRFTEFXIiwiY2FzZS1zdGF0ZSI6IkpVRElDSUFMX1JFVklFVyIsImNhc2UtdmVyc2lvbiI6ImM1ZTI0NDk1NzM0ZjZiMjNiMTE3NjZlODVhNmYyZDM3YjA5NWU5MDdjODU0M2ViMTg5ZTNmZTU2M2YzYzQxZDQiLCJlbnRpdHktdmVyc2lvbiI6MTR9.kCNPN0iCvpa5OdHeVgX9sLC4w7tZUAey3Q4LDkGeBMM",
+    "ignore_warning": false
+  }
+}

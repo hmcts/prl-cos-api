@@ -54,7 +54,6 @@ public class PaymentRequestService {
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
-    private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
     private final CaseService caseService;
 
@@ -143,7 +142,7 @@ public class PaymentRequestService {
                                          CreatePaymentRequest createPaymentRequest,
                                          String paymentServiceReferenceNumber,
                                          String paymentReferenceNumber,
-                                         FeeResponse feeResponse) throws Exception {
+                                         FeeResponse feeResponse) {
         String caseId = createPaymentRequest.getCaseId();
 
         if (null == paymentServiceReferenceNumber
@@ -221,14 +220,14 @@ public class PaymentRequestService {
                 .build();
 
             log.info("Payment is already successful for the case id: {} ", caseId);
-            return paymentResponse;
         } else {
             log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
             paymentResponse = createServicePayment(paymentServiceReferenceNumber, authorization,
                                                    createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
             paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
-            return paymentResponse;
         }
+
+        return paymentResponse;
     }
 
     public PaymentServiceResponse createServiceRequestFromCcdCallack(
@@ -292,7 +291,7 @@ public class PaymentRequestService {
     private CaseData getCaseData(String authorization,
                                  String serviceAuthorization,
                                  String caseId) {
-        log.info("Retrieving caseData for caseId : " + caseId);
+        log.info("Retrieving caseData for caseId : {}", caseId);
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
             serviceAuthorization,
@@ -328,9 +327,10 @@ public class PaymentRequestService {
         log.info("Awp payments updated in case data {}", caseData.getAwpPayments());
 
         //update case
-        caseService.updateCase(caseData, authorization, null,
+        caseService.updateCase(caseData,
+                               authorization,
                                String.valueOf(caseData.getId()),
-                               CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null
+                               CaseEvent.CITIZEN_CASE_UPDATE.getValue()
         );
     }
 

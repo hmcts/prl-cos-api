@@ -28,6 +28,8 @@ java:
         - prl-rd-api-system-username
         - prl-rd-api-system-user-password
         - welsh-court-mapping
+        - judge-testuser-one
+        - judge-testpassword
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
@@ -61,3 +63,5 @@ java:
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     COMMON_DATA_API: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    APP_ENV: "aat"

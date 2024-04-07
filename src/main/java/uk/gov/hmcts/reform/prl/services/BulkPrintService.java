@@ -9,14 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Base64.getEncoder;
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -44,27 +44,31 @@ public class BulkPrintService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
-    private final LaunchDarklyClient launchDarklyClient;
+    private final DocumentGenService documentGenService;
+
 
 
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
-
         String s2sToken = authTokenGenerator.generate();
-        final List<String> stringifiedDocuments = documents.stream()
-            .map(docInfo -> {
-                try {
-                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
+        List<Document> pdfDocuments = new ArrayList<>();
+
+        try {
+            for (Document doc:documents) {
+                pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
+            }
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Null Pointer exception at bulk print send : " + e);
+        } catch (Exception e) {
+            log.info("The bulk print service has failed during convertToPdf: {}", e);
+        }
+
+        final List<String> stringifiedDocuments = pdfDocuments.stream()
+            .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
-            .collect(toList());
+            .toList();
         log.info("Sending {} for case {}", letterType, caseId);
-        SendLetterResponse sendLetterResponse = null;
-        if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
-            log.info("******Bulk print is enabled****");
-            sendLetterResponse = sendLetterApi.sendLetter(
+
+        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
                     stringifiedDocuments,
@@ -72,7 +76,6 @@ public class BulkPrintService {
                     getAdditionalData(caseId, letterType, recipientName)
                 )
             );
-        }
 
         log.info(
             "Letter service produced the following letter Id {} for case {}",
@@ -92,7 +95,7 @@ public class BulkPrintService {
         return additionalData;
     }
 
-    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
+    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) {
         return getDocumentBytes(docUrl, authToken, s2sToken);
     }
 

@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -67,8 +68,8 @@ import static uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationServic
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
-@RunWith(MockitoJUnitRunner.class)
-public class UploadAdditionalApplicationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UploadAdditionalApplicationServiceTest {
 
     @Mock
     private IdamClient idamClient;
@@ -99,7 +100,7 @@ public class UploadAdditionalApplicationServiceTest {
 
     PartyDetails party;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
@@ -123,14 +124,10 @@ public class UploadAdditionalApplicationServiceTest {
         );
         partyDetails = new ArrayList<>();
         partyDetails.add(partyDetailsElement);
-
-        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
-                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
-                                                                    .build());
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForBothC2AndOther() {
+    void testGetAdditionalApplicationElementsForBothC2AndOther() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(partyDynamicMultiSelectList)
             .additionalApplicationsApplyingFor(List.of(
@@ -155,6 +152,9 @@ public class UploadAdditionalApplicationServiceTest {
             .applicants(partyDetails)
             .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
         uploadAdditionalApplicationService.getAdditionalApplicationElements(
             "auth",
             "testAuth",
@@ -165,8 +165,104 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForC2() throws Exception {
+    void testCalculateAdditionalApplicationsFeeSolicitorDetailsNotEmpty() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .representedPartyType("test")
+                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+                .build();
+        CaseData caseData = CaseData.builder()
+                .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+                .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        assertEquals(
+                objectMap,
+                uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
 
+    @Test
+    void testCalculateAdditionalApplicationsFeeApplicantSolicitor() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .representedPartyType("test")
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        assertEquals(
+            objectMap,
+            uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
+
+
+    @Test
+    void testupdateAwpApplicationStatus() throws Exception {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
+                .builder()
+                .otherApplicationsBundle(OtherApplicationsBundle
+                        .builder()
+                        .uploadedDateTime("01")
+                        .build())
+                .build()));
+
+        assertNotNull(
+                uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus("OT_01_02", additionalApplicationsBundle, "OT")
+        );
+    }
+
+    @Test
+    void testupdateAwpApplicationStatusC2() throws Exception {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
+                .builder()
+                .c2DocumentBundle(C2DocumentBundle
+                        .builder()
+                        .uploadedDateTime("01")
+                        .build())
+                .build()));
+
+        assertNotNull(
+                uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus("C2_01_02", additionalApplicationsBundle, "C2")
+        );
+    }
+
+    @Test
+    void testGetAdditionalApplicationElementsForC2() throws Exception {
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+                FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
@@ -175,24 +271,65 @@ public class UploadAdditionalApplicationServiceTest {
             .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicantsList(partyDynamicMultiSelectList)
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+                .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+                .temporaryC2Document(c2DocumentBundle)
+                .representedPartyType(CA_RESPONDENT)
+                .build();
+        CaseData caseData = CaseData.builder()
+                .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+                .additionalApplicationsBundle(additionalApplicationsBundle)
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .respondents(partyDetails)
+                .build();
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsBundle
+        );
+
+        assertNotNull(additionalApplicationsBundle);
+        assertEquals(2, additionalApplicationsBundle.size());
+    }
+
+    @Test
+    void testGetAdditionalApplicationElementsWithoutAuthor() throws Exception {
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .forename("test")
+                                                                    .surname("test")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
+        C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
+            .document(Document.builder().build())
+            .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
+            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
+            .supplementsBundle(List.of(element(Supplement.builder().build())))
+            .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
+            .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(partyDynamicMultiSelectList)
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .representedPartyType(CA_RESPONDENT)
+            .representedPartyType("DUMMY_PARTY")
             .build();
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
-        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(additionalApplicationsBundle)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondents(partyDetails)
             .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
-            FeeType.C2_WITH_NOTICE));
-        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
         uploadAdditionalApplicationService.getAdditionalApplicationElements(
             "auth",
             "testAuth",
@@ -202,10 +339,36 @@ public class UploadAdditionalApplicationServiceTest {
 
         assertNotNull(additionalApplicationsBundle);
         assertEquals(2, additionalApplicationsBundle.size());
+        assertEquals("test test", additionalApplicationsBundle.get(1).getValue().getAuthor());
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForC2ForOtherParties() throws Exception {
+    void testGetAdditionalApplicationElementsWhenNull() throws Exception {
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = null;
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(null)
+            .build();
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsBundle
+        );
+
+        assertNull(additionalApplicationsBundle);
+    }
+
+    @Test
+    void testGetAdditionalApplicationElementsForC2ForOtherParties() throws Exception {
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+                FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
@@ -214,24 +377,21 @@ public class UploadAdditionalApplicationServiceTest {
             .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicantsList(partyDynamicMultiSelectList)
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
-            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(c2DocumentBundle)
-            .representedPartyType(CA_RESPONDENT)
-            .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicantsList(partyDynamicMultiSelectList)
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+                .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+                .temporaryC2Document(c2DocumentBundle)
+                .representedPartyType(CA_RESPONDENT)
+                .build();
         CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .additionalApplicationsBundle(additionalApplicationsBundle)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .othersToNotify(partyDetails)
-            .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
-            FeeType.C2_WITH_NOTICE));
-        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
+                .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+                .additionalApplicationsBundle(additionalApplicationsBundle)
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .othersToNotify(partyDetails)
+                .build();
         uploadAdditionalApplicationService.getAdditionalApplicationElements(
             "auth",
             "testAuth",
@@ -244,7 +404,7 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForOther() throws Exception {
+    void testGetAdditionalApplicationElementsForOther() throws Exception {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                     .email("test@abc.com")
                                                                     .roles(List.of(Roles.CITIZEN.getValue()))
@@ -273,7 +433,7 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFee() throws Exception {
+    void testCalculateAdditionalApplicationsFee() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -293,6 +453,50 @@ public class UploadAdditionalApplicationServiceTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
+        when(userDataStoreService.findUserCaseRoles(
+            anyString(),
+            anyString()
+        )).thenReturn(findUserCaseRolesResponse);
+        assertEquals(
+            objectMap,
+            uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"[APPLICANTSOLICITOR]",
+        "[C100APPLICANTSOLICITOR1]",
+        "[FL401APPLICANTSOLICITOR]",
+        "[C100RESPONDENTSOLICITOR1]",
+        "[FL401RESPONDENTSOLICITOR]",
+        "TEST"})
+    void testCalculateAdditionalApplicationsFeeForApplicantSolicitor(String roles) throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole(roles).build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
         when(userDataStoreService.findUserCaseRoles(
             anyString(),
             anyString()
@@ -304,7 +508,33 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testCreateUploadAdditionalApplicationBundle() throws Exception {
+    void testCalculateAdditionalApplicationsFeeIsEmpty() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+                .build();
+        CaseData caseData = CaseData.builder()
+                .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        assertEquals(
+                objectMap,
+                uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
+
+    @Test
+    void testCreateUploadAdditionalApplicationBundle() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -316,6 +546,9 @@ public class UploadAdditionalApplicationServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build());
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
@@ -328,10 +561,8 @@ public class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
-        "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"})
-    public void testPrePopulateApplicantsForCaApplicant(String input) throws Exception {
+    @Test
+    void testPrePopulateApplicantsForCaApplicant() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -357,17 +588,21 @@ public class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
             "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole(input).build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        String[] roles = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
+            "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"};
+        for (String role : roles) {
+            CaseUser caseUser = CaseUser.builder().caseRole(role).build();
+            findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+            when(userDataStoreService.findUserCaseRoles(
+                anyString(),
+                anyString()
+            )).thenReturn(findUserCaseRolesResponse);
+            assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        }
     }
 
     @Test
-    public void testUploadAdditionalApplicationSubmitted() throws Exception {
+    void testUploadAdditionalApplicationSubmitted() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -388,7 +623,7 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testUploadAdditionalApplicationSubmittedWithHwfYes() throws Exception {
+    void testUploadAdditionalApplicationSubmittedWithHwfYes() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -410,7 +645,7 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testUploadAdditionalApplicationSubmittedWithHwfNo() throws Exception {
+    void testUploadAdditionalApplicationSubmittedWithHwfNo() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -432,7 +667,7 @@ public class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testPopulateHearingList() {
+    void testPopulateHearingList() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .temporaryC2Document(C2DocumentBundle.builder().build())

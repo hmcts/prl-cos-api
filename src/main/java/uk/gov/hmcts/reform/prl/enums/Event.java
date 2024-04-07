@@ -33,6 +33,7 @@ public enum Event {
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     SUBMIT("submit", "Submit"),
+    MANAGE_ORDERS("manageOrders", "Manage orders"),
     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildNotInTheCase","Other children not in the case"),
     CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants"),
     CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents"),
@@ -54,7 +55,13 @@ public enum Event {
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve an order"),
     DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
-    UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications");
+    UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
+    TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court"),
+    EDIT_RETURNED_ORDER("editReturnedOrder", "Edit a returned order"),
+    SOA("serviceOfApplication", "Service of application"),
+    CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
+    ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
+    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper");
 
     private final String id;
     private final String name;

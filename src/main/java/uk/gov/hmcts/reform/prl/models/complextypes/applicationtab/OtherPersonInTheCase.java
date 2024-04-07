@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChil
 import java.time.LocalDate;
 import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class OtherPersonInTheCase {
 
@@ -31,7 +31,7 @@ public class OtherPersonInTheCase {
     private final String email;
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
-    private  List<Element<OtherPersonRelationshipToChild>> relationshipToChild;
+    private final List<Element<OtherPersonRelationshipToChild>> relationshipToChild;
 
 
 }

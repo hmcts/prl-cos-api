@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -49,7 +50,7 @@ public class CaseDataMapper {
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
@@ -110,7 +111,8 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
             C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
-            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
+            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
+                                                        c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
@@ -132,6 +134,7 @@ public class CaseDataMapper {
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
+            mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
             updateSafetyConcernsElementsForCaseData(caseDataBuilder,
