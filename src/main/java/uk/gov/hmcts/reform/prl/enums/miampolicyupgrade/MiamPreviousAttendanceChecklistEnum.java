@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum MiamPreviousAttendanceChecklistEnum {
 
     @JsonProperty("miamPolicyUpgradePreviousAttendance_Value_1")
-    MIAM_PREV_ATT_CHK_LIST_ENUM_VALUE_1(
+    miamPolicyUpgradePreviousAttendance_Value_1(
         "miamPolicyUpgradePreviousAttendance_Value_1",
         "In the 4 months prior to making the application, the person attended a MIAM"
             + " or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended"
@@ -20,7 +20,7 @@ public enum MiamPreviousAttendanceChecklistEnum {
             + " the dispute resolution provider."
     ),
     @JsonProperty("miamPolicyUpgradePreviousAttendance_Value_2")
-    MIAM_PREV_ATT_CHK_LIST_ENUM_VALUE_2(
+    miamPolicyUpgradePreviousAttendance_Value_2(
         "miamPolicyUpgradePreviousAttendance_Value_2",
         "The application would be made in existing proceedings which are continuing"
             + " and the prospective applicant attended a MIAM before initiating those proceedings."

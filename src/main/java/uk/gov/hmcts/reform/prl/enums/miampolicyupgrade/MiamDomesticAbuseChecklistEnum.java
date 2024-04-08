@@ -12,49 +12,49 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum MiamDomesticAbuseChecklistEnum {
 
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_1")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_1(
+    miamDomesticAbuseChecklistEnum_Value_1(
         "miamDomesticAbuseChecklistEnum_Value_1",
         "Evidence that a prospective party has been arrested for a relevant domestic abuse offence."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_2")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_2(
+    miamDomesticAbuseChecklistEnum_Value_2(
         "miamDomesticAbuseChecklistEnum_Value_2",
         "Evidence of a relevant police caution for a domestic abuse offence."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_3")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_3(
+    miamDomesticAbuseChecklistEnum_Value_3(
         "miamDomesticAbuseChecklistEnum_Value_3",
         "Evidence of relevant criminal proceedings for a domestic abuse offence which have not concluded."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_4")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_4(
+    miamDomesticAbuseChecklistEnum_Value_4(
         "miamDomesticAbuseChecklistEnum_Value_4",
         "Evidence of a relevant conviction for a domestic abuse offence."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_5")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_5(
+    miamDomesticAbuseChecklistEnum_Value_5(
         "miamDomesticAbuseChecklistEnum_Value_5",
         "A court order binding a prospective party over in connection with a domestic abuse offence."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_6")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_6(
+    miamDomesticAbuseChecklistEnum_Value_6(
         "miamDomesticAbuseChecklistEnum_Value_6",
         "A domestic violence protection notice issued under section 24"
             + " of the Crime and Security Act 2010 against a prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_7")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_7(
+    miamDomesticAbuseChecklistEnum_Value_7(
         "miamDomesticAbuseChecklistEnum_Value_7",
         "A domestic abuse protection notice given under section 22"
             + " of the Domestic Abuse Act 2021 against a prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_8")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_8(
+    miamDomesticAbuseChecklistEnum_Value_8(
         "miamDomesticAbuseChecklistEnum_Value_8",
         "A relevant protective injunction."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_9")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_9(
+    miamDomesticAbuseChecklistEnum_Value_9(
         "miamDomesticAbuseChecklistEnum_Value_9",
         "An undertaking given in England and Wales under section 46"
             + " or 63E of the Family Law Act 1996 (or given in Scotland or Northern Ireland"
@@ -62,13 +62,13 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " relating to domestic violence or domestic abuse was not given by another prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_10")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_10(
+    miamDomesticAbuseChecklistEnum_Value_10(
         "miamDomesticAbuseChecklistEnum_Value_10",
         "A copy of a finding of fact, made in proceedings in the United Kingdom,"
             + " that there has been domestic abuse by a prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_11")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_11(
+    miamDomesticAbuseChecklistEnum_Value_11(
         "miamDomesticAbuseChecklistEnum_Value_11",
         "An expert report produced as evidence in proceedings in the United Kingdom"
             + " for the benefit of a court or tribunal confirming that a person with whom a prospective"
@@ -76,7 +76,7 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " a victim of domestic abuse by that prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_12")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_12(
+    miamDomesticAbuseChecklistEnum_Value_12(
         "miamDomesticAbuseChecklistEnum_Value_12",
         "A letter or report from an appropriate health professional confirming that-"
             + " (i) that professional, or another appropriate health professional, has examined a prospective party in person,"
@@ -85,7 +85,7 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " condition consistent with being a victim of domestic abuse."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_13")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_13(
+    miamDomesticAbuseChecklistEnum_Value_13(
         "miamDomesticAbuseChecklistEnum_Value_13",
         "A letter or report from - (i) the appropriate health professional who made the referral"
             + " described below; (ii) an appropriate health professional who has access to the medical"
@@ -94,26 +94,26 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " party to a person who provides specialist support or assistance for victims of, or those at risk of, domestic abuse."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_14")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_14(
+    miamDomesticAbuseChecklistEnum_Value_14(
         "miamDomesticAbuseChecklistEnum_Value_14",
         "A letter from any person who is a member of a multi-agency risk assessment conference (or other suitable"
             + " local safeguarding forum) confirming that a prospective party, or a person with whom that prospective party"
             + " is personally connected, is or has been at risk of harm from domestic abuse by another prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_15")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_15(
+    miamDomesticAbuseChecklistEnum_Value_15(
         "miamDomesticAbuseChecklistEnum_Value_15",
         "A letter from an independent domestic violence advisor (IDVA) confirming that they are providing or have provided"
             + " support to a prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_16")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_16(
+    miamDomesticAbuseChecklistEnum_Value_16(
         "miamDomesticAbuseChecklistEnum_Value_16",
         "A letter from an independent sexual violence advisor (ISVA) confirming that they are providing or have provided"
             + " support to a prospective party relating to sexual violence by another prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_17")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_17(
+    miamDomesticAbuseChecklistEnum_Value_17(
         "miamDomesticAbuseChecklistEnum_Value_17",
         "A letter from an officer employed by a local authority or housing association (or their equivalent in Scotland or Northern Ireland)"
             + " for the purpose of supporting tenants containing- (i) a statement to the effect that, in their reasonable professional"
@@ -123,7 +123,7 @@ public enum MiamDomesticAbuseChecklistEnum {
             + "domestic abuse by that prospective party."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_18")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_18(
+    miamDomesticAbuseChecklistEnum_Value_18(
         "miamDomesticAbuseChecklistEnum_Value_18",
         "A letter which- (i) is from an organisation providing domestic abuse support services, which letter confirms that it-"
             + " (a) is situated in the United Kingdom, (b) has been operating for an uninterrupted period of six months or more; and"
@@ -135,7 +135,7 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " the prospective party needed that support."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_19")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_19(
+    miamDomesticAbuseChecklistEnum_Value_19(
         "miamDomesticAbuseChecklistEnum_Value_19",
         "A letter or report from an organisation providing domestic abuse support services in the United Kingdom confirming-"
             + " (i) that a person with whom a prospective party is or was personally connected was refused admission to a refuge; (ii) the"
@@ -143,19 +143,19 @@ public enum MiamDomesticAbuseChecklistEnum {
             + " of domestic abuse by the prospective party referred to in paragraph (i)."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_20")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_20(
+    miamDomesticAbuseChecklistEnum_Value_20(
         "miamDomesticAbuseChecklistEnum_Value_20",
         "A letter from a public authority confirming that a person with whom a prospective party is or was personally connected,"
             + " was assessed as being, or at risk of being, a victim of domestic abuse by that prospective party (or a copy of that assessment)."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_21")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_21(
+    miamDomesticAbuseChecklistEnum_Value_21(
         "miamDomesticAbuseChecklistEnum_Value_21",
         "A letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave"
             + " to remain in the United Kingdom as a victim of domestic abuse."
     ),
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_22")
-    MIAM_DOM_ABUSE_CHK_LIST_ENUM_VALUE_22(
+    miamDomesticAbuseChecklistEnum_Value_22(
         "miamDomesticAbuseChecklistEnum_Value_22",
         "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence "
             + "by another prospective party in the form of abuse which relates to financial matters. "

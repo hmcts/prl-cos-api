@@ -12,19 +12,19 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum MiamOtherGroundsChecklistEnum {
 
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_1")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_1(
+    miamPolicyUpgradeOtherGrounds_Value_1(
         "miamPolicyUpgradeOtherGrounds_Value_1",
         "The application would be made without notice"
             + " (Paragraph 5.1 of Practice Direction 18A sets out the circumstances"
             + " in which applications may be made without notice)"
     ),
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_2")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_2(
+    miamPolicyUpgradeOtherGrounds_Value_2(
         "miamPolicyUpgradeOtherGrounds_Value_2",
         "A child is one of the prospective parties."
     ),
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_3")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_3(
+    miamPolicyUpgradeOtherGrounds_Value_3(
         "miamPolicyUpgradeOtherGrounds_Value_3",
         "(i) The prospective applicant is not able to attend a MIAM online"
             + " or by video-link and an explanation of why this is the case is provided to"
@@ -35,7 +35,7 @@ public enum MiamOtherGroundsChecklistEnum {
             + " 15 business days of the date of contact."
     ),
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_4")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_4(
+    miamPolicyUpgradeOtherGrounds_Value_4(
         "miamPolicyUpgradeOtherGrounds_Value_4",
         "(i) The prospective applicant is not able to attend a MIAM online or by"
             + " video-link and an explanation of why this is the case is provided to the court using the text box provided; and"
@@ -46,13 +46,13 @@ public enum MiamOtherGroundsChecklistEnum {
             + " and all have stated that they are unable to provide such facilities."
     ),
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_5")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_5(
+    miamPolicyUpgradeOtherGrounds_Value_5(
         "miamPolicyUpgradeOtherGrounds_Value_5",
         "(i) The prospective applicant is not able to attend a MIAM online or by video-link; and"
             + " (ii) there is no authorised family mediator with an office within 15 miles of the prospective applicant’s home."
     ),
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_6")
-    MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_6(
+    miamPolicyUpgradeOtherGrounds_Value_6(
         "miamPolicyUpgradeOtherGrounds_Value_6",
         "The prospective applicant cannot attend a MIAM because the prospective applicant is"
             + " (i) in prison or any other institution in which the prospective applicant is required to be"

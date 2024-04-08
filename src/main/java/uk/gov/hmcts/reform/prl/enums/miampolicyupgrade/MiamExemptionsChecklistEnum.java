@@ -13,15 +13,15 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum MiamExemptionsChecklistEnum {
 
     @JsonProperty("domesticAbuse")
-    DOMESTIC_ABUSE("domesticAbuse", "Domestic abuse"),
+    domesticAbuse("domesticAbuse", "Domestic abuse"),
     @JsonProperty("childProtectionConcern")
-    CHILD_PROTECTION_CONCERN("childProtectionConcern", "Child protection concerns"),
+    childProtectionConcern("childProtectionConcern", "Child protection concerns"),
     @JsonProperty("urgency")
-    URGENCY("urgency","Urgency"),
+    urgency("urgency","Urgency"),
     @JsonProperty("previousMiamAttendance")
-    PREVIOUS_MIAM_ATTENDANCE("previousMiamAttendance", "Previous attendance of a MIAM or non-court dispute resolution"),
+    previousMiamAttendance("previousMiamAttendance", "Previous attendance of a MIAM or non-court dispute resolution"),
     @JsonProperty("other")
-    OTHER("other","Other");
+    other("other","Other");
 
     private final String id;
     private final String displayedValue;
