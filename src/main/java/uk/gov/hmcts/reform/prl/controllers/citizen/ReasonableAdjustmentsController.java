@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotes
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class ReasonableAdjustmentsController {
     private final CaseService caseService;
     private final AuthorisationService authorisationService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CitizenCaseUpdateService citizenCaseUpdateService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @PostMapping(value = "{caseId}/{eventId}/party-update-ra", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -56,7 +58,7 @@ public class ReasonableAdjustmentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        log.info("Inside updateCitizenRAflags controller {}");
+        log.info("Inside updateCitizenRAflags controller");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return caseService.updateCitizenRAflags(
                 caseId,
@@ -113,7 +115,7 @@ public class ReasonableAdjustmentsController {
     ) {
         log.info("Inside updateCitizenRAflags controller");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return caseService.addLanguageSupportCaseNotes(
+            return citizenCaseUpdateService.addLanguageSupportCaseNotes(
                 caseId,
                 authorisation,
                 languageSupportCaseNotesRequest
