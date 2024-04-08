@@ -1865,7 +1865,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCAException() throws Exception {
+    public void testServeOrderCAexception() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
