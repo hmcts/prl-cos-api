@@ -31,16 +31,16 @@ public class MiamPolicyUpgradeDetails {
     private String miamDomesticAbuseNoEvidenceReason;
     private MiamUrgencyReasonChecklistEnum miamUrgencyReasons;
     private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceOptions;
-    private Document evidenceFromDisputeResolutionProvider;
+    private Document documentFromDisputeResolutionProvider;
     private TypeOfMiamAttendanceEvidenceEnum typeOfMiamAttendanceEvidence;
     private Document miamCertificateByMediator;
     private String miamAttendanceDetails;
-    private MiamOtherGroundsChecklistEnum miamPolicyUpgradeOtherGroundsChecklist;
+    private MiamOtherGroundsChecklistEnum miamOtherExemptionReasons;
     private String applicantUnableToAttendMiamReason1;
     private String applicantUnableToAttendMiamReason2;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     private final Document miamCertificationDocumentUpload;
-    private MiamChildProtectionConcernChecklistEnum miamPolicyUpgradeChildProtectionConcernList;
+    private MiamChildProtectionConcernChecklistEnum miamChildProtectionConcernReason;
 }
