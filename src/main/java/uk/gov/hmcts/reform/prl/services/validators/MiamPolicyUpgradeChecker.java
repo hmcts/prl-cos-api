@@ -107,13 +107,13 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist
             = caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons();
 
-        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.DOMESTIC_ABUSE)) {
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.domesticAbuse)) {
             finished = checkForDomesticAbuseExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.CHILD_PROTECTION_CONCERN)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.childProtectionConcern)) {
             finished = checkForChildProtectionConcernExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.URGENCY)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.urgency)) {
             finished = checkForUrgencyExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.PREVIOUS_MIAM_ATTENDANCE)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.previousMiamAttendance)) {
             finished = checkForPreviousMiamAttendanceExemption(caseData);
         } else {
             finished = checkedForOtherExemptions(caseData);
@@ -134,12 +134,12 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     private boolean checkedForOtherExemptions(CaseData caseData) {
         boolean finished = true;
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            || ((MiamOtherGroundsChecklistEnum.MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_3.equals(
+            || ((MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            || MiamOtherGroundsChecklistEnum.MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_4.equals(
+            || MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1()))
-            || (MiamOtherGroundsChecklistEnum.MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_5.equals(
+            || (MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2()))) {
             finished = false;
@@ -160,10 +160,10 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     private boolean checkForPreviousMiamAttendanceExemption(CaseData caseData) {
         boolean finished = true;
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
-            || (MiamPreviousAttendanceChecklistEnum.MIAM_PREV_ATT_CHK_LIST_ENUM_VALUE_1.equals(
+            || (MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider()))
-            || (MiamPreviousAttendanceChecklistEnum.MIAM_PREV_ATT_CHK_LIST_ENUM_VALUE_2.equals(
+            || (MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence()))
             || (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())

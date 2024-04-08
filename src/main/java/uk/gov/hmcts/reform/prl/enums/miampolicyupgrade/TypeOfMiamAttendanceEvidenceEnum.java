@@ -12,12 +12,12 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum TypeOfMiamAttendanceEvidenceEnum {
 
     @JsonProperty("miamCertificate")
-    MIAM_ATT_EVIDENCE_MIAM_CERTIFICATE(
+    miamCertificate(
             "miamCertificate",
             "A MIAM certificate"
     ),
     @JsonProperty("miamAttendanceDetails")
-    MIAM_ATTENDANCE_EVIDENCE_ATT_DETAILS(
+    miamAttendanceDetails(
             "miamAttendanceDetails",
             "MIAM attendance details"
     );
