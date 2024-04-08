@@ -148,7 +148,7 @@ public class ManageOrdersControllerTest {
     private HearingService hearingService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -237,7 +237,8 @@ public class ManageOrdersControllerTest {
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
             stringObjectMaps,
-            caseData
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
@@ -1041,7 +1042,7 @@ public class ManageOrdersControllerTest {
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), stringObjectMap, caseData);
+                                                StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate("12345")).thenReturn(startAllTabsUpdateDataContent);
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
@@ -1503,7 +1504,8 @@ public class ManageOrdersControllerTest {
     }
 
 
-    //@Test
+    @Test
+    @Ignore
     public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
         applicant = PartyDetails.builder()
@@ -1597,7 +1599,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
             .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
