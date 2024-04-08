@@ -188,7 +188,7 @@ public class EditAndApproveDraftOrderController {
                     UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
                     UserRoles.CASEMANAGER.toString())) {
                     //Automated Hearing Request Call
-                    createAutomatedHearingManagement(authorisation, caseData);
+                    manageOrderService.createAutomatedHearingManagement(authorisation, caseData);
                 }
 
                 if (Event.EDIT_AND_APPROVE_ORDER.getId()
@@ -481,30 +481,5 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
-        log.info("Automated Hearing Management Call - Start");
-        log.info("Automated Hearing Request: EditAndApproveDraftOrderController: CaseData: {}",caseData);
-        if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            caseData.getManageOrders().getOrdersHearingDetails().stream()
-                .map(Element::getValue)
-                .forEach(hearingData -> {
-                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        log.info(
-                            "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
-                            hearingData.getHearingDateConfirmOptionEnum()
-                        );
-                        ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
-                            authorisation,
-                            caseData
-                        );
-                        log.info("Automated Hearing Request: Inside: End");
-                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
-                    }
-                });
-        }
-        log.info("Automated Hearing Management Call - End");
     }
 }

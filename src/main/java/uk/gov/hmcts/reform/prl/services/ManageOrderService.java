@@ -3378,9 +3378,9 @@ public class ManageOrderService {
             && null != address.getAddressLine1();
     }
 
-    private void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+    public void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
         log.info("Automated Hearing Management Call - Start");
-        log.info("Automated Hearing Request: ManageOrderService: CaseData: {}",caseData);
+        log.info("Automated Hearing Request: CaseData: {}",caseData);
         if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
             caseData.getManageOrders().getOrdersHearingDetails().stream()
                 .map(Element::getValue)
