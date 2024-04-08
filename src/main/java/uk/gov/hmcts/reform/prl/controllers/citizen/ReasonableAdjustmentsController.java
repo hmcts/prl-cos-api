@@ -18,17 +18,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
-
-import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -40,7 +36,6 @@ public class ReasonableAdjustmentsController {
 
     private final CaseService caseService;
     private final AuthorisationService authorisationService;
-    private final AuthTokenGenerator authTokenGenerator;
     private final CitizenCaseUpdateService citizenCaseUpdateService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
@@ -68,20 +63,6 @@ public class ReasonableAdjustmentsController {
             );
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
-        }
-    }
-
-    @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
-    public List<CaseData> retrieveCases(
-        @PathVariable("role") String role,
-        @PathVariable("userId") String userId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
