@@ -3639,7 +3639,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    @Ignore
+    @Ignore ("Need to test and confirm for sendEmailNotificationOnClosingOrder")
     public void testSendEmailNotificationOnClosingOrder() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model

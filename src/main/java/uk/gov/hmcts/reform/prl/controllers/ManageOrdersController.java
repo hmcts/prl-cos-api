@@ -195,8 +195,6 @@ public class ManageOrdersController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            //Automated Hearing Request Call
-            //createAutomatedHearingManagement(authorisation, callbackRequest, caseData);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
@@ -212,28 +210,6 @@ public class ManageOrdersController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
-    /*private void createAutomatedHearingManagement(String authorisation, CallbackRequest callbackRequest, CaseData caseData) {
-        log.info("Automated Hearing Management Call - Start");
-        caseData.getManageOrders().getOrdersHearingDetails().stream()
-            .map(Element::getValue)
-            .forEach(hearingData -> {
-                if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
-                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                    log.info("Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
-                             hearingData.getHearingDateConfirmOptionEnum()
-                    );
-                    ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
-                        authorisation,
-                        callbackRequest.getCaseDetails()
-                    );
-                    log.info("Automated Hearing Request: Inside: End");
-                    log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
-                }
-
-            });
-        log.info("Automated Hearing Request Call - End");
-    }*/
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
