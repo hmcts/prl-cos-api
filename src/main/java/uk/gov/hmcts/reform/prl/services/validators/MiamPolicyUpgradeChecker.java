@@ -98,7 +98,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         } else {
             finished = checkedForClaimedExemptions(caseData);
         }
-
+        log.info("finished in hasClaimedExemption {}", finished);
         return finished;
     }
 
@@ -118,7 +118,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         } else {
             finished = checkedForOtherExemptions(caseData);
         }
-
+        log.info("finished in checkedForClaimedExemptions {}", finished);
         return finished;
     }
 
@@ -127,7 +127,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason())) {
             finished = false;
         }
-
+        log.info("finished in checkForChildProtectionConcernExemption {}", finished);
         return finished;
     }
 
@@ -144,7 +144,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2()))) {
             finished = false;
         }
-
+        log.info("finished in checkedForOtherExemptions {}", finished);
         return finished;
     }
 
@@ -153,7 +153,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuUrgencyReason())) {
             finished = false;
         }
-
+        log.info("finished in checkForUrgencyExemption {}", finished);
         return finished;
     }
 
@@ -174,7 +174,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails()))) {
             finished = false;
         }
-
+        log.info("finished in checkForPreviousMiamAttendanceExemption {}", finished);
         return finished;
     }
 
@@ -187,11 +187,12 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())) {
             finished = false;
         }
-
+        log.info("finished in checkForDomesticAbuseExemption {}", finished);
         return finished;
     }
 
     private static boolean hasProvidedMiamCertificate(CaseData caseData) {
+        log.info("inside hasProvidedMiamCertificate");
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName());
