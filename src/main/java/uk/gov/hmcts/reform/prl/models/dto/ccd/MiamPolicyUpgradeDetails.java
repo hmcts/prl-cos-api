@@ -21,9 +21,9 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MiamPolicyUpgradeDetails {
-    private YesOrNo mpuChildInvolved;
-    private YesOrNo mpuApplicantAttended;
-    private YesOrNo mpuClaimingExemption;
+    private YesOrNo mpuChildInvolvedInMiam;
+    private YesOrNo mpuApplicantAttendedMiam;
+    private YesOrNo mpuClaimingExemptionMiam;
     private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
     private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
     private YesOrNo mpuIsDomesticAbuseEvidenceProvided;

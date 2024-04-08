@@ -38,9 +38,9 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         boolean finished = false;
         log.info("MiamPolicyUpgradeDetails {}", caseData.getMiamPolicyUpgradeDetails());
 
-        Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolved());
-        Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttended());
-        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemption());
+        Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
+        Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
+        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam());
         log.info("childInvolvedInMiam.isPresent() {}", childInvolvedInMiam.isPresent());
         log.info("applicantAttendedMiam.isPresent() {}", applicantAttendedMiam.isPresent());
         log.info("claimingExemptionMiam.isPresent() {}", claimingExemptionMiam.isPresent());
@@ -209,7 +209,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         log.info("verifying isStarted for miam");
-        Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolved());
+        Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         log.info("verifying isStarted for miam {}", childInvolvedInMiam.isPresent());
         return childInvolvedInMiam.isPresent();
     }
