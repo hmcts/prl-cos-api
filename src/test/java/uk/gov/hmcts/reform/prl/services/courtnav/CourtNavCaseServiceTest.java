@@ -223,7 +223,7 @@ public class CourtNavCaseServiceTest {
         when(documentGenService.generateDocuments(authToken, caseData)).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         courtNavCaseService.refreshTabs(authToken,"1234567891234567");
