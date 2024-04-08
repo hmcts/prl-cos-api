@@ -2783,7 +2783,7 @@ public class ServiceOfApplicationService {
                             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                     }
                 }
-                if (unServedRespondentPack != null && unServedRespondentPack.getPersonalServiceBy() != null) {
+                if (unServedApplicantPack != null && unServedApplicantPack.getPersonalServiceBy() != null) {
                     whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
                         .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
                         ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
