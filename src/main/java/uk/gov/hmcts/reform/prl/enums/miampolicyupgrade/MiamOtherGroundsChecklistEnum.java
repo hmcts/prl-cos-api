@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum MiamPolicyUpgradeOtherGroundsChecklistEnum {
+public enum MiamOtherGroundsChecklistEnum {
 
     @JsonProperty("miamPolicyUpgradeOtherGrounds_Value_1")
     MIAM_POLICY_UPGRADE_OTHER_GROUNDS_CHECKLIST_ENUM_1(
@@ -71,8 +71,8 @@ public enum MiamPolicyUpgradeOtherGroundsChecklistEnum {
     }
 
     @JsonCreator
-    public static MiamPolicyUpgradeOtherGroundsChecklistEnum getValue(String key) {
-        return MiamPolicyUpgradeOtherGroundsChecklistEnum.valueOf(key);
+    public static MiamOtherGroundsChecklistEnum getValue(String key) {
+        return MiamOtherGroundsChecklistEnum.valueOf(key);
     }
 
 }
