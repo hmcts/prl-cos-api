@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -49,8 +50,6 @@ public class CaseDataRespondentDetailsElementsMapper {
     private static List<Element<PartyDetails>> buildRespondentDetails(C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
-        log.info("respondentDetailsList------> {}",respondentDetailsList);
-
         return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
             buildPartyDetails(respondentDetails)).build()).toList();
 
@@ -66,6 +65,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(buildDateOfBirthKnown(respondentDetails.getPersonalDetails()))
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
@@ -78,6 +78,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
     }
 
@@ -114,6 +115,10 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
         return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
+    }
+
+    private static YesOrNo buildDateOfBirthKnown(PersonalDetails personalDetails) {
+        return null != personalDetails.getDateOfBirth() ? Yes : No;
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {

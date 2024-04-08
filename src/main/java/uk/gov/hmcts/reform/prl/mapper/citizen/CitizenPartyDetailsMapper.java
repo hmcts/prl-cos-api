@@ -665,8 +665,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     public CaseData buildUpdatedCaseData(CaseData caseData, C100RebuildData c100RebuildData) throws JsonProcessingException {
-        log.info("vvvvvvvvvv {}",caseData);
-        log.info("============== ");
         log.info("vvvvvc100RebuildDatavvvvv {}",c100RebuildData);
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
@@ -721,10 +719,8 @@ public class CitizenPartyDetailsMapper {
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
-            log.info("c100RebuildData.getC100RebuildRespondentDetails()---->{}",c100RebuildData.getC100RebuildRespondentDetails());
             C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
-            log.info("c100RebuildRespondentDetailsElements....> {}",c100RebuildRespondentDetailsElements);
             updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements, c100RebuildChildDetailsElements);
         }
 
