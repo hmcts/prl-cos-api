@@ -36,6 +36,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         log.info("verifying isFinished for miam");
         boolean finished = false;
+        log.info("MiamPolicyUpgradeDetails {}", caseData.getMiamPolicyUpgradeDetails());
 
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolved());
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttended());
