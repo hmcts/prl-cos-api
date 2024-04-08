@@ -66,12 +66,13 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
-            .isDateOfBirthKnown(Yes) // In citizen created case, either proper DOB or Appx DOB  will be available always.
+            .isDateOfBirthKnown(buildIsRealDateOfBirthKnown(respondentDetails.getPersonalDetails()))
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
             .isAtAddressLessThan5Years(buildAddressLivedLessThan5YearsDetails(respondentDetails))
+            .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetailsWithDontKnow(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
@@ -108,6 +109,24 @@ public class CaseDataRespondentDetailsElementsMapper {
         return (!"Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) ? Yes : YesOrNo.No;
     }
 
+    private static YesNoDontKnow buildAddressLivedLessThan5YearsDetailsWithDontKnow(RespondentDetails respondentDetails) {
+        if (null != respondentDetails.getAddress().getAddressHistory()) {
+            log.info("respondentDetailsssssssss ---> {}",respondentDetails.getAddress().getAddressHistory());
+            String addressHistory = respondentDetails.getAddress().getAddressHistory();
+            if (YesNoDontKnow.yes.getDisplayedValue().equals(addressHistory)) {
+                log.info("YESSSSSS");
+                return YesNoDontKnow.yes;
+            } else if (YesNoDontKnow.no.getDisplayedValue().equals(addressHistory)) {
+                log.info("NOOOOO");
+                return YesNoDontKnow.no;
+            } else if (YesNoDontKnow.dontKnow.getDisplayedValue().equals(addressHistory)) {
+                log.info("DONTTTTTT");
+                return YesNoDontKnow.dontKnow;
+            }
+        }
+        return null;
+    }
+
     private static String buildPreviousName(RespondentDetails respondentDetails) {
 
         return "Yes".equalsIgnoreCase(respondentDetails.getPersonalDetails().getHasNameChanged())
@@ -116,6 +135,11 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
         return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
+    }
+
+    private static YesOrNo buildIsRealDateOfBirthKnown(PersonalDetails personalDetails) {
+        return !"Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? Yes : No;
+
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
