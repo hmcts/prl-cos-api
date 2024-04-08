@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_POLICY_UPGRADE_
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MiamPolicyUpgradeChecker implements EventChecker {
@@ -26,7 +28,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-
+        log.info("verifying isFinished for miam");
         boolean finished = false;
 
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam());
@@ -43,6 +45,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             );
         }
         if (finished) {
+            log.info("all done, its done");
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
             return true;
         }
@@ -51,6 +54,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
+        log.info("nope, something is wrong");
         return false;
     }
 
@@ -68,29 +72,29 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
                 finished = true;
             }
         }
+        log.info("finished in inspectChildInvolvedInMiamNoFlow {}", finished);
         return finished;
     }
 
     private static boolean hasProvidedMiamCertificate(CaseData caseData) {
-        boolean finished;
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName());
         Optional<Document> miamCertDocument = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMiamCertificationDocumentUpload());
-        finished = mediatorRegNumber.isPresent()
+        return mediatorRegNumber.isPresent()
             && StringUtils.isNotEmpty(mediatorRegNumber.get().trim())
             && mediatorServiceName.isPresent()
             && StringUtils.isNotEmpty(mediatorServiceName.get().trim())
             && mediatorSoleTrader.isPresent()
             && StringUtils.isNotEmpty(mediatorSoleTrader.get().trim())
             && miamCertDocument.isPresent();
-        return finished;
     }
-
 
     @Override
     public boolean isStarted(CaseData caseData) {
+        log.info("verifying isStarted for miam");
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam());
+        log.info("verifying isStarted for miam {}", childInvolvedInMiam.isPresent());
         return childInvolvedInMiam.isPresent();
     }
 
