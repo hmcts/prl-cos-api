@@ -151,6 +151,8 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -237,7 +239,7 @@ public class ManageOrdersControllerTest {
             .courtName("testcourt")
             .build();
         Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
@@ -3640,16 +3642,24 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testSendEmailNotificationOnClosingOrder() throws Exception {
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
+        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMaps,
+            caseData,
+            null
+        );
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
-                             .data(stringObjectMap)
+                             .data(stringObjectMaps)
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()))).thenReturn(startAllTabsUpdateDataContent);
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         Map<String, Object> summaryTabFields = Map.of(
@@ -3657,8 +3667,6 @@ public class ManageOrdersControllerTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        /*ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
-        when(hearingService.createAutomatedHearing(authToken, callbackRequest.getCaseDetails())).thenReturn(response);*/
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.sendEmailNotificationOnClosingOrder(
