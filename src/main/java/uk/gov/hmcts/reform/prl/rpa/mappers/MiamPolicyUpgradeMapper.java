@@ -18,6 +18,7 @@ public class MiamPolicyUpgradeMapper {
     public JsonObject map(CaseData caseData) {
 
         return new NullAwareJsonObjectBuilder()
+            .add("childInvolvedInMIAM", CommonUtils.getYesOrNoValue(caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam()))
             .add("applicantAttendedMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getApplicantAttendedMiam()))
             .add("claimingExemptionMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getClaimingExemptionMiam()))
             .add("familyMediatorMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getFamilyMediatorMiam()))
