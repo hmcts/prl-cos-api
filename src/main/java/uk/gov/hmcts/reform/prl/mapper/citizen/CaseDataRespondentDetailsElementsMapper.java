@@ -50,6 +50,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     private static List<Element<PartyDetails>> buildRespondentDetails(C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
 
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
+
         return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
             buildPartyDetails(respondentDetails)).build()).toList();
 
