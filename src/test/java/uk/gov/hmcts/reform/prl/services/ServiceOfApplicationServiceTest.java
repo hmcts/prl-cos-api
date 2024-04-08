@@ -1209,7 +1209,7 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court admin", servedApplicationDetails.getWhoIsResponsible());
 
     }
 
@@ -3795,7 +3795,7 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
 
@@ -3862,7 +3862,7 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         //assertNull(servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
