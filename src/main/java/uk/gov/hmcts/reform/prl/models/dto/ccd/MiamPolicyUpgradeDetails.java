@@ -22,7 +22,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MiamPolicyUpgradeDetails {
     @JsonProperty("childInvolvedInMiam")
-    private YesOrNo childInvolvedInMiam;
+    private final YesOrNo childInvolvedInMiam;
     private YesOrNo applicantAttendedMiam;
     private YesOrNo claimingExemptionMiam;
     private List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist;
