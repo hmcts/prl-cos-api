@@ -22,9 +22,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 
 import java.util.List;
 
@@ -39,6 +41,7 @@ public class ReasonableAdjustmentsController {
     private final CaseService caseService;
     private final AuthorisationService authorisationService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CitizenCaseUpdateService citizenCaseUpdateService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @PostMapping(value = "{caseId}/{eventId}/party-update-ra", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -55,7 +58,7 @@ public class ReasonableAdjustmentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        log.info("Inside updateCitizenRAflags controller {}");
+        log.info("Inside updateCitizenRAflags controller");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return caseService.updateCitizenRAflags(
                 caseId,
@@ -94,6 +97,31 @@ public class ReasonableAdjustmentsController {
             return caseService.getPartyCaseFlags(authorisation, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/language-support-notes", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Update party flags for citizen")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Updated party flags for citizen"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Not found")})
+    public ResponseEntity<Object> languageSupportCaseNotes(
+        @NotNull @RequestBody LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        log.info("Inside updateCitizenRAflags controller");
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return citizenCaseUpdateService.addLanguageSupportCaseNotes(
+                caseId,
+                authorisation,
+                languageSupportCaseNotesRequest
+            );
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
         }
     }
 }

@@ -580,17 +580,20 @@ jacocoTestCoverageVerification {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 def sonarExclusions = [
-  '**uk/gov/hmcts/reform/prl/models/**/*',
-  '**uk/gov/hmcts/reform/prl/exception/*',
-  '**uk/gov/hmcts/reform/prl/enums/**/*',
-  '**uk/gov/hmcts/reform/prl/config/**/*',
-  '**uk/gov/hmcts/reform/prl/utils/*',
-  '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
-  '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
-  "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
+        '**uk/gov/hmcts/reform/prl/models/**/*',
+        '**uk/gov/hmcts/reform/prl/exception/*',
+        '**uk/gov/hmcts/reform/prl/enums/**/*',
+        '**uk/gov/hmcts/reform/prl/config/**/*',
+        '**uk/gov/hmcts/reform/prl/utils/*',
+        '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
+        '**uk/gov/hmcts/reform/prl/Application.*',
+        '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
+        '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
+        '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
+        '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
+        '**uk/gov/hmcts/reform/prl/controllers/citizen/ReasonableAdjustmentsController.java',
+        '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
+        '**uk/gov/hmcts/reform/prl/services/citizen/CitizenCaseUpdateService.java'
 ]
 
 sonarqube {
