@@ -41,33 +41,6 @@ public class CitizenCoreCaseDataService {
     private final ObjectMapper objectMapper;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
-    public CaseDetails linkDefendant(
-        String systemUserToken,
-        Long caseId,
-        EventRequestData eventRequestData,
-        StartEventResponse startEventResponse,
-        Map<String, Object> caseDataUpdated) {
-        try {
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataUpdated);
-
-            return ccdCoreCaseDataService.submitUpdate(
-                systemUserToken,
-                eventRequestData,
-                caseDataContent,
-                String.valueOf(caseId),
-                true
-            );
-        } catch (Exception exception) {
-            throw new CoreCaseDataStoreException(
-                String.format(
-                    CCD_UPDATE_FAILURE_MESSAGE,
-                    caseId,
-                    eventRequestData
-                ), exception
-            );
-        }
-    }
-
     private CaseDataContent caseDataContent(StartEventResponse startEventResponse, Object content) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
