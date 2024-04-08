@@ -58,6 +58,9 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
         log.info("BBBBBB {}",respondentDetails);
+
+        log.info("CCCCCC {}",buildDateOfBirth(respondentDetails));
+
         return PartyDetails
             .builder()
             .firstName(respondentDetails.getFirstName())
