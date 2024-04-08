@@ -1292,12 +1292,14 @@ public class SendAndReplyService {
 
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
+                    log.info("----> isSolicitorRepresentative(partyDetails) 1295 >>>> {}", isSolicitorRepresentative(partyDetails));
+                    log.info("----> partyDetails.getContactPreferences() 1296 >>>> {}", partyDetails.getContactPreferences());
                     if (isSolicitorRepresentative(partyDetails) || partyDetails.getContactPreferences().equals(ContactPreferences.email)) {
                         log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
                         try {
                             sendEmailNotification(caseData, partyDetails, authorisation);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                        } catch (Exception e) {
+                            log.info("----> Error sendEmailNotification {} | {}", e, e.getMessage());
                         }
                     } else {
                         log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
@@ -1330,9 +1332,14 @@ public class SendAndReplyService {
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorisation) throws IOException {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        log.info("sendEmailNotification message 1333 >>>> : {} ", objectMapper.writeValueAsString(message));
+        log.info("sendEmailNotification emailAddress 1334 >>>> : {} ", emailAddress);
         List<Document> allSelectedDocuments = new ArrayList<>();
         allSelectedDocuments.add(message.getSelectedDocument());
-        log.info("message 1331 >>>> : {} ", objectMapper.writeValueAsString(message));
+        if (null != message.getExternalMessageAttachDocs() && !message.getExternalMessageAttachDocs().isEmpty()) {
+            message.getExternalMessageAttachDocs().forEach(element -> allSelectedDocuments.add(element.getValue()));
+        }
+        log.info("sendEmailNotification allSelectedDocuments 1340 >>>> : {} ", objectMapper.writeValueAsString(allSelectedDocuments));
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorisation,
