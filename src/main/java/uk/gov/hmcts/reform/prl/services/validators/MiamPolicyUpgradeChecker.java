@@ -90,7 +90,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     }
 
     private boolean hasClaimedExemption(CaseData caseData) {
-        boolean finished = true;
+        boolean finished;
         Optional<List<MiamExemptionsChecklistEnum>> miamPolicyUpgradeExemptionsChecklist
             = Optional.ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons());
         if (!miamPolicyUpgradeExemptionsChecklist.isPresent()) {
