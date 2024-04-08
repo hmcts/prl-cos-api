@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1271,10 +1272,10 @@ public class SendAndReplyService {
     }
 
     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
-        log.info("----> sendNotificationToExternalParties 1274 >>>>");
         try {
             //get the latest message
             Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+            log.info("----> sendNotificationToExternalParties 1274 >>>> {} ", message.getInternalOrExternalMessage());
             // Return if not external message
             if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
                 return;
@@ -1284,12 +1285,18 @@ public class SendAndReplyService {
 
             //Get list of Applicant & Respondent in Case
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-
+            log.info("----> selectedApplicantsOrRespondents 1287 size >>>> {}", selectedApplicantsOrRespondents.size());
+            log.info("----> selectedApplicantsOrRespondents 1288 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
             selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     applicantOrRespondent.getCode(),
                     applicantAndRespondentInCase
                 );
+                try {
+                    log.info("----> sendNotificationToExternalParties party.isPresent() 1295 >>>> {}", objectMapper.writeValueAsString(party));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
                 log.info("----> sendNotificationToExternalParties party.isPresent() 1295 >>>> {}", party.isPresent());
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
