@@ -93,7 +93,6 @@ public class CitizenCaseUpdateService {
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
             throws JsonProcessingException {
-        log.info("saveDraftCitizenApplication-AAAAAAA->");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,

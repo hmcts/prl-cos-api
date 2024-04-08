@@ -57,10 +57,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
-        log.info("BBBBBB {}",respondentDetails);
-
-        log.info("CCCCCC {}",buildDateOfBirth(respondentDetails));
-
+        log.info("respondentDetails----BBBBBB {}",respondentDetails);
         return PartyDetails
             .builder()
             .firstName(respondentDetails.getFirstName())
@@ -69,6 +66,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(Yes) // In citizen created case, either proper DOB or Appx DOB  will be available always.
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))

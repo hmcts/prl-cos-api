@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,7 +51,6 @@ public class CitizenCaseUpdateController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("update-party-detailssssss ----->{}",citizenUpdatedCaseData);
             CaseDetails caseDetails = citizenCaseUpdateService.updateCitizenPartyDetails(
                 authorisation,
                 caseId,
@@ -78,10 +76,6 @@ public class CitizenCaseUpdateController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(caseData);
-        log.info("Citizen Case controlerrrrrrr--AAAAAAA-> {}", result);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
                 caseId,
@@ -109,7 +103,6 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("Submittttt c1000000 Controlllerrrr");
             CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
                 caseId,

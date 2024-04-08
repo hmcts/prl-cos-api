@@ -97,7 +97,7 @@ public class CitizenPartyDetailsMapper {
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                 CaseEvent caseEvent,
                                                                 String authorisation) {
-        log.info("mapUpdatedPartyDetailssssss ----->");
+        log.info("mapUpdatedPartyDetails ----->");
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsCa(
@@ -159,7 +159,6 @@ public class CitizenPartyDetailsMapper {
                                                                  CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                  CaseEvent caseEvent,
                                                                  String authorisation) {
-        log.info("updatingPartyDetailsCasssss ----->");
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
@@ -288,7 +287,6 @@ public class CitizenPartyDetailsMapper {
                                                                    CaseEvent caseEvent) {
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
-                log.info("getUpdatedPartyDetailsBasedOnEventsssss ----->");
                 return updateCitizenPersonalDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
@@ -484,8 +482,6 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
 
-        log.info("updateCitizenPersonalDetailssssssss ----->{}",citizenProvidedPartyDetails.getDateOfBirth());
-
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 
@@ -581,7 +577,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     public Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) throws JsonProcessingException {
-        log.info("saveDraftCitizenApplication-AAAAAAA->{}", citizenUpdatedCaseData);
+        log.info("saveDraftCitizenApplication----->{}", citizenUpdatedCaseData);
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (citizenUpdatedCaseData != null) {
             caseDataMapToBeUpdated.put(
