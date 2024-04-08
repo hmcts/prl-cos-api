@@ -44,6 +44,7 @@ public enum CaseEvent {
     FL401_MANAGE_SUPPORT("fl401ManageSupport"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
+    CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_CONTACT_PREFERENCE("citizenContactPreference");
 
