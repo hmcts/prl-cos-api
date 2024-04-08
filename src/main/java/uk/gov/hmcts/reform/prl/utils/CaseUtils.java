@@ -89,7 +89,6 @@ public class CaseUtils {
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
-        log.info("getCaseData caseDetails.getData() " + caseDetails.getData());
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
