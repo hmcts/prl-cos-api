@@ -21,26 +21,26 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MiamPolicyUpgradeDetails {
-    private YesOrNo childInvolvedInMiam;
-    private YesOrNo applicantAttendedMiam;
-    private YesOrNo claimingExemptionMiam;
-    private List<MiamExemptionsChecklistEnum> miamExemptionReasons;
-    private List<MiamDomesticAbuseChecklistEnum> miamDomesticAbuseEvidences;
-    private YesOrNo miamDomesticAbuseEvidenceOptions;
-    private List<Document> miamDomesticAbuseEvidenceDocument;
-    private String miamDomesticAbuseNoEvidenceReason;
-    private MiamUrgencyReasonChecklistEnum miamUrgencyReasons;
-    private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceOptions;
-    private Document documentFromDisputeResolutionProvider;
-    private TypeOfMiamAttendanceEvidenceEnum typeOfMiamAttendanceEvidence;
-    private Document miamCertificateByMediator;
-    private String miamAttendanceDetails;
-    private MiamOtherGroundsChecklistEnum miamOtherExemptionReasons;
-    private String applicantUnableToAttendMiamReason1;
-    private String applicantUnableToAttendMiamReason2;
+    private YesOrNo mpuChildInvolved;
+    private YesOrNo mpuApplicantAttended;
+    private YesOrNo mpuClaimingExemption;
+    private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
+    private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
+    private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
+    private List<Document> mpuDomesticAbuseEvidenceDocument;
+    private String mpuNoDomesticAbuseEvidenceReason;
+    private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
+    private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
+    private Document mpuDocFromDisputeResolutionProvider;
+    private TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence;
+    private Document mpuCertificateByMediator;
+    private String mpuMediatorDetails;
+    private MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons;
+    private String mpuApplicantUnableToAttendMiamReason1;
+    private String mpuApplicantUnableToAttendMiamReason2;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     private final Document miamCertificationDocumentUpload;
-    private MiamChildProtectionConcernChecklistEnum miamChildProtectionConcernReason;
+    private MiamChildProtectionConcernChecklistEnum mpuChildProtectionConcernReason;
 }
