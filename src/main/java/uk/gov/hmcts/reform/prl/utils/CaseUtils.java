@@ -50,6 +50,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -66,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -383,6 +385,8 @@ public class CaseUtils {
             return COURT_STAFF;
         } else if (roles.contains(CAFCASS)) {
             return CAFCASS;
+        } else if (roles.contains(BULK_SCAN)) {
+            return BULK_SCAN;
         }
 
         return CAFCASS;
@@ -594,9 +598,12 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        log.info("inside checkIfAddressIsChanged old {} , new {}",
+                 updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
-        Address previousAddress = updatedParty.getAddress();
-        return currentAddress != null
+        Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
+            ? updatedParty.getAddress() : Address.builder().build();
+        boolean flag = currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
             || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
@@ -604,20 +611,49 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
-            || (currentParty.getIsAddressConfidential() != null
-            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+            || !isConfidentialityRemainsSame(currentParty.getIsAddressConfidential(),
+                                             updatedParty.getIsAddressConfidential()))
+            && (StringUtils.isNotEmpty(currentAddress.getAddressLine1())
+                || StringUtils.isNotEmpty(previousAddress.getAddressLine1()));
+        log.info("checkIfAddressIsChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
+        boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
+                                             updatedParty.getIsEmailAddressConfidential()))
+            && (StringUtils.isNotEmpty(currentParty.getEmail())
+                || StringUtils.isNotEmpty(updatedParty.getEmail()));
+        log.info("isEmailAddressChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
+        boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
+                                             updatedParty.getIsPhoneNumberConfidential()))
+            && (StringUtils.isNotEmpty(currentParty.getPhoneNumber())
+                || StringUtils.isNotEmpty(updatedParty.getPhoneNumber()));
+        log.info("isPhoneNumberChanged ===>" + flag);
+        return flag;
+    }
+
+    private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+        log.info("inside isConfidentialityRemainsSame");
+        log.info("newConfidentiality ==> " + newConfidentiality);
+        log.info("oldConfidentiality ==> " + oldConfidentiality);
+        if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isEmpty(newConfidentiality)) {
+            return true;
+        } else if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isNotEmpty(newConfidentiality)) {
+            return No.equals(newConfidentiality);
+        } else {
+            return newConfidentiality.equals(oldConfidentiality);
+        }
     }
 
     public static String getLanguageRequirements(CaseData caseData) {
