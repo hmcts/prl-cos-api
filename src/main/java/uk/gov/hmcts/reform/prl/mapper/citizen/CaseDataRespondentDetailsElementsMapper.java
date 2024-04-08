@@ -119,6 +119,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static YesOrNo buildDateOfBirthKnown(PersonalDetails personalDetails) {
+        log.info("DOBBBB --> {}",personalDetails.getDateOfBirth());
         return null != personalDetails.getDateOfBirth() ? Yes : No;
     }
 
