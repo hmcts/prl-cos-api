@@ -24,13 +24,13 @@ public class MiamPolicyUpgradeDetails {
     private YesOrNo childInvolvedInMiam;
     private YesOrNo applicantAttendedMiam;
     private YesOrNo claimingExemptionMiam;
-    private List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist;
-    private List<MiamDomesticAbuseChecklistEnum> miamDomesticAbuseChecklist;
+    private List<MiamExemptionsChecklistEnum> miamExemptionReasons;
+    private List<MiamDomesticAbuseChecklistEnum> miamDomesticAbuseEvidences;
     private YesOrNo miamDomesticAbuseEvidenceOptions;
     private List<Document> miamDomesticAbuseEvidenceDocument;
     private String miamDomesticAbuseNoEvidenceReason;
-    private MiamUrgencyReasonChecklistEnum miamPolicyUpgradeUrgencyReasonChecklist;
-    private MiamPreviousAttendanceChecklistEnum miamPolicyUpgradePreviousAttendanceChecklist;
+    private MiamUrgencyReasonChecklistEnum miamUrgencyReasons;
+    private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceOptions;
     private Document evidenceFromDisputeResolutionProvider;
     private TypeOfMiamAttendanceEvidenceEnum typeOfMiamAttendanceEvidence;
     private Document miamCertificateByMediator;
