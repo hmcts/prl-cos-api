@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -222,7 +221,6 @@ public class CaseControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    @Ignore
     public void testUpdateCaseInvalidClient() throws JsonProcessingException {
 
         caseData = CaseData.builder()
