@@ -27,6 +27,7 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
+    public static final String CHILD_INVOLVED_IN_MIAM = "childInvolvedInMiam";
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
