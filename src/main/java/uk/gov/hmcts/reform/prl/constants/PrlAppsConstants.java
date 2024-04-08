@@ -27,9 +27,9 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
-    public static final String CHILD_INVOLVED_IN_MIAM = "mpuChildInvolved";
-    public static final String APPLICANT_ATTENDED_MIAM = "mpuApplicantAttended";
-    public static final String CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemption";
+    public static final String CHILD_INVOLVED_IN_MIAM = "mpuChildInvolvedInMiam";
+    public static final String APPLICANT_ATTENDED_MIAM = "mpuApplicantAttendedMiam";
+    public static final String CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemptionMiam";
 
     // Fee and Pay related constants
     public static final String FEE_VERSION = "1";
