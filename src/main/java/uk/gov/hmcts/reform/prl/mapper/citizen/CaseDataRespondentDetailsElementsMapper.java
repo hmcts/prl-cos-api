@@ -113,13 +113,13 @@ public class CaseDataRespondentDetailsElementsMapper {
         if (null != respondentDetails.getAddress().getAddressHistory()) {
             log.info("respondentDetailsssssssss ---> {}",respondentDetails.getAddress().getAddressHistory());
             String addressHistory = respondentDetails.getAddress().getAddressHistory();
-            if (YesNoDontKnow.yes.getDisplayedValue().equals(addressHistory)) {
+            if (YesNoDontKnow.yes.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
                 log.info("YESSSSSS");
                 return YesNoDontKnow.yes;
-            } else if (YesNoDontKnow.no.getDisplayedValue().equals(addressHistory)) {
+            } else if (YesNoDontKnow.no.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
                 log.info("NOOOOO");
                 return YesNoDontKnow.no;
-            } else if (YesNoDontKnow.dontKnow.getDisplayedValue().equals(addressHistory)) {
+            } else if (YesNoDontKnow.dontKnow.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
                 log.info("DONTTTTTT");
                 return YesNoDontKnow.dontKnow;
             }
