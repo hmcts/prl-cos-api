@@ -6,11 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -34,15 +36,20 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam());
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getApplicantAttendedMiam());
         Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getClaimingExemptionMiam());
-
+        log.info("childInvolvedInMiam.isPresent() {}", childInvolvedInMiam.isPresent());
+        log.info("applicantAttendedMiam.isPresent() {}", applicantAttendedMiam.isPresent());
+        log.info("claimingExemptionMiam.isPresent() {}", claimingExemptionMiam.isPresent());
         if (childInvolvedInMiam.isPresent() && Yes.equals(childInvolvedInMiam.get())) {
+            log.info("claimingExemptionMiam is Yes");
             finished = true;
         } else if (childInvolvedInMiam.isPresent() && No.equals(childInvolvedInMiam.get())) {
+            log.info("claimingExemptionMiam is No");
             finished = inspectChildInvolvedInMiamNoFlow(
                 caseData,
                 applicantAttendedMiam,
                 claimingExemptionMiam
             );
+            log.info("Dont know");
         }
         if (finished) {
             log.info("all done, its done");
@@ -50,7 +57,11 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             return true;
         }
         Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
-        taskErrorService.addEventError(MIAM_POLICY_UPGRADE, MIAM_POLICY_UPGRADE_ERROR, MIAM_POLICY_UPGRADE_ERROR.getError());
+        taskErrorService.addEventError(
+            MIAM_POLICY_UPGRADE,
+            MIAM_POLICY_UPGRADE_ERROR,
+            MIAM_POLICY_UPGRADE_ERROR.getError()
+        );
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
@@ -58,7 +69,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         return false;
     }
 
-    private static boolean inspectChildInvolvedInMiamNoFlow(CaseData caseData,
+    private boolean inspectChildInvolvedInMiamNoFlow(CaseData caseData,
                                                             Optional<YesOrNo> applicantAttendedMiam,
                                                             Optional<YesOrNo> claimingExemptionMiam) {
         boolean finished = false;
@@ -66,13 +77,24 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             if (Yes.equals(applicantAttendedMiam.get())) {
                 finished = hasProvidedMiamCertificate(caseData);
             } else if (claimingExemptionMiam.isPresent() && Yes.equals(claimingExemptionMiam.get())) {
-                finished = hasProvidedMiamCertificate(caseData);
-            } else if (claimingExemptionMiam.isPresent() && No.equals(claimingExemptionMiam.get())) {
-                //TODO: Rest of the logic to go here for No, No & No topic
-                finished = true;
+                finished = hasClaimedExemption(caseData);
             }
         }
         log.info("finished in inspectChildInvolvedInMiamNoFlow {}", finished);
+        return finished;
+    }
+
+    private boolean hasClaimedExemption(CaseData caseData) {
+        boolean finished = true;
+        Optional<List<MiamExemptionsChecklistEnum>> miamPolicyUpgradeExemptionsChecklist
+            = Optional.ofNullable(caseData.getMiamPolicyUpgradeDetails().getMiamPolicyUpgradeExemptionsChecklist());
+        if (!miamPolicyUpgradeExemptionsChecklist.isPresent()) {
+            finished = false;
+        } else if (miamPolicyUpgradeExemptionsChecklist.isPresent()
+            && miamPolicyUpgradeExemptionsChecklist.isEmpty()) {
+            finished = false;
+        }
+
         return finished;
     }
 
