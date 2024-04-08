@@ -1292,7 +1292,7 @@ public class SendAndReplyService {
 
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
-                    if (partyDetails.getContactPreferences().equals(ContactPreferences.email) || isSolicitorRepresentative(partyDetails)) {
+                    if (isSolicitorRepresentative(partyDetails) || partyDetails.getContactPreferences().equals(ContactPreferences.email)) {
                         log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
                         try {
                             sendEmailNotification(caseData, partyDetails, authorisation);
@@ -1330,14 +1330,15 @@ public class SendAndReplyService {
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorisation) throws IOException {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        List<Document> allSelectedDocuments = new ArrayList<>();
+        allSelectedDocuments.add(message.getSelectedDocument());
         log.info("message 1331 >>>> : {} ", objectMapper.writeValueAsString(message));
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorisation,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
                 .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails))
-                .listOfAttachments(new ArrayList<Document>() {
-                })
+                .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
     }

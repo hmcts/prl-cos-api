@@ -1408,5 +1408,208 @@ public class SendAndReplyServiceTest {
         assertNull(null);
     }
 
+    @Test
+    public void testSendEmailNotificationToExternalParties() {
+
+        final EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+
+
+        Message newMessage = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .messageAbout(MessageAboutEnum.OTHER)
+            .build();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .contactPreferences(ContactPreferences.post)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(
+            respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        assertNull(null);
+    }
+
+    @Test
+    public void testSendEmailNotificationToExternalPartiesForFL401Case() {
+
+        Message newMessage = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .messageAbout(MessageAboutEnum.OTHER)
+            .build();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .contactPreferences(ContactPreferences.post)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(applicant.getPartyId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(respondent.getPartyId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("FL401")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        assertNull(null);
+    }
 
 }
