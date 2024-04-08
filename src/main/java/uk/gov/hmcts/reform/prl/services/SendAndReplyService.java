@@ -1343,8 +1343,13 @@ public class SendAndReplyService {
                         log.info("----> Else if partyDetails.getContactPreferences() {}",
                                  partyDetails.getAddress());
 
-                        sendPostNotificationToExternalParties(caseData, partyDetails,
+                        List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
                                                               caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+                        if (null != message.getBulkPrintDetails()) {
+                            message.getBulkPrintDetails().addAll(bulkPrintDetails);
+                        } else {
+                            message.setBulkPrintDetails(bulkPrintDetails);
+                        }
                     } else {
                         log.info("----> Else partyDetails.getContactPreferences() {}",
                                  partyDetails.getAddress());
@@ -1421,6 +1426,8 @@ public class SendAndReplyService {
         dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         dataMap.put("id", String.valueOf(caseData.getId()));
         dataMap.put("message", message);
+        dataMap.put("isDocumentExist", null != message.getExternalMessageAttachDocs()
+            || null != message.getSelectedDocument() ? true : false);
         dataMap.put("urlLink", message);
 
         return getGeneratedDocumentInfo(caseData, auth, DOCUMENT_SEND_REPLY_MESSAGE, address, dataMap);
