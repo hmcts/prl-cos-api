@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -115,7 +114,6 @@ public class CitizenCaseUpdateControllerTest {
     }
 
     @Test
-    @Ignore
     public void testSaveDraftCitizenApplication() throws JsonProcessingException {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(citizenCaseUpdateService.saveDraftCitizenApplication(any(),

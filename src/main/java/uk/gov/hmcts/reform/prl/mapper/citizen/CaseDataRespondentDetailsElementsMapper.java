@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -29,7 +28,6 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@Slf4j
 public class CaseDataRespondentDetailsElementsMapper {
 
     private CaseDataRespondentDetailsElementsMapper() {
@@ -57,7 +55,6 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
-        log.info("respondentDetails----BBBBBB {}",respondentDetails);
         return PartyDetails
             .builder()
             .firstName(respondentDetails.getFirstName())
@@ -111,16 +108,12 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static YesNoDontKnow buildAddressLivedLessThan5YearsDetailsWithDontKnow(RespondentDetails respondentDetails) {
         if (null != respondentDetails.getAddress().getAddressHistory()) {
-            log.info("respondentDetailsssssssss ---> {}",respondentDetails.getAddress().getAddressHistory());
             String addressHistory = respondentDetails.getAddress().getAddressHistory();
             if (YesNoDontKnow.yes.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
-                log.info("YESSSSSS");
                 return YesNoDontKnow.yes;
             } else if (YesNoDontKnow.no.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
-                log.info("NOOOOO");
                 return YesNoDontKnow.no;
             } else if (YesNoDontKnow.dontKnow.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
-                log.info("DONTTTTTT");
                 return YesNoDontKnow.dontKnow;
             }
         }
@@ -139,7 +132,6 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static YesOrNo buildIsRealDateOfBirthKnown(PersonalDetails personalDetails) {
         return !"Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? Yes : No;
-
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {

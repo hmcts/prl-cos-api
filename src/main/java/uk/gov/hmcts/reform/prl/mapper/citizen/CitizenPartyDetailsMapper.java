@@ -97,7 +97,6 @@ public class CitizenPartyDetailsMapper {
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
                                                                 CaseEvent caseEvent,
                                                                 String authorisation) {
-        log.info("mapUpdatedPartyDetails ----->");
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent;
         if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
             citizenUpdatePartyDataContent = Optional.ofNullable(updatingPartyDetailsCa(
@@ -481,7 +480,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenPersonalDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-
         boolean isAddressNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getAddress())
             && StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddress().getAddressLine1());
 
@@ -490,8 +488,6 @@ public class CitizenPartyDetailsMapper {
         boolean isPhoneNoNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPhoneNumber());
 
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
-
-        log.info("isDateOfBirthNeedsToUpdate ----->{}",isDateOfBirthNeedsToUpdate);
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
 
@@ -577,7 +573,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     public Map<String, Object> getC100RebuildCaseDataMap(CaseData citizenUpdatedCaseData) throws JsonProcessingException {
-        log.info("saveDraftCitizenApplication----->{}", citizenUpdatedCaseData);
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (citizenUpdatedCaseData != null) {
             caseDataMapToBeUpdated.put(
@@ -669,7 +664,6 @@ public class CitizenPartyDetailsMapper {
     }
 
     public CaseData buildUpdatedCaseData(CaseData caseData, C100RebuildData c100RebuildData) throws JsonProcessingException {
-        log.info("vvvvvc100RebuildDatavvvvv {}",c100RebuildData);
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
