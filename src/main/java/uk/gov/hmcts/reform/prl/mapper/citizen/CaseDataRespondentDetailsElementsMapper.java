@@ -66,7 +66,6 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
-            .isDateOfBirthKnown(buildDateOfBirthKnown(respondentDetails.getPersonalDetails()))
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
@@ -116,11 +115,6 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
         return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
-    }
-
-    private static YesOrNo buildDateOfBirthKnown(PersonalDetails personalDetails) {
-        log.info("DOBBBB --> {}",personalDetails.getDateOfBirth());
-        return null != personalDetails.getDateOfBirth() ? Yes : No;
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
