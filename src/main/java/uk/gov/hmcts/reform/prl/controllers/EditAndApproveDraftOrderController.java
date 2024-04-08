@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -30,12 +31,14 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -68,6 +71,7 @@ public class EditAndApproveDraftOrderController {
     private final EditReturnedOrderService editReturnedOrderService;
     private final RoleAssignmentService roleAssignmentService;
     private final AllTabServiceImpl allTabService;
+    private final HearingService hearingService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -179,6 +183,14 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
+                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
+                    UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
+                    UserRoles.CASEMANAGER.toString())) {
+                    //Automated Hearing Request Call
+                    createAutomatedHearingManagement(authorisation, caseData);
+                }
+
                 if (Event.EDIT_AND_APPROVE_ORDER.getId()
                     .equalsIgnoreCase(callbackRequest.getEventId())) {
                     caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
@@ -469,5 +481,32 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+        log.info("Automated Hearing Management Call - Start");
+        log.info("Automated Hearing Request: EditAndApproveDraftOrderController: CaseData: {}",caseData);
+        if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            caseData.getManageOrders().getOrdersHearingDetails().stream()
+                .map(Element::getValue)
+                .forEach(hearingData -> {
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        log.info(
+                            "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
+                            hearingData.getHearingDateConfirmOptionEnum()
+                        );
+                        ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
+                            authorisation,
+                            caseData
+                        );
+                        log.info("Automated Hearing Request: Inside: End");
+                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
+                    }
+                });
+        } else {
+            log.info("Automated Hearing Management: ordersHearingDetails is empty");
+        }
+        log.info("Automated Hearing Management Call - End");
     }
 }

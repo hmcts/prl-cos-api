@@ -20,16 +20,21 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -42,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
@@ -926,6 +932,30 @@ public class EditAndApproveDraftOrderControllerTest {
         List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
         hearingDataCollection.add(hearingDataElement);
 
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        DynamicMultiSelectList dummyDynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(
+                dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassCymruServedOptions(YesOrNo.No)
+            .serveOrderDynamicList(dummyDynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .ordersHearingDetails(List.of(element(HearingData.builder()
+                                                      .hearingDateConfirmOptionEnum(
+                                                          HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                      .build())))
+            .build();
+
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
@@ -950,6 +980,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                 .doYouWantToServeOrder(Yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .manageOrders(manageOrders)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -973,6 +1004,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);

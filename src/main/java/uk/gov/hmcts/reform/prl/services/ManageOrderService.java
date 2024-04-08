@@ -1130,8 +1130,6 @@ public class ManageOrderService {
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             } else {
-                //Automated Hearing Request Call
-                createAutomatedHearingManagement(authorisation, caseData);
                 return setFinalOrderCollection(authorisation, caseData, userDetails);
             }
         }
@@ -1145,6 +1143,8 @@ public class ManageOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            //Automated Hearing Request Call
+            createAutomatedHearingManagement(authorisation, caseData);
             updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
@@ -3380,6 +3380,7 @@ public class ManageOrderService {
 
     private void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
         log.info("Automated Hearing Management Call - Start");
+        log.info("Automated Hearing Request: ManageOrderService: CaseData: {}",caseData);
         if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
             caseData.getManageOrders().getOrdersHearingDetails().stream()
                 .map(Element::getValue)
