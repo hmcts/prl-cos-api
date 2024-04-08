@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -109,8 +108,8 @@ public class CaseApplicationResponseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(coreCaseDataApi.getCase(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
-                                    Mockito.anyString(), Mockito.anyString(),Mockito.isNull()
+        when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString()
         )).thenReturn(caseDetails);
 
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
@@ -122,8 +121,7 @@ public class CaseApplicationResponseControllerTest {
         when(caseApplicationResponseService.generateC7DraftDocument(authToken, caseData, false))
             .thenReturn(Document.builder().build());
         Document document = caseApplicationResponseController
-            .generateC7DraftDocument(caseId, partyId, authToken, DocumentRequest
-                .builder().isWelsh(false).build(), servAuthToken);
+            .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(document);
     }
 

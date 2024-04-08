@@ -94,7 +94,7 @@ public class CafcassUploadDocService {
         ).getCafcassUploadedDocs());
 
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(caseId),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),

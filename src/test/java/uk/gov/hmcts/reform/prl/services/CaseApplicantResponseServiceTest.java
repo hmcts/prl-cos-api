@@ -115,7 +115,7 @@ public class CaseApplicantResponseServiceTest {
         when(coreCaseDataApi.getCase(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
-            Mockito.anyString(), Mockito.anyString(),Mockito.isNull()
+                                    Mockito.anyString()
         )).thenReturn(caseDetails);
 
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());

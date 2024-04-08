@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
@@ -126,6 +128,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -244,6 +248,14 @@ public class DocumentGenService {
     protected String solicitorC7FinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_template}")
+    protected String solicitorC7WelshDraftTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_filename}")
+    protected String solicitorC7WelshDraftFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_template}")
+    protected String solicitorC7WelshFinalTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_filename}")
+    protected String solicitorC7WelshFinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
@@ -252,6 +264,14 @@ public class DocumentGenService {
     protected String solicitorC1AFinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
     protected String solicitorC1AFinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_template}")
+    protected String solicitorC1ADraftWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_filename}")
+    protected String solicitorC1ADraftWelshFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_template}")
+    protected String solicitorC1AFinalWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_filename}")
+    protected String solicitorC1AFinalWelshFilename;
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
     @Value("${document.templates.common.prl_c1a_blank_filename}")
@@ -290,6 +310,7 @@ public class DocumentGenService {
     private final IdamClient idamClient;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final AllTabServiceImpl allTabService;
 
     private final DgsApiClient dgsApiClient;
 
@@ -768,16 +789,22 @@ public class DocumentGenService {
                 fileName = getC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                fileName = solicitorC7DraftFilename;
+                fileName = findDocCoverSheetC7DraftFileName(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                fileName = solicitorC7FinalFilename;
+                fileName = findDocCoverSheetC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 fileName = solicitorC1AFinalFilename;
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                fileName = solicitorC1AFinalWelshFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftWelshFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -885,16 +912,22 @@ public class DocumentGenService {
                 template = getC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                template = solicitorC7DraftTemplate;
+                template = findDocCoverSheetC7DraftTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                template = solicitorC7FinalTemplate;
+                template = findDocCoverSheetC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 template = solicitorC1AFinalTemplate;
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                template = solicitorC1AFinalWelshTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftWelshTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
@@ -965,6 +998,22 @@ public class DocumentGenService {
     private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
         //Need to replace EMPTY_STRING with received welsh template
         return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftTemplate : solicitorC7WelshDraftTemplate;
+    }
+
+    private String findDocCoverSheetC7FinalTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalTemplate : solicitorC7WelshFinalTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftFilename : solicitorC7WelshDraftFilename;
+    }
+
+    private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -1345,17 +1394,14 @@ public class DocumentGenService {
     }
 
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
-        //Get case data from caseId
+
         String caseId = documentRequest.getCaseId();
-        CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
 
-        if (null == caseDetails) {
-            log.info("Retrieved caseDetails is null for caseId {}", caseId);
-            return null;
-        }
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificEvent(String.valueOf(caseId), CITIZEN_CASE_UPDATE.getValue());
+        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (isNotBlank(documentRequest.getCategoryId())
@@ -1373,30 +1419,35 @@ public class DocumentGenService {
                 ))
                 .toList();
 
-            manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
-
-            caseData = moveCitizenDocumentsToQuarantineTab(
-                quarantineLegalDocs,
-                caseData,
-                caseDataUpdated
+            manageDocumentsService.setFlagsForWaTask(
+                updatedCaseData,
+                updatedCaseDataMap,
+                CITIZEN,
+                quarantineLegalDocs.get(0)
             );
 
-            return caseService.updateCase(
-                caseData,
-                authorisation,
-                authTokenGenerator.generate(),
+            updatedCaseDataMap = moveCitizenDocumentsToQuarantineTab(
+                quarantineLegalDocs,
+                updatedCaseData,
+                updatedCaseDataMap
+            );
+
+            //update all tabs
+            return allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
                 caseId,
-                CITIZEN_CASE_UPDATE.getValue(),
-                null
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                updatedCaseDataMap
             );
 
         }
         return null;
     }
 
-    private CaseData moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                         CaseData caseData,
-                                                         Map<String, Object> caseDataUpdated) {
+    private Map<String, Object> moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
+                                                                    CaseData caseData,
+                                                                    Map<String, Object> caseDataUpdated) {
         for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
             //invoke common manage docs
             manageDocumentsService.moveDocumentsToQuarantineTab(
@@ -1405,9 +1456,8 @@ public class DocumentGenService {
                 caseDataUpdated,
                 CITIZEN
             );
-            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
-        return caseData;
+        return caseDataUpdated;
     }
 
     private CaseData moveCitizenDocumentsToCaseDocumentsTab(List<QuarantineLegalDoc> quarantineLegalDocs,
