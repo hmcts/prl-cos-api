@@ -55,6 +55,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
+
         return PartyDetails
             .builder()
             .firstName(respondentDetails.getFirstName())
@@ -109,11 +110,11 @@ public class CaseDataRespondentDetailsElementsMapper {
     private static YesNoDontKnow buildAddressLivedLessThan5YearsDetailsWithDontKnow(RespondentDetails respondentDetails) {
         if (null != respondentDetails.getAddress().getAddressHistory()) {
             String addressHistory = respondentDetails.getAddress().getAddressHistory();
-            if (YesNoDontKnow.yes.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
+            if (YesNoDontKnow.yes.toString().equalsIgnoreCase(addressHistory)) {
                 return YesNoDontKnow.yes;
-            } else if (YesNoDontKnow.no.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
+            } else if (YesNoDontKnow.no.toString().equalsIgnoreCase(addressHistory)) {
                 return YesNoDontKnow.no;
-            } else if (YesNoDontKnow.dontKnow.getDisplayedValue().equalsIgnoreCase(addressHistory)) {
+            } else if (YesNoDontKnow.dontKnow.toString().equalsIgnoreCase(addressHistory)) {
                 return YesNoDontKnow.dontKnow;
             }
         }
