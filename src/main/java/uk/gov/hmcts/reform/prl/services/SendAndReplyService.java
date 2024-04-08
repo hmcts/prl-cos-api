@@ -1271,6 +1271,7 @@ public class SendAndReplyService {
     }
 
     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
+        log.info("----> sendNotificationToExternalParties 1274 >>>>");
         try {
             //get the latest message
             Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
@@ -1289,7 +1290,7 @@ public class SendAndReplyService {
                     applicantOrRespondent.getCode(),
                     applicantAndRespondentInCase
                 );
-
+                log.info("----> sendNotificationToExternalParties party.isPresent() 1295 >>>> {}", party.isPresent());
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
                     log.info("----> isSolicitorRepresentative(partyDetails) 1295 >>>> {}", isSolicitorRepresentative(partyDetails));
