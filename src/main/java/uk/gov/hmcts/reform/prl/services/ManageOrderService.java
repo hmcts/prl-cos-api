@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -3380,25 +3381,35 @@ public class ManageOrderService {
 
     public void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
         log.info("Automated Hearing Management Call - Start");
-        log.info("Automated Hearing Request: CaseData: {}",caseData);
-        if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            caseData.getManageOrders().getOrdersHearingDetails().stream()
-                .map(Element::getValue)
-                .forEach(hearingData -> {
-                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                        log.info(
-                            "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
-                            hearingData.getHearingDateConfirmOptionEnum()
-                        );
-                        ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
-                            authorisation,
-                            caseData
-                        );
-                        log.info("Automated Hearing Request: Inside: End");
-                        log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
-                    }
-                });
+        try {
+            ObjectMapper objectMappers = new ObjectMapper();
+            objectMappers.registerModule(new JavaTimeModule());
+            String caseDataObjectJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(caseData);
+            log.info("Automated Hearing Request: CaseData: {}", caseDataObjectJson);
+            if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+                caseData.getManageOrders().getOrdersHearingDetails().stream()
+                    .map(Element::getValue)
+                    .forEach(hearingData -> {
+                        if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                            || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                            log.info(
+                                "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
+                                hearingData.getHearingDateConfirmOptionEnum()
+                            );
+                            ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
+                                authorisation,
+                                caseData
+                            );
+                            log.info("Automated Hearing Request: Inside: End");
+                            log.info(
+                                "Automated Hearing Response: sendEmailNotificationOnClosingOrder: automatedHearingResponse: {}",
+                                automatedHearingResponse
+                            );
+                        }
+                    });
+            }
+        } catch (Exception e) {
+            throw new ManageOrderRuntimeException("Invalid Json", e);
         }
         log.info("Automated Hearing Management Call - End");
     }
