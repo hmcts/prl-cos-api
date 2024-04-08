@@ -304,9 +304,11 @@ public class PaymentRequestService {
                                                   FeeResponse feeResponse) {
         //Remove existing awp payment before adding/updating with new details
         if (null != existingAwpElement) {
+            log.info("Removing existing awp payment from caseData");
             caseData.getAwpPayments().remove(existingAwpElement);
         }
-        log.info("Update case data with Awp payment details");
+        log.info("*** Awp payments, after removing old payment data {}", caseData.getAwpPayments());
+
         Element<AwpPayment> awpPayment = null != existingAwpElement
             ? updateExistingAwpPayment(existingAwpElement, paymentResponse)
             : createNewAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
@@ -314,7 +316,7 @@ public class PaymentRequestService {
 
         //update case only if payment details not present already
         List<Element<AwpPayment>> awpPayments = getAwpPayments(caseData, awpPayment);
-        log.info("Update Awp payments in case data map {}", awpPayments);
+        log.info("*** New Awp payments data to be updated {}", awpPayments);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         updatedCaseDataMap.put("awpPayments", awpPayments);
 
