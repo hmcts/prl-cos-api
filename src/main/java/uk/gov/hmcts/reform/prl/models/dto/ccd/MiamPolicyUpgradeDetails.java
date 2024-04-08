@@ -32,11 +32,11 @@ public class MiamPolicyUpgradeDetails {
     private List<MiamPreviousAttendanceChecklistEnum> miamPolicyUpgradePreviousAttendanceChecklist;
     private Document evidenceFromDisputeResolutionProvider;
     private List<TypeOfMiamAttendanceEvidenceEnum> typeOfMiamAttendanceEvidence;
-    private Document miamCertificateDocument;
+    private Document miamCertificateByMediator;
     private String miamAttendanceDetails;
     private List<MiamChildProtectionConcernChecklistEnum> miamPolicyUpgradeOtherGroundsChecklist;
-    private String applicantUnableToMiamReason1;
-    private String applicantUnableToMiamReason2;
+    private String applicantUnableToAttendMiamReason1;
+    private String applicantUnableToAttendMiamReason2;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;

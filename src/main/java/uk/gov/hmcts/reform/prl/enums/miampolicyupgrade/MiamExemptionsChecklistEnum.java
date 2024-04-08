@@ -18,8 +18,8 @@ public enum MiamExemptionsChecklistEnum {
     CHILD_PROTECTION_CONCERN("childProtectionConcern", "Child protection concerns"),
     @JsonProperty("urgency")
     URGENCY("urgency","Urgency"),
-    @JsonProperty("previousMIAMattendance")
-    PREVIOUS_MIAM_ATTENDANCE("previousMIAMattendance", "Previous attendance of a MIAM or non-court dispute resolution"),
+    @JsonProperty("previousMiamAttendance")
+    PREVIOUS_MIAM_ATTENDANCE("previousMiamAttendance", "Previous attendance of a MIAM or non-court dispute resolution"),
     @JsonProperty("other")
     OTHER("other","Other");
 
