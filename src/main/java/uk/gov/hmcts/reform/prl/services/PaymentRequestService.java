@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -26,16 +24,17 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -48,14 +47,12 @@ public class PaymentRequestService {
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
-    private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
-
-    private final CaseService caseService;
+    private final AllTabServiceImpl allTabService;
 
     @Value("${payments.api.callback-url}")
     String callBackUrl;
@@ -96,10 +93,14 @@ public class PaymentRequestService {
     }
 
     public PaymentResponse createPayment(String authorization,
-                                         String serviceAuthorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
         log.info("Inside createPayment -> request {}", createPaymentRequest);
-        CaseData caseData = getCaseData(authorization, serviceAuthorization, createPaymentRequest.getCaseId());
+        log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            allTabService.getStartUpdateForSpecificEvent(createPaymentRequest.getCaseId(),
+                                                           CITIZEN_CASE_UPDATE.getValue());
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+
         if (null == caseData) {
             log.info("Retrieved caseData is null for caseId {}, please provide a valid caseId", createPaymentRequest.getCaseId());
             return null;
@@ -109,6 +110,8 @@ public class PaymentRequestService {
             log.info("Error in fetching fee details for feeType {}", createPaymentRequest.getFeeType());
             return null;
         }
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .applicantCaseName(caseData.getApplicantCaseName()).build();
 
         if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
             log.info("Creating payment for C100");
@@ -131,7 +134,12 @@ public class PaymentRequestService {
                                             feeResponse);
 
             //save service req & payment req ref into caseData
-            updateCaseDataWithPaymentDetails(caseData, authorization, createPaymentRequest, paymentResponse, awpPaymentElement, feeResponse);
+            updateCaseDataWithPaymentDetails(caseData,
+                                             startAllTabsUpdateDataContent,
+                                             createPaymentRequest,
+                                             paymentResponse,
+                                             awpPaymentElement,
+                                             feeResponse);
 
             return paymentResponse;
         }
@@ -288,27 +296,12 @@ public class PaymentRequestService {
             );
     }
 
-    private CaseData getCaseData(String authorization,
-                                 String serviceAuthorization,
-                                 String caseId) {
-        log.info("Retrieving caseData for caseId : {}", caseId);
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
-            authorization,
-            serviceAuthorization,
-            caseId
-        );
-
-        return null != caseDetails
-            ? CaseUtils.getCaseData(caseDetails, objectMapper)
-            : null;
-    }
-
     private void updateCaseDataWithPaymentDetails(CaseData caseData,
-                                                  String authorization,
+                                                  StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
                                                   CreatePaymentRequest createPaymentRequest,
                                                   PaymentResponse paymentResponse,
                                                   Element<AwpPayment> existingAwpElement,
-                                                  FeeResponse feeResponse) throws JsonProcessingException {
+                                                  FeeResponse feeResponse) {
         //Remove existing awp payment before adding/updating with new details
         if (null != existingAwpElement) {
             caseData.getAwpPayments().remove(existingAwpElement);
@@ -321,16 +314,17 @@ public class PaymentRequestService {
 
         //update case only if payment details not present already
         List<Element<AwpPayment>> awpPayments = getAwpPayments(caseData, awpPayment);
-        caseData = caseData.toBuilder()
-            .awpPayments(awpPayments)
-            .build();
-        log.info("Awp payments updated in case data {}", caseData.getAwpPayments());
+        log.info("Update Awp payments in case data map {}", awpPayments);
+        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        updatedCaseDataMap.put("awpPayments", awpPayments);
 
         //update case
-        caseService.updateCase(caseData,
-                               authorization,
-                               String.valueOf(caseData.getId()),
-                               CaseEvent.CITIZEN_CASE_UPDATE.getValue()
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            createPaymentRequest.getCaseId(),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            updatedCaseDataMap
         );
     }
 

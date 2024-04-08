@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +10,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -26,7 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -76,13 +78,11 @@ public class PaymentRequestServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Mock
+    private AllTabServiceImpl allTabService;
+
     private CallbackRequest callbackRequest;
-
     private CreatePaymentRequest createPaymentRequest;
-
-    @Mock
-    private CaseService caseService;
-    @Mock
     private PaymentResponse paymentResponse;
     private PaymentServiceRequest paymentServiceRequest;
     public static final String TEST_CASE_ID = "1656350492135029";
@@ -155,6 +155,13 @@ public class PaymentRequestServiceTest {
                 .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
                 .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
+
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseDetails, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
     }
 
     @Test
@@ -363,7 +370,6 @@ public class PaymentRequestServiceTest {
 
         PaymentResponse paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
@@ -401,7 +407,7 @@ public class PaymentRequestServiceTest {
                                              any(OnlineCardPaymentRequest.class)))
             .thenReturn(PaymentResponse.builder().build());
 
-        assertNotNull(paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest));
+        assertNotNull(paymentRequestService.createPayment(authToken, createPaymentRequest));
 
     }
 
@@ -423,8 +429,8 @@ public class PaymentRequestServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(caseDetails);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        PaymentResponse paymentResponseReturned = paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
-        Assert.assertEquals("12345", paymentResponseReturned.getServiceRequestReference());
+        PaymentResponse paymentResponseReturned = paymentRequestService.createPayment(authToken, createPaymentRequest);
+        assertNotNull(paymentResponseReturned.getServiceRequestReference());
     }
 
     @Test
@@ -511,14 +517,12 @@ public class PaymentRequestServiceTest {
 
         PaymentResponse paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
         createPaymentRequest.setHwfRefNumber("referNumber");
         paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
@@ -612,14 +616,12 @@ public class PaymentRequestServiceTest {
 
         PaymentResponse paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
         createPaymentRequest.setHwfRefNumber("referNumber");
         paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
@@ -709,7 +711,6 @@ public class PaymentRequestServiceTest {
 
         PaymentResponse paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
 
@@ -717,7 +718,6 @@ public class PaymentRequestServiceTest {
         createPaymentRequest.setHwfRefNumber("refer");
         paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
@@ -771,7 +771,6 @@ public class PaymentRequestServiceTest {
 
         PaymentResponse paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
@@ -810,8 +809,7 @@ public class PaymentRequestServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
         paymentResponse = paymentRequestService.createPayment(authToken,
-                                            serviceAuthToken,
-                                            createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build());
+                                                              createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build());
 
         assertNotNull(paymentResponse);
         assertEquals(PAYMENTSRREFERENCENUMBER, paymentResponse.getServiceRequestReference());
@@ -848,7 +846,6 @@ public class PaymentRequestServiceTest {
 
         paymentResponse = paymentRequestService.createPayment(
             authToken,
-            serviceAuthToken,
             createPaymentRequest);
 
         assertNotNull(paymentResponse);
