@@ -13,12 +13,10 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_POLICY_UPGRADE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
-
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -41,25 +39,25 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             finished = inspectChildInvolvedInMiamNoFlow(
                 caseData,
                 applicantAttendedMiam,
-                finished,
                 claimingExemptionMiam
             );
         }
         if (finished) {
-            taskErrorService.removeError(MIAM_ERROR);
+            taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
             return true;
         }
         Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
-        taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
+        taskErrorService.addEventError(MIAM_POLICY_UPGRADE, MIAM_POLICY_UPGRADE_ERROR, MIAM_POLICY_UPGRADE_ERROR.getError());
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
-            taskErrorService.removeError(MIAM_ERROR);
+            taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
         return false;
     }
 
     private static boolean inspectChildInvolvedInMiamNoFlow(CaseData caseData,
                                                             Optional<YesOrNo> applicantAttendedMiam,
-                                                            boolean finished, Optional<YesOrNo> claimingExemptionMiam) {
+                                                            Optional<YesOrNo> claimingExemptionMiam) {
+        boolean finished = false;
         if (applicantAttendedMiam.isPresent()) {
             if (Yes.equals(applicantAttendedMiam.get())) {
                 finished = hasProvidedMiamCertificate(caseData);
@@ -92,9 +90,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return anyNonEmpty(
-            caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam()
-        );
+        Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getChildInvolvedInMiam());
+        return childInvolvedInMiam.isPresent();
     }
 
     @Override
