@@ -504,8 +504,6 @@ public class EditAndApproveDraftOrderController {
                         log.info("sendEmailNotificationOnClosingOrder: caseDetails: {}", automatedHearingResponse);
                     }
                 });
-        } else {
-            log.info("Automated Hearing Management: ordersHearingDetails is empty");
         }
         log.info("Automated Hearing Management Call - End");
     }
