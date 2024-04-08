@@ -267,7 +267,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
-            sendAndReplyService.sendNotificationToExternalParties(caseData);
+            sendAndReplyService.sendNotificationToExternalParties(caseData, authorisation);
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);

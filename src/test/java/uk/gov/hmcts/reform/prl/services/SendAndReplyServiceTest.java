@@ -1328,7 +1328,7 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        sendAndReplyService.sendNotificationToExternalParties(caseData);
+        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
     }
 
 }
