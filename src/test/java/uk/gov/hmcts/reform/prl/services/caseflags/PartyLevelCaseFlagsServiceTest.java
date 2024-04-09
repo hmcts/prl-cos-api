@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -81,6 +82,8 @@ public class PartyLevelCaseFlagsServiceTest {
             .firstName("")
             .lastName("")
             .email("")
+            .representativeFirstName("")
+            .representativeLastName("")
             .user(User.builder().email("").idamId("").build())
             .build();
 
@@ -105,6 +108,7 @@ public class PartyLevelCaseFlagsServiceTest {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetailsApplicant).build()))
             .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                      .value(partyDetailsRespondent).build()))
