@@ -87,6 +87,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -1331,4 +1332,51 @@ public class SendAndReplyServiceTest {
         sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
     }
 
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistForSend() {
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
+        Message newMessage = Message.builder()
+            .messageSubject("testSubject1")
+            .messageContent("This is message 1 body")
+            .applicationsList(dynamicList)
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .sendMessageObject(newMessage)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND);
+        assertEquals(dynamicList.getValueCode(), returnString);
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistForReply() {
+
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        CaseData caseData = CaseData.builder().id(123451L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(ListUtils.union(listOfOpenMessages, listOfClosedMessages))
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(dynamicList)
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY);
+        assertEquals(dynamicList.getValueCode(), returnString);
+    }
 }
