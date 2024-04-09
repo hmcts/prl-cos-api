@@ -1285,28 +1285,30 @@ public class SendAndReplyService {
 
             //Get list of Applicant & Respondent in Case
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-            log.info("----> selectedApplicantsOrRespondents 1287 size >>>> {}", selectedApplicantsOrRespondents.size());
-            log.info("----> selectedApplicantsOrRespondents 1288 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
             String a1 = objectMapper.writeValueAsString(applicantAndRespondentInCase.get(0).getId());
             selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-            log.info("----> applicant a1 1292 >>>> {}", a1);
-            log.info("----> applicantAndRespondentInCase 1291 size >>>> {}", applicantAndRespondentInCase.size());
-            log.info("----> applicantAndRespondentInCase 1292 >>>> {}", objectMapper.writeValueAsString(applicantAndRespondentInCase));
+            log.info("----> applicant a1 1290 >>>> {}", a1);
+
+            log.info("----> selectedApplicantsOrRespondents 1292 size >>>> {}", selectedApplicantsOrRespondents.size());
+            log.info("----> selectedApplicantsOrRespondents 1293 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
+
+            log.info("----> applicantAndRespondentInCase 1296 size >>>> {}", applicantAndRespondentInCase.size());
+            log.info("----> applicantAndRespondentInCase 1297 >>>> {}", objectMapper.writeValueAsString(applicantAndRespondentInCase));
             selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     applicantOrRespondent.getCode(),
                     applicantAndRespondentInCase
                 );
                 try {
-                    log.info("----> sendNotificationToExternalParties party.isPresent() 1295 >>>> {}", objectMapper.writeValueAsString(party));
+                    log.info("----> sendNotificationToExternalParties party.isPresent() 1303 >>>> {}", objectMapper.writeValueAsString(party));
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-                log.info("----> sendNotificationToExternalParties party.isPresent() 1295 >>>> {}", party.isPresent());
+                log.info("----> sendNotificationToExternalParties party.isPresent() 1307 >>>> {}", party.isPresent());
                 if (party.isPresent()) {
                     PartyDetails partyDetails = party.get().getValue();
-                    log.info("----> isSolicitorRepresentative(partyDetails) 1295 >>>> {}", isSolicitorRepresentative(partyDetails));
-                    log.info("----> partyDetails.getContactPreferences() 1296 >>>> {}", partyDetails.getContactPreferences());
+                    log.info("----> isSolicitorRepresentative(partyDetails) 1310 >>>> {}", isSolicitorRepresentative(partyDetails));
+                    log.info("----> partyDetails.getContactPreferences() 1311 >>>> {}", partyDetails.getContactPreferences());
                     if (isSolicitorRepresentative(partyDetails) || partyDetails.getContactPreferences().equals(ContactPreferences.email)) {
                         log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
                         try {
@@ -1331,21 +1333,9 @@ public class SendAndReplyService {
     private List<Element<PartyDetails>> getApplicantAndRespondentList(CaseData caseData) {
         List<Element<PartyDetails>> applicantRespondentList = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            try {
-                log.info("caseData.getApplicants() : 1330 {}", objectMapper.writeValueAsString(caseData.getApplicants()));
-                log.info("caseData.getRespondents() : 1331 {}", objectMapper.writeValueAsString(caseData.getRespondents()));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             applicantRespondentList.addAll(caseData.getApplicants());
             applicantRespondentList.addAll(caseData.getRespondents());
         } else {
-            try {
-                log.info("caseData.getApplicants FL401 : 1330 {}", objectMapper.writeValueAsString(caseData.getApplicantsFL401()));
-                log.info("caseData.getRespondents FL401 : 1331 {}", objectMapper.writeValueAsString(caseData.getRespondentsFL401()));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getApplicantsFL401().getPartyId()).value(
                 caseData.getApplicantsFL401()).build()));
             applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getRespondentsFL401().getPartyId()).value(
