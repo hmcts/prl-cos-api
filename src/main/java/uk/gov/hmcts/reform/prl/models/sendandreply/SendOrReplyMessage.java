@@ -7,6 +7,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
 
@@ -27,18 +28,21 @@ public class SendOrReplyMessage {
     @JsonProperty("externalMessageAttachDocsList")
     private List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList;
 
+    private DynamicMultiSelectList externalMessageTo;
+
+
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
             "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
-            "replyMessageObject", "messageReplyTable", "chooseSendOrReply", "externalMessageAttachDocsList"
+            "replyMessageObject", "messageReplyTable", "chooseSendOrReply", "externalMessageAttachDocsList","externalMessageTo"
         };
     }
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
             "messageContent",
-            "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList"
+            "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList","externalMessageTo"
         };
     }
 }

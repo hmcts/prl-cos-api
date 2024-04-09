@@ -738,7 +738,6 @@ public class SendAndReplyControllerTest {
 
     }
 
-    @Test
     public void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();

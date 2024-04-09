@@ -84,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OR_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -95,7 +94,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
@@ -115,8 +113,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class SendAndReplyService {
 
     private final EmailService emailService;
-
-    private final SendgridService sendgridService;
 
     private final UserService userService;
 
@@ -156,6 +152,8 @@ public class SendAndReplyService {
     private final CaseDocumentClient caseDocumentClient;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private final SendgridService sendgridService;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -202,8 +200,14 @@ public class SendAndReplyService {
         String content = message.getLatestMessage();
         String caseLink = manageCaseUrl + "/" + caseData.getId();
 
-        return SendAndReplyNotificationEmail.builder().caseName(caseName).messageSubject(subject).senderEmail(
-            senderEmail).messageUrgency(urgency).messageContent(content).caseLink(caseLink).build();
+        return SendAndReplyNotificationEmail.builder()
+            .caseName(caseName)
+            .messageSubject(subject)
+            .senderEmail(senderEmail)
+            .messageUrgency(urgency)
+            .messageContent(content)
+            .caseLink(caseLink)
+            .build();
     }
 
     public void sendNotificationEmail(CaseData caseData, Message message) {
@@ -446,8 +450,6 @@ public class SendAndReplyService {
         if (CollectionUtils.isNotEmpty(respondentList)) {
             applicantRespondentList.addAll(respondentList);
         }
-        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("OTHER").label(OTHER).build());
-        applicantRespondentList.add(DynamicMultiselectListElement.builder().code("cafcassOrCafcassCymru").label(CAFCASS_OR_CAFCASS_CYMRU).build());
 
         return applicantRespondentList;
     }
