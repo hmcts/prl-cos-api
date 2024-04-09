@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
@@ -166,6 +168,26 @@ public class CitizenCaseUpdateController {
             } else {
                 log.error("withdrawCase is not successful for the case {}", caseId);
                 throw new CoreCaseDataStoreException("Citizen withdraw application failed for this transaction");
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/save-citizen-awp-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Save citizen awp application into case data")
+    public ResponseEntity<Object> saveCitizenAwpApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                            @PathVariable("caseId") String caseId,
+                                                            @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("*** Inside saveCitizenAwpApplication -> citizen awp request  {}", citizenAwpRequest);
+            CaseDetails caseDetails = citizenCaseUpdateService.saveCitizenAwpApplication(authorisation, caseId, citizenAwpRequest);
+
+            if (null != caseDetails) {
+                return ResponseEntity.ok("Success");
+            } else {
+                return ResponseEntity.internalServerError().body("Error happened in saving citizen awp application");
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

@@ -47,11 +47,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class CitizenAwpMapper {
     private static final String DATE_FORMAT = "dd-MMM-yyyy hh:mm:ss a";
 
-    public CaseData map(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
+    public CaseData map(CaseData caseData,
+                        CitizenAwpRequest citizenAwpRequest) {
         log.info("Mapping AWP citizen to solicitor");
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
-            isNotEmpty(caseData.getAdditionalApplicationsBundle())
-                ? caseData.getAdditionalApplicationsBundle() : new ArrayList<>();
 
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .author(citizenAwpRequest.getPartyName())
@@ -64,7 +62,25 @@ public class CitizenAwpMapper {
             .build();
 
         log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
-        //get awp payment details
+        //Map awp payment details & then remove from in progress
+        additionalApplicationsBundle = mapPaymentDetailsAndRemove(caseData,
+                                                                  citizenAwpRequest,
+                                                                  additionalApplicationsBundle);
+        log.info("Mapped data with payment details {}", additionalApplicationsBundle);
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
+            isNotEmpty(caseData.getAdditionalApplicationsBundle())
+                ? caseData.getAdditionalApplicationsBundle() : new ArrayList<>();
+        additionalApplicationsBundles.add(element(additionalApplicationsBundle));
+
+        return caseData.toBuilder()
+            .additionalApplicationsBundle(additionalApplicationsBundles)
+            .build();
+    }
+
+    private AdditionalApplicationsBundle mapPaymentDetailsAndRemove(CaseData caseData,
+                                                                    CitizenAwpRequest citizenAwpRequest,
+                                                                    AdditionalApplicationsBundle additionalApplicationsBundle) {
         Optional<Element<AwpPayment>> optionalAwpPaymentElement =
             getAwpPaymentIfPresent(caseData.getAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
         //update payment details
@@ -76,11 +92,8 @@ public class CitizenAwpMapper {
             //Remove in progress awp payment details
             caseData.getAwpPayments().remove(optionalAwpPaymentElement.get());
         }
-        additionalApplicationsBundles.add(element(additionalApplicationsBundle));
 
-        return caseData.toBuilder()
-            .additionalApplicationsBundle(additionalApplicationsBundles)
-            .build();
+        return additionalApplicationsBundle;
     }
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {

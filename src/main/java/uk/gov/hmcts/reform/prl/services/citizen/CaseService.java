@@ -14,12 +14,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
-import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -55,7 +53,6 @@ public class CaseService {
     private final RoleAssignmentService roleAssignmentService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
-    private final CitizenAwpMapper citizenAwpMapper;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -182,25 +179,5 @@ public class CaseService {
         }
 
         return caseDataWithHearingResponse;
-    }
-
-    public CaseDetails updateCitizenAwp(String authorisation,
-                                        String caseId,
-                                        CitizenAwpRequest citizenAwpRequest) {
-        //Fetch case data
-        CaseData caseData = CaseUtils.getCaseData(getCase(authorisation, caseId), objectMapper);
-
-        if (null == caseData) {
-            log.info("CaseData is null for caseId {}", caseId);
-            return null;
-        }
-
-        CaseData updatedCaseData = citizenAwpMapper.map(caseData, citizenAwpRequest);
-
-        return caseRepository.updateCase(authorisation,
-                                         caseId,
-                                         updatedCaseData,
-                                         CaseEvent.CITIZEN_CASE_UPDATE
-        );
     }
 }

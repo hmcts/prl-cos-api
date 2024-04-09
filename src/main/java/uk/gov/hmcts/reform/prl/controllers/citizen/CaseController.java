@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
-import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -194,26 +192,6 @@ public class CaseController {
         boolean isAuthorised = authorisationService.authoriseUser(authorisation);
         if (isAuthorised) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(value = "{caseId}/update-citizen-awp", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Update citizen awp into case data")
-    public ResponseEntity<Object> updateCitizenAwpData(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                                       @PathVariable("caseId") String caseId,
-                                                       @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("Citizen awp update for {}", citizenAwpRequest);
-            CaseDetails caseDetails = caseService.updateCitizenAwp(authorisation, caseId, citizenAwpRequest);
-
-            if (null != caseDetails) {
-                return ResponseEntity.ok("Success");
-            } else {
-                return ResponseEntity.internalServerError().body("Error happened in updating citizen awp");
-            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -74,9 +74,9 @@ public enum OtherApplicationType {
     ),
 
     //Citizen AWP reasons
-    @JsonProperty("C1_REQUEST_PARENTAL_RESPONSIBILITY")
-    C1_REQUEST_PARENTAL_RESPONSIBILITY("C1_REQUEST_PARENTAL_RESPONSIBILITY",
-                                       "C1 - Request to grant parental responsibility"),
+    @JsonProperty("C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY")
+    C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY("C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY",
+                                       "C1 - Request to grant for parental responsibility"),
     @JsonProperty("C1_REQUEST_GUARDIAN_FOR_CHILD")
     C1_REQUEST_GUARDIAN_FOR_CHILD("C1_REQUEST_GUARDIAN_FOR_CHILD",
                                   "C1 - Request to appoint a guardian for the child"),
