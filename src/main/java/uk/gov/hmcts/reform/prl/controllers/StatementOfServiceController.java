@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -112,7 +111,7 @@ public class StatementOfServiceController {
         }
     }
 
-    @PostMapping(path = "/save-statement-of-service-by-citizen", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/{caseId}/{eventId}/save-statement-of-service-by-citizen", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Updating casedata with citizen sos")
     public ResponseEntity<Object> citizenSoaSubmit(
         @PathVariable("caseId") String caseId,
@@ -120,7 +119,7 @@ public class StatementOfServiceController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @ModelAttribute CitizenSos sosObject
-    ) throws JsonProcessingException {
+    ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             stmtOfServImplService.saveCitizenSos(caseId, eventId, authorisation, sosObject);
