@@ -551,12 +551,35 @@ public class ManageOrderEmailService {
                                      SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
                 );
             } else {
-                log.info("*** courtAdmin/courtBailiff: Sending email to applicant LiP");
-                dynamicDataForEmail.put("name", party.getLabelForDynamicList());
-                dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
-                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getEmail(),
-                                     SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
-                );
+                if (party.getContactPreferences() == ContactPreferences.email) {
+                    log.info("*** courtAdmin/courtBailiff: Sending email to applicant LiP");
+                    dynamicDataForEmail.put("name", party.getLabelForDynamicList());
+                    dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
+                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getEmail(),
+                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    );
+                } else {
+                    log.info("*** courtAdmin/courtBailiff: Sending post to applicant LiP");
+                    try {
+                        for (Element<PartyDetails> applicant :  caseData.getApplicants()) {
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData,
+                                applicant.getValue().getAddress(),
+                                applicant.getValue().getLabelForDynamicList(),
+                                authorisation,
+                                orderDocuments
+                            );
+                            bulkPrintOrderDetails.add(element(
+                                buildBulkPrintOrderDetail(
+                                    bulkPrintId,
+                                    String.valueOf(applicant.getValue().getPartyId()),
+                                    applicant.getValue().getLabelForDynamicList()
+                                )));
+                        }
+                    } catch (Exception e) {
+                        log.error("Error in sending orders to party address {}", party.getPartyId());
+                        log.error("Exception occurred in sending orders to party address", e);
+                    }
+                }
             }
         }
     }
