@@ -1287,6 +1287,9 @@ public class SendAndReplyService {
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
             log.info("----> selectedApplicantsOrRespondents 1287 size >>>> {}", selectedApplicantsOrRespondents.size());
             log.info("----> selectedApplicantsOrRespondents 1288 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
+
+            log.info("----> applicantAndRespondentInCase 1291 size >>>> {}", applicantAndRespondentInCase.size());
+            log.info("----> applicantAndRespondentInCase 1292 >>>> {}", objectMapper.writeValueAsString(applicantAndRespondentInCase));
             selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     applicantOrRespondent.getCode(),
@@ -1326,9 +1329,21 @@ public class SendAndReplyService {
     private List<Element<PartyDetails>> getApplicantAndRespondentList(CaseData caseData) {
         List<Element<PartyDetails>> applicantRespondentList = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            try {
+                log.info("caseData.getApplicants() : 1330 {}", objectMapper.writeValueAsString(caseData.getApplicants()));
+                log.info("caseData.getRespondents() : 1331 {}", objectMapper.writeValueAsString(caseData.getRespondents()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             applicantRespondentList.addAll(caseData.getApplicants());
             applicantRespondentList.addAll(caseData.getRespondents());
         } else {
+            try {
+                log.info("caseData.getApplicants FL401 : 1330 {}", objectMapper.writeValueAsString(caseData.getApplicantsFL401()));
+                log.info("caseData.getRespondents FL401 : 1331 {}", objectMapper.writeValueAsString(caseData.getRespondentsFL401()));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getApplicantsFL401().getPartyId()).value(
                 caseData.getApplicantsFL401()).build()));
             applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getRespondentsFL401().getPartyId()).value(
@@ -1356,10 +1371,12 @@ public class SendAndReplyService {
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
+        log.info(">>>>>>>>>>>>>>> Message sent using send grid  1374 >>>>>>>>>>");
     }
 
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails) {
+        log.info(">>>>>>>>>>>>>>> Preparing dynamic data for email 1379 >>>>>>>>>>");
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
