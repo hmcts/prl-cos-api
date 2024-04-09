@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,7 +38,6 @@ import java.util.Optional;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromCitizenDocument;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -151,9 +151,9 @@ public class CitizenAwpMapper {
         ));
     }
 
-    private List<Element<Document>> getDocuments(List<uk.gov.hmcts.reform.prl.models.c100rebuild.Document> uploadedApplicationForms) {
+    private List<Element<Document>> getDocuments(List<Document> uploadedApplicationForms) {
         return nullSafeCollection(uploadedApplicationForms).stream()
-            .map(document -> element(buildFromCitizenDocument(document)))
+            .map(ElementUtils::element)
             .toList();
     }
 
@@ -164,7 +164,7 @@ public class CitizenAwpMapper {
                     .uploadedBy(citizenAwpRequest.getPartyName())
                     .dateTimeUploaded(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .documentRelatedToCase(YesOrNo.Yes)
-                    .document(buildFromCitizenDocument(document))
+                    .document(document)
                     .build()
             )).toList();
     }

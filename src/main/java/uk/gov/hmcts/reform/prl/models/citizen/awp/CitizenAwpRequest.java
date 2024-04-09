@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 

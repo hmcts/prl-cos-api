@@ -52,12 +52,4 @@ public class Document {
             .build();
     }
 
-    public static Document buildFromCitizenDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document document) {
-        return Document.builder()
-            .documentUrl(document.getUrl())
-            .documentBinaryUrl(document.getBinaryUrl())
-            .documentFileName(document.getFilename())
-            .build();
-    }
-
 }
