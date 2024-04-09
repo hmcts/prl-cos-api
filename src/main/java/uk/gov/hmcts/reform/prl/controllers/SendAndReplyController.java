@@ -304,6 +304,9 @@ public class SendAndReplyController extends AbstractCallbackController {
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, authorisation);
+
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 

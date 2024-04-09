@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,16 +26,19 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -58,6 +62,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -73,6 +79,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     SendAndReplyService sendAndReplyService;
+
+    @Mock
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -323,6 +332,28 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
+    public void testSendOrReplyToMessagesMidEventForSendMessageNull() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .build())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .closedMessages(Collections.singletonList(element(message)))
+            .build();
+        UUID selectedValue = UUID.randomUUID();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        Assert.assertEquals("There are no messages to respond to.", response.getErrors().get(0));
+    }
+
+    @Test
     public void testSendOrReplyToMessagesMidEventForReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
@@ -446,6 +477,9 @@ public class SendAndReplyControllerTest {
     @Test
     public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
 
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
         Message newMessage = Message.builder()
             .senderEmail("sender@email.com")
             .recipientEmail("testRecipient1@email.com")
@@ -457,14 +491,9 @@ public class SendAndReplyControllerTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
+            .applicationsList(dynamicList)
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
             .messageAbout(MessageAboutEnum.OTHER)
-            .build();
-
-        caseDataMap = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(caseDataMap)
             .build();
 
         List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
@@ -488,6 +517,16 @@ public class SendAndReplyControllerTest {
                     .build())
             .build();
 
+        caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDataMap)
+            .build();
+
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND)).thenReturn(dynamicList.getValueCode());
+        when(uploadAdditionalApplicationService.updateAwpApplicationStatus(dynamicList.getValueCode(),
+                                                                           caseData.getAdditionalApplicationsBundle(),
+                                                                           AWP_STATUS_IN_REVIEW)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
 
@@ -800,6 +839,44 @@ public class SendAndReplyControllerTest {
             .id(123451L)
             .data(caseDataMap)
             .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        verify(sendAndReplyService).closeMessage(caseData);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitForReplyWithReplyMessageDynamicList() {
+
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        CaseData caseData = CaseData.builder().id(123451L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(dynamicList)
+            .build();
+
+        caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123451L)
+            .data(caseDataMap)
+            .build();
+
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY)).thenReturn(dynamicList.getValueCode());
+        when(uploadAdditionalApplicationService.updateAwpApplicationStatus(dynamicList.getValueCode(),
+                                                                           caseData.getAdditionalApplicationsBundle(),
+                                                                           AWP_STATUS_CLOSED)).thenReturn(null);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
