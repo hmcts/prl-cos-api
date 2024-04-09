@@ -416,10 +416,6 @@ public class SendAndReplyService {
                                                                                         caseReference
                                                                                     ))
                                                                                 .build())))
-                    .externalMessageTo(DynamicMultiSelectList.builder()
-                                           .listItems(
-                                               getExternalMessageRecipientEligibleList(caseData))
-                                           .build())
                     .build())
             .build();
     }
@@ -730,7 +726,7 @@ public class SendAndReplyService {
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
             .internalOrExternalSentTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-                                          ? getExternalSentTo(caseData.getSendOrReplyMessage().getExternalMessageTo()) : String.valueOf(
+                                          ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
                 (REPLY.equals(caseData.getChooseSendOrReply())
                     ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                     : message.getInternalMessageWhoToSendTo())))
@@ -749,7 +745,7 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .externalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(
-                message.getInternalOrExternalMessage()) ? caseData.getSendOrReplyMessage().getExternalMessageTo() : null)
+                message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
