@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class AwpPayment {
+public class CitizenAwpPayment {
 
     private String awpType;
     private String partType;

@@ -232,7 +232,7 @@ public class CitizenCaseUpdateService {
         Map<String, Object> caseDataMapToBeUpdated = startAllTabsUpdateDataContent.caseDataMap();
         //Update latest awp data after mapping into caseData
         caseDataMapToBeUpdated.put("additionalApplicationsBundle", updatedCaseData.getAdditionalApplicationsBundle());
-        caseDataMapToBeUpdated.put("awpPayments", updatedCaseData.getAwpPayments());
+        caseDataMapToBeUpdated.put("citizenAwpPayments", updatedCaseData.getCitizenAwpPayments());
 
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),

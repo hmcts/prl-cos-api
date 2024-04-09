@@ -96,7 +96,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
-import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -788,6 +788,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
-    @JsonProperty("awpPayments")
-    private List<Element<AwpPayment>> awpPayments;
+    /**
+     * PRL-4044 - This is store citizen awp payment data for temp & will be removed once awp is submitted successfully.
+     */
+    @JsonProperty("citizenAwpPayments")
+    private List<Element<CitizenAwpPayment>> citizenAwpPayments;
 }

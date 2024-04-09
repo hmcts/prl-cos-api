@@ -30,7 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 
 import java.time.Duration;
@@ -657,22 +657,23 @@ public class CaseUtils {
     }
 
 
-    public static Optional<Element<AwpPayment>> getAwpPaymentIfPresent(List<Element<AwpPayment>> awpPayments,
-                                              CreatePaymentRequest createPaymentRequest) {
-        log.info("Existing Awp payments {}", awpPayments);
-        if (isNotEmpty(awpPayments)) {
-            return awpPayments.stream()
-                .filter(awpPaymentElement -> isAwpPresent(awpPaymentElement.getValue(), createPaymentRequest))
+    public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
+                                                                                     CreatePaymentRequest createPaymentRequest) {
+        log.info("Existing citizen awp payments {}", citizenAwpPayments);
+        if (isNotEmpty(citizenAwpPayments)) {
+            return citizenAwpPayments.stream()
+                .filter(awpPaymentElement ->
+                            isCitizenAwpPaymentPresent(awpPaymentElement.getValue(), createPaymentRequest))
                 .findFirst();
         }
         return Optional.empty();
     }
 
-    public static boolean isAwpPresent(AwpPayment awpPayment,
-                                        CreatePaymentRequest createPaymentRequest) {
-        return awpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
-            && awpPayment.getPartType().equals(createPaymentRequest.getPartyType())
+    public static boolean isCitizenAwpPaymentPresent(CitizenAwpPayment citizenAwpPayment,
+                                                     CreatePaymentRequest createPaymentRequest) {
+        return citizenAwpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
+            && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && null != createPaymentRequest.getFeeType()
-            && awpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
+            && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
 }

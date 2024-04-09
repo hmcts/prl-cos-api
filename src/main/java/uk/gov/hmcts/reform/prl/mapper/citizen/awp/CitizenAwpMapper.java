@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -38,7 +38,7 @@ import java.util.Optional;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCitizenAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -62,7 +62,7 @@ public class CitizenAwpMapper {
             .build();
 
         log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
-        //Map awp payment details & then remove from in progress
+        //Map citizen awp payment details & then remove from in progress
         additionalApplicationsBundle = mapPaymentDetailsAndRemove(caseData,
                                                                   citizenAwpRequest,
                                                                   additionalApplicationsBundle);
@@ -81,16 +81,16 @@ public class CitizenAwpMapper {
     private AdditionalApplicationsBundle mapPaymentDetailsAndRemove(CaseData caseData,
                                                                     CitizenAwpRequest citizenAwpRequest,
                                                                     AdditionalApplicationsBundle additionalApplicationsBundle) {
-        Optional<Element<AwpPayment>> optionalAwpPaymentElement =
-            getAwpPaymentIfPresent(caseData.getAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
+        Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
+            getCitizenAwpPaymentIfPresent(caseData.getCitizenAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
         //update payment details
-        if (optionalAwpPaymentElement.isPresent()) {
+        if (optionalCitizenAwpPaymentElement.isPresent()) {
             additionalApplicationsBundle = additionalApplicationsBundle.toBuilder()
                 .payment(getPaymentDetails(citizenAwpRequest,
-                                           optionalAwpPaymentElement.get().getValue()))
+                                           optionalCitizenAwpPaymentElement.get().getValue()))
                 .build();
-            //Remove in progress awp payment details
-            caseData.getAwpPayments().remove(optionalAwpPaymentElement.get());
+            //Remove in progress citizen awp payment details
+            caseData.getCitizenAwpPayments().remove(optionalCitizenAwpPaymentElement.get());
         }
 
         return additionalApplicationsBundle;
@@ -187,15 +187,15 @@ public class CitizenAwpMapper {
     }
 
     private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
-                                      AwpPayment awpPayment) {
-        log.info("Inside citizen awp payment mapping {}", awpPayment);
+                                      CitizenAwpPayment citizenAwpPayment) {
+        log.info("Inside citizen awp payment mapping {}", citizenAwpPayment);
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
             .status(PaymentStatus.PAID.getDisplayedValue())
-            .fee(awpPayment.getFee())
-            .paymentServiceRequestReferenceNumber(awpPayment.getServiceReqRef())
-            .paymentReferenceNumber(awpPayment.getPaymentReqRef())
+            .fee(citizenAwpPayment.getFee())
+            .paymentServiceRequestReferenceNumber(citizenAwpPayment.getServiceReqRef())
+            .paymentReferenceNumber(citizenAwpPayment.getPaymentReqRef())
             .build();
     }
 

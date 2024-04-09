@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
@@ -35,7 +35,7 @@ import java.util.Optional;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCitizenAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -97,12 +97,17 @@ public class PaymentRequestService {
         log.info("Inside createPayment -> request {}", createPaymentRequest);
         log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificEvent(createPaymentRequest.getCaseId(),
-                                                           CITIZEN_CASE_UPDATE.getValue());
+            allTabService.getStartUpdateForSpecificEvent(
+                createPaymentRequest.getCaseId(),
+                CITIZEN_CASE_UPDATE.getValue()
+            );
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
         if (null == caseData) {
-            log.info("Retrieved caseData is null for caseId {}, please provide a valid caseId", createPaymentRequest.getCaseId());
+            log.info(
+                "Retrieved caseData is null for caseId {}, please provide a valid caseId",
+                createPaymentRequest.getCaseId()
+            );
             return null;
         }
         FeeResponse feeResponse = feeService.fetchFeeDetails(createPaymentRequest.getFeeType());
@@ -115,31 +120,40 @@ public class PaymentRequestService {
 
         if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
             log.info("Creating payment for C100");
-            return createPayment(authorization,
-                                 createPaymentRequest,
-                                 caseData.getPaymentServiceRequestReferenceNumber(),
-                                 caseData.getPaymentReferenceNumber(),
-                                 feeResponse);
+            return createPayment(
+                authorization,
+                createPaymentRequest,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getPaymentReferenceNumber(),
+                feeResponse
+            );
         } else {
-            log.info("Creating payment for AWP");
-            Optional<Element<AwpPayment>> optionalAwpPaymentElement = getAwpPaymentIfPresent(caseData.getAwpPayments(),
-                                                                              createPaymentRequest);
-            Element<AwpPayment> awpPaymentElement = optionalAwpPaymentElement.orElse(null);
-            log.info("Awp payment retrieved from caseData {}", awpPaymentElement);
+            log.info("*** Citizen awp payment ***");
+            Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
+                getCitizenAwpPaymentIfPresent(
+                    caseData.getCitizenAwpPayments(),
+                    createPaymentRequest
+                );
+            Element<CitizenAwpPayment> citizenAwpPaymentElement = optionalCitizenAwpPaymentElement.orElse(null);
+            log.info("Citizen awp payment retrieved from caseData {}", citizenAwpPaymentElement);
 
-            paymentResponse = createPayment(authorization,
-                                            createPaymentRequest,
-                                            null != awpPaymentElement ? awpPaymentElement.getValue().getServiceReqRef() : null,
-                                            null != awpPaymentElement ? awpPaymentElement.getValue().getPaymentReqRef() : null,
-                                            feeResponse);
+            paymentResponse = createPayment(
+                authorization,
+                createPaymentRequest,
+                null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getServiceReqRef() : null,
+                null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getPaymentReqRef() : null,
+                feeResponse
+            );
 
             //save service req & payment req ref into caseData
-            updateCaseDataWithPaymentDetails(caseData,
-                                             startAllTabsUpdateDataContent,
-                                             createPaymentRequest,
-                                             paymentResponse,
-                                             awpPaymentElement,
-                                             feeResponse);
+            updateCaseDataWithCitizenAwpPayments(
+                caseData,
+                startAllTabsUpdateDataContent,
+                createPaymentRequest,
+                paymentResponse,
+                citizenAwpPaymentElement,
+                feeResponse
+            );
 
             return paymentResponse;
         }
@@ -296,29 +310,30 @@ public class PaymentRequestService {
             );
     }
 
-    private void updateCaseDataWithPaymentDetails(CaseData caseData,
-                                                  StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
-                                                  CreatePaymentRequest createPaymentRequest,
-                                                  PaymentResponse paymentResponse,
-                                                  Element<AwpPayment> existingAwpElement,
-                                                  FeeResponse feeResponse) {
-        //Remove existing awp payment before adding/updating with new details
-        if (null != existingAwpElement) {
-            log.info("Removing existing awp payment from caseData");
-            caseData.getAwpPayments().remove(existingAwpElement);
+    private void updateCaseDataWithCitizenAwpPayments(CaseData caseData,
+                                                      StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
+                                                      CreatePaymentRequest createPaymentRequest,
+                                                      PaymentResponse paymentResponse,
+                                                      Element<CitizenAwpPayment> existingCitizenAwpPayment,
+                                                      FeeResponse feeResponse) {
+        //Remove existing citizen awp payment before adding/updating with new details
+        if (null != existingCitizenAwpPayment) {
+            log.info("Remove existing citizen awp payment from caseData");
+            caseData.getCitizenAwpPayments().remove(existingCitizenAwpPayment);
         }
-        log.info("*** Awp payments, after removing old payment data {}", caseData.getAwpPayments());
 
-        Element<AwpPayment> awpPayment = null != existingAwpElement
-            ? updateExistingAwpPayment(existingAwpElement, paymentResponse)
-            : createNewAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
-        log.info("Awp payment created/updated {}", awpPayment);
+        Element<CitizenAwpPayment> citizenAwpPayment = null != existingCitizenAwpPayment
+            ? updateCitizenAwpPayment(existingCitizenAwpPayment, paymentResponse)
+            : createCitizenAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
+        log.info("Citizen awp payment created/updated {}", citizenAwpPayment);
 
         //update case only if payment details not present already
-        List<Element<AwpPayment>> awpPayments = getAwpPayments(caseData, awpPayment);
-        log.info("*** New Awp payments data to be updated {}", awpPayments);
+        List<Element<CitizenAwpPayment>> citizenAwpPayments =
+            isNotEmpty(caseData.getCitizenAwpPayments())
+                ? caseData.getCitizenAwpPayments() : new ArrayList<>();
+        log.info("Citizen awp payments data to be updated {}", citizenAwpPayments);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-        updatedCaseDataMap.put("awpPayments", awpPayments);
+        updatedCaseDataMap.put("citizenAwpPayments", getCitizenAwpPayments(caseData, citizenAwpPayment));
 
         //update case
         allTabService.submitAllTabsUpdate(
@@ -330,30 +345,31 @@ public class PaymentRequestService {
         );
     }
 
-    private List<Element<AwpPayment>> getAwpPayments(CaseData caseData,
-                                                     Element<AwpPayment> awpPaymentElement) {
-        List<Element<AwpPayment>> awpPayments = new ArrayList<>();
-        if (isNotEmpty(caseData.getAwpPayments())) {
-            awpPayments.addAll(caseData.getAwpPayments());
-        }
-        awpPayments.add(awpPaymentElement);
+    private List<Element<CitizenAwpPayment>> getCitizenAwpPayments(CaseData caseData,
+                                                                   Element<CitizenAwpPayment> citizenAwpPayment) {
+        List<Element<CitizenAwpPayment>> citizenAwpPayments =
+            isNotEmpty(caseData.getCitizenAwpPayments())
+                ? caseData.getCitizenAwpPayments()
+                : new ArrayList<>();
 
-        return awpPayments;
+        citizenAwpPayments.add(citizenAwpPayment);
+
+        return citizenAwpPayments;
     }
 
-    private Element<AwpPayment> updateExistingAwpPayment(Element<AwpPayment> existingAwp,
-                                                PaymentResponse paymentResponse) {
+    private Element<CitizenAwpPayment> updateCitizenAwpPayment(Element<CitizenAwpPayment> existingCitizenAwpElement,
+                                                               PaymentResponse paymentResponse) {
         return element(
-            existingAwp.getValue().toBuilder()
+            existingCitizenAwpElement.getValue().toBuilder()
                 .paymentReqRef(paymentResponse.getPaymentReference())
                 .build()
         );
     }
 
-    private Element<AwpPayment> createNewAwpPayment(CreatePaymentRequest createPaymentRequest,
-                                           PaymentResponse paymentResponse,
-                                           FeeResponse feeResponse) {
-        return element(AwpPayment.builder()
+    private Element<CitizenAwpPayment> createCitizenAwpPayment(CreatePaymentRequest createPaymentRequest,
+                                                               PaymentResponse paymentResponse,
+                                                               FeeResponse feeResponse) {
+        return element(CitizenAwpPayment.builder()
                            .awpType(createPaymentRequest.getAwpType())
                            .partType(createPaymentRequest.getPartyType())
                            .feeType(createPaymentRequest.getFeeType().name())
