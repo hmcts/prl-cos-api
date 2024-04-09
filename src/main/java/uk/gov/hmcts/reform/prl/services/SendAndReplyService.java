@@ -1274,6 +1274,7 @@ public class SendAndReplyService {
 
     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
         try {
+            log.info("----> sendNotificationToExternalParties caseData 1277 >>>> {} ", objectMapper.writeValueAsString(caseData));
             //get the latest message
             Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
             log.info("----> sendNotificationToExternalParties 1274 >>>> {} ", message.getInternalOrExternalMessage());
