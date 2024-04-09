@@ -1633,7 +1633,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
+    public void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, Document coverLetter,
                                                      String servedParty) {

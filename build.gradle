@@ -593,7 +593,9 @@ def sonarExclusions = [
   "**uk/gov/hmcts/reform/prl/services/SendgridService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  "**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService"
+  "**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService",
+  "**uk/gov/hmcts/reform/prl/services/StmtOfServImplService",
+  "**uk/gov/hmcts/reform/prl/controllers/StatementOfServiceController"
 ]
 
 sonarqube {

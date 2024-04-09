@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -20,8 +21,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
@@ -47,6 +50,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSO
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -55,9 +59,13 @@ public class StmtOfServImplService {
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST = "Respondent has been served personally by Court,"
         + " hence no bulk print id is generated";
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL = "Respondent has been served personally by Court through email";
+    private static final String BY_POST = "By post";
+    public static final String UN_SERVED_RESPONDENT_PACK = "unServedRespondentPack";
+    public static final String STMT_OF_SERVICE_FOR_APPLICATION = "stmtOfServiceForApplication";
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final AllTabServiceImpl allTabService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -143,13 +151,13 @@ public class StmtOfServImplService {
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
                 );
-                caseDataUpdateMap.put("unServedRespondentPack", null);
+                caseDataUpdateMap.put(UN_SERVED_RESPONDENT_PACK, null);
             }
             elementList.add(element(recipient));
         }
 
         caseDataUpdateMap.put(
-            "stmtOfServiceForApplication",
+            STMT_OF_SERVICE_FOR_APPLICATION,
             appendStatementOfServiceToSoaTab(
                 caseData,
                 elementList
@@ -341,5 +349,78 @@ public class StmtOfServImplService {
                            CaseUtils.getPartyIdList(parties).stream()
                                .map(Element::getValue)
                                .toList());
+    }
+
+    public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
+        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
+        if (null != updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK)
+            && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())) {
+
+            List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
+            stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
+                                                      .citizenPartiesServedDate(sosObject.getPartiesServedDate())
+                                                      .citizenPartiesServedList(sosObject.getPartiesServed())
+                                                        .stmtOfServiceDocument(Document.builder()
+                                                                                   .documentFileName(sosObject.getCitizenSosDocs()
+                                                                                                         .getDocumentFileName())
+                                                                                   .documentUrl(sosObject.getCitizenSosDocs()
+                                                                                                    .getDocumentUrl())
+                                                                                   .documentHash(sosObject.getCitizenSosDocs()
+                                                                                                     .getDocumentHash())
+                                                                                   .build())
+                                                      .build()));
+
+            log.info("Statement of service list :: {}", stmtOfServiceforApplication);
+            updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
+            updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
+            if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
+            } else {
+                updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
+            }
+            List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument();
+            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+            updatedCaseData.getRespondents().forEach(respondent -> {
+                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    Document coverLetter = serviceOfApplicationService
+                        .generateCoverLetterBasedOnCaseAccess(startAllTabsUpdateDataContent.authorisation(), updatedCaseData, respondent,
+                                                                                                            Templates.PRL_LET_ENG_RE5
+                    );
+                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(updatedCaseData,
+                                                                                    startAllTabsUpdateDataContent.authorisation(),
+                                                                                    unwrapElements(packDocs),
+                                                                                    bulkPrintDetails,
+                                                                                    respondent,
+                                                                                    coverLetter,
+                                                                                    respondent.getValue().getLabelForDynamicList());
+                }
+            });
+
+            List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+            if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
+                finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
+            } else {
+                log.info("*** finalServedApplicationDetailsList is empty in case data ***");
+                finalServedApplicationDetailsList = new ArrayList<>();
+            }
+            finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder()
+                                                              .servedBy(userService.getUserDetails(authorisation).getFullName())
+                                                              .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                                              .modeOfService(BY_POST)
+                                                              .whoIsResponsible("Applicant Lip")
+                                                              .bulkPrintDetails(bulkPrintDetails).build()));
+            updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+        }
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            updatedCaseDataMap
+        );
     }
 }

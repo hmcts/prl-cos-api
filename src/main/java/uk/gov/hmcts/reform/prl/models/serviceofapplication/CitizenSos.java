@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 
 @Data
 @AllArgsConstructor
@@ -14,5 +13,5 @@ import java.util.List;
 public class CitizenSos {
     private final String partiesServedDate;
     private final String partiesServed;
-    private final List<String> citizenSosDocs;
+    private final Document citizenSosDocs;
 }

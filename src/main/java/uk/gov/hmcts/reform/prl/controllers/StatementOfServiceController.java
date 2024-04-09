@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 
@@ -103,6 +107,24 @@ public class StatementOfServiceController {
                 SOS_CONFIRMATION_HEADER).confirmationBody(
                 SOS_CONFIRMATION_BODY_PREFIX
             ).build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/save-statement-of-service-by-citizen", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata with citizen sos")
+    public ResponseEntity<Object> citizenSoaSubmit(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("eventId") String eventId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @ModelAttribute CitizenSos sosObject
+    ) throws JsonProcessingException {
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            stmtOfServImplService.saveCitizenSos(caseId, eventId, authorisation, sosObject);
+            return ResponseEntity.ok().build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
