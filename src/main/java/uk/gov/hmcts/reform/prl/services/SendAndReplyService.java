@@ -1366,7 +1366,7 @@ public class SendAndReplyService {
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
-                .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails))
+                .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments))
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
@@ -1388,19 +1388,30 @@ public class SendAndReplyService {
     }
 
 
-    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails) {
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
         log.info(">>>>>>>>>>>>>>> Preparing dynamic data for email 1379 >>>>>>>>>>");
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        // get selected Document size
+        int documentSize = 0;
+        if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
+            documentSize = allSelectedDocuments.size();
+        }
+        String messageAbout = "";
+        // get Message About
+        if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
+            messageAbout = message.getMessageAbout().getDisplayedValue().toLowerCase();
+        }
         String receiverFullName = getReceiverFullName(partyDetails);
-
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
         dynamicData.put("dashBoardLink", dashboardLink);
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("content", message.getMessageContent());
+        dynamicData.put("content", caseData.getSendOrReplyMessage().getSendMessageObject().getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("name", receiverFullName);
+        dynamicData.put("documentSize", documentSize);
+        dynamicData.put("messageAbout", messageAbout);
         return dynamicData;
     }
 
