@@ -1285,9 +1285,9 @@ public class SendAndReplyService {
 
             //Get list of Applicant & Respondent in Case
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-            String a1 = objectMapper.writeValueAsString(applicantAndRespondentInCase.get(0).getId());
+            String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
             selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-            log.info("----> applicant a1 1290 >>>> {}", a1);
+            log.info("----> 1111 applicant a1 1290 >>>> {}", a1);
 
             log.info("----> selectedApplicantsOrRespondents 1292 size >>>> {}", selectedApplicantsOrRespondents.size());
             log.info("----> selectedApplicantsOrRespondents 1293 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
