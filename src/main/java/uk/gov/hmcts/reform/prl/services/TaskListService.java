@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
@@ -143,7 +145,31 @@ public class TaskListService {
 
     public List<Event> getC100Events(CaseData caseData) {
 
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return new ArrayList<>(List.of(
+                CASE_NAME,
+                TYPE_OF_APPLICATION,
+                HEARING_URGENCY,
+                CHILD_DETAILS_REVISED,
+                APPLICANT_DETAILS,
+                RESPONDENT_DETAILS,
+                OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                CHILDREN_AND_APPLICANTS,
+                CHILDREN_AND_RESPONDENTS,
+                CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                ALLEGATIONS_OF_HARM_REVISED,
+                MIAM_POLICY_UPGRADE,
+                OTHER_PROCEEDINGS,
+                ATTENDING_THE_HEARING,
+                INTERNATIONAL_ELEMENT,
+                LITIGATION_CAPACITY,
+                WELSH_LANGUAGE_REQUIREMENTS,
+                VIEW_PDF_DOCUMENT,
+                SUBMIT_AND_PAY,
+                SUBMIT
+            ));
+        } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
                     CASE_NAME,
                     TYPE_OF_APPLICATION,

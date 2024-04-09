@@ -252,6 +252,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final MiamDetails miamDetails;
 
     /**
+     * MIAM.
+     */
+    @JsonUnwrapped
+    private final MiamPolicyUpgradeDetails miamPolicyUpgradeDetails;
+
+    /**
      * Allegations of harm.
      */
 
