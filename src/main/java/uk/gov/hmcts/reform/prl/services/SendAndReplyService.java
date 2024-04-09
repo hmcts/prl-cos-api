@@ -1287,7 +1287,7 @@ public class SendAndReplyService {
             List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
             String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
             selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-            log.info("----> 1111 applicant a1 1290 >>>> {}", a1);
+            log.info("----> 2222 applicant a1 1290 >>>> {}", a1);
 
             log.info("----> selectedApplicantsOrRespondents 1292 size >>>> {}", selectedApplicantsOrRespondents.size());
             log.info("----> selectedApplicantsOrRespondents 1293 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
@@ -1309,7 +1309,8 @@ public class SendAndReplyService {
                     PartyDetails partyDetails = party.get().getValue();
                     log.info("----> isSolicitorRepresentative(partyDetails) 1310 >>>> {}", isSolicitorRepresentative(partyDetails));
                     log.info("----> partyDetails.getContactPreferences() 1311 >>>> {}", partyDetails.getContactPreferences());
-                    if (isSolicitorRepresentative(partyDetails) || partyDetails.getContactPreferences().equals(ContactPreferences.email)) {
+                    if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                        .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
                         log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
                         try {
                             sendEmailNotification(caseData, partyDetails, authorisation);
@@ -1344,26 +1345,43 @@ public class SendAndReplyService {
         return applicantRespondentList;
     }
 
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorisation) throws IOException {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
+        log.info("sendEmailNotification isSolicitorRepresentative 1348 >>>> : {} ", isSolicitorRepresentative(partyDetails));
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
+
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         log.info("sendEmailNotification message 1333 >>>> : {} ", objectMapper.writeValueAsString(message));
         log.info("sendEmailNotification emailAddress 1334 >>>> : {} ", emailAddress);
-        List<Document> allSelectedDocuments = new ArrayList<>();
-        allSelectedDocuments.add(message.getSelectedDocument());
+        List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+
         if (null != message.getExternalMessageAttachDocs() && !message.getExternalMessageAttachDocs().isEmpty()) {
             message.getExternalMessageAttachDocs().forEach(element -> allSelectedDocuments.add(element.getValue()));
         }
-        log.info("sendEmailNotification allSelectedDocuments 1340 >>>> : {} ", objectMapper.writeValueAsString(allSelectedDocuments));
+        log.info("sendEmailNotification allSelectedDocuments 1360 size >>>> : {} ", allSelectedDocuments.size());
+        log.info("sendEmailNotification allSelectedDocuments 1361 >>>> : {} ", objectMapper.writeValueAsString(allSelectedDocuments));
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
-            authorisation,
+            authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
                 .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails))
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
         log.info(">>>>>>>>>>>>>>> Message sent using send grid  1374 >>>>>>>>>>");
+    }
+
+    private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
+        List<Document> selectedDocList = new ArrayList<>();
+        selectedDocList.add(getSelectedDocument(authorization, message.getSubmittedDocumentsList()));
+
+        List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
+            authorization,
+            caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
+        );
+        if (null != externalMessageDocList && !externalMessageDocList.isEmpty()) {
+            externalMessageDocList.forEach(element -> selectedDocList.add(element.getValue()));
+        }
+        return selectedDocList;
     }
 
 
