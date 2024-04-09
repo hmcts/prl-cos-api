@@ -21,8 +21,10 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagsRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -39,6 +41,9 @@ public class ReasonableAdjustmentsControllerTest {
 
     @Mock
     private CaseService caseService;
+
+    @Mock
+    private CitizenCaseUpdateService citizenCaseUpdateService;
 
     @Mock
     private AuthorisationService authorisationService;
@@ -155,6 +160,51 @@ public class ReasonableAdjustmentsControllerTest {
         ResponseEntity<Object> updateResponse = reasonableAdjustmentsController.updateCitizenRAflags(
             partyRequestFlags,
             eventId,
+            caseId,
+            authToken,
+            servAuthToken
+        );
+
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void testlanguageSupportCaseNotes() {
+        String caseId = "1234567891234567L";
+        LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder()
+            .languageSupportNotes("test").build();
+        Mockito.when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(citizenCaseUpdateService.addLanguageSupportCaseNotes(
+            caseId,
+            authToken,
+            languageSupportCaseNotesRequest
+        )).thenReturn(ResponseEntity.status(HttpStatus.OK).body("party flags updated"));
+
+        ResponseEntity<Object> updateResponse = reasonableAdjustmentsController.languageSupportCaseNotes(
+            languageSupportCaseNotesRequest,
+            caseId,
+            authToken,
+            servAuthToken
+        );
+
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void testlanguageSupportCaseNotesWhenAuthFails() {
+        String caseId = "1234567891234567L";
+        LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder()
+            .languageSupportNotes("test").build();
+        Mockito.when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(citizenCaseUpdateService.addLanguageSupportCaseNotes(
+            caseId,
+            authToken,
+            languageSupportCaseNotesRequest
+        )).thenReturn(ResponseEntity.status(HttpStatus.OK).body("party flags updated"));
+
+        ResponseEntity<Object> updateResponse = reasonableAdjustmentsController.languageSupportCaseNotes(
+            languageSupportCaseNotesRequest,
             caseId,
             authToken,
             servAuthToken
