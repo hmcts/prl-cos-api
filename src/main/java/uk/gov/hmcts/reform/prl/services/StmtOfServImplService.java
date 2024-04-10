@@ -362,7 +362,6 @@ public class StmtOfServImplService {
         log.info("Unserved respondent pack {}", updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK));
         if (null != updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK)
             && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())) {
-
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
             updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
@@ -390,29 +389,56 @@ public class StmtOfServImplService {
                                                                                         CaseData updatedCaseData,
                                                                                         List<Element<BulkPrintDetails>> bulkPrintDetails) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
-            .stream()
-            .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-            .toList();
+        List<Element<Document>> packDocs;
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
+            packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
+                .stream()
+                .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                .toList();
+            updatedCaseData.getRespondents().forEach(respondent -> {
+                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    Document coverLetter = serviceOfApplicationService
+                        .generateCoverLetterBasedOnCaseAccess(authorization,
+                                                              updatedCaseData, respondent,
+                                                              Templates.PRL_LET_ENG_RE7
+                        );
+                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
+                        updatedCaseData,
+                        authorization,
+                        unwrapElements(packDocs),
+                        bulkPrintDetails,
+                        respondent,
+                        coverLetter,
+                        respondent.getValue().getLabelForDynamicList());
+                }
+            });
+        } else {
+            packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
+                .stream()
+                .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                .toList();
+                if (!CaseUtils.hasLegalRepresentation(updatedCaseData.getRespondentsFL401())) {
+                    Document coverLetter = serviceOfApplicationService
+                        .generateCoverLetterBasedOnCaseAccess(authorization,
+                                                              updatedCaseData,
+                                                              element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                                                                      updatedCaseData.getRespondentsFL401()),
+                                                              Templates.PRL_LET_ENG_RE7
+                        );
+                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
+                        updatedCaseData,
+                        authorization,
+                        unwrapElements(packDocs),
+                        bulkPrintDetails,
+                        element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                                updatedCaseData.getRespondentsFL401()),
+                        coverLetter,
+                        updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
+                }
+        }
 
         log.info("pack docs {}", packDocs);
-        updatedCaseData.getRespondents().forEach(respondent -> {
-            if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                Document coverLetter = serviceOfApplicationService
-                    .generateCoverLetterBasedOnCaseAccess(authorization,
-                                                          updatedCaseData, respondent,
-                                                          Templates.PRL_LET_ENG_RE7
-                );
-                serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
-                    updatedCaseData,
-                    authorization,
-                    unwrapElements(packDocs),
-                    bulkPrintDetails,
-                    respondent,
-                    coverLetter,
-                    respondent.getValue().getLabelForDynamicList());
-            }
-        });
+
 
         if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
@@ -434,11 +460,17 @@ public class StmtOfServImplService {
                                                     List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication) {
         String[] partiesList = sosObject.getPartiesServed().split(",");
         List<String> partiesServed = new ArrayList<>();
-        updatedCaseData.getRespondents().forEach(respondent -> {
-            if (Arrays.asList(partiesList).contains(respondent.getId().toString())) {
-                partiesServed.add(respondent.getValue().getLabelForDynamicList());
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
+            updatedCaseData.getRespondents().forEach(respondent -> {
+                if (Arrays.asList(partiesList).contains(respondent.getId().toString())) {
+                    partiesServed.add(respondent.getValue().getLabelForDynamicList());
+                }
+            });
+        } else {
+            if (Arrays.asList(partiesList).contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
+                partiesServed.add(updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
             }
-        });
+        }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat targetFormat = new SimpleDateFormat("DD MMM YYYY");
         try {
