@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -70,6 +71,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalE
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamPolicyUpgrade;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamPolicyUpgradeExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
@@ -138,8 +141,13 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            applicationTab.put("miamTable", getMiamTable(caseData));
-            applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
+            if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+                applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
+                applicationTab.put("miamPolicyUpgradeExemptionsTable", getMiamExemptionsTableForPolicyUpgrade(caseData));
+            } else {
+                applicationTab.put("miamTable", getMiamTable(caseData));
+                applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
+            }
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
             applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
@@ -595,6 +603,86 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> getMiamTable(CaseData caseData) {
         Miam miam = objectMapper.convertValue(caseData, Miam.class);
         return toMap(miam);
+    }
+
+    public Map<String, Object> getMiamPolicyUpgradeTable(CaseData caseData) {
+        MiamPolicyUpgrade miam = objectMapper.convertValue(caseData, MiamPolicyUpgrade.class);
+        return toMap(miam);
+    }
+
+    public Map<String, Object> getMiamExemptionsTableForPolicyUpgrade(CaseData caseData) {
+        Optional<List<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum>> miamExemptionsCheck
+            = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons());
+        String reasonsForMiamExemption;
+        if (miamExemptionsCheck.isPresent()) {
+            reasonsForMiamExemption = caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons()
+                .stream().map(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        } else {
+            reasonsForMiamExemption = "";
+        }
+
+        String domesticAbuseEvidence;
+        Optional<List<MiamDomesticAbuseChecklistEnum>> domesticAbuseCheck
+            = ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                             .getMpuDomesticAbuseEvidences());
+        if (domesticAbuseCheck.isPresent()) {
+            domesticAbuseEvidence = caseData.getMiamPolicyUpgradeDetails()
+                .getMpuDomesticAbuseEvidences()
+                .stream().map(MiamDomesticAbuseChecklistEnum::getDisplayedValue)
+                .collect(Collectors.joining("\n"));
+        } else {
+            domesticAbuseEvidence = "";
+        }
+
+        String urgencyEvidence;
+        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum> urgencyCheck =
+            ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                           .getMpuUrgencyReason());
+        if (urgencyCheck.isPresent()) {
+            urgencyEvidence = urgencyCheck.get().getDisplayedValue();
+        } else {
+            urgencyEvidence = "";
+        }
+
+        String previousAttendenceEvidence;
+        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum> prevCheck =
+            ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason());
+        if (prevCheck.isPresent()) {
+            previousAttendenceEvidence = prevCheck.get().getDisplayedValue();
+        } else {
+            previousAttendenceEvidence = "";
+        }
+
+        String otherGroundsEvidence;
+        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum> othCheck =
+            ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons());
+        if (othCheck.isPresent()) {
+            otherGroundsEvidence = othCheck.get().getDisplayedValue();
+        } else {
+            otherGroundsEvidence = "";
+        }
+
+        String childEvidence;
+        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum> childCheck =
+            ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason());
+        if (childCheck.isPresent()) {
+            childEvidence = childCheck.get().getDisplayedValue();
+        } else {
+            childEvidence = "";
+        }
+
+        MiamPolicyUpgradeExemptions miamExemptions = MiamPolicyUpgradeExemptions.builder()
+            .mpuReasonsForMiamExemption(reasonsForMiamExemption)
+            .mpuDomesticAbuseEvidence(domesticAbuseEvidence)
+            .mpuChildProtectionEvidence(childEvidence)
+            .mpuUrgencyEvidence(urgencyEvidence)
+            .mpuPreviousAttendenceEvidence(previousAttendenceEvidence)
+            .mpuOtherGroundsEvidence(otherGroundsEvidence)
+            .build();
+
+        return toMap(miamExemptions);
+
     }
 
     public Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
