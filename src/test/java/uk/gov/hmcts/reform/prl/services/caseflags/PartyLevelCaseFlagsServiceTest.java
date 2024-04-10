@@ -76,14 +76,16 @@ public class PartyLevelCaseFlagsServiceTest {
             .firstName("")
             .lastName("")
             .email("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
         PartyDetails partyDetailsRespondent = PartyDetails.builder()
             .firstName("")
             .lastName("")
             .email("")
-            .representativeFirstName("")
-            .representativeLastName("")
+            .representativeFirstName("John")
+            .representativeLastName("Smith")
             .user(User.builder().email("").idamId("").build())
             .build();
 
@@ -100,6 +102,8 @@ public class PartyLevelCaseFlagsServiceTest {
             .firstName("")
             .lastName("")
             .email("")
+            .representativeFirstName("")
+            .representativeLastName("")
             .user(User.builder().email("").idamId("").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("last name")
@@ -140,7 +144,7 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testGenerateAndStoreC100CaseFlagsForProvidedCaseIdWhenRepresentedByParty() {
         EventRequestData eventRequestData = EventRequestData.builder().build();
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUser))
-                .thenReturn(eventRequestData);
+            .thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails).build();
         when(coreCaseDataService.startUpdate(authorisation, eventRequestData, CASE_ID,
