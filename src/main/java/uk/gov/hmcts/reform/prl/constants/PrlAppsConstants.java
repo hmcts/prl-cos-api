@@ -764,7 +764,6 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
-    public static final String CAFCASS_OR_CAFCASS_CYMRU = "CAFCASS or CAFCASS Cymru";
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
