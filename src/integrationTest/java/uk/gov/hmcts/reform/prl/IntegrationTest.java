@@ -11,6 +11,7 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.prl.models.CreateUserRequest;
 import uk.gov.hmcts.reform.prl.models.UserCode;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @Slf4j
 @RunWith(SerenityRunner.class)
 @ContextConfiguration(classes = {ServiceContextConfiguration.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
