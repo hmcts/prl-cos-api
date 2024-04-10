@@ -118,7 +118,7 @@ public class StatementOfServiceController {
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @ModelAttribute CitizenSos sosObject
+        @RequestBody CitizenSos sosObject
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
