@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import java.util.Map;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class SendAndReplyControllerIT {
+public class SendAndReplyControllerIT extends IntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired

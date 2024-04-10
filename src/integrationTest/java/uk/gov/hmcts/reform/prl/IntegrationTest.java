@@ -26,7 +26,7 @@ import java.util.UUID;
 @Slf4j
 @RunWith(SerenityRunner.class)
 @ContextConfiguration(classes = {ServiceContextConfiguration.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")

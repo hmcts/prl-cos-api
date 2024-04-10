@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, CaseApplicationReponseControllerIntegrationTest.class})
-public class CaseApplicationReponseControllerIntegrationTest {
+public class CaseApplicationReponseControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, AddCafcassOfficerControllerIntegrationTest.class})
-public class AddCafcassOfficerControllerIntegrationTest {
+public class AddCafcassOfficerControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;

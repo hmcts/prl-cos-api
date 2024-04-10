@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.Application;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ManageDocumentIntegrationTest.class, Application.class})
-public class ManageDocumentIntegrationTest {
+public class ManageDocumentIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;

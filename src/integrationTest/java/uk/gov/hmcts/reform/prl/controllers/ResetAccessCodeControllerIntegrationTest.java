@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, ResetAccessCodeControllerIntegrationTest.class})
-public class ResetAccessCodeControllerIntegrationTest {
+public class ResetAccessCodeControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
