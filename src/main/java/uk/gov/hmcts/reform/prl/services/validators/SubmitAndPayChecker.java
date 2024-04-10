@@ -116,9 +116,11 @@ public class SubmitAndPayChecker implements EventChecker {
             }
         }
         boolean optionalFinished;
+        log.info("list of mandatory events {}", mandatoryEvents);
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(caseData) || e.getValue().hasMandatoryCompleted(caseData);
             if (!mandatoryFinished) {
+                log.info("Mandatory Event that has failed is {}", e);
                 return false;
             }
         }
@@ -126,9 +128,12 @@ public class SubmitAndPayChecker implements EventChecker {
         for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
             optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData));
             if (!optionalFinished) {
+                log.info("Optional Event that has failed is {}", e);
                 return false;
             }
         }
+
+        log.info("All events completed successfully");
         return true;
     }
 
@@ -140,7 +145,8 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
         log.info("TASK_LIST_VERSION" + caseData.getTaskListVersion());
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
             mandatoryEvents.put(
                 CHILDREN_AND_APPLICANTS,
