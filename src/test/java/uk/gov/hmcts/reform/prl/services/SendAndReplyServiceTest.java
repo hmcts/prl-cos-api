@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +51,8 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -60,6 +63,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -80,7 +84,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,8 +112,14 @@ public class SendAndReplyServiceTest {
     @Mock
     EmailService emailService;
 
+    @Mock
+    SendgridService sendgridService;
+
     @Value("${xui.url}")
     private String manageCaseUrl;
+
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
 
     String auth = "auth-token";
     UserDetails userDetails;
@@ -1303,32 +1313,6 @@ public class SendAndReplyServiceTest {
     @Test
     public void testSendNotificationToExternalParties() {
 
-        final EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + "/" + caseData.getId())
-            .build();
-
-
-        Message newMessage = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-            .messageAbout(MessageAboutEnum.OTHER)
-            .build();
-
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
-        msgListWithNewMessage.add(element(newMessage));
-
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .representativeFirstName("Abc")
@@ -1341,7 +1325,7 @@ public class SendAndReplyServiceTest {
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
@@ -1403,44 +1387,19 @@ public class SendAndReplyServiceTest {
                     .messages(messages)
                     .build())
             .build();
-
         sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
         assertNull(null);
     }
 
     @Test
-    public void testSendEmailNotificationToExternalParties() {
-
-        final EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + "/" + caseData.getId())
-            .build();
-
-
-        Message newMessage = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-            .messageAbout(MessageAboutEnum.OTHER)
-            .build();
-
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
-        msgListWithNewMessage.add(element(newMessage));
+    public void testSendEmailNotificationToExternalPartiesC100Case() throws IOException {
 
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .representativeFirstName("Abc")
             .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
             .gender(Gender.male)
             .email("abc@xyz.com")
             .solicitorEmail("testSolicitor@xyz.com")
@@ -1462,13 +1421,15 @@ public class SendAndReplyServiceTest {
             .partyId(UUID.randomUUID())
             .representativeFirstName("Abc")
             .representativeLastName("Xyz")
+            .firstName("Respondent firstname")
+            .lastName("Respondent lastName")
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
-            .contactPreferences(ContactPreferences.post)
+            .contactPreferences(ContactPreferences.email)
             .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -1487,7 +1448,7 @@ public class SendAndReplyServiceTest {
 
         DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
             .code(wrappedRespondents.getId().toString())
-            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .label(respondent.getFirstName() + " " + respondent.getLastName())
             .build();
 
         DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
@@ -1507,6 +1468,7 @@ public class SendAndReplyServiceTest {
                                            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
                                            .messageAbout(MessageAboutEnum.APPLICATION)
                                            .messageContent("some msg content")
+                                           .messageSubject("message subject")
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
@@ -1514,32 +1476,22 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
         sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
-        assertNull(null);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );
     }
 
     @Test
-    public void testSendEmailNotificationToExternalPartiesForFL401Case() {
-
-        Message newMessage = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-            .messageAbout(MessageAboutEnum.OTHER)
-            .build();
-
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
-        msgListWithNewMessage.add(element(newMessage));
-
+    public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
             .representativeFirstName("Abc")
@@ -1590,6 +1542,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
+            .applicantCaseName("case name a")
             .caseTypeOfApplication("FL401")
             .replyMessageDynamicList(DynamicList.builder().build())
             .applicantsFL401(applicant)
@@ -1601,15 +1554,66 @@ public class SendAndReplyServiceTest {
                                            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
                                            .messageAbout(MessageAboutEnum.APPLICATION)
                                            .messageContent("some msg content")
+                                           .messageSubject("message subject")
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
                     .build())
             .build();
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );
+    }
 
+    @NotNull
+    private Map<String, Object> getEmailDynamicData(CaseData caseData) {
+        Map<String, Object> dynamicData = new HashMap<>();
+        dynamicData.put("caseReference", "12345");
+        dynamicData.put("dashBoardLink", manageCaseUrl+"/"+ caseData.getId());
+        dynamicData.put("subject", "message subject");
+        dynamicData.put("content", "some msg content");
+        dynamicData.put("attachmentType", "pdf");
+        dynamicData.put("disposition", "attachment");
+        dynamicData.put("name", "Abc Xyz");
+        dynamicData.put("documentSize", 0);
+        dynamicData.put("messageAbout", "an application");
+        dynamicData.put("caseName", caseData.getApplicantCaseName());
+        return dynamicData;
+    }
+
+    @Test
+    public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() throws IOException {
+    CaseData caseData = CaseData.builder().id(12345L)
+        .chooseSendOrReply(SendOrReply.SEND)
+        .caseTypeOfApplication("C100")
+        .replyMessageDynamicList(DynamicList.builder().build())
+        .applicants(null)
+        .respondents(null)
+        .sendOrReplyMessage(
+            SendOrReplyMessage.builder()
+                .sendMessageObject(Message.builder()
+                                       .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                       .externalMessageWhoToSendTo(null)
+                                       .messageAbout(MessageAboutEnum.APPLICATION)
+                                       .messageContent("some msg content")
+                                       .build()
+                )
+                .respondToMessage(YesOrNo.No)
+                .messages(messages)
+                .build())
+        .build();
         sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
         assertNull(null);
-    }
+}
 
 }

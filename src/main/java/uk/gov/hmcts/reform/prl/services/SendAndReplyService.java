@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1275,61 +1274,41 @@ public class SendAndReplyService {
     }
 
     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
-        try {
-            log.info("----> sendNotificationToExternalParties caseData 1277 >>>>> {} ", objectMapper
-                .writeValueAsString(caseData.getSendOrReplyMessage()));
-            //get the latest message
-            Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-            log.info("----> sendNotificationToExternalParties 1274 >>>> {} ", message.getInternalOrExternalMessage());
-            // Return if not external message
-            if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-                return;
-            }
-            //Get Selected Applicant Respondent
-            List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
+        //get the latest message
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        // Return if not external message
+        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            return;
+        }
+        //Get Selected Applicant Respondent
+        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
 
-            //Get list of Applicant & Respondent in Case
-            List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
+        //Get list of Applicant & Respondent in Case
+        List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
+        /*
             String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
             selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-            log.info("----> 2222 applicant a1 1290 >>>> {}", a1);
+        */
+        selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
+            Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                applicantOrRespondent.getCode(),
+                applicantAndRespondentInCase
+            );
 
-            log.info("----> selectedApplicantsOrRespondents 1292 size >>>> {}", selectedApplicantsOrRespondents.size());
-            log.info("----> selectedApplicantsOrRespondents 1293 >>>> {}", objectMapper.writeValueAsString(selectedApplicantsOrRespondents));
-
-            log.info("----> applicantAndRespondentInCase 1296 size >>>> {}", applicantAndRespondentInCase.size());
-            log.info("----> applicantAndRespondentInCase 1297 >>>> {}", objectMapper.writeValueAsString(applicantAndRespondentInCase));
-            selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
-                Optional<Element<PartyDetails>> party = CaseUtils.getParty(
-                    applicantOrRespondent.getCode(),
-                    applicantAndRespondentInCase
-                );
-                try {
-                    log.info("----> sendNotificationToExternalParties party.isPresent() 1303 >>>> {}", objectMapper.writeValueAsString(party));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-                log.info("----> sendNotificationToExternalParties party.isPresent() 1307 >>>> {}", party.isPresent());
-                if (party.isPresent()) {
-                    PartyDetails partyDetails = party.get().getValue();
-                    log.info("----> isSolicitorRepresentative(partyDetails) 1310 >>>> {}", isSolicitorRepresentative(partyDetails));
-                    log.info("----> partyDetails.getContactPreferences() 1311 >>>> {}", partyDetails.getContactPreferences());
-                    if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
-                        .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
-                        log.info("----> If partyDetails.getSolicitorEmail() {}", partyDetails.getSolicitorEmail());
-                        try {
-                            sendEmailNotification(caseData, partyDetails, authorisation);
-                        } catch (Exception e) {
-                            log.info("----> Error sendEmailNotification {} | {}", e, e.getMessage());
-                        }
-                    } else {
-                        log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
+            if (party.isPresent()) {
+                PartyDetails partyDetails = party.get().getValue();
+                if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                    .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                    try {
+                        sendEmailNotification(caseData, partyDetails, authorisation);
+                    } catch (Exception e) {
+                        log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
                     }
+                } else {
+                    log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
                 }
-            });
-        } catch (Exception e) {
-            log.error("Case id {} ", caseData.getId(), e);
-        }
+            }
+        });
     }
 
     private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
@@ -1351,33 +1330,29 @@ public class SendAndReplyService {
     }
 
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
-        log.info("sendEmailNotification isSolicitorRepresentative 1348 >>>> : {} ", isSolicitorRepresentative(partyDetails));
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        log.info("sendEmailNotification message 1333 >>>> : {} ", objectMapper.writeValueAsString(message));
-        log.info("sendEmailNotification emailAddress 1334 >>>> : {} ", emailAddress);
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
 
-        if (null != message.getExternalMessageAttachDocs() && !message.getExternalMessageAttachDocs().isEmpty()) {
-            message.getExternalMessageAttachDocs().forEach(element -> allSelectedDocuments.add(element.getValue()));
-        }
-        log.info("sendEmailNotification allSelectedDocuments 1360 size >>>> : {} ", allSelectedDocuments.size());
-        log.info("sendEmailNotification allSelectedDocuments 1361 >>>> : {} ", objectMapper.writeValueAsString(allSelectedDocuments));
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
-                .dynamicTemplateData(getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments))
+                .dynamicTemplateData(dynamicDataForEmail)
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
                 .build());
-        log.info(">>>>>>>>>>>>>>> Message sent using send grid  1374 >>>>>>>>>>");
     }
 
     private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
         List<Document> selectedDocList = new ArrayList<>();
-        selectedDocList.add(getSelectedDocument(authorization, message.getSubmittedDocumentsList()));
+
+        Document selectedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
+        if (null != selectedDoc) {
+            selectedDocList.add(selectedDoc);
+        }
 
         List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
             authorization,
@@ -1391,7 +1366,6 @@ public class SendAndReplyService {
 
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
-        log.info(">>>>>>>>>>>>>>> Preparing dynamic data for email 1379 >>>>>>>>>>");
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         // get selected Document size
         int documentSize = 0;
@@ -1408,7 +1382,7 @@ public class SendAndReplyService {
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
         dynamicData.put("dashBoardLink", dashboardLink);
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("content", caseData.getSendOrReplyMessage().getSendMessageObject().getMessageContent());
+        dynamicData.put("content", message.getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("name", receiverFullName);
@@ -1419,10 +1393,10 @@ public class SendAndReplyService {
 
     private String getReceiverFullName(PartyDetails partyDetails) {
         String receiverFullName = "";
-        if (!isSolicitorRepresentative(partyDetails)) {
-            receiverFullName = partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName();
-        } else {
+        if (isSolicitorRepresentative(partyDetails)) {
             receiverFullName = partyDetails.getRepresentativeFirstName() + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName();
+        } else {
+            receiverFullName = partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName();
         }
         return receiverFullName;
     }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -266,12 +265,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                             AWP_STATUS_IN_REVIEW
                         )
                 );
-            }
-            try {
-                String s1 = objectMapper.writeValueAsString(caseData.getSendOrReplyMessage().getSendMessageObject());
-                log.info("Message >>> 272 : {} ", s1);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
             }
 
             //send emails in case of sending to others with emails
