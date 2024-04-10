@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @AllArgsConstructor
