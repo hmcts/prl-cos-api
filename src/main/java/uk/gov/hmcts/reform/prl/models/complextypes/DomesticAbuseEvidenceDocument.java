@@ -10,11 +10,11 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @Builder(toBuilder = true)
 public class DomesticAbuseEvidenceDocument {
 
-    @JsonProperty("domesticAbuseEvidenceDocument")
-    private final Document domesticAbuseEvidenceDocument;
+    @JsonProperty("domesticAbuseDocument")
+    private final Document domesticAbuseDocument;
 
     @JsonCreator
-    public DomesticAbuseEvidenceDocument(Document domesticAbuseEvidenceDocument) {
-        this.domesticAbuseEvidenceDocument = domesticAbuseEvidenceDocument;
+    public DomesticAbuseEvidenceDocument(Document domesticAbuseDocument) {
+        this.domesticAbuseDocument = domesticAbuseDocument;
     }
 }
