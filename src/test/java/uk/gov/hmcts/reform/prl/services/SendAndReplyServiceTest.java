@@ -1329,6 +1329,91 @@ public class SendAndReplyServiceTest {
         sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
     }
 
+    @Test
+    public void testSendPostNotificationToExternalPartiesForFL401()  throws Exception {
+
+        Message newMessage = getMessage();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = getApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = getRespondent();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
+            .id(UUID.randomUUID())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicList).build())
+            .build();
+        // need to remove applicants and respondent once XUI bug fix.
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("FL401")
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantsFL401(getApplicant())
+            .respondentsFL401(getRespondent())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
+                    .build())
+            .build();
+
+
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(
+                uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().originalDocumentName("doc1")
+                    .build());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.getTemplate(
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+        when(dgsService.generateDocument(
+            eq(auth), eq(String.valueOf(caseData.getId())), eq("abc_template"), anyMap()))
+            .thenReturn(getGeneratedDocumentInfo());
+        when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(UUID.randomUUID());
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
+    }
+
     private Message getMessage() {
 
         DynamicList dynamicList = DynamicList.builder()

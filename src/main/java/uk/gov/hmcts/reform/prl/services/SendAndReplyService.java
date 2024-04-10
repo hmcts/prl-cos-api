@@ -135,6 +135,9 @@ public class SendAndReplyService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
+
     private final HearingDataService hearingDataService;
 
     private final RefDataService refDataService;
@@ -1385,12 +1388,13 @@ public class SendAndReplyService {
             if (null != partyDetails && null != partyDetails.getAddress()
                 && null != partyDetails.getAddress().getAddressLine1()) {
 
+                List<Document> attachedDocs = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+
                 docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
                                        partyDetails.getLabelForDynamicList()));
-                docs.add(getMessageDocument(authorization, caseData, message, partyDetails.getAddress(),
-                                            partyDetails.getLabelForDynamicList()));
+                docs.add(getMessageDocument(authorization, caseData, message, partyDetails, attachedDocs));
 
-                docs.addAll(getExternalMessageSelectedDocumentList(caseData, authorization, message));
+                docs.addAll(attachedDocs);
 
                 bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
             } else {
@@ -1426,11 +1430,12 @@ public class SendAndReplyService {
         return selectedDocList;
     }
 
-    private Document getMessageDocument(String authorization, CaseData caseData, Message message, Address address, String name) {
+    private Document getMessageDocument(String authorization, CaseData caseData, Message message,
+                                        PartyDetails partyDetails, List<Document> attachedDocs) {
 
         try {
             return DocumentUtils.toDocument(
-                getMessageLetterGeneratedDocInfo(caseData, authorization, address, name, message));
+                getMessageLetterGeneratedDocInfo(caseData, authorization, partyDetails, message, attachedDocs));
         } catch (Exception e) {
             log.error("Failed to generate message document {}", e);
         }
@@ -1449,19 +1454,26 @@ public class SendAndReplyService {
     }
 
     private GeneratedDocumentInfo getMessageLetterGeneratedDocInfo(
-        CaseData caseData, String auth, Address address, String name, Message message) throws Exception {
+        CaseData caseData, String auth, PartyDetails partyDetails, Message message, List<Document> attachedDocs) throws Exception {
 
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("partyName", name);
-        dataMap.put("partyAddress", address);
+        dataMap.put("partyName", partyDetails.getLabelForDynamicList());
+        dataMap.put("partyAddress", partyDetails.getAddress());
         dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("message", message);
-        dataMap.put("isDocumentExist", null != message.getExternalMessageAttachDocs()
-            || null != message.getSelectedDocument() ? true : false);
-        dataMap.put("urlLink", message);
+        dataMap.put("messageContent", message.getMessageContent());
+        dataMap.put("documentSize", isNotEmpty(attachedDocs) ? attachedDocs.size() : 0);
 
-        return getGeneratedDocumentInfo(caseData, auth, DOCUMENT_SEND_REPLY_MESSAGE, address, dataMap);
+        String messageAbout = "";
+        if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
+            messageAbout = message.getMessageAbout().getDisplayedValue().toLowerCase();
+        }
+        dataMap.put("messageAbout", messageAbout);
+
+        String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
+        dataMap.put("urlLink", dashboardLink);
+
+        return getGeneratedDocumentInfo(caseData, auth, DOCUMENT_SEND_REPLY_MESSAGE, partyDetails.getAddress(), dataMap);
     }
 
     private GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(
@@ -1549,5 +1561,9 @@ public class SendAndReplyService {
         }
 
         return applicantsRespondentInCase;
+    }
+
+    private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
+        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 }
