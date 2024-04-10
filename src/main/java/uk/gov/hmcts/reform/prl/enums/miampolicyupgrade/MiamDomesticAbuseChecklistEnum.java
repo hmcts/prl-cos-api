@@ -157,8 +157,8 @@ public enum MiamDomesticAbuseChecklistEnum {
     @JsonProperty("miamDomesticAbuseChecklistEnum_Value_22")
     miamDomesticAbuseChecklistEnum_Value_22(
         "miamDomesticAbuseChecklistEnum_Value_22",
-        "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence "
-            + "by another prospective party in the form of abuse which relates to financial matters. "
+        "Evidence which demonstrates that a prospective party has been, or is at risk of being,"
+            + " the victim of domestic abuse by another prospective party in the form of abuse which relates to financial matters."
     );
 
     private final String id;
