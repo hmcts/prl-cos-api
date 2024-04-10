@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -151,7 +153,7 @@ public class PartyLevelCaseFlagsServiceTest {
                                              true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
-        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+        when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
                  .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
@@ -172,7 +174,7 @@ public class PartyLevelCaseFlagsServiceTest {
                                              true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
-        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+        when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
                  .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
@@ -193,7 +195,7 @@ public class PartyLevelCaseFlagsServiceTest {
                                              true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataSolicitorRepresent);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
-        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+        when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
                  .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
@@ -214,7 +216,7 @@ public class PartyLevelCaseFlagsServiceTest {
                                              true)).thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataFl401SolicitorRepresent);
         CaseDataContent caseDataContent = CaseDataContent.builder().build();
-        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+        when(coreCaseDataService.createCaseDataContent(any(), any()))
             .thenReturn(caseDataContent);
         when(coreCaseDataService
                  .submitUpdate(authorisation, eventRequestData, caseDataContent, CASE_ID, true))
@@ -228,8 +230,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testIndividualCaseFlagForC100CaseWhenPartiesRepresent() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseData);
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
@@ -243,8 +245,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testIndividualCaseFlagForFl401CaseWhenPartiesRepresent() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataFl401);
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
@@ -257,8 +259,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testIndividualCaseFlagForC100CaseWhenSolicitorRepresent() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorRepresent);
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
@@ -272,8 +274,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testIndividualCaseFlagForFl401CaseWhenSolicitorRepresent() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataFl401SolicitorRepresent);
         CaseData caseData =  partyLevelCaseFlagsService
             .generateIndividualPartySolicitorCaseFlags(
@@ -286,8 +288,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testGenerateC100AllPartyCaseFlags() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorRepresent);
         CaseData caseData = CaseData.builder().build();
         caseData =  partyLevelCaseFlagsService
@@ -301,8 +303,8 @@ public class PartyLevelCaseFlagsServiceTest {
     public void testGenerateC100AllPartyCaseFlagsForSolicitor() {
 
         when(partyLevelCaseFlagsGenerator
-                 .generatePartyFlags(Mockito.any(),
-                                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
+                 .generatePartyFlags(any(),
+                                     any(), any(), any(), Mockito.anyBoolean(), any()))
             .thenReturn(caseDataSolicitorRepresent);
 
         CaseData caseData = CaseData.builder().build();
@@ -311,5 +313,12 @@ public class PartyLevelCaseFlagsServiceTest {
 
         Assert.assertNotNull(caseData);
         Assert.assertEquals(C100_CASE_TYPE, caseData.getCaseTypeOfApplication());
+    }
+
+    @Test
+    public void testGetPartyCaseDataExternalField() {
+        CaseData caseData1 = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).build();
+        partyLevelCaseFlagsService.getPartyCaseDataExternalField(C100_CASE_TYPE,PartyRole.Representing.CAAPPLICANTSOLICITOR,1);
+        Assert.assertEquals(C100_CASE_TYPE, caseData1.getCaseTypeOfApplication());
     }
 }
