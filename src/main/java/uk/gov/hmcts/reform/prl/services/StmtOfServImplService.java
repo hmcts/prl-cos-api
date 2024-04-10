@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -265,8 +266,7 @@ public class StmtOfServImplService {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
-                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
-                                      SOA_FL415_FILENAME)).toList())
+                                  .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName())).toList())
                 .build();
         } else {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
@@ -417,24 +417,24 @@ public class StmtOfServImplService {
                 .stream()
                 .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
                 .toList();
-                if (!CaseUtils.hasLegalRepresentation(updatedCaseData.getRespondentsFL401())) {
-                    Document coverLetter = serviceOfApplicationService
-                        .generateCoverLetterBasedOnCaseAccess(authorization,
-                                                              updatedCaseData,
-                                                              element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                                                                      updatedCaseData.getRespondentsFL401()),
-                                                              Templates.PRL_LET_ENG_RE7
-                        );
-                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
-                        updatedCaseData,
-                        authorization,
-                        unwrapElements(packDocs),
-                        bulkPrintDetails,
-                        element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                                updatedCaseData.getRespondentsFL401()),
-                        coverLetter,
-                        updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
-                }
+            if (!CaseUtils.hasLegalRepresentation(updatedCaseData.getRespondentsFL401())) {
+                Document coverLetter = serviceOfApplicationService
+                    .generateCoverLetterBasedOnCaseAccess(authorization,
+                                                          updatedCaseData,
+                                                          element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                                                                  updatedCaseData.getRespondentsFL401()),
+                                                          Templates.PRL_LET_ENG_RE7
+                    );
+                serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
+                    updatedCaseData,
+                    authorization,
+                    unwrapElements(packDocs),
+                    bulkPrintDetails,
+                    element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                            updatedCaseData.getRespondentsFL401()),
+                    coverLetter,
+                    updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
+            }
         }
 
         log.info("pack docs {}", packDocs);
@@ -472,7 +472,7 @@ public class StmtOfServImplService {
             }
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat targetFormat = new SimpleDateFormat("DD MMM YYYY");
+        SimpleDateFormat targetFormat = new SimpleDateFormat("dd MMM yyyy");
         try {
             stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
                                                       .citizenPartiesServedDate(targetFormat.format(format.parse(sosObject
@@ -494,7 +494,8 @@ public class StmtOfServImplService {
         }
 
         log.info("Statement of service list :: {}", stmtOfServiceforApplication);
-        if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
+        if (ObjectUtils.isNotEmpty(updatedCaseData.getStatementOfService())
+                && CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
             stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
         }
     }
