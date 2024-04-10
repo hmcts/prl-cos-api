@@ -1285,10 +1285,11 @@ public class SendAndReplyService {
 
         //Get list of Applicant & Respondent in Case
         List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-        /*
-            String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
-            selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-        */
+
+        //Hardcoded for testing
+        String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
+        selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
+
         selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
             Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                 applicantOrRespondent.getCode(),
