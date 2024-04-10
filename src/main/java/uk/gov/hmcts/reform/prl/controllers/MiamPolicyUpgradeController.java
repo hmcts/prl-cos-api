@@ -32,7 +32,7 @@ public class MiamPolicyUpgradeController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @PostMapping(path = "/submit-miam-policy-upgrade", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Send Email Notification on Case order")
+    @Operation(description = "Submit Miam Policy Upgrade event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
