@@ -387,7 +387,7 @@ public class StmtOfServImplService {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     Document coverLetter = serviceOfApplicationService
                         .generateCoverLetterBasedOnCaseAccess(startAllTabsUpdateDataContent.authorisation(), updatedCaseData, respondent,
-                                                                                                            Templates.PRL_LET_ENG_RE5
+                                                                                                            Templates.PRL_LET_ENG_RE7
                     );
                     serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(updatedCaseData,
                                                                                     startAllTabsUpdateDataContent.authorisation(),
