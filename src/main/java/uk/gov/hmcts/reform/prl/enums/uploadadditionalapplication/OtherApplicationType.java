@@ -76,43 +76,44 @@ public enum OtherApplicationType {
     //Citizen AWP reasons
     @JsonProperty("C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY")
     C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY("C1_REQUEST_GRANT_FOR_PARENTAL_RESPONSIBILITY",
-                                       "C1 - Request grant for parental responsibility"),
-    @JsonProperty("C1_REQUEST_GUARDIAN_FOR_CHILD")
-    C1_REQUEST_GUARDIAN_FOR_CHILD("C1_REQUEST_GUARDIAN_FOR_CHILD",
-                                  "C1 - Request to appoint a guardian for the child"),
-    @JsonProperty("C3_ORDER_AUTHORISING_SEARCH")
-    C3_ORDER_AUTHORISING_SEARCH("C3_ORDER_AUTHORISING_SEARCH",
-                                "C3 - Request for an order authorizing search for, taking charge of and delivery of a child"),
-    @JsonProperty("C4_ORDER_TO_KNOW_ABOUT_CHILD")
-    C4_ORDER_TO_KNOW_ABOUT_CHILD("C4_ORDER_TO_KNOW_ABOUT_CHILD",
-                                 "C4 - Request the court to order someone to provide information on where a child is"),
-    @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
-    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER",
+                                       "C1 - Request the court grants you parental responsibility"),
+    @JsonProperty("C1_REQUEST_APPOINT_A_GUARDIAN_FOR_CHILD")
+    C1_REQUEST_GUARDIAN_FOR_CHILD("C1_REQUEST_APPOINT_A_GUARDIAN_FOR_CHILD",
+                                  "C1 - Request the court appoints a guardian for child"),
+    @JsonProperty("C3_ORDER_AUTHORISING_SEARCH_FOR_TAKING_CHARGE_OF_AND_DELIVERY_OF_A_CHILD")
+    C3_ORDER_AUTHORISING_SEARCH("C3_ORDER_AUTHORISING_SEARCH_FOR_TAKING_CHARGE_OF_AND_DELIVERY_OF_A_CHILD",
+                                "C3 - Ask for an order authorizing search for, taking charge of and delivery of a child"),
+    @JsonProperty("C4_ASK_COURT_TO_ORDER_SOMEONE_TO_PROVIDE_CHILD_INFORMATION")
+    C4_ORDER_TO_KNOW_ABOUT_CHILD("C4_ASK_COURT_TO_ORDER_SOMEONE_TO_PROVIDE_CHILD_INFORMATION",
+                                 "C4 - Ask the court to order someone to provide information on where child is"),
+    @JsonProperty("C79_ENFORCE_A_CHILD_ARRANGEMENTS_ORDER")
+    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER("C79_ENFORCE_A_CHILD_ARRANGEMENTS_ORDER",
                                          "C79 - Enforce a Child Arrangements Order"),
-    @JsonProperty("D89_DELIVER_PAPER_TO_OTHER_PARTY")
-    D89_DELIVER_PAPER_TO_OTHER_PARTY("D89_DELIVER_PAPER_TO_OTHER_PARTY",
-                                     "D89 - Request the court to deliver papers to the other party"),
-    @JsonProperty("EX740_YOU_ACCUSED_SOMEONE")
-    EX740_YOU_ACCUSED_SOMEONE("EX740_YOU_ACCUSED_SOMEONE",
-                              "EX740 - Request the court to prevent questioning in person with accused"),
-    @JsonProperty("EX741_ACCUSED_BY_SOMEONE")
-    EX741_ACCUSED_BY_SOMEONE("EX741_ACCUSED_BY_SOMEONE",
-                             "EX741 - Request the court to prevent questioning in person if someone has accused you"),
-    @JsonProperty("FP25_REQUEST_FOR_ORDER_WITNESS")
-    FP25_REQUEST_FOR_ORDER_WITNESS("FP25_REQUEST_FOR_ORDER_WITNESS",
-                                   "FP25 - Request the court to order a witness to attend the court"),
-    @JsonProperty("FC600_REQUEST_COURT_TO_ACT_DURING_DISOBEY")
-    FC600_REQUEST_COURT_TO_ACT_DURING_DISOBEY("FC600_REQUEST_COURT_TO_ACT_DURING_DISOBEY",
-                                              "FC600 - Request the court to act when someone is disobeying a court order"),
-    @JsonProperty("N161_APPEAL_COURT_ORDER")
-    N161_APPEAL_COURT_ORDER("N161_APPEAL_COURT_ORDER",
+    @JsonProperty("D89_ASK_TO_DELIVER_PAPER_TO_OTHER_PARTY")
+    D89_DELIVER_PAPER_TO_OTHER_PARTY("D89_ASK_TO_DELIVER_PAPER_TO_OTHER_PARTY",
+                                     "D89 - Ask the court to deliver papers to the other party"),
+    @JsonProperty("EX740_PREVENT_QUESTIONING_IN_PERSON_ACCUSING_SOMEONE")
+    EX740_YOU_ACCUSED_SOMEONE("EX740_PREVENT_QUESTIONING_IN_PERSON_ACCUSING_SOMEONE",
+                              "EX740 - Ask the court to prevent questioning in person - you accused someone"),
+    @JsonProperty("EX741_PREVENT_QUESTIONING_IN_PERSON_SOMEONE_ACCUSING_YOU")
+    EX741_ACCUSED_BY_SOMEONE("EX741_PREVENT_QUESTIONING_IN_PERSON_SOMEONE_ACCUSING_YOU",
+                             "EX741 - Ask the court to prevent questioning in person - someone accused you"),
+    @JsonProperty("FP25_REQUEST_TO_ORDER_A_WITNESS_TO_ATTEND_COURT")
+    FP25_REQUEST_FOR_ORDER_WITNESS("FP25_REQUEST_TO_ORDER_A_WITNESS_TO_ATTEND_COURT",
+                                   "FP25 - Make a request to order a witness to attend court"),
+    @JsonProperty("FC600_REQUEST_COURT_TO_ACT_WHEN_SOMEONE_IN_THE_CASE_IS_DISOBEYING_COURT_ORDER")
+    FC600_REQUEST_COURT_TO_ACT_DURING_DISOBEY("FC600_REQUEST_COURT_TO_ACT_WHEN_SOMEONE_IN_THE_CASE_IS_DISOBEYING_COURT_ORDER",
+                                              "FC600 - Request the court acts when someone in the case is disobeying a court order"),
+    @JsonProperty("N161_APPEAL_A_ORDER_OR_ASK_PERMISSION_TO_APPEAL")
+    N161_APPEAL_COURT_ORDER("N161_APPEAL_A_ORDER_OR_ASK_PERMISSION_TO_APPEAL",
                             "N161 - Appeal a court order or ask for permission to appeal"),
-    @JsonProperty("FL403_CHANGE_EXTEND_CANCEL_NON_MOLESTATION_OR_OCCUPATION_ORDER")
-    FL403_CHANGE_EXTEND_CANCEL_NON_MOLESTATION_OR_OCCUPATION_ORDER("FL403_CHANGE_EXTEND_CANCEL_NON_MOLESTATION_OR_OCCUPATION_ORDER",
-                                                                   "FL403 - Apply to change, extend or cancel a non-molestation or occupation order"),
-    @JsonProperty("FL407_REQUEST_FOR_ARREST_WARRANT")
-    FL407_REQUEST_FOR_ARREST_WARRANT("FL407_REQUEST_FOR_ARREST_WARRANT",
-                                     "FL407 - Request the court to issue an arrest warrant");
+    @JsonProperty("FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER")
+    FL403_CHANGE_EXTEND_CANCEL_NON_MOLESTATION_OR_OCCUPATION_ORDER("FL403_CHANGE_EXTEND_OR_CANCEL_NON_MOLESTATION_ORDER_OR_OCCUPATION_ORDER",
+                                                                   "FL403 - Apply to change, extend or "
+                                                                       + "cancel a non-molestation order or occupation order"),
+    @JsonProperty("FL407_REQUEST_THE_COURT_ISSUES_AN_ARREST_WARRANT")
+    FL407_REQUEST_FOR_ARREST_WARRANT("FL407_REQUEST_THE_COURT_ISSUES_AN_ARREST_WARRANT",
+                                     "FL407 - Request the court issues an arrest warrant");
 
 
     private final String id;

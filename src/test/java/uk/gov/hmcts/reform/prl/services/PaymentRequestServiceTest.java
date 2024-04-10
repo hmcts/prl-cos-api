@@ -872,16 +872,5 @@ public class PaymentRequestServiceTest {
         assertEquals("response", paymentServiceResponse.getServiceRequestReference());
     }
 
-    @Test
-    public void createServiceRequestForAdditionalApplications() {
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference("response").build();
-        when(paymentApi
-                 .createPaymentServiceRequest(anyString(), anyString(), any(PaymentServiceRequest.class)))
-            .thenReturn(paymentServiceResponse);
-        PaymentServiceResponse paymentResponse = paymentRequestService
-            .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
-        assertEquals("response", paymentServiceResponse.getServiceRequestReference());
-    }
 }
 

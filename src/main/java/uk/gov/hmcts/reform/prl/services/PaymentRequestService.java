@@ -284,32 +284,6 @@ public class PaymentRequestService {
             );
     }
 
-    //not used - to be removed
-    public PaymentServiceResponse createServiceRequestForAdditionalApplications(
-        CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
-        return paymentApi
-            .createPaymentServiceRequest(
-                authorisation,
-                authTokenGenerator.generate(),
-                PaymentServiceRequest
-                    .builder()
-                    .callBackUrl(callBackUrl)
-                    .casePaymentRequest(CasePaymentRequestDto.builder()
-                                            .action(PAYMENT_ACTION)
-                                            .responsibleParty(serviceReferenceResponsibleParty).build())
-                    .caseReference(String.valueOf(caseData.getId()))
-                    .ccdCaseNumber(String.valueOf(caseData.getId()))
-                    .fees(new FeeDto[]{
-                        FeeDto.builder()
-                            .calculatedAmount(response.getAmount())
-                            .code(response.getCode())
-                            .version(response.getVersion())
-                            .volume(1).build()
-                    })
-                    .build()
-            );
-    }
-
     private void updateCaseDataWithCitizenAwpPayments(CaseData caseData,
                                                       StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
                                                       CreatePaymentRequest createPaymentRequest,
@@ -327,11 +301,6 @@ public class PaymentRequestService {
             : createCitizenAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
         log.info("Citizen awp payment created/updated {}", citizenAwpPayment);
 
-        //update case only if payment details not present already
-        List<Element<CitizenAwpPayment>> citizenAwpPayments =
-            isNotEmpty(caseData.getCitizenAwpPayments())
-                ? caseData.getCitizenAwpPayments() : new ArrayList<>();
-        log.info("Citizen awp payments data to be updated {}", citizenAwpPayments);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         updatedCaseDataMap.put("citizenAwpPayments", getCitizenAwpPayments(caseData, citizenAwpPayment));
 
