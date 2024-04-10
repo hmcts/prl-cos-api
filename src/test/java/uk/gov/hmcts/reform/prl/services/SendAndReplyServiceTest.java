@@ -1309,7 +1309,7 @@ public class SendAndReplyServiceTest {
         );
     }
 
-//    @Test
+    //    @Test
     public void testSendEmailNotificationToExternalPartiesC100Case() throws IOException {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -1408,7 +1408,7 @@ public class SendAndReplyServiceTest {
         );
     }
 
-//    @Test
+    //    @Test
     public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
