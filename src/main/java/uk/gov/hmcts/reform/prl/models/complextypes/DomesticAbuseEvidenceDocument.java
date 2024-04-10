@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,5 +11,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @AllArgsConstructor
 public class DomesticAbuseEvidenceDocument {
 
-    private Document domesticAbuseEvidenceDocument;
+    @JsonProperty("domesticAbuseEvidenceDocument")
+    private final Document domesticAbuseEvidenceDocument;
 }
