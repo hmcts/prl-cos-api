@@ -11,9 +11,11 @@ public enum CaseEvent {
     CITIZEN_CASE_UPDATE("citizen-case-update"),
     CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
-    DELETE_CASE("deleteApplication"),
+    CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
+    DELETE_APPLICATION("deleteApplication"),
+    CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
-    EVENT_RESPONDENT_SAFETY_CONCERNS("citizenSafetyConcerns"),
+    EVENT_RESPONDENT_AOH("citizenRespondentAoH"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
@@ -39,7 +41,8 @@ public enum CaseEvent {
     MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
-    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    CITIZEN_CONTACT_PREFERENCE("citizenContactPreference");
 
     private final String value;
 
