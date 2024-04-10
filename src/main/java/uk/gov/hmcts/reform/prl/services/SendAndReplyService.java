@@ -1301,20 +1301,24 @@ public class SendAndReplyService {
             return;
         }
 
+        List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
+
+        //mock
         DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
-            .code("wrappedApplicant.getId().toString()")
-            .label("applicant.getFirstName()" + " " + "applicant.getLastName()")
+            .code(caseData.getApplicants().get(0).getId().toString())
+            .label(caseData.getApplicants().get(0).getValue().getFirstName())
             .build();
 
         DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
-            .code("wrappedRespondents.getId().toString()")
-            .label("applicant.getFirstName()" + " " + "applicant.getLastName()")
+            .code(caseData.getRespondents().get(0).getId().toString())
+            .label(caseData.getRespondents().get(0).getValue().getFirstName())
             .build();
 
         DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
             .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
 
         caseData.getSendOrReplyMessage().getSendMessageObject().setExternalMessageWhoToSendTo(externalMessageWhoToSendTo);
+        //End of mock
 
         if (caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
 
@@ -1327,29 +1331,37 @@ public class SendAndReplyService {
             log.info("----> caseData.getExternalMessageWhoToSendTo().getValue() {}", caseData.getSendOrReplyMessage()
                 .getSendMessageObject().getExternalMessageWhoToSendTo().getValue());
 
-            List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
             dynamicMultiselectListElementList.forEach(selectedElement -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     selectedElement.getCode(),
                     applicantsRespondentInCase
                 );
+
                 if (party.isPresent()) {
+
                     PartyDetails partyDetails = party.get().getValue();
+
                     if (YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
                         log.info("----> Else if partyDetails.getContactPreferences() {}", partyDetails.getDoTheyHaveLegalRepresentation());
-                    } else if (partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
-                        log.info("----> Else if partyDetails.getContactPreferences() {}",
-                                 partyDetails.getContactPreferences().getDisplayedValue());
+                    } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
                         log.info("----> Else if partyDetails.getContactPreferences() {}",
                                  partyDetails.getAddress());
+                        try {
+                            List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
+                                                                  caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
-                        List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
-                                                              caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
-                        if (null != message.getBulkPrintDetails()) {
-                            message.getBulkPrintDetails().addAll(bulkPrintDetails);
-                        } else {
-                            message.setBulkPrintDetails(bulkPrintDetails);
+                            log.info("----> bulkPrintDetails {}", bulkPrintDetails);
+                            if (isNotEmpty(bulkPrintDetails)) {
+                                if (isNotEmpty(message.getBulkPrintDetails())) {
+                                    message.getBulkPrintDetails().addAll(bulkPrintDetails);
+                                } else {
+                                    message.setBulkPrintDetails(bulkPrintDetails);
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error(e.getMessage());
                         }
+
                     } else {
                         log.info("----> Else partyDetails.getContactPreferences() {}",
                                  partyDetails.getAddress());
@@ -1362,7 +1374,7 @@ public class SendAndReplyService {
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
-        CaseData caseData, PartyDetails partyDetails, Message message, String authorization) {
+        CaseData caseData, PartyDetails partyDetails, Message message, String authorization) throws Exception {
 
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
 
@@ -1378,21 +1390,40 @@ public class SendAndReplyService {
                 docs.add(getMessageDocument(authorization, caseData, message, partyDetails.getAddress(),
                                             partyDetails.getLabelForDynamicList()));
 
-                if (null != message.getSelectedDocument()) {
-                    docs.add(message.getSelectedDocument());
-                }
-
-                if (null != message.getExternalMessageAttachDocs() && message.getExternalMessageAttachDocs().size() > 0) {
-                    message.getExternalMessageAttachDocs().stream().forEach(element -> docs.add(element.getValue()));
-                }
+                docs.addAll(getExternalMessageSelectedDocumentList(caseData, authorization, message));
 
                 bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
+            } else {
+                log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
+                throw new Exception("External party does not have any postal address to send " + partyDetails.getPartyId());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         return bulkPrintDetails;
+    }
+
+    private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
+        List<Document> selectedDocList = new ArrayList<>();
+
+        Document selectedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
+        if (null != selectedDoc) {
+            selectedDocList.add(selectedDoc);
+        }
+
+        List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
+            authorization,
+            caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
+        );
+        if (null != externalMessageDocList && !externalMessageDocList.isEmpty()) {
+            externalMessageDocList.forEach(element -> {
+                if (null != element.getValue()) {
+                    selectedDocList.add(element.getValue());
+                }
+            });
+        }
+        return selectedDocList;
     }
 
     private Document getMessageDocument(String authorization, CaseData caseData, Message message, Address address, String name) {
