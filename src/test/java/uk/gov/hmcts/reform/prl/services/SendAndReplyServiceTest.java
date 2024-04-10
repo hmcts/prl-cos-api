@@ -19,21 +19,29 @@ import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -43,11 +51,14 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -73,12 +84,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -88,6 +105,18 @@ public class SendAndReplyServiceTest {
 
     @Mock
     UserService userService;
+
+    @Mock
+    private DgsService dgsService;
+
+    @Mock
+    private BulkPrintService bulkPrintService;
+
+    @Mock
+    private DocumentGenService documentGenService;
+
+    @Mock
+    private DocumentLanguageService documentLanguageService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -1217,4 +1246,283 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Test
+    public void testSendPostNotificationToExternalPartiesForC100()  throws Exception {
+
+        Message newMessage = getMessage();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = getApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = getRespondent();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
+            .id(UUID.randomUUID())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicList).build())
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
+                    .build())
+            .build();
+
+
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(
+                uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().originalDocumentName("doc1")
+                    .build());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.getTemplate(
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+        when(dgsService.generateDocument(
+            eq(auth), eq(String.valueOf(caseData.getId())), eq("abc_template"), anyMap()))
+            .thenReturn(getGeneratedDocumentInfo());
+        when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(UUID.randomUUID());
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
+    }
+
+    @Test
+    public void testSendPostNotificationToExternalPartiesForFL401()  throws Exception {
+
+        Message newMessage = getMessage();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = getApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = getRespondent();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
+            .id(UUID.randomUUID())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicList).build())
+            .build();
+        // need to remove applicants and respondent once XUI bug fix.
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("FL401")
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .applicantsFL401(getApplicant())
+            .respondentsFL401(getRespondent())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
+                    .build())
+            .build();
+
+
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(
+                uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().originalDocumentName("doc1")
+                    .build());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.getTemplate(
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+        when(dgsService.generateDocument(
+            eq(auth), eq(String.valueOf(caseData.getId())), eq("abc_template"), anyMap()))
+            .thenReturn(getGeneratedDocumentInfo());
+        when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(UUID.randomUUID());
+
+        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
+    }
+
+    private Message getMessage() {
+
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        return Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .messageAbout(MessageAboutEnum.OTHER)
+            .submittedDocumentsList(dynamicList)
+            .build();
+    }
+
+    private PartyDetails getApplicant() {
+        return PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+    }
+
+    private PartyDetails getRespondent() {
+        return PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .contactPreferences(ContactPreferences.post)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+    }
+
+    private GeneratedDocumentInfo getGeneratedDocumentInfo() {
+        return GeneratedDocumentInfo.builder().url("TestUrl").binaryUrl("binaryUrl").hashToken("testHashToken").build();
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistForSend() {
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
+        Message newMessage = Message.builder()
+            .messageSubject("testSubject1")
+            .messageContent("This is message 1 body")
+            .applicationsList(dynamicList)
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .sendMessageObject(newMessage)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND);
+        assertEquals(dynamicList.getValueCode(), returnString);
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistForReply() {
+
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        CaseData caseData = CaseData.builder().id(123451L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(ListUtils.union(listOfOpenMessages, listOfClosedMessages))
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(dynamicList)
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY);
+        assertEquals(dynamicList.getValueCode(), returnString);
+    }
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -616,5 +617,27 @@ public class CaseUtils {
         return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
             || (currentParty.getIsEmailAddressConfidential() != null
             && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
+        Optional<Element<PartyDetails>> party = Optional.empty();
+        if (CollectionUtils.isNotEmpty(parties)) {
+            party = parties.stream()
+                .filter(element -> code.equalsIgnoreCase(String.valueOf(element.getId()))).findFirst();
+        }
+        return party;
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForC100(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                                List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
+                                                                                                 List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
+            element.getCode())).collect(Collectors.toList());
     }
 }
