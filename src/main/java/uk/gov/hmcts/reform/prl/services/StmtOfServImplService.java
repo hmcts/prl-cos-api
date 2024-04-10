@@ -28,10 +28,13 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -361,59 +364,16 @@ public class StmtOfServImplService {
             && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())) {
 
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
-            stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
-                                                      .citizenPartiesServedDate(sosObject.getPartiesServedDate())
-                                                      .citizenPartiesServedList(sosObject.getPartiesServed())
-                                                        .stmtOfServiceDocument(Document.builder()
-                                                                                   .documentFileName(sosObject.getCitizenSosDocs()
-                                                                                                         .getDocumentFileName())
-                                                                                   .documentUrl(sosObject.getCitizenSosDocs()
-                                                                                                    .getDocumentUrl())
-                                                                                   .documentHash(sosObject.getCitizenSosDocs()
-                                                                                                     .getDocumentHash())
-                                                                                   .build())
-                                                      .build()));
-
-            log.info("Statement of service list :: {}", stmtOfServiceforApplication);
+            updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
-                stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
-            } else {
-                updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            }
-            List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument();
-            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-            log.info("pack docs {}", packDocs);
-            updatedCaseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    Document coverLetter = serviceOfApplicationService
-                        .generateCoverLetterBasedOnCaseAccess(startAllTabsUpdateDataContent.authorisation(), updatedCaseData, respondent,
-                                                                                                            Templates.PRL_LET_ENG_RE7
-                    );
-                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(updatedCaseData,
-                                                                                    startAllTabsUpdateDataContent.authorisation(),
-                                                                                    unwrapElements(packDocs),
-                                                                                    bulkPrintDetails,
-                                                                                    respondent,
-                                                                                    coverLetter,
-                                                                                    respondent.getValue().getLabelForDynamicList());
-                }
-            });
-
             List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-            if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
-                finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
-            } else {
-                log.info("*** finalServedApplicationDetailsList is empty in case data ***");
-                finalServedApplicationDetailsList = new ArrayList<>();
-            }
-            finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder()
-                                                              .servedBy(userService.getUserDetails(authorisation).getFullName())
-                                                              .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                                              .modeOfService(BY_POST)
-                                                              .whoIsResponsible("Applicant Lip")
-                                                              .bulkPrintDetails(bulkPrintDetails).build()));
+            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+            finalServedApplicationDetailsList = updateFinalListOfServedApplications(
+                authorisation,
+                startAllTabsUpdateDataContent.authorisation(),
+                updatedCaseData,
+                bulkPrintDetails
+            );
             updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
             updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
         }
@@ -424,5 +384,86 @@ public class StmtOfServImplService {
             startAllTabsUpdateDataContent.eventRequestData(),
             updatedCaseDataMap
         );
+    }
+
+    private List<Element<ServedApplicationDetails>> updateFinalListOfServedApplications(String authorisation, String authorization,
+                                                                                        CaseData updatedCaseData,
+                                                                                        List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+        List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
+            .stream()
+            .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+            .toList();
+
+        log.info("pack docs {}", packDocs);
+        updatedCaseData.getRespondents().forEach(respondent -> {
+            if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                Document coverLetter = serviceOfApplicationService
+                    .generateCoverLetterBasedOnCaseAccess(authorization,
+                                                          updatedCaseData, respondent,
+                                                          Templates.PRL_LET_ENG_RE7
+                );
+                serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
+                    updatedCaseData,
+                    authorization,
+                    unwrapElements(packDocs),
+                    bulkPrintDetails,
+                    respondent,
+                    coverLetter,
+                    respondent.getValue().getLabelForDynamicList());
+            }
+        });
+
+        if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
+            finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
+        } else {
+            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
+            finalServedApplicationDetailsList = new ArrayList<>();
+        }
+        finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder()
+                                                          .servedBy(userService.getUserDetails(authorisation).getFullName())
+                                                          .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                                          .modeOfService(BY_POST)
+                                                          .whoIsResponsible("Applicant Lip")
+                                                          .bulkPrintDetails(bulkPrintDetails).build()));
+        return finalServedApplicationDetailsList;
+    }
+
+    private void updateStatementOfServiceCollection(CitizenSos sosObject, CaseData updatedCaseData,
+                                                    List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication) {
+        String[] partiesList = sosObject.getPartiesServed().split(",");
+        List<String> partiesServed = new ArrayList<>();
+        updatedCaseData.getRespondents().forEach(respondent -> {
+            if (Arrays.asList(partiesList).contains(respondent.getId().toString())) {
+                partiesServed.add(respondent.getValue().getLabelForDynamicList());
+            }
+        });
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat targetFormat = new SimpleDateFormat("DD MMM YYYY");
+        try {
+            stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
+                                                      .citizenPartiesServedDate(targetFormat.format(format.parse(sosObject
+                                                                                                                     .getPartiesServedDate())))
+                                                      .citizenPartiesServedList(String.join(",", partiesServed))
+                                                        .stmtOfServiceDocument(Document.builder()
+                                                                                   .documentFileName(sosObject.getCitizenSosDocs()
+                                                                                                         .getDocumentFileName())
+                                                                                   .documentUrl(sosObject.getCitizenSosDocs()
+                                                                                                    .getDocumentUrl())
+                                                                                   .documentHash(sosObject.getCitizenSosDocs()
+                                                                                                     .getDocumentHash())
+                                                                                   .documentBinaryUrl(sosObject.getCitizenSosDocs()
+                                                                                                          .getDocumentBinaryUrl())
+                                                                                   .build())
+                                                      .build()));
+        } catch (ParseException e) {
+            log.error("Error while building Sos Object {}", e.getMessage());
+        }
+
+        log.info("Statement of service list :: {}", stmtOfServiceforApplication);
+        if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
+            stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
+        }
     }
 }

@@ -17,5 +17,6 @@ public class CitizenFlags {
     private final YesOrNo isAllDocumentsViewed;
     private final YesOrNo isResponseInitiated;
     private YesOrNo isApplicationToBeServed;
+    private YesOrNo isOrderPersonallyServed;
     private YesOrNo isStatementOfServiceProvided;
 }
