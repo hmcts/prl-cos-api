@@ -601,7 +601,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/validators/SubmitAndPayChecker.java',
   '**uk/gov/hmcts/reform/prl/controllers/TaskListController.java',
   '**uk/gov/hmcts/reform/prl/services/document/C100DocumentTemplateFinderService.java',
-  '**uk/gov/hmcts/reform/prl/tasks/ValidateMiamApplicationOrExemptionTask.java'
+  '**uk/gov/hmcts/reform/prl/tasks/ValidateMiamApplicationOrExemptionTask.java',
+  '**uk/gov/hmcts/reform/prl/controllers/MiamPolicyUpgradeController.java',
+  '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeService.java'
 ]
 
 sonarqube {

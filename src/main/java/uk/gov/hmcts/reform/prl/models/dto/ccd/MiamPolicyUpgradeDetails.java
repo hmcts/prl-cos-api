@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklist
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -27,7 +29,7 @@ public class MiamPolicyUpgradeDetails {
     private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
     private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
     private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
-    private List<Document> mpuDomesticAbuseEvidenceDocument;
+    private List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument;
     private String mpuNoDomesticAbuseEvidenceReason;
     private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
     private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
