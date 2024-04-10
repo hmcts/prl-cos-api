@@ -84,7 +84,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1497,7 +1497,7 @@ public class SendAndReplyServiceTest {
     private Map<String, Object> getEmailDynamicData(CaseData caseData) {
         Map<String, Object> dynamicData = new HashMap<>();
         dynamicData.put("caseReference", "12345");
-        dynamicData.put("dashBoardLink", manageCaseUrl+"/"+ caseData.getId());
+        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId());
         dynamicData.put("subject", "message subject");
         dynamicData.put("content", "some msg content");
         dynamicData.put("attachmentType", "pdf");
@@ -1511,27 +1511,26 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() throws IOException {
-    CaseData caseData = CaseData.builder().id(12345L)
-        .chooseSendOrReply(SendOrReply.SEND)
-        .caseTypeOfApplication("C100")
-        .replyMessageDynamicList(DynamicList.builder().build())
-        .applicants(null)
-        .respondents(null)
-        .sendOrReplyMessage(
-            SendOrReplyMessage.builder()
-                .sendMessageObject(Message.builder()
-                                       .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                                       .externalMessageWhoToSendTo(null)
-                                       .messageAbout(MessageAboutEnum.APPLICATION)
-                                       .messageContent("some msg content")
-                                       .build()
-                )
-                .respondToMessage(YesOrNo.No)
-                .messages(messages)
-                .build())
-        .build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(null)
+            .respondents(null)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .externalMessageWhoToSendTo(null)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
         sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
         assertNull(null);
-}
+    }
 
 }
