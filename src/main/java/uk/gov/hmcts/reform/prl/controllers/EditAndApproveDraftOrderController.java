@@ -182,14 +182,6 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
-                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
-                    UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
-                    UserRoles.CASEMANAGER.toString())) {
-                    //Automated Hearing Request Call
-                    manageOrderService.createAutomatedHearingManagement(authorisation, caseData);
-                }
-
                 if (Event.EDIT_AND_APPROVE_ORDER.getId()
                     .equalsIgnoreCase(callbackRequest.getEventId())) {
                     caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
@@ -212,6 +204,14 @@ public class EditAndApproveDraftOrderController {
                     authorisation,
                     callbackRequest.getEventId()
                 ));
+                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
+                    UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
+                    UserRoles.CASEMANAGER.toString())) {
+                    List<Element<DraftOrder>> draftOrderList = (List<Element<DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
+                    //Automated Hearing Request Call
+                    manageOrderService.createAutomatedHearingManagement(authorisation, caseData, draftOrderList.get(0).getId());
+                }
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));

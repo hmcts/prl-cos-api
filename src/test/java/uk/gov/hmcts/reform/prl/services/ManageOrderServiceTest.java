@@ -100,6 +100,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -1799,6 +1800,25 @@ public class ManageOrderServiceTest {
             .code("1234")
             .label("test label").build();
         elements.add(element);
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        uuid = UUID.fromString(TEST_UUID);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
@@ -1812,8 +1832,8 @@ public class ManageOrderServiceTest {
                                    .listItems(elements)
                                    .build())
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                       .emailInformation(EmailInformation.builder().emailName("").build())
-                                                       .build())))
+                                                     .emailInformation(EmailInformation.builder().emailName("").build())
+                                                     .build())))
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
@@ -1829,20 +1849,6 @@ public class ManageOrderServiceTest {
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
             .build();
-
-        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                          .builder()
-                                                                                          .orderDocument(Document
-                                                                                                             .builder()
-                                                                                                             .build())
-                                                                                          .dateCreated(now)
-                                                                                          .orderTypeId(TEST_UUID)
-                                                                                          .otherDetails(
-                                                                                              OtherOrderDetails.builder().build())
-                                                                                          .build()).build();
-        List<Element<OrderDetails>> orderList = new ArrayList<>();
-        orderList.add(orders);
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1855,12 +1861,9 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
         ResponseEntity<Object> response = ResponseEntity.ok(caseData.getId());
-        when(hearingService.createAutomatedHearing(authToken, caseData)).thenReturn(response);
+        when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
+            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(response);
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
 

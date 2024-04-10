@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -85,6 +84,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -1123,9 +1123,12 @@ public class ManageOrderService {
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            //setDraftOrderCollection(caseData, loggedInUserType,userDetails); //fetch list -> draftOrderList -> get 0
             //Automated Hearing Request Call
-            createAutomatedHearingManagement(authorisation, caseData);
-            return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
+            Map<String, Object> draftOrderCollection = setDraftOrderCollection(caseData, loggedInUserType,userDetails);
+            List<Element<DraftOrder>> draftOrderList = (List<Element<DraftOrder>>) draftOrderCollection.get("draftOrderCollection");
+            createAutomatedHearingManagement(authorisation, caseData, draftOrderList.get(0).getId()); // pass the order id
+            return draftOrderCollection; // return the same draftOrderList
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
@@ -1144,13 +1147,13 @@ public class ManageOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            //Automated Hearing Request Call
-            createAutomatedHearingManagement(authorisation, caseData);
             updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
                 newOrderDetails
             );
+            //Automated Hearing Request Call
+            createAutomatedHearingManagement(authorisation, caseData, newOrderDetails.get(0).getId()); // newOrderDetails -> get the id
         }
         orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(
@@ -3379,13 +3382,9 @@ public class ManageOrderService {
             && null != address.getAddressLine1();
     }
 
-    public void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+    public void createAutomatedHearingManagement(String authorisation, CaseData caseData, UUID id) {
         log.info("Automated Hearing Management Call - Start");
         try {
-            ObjectMapper objectMappers = new ObjectMapper();
-            objectMappers.registerModule(new JavaTimeModule());
-            String caseDataObjectJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(caseData);
-            log.info("Automated Hearing Request: CaseData: {}", caseDataObjectJson);
             if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                 caseData.getManageOrders().getOrdersHearingDetails().stream()
                     .map(Element::getValue)
@@ -3398,7 +3397,7 @@ public class ManageOrderService {
                             );
                             ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
                                 authorisation,
-                                caseData
+                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, id)
                             );
                             log.info("Automated Hearing Request: Inside: End");
                             log.info(

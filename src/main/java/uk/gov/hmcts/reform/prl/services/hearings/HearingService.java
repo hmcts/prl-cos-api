@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -216,11 +216,11 @@ public class HearingService {
         return Collections.emptyList();
     }
 
-    public ResponseEntity<Object> createAutomatedHearing(String userToken, CaseData caseData) {
+    public ResponseEntity<Object> createAutomatedHearing(String userToken, AutomatedHearingCaseData automatedHearingCaseData) {
         ResponseEntity<Object> response = null;
         try {
             log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
-            response = hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), caseData);
+            response = hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), automatedHearingCaseData);
         } catch (Exception e) {
             log.error("Error in createAutomatedHearing", e);
         }

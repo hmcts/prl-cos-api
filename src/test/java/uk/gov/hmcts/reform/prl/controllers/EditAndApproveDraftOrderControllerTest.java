@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -67,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -122,8 +124,12 @@ public class EditAndApproveDraftOrderControllerTest {
     @Mock
     AllTabServiceImpl allTabService;
 
+    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    private UUID uuid;
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     @Before
     public void setUp() {
@@ -992,6 +998,16 @@ public class EditAndApproveDraftOrderControllerTest {
             DraftOrder::getLabelForOrdersDynamicList
         ));
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(caseDataMap);
+        ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
+        when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
+            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(createAutomatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
@@ -1000,11 +1016,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
@@ -1083,6 +1094,17 @@ public class EditAndApproveDraftOrderControllerTest {
             DraftOrder::getLabelForOrdersDynamicList
         ));
 
+        uuid = UUID.fromString(TEST_UUID);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.CASEMANAGER.name());
+        caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(caseDataMap);
+        ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
+        when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
+            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(createAutomatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
@@ -1091,11 +1113,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.CASEMANAGER.name());
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
