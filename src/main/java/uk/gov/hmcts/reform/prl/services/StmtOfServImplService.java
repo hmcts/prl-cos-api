@@ -356,6 +356,7 @@ public class StmtOfServImplService {
             = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
+        log.info("Unserved respondent pack {}", updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK));
         if (null != updatedCaseDataMap.get(UN_SERVED_RESPONDENT_PACK)
             && CollectionUtils.isNotEmpty(updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())) {
 
@@ -375,7 +376,6 @@ public class StmtOfServImplService {
 
             log.info("Statement of service list :: {}", stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
             if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication())) {
                 stmtOfServiceforApplication.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForApplication());
             } else {
@@ -383,6 +383,7 @@ public class StmtOfServImplService {
             }
             List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument();
             List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+            log.info("pack docs {}", packDocs);
             updatedCaseData.getRespondents().forEach(respondent -> {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     Document coverLetter = serviceOfApplicationService
@@ -414,6 +415,7 @@ public class StmtOfServImplService {
                                                               .whoIsResponsible("Applicant Lip")
                                                               .bulkPrintDetails(bulkPrintDetails).build()));
             updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+            updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
         }
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
