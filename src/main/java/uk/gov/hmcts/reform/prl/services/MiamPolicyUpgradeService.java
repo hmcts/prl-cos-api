@@ -38,9 +38,9 @@ public class MiamPolicyUpgradeService {
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateMiamPolicyUpgradeDetails(CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+
         log.info("MiamPolicyUpgradeDetails from request" + caseData.getMiamPolicyUpgradeDetails());
 
         caseDataUpdated.put(
