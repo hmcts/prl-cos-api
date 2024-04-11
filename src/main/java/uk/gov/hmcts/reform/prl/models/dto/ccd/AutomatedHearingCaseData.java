@@ -13,9 +13,8 @@ import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
-import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.caselink.AutomatedHearingCaseLink;
+import uk.gov.hmcts.reform.prl.models.complextypes.AutomatedHearingCaseManagementLocation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +29,7 @@ import java.util.UUID;
 @Builder(builderMethodName = "automatedHearingCaseDataBuilder")
 public class AutomatedHearingCaseData {
 
-    public AutomatedHearingCaseData(ManageOrders manageOrders, AttendHearing attendHearing, LocalDate issueDate) {
+    public AutomatedHearingCaseData(AutomatedHearingManageOrders manageOrders, AutomatedHearingAttendHearing attendHearing, LocalDate issueDate) {
         /* default constructor */
         this.manageOrders = manageOrders;
         this.attendHearing = attendHearing;
@@ -60,13 +59,13 @@ public class AutomatedHearingCaseData {
     private String caseTypeOfApplication;
 
     @JsonProperty("applicants")
-    private List<Element<PartyDetails>> applicants;
+    private List<Element<AutomatedHearingPartyDetails>> applicants;
 
     @JsonProperty("respondents")
-    private List<Element<PartyDetails>> respondents;
+    private List<Element<AutomatedHearingPartyDetails>> respondents;
 
     @JsonProperty("otherPartyInTheCaseRevised")
-    private List<Element<PartyDetails>> otherPartyInTheCaseRevised;
+    private List<Element<AutomatedHearingPartyDetails>> otherPartyInTheCaseRevised;
 
     @JsonProperty("applicantSolicitorEmailAddress")
     private String applicantSolicitorEmailAddress;
@@ -78,16 +77,16 @@ public class AutomatedHearingCaseData {
     private String courtName;
 
     @JsonProperty("applicantsFL401")
-    private PartyDetails applicantsFL401;
+    private AutomatedHearingPartyDetails applicantsFL401;
 
     @JsonProperty("respondentsFL401")
-    private PartyDetails respondentsFL401;
+    private AutomatedHearingPartyDetails respondentsFL401;
 
     @JsonProperty("caseManagementLocation")
-    private CaseManagementLocation caseManagementLocation;
+    private AutomatedHearingCaseManagementLocation caseManagementLocation;
 
     @JsonProperty("caseLinks")
-    public List<CaseLinksElement<CaseLink>> caseLinks;
+    public List<CaseLinksElement<AutomatedHearingCaseLink>> caseLinks;
 
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private String applicantCaseName;
@@ -96,10 +95,10 @@ public class AutomatedHearingCaseData {
     private AllPartyFlags allPartyFlags;
 
     @JsonUnwrapped
-    private final ManageOrders manageOrders;
+    private final AutomatedHearingManageOrders manageOrders;
 
     @JsonUnwrapped
-    private final AttendHearing attendHearing;
+    private final AutomatedHearingAttendHearing attendHearing;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonProperty("issueDate")
