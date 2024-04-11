@@ -73,7 +73,7 @@ public class Message extends MessageMetaData {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<Document>> externalMessageAttachDocs;
 
-    private List<Element<BulkPrintDetails>> bulkPrintDetails;
+    private List<Element<BulkPrintDetails>> messageBulkPrintDetails;
 
     public JudicialUser getSendReplyJudgeName() {
         if (sendReplyJudgeName == null

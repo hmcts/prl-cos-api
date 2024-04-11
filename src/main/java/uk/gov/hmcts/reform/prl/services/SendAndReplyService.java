@@ -1351,10 +1351,10 @@ public class SendAndReplyService {
 
                             log.info("----> bulkPrintDetails {}", bulkPrintDetails);
                             if (isNotEmpty(bulkPrintDetails)) {
-                                if (isNotEmpty(message.getBulkPrintDetails())) {
-                                    message.getBulkPrintDetails().addAll(bulkPrintDetails);
+                                if (isNotEmpty(message.getMessageBulkPrintDetails())) {
+                                    message.getMessageBulkPrintDetails().addAll(bulkPrintDetails);
                                 } else {
-                                    message.setBulkPrintDetails(bulkPrintDetails);
+                                    message.setMessageBulkPrintDetails(bulkPrintDetails);
                                 }
                             }
                         } catch (Exception e) {
