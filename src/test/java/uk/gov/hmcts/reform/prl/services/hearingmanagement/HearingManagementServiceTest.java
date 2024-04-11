@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -38,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -240,26 +237,6 @@ public class HearingManagementServiceTest {
         caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(c100CaseData);
 
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
-
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_DETAILS,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_DETAILS,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
-
-        doNothing().when(emailService).send(applicantSolicitorEmail,
-                                            EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                                            applicantSolicitorEmailvars,
-                                            LanguagePreference.english);
-
-        doNothing().when(emailService).send(respondentSolicitorEmail,
-                                            EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
-                                            respondentSolicitorEmailvars,
-                                            LanguagePreference.english);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
 
         verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
@@ -278,16 +255,7 @@ public class HearingManagementServiceTest {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
 
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_CHANGES,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_CHANGES,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
         HearingRequest hearingRequest1 = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
@@ -319,16 +287,7 @@ public class HearingManagementServiceTest {
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
 
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_CANCELLED,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_CANCELLED,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
         HearingRequest hearingRequest1 = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
@@ -426,20 +385,6 @@ public class HearingManagementServiceTest {
         respondentEmail = respondentFl401.getEmail();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
-
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_DETAILS,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_DETAILS,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(applicantSolicitorEmail,
-                                            EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
 
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
@@ -500,16 +445,7 @@ public class HearingManagementServiceTest {
         respondentEmail = respondentFl401.getEmail();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
 
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_CHANGES,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_CHANGES,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
         HearingRequest hearingRequest1 = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
@@ -578,16 +514,7 @@ public class HearingManagementServiceTest {
         applicantEmail = applicantFl401.getEmail();
         respondentEmail = respondentFl401.getEmail();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
 
-        doNothing().when(emailService).send(applicantEmail,
-                                            EmailTemplateNames.HEARING_CANCELLED,
-                                            applicantEmailVars,
-                                            LanguagePreference.english);
-        doNothing().when(emailService).send(respondentEmail,
-                                            EmailTemplateNames.HEARING_CANCELLED,
-                                            respondentEmailVars,
-                                            LanguagePreference.english);
         HearingRequest hearingRequest1 = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
