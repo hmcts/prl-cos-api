@@ -293,29 +293,24 @@ public class TaskListService {
     }
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = mapAmUserRolesToIdamRoles(authorisation, userDetails);
-        log.info("list of roles {}", roles);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         log.info("Miam policy upgrade details before document generation {}", caseData.getMiamPolicyUpgradeDetails());
 
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = mapAmUserRolesToIdamRoles(authorisation, userDetails);
+        log.info("list of roles {}", roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
 
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
             || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
-            log.info("court staff exists");
             try {
                 log.info("Generating documents");
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
-
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                log.info("Setting documents");
-                log.info("Updated casedata miam details are: {}", updatedCaseData.getMiamPolicyUpgradeDetails());
-                log.info("Final document is: {}", updatedCaseData.getFinalDocument());
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())
