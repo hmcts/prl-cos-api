@@ -298,6 +298,7 @@ public class TaskListService {
         List<String> roles = new ArrayList<>();
 
         roles = getAmUserRoles(authorisation, userDetails, roles);
+        log.info("list of roles {}", roles);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
@@ -356,7 +357,6 @@ public class TaskListService {
                 userDetails.getId()
             );
             roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
-            log.info("list of roles {}", roles);
 
             String loggedInUserType;
             if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
