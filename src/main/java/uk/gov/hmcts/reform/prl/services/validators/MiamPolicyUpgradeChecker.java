@@ -140,10 +140,10 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-            && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim()))
+            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim()))
             || (MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim()))) {
+            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim()))) {
             finished = false;
         }
         log.info("finished in checkedForOtherExemptions {}", finished);
@@ -172,7 +172,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             && ObjectUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()))
             || (miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-            && ObjectUtils.isEmpty(
+            && StringUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim()))) {
             finished = false;
         }
