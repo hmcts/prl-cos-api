@@ -27,25 +27,25 @@ public enum MiamUrgencyReasonChecklistEnum {
         "Any delay caused by attending a MIAM would cause a risk of unlawful removal"
             + " of a child from the United Kingdom, or a risk of unlawful retention of a child who is currently outside England and Wales."
     ),
-    @JsonProperty("miamDomesticAbuseChecklistEnum_Value_4")
-    miamDomesticAbuseChecklistEnum_Value_4(
-        "miamDomesticAbuseChecklistEnum_Value_4",
+    @JsonProperty("miamPolicyUpgradeUrgencyReason_Value_4")
+    miamPolicyUpgradeUrgencyReason_Value_4(
+        "miamPolicyUpgradeUrgencyReason_Value_4",
         "Any delay caused by attending a MIAM would cause a significant risk of a miscarriage of justice."
     ),
-    @JsonProperty("miamDomesticAbuseChecklistEnum_Value_5")
-    miamDomesticAbuseChecklistEnum_Value_5(
-        "miamDomesticAbuseChecklistEnum_Value_5",
+    @JsonProperty("miamPolicyUpgradeUrgencyReason_Value_5")
+    miamPolicyUpgradeUrgencyReason_Value_5(
+        "miamPolicyUpgradeUrgencyReason_Value_5",
         "Any delay caused by attending a MIAM would cause significant financial hardship to the prospective applicant."
     ),
-    @JsonProperty("miamDomesticAbuseChecklistEnum_Value_6")
-    miamDomesticAbuseChecklistEnum_Value_6(
-        "miamDomesticAbuseChecklistEnum_Value_6",
+    @JsonProperty("miamPolicyUpgradeUrgencyReason_Value_6")
+    miamPolicyUpgradeUrgencyReason_Value_6(
+        "miamPolicyUpgradeUrgencyReason_Value_6",
         "Any delay caused by attending a MIAM would cause irretrievable problems"
             + " in dealing with the dispute (including the irretrievable loss of significant evidence)."
     ),
-    @JsonProperty("miamDomesticAbuseChecklistEnum_Value_7")
-    miamDomesticAbuseChecklistEnum_Value_7(
-        "miamDomesticAbuseChecklistEnum_Value_7",
+    @JsonProperty("miamPolicyUpgradeUrgencyReason_Value_7")
+    miamPolicyUpgradeUrgencyReason_Value_7(
+        "miamPolicyUpgradeUrgencyReason_Value_7",
         "There is a significant risk that in the period necessary to schedule"
             + " and attend a MIAM, proceedings relating to the dispute will be brought in another"
             + " state in which a valid claim to jurisdiction may exist, such that a court in that"
