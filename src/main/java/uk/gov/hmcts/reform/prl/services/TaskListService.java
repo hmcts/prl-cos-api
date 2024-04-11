@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -291,7 +295,57 @@ public class TaskListService {
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = new ArrayList<>();
 
+        roles = getAmUserRoles(authorisation, userDetails, roles);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        log.info("Miam policy upgrade details before document generation {}", caseData.getMiamPolicyUpgradeDetails());
+
+        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
+        String state = callbackRequest.getCaseDetails().getState();
+
+        if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
+            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
+            log.info("court staff exists");
+            try {
+                log.info("Generating documents");
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+
+                CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                log.info("Setting documents");
+                log.info("Updated casedata miam details are: {}", updatedCaseData.getMiamPolicyUpgradeDetails());
+                log.info("Final document is: {}", updatedCaseData.getFinalDocument());
+                caseData = caseData.toBuilder()
+                    .c8Document(updatedCaseData.getC8Document())
+                    .c1ADocument(updatedCaseData.getC1ADocument())
+                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+                    .finalDocument(updatedCaseData.getFinalDocument())
+                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
+                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                    .build();
+            } catch (Exception e) {
+                log.error("Error regenerating the document", e);
+            }
+        }
+
+        tabService.mapAndSubmitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseData
+        );
+
+        if (!isCourtStaff) {
+            eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private List<String> getAmUserRoles(String authorisation, UserDetails userDetails, List<String> roles) {
         if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
@@ -301,55 +355,27 @@ public class TaskListService {
                 null,
                 userDetails.getId()
             );
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
+            roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
             log.info("list of roles {}", roles);
 
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            log.info("Miam policy upgrade details before document generation {}", caseData.getMiamPolicyUpgradeDetails());
-
-            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
-            boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
-            String state = callbackRequest.getCaseDetails().getState();
-
-            if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
-                || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
-                log.info("court staff exists");
-                try {
-                    log.info("Generating documents");
-                    caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
-
-                    CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                    log.info("Setting documents");
-                    log.info("Updated casedata miam details are: {}", updatedCaseData.getMiamPolicyUpgradeDetails());
-                    log.info("Final document is: {}", updatedCaseData.getFinalDocument());
-                    caseData = caseData.toBuilder()
-                        .c8Document(updatedCaseData.getC8Document())
-                        .c1ADocument(updatedCaseData.getC1ADocument())
-                        .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                        .finalDocument(updatedCaseData.getFinalDocument())
-                        .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
-                        .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                        .build();
-                } catch (Exception e) {
-                    log.error("Error regenerating the document", e);
-                }
+            String loggedInUserType;
+            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
+                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                loggedInUserType = UserRoles.JUDGE.name();
+            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                loggedInUserType = UserRoles.COURT_ADMIN.name();
+            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType = UserRoles.SOLICITOR.name();
+            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType = UserRoles.CITIZEN.name();
+            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+            } else {
+                loggedInUserType = "";
             }
 
-            tabService.mapAndSubmitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseData
-            );
-
-            if (!isCourtStaff) {
-                eventPublisher.publishEvent(new CaseDataChanged(caseData));
-            }
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            roles = new ArrayList<>(Collections.singleton(loggedInUserType));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().build();
+        return roles;
     }
 }
