@@ -36,7 +36,7 @@ public class AutomatedHearingTransactionRequestMapper {
         try {
             List<Element<AutomatedHearingPartyDetails>> applicantsAutomatedHearingpartyDetails = new ArrayList<>();
             List<Element<PartyDetails>> applicantList = caseData.getApplicants();
-            if(applicantList != null) {
+            if (applicantList != null) {
                 applicantList.forEach(applicants -> getApplicantsDetails(
                     applicants,
                     applicantsAutomatedHearingpartyDetails
@@ -45,7 +45,7 @@ public class AutomatedHearingTransactionRequestMapper {
 
             List<Element<AutomatedHearingPartyDetails>> respondentsAutomatedHearingpartyDetails = new ArrayList<>();
             List<Element<PartyDetails>> respondentsList = caseData.getRespondents();
-            if(respondentsList != null) {
+            if (respondentsList != null) {
                 respondentsList.forEach(respondents -> getApplicantsDetails(
                     respondents,
                     respondentsAutomatedHearingpartyDetails
@@ -54,7 +54,7 @@ public class AutomatedHearingTransactionRequestMapper {
 
             List<Element<AutomatedHearingPartyDetails>> automatedHearingOtherPartyInTheCaseRevised = new ArrayList<>();
             List<Element<PartyDetails>> otherPartyInTheCaseRevisedList = caseData.getOtherPartyInTheCaseRevised();
-            if(otherPartyInTheCaseRevisedList != null) {
+            if (otherPartyInTheCaseRevisedList != null) {
                 otherPartyInTheCaseRevisedList.forEach(otherParty -> getApplicantsDetails(
                     otherParty,
                     automatedHearingOtherPartyInTheCaseRevised
@@ -63,7 +63,7 @@ public class AutomatedHearingTransactionRequestMapper {
 
             List<CaseLinksElement<AutomatedHearingCaseLink>> automatedHearingCaseLinks = new ArrayList<>();
             List<CaseLinksElement<CaseLink>> caseLinksList = caseData.getCaseLinks();
-            if(caseLinksList != null) {
+            if (caseLinksList != null) {
                 caseLinksList.forEach(caseLink -> getCaseLinksDetails(caseLink, automatedHearingCaseLinks));
             }
 
@@ -83,23 +83,23 @@ public class AutomatedHearingTransactionRequestMapper {
                 .courtName(caseData.getCourtName())
                 .applicantsFL401(getApplicantsDetails(caseData))
                 .respondentsFL401(getRespondentsDetails(caseData))
-                .caseManagementLocation(isNull(caseData.getCaseManagementLocation())?
-                                                   AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith().build():
-                                                   AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith()
-                .region(caseData.getCaseManagementLocation().getRegion())
-                .baseLocation(caseData.getCaseManagementLocation().getBaseLocation())
-                .build())
+                .caseManagementLocation(isNull(caseData.getCaseManagementLocation())
+                                            ? AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith().build() :
+                                            AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith()
+                                                .region(caseData.getCaseManagementLocation().getRegion())
+                                                .baseLocation(caseData.getCaseManagementLocation().getBaseLocation())
+                                                .build())
                 .caseLinks(automatedHearingCaseLinks)
                 .applicantCaseName(caseData.getApplicantCaseName())
                 .allPartyFlags(caseData.getAllPartyFlags())
-                .manageOrders(isNull(caseData.getManageOrders())?AutomatedHearingManageOrders.automatedHearingManageOrdersWith().build():
+                .manageOrders(isNull(caseData.getManageOrders()) ? AutomatedHearingManageOrders.automatedHearingManageOrdersWith().build() :
                                   AutomatedHearingManageOrders.automatedHearingManageOrdersWith()
-                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-                                  .build())
-                .attendHearing(isNull(caseData.getAttendHearing())?AutomatedHearingAttendHearing.automatedHearingAttendHearingWith().build():
-                               AutomatedHearingAttendHearing.automatedHearingAttendHearingWith()
-                                   .isWelshNeeded(YesOrNo.Yes.equals(caseData.getAttendHearing().getIsWelshNeeded()))
-                                   .build())
+                                      .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                      .build())
+                .attendHearing(isNull(caseData.getAttendHearing()) ? AutomatedHearingAttendHearing.automatedHearingAttendHearingWith().build() :
+                                   AutomatedHearingAttendHearing.automatedHearingAttendHearingWith()
+                                       .isWelshNeeded(YesOrNo.Yes.equals(caseData.getAttendHearing().getIsWelshNeeded()))
+                                       .build())
                 .issueDate(caseData.getIssueDate())
                 .build();
             String automatedHearingCaseDataJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(
@@ -113,7 +113,7 @@ public class AutomatedHearingTransactionRequestMapper {
     }
 
     private static AutomatedHearingPartyDetails getRespondentsDetails(CaseData caseData) {
-        if(caseData.getRespondentsFL401() != null) {
+        if (caseData.getRespondentsFL401() != null) {
             return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith()
                 .firstName(caseData.getRespondentsFL401().getFirstName())
                 .lastName(caseData.getRespondentsFL401().getLastName())
@@ -151,7 +151,7 @@ public class AutomatedHearingTransactionRequestMapper {
     }
 
     private static AutomatedHearingPartyDetails getApplicantsDetails(CaseData caseData) {
-        if(caseData.getApplicantsFL401() != null) {
+        if (caseData.getApplicantsFL401() != null) {
             return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith()
                 .firstName(caseData.getApplicantsFL401().getFirstName())
                 .lastName(caseData.getApplicantsFL401().getLastName())
