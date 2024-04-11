@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -365,15 +366,17 @@ public class StmtOfServImplService {
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
             updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-            List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-            finalServedApplicationDetailsList = updateFinalListOfServedApplications(
-                authorisation,
-                startAllTabsUpdateDataContent.authorisation(),
-                updatedCaseData,
-                bulkPrintDetails
-            );
-            updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+            if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(sosObject.getIsOrder())) {
+                List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+                List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+                finalServedApplicationDetailsList = updateFinalListOfServedApplications(
+                    authorisation,
+                    startAllTabsUpdateDataContent.authorisation(),
+                    updatedCaseData,
+                    bulkPrintDetails
+                );
+                updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+            }
             updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
         }
         allTabService.submitAllTabsUpdate(

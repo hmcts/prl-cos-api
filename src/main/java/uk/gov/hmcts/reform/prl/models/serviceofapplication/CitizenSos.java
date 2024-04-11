@@ -14,4 +14,5 @@ public class CitizenSos {
     private final String partiesServedDate;
     private final String partiesServed;
     private final Document citizenSosDocs;
+    private final String isOrder;
 }
