@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -295,9 +294,7 @@ public class TaskListService {
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = new ArrayList<>();
-
-        roles = getAmUserRoles(authorisation, userDetails, roles);
+        List<String> roles = mapAmUserRolesToIdamRoles(authorisation, userDetails);
         log.info("list of roles {}", roles);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
@@ -346,7 +343,8 @@ public class TaskListService {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private List<String> getAmUserRoles(String authorisation, UserDetails userDetails, List<String> roles) {
+    private List<String> mapAmUserRolesToIdamRoles(String authorisation, UserDetails userDetails) {
+        List<String> roles = new ArrayList<>();
         if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
@@ -359,17 +357,18 @@ public class TaskListService {
             roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
 
             String loggedInUserType;
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = UserRoles.JUDGE.name();
+            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+                loggedInUserType = Roles.JUDGE.getValue();
+            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                loggedInUserType = Roles.LEGAL_ADVISER.getValue();
             } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
+                loggedInUserType = Roles.COURT_ADMIN.getValue();
             } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
+                loggedInUserType = Roles.SOLICITOR.getValue();
             } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
+                loggedInUserType = Roles.CITIZEN.getValue();
             } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+                loggedInUserType = Roles.SYSTEM_UPDATE.getValue();
             } else {
                 loggedInUserType = "";
             }
