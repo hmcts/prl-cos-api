@@ -39,8 +39,13 @@ public enum CaseEvent {
     HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
     HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome"),
     CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
+    C100_REQUEST_SUPPORT("c100RequestSupport"),
+    FL401_REQUEST_SUPPORT("fl401RequestSupport"),
+    C100_MANAGE_SUPPORT("c100ManageSupport"),
+    FL401_MANAGE_SUPPORT("fl401ManageSupport"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
+    CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_CONTACT_PREFERENCE("citizenContactPreference");
 
