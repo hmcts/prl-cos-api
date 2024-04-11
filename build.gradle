@@ -604,6 +604,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/tasks/ValidateMiamApplicationOrExemptionTask.java',
   '**uk/gov/hmcts/reform/prl/controllers/MiamPolicyUpgradeController.java',
   '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeService.java',
+  '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**uk/gov/hmcts/reform/prl/services/ApplicationsTabService.java'
 ]
 
