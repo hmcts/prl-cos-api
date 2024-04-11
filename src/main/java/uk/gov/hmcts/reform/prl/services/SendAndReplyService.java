@@ -1350,13 +1350,13 @@ public class SendAndReplyService {
                                                                   caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
                             log.info("----> bulkPrintDetails {}", bulkPrintDetails);
-                            if (isNotEmpty(bulkPrintDetails)) {
+                            /*if (isNotEmpty(bulkPrintDetails)) {
                                 if (isNotEmpty(message.getMessageBulkPrintDetails())) {
                                     message.getMessageBulkPrintDetails().addAll(bulkPrintDetails);
                                 } else {
                                     message.setMessageBulkPrintDetails(bulkPrintDetails);
                                 }
-                            }
+                            }*/
                         } catch (Exception e) {
                             log.error(e.getMessage());
                         }
