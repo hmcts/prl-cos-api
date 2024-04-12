@@ -113,7 +113,7 @@ public class TaskListRenderer {
 
     private List<TaskSection> groupInSections(List<Task> allTasks, CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
-
+        log.info(caseData.getTaskListVersion() + " case data task list version");
         if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return generateTaskListV3(caseData, tasks);
         } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
@@ -250,6 +250,7 @@ public class TaskListRenderer {
     }
 
     private static List<TaskSection> generateTaskListV3(CaseData caseData, Map<Event, Task> tasks) {
+        log.info("Inside generateTaskListV3");
         final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
             .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
