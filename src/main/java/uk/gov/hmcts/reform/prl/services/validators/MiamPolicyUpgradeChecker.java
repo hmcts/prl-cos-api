@@ -24,6 +24,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_POLICY_UPGRADE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum.miamCertificate;
 
 @Slf4j
 @Service
@@ -93,7 +95,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         boolean finished;
         Optional<List<MiamExemptionsChecklistEnum>> miamPolicyUpgradeExemptionsChecklist
             = Optional.ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons());
-        if (!miamPolicyUpgradeExemptionsChecklist.isPresent()) {
+        if (!miamPolicyUpgradeExemptionsChecklist.isPresent() || miamPolicyUpgradeExemptionsChecklist.get().isEmpty()) {
             finished = false;
         } else {
             finished = checkedForClaimedExemptions(caseData);
@@ -138,10 +140,10 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-            && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1()))
+            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim()))
             || (MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2()))) {
+            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim()))) {
             finished = false;
         }
         log.info("finished in checkedForOtherExemptions {}", finished);
@@ -166,12 +168,12 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             || (MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
             && ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence()))
-            || (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
+            || (miamCertificate.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
             && ObjectUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()))
-            || (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-            && ObjectUtils.isEmpty(
-            caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails()))) {
+            || (miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
+            && StringUtils.isEmpty(
+            caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim()))) {
             finished = false;
         }
         log.info("finished in checkForPreviousMiamAttendanceExemption {}", finished);
@@ -183,6 +185,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         Optional<List<MiamDomesticAbuseChecklistEnum>> miamDomesticAbuseEvidenceList
             = Optional.ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidences());
         if (!miamDomesticAbuseEvidenceList.isPresent()
+            || miamDomesticAbuseEvidenceList.get().isEmpty()
             || ObjectUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())) {
             finished = false;
