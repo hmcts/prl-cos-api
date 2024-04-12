@@ -149,6 +149,8 @@ public class DraftOrder {
     private final SdoDetails sdoDetails;
     private final YesOrNo isOrderCreatedBySolicitor;
 
+    private final boolean isAutoHearingReqPending;
+
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
         return String.format(

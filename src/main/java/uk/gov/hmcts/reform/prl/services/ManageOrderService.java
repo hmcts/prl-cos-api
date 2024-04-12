@@ -1123,12 +1123,7 @@ public class ManageOrderService {
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            //setDraftOrderCollection(caseData, loggedInUserType,userDetails); //fetch list -> draftOrderList -> get 0
-            //Automated Hearing Request Call
-            Map<String, Object> draftOrderCollection = setDraftOrderCollection(caseData, loggedInUserType,userDetails);
-            List<Element<DraftOrder>> draftOrderList = (List<Element<DraftOrder>>) draftOrderCollection.get("draftOrderCollection");
-            // submitted with flag -> call only flag is true
-            return draftOrderCollection; // return the same draftOrderList
+            return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
@@ -1153,7 +1148,7 @@ public class ManageOrderService {
                 newOrderDetails
             );
         }
-        // Check for create an order option
+        // #PendingCheck for create an order option
         //Automated Hearing Request Call
         // set a flag in newOrderDetails element
         orderCollection.addAll(newOrderDetails);
@@ -1198,7 +1193,10 @@ public class ManageOrderService {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
-            // set the flag true - createAmhPending = true
+            if (isHearingPageNeeded(draftOrderElement.getValue().getOrderType(), draftOrderElement.getValue().getC21OrderOptions())) {
+                draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()
+                    .isAutoHearingReqPending(true).build());
+            }
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());

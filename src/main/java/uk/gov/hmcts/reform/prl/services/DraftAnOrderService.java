@@ -1030,11 +1030,10 @@ public class DraftAnOrderService {
                 }
                 if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
                     .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
-                    UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
-                    UserRoles.CASEMANAGER.toString())) {
-                    //set a flag -> draftOrder
+                    UserRoles.JUDGE.toString()) || loggedInUserType.equalsIgnoreCase(UserRoles.CASEMANAGER.toString()))
+                    && isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
+                    draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(true).build();
                 }
-
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(selectedOrderId, draftOrder)
