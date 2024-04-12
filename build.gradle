@@ -596,8 +596,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/rpa/mappers/MiamPolicyUpgradeMapper.java',
   '**uk/gov/hmcts/reform/prl/services/TaskListRenderer.java',
   '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
-  '**uk/gov/hmcts/reform/prl/rpa/mappers/C100JsonMapper.java'
+  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java'
 ]
 
 sonarqube {
