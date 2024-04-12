@@ -253,7 +253,7 @@ public class MiamPolicyUpgradeService {
 
     public CaseData renameConfidentialDocumentForMiamPolicyUpgrade(CaseData caseData, String systemAuthorisation) {
         log.info("Inside renameConfidentialDocumentForMiamPolicyUpgrade");
-        if (domesticAbuse.equals(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+        if ((caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse))
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument())) {
             List<Element<DomesticAbuseEvidenceDocument>> mpuConfidentialDomesticAbuseEvidenceDocument = new ArrayList<>();
@@ -272,7 +272,7 @@ public class MiamPolicyUpgradeService {
                                               .build())
                 .build();
         }
-        if (previousMiamAttendance.equals(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+        if (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance)
             && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())) {
             if (miamPolicyUpgradePreviousAttendance_Value_1.equals(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider())) {
