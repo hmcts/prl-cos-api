@@ -10,8 +10,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -117,5 +122,223 @@ public class MiamPolicyUpgradeServiceTest {
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuNoDomesticAbuseEvidenceReason"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamChildProtection() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.childProtectionConcern))
+            .mpuChildProtectionConcernReason(MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1)
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals(MiamChildProtectionConcernChecklistEnum
+            .MIAMChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamUrgency() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.urgency))
+            .mpuUrgencyReason(MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals(MiamUrgencyReasonChecklistEnum
+            .miamPolicyUpgradeUrgencyReason_Value_1, objectMap.get("mpuUrgencyReason"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason1() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
+            .mpuDocFromDisputeResolutionProvider(Document.builder().build())
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals(Document.builder().build(), objectMap.get("mpuDocFromDisputeResolutionProvider"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
+            .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails)
+            .mpuMediatorDetails("test")
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals("test", objectMap.get("mpuMediatorDetails"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamPreviousReason2Certificate() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
+            .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+            .mpuCertificateByMediator(Document.builder().build())
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals(Document.builder().build(), objectMap.get("mpuCertificateByMediator"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption3() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3)
+            .mpuApplicantUnableToAttendMiamReason1("test")
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption4() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4)
+            .mpuApplicantUnableToAttendMiamReason1("test")
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
+    }
+
+    @Test
+    public void testPopulateMiamPolicyUpgradeDetailsClaimingExcemptionFromMiamOtherExcemption5() {
+        uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5)
+            .mpuApplicantUnableToAttendMiamReason2("test")
+            .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
+            .thenReturn(CaseData.builder()
+                .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Assert.assertNotNull(objectMap);
+        Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
     }
 }
