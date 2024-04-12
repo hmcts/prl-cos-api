@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
