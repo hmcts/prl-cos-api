@@ -31,15 +31,18 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -69,6 +72,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Value("${southampton.court.email-address}")
     protected String southamptonCourtEmailAddress;
+
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
@@ -115,6 +120,9 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
 
+                if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
+                }
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,
                     callbackRequest,

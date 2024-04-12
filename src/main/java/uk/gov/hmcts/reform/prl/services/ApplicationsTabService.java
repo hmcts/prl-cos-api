@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -130,6 +131,7 @@ public class ApplicationsTabService implements TabService {
     private final ObjectMapper objectMapper;
     private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -142,6 +144,9 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+                if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
+                }
                 applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
                 applicationTab.put("miamPolicyUpgradeExemptionsTable", getMiamExemptionsTableForPolicyUpgrade(caseData));
             } else {
