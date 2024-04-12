@@ -112,6 +112,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
@@ -135,6 +136,9 @@ public class ApplicationsTabServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Mock
+    MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -647,6 +651,8 @@ public class ApplicationsTabServiceTest {
             .thenReturn(OtherPersonInTheCase.builder().build());
         when(objectMapper.convertValue(caseData, AllegationsOfHarmOrders.class))
             .thenReturn(allegationsOfHarmOrders);
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
+            .thenReturn(caseData);
 
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
@@ -703,6 +709,8 @@ public class ApplicationsTabServiceTest {
             .thenReturn(OtherPersonInTheCase.builder().build());
         when(objectMapper.convertValue(caseData, AllegationsOfHarmOrders.class))
             .thenReturn(allegationsOfHarmOrders);
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
+            .thenReturn(caseData);
 
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
