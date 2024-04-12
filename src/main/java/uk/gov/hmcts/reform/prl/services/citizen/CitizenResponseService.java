@@ -182,7 +182,8 @@ public class CitizenResponseService {
                             startAllTabsUpdateDataContent.userDetails()
                     ));
                     try {
-                        log.info("******* after docs added caseDataMapToBeUpdated json ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+                        log.info("******* after docs added caseDataMapToBeUpdated json ===>"
+                                + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
                     } catch (JsonProcessingException e) {
                         log.info("error");
                     }
