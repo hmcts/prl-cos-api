@@ -134,8 +134,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-       // String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
-
+        // String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
         emailService.send(
             "anshika.nigam1@hmcts.net",
             EmailTemplateNames.CASEWORKER,
