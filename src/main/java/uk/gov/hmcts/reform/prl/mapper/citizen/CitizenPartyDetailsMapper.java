@@ -424,7 +424,8 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
-                          .respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
+                          //.respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
+                          .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
                           .build())
             .build();
     }
