@@ -471,6 +471,7 @@ public class CaseService {
         return CitizenDocuments.builder()
             .partyId(quarantineDoc.getUploadedByIdamId())
             .partyType(quarantineDoc.getDocumentParty())
+            .partyName(quarantineDoc.getUploadedBy())
             .categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
