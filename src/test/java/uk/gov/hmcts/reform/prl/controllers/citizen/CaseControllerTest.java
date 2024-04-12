@@ -157,7 +157,7 @@ public class CaseControllerTest {
             .applicantCaseName("test")
             .createdDate(LocalDateTime.now().minusDays(10))
             .build();
-        String caseId = "1234567891234567";
+        String caseId = "1234567891234568";
 
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(false);
         caseController.retrieveCaseWithHearing(caseId, "test", authToken, servAuthToken);
