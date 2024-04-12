@@ -47,7 +47,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
@@ -62,7 +62,7 @@ public class MiamPolicyUpgradeServiceTest {
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
                     .mpuClaimingExemptionMiam(YesOrNo.Yes)
                     .mpuExemptionReasons(new ArrayList<>()).build()).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNotNull(objectMap.get("mpuClaimingExemptionMiam"));
         Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
@@ -91,7 +91,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNotNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
@@ -115,7 +115,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuNoDomesticAbuseEvidenceReason"));
     }
@@ -137,7 +137,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(MiamChildProtectionConcernChecklistEnum
             .MIAMChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
@@ -160,7 +160,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(MiamUrgencyReasonChecklistEnum
             .miamPolicyUpgradeUrgencyReason_Value_1, objectMap.get("mpuUrgencyReason"));
@@ -184,7 +184,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(Document.builder().build(), objectMap.get("mpuDocFromDisputeResolutionProvider"));
     }
@@ -208,7 +208,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuMediatorDetails"));
     }
@@ -232,7 +232,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(Document.builder().build(), objectMap.get("mpuCertificateByMediator"));
     }
@@ -255,7 +255,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
@@ -278,7 +278,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
@@ -301,7 +301,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
     }
