@@ -1028,6 +1028,13 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
+                    UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
+                    UserRoles.CASEMANAGER.toString())) {
+                    //set a flag -> draftOrder
+                }
+
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(selectedOrderId, draftOrder)

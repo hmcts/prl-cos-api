@@ -204,14 +204,14 @@ public class EditAndApproveDraftOrderController {
                     authorisation,
                     callbackRequest.getEventId()
                 ));
-                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                /*if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
                     .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
                     UserRoles.JUDGE.toString())) || loggedInUserType.equalsIgnoreCase(
                     UserRoles.CASEMANAGER.toString())) {
                     List<Element<DraftOrder>> draftOrderList = (List<Element<DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
                     //Automated Hearing Request Call
                     manageOrderService.createAutomatedHearingManagement(authorisation, caseData, draftOrderList.get(0).getId());
-                }
+                }*/
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));

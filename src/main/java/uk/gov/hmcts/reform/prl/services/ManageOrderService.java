@@ -1127,7 +1127,7 @@ public class ManageOrderService {
             //Automated Hearing Request Call
             Map<String, Object> draftOrderCollection = setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             List<Element<DraftOrder>> draftOrderList = (List<Element<DraftOrder>>) draftOrderCollection.get("draftOrderCollection");
-            createAutomatedHearingManagement(authorisation, caseData, draftOrderList.get(0).getId()); // pass the order id
+            // submitted with flag -> call only flag is true
             return draftOrderCollection; // return the same draftOrderList
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
@@ -1152,9 +1152,10 @@ public class ManageOrderService {
                 orderCollection,
                 newOrderDetails
             );
-            //Automated Hearing Request Call
-            createAutomatedHearingManagement(authorisation, caseData, newOrderDetails.get(0).getId()); // newOrderDetails -> get the id
         }
+        // Check for create an order option
+        //Automated Hearing Request Call
+        // set a flag in newOrderDetails element
         orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(
             m -> m.getValue().getDateCreated(),
@@ -1191,12 +1192,13 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
-        List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
+        List<Element<DraftOrder>> draftOrderList = new ArrayList<>(); // add flag in DraftOrder -> createAmhPending
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            // set the flag true - createAmhPending = true
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
