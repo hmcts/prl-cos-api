@@ -67,6 +67,8 @@ public class OrderDetails {
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
 
+    private final boolean isAutoHearingReqPending;
+
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
     private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;

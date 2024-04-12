@@ -946,9 +946,7 @@ public class ManageOrderService {
                 }
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                       fieldMap, caseData
-            ));
-
+                                                       fieldMap, caseData));
             return orderCollection;
         } else {
             return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, userDetails);
@@ -2230,10 +2228,15 @@ public class ManageOrderService {
         }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
+        boolean isAutoHearingReqPending = false;
+        if (isHearingPageNeeded(CreateSelectOrderOptionsEnum.valueOf(flagSelectedOrderId), orderDetails.getC21OrderOptions())) {
+            isAutoHearingReqPending = true;
+        }
         return element(orderDetails.toBuilder()
+                           .isAutoHearingReqPending(isAutoHearingReqPending)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+
                                              .orderCreatedBy(
                                                  (null != orderDetails.getOtherDetails()
                                                      && null != orderDetails.getOtherDetails().getOrderCreatedBy())
