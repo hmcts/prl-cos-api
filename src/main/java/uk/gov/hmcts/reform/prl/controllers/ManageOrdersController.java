@@ -188,9 +188,11 @@ public class ManageOrdersController {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                     = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            log.info("Automated Hearing Management: startAllTabsUpdateDataContent: caseDataMap: {}", caseDataUpdated);
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            log.info("Automated Hearing Management: startAllTabsUpdateDataContent: caseDataMap: {}", caseData);
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
