@@ -811,8 +811,15 @@ public class CitizenPartyDetailsMapper {
         if (null != citizenProvidedPartyDetails.getResponse()) {
             return existingPartyDetails.toBuilder()
                     .response(existingPartyDetails.getResponse().toBuilder()
-                            .c7ResponseSubmitted(Yes).build())
+                            .c7ResponseSubmitted(Yes)
+                            .build())
+                    .currentRespondent(null)
                     .build();
+        }
+        try {
+            log.info("******* existingPartyDetails after updated json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
         }
 
         return existingPartyDetails;

@@ -170,14 +170,22 @@ public class CitizenResponseService {
                         responseDocs.add(element(c1aFinalDocument));
                         log.info("C1A Final document generated successfully for respondent ");
                     }
-
+                    try {
+                        log.info("******* starting caseDataMapToBeUpdated json ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+                    } catch (JsonProcessingException e) {
+                        log.info("error");
+                    }
 
                     caseDataMapToBeUpdated.putAll(addCitizenDocumentsToTheQuarantineList(
                             dbCaseData,
                             responseDocs,
                             startAllTabsUpdateDataContent.userDetails()
                     ));
-
+                    try {
+                        log.info("******* after docs added caseDataMapToBeUpdated json ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+                    } catch (JsonProcessingException e) {
+                        log.info("error");
+                    }
                     caseDataMapToBeUpdated.putAll(generateC8Document(
                             authorisation,
                             dbCaseData,
@@ -186,6 +194,12 @@ public class CitizenResponseService {
                             partyDetailsElement.getValue().getLabelForDynamicList(),
                             startAllTabsUpdateDataContent.userDetails()
                     ));
+
+                    try {
+                        log.info("******* After C8 caseDataMapToBeUpdated json ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+                    } catch (JsonProcessingException e) {
+                        log.info("error");
+                    }
 
                     if (Yes != response.getC7ResponseSubmitted()) {
                         log.info("setting c7 response submitted");
@@ -209,6 +223,12 @@ public class CitizenResponseService {
                         caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
                     }
                 }
+            }
+
+            try {
+                log.info("******* final caseDataMapToBeUpdated json ===>" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+            } catch (JsonProcessingException e) {
+                log.info("error");
             }
 
             return allTabService.submitUpdateForSpecificUserEvent(
