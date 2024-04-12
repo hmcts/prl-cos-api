@@ -63,7 +63,8 @@ public enum Event {
     SOA("serviceOfApplication", "Service of application"),
     CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
     ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
-    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper");
+    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
+    AMEND_MIAM_UPGRADE("amendMiamUpgrade", "Amend MIAM");
 
     private final String id;
     private final String name;

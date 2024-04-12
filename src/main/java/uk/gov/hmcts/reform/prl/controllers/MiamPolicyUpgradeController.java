@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 
-import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -45,8 +44,8 @@ public class MiamPolicyUpgradeController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("inside /submit-miam-policy-upgrade");
-            Map<String, Object> caseDataUpdated = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

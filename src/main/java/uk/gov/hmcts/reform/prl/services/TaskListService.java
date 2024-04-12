@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -82,12 +83,15 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.domesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.previousMiamAttendance;
 
 
 @Slf4j
@@ -107,22 +111,24 @@ public class TaskListService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
 
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-                .map(event -> Task.builder()
-                        .event(event)
-                        .state(getTaskState(caseData, event))
-                        .build())
-                .toList();
+            .map(event -> Task.builder()
+                .event(event)
+                .state(getTaskState(caseData, event))
+                .build())
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         return getRespondentsEvents(caseData).stream()
-                .map(event -> RespondentTask.builder()
-                        .event(event)
-                        .state(getRespondentTaskState(event, respondingParty))
-                        .build())
-                .toList();
+            .map(event -> RespondentTask.builder()
+                .event(event)
+                .state(getRespondentTaskState(event, respondingParty))
+                .build())
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -135,7 +141,7 @@ public class TaskListService {
         if (eventsChecker.isStarted(event, caseData)) {
             return TaskState.IN_PROGRESS;
         }
-        return eventsChecker.getDefaultState(event,caseData);
+        return eventsChecker.getDefaultState(event, caseData);
     }
 
     private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty) {
@@ -150,7 +156,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? getFL401Events(caseData) : getC100Events(caseData);
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -181,40 +187,19 @@ public class TaskListService {
             ));
         } else if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return new ArrayList<>(List.of(
-                    CASE_NAME,
-                    TYPE_OF_APPLICATION,
-                    HEARING_URGENCY,
-                    CHILD_DETAILS_REVISED,
-                    APPLICANT_DETAILS,
-                    RESPONDENT_DETAILS,
-                    OTHER_PEOPLE_IN_THE_CASE_REVISED,
-                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
-                    CHILDREN_AND_APPLICANTS,
-                    CHILDREN_AND_RESPONDENTS,
-                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
-                    ALLEGATIONS_OF_HARM_REVISED,
-                    MIAM,
-                    OTHER_PROCEEDINGS,
-                    ATTENDING_THE_HEARING,
-                    INTERNATIONAL_ELEMENT,
-                    LITIGATION_CAPACITY,
-                    WELSH_LANGUAGE_REQUIREMENTS,
-                    VIEW_PDF_DOCUMENT,
-                    SUBMIT_AND_PAY,
-                    SUBMIT
-            ));
-        }
-
-        return new ArrayList<>(List.of(
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
                 HEARING_URGENCY,
+                CHILD_DETAILS_REVISED,
                 APPLICANT_DETAILS,
-                CHILD_DETAILS,
                 RESPONDENT_DETAILS,
+                OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                CHILDREN_AND_APPLICANTS,
+                CHILDREN_AND_RESPONDENTS,
+                CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                ALLEGATIONS_OF_HARM_REVISED,
                 MIAM,
-                ALLEGATIONS_OF_HARM,
-                OTHER_PEOPLE_IN_THE_CASE,
                 OTHER_PROCEEDINGS,
                 ATTENDING_THE_HEARING,
                 INTERNATIONAL_ELEMENT,
@@ -223,6 +208,27 @@ public class TaskListService {
                 VIEW_PDF_DOCUMENT,
                 SUBMIT_AND_PAY,
                 SUBMIT
+            ));
+        }
+
+        return new ArrayList<>(List.of(
+            CASE_NAME,
+            TYPE_OF_APPLICATION,
+            HEARING_URGENCY,
+            APPLICANT_DETAILS,
+            CHILD_DETAILS,
+            RESPONDENT_DETAILS,
+            MIAM,
+            ALLEGATIONS_OF_HARM,
+            OTHER_PEOPLE_IN_THE_CASE,
+            OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            INTERNATIONAL_ELEMENT,
+            LITIGATION_CAPACITY,
+            WELSH_LANGUAGE_REQUIREMENTS,
+            VIEW_PDF_DOCUMENT,
+            SUBMIT_AND_PAY,
+            SUBMIT
         ));
     }
 
@@ -231,28 +237,28 @@ public class TaskListService {
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
         List<Event> eventsList = new ArrayList<>(List.of(
-                FL401_CASE_NAME,
-                FL401_TYPE_OF_APPLICATION,
-                WITHOUT_NOTICE_ORDER,
-                APPLICANT_DETAILS,
-                RESPONDENT_DETAILS,
-                FL401_APPLICANT_FAMILY_DETAILS,
-                RELATIONSHIP_TO_RESPONDENT,
-                FL401_OTHER_PROCEEDINGS,
-                ATTENDING_THE_HEARING,
-                WELSH_LANGUAGE_REQUIREMENTS,
-                FL401_UPLOAD_DOCUMENTS,
-                VIEW_PDF_DOCUMENT,
-                FL401_SOT_AND_SUBMIT,
-                FL401_RESUBMIT
+            FL401_CASE_NAME,
+            FL401_TYPE_OF_APPLICATION,
+            WITHOUT_NOTICE_ORDER,
+            APPLICANT_DETAILS,
+            RESPONDENT_DETAILS,
+            FL401_APPLICANT_FAMILY_DETAILS,
+            RELATIONSHIP_TO_RESPONDENT,
+            FL401_OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            WELSH_LANGUAGE_REQUIREMENTS,
+            FL401_UPLOAD_DOCUMENTS,
+            VIEW_PDF_DOCUMENT,
+            FL401_SOT_AND_SUBMIT,
+            FL401_RESUBMIT
         ));
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
-                &&
-                ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            &&
+            ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             eventsList.add(RESPONDENT_BEHAVIOUR);
             eventsList.add(FL401_HOME);
-        } else  if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+        } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             eventsList.add(FL401_HOME);
         } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             eventsList.add(RESPONDENT_BEHAVIOUR);
@@ -263,32 +269,32 @@ public class TaskListService {
     public List<RespondentSolicitorEvents> getRespondentsEvents(CaseData caseData) {
         if (null != caseData.getC1ADocument()) {
             return new ArrayList<>(List.of(
-                    CONSENT,
-                    KEEP_DETAILS_PRIVATE,
-                    CONFIRM_EDIT_CONTACT_DETAILS,
-                    ATTENDING_THE_COURT,
-                    RespondentSolicitorEvents.MIAM,
-                    RespondentSolicitorEvents.OTHER_PROCEEDINGS,
-                    RespondentSolicitorEvents.ALLEGATION_OF_HARM,
-                    RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM,
-                    RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
-                    ABILITY_TO_PARTICIPATE,
-                    VIEW_DRAFT_RESPONSE,
-                    RespondentSolicitorEvents.SUBMIT
-            ));
-        }
-        return new ArrayList<>(List.of(
                 CONSENT,
                 KEEP_DETAILS_PRIVATE,
                 CONFIRM_EDIT_CONTACT_DETAILS,
                 ATTENDING_THE_COURT,
                 RespondentSolicitorEvents.MIAM,
-            RespondentSolicitorEvents.OTHER_PROCEEDINGS,
+                RespondentSolicitorEvents.OTHER_PROCEEDINGS,
                 RespondentSolicitorEvents.ALLEGATION_OF_HARM,
+                RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM,
                 RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
                 ABILITY_TO_PARTICIPATE,
                 VIEW_DRAFT_RESPONSE,
                 RespondentSolicitorEvents.SUBMIT
+            ));
+        }
+        return new ArrayList<>(List.of(
+            CONSENT,
+            KEEP_DETAILS_PRIVATE,
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            ATTENDING_THE_COURT,
+            RespondentSolicitorEvents.MIAM,
+            RespondentSolicitorEvents.OTHER_PROCEEDINGS,
+            RespondentSolicitorEvents.ALLEGATION_OF_HARM,
+            RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
+            ABILITY_TO_PARTICIPATE,
+            VIEW_DRAFT_RESPONSE,
+            RespondentSolicitorEvents.SUBMIT
         ));
     }
 
@@ -305,6 +311,16 @@ public class TaskListService {
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
             || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
             try {
+                if (Event.AMEND_MIAM_UPGRADE.getId().equals(callbackRequest.getEventId())
+                    && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+                    && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+                    && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
+                    || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
+                    caseData = miamPolicyUpgradeService.renameConfidentialDocumentForMiamPolicyUpgrade(
+                        caseData,
+                        startAllTabsUpdateDataContent.authorisation()
+                    );
+                }
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
@@ -333,6 +349,7 @@ public class TaskListService {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 
     private List<String> mapAmUserRolesToIdamRoles(String authorisation, UserDetails userDetails) {
         List<String> roles = new ArrayList<>();

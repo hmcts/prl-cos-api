@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
@@ -40,6 +41,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.domesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.previousMiamAttendance;
 
 @Slf4j
 @Service
@@ -179,6 +183,14 @@ public class AllTabServiceImpl implements AllTabsService {
         return documentMap;
     }
 
+    public Map<String, Object> getMiamPolicyupgradeDocumentMap(CaseData caseData, Map<String, Object> documentMap) {
+
+        documentMap.put("mpuDomesticAbuseEvidenceDocument", caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument());
+        documentMap.put("mpuDocFromDisputeResolutionProvider", caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider());
+        documentMap.put("mpuCertificateByMediator", caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator());
+        return documentMap;
+    }
+
     private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
@@ -242,6 +254,14 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+
+        if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+            && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
+            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
+            getMiamPolicyupgradeDocumentMap(caseData, combinedFieldsMap);
+        }
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }

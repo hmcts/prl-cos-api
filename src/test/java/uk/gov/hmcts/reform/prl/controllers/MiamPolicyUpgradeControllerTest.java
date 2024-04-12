@@ -30,7 +30,7 @@ public class MiamPolicyUpgradeControllerTest {
     public void testSubmitMiamPolicyUpgrade() {
         when(authorisationService.isAuthorized("test", "test")).thenReturn(true);
         when(miamPolicyUpgradeService
-            .populateMiamPolicyUpgradeDetails(CallbackRequest.builder().build())).thenReturn(new HashMap<>());
+            .populateAmendedMiamPolicyUpgradeDetails(CallbackRequest.builder().build())).thenReturn(new HashMap<>());
         Assert.assertNotNull(miamPolicyUpgradeController
             .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build()));
     }
