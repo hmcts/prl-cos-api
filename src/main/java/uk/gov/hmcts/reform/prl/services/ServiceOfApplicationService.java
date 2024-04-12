@@ -2263,7 +2263,7 @@ public class ServiceOfApplicationService {
         return fetchCoverLetter(authorisation, template, dataMap);
     }
 
-    private Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
+    public Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
@@ -2321,7 +2321,7 @@ public class ServiceOfApplicationService {
         return No;
     }
 
-    private CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
+    public CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
         if (CollectionUtils.isNotEmpty(caseInvites)) {
             Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
                 .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)

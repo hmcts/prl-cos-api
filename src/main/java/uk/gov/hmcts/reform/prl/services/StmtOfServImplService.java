@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespo
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -400,11 +401,8 @@ public class StmtOfServImplService {
                 .toList();
             updatedCaseData.getRespondents().forEach(respondent -> {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    Document coverLetter = serviceOfApplicationService
-                        .generateCoverLetterBasedOnCaseAccess(authorization,
-                                                              updatedCaseData, respondent,
-                                                              Templates.PRL_LET_ENG_RE7
-                        );
+                    Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
+                                                          updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
                     serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
                         updatedCaseData,
                         authorization,
@@ -421,13 +419,11 @@ public class StmtOfServImplService {
                 .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
                 .toList();
             if (!CaseUtils.hasLegalRepresentation(updatedCaseData.getRespondentsFL401())) {
-                Document coverLetter = serviceOfApplicationService
-                    .generateCoverLetterBasedOnCaseAccess(authorization,
-                                                          updatedCaseData,
-                                                          element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                                                                  updatedCaseData.getRespondentsFL401()),
-                                                          Templates.PRL_LET_ENG_RE7
-                    );
+                Document coverLetter = getCoverLetter(authorization, updatedCaseData,
+                                                      element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                                                                                              updatedCaseData.getRespondentsFL401()),
+                                                      updatedCaseData.getApplicantsFL401().getLabelForDynamicList());
+
                 serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
                     updatedCaseData,
                     authorization,
@@ -457,6 +453,15 @@ public class StmtOfServImplService {
                                                           .whoIsResponsible("Applicant Lip")
                                                           .bulkPrintDetails(bulkPrintDetails).build()));
         return finalServedApplicationDetailsList;
+    }
+
+    private Document getCoverLetter(String authorization, CaseData updatedCaseData, Element<PartyDetails> respondent, String applicantName) {
+        CaseInvite caseInvite = serviceOfApplicationService.getCaseInvite(respondent.getId(), updatedCaseData.getCaseInvites());
+        Map<String, Object> dataMap = serviceOfApplicationService.populateAccessCodeMap(
+            updatedCaseData,
+            respondent, caseInvite);
+        dataMap.put("applicantName", applicantName);
+        return serviceOfApplicationService.fetchCoverLetter(authorization, Templates.PRL_LET_ENG_RE7, dataMap);
     }
 
     private void updateStatementOfServiceCollection(CitizenSos sosObject, CaseData updatedCaseData,
