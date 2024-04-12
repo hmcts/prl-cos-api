@@ -1289,10 +1289,6 @@ public class SendAndReplyService {
 
     public void sendNotificationToExternalParties(CaseData caseData, String auth) {
 
-        log.info("----> caseData {}", caseData);
-
-        log.info("----> caseData.getSendOrReplyMessage() {}", caseData.getSendOrReplyMessage());
-
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
@@ -1324,12 +1320,6 @@ public class SendAndReplyService {
             List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
                 .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
 
-            log.info("----> caseData.getExternalMessageWhoToSendTo() {}", caseData.getSendOrReplyMessage()
-                .getSendMessageObject().getExternalMessageWhoToSendTo());
-
-            log.info("----> caseData.getExternalMessageWhoToSendTo().getValue() {}", caseData.getSendOrReplyMessage()
-                .getSendMessageObject().getExternalMessageWhoToSendTo().getValue());
-
             dynamicMultiselectListElementList.forEach(selectedElement -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     selectedElement.getCode(),
@@ -1343,13 +1333,12 @@ public class SendAndReplyService {
                     if (YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
                         log.info("----> Else if partyDetails.getContactPreferences() {}", partyDetails.getDoTheyHaveLegalRepresentation());
                     } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
-                        log.info("----> Else if partyDetails.getContactPreferences() {}",
-                                 partyDetails.getAddress());
+
                         try {
                             List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
                                                                   caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
-                            log.info("----> bulkPrintDetails {}", bulkPrintDetails);
+                            log.info("Messsage send as post to external parties and bulkPrintDetails {}", bulkPrintDetails);
                             /*if (isNotEmpty(bulkPrintDetails)) {
                                 if (isNotEmpty(message.getMessageBulkPrintDetails())) {
                                     message.getMessageBulkPrintDetails().addAll(bulkPrintDetails);
@@ -1369,7 +1358,6 @@ public class SendAndReplyService {
             }
             );
         }
-        log.info("----> end method call");
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
