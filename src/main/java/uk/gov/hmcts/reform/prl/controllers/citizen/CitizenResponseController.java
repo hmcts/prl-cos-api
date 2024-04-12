@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -32,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
+@RequestMapping("/citizen")
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseController {
@@ -42,17 +44,17 @@ public class CitizenResponseController {
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Document generated"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")})
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
     public Document generateC7DraftDocument(
             @PathVariable("caseId") String caseId,
             @PathVariable("partyId") String partyId,
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        if (authorisationService.isAuthorized(authorisation, s2sToken))
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation);
-        else {
+        } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
@@ -60,9 +62,9 @@ public class CitizenResponseController {
     @PostMapping(path = "/{caseId}/submit-citizen-response", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Submit C7 response and generate all docs for citizen respondent")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Document generated"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")})
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
     public CaseData submitAndGenerateC7(
             @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
             @PathVariable("caseId") String caseId,
