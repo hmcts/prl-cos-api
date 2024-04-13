@@ -1146,9 +1146,6 @@ public class ManageOrderService {
                 newOrderDetails
             );
         }
-        // #PendingCheck for create an order option
-        //Automated Hearing Request Call
-        // set a flag in newOrderDetails element
         orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(
             m -> m.getValue().getDateCreated(),
@@ -1185,12 +1182,13 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
-        List<Element<DraftOrder>> draftOrderList = new ArrayList<>(); // add flag in DraftOrder -> createAmhPending
+        List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            // Check for Automated Hearing Management
             if (isHearingPageNeeded(draftOrderElement.getValue().getOrderType(), draftOrderElement.getValue().getC21OrderOptions())) {
                 draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()
                     .isAutoHearingReqPending(true).build());
@@ -3385,8 +3383,8 @@ public class ManageOrderService {
             && null != address.getAddressLine1();
     }
 
-    public void createAutomatedHearingManagement(String authorisation, CaseData caseData, UUID id) {
-        log.info("Automated Hearing Management Call - Start");
+    public void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+        log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
             if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                 caseData.getManageOrders().getOrdersHearingDetails().stream()
@@ -3400,7 +3398,7 @@ public class ManageOrderService {
                             );
                             ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
                                 authorisation,
-                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, id)
+                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData)
                             );
                             log.info("Automated Hearing Request: Inside: End");
                             log.info(
@@ -3413,6 +3411,6 @@ public class ManageOrderService {
         } catch (Exception e) {
             throw new ManageOrderRuntimeException("Invalid Json", e);
         }
-        log.info("Automated Hearing Management Call - End");
+        log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
     }
 }

@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -188,15 +189,16 @@ public class ManageOrdersController {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                     = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
-            log.info("Automated Hearing Management: startAllTabsUpdateDataContent: caseDataMap: {}", caseDataUpdated);
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
-            log.info("Automated Hearing Management: startAllTabsUpdateDataContent: caseDataMap: {}", caseData);
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
+
+            // Check for Automated Hearing Management
+            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, manageOrderService);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state

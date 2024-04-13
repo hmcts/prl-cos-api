@@ -29,7 +29,7 @@ public class AutomatedHearingTransactionRequestMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    public static AutomatedHearingCaseData mappingAutomatedHearingTransactionRequest(CaseData caseData, UUID id) {
+    public static AutomatedHearingCaseData mappingAutomatedHearingTransactionRequest(CaseData caseData) {
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder().build();
         ObjectMapper objectMappers = new ObjectMapper();
         objectMappers.registerModule(new JavaTimeModule());
@@ -68,7 +68,6 @@ public class AutomatedHearingTransactionRequestMapper {
             }
 
             automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder()
-                .orderId(id)
                 .id(caseData.getId())
                 .taskListVersion(caseData.getTaskListVersion())
                 .createdDate(caseData.getCreatedDate())

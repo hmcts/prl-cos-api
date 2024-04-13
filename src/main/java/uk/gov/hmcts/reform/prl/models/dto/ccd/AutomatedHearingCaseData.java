@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AutomatedHearingCaseManagemen
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -38,9 +37,6 @@ public class AutomatedHearingCaseData {
 
     @JsonProperty("id")
     private long id;
-
-    @JsonProperty("orderId")
-    private UUID orderId;
 
     @JsonProperty("taskListVersion")
     private String taskListVersion;

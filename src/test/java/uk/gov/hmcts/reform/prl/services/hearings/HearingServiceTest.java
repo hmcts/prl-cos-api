@@ -349,9 +349,8 @@ public class HearingServiceTest {
     public void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
-        uuid = UUID.fromString(TEST_UUID);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, uuid);
+            .mappingAutomatedHearingTransactionRequest(caseData);
         when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(response);
         ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
 
@@ -364,9 +363,8 @@ public class HearingServiceTest {
     public void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        uuid = UUID.fromString(TEST_UUID);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, uuid);
+            .mappingAutomatedHearingTransactionRequest(caseData);
         when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(response);
         ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
 

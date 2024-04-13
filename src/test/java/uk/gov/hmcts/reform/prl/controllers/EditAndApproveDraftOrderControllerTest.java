@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -1007,7 +1008,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .thenReturn(caseDataMap);
         ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(createAutomatedHearingResponse);
+            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(createAutomatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
@@ -1104,7 +1105,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .thenReturn(caseDataMap);
         ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(createAutomatedHearingResponse);
+            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(createAutomatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
@@ -1397,7 +1398,9 @@ public class EditAndApproveDraftOrderControllerTest {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
         CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)

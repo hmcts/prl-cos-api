@@ -1028,6 +1028,7 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                // Check for Automated Hearing Management
                 if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
                     .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
                     UserRoles.JUDGE.toString()) || loggedInUserType.equalsIgnoreCase(UserRoles.CASEMANAGER.toString()))

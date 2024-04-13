@@ -1863,7 +1863,7 @@ public class ManageOrderServiceTest {
             .build();
         ResponseEntity<Object> response = ResponseEntity.ok(caseData.getId());
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, uuid))).thenReturn(response);
+            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(response);
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
 

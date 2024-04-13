@@ -1289,9 +1289,10 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             Event.EDIT_AND_APPROVE_ORDER.getId()
         );
 
@@ -1345,9 +1346,10 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             null
         );
 
@@ -1394,9 +1396,10 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             null
         );
 
@@ -1451,9 +1454,10 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             null
         );
 
@@ -1514,9 +1518,10 @@ public class DraftAnOrderServiceTest {
             .thenReturn(List.of(element(HearingData.builder()
                                             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                             .build())));
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             null
         );
 
@@ -4311,10 +4316,11 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString(),
             Mockito.anyString()
         )).thenReturn(hearings);
-        when(manageOrderService.setHearingDataForSdo(caseData, hearings, "test-auth")).thenReturn(caseData);
+        when(manageOrderService.setHearingDataForSdo(caseData, hearings, authToken)).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             Event.EDIT_AND_APPROVE_ORDER.getId()
         );
 
@@ -5499,10 +5505,11 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             ADMIN_EDIT_AND_APPROVE_ORDER.getId()
         );
 
@@ -5554,10 +5561,11 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
-            "test-auth",
+            authToken,
             EDIT_AND_APPROVE_ORDER.getId()
         );
 
@@ -5601,7 +5609,7 @@ public class DraftAnOrderServiceTest {
 
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
