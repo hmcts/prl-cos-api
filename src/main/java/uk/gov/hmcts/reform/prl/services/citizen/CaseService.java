@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -41,7 +43,6 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,14 +55,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -77,7 +82,6 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final RoleAssignmentService roleAssignmentService;
     private final UserService userService;
-    private static final String INVALID_CLIENT = "Invalid Client";
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
 
@@ -226,8 +230,8 @@ public class CaseService {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         switch (caseData.getState()) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING:
-            case DECISION_OUTCOME: {
+            case PREPARE_FOR_HEARING_CONDUCT_HEARING,
+                 DECISION_OUTCOME: {
                 HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
                 if (partyIdAndType != null) {
@@ -249,7 +253,7 @@ public class CaseService {
             .forEach(servedApplicationDetails -> {
                 if (citizenDocuments[0].size() == 0) {
                     if (servedApplicationDetails.getModeOfService().equals("By email")) {
-                        citizenDocuments[0].add(retreiveApplicationPackFromEmailNotifications(
+                        citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
                             servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
                             partyIdAndType
                         ));
@@ -264,17 +268,16 @@ public class CaseService {
         return citizenDocuments[0];
     }
 
-    private CitizenDocuments retreiveApplicationPackFromEmailNotifications(
+    private CitizenDocuments retrieveApplicationPackFromEmailNotifications(
         List<Element<EmailNotificationDetails>> emailNotificationDetailsList,
         ServiceOfApplication serviceOfApplication, HashMap<String, String> partyIdAndType) {
         final CitizenDocuments[] citizenDocuments = {null};
 
-        String partyId = partyIdAndType.entrySet().stream()
-            .map(Map.Entry::getKey)
+        String partyId = partyIdAndType.keySet().stream()
             .findFirst()
             .orElse(null);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
         emailNotificationDetailsList.stream()
             .map(Element::getValue)
@@ -282,30 +285,29 @@ public class CaseService {
             .filter(emailNotificationDetails -> emailNotificationDetails.getPartyIds().contains(partyId))
             .findFirst()
             .ifPresent(
-                emailNotificationDetails -> {
-                    citizenDocuments[0] = CitizenDocuments.builder()
-                        .partyId(emailNotificationDetails.getPartyIds())
-                        .servedParty(emailNotificationDetails.getServedParty())
-                        .uploadedDate(LocalDateTime.parse(
-                            emailNotificationDetails.getTimeStamp(),
-                            formatter
-                        ))
-                        .applicantSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
-                                ? emailNotificationDetails.getDocs().stream()
+                emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                    .partyId(emailNotificationDetails.getPartyIds())
+                    .servedParty(emailNotificationDetails.getServedParty())
+                    .uploadedDate(LocalDateTime.parse(
+                        emailNotificationDetails.getTimeStamp(),
+                        formatter
+                    ))
+                    .applicantSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                            ? emailNotificationDetails.getDocs().stream()
+                            .map(Element::getValue)
+                            .collect(Collectors.toList()) : null
+                    )
+                    .respondentSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                            ? (
+                            emailNotificationDetails.getDocs().stream()
                                 .map(Element::getValue)
-                                .collect(Collectors.toList()) : null
-                        )
-                        .respondentSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
-                                ? (
-                                emailNotificationDetails.getDocs().stream()
-                                    .map(Element::getValue)
-                                    .collect(Collectors.toList())
-                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
-                        )
-                        .build();
-                }
+                                .collect(Collectors.toList())
+                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                    )
+                    .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList))
+                    .build()
             );
         return citizenDocuments[0];
     }
@@ -315,7 +317,7 @@ public class CaseService {
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList()) : null;
+            .toList() : null;
     }
 
 
@@ -325,12 +327,11 @@ public class CaseService {
 
         final CitizenDocuments[] citizenDocuments = {null};
 
-        String partyId = partyIdAndType.entrySet().stream()
-            .map(Map.Entry::getKey)
+        String partyId = partyIdAndType.keySet().stream()
             .findFirst()
             .orElse(null);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
         bulkPrintDetailsList.stream()
             .map(Element::getValue)
@@ -338,30 +339,28 @@ public class CaseService {
             .filter(bulkPrintDetails -> bulkPrintDetails.getPartyIds().contains(partyId))
             .findFirst()
             .ifPresent(
-                bulkPrintDetails -> {
-                    citizenDocuments[0] = CitizenDocuments.builder()
-                        .partyId(bulkPrintDetails.getPartyIds())
-                        .servedParty(bulkPrintDetails.getServedParty())
-                        .uploadedDate(LocalDateTime.parse(
-                            bulkPrintDetails.getTimeStamp(),
-                            formatter
-                        ))
-                        .applicantSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
-                                ? bulkPrintDetails.getPrintDocs().stream()
+                bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
+                    .partyId(bulkPrintDetails.getPartyIds())
+                    .servedParty(bulkPrintDetails.getServedParty())
+                    .uploadedDate(LocalDateTime.parse(
+                        bulkPrintDetails.getTimeStamp(),
+                        formatter
+                    ))
+                    .applicantSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_APPLICANT)
+                            ? bulkPrintDetails.getPrintDocs().stream()
+                            .map(Element::getValue)
+                            .toList() : null
+                    )
+                    .respondentSoaPack(
+                        partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
+                            ? (
+                            bulkPrintDetails.getPrintDocs().stream()
                                 .map(Element::getValue)
-                                .collect(Collectors.toList()) : null
-                        )
-                        .respondentSoaPack(
-                            partyIdAndType.get(partyId).equals(SERVED_PARTY_RESPONDENT)
-                                ? (
-                                bulkPrintDetails.getPrintDocs().stream()
-                                    .map(Element::getValue)
-                                    .collect(Collectors.toList())
-                            ) : getUnservedRespondentDocumentList(serviceOfApplication)
-                        )
-                        .build();
-                }
+                                .toList()
+                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                    )
+                    .build()
             );
         return citizenDocuments[0];
     }
@@ -369,32 +368,6 @@ public class CaseService {
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
                                                        CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
-        List<String> unReturnedCategoriesForUI = List.of(
-            "safeguardingLetter",
-            "section37Report",
-            "section7Report",
-            "16aRiskAssessment",
-            "guardianReport",
-            "specialGuardianshipReport",
-            "otherDocs",
-            "sec37Report",
-            "localAuthorityOtherDoc",
-            "emailsToCourtToRequestHearingsAdjourned",
-            "publicFundingCertificates",
-            "noticesOfActingDischarge",
-            "requestForFASFormsToBeChanged",
-            "witnessAvailability",
-            "lettersOfComplaint",
-            "SPIPReferralRequests",
-            "homeOfficeDWPResponses",
-            "internalCorrespondence",
-            "importantInfoAboutAddressAndContact",
-            "privacyNotice",
-            "specialMeasures",
-            "anyOtherDoc",
-            "noticeOfHearing",
-            "caseSummary"
-        );
 
         if (null != caseData.getReviewDocuments()) {
             //add solicitor uploaded docs
@@ -430,7 +403,7 @@ public class CaseService {
             ));
         }
 
-        Collections.sort(citizenDocuments, comparing(CitizenDocuments::getUploadedDate).reversed());
+        citizenDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
 
         return citizenDocuments;
     }
@@ -483,8 +456,7 @@ public class CaseService {
 
         HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
         if (partyIdAndType != null) {
-            String partyId = partyIdAndType.entrySet().stream()
-                .map(Map.Entry::getKey)
+            String partyId = partyIdAndType.keySet().stream()
                 .findFirst()
                 .orElse(null);
 
@@ -509,9 +481,44 @@ public class CaseService {
             //.categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(order.getOtherDetails().getCreatedBy())
             .uploadedDate(order.getDateCreated())
+            .servedDate(getServedDate(order))
             .document(order.getOrderDocument())
             .documentWelsh(order.getOrderDocumentWelsh())
+            .isNew(!isFinalOrder(order))
+            .isFinal(isFinalOrder(order))
+            .wasCafcassServed(isCafcassOrCafcassCymruServed(order))
             .build();
+    }
+
+    private LocalDateTime getServedDate(OrderDetails order) {
+        if (null != order.getOtherDetails()
+            && null != order.getOtherDetails().getOrderServedDate()) {
+            return LocalDateTime.parse(
+                order.getOtherDetails().getOrderServedDate(),
+                DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+            );
+        }
+        return null;
+    }
+
+    private boolean isCafcassOrCafcassCymruServed(OrderDetails order) {
+        return null != order.getServeOrderDetails()
+            && (YesOrNo.Yes.equals(order.getServeOrderDetails().getCafcassServed())
+            || YesOrNo.Yes.equals(order.getServeOrderDetails().getCafcassCymruServed()));
+    }
+
+    private boolean isCafcassOrCafcassCymruServed(List<Element<EmailNotificationDetails>> emailNotificationDetailsList) {
+        return nullSafeCollection(emailNotificationDetailsList).stream()
+            .map(Element::getValue)
+            .anyMatch(emailNotificationDetails ->
+                          SERVED_PARTY_CAFCASS.equalsIgnoreCase(emailNotificationDetails.getServedParty())
+                              || SERVED_PARTY_CAFCASS_CYMRU.equalsIgnoreCase(emailNotificationDetails.getServedParty()));
+    }
+
+    private boolean isFinalOrder(OrderDetails order) {
+        return StringUtils.equals(
+            SelectTypeOfOrderEnum.finl.getDisplayedValue(),
+            order.getTypeOfOrder());
     }
 
     private boolean isOrderServedForParty(OrderDetails order,
@@ -521,7 +528,7 @@ public class CaseService {
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
 
-    private HashMap findPartyIdAndType(CaseData caseData,
+    private HashMap<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
         HashMap<String, String> partyIdAndTypeMap = new HashMap<>();
         log.info("*** Inside find partyId method ***");
