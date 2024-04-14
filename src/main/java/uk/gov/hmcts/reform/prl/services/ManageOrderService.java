@@ -3383,11 +3383,11 @@ public class ManageOrderService {
             && null != address.getAddressLine1();
     }
 
-    public void createAutomatedHearingManagement(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData, List<Element<HearingData>> hearingsList) {
         log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
-            if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-                caseData.getManageOrders().getOrdersHearingDetails().stream()
+            if (!hearingsList.isEmpty()) {
+                hearingsList.stream()
                     .map(Element::getValue)
                     .forEach(hearingData -> {
                         if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
@@ -3398,8 +3398,10 @@ public class ManageOrderService {
                             );
                             ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
                                 authorisation,
-                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData)
+                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
+                            //Fetch hearingId from the response and uncomment below line and assign the id
+                            //hearingData.setHearingId(response.hearingId);
                             log.info("Automated Hearing Request: Inside: End");
                             log.info(
                                 "Automated Hearing Response: sendEmailNotificationOnClosingOrder: automatedHearingResponse: {}",
@@ -3411,6 +3413,7 @@ public class ManageOrderService {
         } catch (Exception e) {
             throw new ManageOrderRuntimeException("Invalid Json", e);
         }
+        return hearingList;
         log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
     }
 }

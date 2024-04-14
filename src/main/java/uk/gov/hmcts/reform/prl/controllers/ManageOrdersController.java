@@ -198,7 +198,7 @@ public class ManageOrdersController {
             }
 
             // Check for Automated Hearing Management
-            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, manageOrderService);
+            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, caseDataUpdated, manageOrderService);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state

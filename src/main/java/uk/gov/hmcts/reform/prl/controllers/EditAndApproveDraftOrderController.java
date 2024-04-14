@@ -409,7 +409,7 @@ public class EditAndApproveDraftOrderController {
             }
 
             // Check for Automated Hearing Management
-            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, manageOrderService);
+            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, caseDataUpdated, manageOrderService);
 
             caseDataUpdated.put(STATE, caseData.getState());
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);

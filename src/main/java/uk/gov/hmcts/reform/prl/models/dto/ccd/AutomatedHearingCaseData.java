@@ -100,4 +100,6 @@ public class AutomatedHearingCaseData {
     @JsonProperty("issueDate")
     private final LocalDate issueDate;
 
+    @JsonProperty("hearingData")
+    private HearingData hearingData;
 }

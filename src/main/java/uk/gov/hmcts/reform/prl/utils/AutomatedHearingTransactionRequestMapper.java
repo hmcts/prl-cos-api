@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AutomatedHearingCaseManagemen
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingAttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingPartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class AutomatedHearingTransactionRequestMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    public static AutomatedHearingCaseData mappingAutomatedHearingTransactionRequest(CaseData caseData) {
+    public static AutomatedHearingCaseData mappingAutomatedHearingTransactionRequest(CaseData caseData, HearingData hearingData) {
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder().build();
         ObjectMapper objectMappers = new ObjectMapper();
         objectMappers.registerModule(new JavaTimeModule());
@@ -69,6 +69,7 @@ public class AutomatedHearingTransactionRequestMapper {
 
             automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder()
                 .id(caseData.getId())
+                .hearingData(hearingData)
                 .taskListVersion(caseData.getTaskListVersion())
                 .createdDate(caseData.getCreatedDate())
                 .familymanCaseNumber(caseData.getFamilymanCaseNumber())
@@ -91,10 +92,6 @@ public class AutomatedHearingTransactionRequestMapper {
                 .caseLinks(automatedHearingCaseLinks)
                 .applicantCaseName(caseData.getApplicantCaseName())
                 .allPartyFlags(caseData.getAllPartyFlags())
-                .manageOrders(isNull(caseData.getManageOrders()) ? AutomatedHearingManageOrders.automatedHearingManageOrdersWith().build() :
-                                  AutomatedHearingManageOrders.automatedHearingManageOrdersWith()
-                                      .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-                                      .build())
                 .attendHearing(isNull(caseData.getAttendHearing()) ? AutomatedHearingAttendHearing.automatedHearingAttendHearingWith().build() :
                                    AutomatedHearingAttendHearing.automatedHearingAttendHearingWith()
                                        .isWelshNeeded(YesOrNo.Yes.equals(caseData.getAttendHearing().getIsWelshNeeded()))

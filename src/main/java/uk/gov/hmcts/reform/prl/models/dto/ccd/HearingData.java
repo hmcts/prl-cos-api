@@ -35,6 +35,8 @@ public class HearingData {
 
     private DynamicList hearingTypes;
 
+    private String hearingId;
+
     private DynamicList confirmedHearingDates;
 
     private DynamicList hearingChannels;
