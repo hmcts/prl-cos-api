@@ -282,7 +282,7 @@ public class CitizenPartyDetailsMapper {
         return null;
     }
 
-    private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
+    public PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
                                                                    PartyDetails existingPartyDetails,
                                                                    CaseEvent caseEvent) {
         switch (caseEvent) {
@@ -353,11 +353,25 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
-                //For citizen-case-update - currentOrPreviousProceedings
+  //For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseForProceedings(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
+            }
+            case REVIEW_AND_SUBMIT -> {
+                try {
+                    log.info("******* citizenProvidedPartyDetails json ===>" + objectMapper.writeValueAsString(citizenProvidedPartyDetails));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+
+                try {
+                    log.info("******* existingPartyDetails json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                return updateCitizenC7Response(existingPartyDetails, citizenProvidedPartyDetails);
             }
             default -> {
                 //return existing party details - no event
@@ -818,5 +832,23 @@ public class CitizenPartyDetailsMapper {
         }
 
         return caseName;
+    }
+
+    private PartyDetails updateCitizenC7Response(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (null != citizenProvidedPartyDetails.getResponse()) {
+            return existingPartyDetails.toBuilder()
+                    .response(existingPartyDetails.getResponse().toBuilder()
+                            .c7ResponseSubmitted(Yes)
+                            .build())
+                    .currentRespondent(null)
+                    .build();
+        }
+        try {
+            log.info("******* existingPartyDetails after updated json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        return existingPartyDetails;
     }
 }
