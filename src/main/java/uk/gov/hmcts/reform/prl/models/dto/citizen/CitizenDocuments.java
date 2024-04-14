@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.citizen;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.List;
 @Getter
 @Data
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CitizenDocuments {
 
     private String partyId;
@@ -30,5 +32,8 @@ public class CitizenDocuments {
     //private List<Document> unservedRespondentPack; // if personal service - CA/CB -> Either applicant pack //
     private List<Document> respondentSoaPack;
     private String servedParty;
-    private String wasCafcassServed;
+    private boolean wasCafcassServed;
+    private LocalDateTime servedDate;
+    private boolean isNew;
+    private boolean isFinal;
 }
