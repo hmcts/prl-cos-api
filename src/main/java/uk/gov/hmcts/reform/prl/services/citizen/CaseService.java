@@ -202,9 +202,14 @@ public class CaseService {
         CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = caseData.toBuilder().noOfDaysRemainingToSubmitCase(
-            CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
-        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder().caseData(caseData).build();
+        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
+            .caseData(caseData.toBuilder()
+                          .noOfDaysRemainingToSubmitCase(
+                              CaseUtils.getRemainingDaysSubmitCase(caseData))
+                          .build())
+            //This is a non-persistent view, list of citizen documents, orders & packs
+            .citizenDocumentsManagement(getAllCitizenDocumentsOrders(authorisation, caseData))
+            .build();
         if ("Yes".equalsIgnoreCase(hearingNeeded)) {
             caseDataWithHearingResponse =
                 caseDataWithHearingResponse.toBuilder().hearings(
