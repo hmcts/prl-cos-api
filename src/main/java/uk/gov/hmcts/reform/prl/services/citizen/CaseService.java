@@ -481,7 +481,7 @@ public class CaseService {
             //.categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(order.getOtherDetails().getCreatedBy())
             .uploadedDate(order.getDateCreated())
-            .servedDate(getServedDate(order))
+            //.servedDate(getServedDate(order))
             .document(order.getOrderDocument())
             .documentWelsh(order.getOrderDocumentWelsh())
             .isNew(!isFinalOrder(order))
