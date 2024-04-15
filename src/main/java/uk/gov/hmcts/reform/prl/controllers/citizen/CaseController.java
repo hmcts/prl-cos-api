@@ -44,6 +44,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
+
     private final ObjectMapper objectMapper;
     private final HearingService hearingService;
     private final CaseService caseService;
@@ -51,6 +52,7 @@ public class CaseController {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -109,6 +111,7 @@ public class CaseController {
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
         } else {
