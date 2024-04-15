@@ -29,7 +29,7 @@ public class AutomatedHearingUtils {
                          caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
                 );
                 caseData.getDraftOrderCollection().forEach(draftOrder -> {
-                    if (Yes.equals(draftOrder.getValue().isAutoHearingReqPending())) {
+                    if (Yes.equals(draftOrder.getValue().getIsAutoHearingReqPending())) {
                         draftOrder.getValue().setManageOrderHearingDetails(manageOrderService
                             .createAutomatedHearingManagement(authorisation, caseData, draftOrder.getValue().getManageOrderHearingDetails()));
                     }
@@ -40,7 +40,7 @@ public class AutomatedHearingUtils {
                          caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
                 );
                 caseData.getOrderCollection().forEach(order -> {
-                    if (Yes.equals(order.getValue().isAutoHearingReqPending())) {
+                    if (Yes.equals(order.getValue().getIsAutoHearingReqPending())) {
                         order.getValue().setManageOrderHearingDetails(manageOrderService
                             .createAutomatedHearingManagement(authorisation, caseData, order.getValue()
                                 .getManageOrderHearingDetails()));
