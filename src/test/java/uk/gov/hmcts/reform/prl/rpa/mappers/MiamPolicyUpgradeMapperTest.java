@@ -5,10 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
@@ -32,6 +29,7 @@ public class MiamPolicyUpgradeMapperTest {
             .builder()
             .miamDetails(MiamDetails
                 .builder()
+                .miamExemptionsChecklist(List.of(MiamExemptionsChecklistEnum.domesticViolence))
                 .miamDomesticViolenceChecklist(List.of(MiamDomesticViolenceChecklistEnum
                     .miamDomesticViolenceChecklistEnum_Value_1))
                 .miamUrgencyReasonChecklist(List.of(MiamUrgencyReasonChecklistEnum
