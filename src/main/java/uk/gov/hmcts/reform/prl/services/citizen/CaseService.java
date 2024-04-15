@@ -264,7 +264,7 @@ public class CaseService {
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].size() == 0) {
+                if (citizenDocuments[0].isEmpty()) {
                     if (servedApplicationDetails.getModeOfService().equals("By email")) {
                         citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
                             servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
