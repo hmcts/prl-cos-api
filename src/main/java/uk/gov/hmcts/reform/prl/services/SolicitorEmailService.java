@@ -81,10 +81,10 @@ public class SolicitorEmailService {
     }
 
     public void sendReSubmitEmail(CaseDetails caseDetails) {
-        //String applicantSolicitorEmailAddress = caseDetails.getData()
-        //.get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
+        String applicantSolicitorEmailAddress = caseDetails.getData()
+            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
         emailService.send(
-            "anshika.nigam1@hmcts.net",
+            applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
             buildEmail(caseDetails, false),
             LanguagePreference.english
