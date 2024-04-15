@@ -310,7 +310,15 @@ public enum ManageOrderFieldsEnum {
     draftOrderOptions("draftOrderOptions"),
     legalRepInstructionsPlaceHolder("legalRepInstructionsPlaceHolder"),
     editOrderTextInstructions("editOrderTextInstructions"),
-    orderNameForWA("orderNameForWA");
+    orderNameForWA("orderNameForWA"),
+    sdoPreamblesTempList("sdoPreamblesTempList"),
+    sdoHearingsAndNextStepsTempList("sdoHearingsAndNextStepsTempList"),
+    sdoCafcassOrCymruTempList("sdoCafcassOrCymruTempList"),
+    sdoLocalAuthorityTempList("sdoLocalAuthorityTempList"),
+    sdoCourtTempList("sdoCourtTempList"),
+    sdoDocumentationAndEvidenceTempList("sdoDocumentationAndEvidenceTempList"),
+    sdoOtherTempList("sdoOtherTempList"),
+    listElementsSetToDefaultValue("listElementsSetToDefaultValue");
 
     private final String value;
 

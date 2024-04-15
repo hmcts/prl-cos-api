@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.SdoPartyToProvideDetailsEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSafeguardingCafcassCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSection7CheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoWitnessStatementsCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
@@ -71,20 +72,34 @@ public class StandardDirectionOrder implements MappableObject {
 
     @JsonProperty("sdoPreamblesList")
     private final List<SdoPreamblesEnum> sdoPreamblesList;
+    @JsonProperty("sdoPreamblesTempList")
+    private final List<SdoPreamblesEnum> sdoPreamblesTempList;
     @JsonProperty("sdoHearingsAndNextStepsList")
     private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsList;
+    @JsonProperty("sdoHearingsAndNextStepsTempList")
+    private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsTempList;
     @JsonProperty("sdoCafcassOrCymruList")
     private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruList;
+    @JsonProperty("sdoCafcassOrCymruTempList")
+    private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruTempList;
     @JsonProperty("sdoLocalAuthorityList")
     private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityList;
+    @JsonProperty("sdoLocalAuthorityTempList")
+    private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityTempList;
     @JsonProperty("sdoCourtList")
     private final List<SdoCourtEnum> sdoCourtList;
+    @JsonProperty("sdoCourtTempList")
+    private final List<SdoCourtEnum> sdoCourtTempList;
     @JsonProperty("sdoDocumentationAndEvidenceList")
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
+    @JsonProperty("sdoDocumentationAndEvidenceTempList")
+    private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceTempList;
     @JsonProperty("sdoFurtherList")
     private final List<SdoFurtherInstructionsEnum> sdoFurtherList;
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
+    @JsonProperty("sdoOtherTempList")
+    private final List<SdoOtherEnum> sdoOtherTempList;
 
     @JsonProperty("sdoRightToAskCourt")
     private final String sdoRightToAskCourt;
@@ -348,5 +363,6 @@ public class StandardDirectionOrder implements MappableObject {
     private final String sdoNewPartnerPartiesCafcassCymruText;
     @JsonProperty("sdoAllocateDecisionJudgeFullName")
     private String sdoAllocateDecisionJudgeFullName;
-
+    @JsonProperty("listElementsSetToDefaultValue")
+    private YesOrNo listElementsSetToDefaultValue;
 }
