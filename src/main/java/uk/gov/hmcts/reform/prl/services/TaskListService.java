@@ -111,7 +111,7 @@ public class TaskListService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
 
-    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
@@ -316,7 +316,7 @@ public class TaskListService {
                     && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
                     && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
                     || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
-                    caseData = miamPolicyUpgradeService.renameConfidentialDocumentForMiamPolicyUpgrade(
+                    caseData = miamPolicyUpgradeFileUploadService.renameConfidentialDocumentForMiamPolicyUpgrade(
                         caseData,
                         startAllTabsUpdateDataContent.authorisation()
                     );

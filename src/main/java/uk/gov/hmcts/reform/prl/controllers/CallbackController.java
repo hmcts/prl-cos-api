@@ -67,6 +67,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -170,6 +171,8 @@ public class CallbackController {
     private final RoleAssignmentService roleAssignmentService;
 
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     private final SystemUserService systemUserService;
 
@@ -375,7 +378,7 @@ public class CallbackController {
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
             && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
             || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
-            caseData = miamPolicyUpgradeService.renameConfidentialDocumentForMiamPolicyUpgrade(
+            caseData = miamPolicyUpgradeFileUploadService.renameConfidentialDocumentForMiamPolicyUpgrade(
                 caseData,
                 systemUserService.getSysUserToken()
             );
