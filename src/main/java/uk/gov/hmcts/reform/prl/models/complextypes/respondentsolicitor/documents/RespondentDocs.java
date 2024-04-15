@@ -12,5 +12,6 @@ import java.util.List;
 public class RespondentDocs {
     private ResponseDocuments c1aDocument;
     private ResponseDocuments c7Document;
+    private ResponseDocuments c7WelshDocument;
     private List<Element<ResponseDocuments>> otherDocuments;
 }
