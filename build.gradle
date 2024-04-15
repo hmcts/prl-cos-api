@@ -594,7 +594,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/controllers/SystemUserRoleAssingmentController.java',
   '**uk/gov/hmcts/reform/prl/mapper/bundle/BundleCreateRequestMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenResponseController.java',
   '**uk/gov/hmcts/reform/prl/services/citizen/CitizenResponseService.java',
