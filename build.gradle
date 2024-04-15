@@ -593,11 +593,9 @@ def sonarExclusions = [
   "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/services/validators/SubmitAndPayChecker.java',
   '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeService.java',
-  '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
   '**uk/gov/hmcts/reform/prl/controllers/PrePopulateFeeAndSolicitorNameController.java',
   '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeFileUploadService.java'
