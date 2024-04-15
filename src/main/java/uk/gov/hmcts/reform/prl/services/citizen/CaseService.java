@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -203,12 +204,14 @@ public class CaseService {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
-            .caseData(caseData.toBuilder()
-                          .noOfDaysRemainingToSubmitCase(
-                              CaseUtils.getRemainingDaysSubmitCase(caseData))
+            .caseData(UiCitizenCaseData.builder()
+                          .caseData(caseData.toBuilder()
+                                        .noOfDaysRemainingToSubmitCase(
+                                            CaseUtils.getRemainingDaysSubmitCase(caseData))
+                                        .build())
+                          //This is a non-persistent view, list of citizen documents, orders & packs
+                          .citizenDocumentsManagement(getAllCitizenDocumentsOrders(authorisation, caseData))
                           .build())
-            //This is a non-persistent view, list of citizen documents, orders & packs
-            .citizenDocumentsManagement(getAllCitizenDocumentsOrders(authorisation, caseData))
             .build();
         if ("Yes".equalsIgnoreCase(hearingNeeded)) {
             caseDataWithHearingResponse =
