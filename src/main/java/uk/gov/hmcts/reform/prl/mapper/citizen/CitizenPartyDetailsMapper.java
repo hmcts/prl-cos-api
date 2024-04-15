@@ -352,6 +352,13 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
+                // For citizen-case-update - currentOrPreviousProceedings
+                return updateCitizenResponseForProceedings(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             case REVIEW_AND_SUBMIT -> {
                 try {
                     log.info("******* citizenProvidedPartyDetails json ===>" + objectMapper.writeValueAsString(citizenProvidedPartyDetails));
@@ -367,11 +374,8 @@ public class CitizenPartyDetailsMapper {
                 return updateCitizenC7Response(existingPartyDetails, citizenProvidedPartyDetails);
             }
             default -> {
-                //For citizen-case-update - currentOrPreviousProceedings
-                return updateCitizenResponseDataForOtherEvents(
-                    existingPartyDetails,
-                    citizenProvidedPartyDetails
-                );
+                //return existing party details - no event
+                return existingPartyDetails;
             }
         }
     }
@@ -412,7 +416,7 @@ public class CitizenPartyDetailsMapper {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
-                          .safetyConcerns(citizenProvidedPartyDetails.getResponse().getSafetyConcerns())
+                          .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
                           .build())
             .build();
     }
@@ -444,7 +448,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenResponseForProceedings(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
