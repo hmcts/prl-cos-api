@@ -9,7 +9,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -3384,7 +3383,8 @@ public class ManageOrderService {
             && null != address.getAddressLine1();
     }
 
-    public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData, List<Element<HearingData>> hearingsList) {
+    public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
+                                                                       List<Element<HearingData>> hearingsList) {
         log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
             if (!hearingsList.isEmpty()) {
@@ -3401,13 +3401,9 @@ public class ManageOrderService {
                                 authorisation,
                                 AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
-                            //Fetch hearingId from the response and uncomment below line and assign the id
-                            //hearingData.setHearingId(response.hearingId);
-                            log.info("Automated Hearing Request: Inside: End");
-                            log.info(
-                                "Automated Hearing Response: sendEmailNotificationOnClosingOrder: automatedHearingResponse: {}",
-                                automatedHearingResponse
-                            );
+                            hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                            log.info("Automated Hearing Response: {}", automatedHearingResponse);
+
                         }
                     });
             }

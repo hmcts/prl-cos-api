@@ -41,7 +41,9 @@ public class AutomatedHearingUtils {
                 caseData.getOrderCollection().forEach(order -> {
                     if (order.getValue().isAutoHearingReqPending()) {
                         order.getValue().setManageOrderHearingDetails(manageOrderService
-                           .createAutomatedHearingManagement(authorisation, caseData, order.getValue().getManageOrderHearingDetails()));                    }
+                            .createAutomatedHearingManagement(authorisation, caseData, order.getValue()
+                                .getManageOrderHearingDetails()));
+                    }
                 });
                 caseDataMap.put("orderCollection", caseData.getOrderCollection());
             }
