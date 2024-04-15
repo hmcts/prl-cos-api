@@ -316,7 +316,7 @@ public class TaskListService {
                     && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
                     && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
                     || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
-                    caseData = miamPolicyUpgradeFileUploadService.renameConfidentialDocumentForMiamPolicyUpgrade(
+                    caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
                         caseData,
                         startAllTabsUpdateDataContent.authorisation()
                     );
