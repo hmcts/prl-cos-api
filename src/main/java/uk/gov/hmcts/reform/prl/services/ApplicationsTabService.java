@@ -179,7 +179,7 @@ public class ApplicationsTabService implements TabService {
                 applicationTab.put("allegationsOfHarmRevisedChildContactTable", getAllegationsOfHarmRevisedChildContact(caseData));
                 applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateRevisedChildAndCafcassOfficerDetails(caseData));
 
-                log.info("application tab data v2");
+                log.info("application tab data v2 & v3");
             } else {
                 applicationTab.put("childDetailsTable", getChildDetails(caseData));
                 applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
