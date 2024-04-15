@@ -9,8 +9,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_ATTENDED_MIAM;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_INVOLVED_IN_MIAM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MPU_APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MPU_CHILD_INVOLVED_IN_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MPU_CLAIMING_EXEMPTION_MIAM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
@@ -25,9 +27,9 @@ public class ValidateMiamApplicationOrExemptionTask implements Task<WorkflowResu
 
         Map<String, Object> caseData = payload.getCaseData();
         if (TASK_LIST_VERSION_V3.equals(caseData.get("taskListVersion"))
-            && NO.equals(caseData.get(CHILD_INVOLVED_IN_MIAM))
-            && NO.equals(caseData.get(APPLICANT_ATTENDED_MIAM))
-            && NO.equals(caseData.get(CLAIMING_EXEMPTION_MIAM))) {
+            && NO.equals(caseData.get(MPU_CHILD_INVOLVED_IN_MIAM))
+            && NO.equals(caseData.get(MPU_APPLICANT_ATTENDED_MIAM))
+            && NO.equals(caseData.get(MPU_CLAIMING_EXEMPTION_MIAM))) {
             payload.getErrors().add(ERROR_MSG_MIAM);
         } else if (applicantHasNotAttendedMiam(caseData)
             && applicantIsNotClaimingMiamExemption(caseData)) {
