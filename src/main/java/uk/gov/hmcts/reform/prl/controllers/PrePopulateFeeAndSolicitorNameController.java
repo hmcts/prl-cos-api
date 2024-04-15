@@ -85,6 +85,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside prePopulateSolicitorAndFees");
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
@@ -94,6 +95,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
             } else {
+                log.info("inside else block");
                 FeeResponse feeResponse = null;
                 try {
                     feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -119,9 +121,10 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
-
-                if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
-                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
+                log.info("before buildGeneratedDocumentCaseData");
+                if (isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
+                    log.info("caseDataForOrgDetails.getMiamPolicyUpgradeDetails() ===> " + caseDataForOrgDetails.getMiamPolicyUpgradeDetails());
+                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataForOrgDetails, new HashMap<>());
                 }
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,
