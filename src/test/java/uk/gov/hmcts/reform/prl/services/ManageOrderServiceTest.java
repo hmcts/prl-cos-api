@@ -79,6 +79,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Serv
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -1863,7 +1864,8 @@ public class ManageOrderServiceTest {
             .build();
         ResponseEntity<Object> response = ResponseEntity.ok(caseData.getId());
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(response);
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build())))
+            .thenReturn(AutomatedHearingResponse.builder().build());
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
 

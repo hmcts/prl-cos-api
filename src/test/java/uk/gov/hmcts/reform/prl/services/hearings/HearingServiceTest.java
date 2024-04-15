@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -350,12 +352,11 @@ public class HearingServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData);
-        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(response);
-        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
+        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(AutomatedHearingResponse.builder().build());
+        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
 
-        Assert.assertEquals(
-            HttpStatus.OK, automatedHearingsResponse.getStatusCode());
+        Assert.assertNotNull(automatedHearingsResponse);
     }
 
     @Test
@@ -364,12 +365,10 @@ public class HearingServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData);
-        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(response);
-        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-
-        Assert.assertEquals(
-            HttpStatus.BAD_REQUEST, automatedHearingsResponse.getStatusCode());
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
+        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(AutomatedHearingResponse.builder().build());
+        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+        Assert.assertNotNull(automatedHearingsResponse);
     }
 
     @Test
@@ -377,7 +376,9 @@ public class HearingServiceTest {
     public void createAutomatedHearingManagementTestException() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
-        ResponseEntity<Object> automatedHearingsResponse = hearingService.createAutomatedHearing(auth, null);
+        AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
+        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
     }
 

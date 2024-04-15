@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -1006,9 +1007,9 @@ public class EditAndApproveDraftOrderControllerTest {
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
-        ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
+        AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder().build();
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(createAutomatedHearingResponse);
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build()))).thenReturn(automatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
@@ -1103,9 +1104,9 @@ public class EditAndApproveDraftOrderControllerTest {
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
-        ResponseEntity<Object> createAutomatedHearingResponse = ResponseEntity.ok(caseData.getId());
+        AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder().build();
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData))).thenReturn(createAutomatedHearingResponse);
+            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build()))).thenReturn(automatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("editAndApproveAnOrder")
