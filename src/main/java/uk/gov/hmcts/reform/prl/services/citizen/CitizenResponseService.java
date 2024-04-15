@@ -159,7 +159,27 @@ public class CitizenResponseService {
 
                 if (isNotEmpty(partyDetailsElement.getValue().getResponse())) {
                     Response response = partyDetailsElement.getValue().getResponse();
+                    if (Yes != response.getC7ResponseSubmitted()) {
+                        log.info("setting c7 response submitted");
+                        List<Element<PartyDetails>> respondents = new ArrayList<>(dbCaseData.getRespondents());
+                        respondents.stream()
+                            .filter(party -> Objects.equals(
+                                party.getValue().getUser().getIdamId(),
+                                citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
+                            ))
+                            .findFirst()
+                            .ifPresent(party -> {
 
+                                PartyDetails updatedPartyDetails = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
+                                    citizenUpdatedCaseData.getPartyDetails(),
+                                    party.getValue(),
+                                    CaseEvent.REVIEW_AND_SUBMIT);
+                                Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
+                                int updatedRespondentPartyIndex = respondents.indexOf(party);
+                                respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
+                            });
+                        caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
+                    }
                     responseDocs = checkPreviousProceedings(responseDocs, response);
 
                     //TODO: AoH to be revisited
@@ -202,27 +222,7 @@ public class CitizenResponseService {
                         log.info("error");
                     }
 
-                    if (Yes != response.getC7ResponseSubmitted()) {
-                        log.info("setting c7 response submitted");
-                        List<Element<PartyDetails>> respondents = new ArrayList<>(dbCaseData.getRespondents());
-                        respondents.stream()
-                                .filter(party -> Objects.equals(
-                                        party.getValue().getUser().getIdamId(),
-                                        citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
-                                ))
-                                .findFirst()
-                                .ifPresent(party -> {
 
-                                    PartyDetails updatedPartyDetails = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
-                                            citizenUpdatedCaseData.getPartyDetails(),
-                                            party.getValue(),
-                                            CaseEvent.REVIEW_AND_SUBMIT);
-                                    Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
-                                    int updatedRespondentPartyIndex = respondents.indexOf(party);
-                                    respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
-                                });
-                        caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
-                    }
                 }
             }
 

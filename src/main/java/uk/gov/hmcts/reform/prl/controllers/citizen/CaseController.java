@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -55,7 +56,7 @@ public class CaseController {
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public CaseData getCase(
+    public UiCitizenCaseData getCase(
         @PathVariable("caseId") String caseId,
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
@@ -63,8 +64,14 @@ public class CaseController {
         if (authorisationService.isAuthorized(userToken, s2sToken)) {
             CaseDetails caseDetails = caseService.getCase(userToken, caseId);
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+            return UiCitizenCaseData.builder()
+                .caseData(caseData.toBuilder()
+                              .noOfDaysRemainingToSubmitCase(
+                                  CaseUtils.getRemainingDaysSubmitCase(caseData))
+                              .build())
+                .citizenDocumentsManagement(caseService.getAllCitizenDocumentsOrders(userToken, caseData))
+                .build();
+
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
