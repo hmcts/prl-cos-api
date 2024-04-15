@@ -68,6 +68,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -81,6 +82,7 @@ public class UpdatePartyDetailsService {
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
@@ -102,7 +104,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}",e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -113,10 +115,8 @@ public class UpdatePartyDetailsService {
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-            if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                                                         ElementUtils.unwrapElements(applicantList.get()).get(0));
-            }
+            applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
+                    ElementUtils.unwrapElements(elements).get(0)));
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -297,6 +297,8 @@ public class UpdatePartyDetailsService {
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
+        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
@@ -305,30 +307,29 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(callbackRequest,respondent),
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;
         }
     }
 
-    public Boolean checkIfConfidentialityDetailsChangedRespondent(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
-        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
-        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+    public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
+        log.info("inside checkIfConfidentialityDetailsChangedRespondent");
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
-                    .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                            && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.isPhoneNumberChanged(respondent.getValue(),resp1.getValue())
-                            || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                            .getLabelForDynamicList()))).toList();
+                .filter(resp1 -> resp1.getId().equals(respondent.getId())
+                    && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
+                    .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
-                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
-                    || (CaseUtils.isPhoneNumberChanged(respondent.getValue(),respondentDetailsFL401))
+                || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
+                || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
                 .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
@@ -340,14 +341,15 @@ public class UpdatePartyDetailsService {
             return true;
         }
         log.info("respondent data not changed");
-        return  false;
+        return false;
     }
 
 
 
-    private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+    public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
+        log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
@@ -403,15 +405,14 @@ public class UpdatePartyDetailsService {
     private List<Element<ResponseDocuments>> getOrCreateC8DocumentList(String authorisation, CaseData caseData,
                                                                        Map<String, Object> dataMap,
                                                                        List<Element<ResponseDocuments>> c8Documents,
-                                                                       Boolean isDetailsChanged,
+                                                                       boolean isDetailsChanged,
                                                                        Element<PartyDetails> respondent)
         throws  Exception {
         Document c8FinalDocument;
         Document c8FinalWelshDocument;
         String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
-            if ((isDetailsChanged
-                || CollectionUtils.isEmpty(c8Documents))) {
+            if (isDetailsChanged) {
                 String fileName = C_8_OF + partyName
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");

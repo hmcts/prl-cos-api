@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
@@ -308,8 +309,10 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             caseData = caseData.toBuilder()
                 .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
                 .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
@@ -327,7 +330,13 @@ public class TestingSupportService {
                     Document.class
                 ))
                 .build();
-            tabService.updateAllTabsIncludingConfTab(caseData);
+            tabService.mapAndSubmitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseData
+            );
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
             AboutToStartOrSubmitCallbackResponse response
