@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +34,10 @@ public class CitizenDocuments {
     private List<Document> respondentSoaPack;
     private String servedParty;
     private boolean wasCafcassServed;
-    private LocalDateTime servedDate;
+
+    private String orderType;
+    private LocalDate createdDate;
+    private LocalDate servedDate;
     private boolean isNew;
     private boolean isFinal;
 }
