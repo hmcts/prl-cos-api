@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1788,7 +1787,6 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings));
     }
 
-    @Ignore
     @Test
     public void testServeOrderCA() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1796,7 +1794,6 @@ public class ManageOrderServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-
 
         List<DynamicMultiselectListElement> elements = new ArrayList<>();
         DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
@@ -1852,9 +1849,13 @@ public class ManageOrderServiceTest {
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
             .build();
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(parties)
+            .respondents(parties)
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")

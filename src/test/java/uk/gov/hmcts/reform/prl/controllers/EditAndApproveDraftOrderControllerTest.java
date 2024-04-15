@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -38,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
@@ -928,7 +928,6 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
     }
 
-    @Ignore
     @Test
     public void testSaveServeOrderDetailsForEditAndApprove() {
 
@@ -965,11 +964,14 @@ public class EditAndApproveDraftOrderControllerTest {
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
             .build();
-
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(UUID.fromString(TEST_UUID), PartyDetails.builder().build()));
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
             .welshLanguageRequirementApplication(english)
+            .applicants(parties)
+            .respondents(parties)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -1025,7 +1027,6 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
     }
 
-    @Ignore
     @Test
     public void testSaveServeOrderDetailsForEditAndApproveCaseManager() {
 
@@ -1062,12 +1063,15 @@ public class EditAndApproveDraftOrderControllerTest {
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
             .build();
-
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(UUID.fromString(TEST_UUID), PartyDetails.builder().build()));
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
+            .applicants(parties)
+            .respondents(parties)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

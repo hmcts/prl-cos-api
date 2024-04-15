@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -347,31 +347,28 @@ public class HearingServiceTest {
         Assert.assertTrue(hearingsResp.isEmpty());
     }
 
-    @Ignore
     @Test
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.OK);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
-        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(AutomatedHearingResponse.builder().build());
+        when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(ResponseEntity.ok(AutomatedHearingResponse.builder().build()));
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-
         Assert.assertNotNull(automatedHearingsResponse);
     }
 
-    @Ignore
     @Test
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        ResponseEntity<Object> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
-        when(hearingService.createAutomatedHearing(auth, automatedHearingCaseData)).thenReturn(AutomatedHearingResponse.builder().build());
+        when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenThrow(new RuntimeException());
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNotNull(automatedHearingsResponse);
+        Assert.assertNull(automatedHearingsResponse);
     }
 
     @Test
