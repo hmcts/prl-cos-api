@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
@@ -61,7 +62,7 @@ public interface HearingApiClient {
     );
 
     @PostMapping(value = "/automated-hearing", consumes = "application/json")
-    ResponseEntity<Object> createAutomatedHearing(
+    ResponseEntity<AutomatedHearingResponse> createAutomatedHearing(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody AutomatedHearingCaseData automatedHearingCaseData

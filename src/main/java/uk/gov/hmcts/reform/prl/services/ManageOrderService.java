@@ -65,6 +65,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -3396,7 +3397,7 @@ public class ManageOrderService {
                                 "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
                                 hearingData.getHearingDateConfirmOptionEnum()
                             );
-                            ResponseEntity<Object> automatedHearingResponse = hearingService.createAutomatedHearing(
+                            AutomatedHearingResponse automatedHearingResponse = hearingService.createAutomatedHearing(
                                 authorisation,
                                 AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
                             );
@@ -3413,7 +3414,7 @@ public class ManageOrderService {
         } catch (Exception e) {
             throw new ManageOrderRuntimeException("Invalid Json", e);
         }
-        return hearingList;
         log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
+        return hearingsList;
     }
 }
