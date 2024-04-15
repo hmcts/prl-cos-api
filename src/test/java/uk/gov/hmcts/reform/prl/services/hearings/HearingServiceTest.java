@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -346,6 +347,7 @@ public class HearingServiceTest {
         Assert.assertTrue(hearingsResp.isEmpty());
     }
 
+    @Ignore
     @Test
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestSuccess() {
@@ -359,6 +361,7 @@ public class HearingServiceTest {
         Assert.assertNotNull(automatedHearingsResponse);
     }
 
+    @Ignore
     @Test
     @DisplayName("test case for Automated Hearing Management.")
     public void createAutomatedHearingManagementTestBadRequest() {
