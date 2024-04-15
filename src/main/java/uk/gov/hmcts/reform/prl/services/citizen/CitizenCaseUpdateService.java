@@ -57,7 +57,8 @@ public class CitizenCaseUpdateService {
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
-        CaseEvent.KEEP_DETAILS_PRIVATE
+        CaseEvent.KEEP_DETAILS_PRIVATE,
+        CaseEvent.CITIZEN_CONTACT_PREFERENCE
     );
 
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";

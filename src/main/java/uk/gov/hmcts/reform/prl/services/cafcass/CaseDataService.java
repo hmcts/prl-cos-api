@@ -3,24 +3,32 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -90,6 +98,7 @@ public class CaseDataService {
                 ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.registerModule(new ParameterNamesModule());
                 objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
@@ -250,6 +259,8 @@ public class CaseDataService {
                         caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                     );
                     caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
+                    caseDetails.getCaseData().setOtherDocuments(updateOtherDocuments(caseDetails.getCaseData()));
+                    caseDetails.getCaseData().setCafcassUploadedDocs(null);
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }
@@ -261,6 +272,29 @@ public class CaseDataService {
 
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
+    }
+
+    private List<Element<OtherDocuments>> updateOtherDocuments(CafCassCaseData caseData) {
+        List<Element<OtherDocuments>> otherDocsList = CollectionUtils.isNotEmpty(caseData.getOtherDocuments())
+            ? caseData.getOtherDocuments() : new ArrayList<>();
+        final @NotNull @Valid UploadedDocuments[] uploadedDocs = new UploadedDocuments[1];
+        if (caseData.getCafcassUploadedDocs() != null) {
+            caseData.getCafcassUploadedDocs().stream().forEach(
+                uploadedDocumentsElement -> {
+                    uploadedDocs[0] = uploadedDocumentsElement.getValue();
+                    otherDocsList.add(Element.<OtherDocuments>builder()
+                                          .id(uploadedDocumentsElement.getId())
+                                          .value(OtherDocuments.builder()
+                                                     .documentOther(Document.buildFromPrlDocument(uploadedDocs[0].getCafcassDocument()))
+                                                     .documentName(uploadedDocs[0].getCafcassDocument().getDocumentFileName())
+                                                     .documentTypeOther(DocTypeOtherDocumentsEnum.cafcassReports)
+                                                     .build())
+                                          .build());
+                }
+            );
+
+        }
+        return otherDocsList;
     }
 
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
