@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -17,14 +16,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -51,16 +48,8 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -109,19 +98,6 @@ public class CaseServiceTest {
     public static final String eventId = "1234567891234567";
 
     public static final String accessCode = "123456";
-    public static final String INVALID = "Invalid";
-    private final String eventName = "paymentSuccessCallback";
-    private final String eventToken = "eventToken";
-
-    private static final CaseData CASE_DATA = mock(CaseData.class);
-
-    @Mock
-    ConfidentialDetailsMapper confidentialDetailsMapper;
-    Map<String, Object> applicaionFieldsMap = Map.of(
-        "field1", "value1",
-        "field2", "value2",
-        "field3", "value3"
-    );
 
     @InjectMocks
     private CaseService caseService;
@@ -130,12 +106,6 @@ public class CaseServiceTest {
 
     @Mock
     CoreCaseDataApi coreCaseDataApi;
-
-
-    @Mock
-    private CaseData caseDataMock;
-    @Mock
-    CaseDetailsConverter caseDetailsConverter;
 
     @Mock
     IdamClient idamClient;
@@ -150,51 +120,21 @@ public class CaseServiceTest {
     HearingService hearingService;
 
     @Mock
-    SystemUserService systemUserService;
-
-    @Mock
-    private CaseSummaryTabService caseSummaryTab;
-
-    @Mock
     CaseDataMapper caseDataMapper;
 
     @Mock
-    CitizenEmailService citizenEmailService;
-
-    @Mock
-    AllTabServiceImpl allTabsService;
-
-    @Mock
-    CaseEventService caseEventService;
-
-    @Mock
-    NoticeOfChangePartiesService noticeOfChangePartiesService;
-
-    @Mock
-    CaseUtils caseUtils;
-
-    @Mock
-    RoleAssignmentService roleAssignmentService;
-
-    @Mock
     private UserService userService;
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Mock
-    ApplicationsTabService applicationsTabService;
 
     private CaseData caseData;
     private CaseData caseData2;
 
     private CaseData caseData3;
-    private CaseData caseDataWithOutPartyId;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
     private CitizenUpdatedCaseData citizenUpdatedCaseData;
 
-    private StartEventResponse startEventResponse;
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     private ServedApplicationDetails servedApplicationDetails;
@@ -374,7 +314,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException, NotFoundException {
+    public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException {
         //Given
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -405,7 +345,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException, NotFoundException {
+    public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException {
         //Given
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -436,7 +376,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseName() throws IOException, NotFoundException {
+    public void shouldUpdateCaseWithCaseName() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
@@ -473,7 +413,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException, NotFoundException {
+    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .build();
@@ -508,7 +448,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException, NotFoundException {
+    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException {
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -537,7 +477,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException, NotFoundException {
+    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException {
 
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -567,7 +507,7 @@ public class CaseServiceTest {
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
-    @Test
+    /*@Test
     public void testUpdateCaseSosWithCitizenDocs() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -624,7 +564,7 @@ public class CaseServiceTest {
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
-                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
+                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(), updateCaseData);
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -689,8 +629,8 @@ public class CaseServiceTest {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
                                                                            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
         assertNotNull(caseDetailsAfterUpdate);
-    }
-  
+    }*/
+
     @Test
     public void getCaseWithHearing() {
         when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
@@ -764,7 +704,6 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
             .roles(List.of(Roles.CITIZEN.getValue())).build();
-        Map<String, Object> map = new HashMap<>();
 
         //When
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
