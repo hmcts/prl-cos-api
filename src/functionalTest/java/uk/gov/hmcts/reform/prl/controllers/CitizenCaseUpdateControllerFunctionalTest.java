@@ -327,7 +327,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .pathParam(EVENT_ID,"citizenContactPreference")
             .post(updatePartyDetailsEndPoint)
             .then()
-            .body("applicants[0].value.contactPreferences", equalTo("digital"))
+            .body("applicants[0].value.contactPreferences", equalTo("email"))
             .extract()
             .as(CaseData.class);
 
