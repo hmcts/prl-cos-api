@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.isNull;
 
@@ -30,32 +30,32 @@ public class AutomatedHearingTransactionRequestMapper {
     }
 
     public static AutomatedHearingCaseData mappingAutomatedHearingTransactionRequest(CaseData caseData, HearingData hearingData) {
-        AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder().build();
         ObjectMapper objectMappers = new ObjectMapper();
         objectMappers.registerModule(new JavaTimeModule());
         try {
             List<Element<AutomatedHearingPartyDetails>> applicantsAutomatedHearingpartyDetails = new ArrayList<>();
-            List<Element<PartyDetails>> applicantList = caseData.getApplicants();
-            if (applicantList != null) {
-                applicantList.forEach(applicants -> getApplicantsDetails(
+
+            List<Element<AutomatedHearingPartyDetails>> respondentsAutomatedHearingpartyDetails = new ArrayList<>();
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseData.getApplicants().forEach(applicants -> getPartyDetailsForRequest(
                     applicants,
                     applicantsAutomatedHearingpartyDetails
                 ));
-            }
-
-            List<Element<AutomatedHearingPartyDetails>> respondentsAutomatedHearingpartyDetails = new ArrayList<>();
-            List<Element<PartyDetails>> respondentsList = caseData.getRespondents();
-            if (respondentsList != null) {
-                respondentsList.forEach(respondents -> getApplicantsDetails(
+                caseData.getRespondents().forEach(respondents -> getPartyDetailsForRequest(
                     respondents,
                     respondentsAutomatedHearingpartyDetails
                 ));
+            } else {
+                getPartyDetailsForRequest(ElementUtils.element(caseData.getApplicantsFL401().getPartyId(),
+                                                               caseData.getApplicantsFL401()), applicantsAutomatedHearingpartyDetails);
+                getPartyDetailsForRequest(ElementUtils.element(caseData.getRespondentsFL401().getPartyId(),
+                                                               caseData.getRespondentsFL401()), respondentsAutomatedHearingpartyDetails);
             }
 
             List<Element<AutomatedHearingPartyDetails>> automatedHearingOtherPartyInTheCaseRevised = new ArrayList<>();
             List<Element<PartyDetails>> otherPartyInTheCaseRevisedList = caseData.getOtherPartyInTheCaseRevised();
             if (otherPartyInTheCaseRevisedList != null) {
-                otherPartyInTheCaseRevisedList.forEach(otherParty -> getApplicantsDetails(
+                otherPartyInTheCaseRevisedList.forEach(otherParty -> getPartyDetailsForRequest(
                     otherParty,
                     automatedHearingOtherPartyInTheCaseRevised
                 ));
@@ -67,7 +67,7 @@ public class AutomatedHearingTransactionRequestMapper {
                 caseLinksList.forEach(caseLink -> getCaseLinksDetails(caseLink, automatedHearingCaseLinks));
             }
 
-            automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder()
+            AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder()
                 .id(caseData.getId())
                 .hearingData(hearingData)
                 .taskListVersion(caseData.getTaskListVersion())
@@ -81,8 +81,6 @@ public class AutomatedHearingTransactionRequestMapper {
                 .applicantSolicitorEmailAddress(caseData.getApplicantSolicitorEmailAddress())
                 .solicitorName(caseData.getSolicitorName())
                 .courtName(caseData.getCourtName())
-                .applicantsFL401(getApplicantsDetails(caseData))
-                .respondentsFL401(getRespondentsDetails(caseData))
                 .caseManagementLocation(isNull(caseData.getCaseManagementLocation())
                                             ? AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith().build() :
                                             AutomatedHearingCaseManagementLocation.automatedHearingCaseManagementLocationWith()
@@ -104,90 +102,12 @@ public class AutomatedHearingTransactionRequestMapper {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
-        return automatedHearingCaseData;
+        return null;
     }
 
-    private static AutomatedHearingPartyDetails getRespondentsDetails(CaseData caseData) {
-        if (caseData.getRespondentsFL401() != null) {
-            return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith()
-                .firstName(caseData.getRespondentsFL401().getFirstName())
-                .lastName(caseData.getRespondentsFL401().getLastName())
-                .previousName(caseData.getRespondentsFL401().getPreviousName())
-                .dateOfBirth(caseData.getRespondentsFL401().getDateOfBirth())
-                .isDateOfBirthUnknown(caseData.getRespondentsFL401().getIsDateOfBirthUnknown())
-                .otherGender(caseData.getRespondentsFL401().getOtherGender())
-                .placeOfBirth(caseData.getRespondentsFL401().getPlaceOfBirth())
-                .isAddressUnknown(caseData.getRespondentsFL401().getIsAddressUnknown())
-                .addressLivedLessThan5YearsDetails(caseData.getRespondentsFL401().getAddressLivedLessThan5YearsDetails())
-                .landline(caseData.getRespondentsFL401().getLandline())
-                .relationshipToChildren(caseData.getRespondentsFL401().getRelationshipToChildren())
-                .otherPersonRelationshipToChildren(caseData.getRespondentsFL401().getOtherPersonRelationshipToChildren())
-                .solicitorOrg(caseData.getRespondentsFL401().getSolicitorOrg())
-                .solicitorAddress(caseData.getRespondentsFL401().getSolicitorAddress())
-                .dxNumber(caseData.getRespondentsFL401().getDxNumber())
-                .solicitorReference(caseData.getRespondentsFL401().getSolicitorReference())
-                .representativeFirstName(caseData.getRespondentsFL401().getRepresentativeFirstName())
-                .representativeLastName(caseData.getRespondentsFL401().getRepresentativeLastName())
-                .sendSignUpLink(caseData.getRespondentsFL401().getSendSignUpLink())
-                .solicitorEmail(caseData.getRespondentsFL401().getSolicitorEmail())
-                .phoneNumber(caseData.getRespondentsFL401().getPhoneNumber())
-                .email(caseData.getRespondentsFL401().getEmail())
-                .address(caseData.getRespondentsFL401().getAddress())
-                .solicitorTelephone(caseData.getRespondentsFL401().getSolicitorTelephone())
-                .caseTypeOfApplication(caseData.getRespondentsFL401().getCaseTypeOfApplication())
-                .partyLevelFlag(caseData.getRespondentsFL401().getPartyLevelFlag())
-                .partyId(caseData.getRespondentsFL401().getPartyId())
-                .solicitorOrgUuid(caseData.getRespondentsFL401().getSolicitorOrgUuid())
-                .solicitorPartyId(caseData.getRespondentsFL401().getSolicitorPartyId())
-                .build();
-        } else {
-            return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith().build();
-        }
-    }
-
-    private static AutomatedHearingPartyDetails getApplicantsDetails(CaseData caseData) {
-        if (caseData.getApplicantsFL401() != null) {
-            return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith()
-                .firstName(caseData.getApplicantsFL401().getFirstName())
-                .lastName(caseData.getApplicantsFL401().getLastName())
-                .previousName(caseData.getApplicantsFL401().getPreviousName())
-                .dateOfBirth(caseData.getApplicantsFL401().getDateOfBirth())
-                .isDateOfBirthUnknown(caseData.getApplicantsFL401().getIsDateOfBirthUnknown())
-                .otherGender(caseData.getApplicantsFL401().getOtherGender())
-                .placeOfBirth(caseData.getApplicantsFL401().getPlaceOfBirth())
-                .isAddressUnknown(caseData.getApplicantsFL401().getIsAddressUnknown())
-                .addressLivedLessThan5YearsDetails(caseData.getApplicantsFL401().getAddressLivedLessThan5YearsDetails())
-                .landline(caseData.getApplicantsFL401().getLandline())
-                .relationshipToChildren(caseData.getApplicantsFL401().getRelationshipToChildren())
-                .otherPersonRelationshipToChildren(caseData.getApplicantsFL401().getOtherPersonRelationshipToChildren())
-                .solicitorOrg(caseData.getApplicantsFL401().getSolicitorOrg())
-                .solicitorAddress(caseData.getApplicantsFL401().getSolicitorAddress())
-                .dxNumber(caseData.getApplicantsFL401().getDxNumber())
-                .solicitorReference(caseData.getApplicantsFL401().getSolicitorReference())
-                .representativeFirstName(caseData.getApplicantsFL401().getRepresentativeFirstName())
-                .representativeLastName(caseData.getApplicantsFL401().getRepresentativeLastName())
-                .sendSignUpLink(caseData.getApplicantsFL401().getSendSignUpLink())
-                .solicitorEmail(caseData.getApplicantsFL401().getSolicitorEmail())
-                .phoneNumber(caseData.getApplicantsFL401().getPhoneNumber())
-                .email(caseData.getApplicantsFL401().getEmail())
-                .address(caseData.getApplicantsFL401().getAddress())
-                .solicitorTelephone(caseData.getApplicantsFL401().getSolicitorTelephone())
-                .caseTypeOfApplication(caseData.getApplicantsFL401().getCaseTypeOfApplication())
-                .partyLevelFlag(caseData.getApplicantsFL401().getPartyLevelFlag())
-                .partyId(caseData.getApplicantsFL401().getPartyId())
-                .solicitorOrgUuid(caseData.getApplicantsFL401().getSolicitorOrgUuid())
-                .solicitorPartyId(caseData.getApplicantsFL401().getSolicitorPartyId())
-                .build();
-        } else {
-            return AutomatedHearingPartyDetails.automatedHearingPartyDetailsWith().build();
-        }
-    }
-
-    private static void getApplicantsDetails(Element<PartyDetails> applicants,
-                                             List<Element<AutomatedHearingPartyDetails>> applicantsAutomatedHearingpartyDetails) {
-        UUID ids = applicants.getId();
-        PartyDetails partyDetails = applicants.getValue();
+    private static void getPartyDetailsForRequest(Element<PartyDetails> party,
+                                                  List<Element<AutomatedHearingPartyDetails>> applicantsAutomatedHearingpartyDetails) {
+        PartyDetails partyDetails = party.getValue();
         AutomatedHearingPartyDetails automatedHearingPartyDetails = AutomatedHearingPartyDetails
             .automatedHearingPartyDetailsWith().build();
         if (partyDetails != null) {
@@ -226,7 +146,7 @@ public class AutomatedHearingTransactionRequestMapper {
         }
 
         Element<AutomatedHearingPartyDetails> autoElement = Element.<AutomatedHearingPartyDetails>builder()
-            .id(ids)
+            .id(party.getId())
             .value(automatedHearingPartyDetails)
             .build();
         applicantsAutomatedHearingpartyDetails.add(autoElement);

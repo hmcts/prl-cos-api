@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -219,18 +218,18 @@ public class HearingService {
         return Collections.emptyList();
     }
 
-    public ResponseEntity<AutomatedHearingResponse> createAutomatedHearing(String userToken, AutomatedHearingCaseData automatedHearingCaseData) {
-        ResponseEntity<AutomatedHearingResponse> response = null;
+    public AutomatedHearingResponse createAutomatedHearing(String userToken, AutomatedHearingCaseData automatedHearingCaseData) {
         try {
             log.info("Automated Hearing Request: createAutomatedHearing: Post API call: fis-hmc-api/automated-hearing");
-            response = hearingApiClient.createAutomatedHearing(userToken, authTokenGenerator.generate(), automatedHearingCaseData);
-            if (response.getStatusCode().equals(HttpStatusCode.valueOf(200))){
-                //return response.getBody();
+            ResponseEntity<AutomatedHearingResponse> response = hearingApiClient.createAutomatedHearing(userToken,
+                                                                    authTokenGenerator.generate(), automatedHearingCaseData);
+            if (response.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
+                return response.getBody();
             }
         } catch (Exception e) {
             log.error("Error in createAutomatedHearing", e);
         }
-        return response;
+        return null;
     }
 
 }
