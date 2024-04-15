@@ -678,6 +678,13 @@ public class ApplicationsTabService implements TabService {
             childEvidence = "";
         }
 
+        YesOrNo mpuIsDomesticAbuseEvidenceProvided = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuIsDomesticAbuseEvidenceProvided())
+            ? caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided() : null;
+        String mpuTypeOfPreviousMiamAttendanceEvidence = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+                                                                                    .getMpuTypeOfPreviousMiamAttendanceEvidence())
+            ? caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence().getDisplayedValue() : null;
+
         MiamPolicyUpgradeExemptions miamExemptions = MiamPolicyUpgradeExemptions.builder()
             .mpuReasonsForMiamExemption(reasonsForMiamExemption)
             .mpuDomesticAbuseEvidence(domesticAbuseEvidence)
@@ -685,6 +692,8 @@ public class ApplicationsTabService implements TabService {
             .mpuUrgencyEvidence(urgencyEvidence)
             .mpuPreviousAttendenceEvidence(previousAttendenceEvidence)
             .mpuOtherGroundsEvidence(otherGroundsEvidence)
+            .mpuIsDomesticAbuseEvidenceProvided(mpuIsDomesticAbuseEvidenceProvided)
+            .mpuTypeOfPreviousMiamAttendanceEvidence(mpuTypeOfPreviousMiamAttendanceEvidence)
             .build();
 
         return toMap(miamExemptions);
