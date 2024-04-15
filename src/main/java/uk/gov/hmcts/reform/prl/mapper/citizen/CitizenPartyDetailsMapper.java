@@ -353,7 +353,7 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
-  //For citizen-case-update - currentOrPreviousProceedings
+                // For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseForProceedings(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
@@ -413,32 +413,9 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        try {
-            log.info("existingPartyDetails received from DB ===>" + objectMapper.writeValueAsString(existingPartyDetails));
-
-            log.info("citizenProvidedPartyDetails received ===>" + objectMapper.writeValueAsString(
-                citizenProvidedPartyDetails));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        PartyDetails partyDetails = existingPartyDetails.toBuilder()
-            .response(existingPartyDetails.getResponse()
-                          .toBuilder()
-                          //.respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
-                          .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
-                          .build())
-            .build();
-
-        try {
-            log.info("partyDetails final expectation to be updated in DB ===>" + objectMapper.writeValueAsString(
-                partyDetails));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
-                          //.respondentAllegationsOfHarmData(citizenProvidedPartyDetails.getResponse().getRespondentAllegationsOfHarmData())
                           .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
                           .build())
             .build();
