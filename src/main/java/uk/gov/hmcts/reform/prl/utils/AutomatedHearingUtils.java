@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 public class AutomatedHearingUtils {
@@ -28,7 +29,7 @@ public class AutomatedHearingUtils {
                          caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
                 );
                 caseData.getDraftOrderCollection().forEach(draftOrder -> {
-                    if (draftOrder.getValue().isAutoHearingReqPending()) {
+                    if (Yes.equals(draftOrder.getValue().isAutoHearingReqPending())) {
                         draftOrder.getValue().setManageOrderHearingDetails(manageOrderService
                             .createAutomatedHearingManagement(authorisation, caseData, draftOrder.getValue().getManageOrderHearingDetails()));
                     }
@@ -39,7 +40,7 @@ public class AutomatedHearingUtils {
                          caseData.getManageOrders().getAmendOrderSelectCheckOptions(), saveAsDraft
                 );
                 caseData.getOrderCollection().forEach(order -> {
-                    if (order.getValue().isAutoHearingReqPending()) {
+                    if (Yes.equals(order.getValue().isAutoHearingReqPending())) {
                         order.getValue().setManageOrderHearingDetails(manageOrderService
                             .createAutomatedHearingManagement(authorisation, caseData, order.getValue()
                                 .getManageOrderHearingDetails()));

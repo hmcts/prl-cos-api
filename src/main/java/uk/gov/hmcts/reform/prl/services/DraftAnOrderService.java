@@ -1033,7 +1033,7 @@ public class DraftAnOrderService {
                     .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()) && (loggedInUserType.equalsIgnoreCase(
                     UserRoles.JUDGE.toString()) || loggedInUserType.equalsIgnoreCase(UserRoles.CASEMANAGER.toString()))
                     && isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
-                    draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(true).build();
+                    draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),

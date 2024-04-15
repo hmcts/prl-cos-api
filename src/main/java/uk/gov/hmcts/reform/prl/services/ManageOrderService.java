@@ -1191,7 +1191,7 @@ public class ManageOrderService {
             // Check for Automated Hearing Management
             if (isHearingPageNeeded(draftOrderElement.getValue().getOrderType(), draftOrderElement.getValue().getC21OrderOptions())) {
                 draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()
-                    .isAutoHearingReqPending(true).build());
+                    .isAutoHearingReqPending(Yes).build());
             }
         }
         if (caseData.getDraftOrderCollection() != null) {
@@ -2226,9 +2226,9 @@ public class ManageOrderService {
         }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        boolean isAutoHearingReqPending = false;
+        YesOrNo isAutoHearingReqPending = No;
         if (isHearingPageNeeded(CreateSelectOrderOptionsEnum.valueOf(flagSelectedOrderId), orderDetails.getC21OrderOptions())) {
-            isAutoHearingReqPending = true;
+            isAutoHearingReqPending = Yes;
         }
         return element(orderDetails.toBuilder()
                            .isAutoHearingReqPending(isAutoHearingReqPending)
