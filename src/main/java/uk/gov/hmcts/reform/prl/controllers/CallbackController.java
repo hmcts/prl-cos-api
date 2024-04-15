@@ -331,7 +331,8 @@ public class CallbackController {
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
-            if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
             }
             Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
@@ -378,7 +379,7 @@ public class CallbackController {
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
             && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
             || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
-            caseData = miamPolicyUpgradeFileUploadService.renameConfidentialDocumentForMiamPolicyUpgrade(
+            caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
                 caseData,
                 systemUserService.getSysUserToken()
             );
