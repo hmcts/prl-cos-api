@@ -978,6 +978,4 @@ public class PrlAppsConstants {
     public static final String SUCCESS = "Success";
     public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
-
-    public static final String CITIZEN = "Citizen";
 }
