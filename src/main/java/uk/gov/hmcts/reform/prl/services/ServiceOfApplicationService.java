@@ -137,7 +137,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
-import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -916,7 +916,8 @@ public class ServiceOfApplicationService {
                                                             fieldsMap,
                                                             doesC1aExists(caseData).equals(Yes)
                                                                 ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
-                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A);
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
+                        );
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
                                                                                   selectedApplicant, PRL_LET_ENG_AP7);
@@ -2885,7 +2886,7 @@ public class ServiceOfApplicationService {
                                                             fieldsMap,
                                                             doesC1aExists(caseData).equals(Yes)
                                                                 ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
-                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITH_OUT_C1A
+                                                                : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                         );
                     } else {
                         Document ap7Letter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
