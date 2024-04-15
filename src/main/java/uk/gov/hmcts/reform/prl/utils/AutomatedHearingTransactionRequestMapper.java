@@ -92,6 +92,7 @@ public class AutomatedHearingTransactionRequestMapper {
                 .attendHearing(isNull(caseData.getAttendHearing()) ? AutomatedHearingAttendHearing.automatedHearingAttendHearingWith().build() :
                                    AutomatedHearingAttendHearing.automatedHearingAttendHearingWith()
                                        .isWelshNeeded(YesOrNo.Yes.equals(caseData.getAttendHearing().getIsWelshNeeded()))
+                                       .isInterpreterNeeded(YesOrNo.Yes.equals(caseData.getAttendHearing().getIsInterpreterNeeded()))
                                        .build())
                 .issueDate(caseData.getIssueDate())
                 .build();

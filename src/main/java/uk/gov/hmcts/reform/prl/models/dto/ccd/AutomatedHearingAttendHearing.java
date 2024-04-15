@@ -12,4 +12,5 @@ import lombok.Data;
 public class AutomatedHearingAttendHearing {
 
     private Boolean isWelshNeeded;
+    private Boolean isInterpreterNeeded;
 }
