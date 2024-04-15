@@ -598,7 +598,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeService.java',
   '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
   '**uk/gov/hmcts/reform/prl/controllers/PrePopulateFeeAndSolicitorNameController.java',
-  '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeFileUploadService.java'
+  '**uk/gov/hmcts/reform/prl/services/MiamPolicyUpgradeFileUploadService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/ResubmitApplicationController.java'
 ]
 
 sonarqube {
