@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
@@ -99,10 +98,10 @@ public class AutomatedHearingTransactionRequestMapper {
             String automatedHearingCaseDataJson = objectMappers.writerWithDefaultPrettyPrinter().writeValueAsString(
                 automatedHearingCaseData);
             log.info("Automated Hearing Request Mapper: AutomatedHearingCaseData: {}", automatedHearingCaseDataJson);
-        } catch (JsonProcessingException e) {
+            return automatedHearingCaseData;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     private static void getPartyDetailsForRequest(Element<PartyDetails> party,
