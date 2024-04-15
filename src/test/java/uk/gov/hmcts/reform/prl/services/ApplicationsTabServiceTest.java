@@ -635,9 +635,28 @@ public class ApplicationsTabServiceTest {
         Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(partyDetails).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(applicantElement);
 
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+            .newOrdersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(orderRevised)
+            .newOrdersOccupation(YesOrNo.Yes)
+            .occupationOrder(orderRevised)
+            .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageProtectionOrder(orderRevised)
+            .newOrdersRestraining(YesOrNo.Yes)
+            .restrainingOrder(orderRevised)
+            .newOrdersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(orderRevised)
+            .newOrdersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(orderRevised)
+            .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+            .newAbductionChildHasPassport(Yes).build();
+
         CaseData caseData = caseDataWithParties.toBuilder()
             .taskListVersion(TASK_LIST_VERSION_V3)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .othersToNotify(applicantList)
             .applicants(applicantList)
             .respondents(applicantList)
@@ -647,12 +666,12 @@ public class ApplicationsTabServiceTest {
             .thenReturn(Applicant.builder().gender("male").build());
         when(objectMapper.convertValue(partyDetails, Respondent.class))
             .thenReturn(Respondent.builder().build());
-        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
-            .thenReturn(OtherPersonInTheCase.builder().build());
-        when(objectMapper.convertValue(caseData, AllegationsOfHarmOrders.class))
-            .thenReturn(allegationsOfHarmOrders);
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
             .thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+            .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+            .thenReturn(revisedChildAbductionDetails);
 
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
@@ -674,6 +693,24 @@ public class ApplicationsTabServiceTest {
             .isPhoneNumberConfidential(Yes)
             .build();
 
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+            .newOrdersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(orderRevised)
+            .newOrdersOccupation(YesOrNo.Yes)
+            .occupationOrder(orderRevised)
+            .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageProtectionOrder(orderRevised)
+            .newOrdersRestraining(YesOrNo.Yes)
+            .restrainingOrder(orderRevised)
+            .newOrdersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(orderRevised)
+            .newOrdersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(orderRevised)
+            .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+            .newAbductionChildHasPassport(Yes).build();
+
         Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(partyDetails).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(applicantElement);
 
@@ -683,6 +720,7 @@ public class ApplicationsTabServiceTest {
             .miampolicyupgrade.MiamDomesticAbuseChecklistEnum> miamExemptionsDomesticChecklistEnums = new ArrayList<>();
         CaseData caseData = caseDataWithParties.toBuilder()
             .taskListVersion(TASK_LIST_VERSION_V3)
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
                 .builder()
                 .mpuExemptionReasons(miamExemptionsChecklistEnums)
@@ -705,14 +743,15 @@ public class ApplicationsTabServiceTest {
             .thenReturn(Applicant.builder().gender("male").build());
         when(objectMapper.convertValue(partyDetails, Respondent.class))
             .thenReturn(Respondent.builder().build());
-        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
-            .thenReturn(OtherPersonInTheCase.builder().build());
-        when(objectMapper.convertValue(caseData, AllegationsOfHarmOrders.class))
-            .thenReturn(allegationsOfHarmOrders);
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
             .thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+            .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+            .thenReturn(revisedChildAbductionDetails);
 
         assertNotNull(applicationsTabService.updateTab(caseData));
+
     }
 
     private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {
