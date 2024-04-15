@@ -133,7 +133,8 @@ public class C100DocumentTemplateFinderService {
     }
 
     public String findC8DocumentTemplate(CaseData caseData,boolean isWelsh) {
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !isWelsh ? c100C8TemplateV2 : c100C8WelshTemplateV2;
         }
         return !isWelsh ? c100C8Template : c100C8WelshTemplate;
@@ -141,7 +142,8 @@ public class C100DocumentTemplateFinderService {
     }
 
     public String findC8DraftDocumentTemplate(CaseData caseData,boolean isWelsh) {
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !isWelsh ? c100C8DraftTemplateV2 : c100C8DraftWelshTemplateV2;
         }
         return !isWelsh  ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
@@ -149,7 +151,8 @@ public class C100DocumentTemplateFinderService {
     }
 
     public String findC1ATemplate(CaseData caseData,boolean isWelsh) {
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !isWelsh ? c100C1aTemplateV2 : c100C1aWelshTemplateV2;
         }
         return !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
@@ -157,7 +160,8 @@ public class C100DocumentTemplateFinderService {
     }
 
     public String findDraftC1ATemplate(CaseData caseData,boolean isWelsh) {
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !isWelsh ? c100C1aDraftTemplateV2 : c100C1aDraftWelshTemplateV2;
         }
         return !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
