@@ -114,8 +114,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
@@ -132,6 +132,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -550,7 +552,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
 
     }
 
@@ -561,7 +563,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
     }
 
@@ -584,8 +586,8 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(authToken, c100CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_FIELD));
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
@@ -2426,9 +2428,11 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_DRAFT_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_FINAL_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_FINAL_HINT, false);
-        verify(dgsService, times(6)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService, times(8)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test

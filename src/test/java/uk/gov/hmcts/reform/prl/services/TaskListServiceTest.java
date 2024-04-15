@@ -11,7 +11,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -41,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -579,6 +583,12 @@ public class TaskListServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
@@ -623,6 +633,12 @@ public class TaskListServiceTest {
                         .state("CASE_ISSUED")
                         .build())
                 .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
         Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
@@ -645,7 +661,7 @@ public class TaskListServiceTest {
         stringObjectMap.putAll(documentMap);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        //when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -654,6 +670,12 @@ public class TaskListServiceTest {
                         .state("SUBMITTED_PAID")
                         .build())
                 .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
         Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
@@ -677,7 +699,7 @@ public class TaskListServiceTest {
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(dgsService.generateDocuments(authToken, caseData)).thenThrow(new Exception());
+        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -686,6 +708,12 @@ public class TaskListServiceTest {
                         .state("SUBMITTED_PAID")
                         .build())
                 .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(tabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
                 .updateTaskList(callbackRequest, authToken);
         Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);

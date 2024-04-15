@@ -18,6 +18,7 @@ case:
       uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
 
 prl:
+  environment: ${APP_ENV:preview}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
@@ -440,10 +441,18 @@ document:
       prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
       prl_solicitor_c7_final_filename: C7_Response.pdf
+      prl_solicitor_c7_welsh_draft_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_welsh_draft_filename: Draft_C7_response_Welsh.pdf
+      prl_solicitor_c7_welsh_final_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_welsh_final_filename: Final_C7_response_Welsh.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
       prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
       prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_welsh_draft_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_welsh_draft_filename: Draft_C1A_allegation_of_harm_Welsh.pdf
+      prl_solicitor_c1a_welsh_final_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_welsh_final_filename: Final_C1A_allegation_of_harm_Welsh.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
