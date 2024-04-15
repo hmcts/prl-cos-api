@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
@@ -42,7 +43,7 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_SERVICE_AUTH_TOKEN
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CafCassControllerIntegrationTest {
+public class CafCassControllerIntegrationTest extends IntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired

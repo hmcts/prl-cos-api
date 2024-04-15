@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_SERVICE_AUTH_TOKEN
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CafcassDocumentManagementControllerIntegrationTest {
+public class CafcassDocumentManagementControllerIntegrationTest extends IntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
