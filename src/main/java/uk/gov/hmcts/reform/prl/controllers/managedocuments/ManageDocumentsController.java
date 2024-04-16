@@ -45,8 +45,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
     private final UserService userService;
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
-    public static final String FM5ERROR = "The statement of position on non-court dispute resolution "
-        + "(form FM5) cannot contain confidential information or be restricted. ";
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -120,13 +118,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        manageDocumentsService.checkIfFm5IsConfidentialOrRestricted(callbackRequest);
-        if (manageDocumentsService.checkIfFm5IsConfidentialOrRestricted(callbackRequest)) {
-            AboutToStartOrSubmitCallbackResponse
-                .builder()
-                .errors(List.of(FM5ERROR))
-                .build();
-        }
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
