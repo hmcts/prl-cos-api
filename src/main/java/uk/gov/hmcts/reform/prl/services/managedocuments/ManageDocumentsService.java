@@ -166,6 +166,16 @@ public class ManageDocumentsService {
         return errorList;
     }
 
+    public List<String> checkIfFm5IsConfidentialOrRestricted(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+        for (Element<ManageDocuments> element : manageDocuments) {
+            log.info("document category is {}", element.getValue().getDocumentCategories());
+        }
+
+        return new ArrayList<>();
+    }
+
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
