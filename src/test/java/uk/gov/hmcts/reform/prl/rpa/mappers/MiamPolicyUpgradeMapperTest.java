@@ -67,3 +67,4 @@ public class MiamPolicyUpgradeMapperTest {
         Assert.assertNotNull(miamPolicyUpgradeMapper.map(caseData));
     }
 }
+
