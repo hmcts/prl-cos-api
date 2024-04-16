@@ -70,6 +70,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -435,7 +436,7 @@ public class CaseService {
             || caseData.getState().equals(DECISION_OUTCOME)) {
             HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
-            if (partyIdAndType != null) {
+            if (!partyIdAndType.isEmpty()) {
                 citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
             }
             return citizenDocuments;
@@ -476,8 +477,8 @@ public class CaseService {
         emailNotificationDetailsList.stream()
             .map(Element::getValue)
             .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
-            .filter(emailNotificationDetails -> Arrays.asList(
-                emailNotificationDetails.getPartyIds().split("\\s*,\\s*")).contains(partyIdAndType.get(PARTY_ID)))
+            .filter(emailNotificationDetails -> getPartyIds(emailNotificationDetails.getPartyIds())
+                .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
                 emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
@@ -507,6 +508,12 @@ public class CaseService {
         return citizenDocuments[0];
     }
 
+    private List<String> getPartyIds(String partyIds) {
+        return null != partyIds
+            ? Arrays.stream(partyIds.trim().split(COMMA)).map(String::trim).toList()
+            : Collections.emptyList();
+    }
+
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
         return null != serviceOfApplication.getUnServedRespondentPack()
             ? serviceOfApplication.getUnServedRespondentPack()
@@ -526,8 +533,8 @@ public class CaseService {
         bulkPrintDetailsList.stream()
             .map(Element::getValue)
             .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
-            .filter(bulkPrintDetails -> Arrays.asList(
-                bulkPrintDetails.getPartyIds().split("\\s*,\\s*")).contains(partyIdAndType.get(PARTY_ID)))
+            .filter(bulkPrintDetails -> getPartyIds(bulkPrintDetails.getPartyIds())
+                .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
                 bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
@@ -647,7 +654,7 @@ public class CaseService {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
         HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
-        if (partyIdAndType != null) {
+        if (!partyIdAndType.isEmpty()) {
             citizenDocuments.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
@@ -778,7 +785,7 @@ public class CaseService {
             }
         }
 
-        return null;
+        return new HashMap<>();
     }
 
     private Optional<Element<PartyDetails>> getParty(List<Element<PartyDetails>> parties,
