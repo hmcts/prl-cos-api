@@ -84,7 +84,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1545,7 +1544,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testFetchAdditionalApplicationCodeIfExist(){
+    public void testFetchAdditionalApplicationCodeIfExist() {
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .caseTypeOfApplication("C100")
