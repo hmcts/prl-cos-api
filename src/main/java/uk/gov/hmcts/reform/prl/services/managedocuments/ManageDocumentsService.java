@@ -167,8 +167,11 @@ public class ManageDocumentsService {
     }
 
     public List<String> checkIfFm5IsConfidentialOrRestricted(CallbackRequest callbackRequest) {
+        log.info("Inside check if fm5 is condfidential");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("caseData {}", caseData);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+        log.info("manageDocs {}", manageDocuments);
         for (Element<ManageDocuments> element : manageDocuments) {
             log.info("document category is {}", element.getValue().getDocumentCategories());
         }

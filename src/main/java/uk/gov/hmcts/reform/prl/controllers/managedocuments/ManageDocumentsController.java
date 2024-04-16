@@ -118,6 +118,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("Inside copymanage docs");
         manageDocumentsService.checkIfFm5IsConfidentialOrRestricted(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
