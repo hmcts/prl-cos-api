@@ -651,9 +651,9 @@ public class SendAndReplyServiceTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
                                                      .otherApplicationsBundle(OtherApplicationsBundle.builder().uploadedDateTime(
-                                                         dateSent).build())
+                                                         dateSent).applicationStatus(PrlAppsConstants.AWP_STATUS_SUBMITTED).build())
                                                      .c2DocumentBundle(C2DocumentBundle.builder().uploadedDateTime(
-                                                         dateSent).build())
+                                                         dateSent).applicationStatus(PrlAppsConstants.AWP_STATUS_SUBMITTED).build())
                                                      .build()));
 
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
