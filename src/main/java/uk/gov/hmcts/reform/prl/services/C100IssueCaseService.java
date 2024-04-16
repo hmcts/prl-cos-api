@@ -124,4 +124,10 @@ public class C100IssueCaseService {
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
     }
+
+    public void systemRuleLogic(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("CASEDATTTTT - >{}", caseData);
+    }
+
 }
