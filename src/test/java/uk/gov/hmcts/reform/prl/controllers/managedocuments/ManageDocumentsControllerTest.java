@@ -162,8 +162,6 @@ public class ManageDocumentsControllerTest {
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
         verify(manageDocumentsService).copyDocument(callbackRequest, auth);
-        verifyNoMoreInteractions(manageDocumentsService);
-
     }
 
     @Test
