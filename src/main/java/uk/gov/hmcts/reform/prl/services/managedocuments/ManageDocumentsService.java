@@ -166,21 +166,21 @@ public class ManageDocumentsService {
         return errorList;
     }
 
-    public List<String> checkIfFm5IsConfidentialOrRestricted(CallbackRequest callbackRequest) {
+    public boolean checkIfFm5IsConfidentialOrRestricted(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);;
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
-            if (element.getValue().getDocumentCategories().getValueCode().equals("fm5Statements")
+            if (element.getValue().getDocumentCategories().getValue().getCode().equals("fm5Statements")
                 && element.getValue().getIsRestricted().equals(YesOrNo.Yes)
-                && element.getValue().getIsConfidential().equals(YesOrNo.Yes)) {
+                || element.getValue().getIsConfidential().equals(YesOrNo.Yes)) {
                 log.info("inside if statement");
             }
-            log.info("document category is {}", element.getValue().getDocumentCategories().getValueCode());
+            log.info("document category is {}", element.getValue().getDocumentCategories().getValue().getCode());
             log.info("document is restricted {}", element.getValue().getIsRestricted());
             log.info("document is confidential {}", element.getValue().getIsConfidential());
         }
 
-        return new ArrayList<>();
+        return false;
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
@@ -728,7 +728,6 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            log.info("roleAssignmentServiceResponse {}", roleAssignmentServiceResponse);
             if (roles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
