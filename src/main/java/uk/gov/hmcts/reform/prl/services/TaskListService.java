@@ -17,8 +17,6 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -35,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -304,7 +301,16 @@ public class TaskListService {
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = mapAmUserRolesToIdamRoles(authorisation, userDetails);
+        List<String> roles = userDetails.getRoles();
+        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorisation,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
+        }
         log.info("list of roles {}", roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
@@ -348,41 +354,5 @@ public class TaskListService {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-
-    private List<String> mapAmUserRolesToIdamRoles(String authorisation, UserDetails userDetails) {
-        List<String> roles = new ArrayList<>();
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
-            //This would check for roles from AM for Judge/Legal advisor/Court admin
-            //if it doesn't find then it will check for idam roles for rest of the users
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                authorisation,
-                authTokenGenerator.generate(),
-                null,
-                userDetails.getId()
-            );
-            roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
-
-            String loggedInUserType;
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
-                loggedInUserType = Roles.JUDGE.getValue();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = Roles.LEGAL_ADVISER.getValue();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = Roles.COURT_ADMIN.getValue();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = Roles.SOLICITOR.getValue();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = Roles.CITIZEN.getValue();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = Roles.SYSTEM_UPDATE.getValue();
-            } else {
-                loggedInUserType = "";
-            }
-
-            roles = new ArrayList<>(Collections.singleton(loggedInUserType));
-        }
-        return roles;
     }
 }
