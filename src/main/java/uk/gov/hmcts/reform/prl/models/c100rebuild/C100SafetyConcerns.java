@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class C100SafetyConcerns {
 
     @JsonProperty("applicant")
+    @JsonAlias("respondent")
     private ApplicantSafteConcernDto applicant;
     @JsonProperty("child")
     private ChildSafetyConcernsDto child;
