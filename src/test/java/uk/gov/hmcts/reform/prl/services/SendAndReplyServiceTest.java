@@ -1563,7 +1563,6 @@ public class SendAndReplyServiceTest {
                     .messages(messages)
                     .build())
             .build();
-
         assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
         assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
     }
