@@ -109,13 +109,13 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist
             = caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons();
 
-        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.domesticAbuse)) {
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuDomesticAbuse)) {
             finished = checkForDomesticAbuseExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.childProtectionConcern)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuChildProtectionConcern)) {
             finished = checkForChildProtectionConcernExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.urgency)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuUrgency)) {
             finished = checkForUrgencyExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.previousMiamAttendance)) {
+        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance)) {
             finished = checkForPreviousMiamAttendanceExemption(caseData);
         } else {
             finished = checkedForOtherExemptions(caseData);

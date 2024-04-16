@@ -12,16 +12,16 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamExemptionsChecklistEnum {
 
-    @JsonProperty("domesticAbuse")
-    domesticAbuse("domesticAbuse", "Domestic abuse"),
-    @JsonProperty("childProtectionConcern")
-    childProtectionConcern("childProtectionConcern", "Child protection concerns"),
-    @JsonProperty("urgency")
-    urgency("urgency","Urgency"),
-    @JsonProperty("previousMiamAttendance")
-    previousMiamAttendance("previousMiamAttendance", "Previous attendance of a MIAM or non-court dispute resolution"),
-    @JsonProperty("other")
-    other("other","Other");
+    @JsonProperty("mpuDomesticAbuse")
+    mpuDomesticAbuse("mpuDomesticAbuse", "Domestic abuse"),
+    @JsonProperty("mpuChildProtectionConcern")
+    mpuChildProtectionConcern("mpuChildProtectionConcern", "Child protection concerns"),
+    @JsonProperty("mpuUrgency")
+    mpuUrgency("mpuUrgency","Urgency"),
+    @JsonProperty("mpuPreviousMiamAttendance")
+    mpuPreviousMiamAttendance("mpuPreviousMiamAttendance", "Previous attendance of a MIAM or non-court dispute resolution"),
+    @JsonProperty("mpuOther")
+    mpuOther("mpuOther","Other");
 
     private final String id;
     private final String displayedValue;

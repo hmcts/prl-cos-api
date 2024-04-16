@@ -12,14 +12,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_2;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.childProtectionConcern;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.domesticAbuse;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.other;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.previousMiamAttendance;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.urgency;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuOther;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1;
@@ -46,18 +46,18 @@ public class MiamPolicyUpgradeMapperTest {
                                           .mpuApplicantAttendedMiam(YesOrNo.No)
                                           .mpuClaimingExemptionMiam(YesOrNo.Yes)
                                           .mpuExemptionReasons(List.of(
-                                              domesticAbuse,
-                                              childProtectionConcern,
-                                              urgency,
-                                              previousMiamAttendance,
-                                              other
+                                              mpuDomesticAbuse,
+                                              mpuChildProtectionConcern,
+                                              mpuUrgency,
+                                              mpuPreviousMiamAttendance,
+                                              mpuOther
                                           ))
                                           .mpuDomesticAbuseEvidences(List.of(
                                               miamDomesticAbuseChecklistEnum_Value_1,
                                               miamDomesticAbuseChecklistEnum_Value_2
                                           ))
                                           .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-                                          .mpuChildProtectionConcernReason(MIAMChildProtectionConcernChecklistEnum_value_1)
+                                          .mpuChildProtectionConcernReason(mpuChildProtectionConcernChecklistEnum_value_1)
                                           .mpuUrgencyReason(miamPolicyUpgradeUrgencyReason_Value_1)
                                           .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
                                           .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails)
