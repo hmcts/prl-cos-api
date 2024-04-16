@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -670,7 +671,7 @@ public class ApplicationsTabService implements TabService {
         }
 
         String childEvidence;
-        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum> childCheck =
+        Optional<MiamPolicyUpgradeChildProtectionConcernEnum> childCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason());
         if (childCheck.isPresent()) {
             childEvidence = childCheck.get().getDisplayedValue();

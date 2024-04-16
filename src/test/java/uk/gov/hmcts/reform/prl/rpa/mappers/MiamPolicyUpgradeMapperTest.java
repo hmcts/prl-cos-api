@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_2;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
@@ -21,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChec
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1;
 
@@ -57,7 +57,7 @@ public class MiamPolicyUpgradeMapperTest {
                                               miamDomesticAbuseChecklistEnum_Value_2
                                           ))
                                           .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-                                          .mpuChildProtectionConcernReason(mpuChildProtectionConcernChecklistEnum_value_1)
+                                          .mpuChildProtectionConcernReason(mpuChildProtectionConcern_value_1)
                                           .mpuUrgencyReason(miamPolicyUpgradeUrgencyReason_Value_1)
                                           .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
                                           .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails)

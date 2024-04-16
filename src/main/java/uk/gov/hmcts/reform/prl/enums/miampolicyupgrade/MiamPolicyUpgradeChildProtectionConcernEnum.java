@@ -9,15 +9,15 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum MiamChildProtectionConcernChecklistEnum {
+public enum MiamPolicyUpgradeChildProtectionConcernEnum {
 
-    @JsonProperty("mpuChildProtectionConcernChecklistEnum_value_1")
-    mpuChildProtectionConcernChecklistEnum_value_1(
-        "mpuChildProtectionConcernChecklistEnum_value_1",
+    @JsonProperty("mpuChildProtectionConcern_value_1")
+    mpuChildProtectionConcern_value_1(
+        "mpuChildProtectionConcern_value_1",
         "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act"
     ),
-    @JsonProperty("mpuChildProtectionConcernChecklistEnum_value_2")
-    mpuChildProtectionConcernChecklistEnum_value_2(
+    @JsonProperty("mpuChildProtectionConcern_value_2")
+    mpuChildProtectionConcern_value_2(
         "MIAMChildProtectionConcernChecklistEnum_value_2",
         "The subject of a child protection plan put in place by a local authority"
     );
@@ -31,8 +31,8 @@ public enum MiamChildProtectionConcernChecklistEnum {
     }
 
     @JsonCreator
-    public static MiamChildProtectionConcernChecklistEnum getValue(String key) {
-        return MiamChildProtectionConcernChecklistEnum.valueOf(key);
+    public static MiamPolicyUpgradeChildProtectionConcernEnum getValue(String key) {
+        return MiamPolicyUpgradeChildProtectionConcernEnum.valueOf(key);
     }
 
 }
