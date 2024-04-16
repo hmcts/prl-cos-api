@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -74,7 +75,7 @@ public class MiamPolicyUpgradeControllerFunctionalTest {
     }
 
     @Test
-    public void givenBodyWhenAboutToSubmitForMiamPolicyUpgradeReturns400() throws Exception {
+    public void givenBodyWhenAboutToSubmitForMiamPolicyUpgradeReturns200() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MIAM_REQUEST_JSON);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/submit-miam-policy-upgrade")
@@ -84,6 +85,8 @@ public class MiamPolicyUpgradeControllerFunctionalTest {
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("data.mpuClaimingExemptionMiam").value("Yes"))
+            .andExpect(jsonPath("data.mpuApplicantAttendedMiam").value("No"))
             .andReturn();
     }
 }
