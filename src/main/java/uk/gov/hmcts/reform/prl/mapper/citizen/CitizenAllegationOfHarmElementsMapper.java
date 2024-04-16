@@ -96,6 +96,7 @@ public class CitizenAllegationOfHarmElementsMapper {
                                                           newChildDetails, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohAbduction(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
         }
+        log.info("allegation of harm data {}", respondentAllegationsOfHarmData);
         return respondentAllegationsOfHarmData;
     }
 
