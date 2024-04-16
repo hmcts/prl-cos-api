@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,11 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -71,7 +66,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -905,14 +899,19 @@ public class ManageOrderEmailServiceTest {
                                    .postalInformation(listOfAddress)
                                    .build())
             .build();
-
+        List<Element<PartyDetails>> parties = new ArrayList<>();
+        parties.add(element(PartyDetails.builder().build()));
         caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .caseTypeOfApplication("C100")
+            .applicants(parties)
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
                               .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
@@ -1135,7 +1134,6 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(dataMap.get("orderCollection"));
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_General_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1190,14 +1188,13 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class)));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_two_Orders() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1258,17 +1255,15 @@ public class ManageOrderEmailServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
 
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
     }
 
-
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_Interim_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1322,7 +1317,8 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class)));
+                                                                                any(SendgridEmailConfig.class)))
+            .thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
@@ -1888,6 +1884,7 @@ public class ManageOrderEmailServiceTest {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("RespFN")
             .lastName("RespLN")
+            .contactPreferences(ContactPreferences.post)
             .address(Address.builder().addressLine1("#123").build())
             .build();
         caseData = caseData.toBuilder()
@@ -1929,6 +1926,7 @@ public class ManageOrderEmailServiceTest {
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("RespFN")
             .lastName("RespLN")
+            .contactPreferences(ContactPreferences.post)
             .address(Address.builder().addressLine1("#123").build())
             .build();
         PartyDetails respondent2 = PartyDetails.builder()
@@ -1992,6 +1990,7 @@ public class ManageOrderEmailServiceTest {
             .email("applicant@tests.com")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.No)
+            .contactPreferences(ContactPreferences.post)
             .isAddressConfidential(YesOrNo.No)
             .solicitorEmail("test@test.com")
             .build();
@@ -2002,6 +2001,7 @@ public class ManageOrderEmailServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("respondent@tests.com")
             .isEmailAddressConfidential(YesOrNo.No)
+            .contactPreferences(ContactPreferences.post)
             .isAddressConfidential(YesOrNo.No)
             .solicitorEmail("test@test.com")
             .build();
@@ -3315,6 +3315,7 @@ public class ManageOrderEmailServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
+            .contactPreferences(ContactPreferences.post)
             .solicitorEmail("")
             .address(Address.builder().addressLine1("addressLine1").build())
             .build();
@@ -3498,6 +3499,7 @@ public class ManageOrderEmailServiceTest {
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
+            .contactPreferences(ContactPreferences.post)
             .address(Address.builder().addressLine1("#123").build())
             .build();
 
@@ -3603,6 +3605,7 @@ public class ManageOrderEmailServiceTest {
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
+            .contactPreferences(ContactPreferences.post)
             .address(Address.builder().addressLine1("#123").build())
             .build();
 
