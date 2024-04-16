@@ -32,7 +32,6 @@ import java.util.UUID;
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Ignore
 public class DocumentDeleteConsumerTest {
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";

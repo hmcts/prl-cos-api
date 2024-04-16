@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Ignore
 public class PaymentApiConsumerTest {
 
     public static final int SLEEP_TIME = 2000;

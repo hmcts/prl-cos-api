@@ -47,7 +47,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Ignore
 public class DocumentUploadConsumerTest {
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
