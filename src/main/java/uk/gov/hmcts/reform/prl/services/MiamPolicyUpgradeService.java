@@ -128,17 +128,17 @@ public class MiamPolicyUpgradeService {
         boolean isApplicantAttendedMiam = Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
         caseDataUpdated.put(
             "mediatorRegistrationNumber",
-            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber())
+            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber().trim())
                 ? caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber() : null
         );
         caseDataUpdated.put(
             "familyMediatorServiceName",
-            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName())
+            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName().trim())
                 ? caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName() : null
         );
         caseDataUpdated.put(
             "soleTraderName",
-            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName())
+            isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName().trim())
                 ? caseData.getMiamPolicyUpgradeDetails().getSoleTraderName() : null
         );
         caseDataUpdated.put(
@@ -162,13 +162,13 @@ public class MiamPolicyUpgradeService {
             isExemptionForOther
                 && (miamPolicyUpgradeOtherGrounds_Value_3.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
                 || miamPolicyUpgradeOtherGrounds_Value_4.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1() : null);
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim() : null);
 
         caseDataUpdated.put(
             "mpuApplicantUnableToAttendMiamReason2",
             isExemptionForOther
                 && miamPolicyUpgradeOtherGrounds_Value_5.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2() : null);
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim() : null);
     }
 
     private void populateDataForPreviousMiamAttendanceExemption(Map<String, Object> caseDataUpdated,
@@ -209,7 +209,7 @@ public class MiamPolicyUpgradeService {
             isExemptionForPreviousMiamAttendance
                 && miamPolicyUpgradePreviousAttendance_Value_2.equals(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
                 && miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails() : null
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim() : null
         );
     }
 
@@ -238,7 +238,7 @@ public class MiamPolicyUpgradeService {
         caseDataUpdated.put(
             "mpuNoDomesticAbuseEvidenceReason",
             isExemptionForDomesticAbuse && No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason() : null
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason().trim() : null
         );
     }
 }
