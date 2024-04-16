@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -63,40 +64,14 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.AmendCourtService;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -124,8 +99,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
@@ -180,7 +154,13 @@ public class CallbackControllerTest {
     CourtSealFinderService courtSealFinderService;
 
     @Mock
-    GatekeepingDetailsService gatekeepingDetailsService;
+    private GatekeepingDetailsService gatekeepingDetailsService;
+
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
 
     @Mock
     RefDataUserService refDataUserService;
@@ -196,6 +176,9 @@ public class CallbackControllerTest {
 
     @Mock
     private DgsService dgsService;
+
+    @Mock
+    MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -1384,6 +1367,7 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder().children(listOfChildren)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .helpWithFees(No)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
@@ -1400,6 +1384,7 @@ public class CallbackControllerTest {
             .id(123L)
             .build();
 
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
@@ -1541,6 +1526,7 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().mpuClaimingExemptionMiam(Yes).build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAllegationsOfHarmYesNo(Yes)
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
@@ -1555,6 +1541,7 @@ public class CallbackControllerTest {
             .id(123L)
             .build();
 
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
@@ -1709,6 +1696,9 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
             .applicants(applicantList)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                .mpuClaimingExemptionMiam(Yes)
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse)).build())
             .consentOrder(Yes)
             .id(123L)
             .build();
@@ -1730,6 +1720,7 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1821,6 +1812,10 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                .mpuClaimingExemptionMiam(Yes)
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.urgency))
+                .build())
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .allegationsOfHarmChildAbductionYesNo(Yes)
@@ -1835,6 +1830,7 @@ public class CallbackControllerTest {
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .build();
 
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
@@ -2008,6 +2004,9 @@ public class CallbackControllerTest {
                                   .newAllegationsOfHarmChildAbuseYesNo(Yes).build())
                 .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                .mpuClaimingExemptionMiam(Yes)
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance)).build())
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(Collections.emptyList())
@@ -2066,11 +2065,15 @@ public class CallbackControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(miamPolicyUpgradeFileUploadService.renameConfidentialDocumentForMiamPolicyUpgrade(caseData, s2sToken))
+            .thenReturn(caseData);
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
