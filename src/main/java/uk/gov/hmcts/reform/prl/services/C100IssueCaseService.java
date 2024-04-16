@@ -125,9 +125,12 @@ public class C100IssueCaseService {
         eventPublisher.publishEvent(notifyLocalCourtEvent);
     }
 
-    public void systemRuleLogic(CallbackRequest callbackRequest) {
+    public boolean systemRuleLogic(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("CASEDATTTTT - >{}", caseData);
+        log.info("CASEDATTTTT -C1A--->{}", caseData.getC1ADocument());
+        log.info("CASEDATTTTT -CONSENT--->{}", caseData.getDraftConsentOrderFile());
+
+        return null != caseData.getC1ADocument() && null != caseData.getDraftConsentOrderFile();
     }
 
 }
