@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +20,7 @@ import java.util.regex.Pattern;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 
@@ -45,18 +45,6 @@ public class DocumentUtils {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentFileName("coversheet.pdf")
-                .build();
-        }
-        return null;
-    }
-
-
-    public static Document toDocument(GeneratedDocumentInfo generateDocument) {
-        if (null != generateDocument) {
-            return Document.builder().documentUrl(generateDocument.getUrl())
-                .documentHash(generateDocument.getHashToken())
-                .documentBinaryUrl(generateDocument.getBinaryUrl())
-                .documentFileName(generateDocument.getDocName())
                 .build();
         }
         return null;
@@ -137,7 +125,7 @@ public class DocumentUtils {
         } else if (roles.contains(Roles.SOLICITOR.getValue())) {
             loggedInUserType = LEGAL_PROFESSIONAL;
         } else if (roles.contains(Roles.CITIZEN.getValue())) {
-            loggedInUserType = UserRoles.CITIZEN.name();
+            loggedInUserType = CITIZEN;
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
             loggedInUserType = BULK_SCAN;
         } else {
@@ -146,5 +134,4 @@ public class DocumentUtils {
 
         return loggedInUserType;
     }
-
 }
