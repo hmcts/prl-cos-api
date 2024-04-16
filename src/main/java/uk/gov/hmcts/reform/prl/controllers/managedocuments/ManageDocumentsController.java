@@ -118,9 +118,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        manageDocumentsService.checkIfFm5IsConfidentialOrRestricted(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .errors(manageDocumentsService.checkIfFm5IsConfidentialOrRestricted(callbackRequest))
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation))
             .build();
     }
