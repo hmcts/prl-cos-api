@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -58,6 +59,9 @@ public class CitizenCaseUpdateServiceTest {
 
     @Mock
     CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String caseId = "case id";
