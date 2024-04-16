@@ -15,15 +15,15 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.AbuseDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantSafteConcernDto;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildSafetyConcernsDto;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespDomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildPassportDetails;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class CitizenAllegationOfHarmElementsMapper {
 
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
 
-    public RespondentAllegationsOfHarmData map(String aohData) {
+    public RespondentAllegationsOfHarmData map(String aohData, CaseData caseData) {
         if (isNotEmpty(aohData)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -71,7 +71,7 @@ public class CitizenAllegationOfHarmElementsMapper {
                 c100C100RebuildSafetyConcernsElements = mapper
                     .readValue(aohData, C100RebuildSafetyConcernsElements.class);
                 return updateSafetyConcernsElementsForCaseData(c100C100RebuildSafetyConcernsElements,
-                                                               null);
+                                                               caseData.getNewChildDetails());
             } catch (JsonProcessingException e) {
                 log.error("Failed to parse json request {}", e.getMessage());
             }
@@ -81,7 +81,7 @@ public class CitizenAllegationOfHarmElementsMapper {
 
     private RespondentAllegationsOfHarmData updateSafetyConcernsElementsForCaseData(
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-        C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+        List<Element<ChildDetailsRevised>> newChildDetails) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
 
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
@@ -93,7 +93,7 @@ public class CitizenAllegationOfHarmElementsMapper {
             respondentAllegationsOfHarmData = buildAohSubstancesAndDrugs(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohDomesticAbuses(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohChildAbuses(c100RebuildSafetyConcernsElements,
-                                                          c100RebuildChildDetailsElements, respondentAllegationsOfHarmData);
+                                                          newChildDetails, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohAbduction(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
         }
         return respondentAllegationsOfHarmData;
@@ -163,7 +163,7 @@ public class CitizenAllegationOfHarmElementsMapper {
 
 
     private RespondentAllegationsOfHarmData buildAohChildAbuses(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                               C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                               List<Element<ChildDetailsRevised>> newChildDetails,
                                                                RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         if (YesOrNo.No.equals(respondentAllegationsOfHarmData.getRespAohChildAbuseYesNo())
@@ -181,31 +181,31 @@ public class CitizenAllegationOfHarmElementsMapper {
 
         if (childAbuse.getPhysicalAbuse() != null) {
             respondentAllegationsOfHarmData = buildAohChildPhysicalAbuseDetails(
-                childAbuse.getPhysicalAbuse(), c100RebuildChildDetailsElements,
+                childAbuse.getPhysicalAbuse(), newChildDetails,
                 respondentAllegationsOfHarmData);
         }
 
         if (childAbuse.getPsychologicalAbuse() != null) {
             respondentAllegationsOfHarmData = buildAohChildPsychologicalAbuseDetails(
-                childAbuse.getPsychologicalAbuse(), c100RebuildChildDetailsElements,
+                childAbuse.getPsychologicalAbuse(), newChildDetails,
                 respondentAllegationsOfHarmData);
         }
 
         if (childAbuse.getSexualAbuse() != null) {
             respondentAllegationsOfHarmData = buildAohChildSexualAbuseDetails(
-                childAbuse.getSexualAbuse(), c100RebuildChildDetailsElements,
+                childAbuse.getSexualAbuse(), newChildDetails,
                 respondentAllegationsOfHarmData);
         }
 
         if (childAbuse.getEmotionalAbuse() != null) {
             respondentAllegationsOfHarmData = buildAohChildEmotionalAbuseDetails(
-                childAbuse.getEmotionalAbuse(), c100RebuildChildDetailsElements,
+                childAbuse.getEmotionalAbuse(), newChildDetails,
                 respondentAllegationsOfHarmData);
         }
 
         if (childAbuse.getFinancialAbuse() != null) {
             respondentAllegationsOfHarmData = buildAohChildFinancialAbuseDetails(
-                childAbuse.getFinancialAbuse(), c100RebuildChildDetailsElements,
+                childAbuse.getFinancialAbuse(), newChildDetails,
                 respondentAllegationsOfHarmData);
         }
 
@@ -233,7 +233,7 @@ public class CitizenAllegationOfHarmElementsMapper {
     }
 
     private RespondentAllegationsOfHarmData buildAohChildPhysicalAbuseDetails(AbuseDto physicalAbuse,
-                                                                             C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                             List<Element<ChildDetailsRevised>> newChildDetails,
                                                                              RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         String[] physicallyAbusedChildren = physicalAbuse.getChildrenConcernedAbout();
@@ -241,14 +241,14 @@ public class CitizenAllegationOfHarmElementsMapper {
         return respondentAllegationsOfHarmData.toBuilder()
             .respChildPhysicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,physicalAbuse))
             .respAllChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskAbuses(physicallyAbusedChildren,
-                                                                        c100RebuildChildDetailsElements))
-            .respWhichChildrenAreRiskPhysicalAbuse(buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements))
+                                                                            newChildDetails))
+            .respWhichChildrenAreRiskPhysicalAbuse(buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, newChildDetails))
             .build();
 
     }
 
     private RespondentAllegationsOfHarmData buildAohChildPsychologicalAbuseDetails(AbuseDto psychologicalAbuse,
-                                                                                  C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                                   List<Element<ChildDetailsRevised>> newChildDetails,
                                                                                   RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         String[] psychologicallyAbusedChildren = psychologicalAbuse.getChildrenConcernedAbout();
@@ -256,15 +256,15 @@ public class CitizenAllegationOfHarmElementsMapper {
         return respondentAllegationsOfHarmData.toBuilder()
             .respChildPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,psychologicalAbuse))
             .respAllChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren,
-                                                                             c100RebuildChildDetailsElements))
+                                                                                 newChildDetails))
             .respWhichChildrenAreRiskPsychologicalAbuse(buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren,
-                                                                                    c100RebuildChildDetailsElements))
+                                                                                        newChildDetails))
             .build();
 
     }
 
     private RespondentAllegationsOfHarmData buildAohChildSexualAbuseDetails(AbuseDto sexualAbuse,
-                                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                            List<Element<ChildDetailsRevised>> newChildDetails,
                                                                            RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         String[] sexuallyAbusedChildren = sexualAbuse.getChildrenConcernedAbout();
@@ -272,15 +272,15 @@ public class CitizenAllegationOfHarmElementsMapper {
         return respondentAllegationsOfHarmData.toBuilder()
             .respChildSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,sexualAbuse))
             .respAllChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbuses(sexuallyAbusedChildren,
-                                                                      c100RebuildChildDetailsElements))
+                                                                          newChildDetails))
             .respWhichChildrenAreRiskSexualAbuse(buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren,
-                                                                             c100RebuildChildDetailsElements))
+                                                                                 newChildDetails))
             .build();
 
     }
 
     private RespondentAllegationsOfHarmData buildAohChildEmotionalAbuseDetails(AbuseDto emotionalAbuse,
-                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                               List<Element<ChildDetailsRevised>> newChildDetails,
                                                                               RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         String[] emotionallyAbusedChildren = emotionalAbuse.getChildrenConcernedAbout();
@@ -288,16 +288,16 @@ public class CitizenAllegationOfHarmElementsMapper {
         return respondentAllegationsOfHarmData.toBuilder()
             .respChildEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,emotionalAbuse))
             .respAllChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbuses(emotionallyAbusedChildren,
-                                                                         c100RebuildChildDetailsElements))
+                                                                             newChildDetails))
             .respWhichChildrenAreRiskEmotionalAbuse(buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren,
-                                                                                c100RebuildChildDetailsElements))
+                                                                                    newChildDetails))
             .build();
 
 
     }
 
     private RespondentAllegationsOfHarmData buildAohChildFinancialAbuseDetails(AbuseDto financialAbuse,
-                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                               List<Element<ChildDetailsRevised>> newChildDetails,
                                                                               RespondentAllegationsOfHarmData respondentAllegationsOfHarmData) {
 
         String[] financiallyAbusedChildren = financialAbuse.getChildrenConcernedAbout();
@@ -305,9 +305,9 @@ public class CitizenAllegationOfHarmElementsMapper {
         return respondentAllegationsOfHarmData.toBuilder()
             .respChildFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,financialAbuse))
             .respAllChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbuses(financiallyAbusedChildren,
-                                                                         c100RebuildChildDetailsElements))
+                                                                             newChildDetails))
             .respWhichChildrenAreRiskFinancialAbuse(buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren,
-                                                                                c100RebuildChildDetailsElements))
+                                                                                    newChildDetails))
             .build();
     }
 
@@ -443,12 +443,10 @@ public class CitizenAllegationOfHarmElementsMapper {
         return abuseDto.getBehaviourStartDate();
     }
 
-    private YesOrNo isAllChildrenAreRiskAbuses(String[] abusedChildren, C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+    private YesOrNo isAllChildrenAreRiskAbuses(String[] abusedChildren, List<Element<ChildDetailsRevised>> newChildDetails) {
 
-        List<ChildDetail> childDetails =  c100RebuildChildDetailsElements.getChildDetails();
-
-        if (ObjectUtils.isNotEmpty(abusedChildren) && ObjectUtils.isNotEmpty(childDetails)) {
-            if (abusedChildren.length == childDetails.size()) {
+        if (ObjectUtils.isNotEmpty(abusedChildren) && ObjectUtils.isNotEmpty(newChildDetails)) {
+            if (abusedChildren.length == newChildDetails.size()) {
                 return YesOrNo.Yes;
             } else {
                 return YesOrNo.No;
@@ -458,23 +456,21 @@ public class CitizenAllegationOfHarmElementsMapper {
     }
 
     private DynamicMultiSelectList buildWhichChildrenAreRiskAbuses(String[] abusedChildren,
-                                                                          C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+                                                                   List<Element<ChildDetailsRevised>> newChildDetails) {
 
-        List<ChildDetail> childDetails = c100RebuildChildDetailsElements.getChildDetails();
-
-        if (childDetails != null && abusedChildren.length != childDetails.size()) {
+        if (newChildDetails != null && abusedChildren.length != newChildDetails.size()) {
             List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
-            childDetails.forEach(s -> {
+            newChildDetails.forEach(s -> {
                 boolean contains = Arrays.stream(abusedChildren).anyMatch(s.getId()::equals);
                 if (contains) {
                     valueElements.add(DynamicMultiselectListElement.builder()
-                                          .code(s.getId()).label(s.getFirstName()
-                                                                     + EMPTY_SPACE_STRING + s.getLastName()).build());
+                                          .code(s.getId().toString()).label(s.getValue().getFirstName()
+                                                                     + EMPTY_SPACE_STRING + s.getValue().getLastName()).build());
                 }
                 listItemsElements.add(DynamicMultiselectListElement.builder()
-                                          .code(s.getId()).label(s.getFirstName()
-                                                                     + EMPTY_SPACE_STRING  + s.getLastName()).build());
+                                          .code(s.getId().toString()).label(s.getValue().getFirstName()
+                                                                     + EMPTY_SPACE_STRING  + s.getValue().getLastName()).build());
             });
             return DynamicMultiSelectList.builder().value(valueElements).listItems(listItemsElements).build();
         }
