@@ -183,11 +183,25 @@ public class AllTabServiceImpl implements AllTabsService {
         return documentMap;
     }
 
-    public Map<String, Object> getMiamPolicyupgradeDocumentMap(CaseData caseData, Map<String, Object> documentMap) {
-
-        documentMap.put("mpuDomesticAbuseEvidenceDocument", caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument());
-        documentMap.put("mpuDocFromDisputeResolutionProvider", caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider());
-        documentMap.put("mpuCertificateByMediator", caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator());
+    public Map<String, Object> getNewMiamPolicyUpgradeDocumentMap(CaseData caseData, Map<String, Object> documentMap) {
+        if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+            && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
+            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
+            documentMap.put(
+                "mpuDomesticAbuseEvidenceDocument",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
+            );
+            documentMap.put(
+                "mpuDocFromDisputeResolutionProvider",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider()
+            );
+            documentMap.put(
+                "mpuCertificateByMediator",
+                caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()
+            );
+        }
         return documentMap;
     }
 
@@ -255,13 +269,7 @@ public class AllTabServiceImpl implements AllTabsService {
         }
         getDocumentsMap(caseData, combinedFieldsMap);
 
-        if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
-            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
-            && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
-            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
-            getMiamPolicyupgradeDocumentMap(caseData, combinedFieldsMap);
-        }
+        getNewMiamPolicyUpgradeDocumentMap(caseData, combinedFieldsMap);
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }

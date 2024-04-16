@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +36,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 
 @RestController
 @Slf4j
@@ -115,15 +111,11 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
-                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
-                && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
-                && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-                && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
-                || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
+                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(
                     caseData
                 );
-                allTabsService.getMiamPolicyupgradeDocumentMap(caseData, caseDataUpdated);
+                allTabsService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
 
             }
             caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
