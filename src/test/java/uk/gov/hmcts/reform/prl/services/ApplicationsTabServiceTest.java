@@ -732,7 +732,7 @@ public class ApplicationsTabServiceTest {
                 .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
                     .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
                 .mpuChildProtectionConcernReason(uk.gov.hmcts.reform.prl.enums
-                    .miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1)
+                    .miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1)
                 .build())
             .othersToNotify(applicantList)
             .applicants(applicantList)

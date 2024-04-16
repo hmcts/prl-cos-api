@@ -127,8 +127,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.domesticAbuse;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.previousMiamAttendance;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
@@ -378,8 +378,8 @@ public class CallbackController {
         caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
         if (Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
-            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance))) {
+            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
+            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
             caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
                 caseData,
                 systemUserService.getSysUserToken()

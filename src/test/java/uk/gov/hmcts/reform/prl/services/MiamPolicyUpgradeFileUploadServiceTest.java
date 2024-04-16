@@ -63,8 +63,8 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
         document =  Document.builder().documentFileName("test").categoryId("test").documentUrl("url").documentBinaryUrl("url").build();
 
         List<MiamExemptionsChecklistEnum> listMiamExemptionsChecklistEnum = new ArrayList<>();
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.domesticAbuse);
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.previousMiamAttendance);
+        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuDomesticAbuse);
+        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance);
         DomesticAbuseEvidenceDocument domesticAbuseEvidenceDocumentConf = DomesticAbuseEvidenceDocument.builder()
             .domesticAbuseDocument(Document.builder().documentFileName("test").categoryId("test").build()).build();
 

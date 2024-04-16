@@ -83,7 +83,7 @@ public class MiamPolicyUpgradeServiceTest {
             .soleTraderName("test")
             .miamCertificationDocumentUpload(Document.builder().build())
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
             .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
             .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
             .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
@@ -107,7 +107,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
             .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
             .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.No)
             .mpuNoDomesticAbuseEvidenceReason("test")
@@ -131,8 +131,8 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.childProtectionConcern))
-            .mpuChildProtectionConcernReason(MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuChildProtectionConcern))
+            .mpuChildProtectionConcernReason(MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1)
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
@@ -140,7 +140,7 @@ public class MiamPolicyUpgradeServiceTest {
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(MiamChildProtectionConcernChecklistEnum
-            .MIAMChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
+            .mpuChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.urgency))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
             .mpuUrgencyReason(MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
@@ -177,7 +177,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
             .mpuDocFromDisputeResolutionProvider(Document.builder().build())
             .build();
@@ -200,7 +200,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
             .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails)
             .mpuMediatorDetails("test")
@@ -224,7 +224,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
             .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
             .mpuCertificateByMediator(Document.builder().build())
@@ -248,7 +248,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3)
             .mpuApplicantUnableToAttendMiamReason1("test")
             .build();
@@ -271,7 +271,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4)
             .mpuApplicantUnableToAttendMiamReason1("test")
             .build();
@@ -294,7 +294,7 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5)
             .mpuApplicantUnableToAttendMiamReason2("test")
             .build();

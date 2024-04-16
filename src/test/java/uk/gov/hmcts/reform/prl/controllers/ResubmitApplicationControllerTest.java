@@ -141,8 +141,8 @@ public class ResubmitApplicationControllerTest {
     @Before
     public void init() throws Exception {
         List<MiamExemptionsChecklistEnum> listMiamExemptionsChecklistEnum = new ArrayList<>();
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.domesticAbuse);
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.previousMiamAttendance);
+        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuDomesticAbuse);
+        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance);
 
         DomesticAbuseEvidenceDocument domesticAbuseEvidenceDocument = DomesticAbuseEvidenceDocument.builder()
             .domesticAbuseDocument(Document.builder().documentFileName("test").categoryId("test").build()).build();

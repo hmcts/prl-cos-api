@@ -245,7 +245,7 @@ public class AllTabServiceImplTest {
             .soleTraderName("test")
             .miamCertificationDocumentUpload(Document.builder().build())
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
             .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
             .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
             .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
