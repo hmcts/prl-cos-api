@@ -150,7 +150,7 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseDataToSubmit, caseDataToSubmit);
+        caseDataToSubmit = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseDataToSubmit, caseDataToSubmit);
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
