@@ -28,7 +28,8 @@ public class QuarantineLegalDoc {
     private final Document applicantC1AApplicationDocument;
     private final Document applicantC1AResponseDocument;
     private final Document applicationsWithinProceedingsDocument;
-    private final Document miamCertificateDocument;
+    //private final Document miamCertificateDocument;
+    private final Document miamCertificateByMediator;
     private final Document previousOrdersSubmittedWithApplicationDocument;
     private final Document respondentApplicationDocument;
     private final Document ordersFromOtherProceedingsDocument;
