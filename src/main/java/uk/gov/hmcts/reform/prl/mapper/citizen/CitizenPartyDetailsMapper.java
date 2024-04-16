@@ -93,6 +93,7 @@ public class CitizenPartyDetailsMapper {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final ObjectMapper objectMapper;
+    private final CitizenAllegationOfHarmElementsMapper citizenAllegationOfHarmMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -417,6 +418,9 @@ public class CitizenPartyDetailsMapper {
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
                           .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
+                          .respondentAllegationsOfHarmData(citizenAllegationOfHarmMapper
+                                                               .map(citizenProvidedPartyDetails.getResponse()
+                                                                        .getRespondingCitizenAoH()))
                           .build())
             .build();
     }
