@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -10,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -35,19 +33,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -141,8 +132,6 @@ public class C100IssueCaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
 
-    public static final String serviceAuthToken = "Bearer serviceAuthToken";
-
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
     private static final Map<String, Object> c100DocsMap = new HashMap<>();
 
@@ -150,24 +139,8 @@ public class C100IssueCaseServiceTest {
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
     private static DynamicList dynamicList;
 
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private HearingService hearingService;
-
-    private NextHearingDateRequest nextHearingDateRequest;
-
-    private LocalDateTime testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
-
     @Before
     public void setUp() {
-
-        nextHearingDateRequest = NextHearingDateRequest.builder()
-            .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder().hearingID("123").hearingDateTime(testNextHearingDate)
-                                    .build())
-            .build();
 
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
@@ -608,30 +581,4 @@ public class C100IssueCaseServiceTest {
 
         verify(eventPublisher,times(1)).publishEvent(Mockito.any());
     }
-
-    @Test
-    @Ignore
-    public void testPopulateDynamicListsForSendAndReply1111111() {
-
-        LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(3).withNano(1);
-        HearingDaySchedule hearingDaySchedule =
-            HearingDaySchedule.hearingDayScheduleWith()
-                .hearingVenueId("231596")
-                .hearingJudgeId("4925644")
-                .hearingStartDateTime(hearingStartDate)
-                .build();
-        List<HearingDaySchedule> hearingDayScheduleList = new ArrayList<>();
-        hearingDayScheduleList.add(hearingDaySchedule);
-
-        when(hearingService.getNextHearingDate(anyString(),anyString())).thenReturn(NextHearingDetails.builder()
-                                                                                        .hearingID("123")
-                                                                                        .hearingDateTime(testNextHearingDate)
-                                                                                        .build());
-
-        boolean updatedCaseData = c100IssueCaseService.isFirstHearing3WeeksAway(authToken, "123");
-
-    }
-
-
-
 }
