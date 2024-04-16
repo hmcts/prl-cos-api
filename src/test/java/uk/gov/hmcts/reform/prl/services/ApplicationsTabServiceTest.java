@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -731,8 +732,7 @@ public class ApplicationsTabServiceTest {
                     .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
                 .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
                     .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
-                .mpuChildProtectionConcernReason(uk.gov.hmcts.reform.prl.enums
-                    .miampolicyupgrade.MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1)
+                .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
                 .build())
             .othersToNotify(applicantList)
             .applicants(applicantList)

@@ -10,10 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
@@ -132,15 +132,15 @@ public class MiamPolicyUpgradeServiceTest {
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuChildProtectionConcern))
-            .mpuChildProtectionConcernReason(MiamChildProtectionConcernChecklistEnum.mpuChildProtectionConcernChecklistEnum_value_1)
+            .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
-        Assert.assertEquals(MiamChildProtectionConcernChecklistEnum
-            .mpuChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
+        Assert.assertEquals(MiamPolicyUpgradeChildProtectionConcernEnum
+            .mpuChildProtectionConcern_value_1, objectMap.get("mpuChildProtectionConcernReason"));
     }
 
     @Test
