@@ -60,5 +60,4 @@ public class DocumentDeleteConsumerTest {
         caseDocumentClientApi.deleteDocument(BEARER_TOKEN,
                 SERVICE_AUTHORIZATION_HEADER, UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), true
         );
-    }
-}
+    }}
