@@ -58,6 +58,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -428,19 +431,16 @@ public class CaseService {
                                                               CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
-        switch (caseData.getState()) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING,
-                 DECISION_OUTCOME: {
-                HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
+        if (caseData.getState().equals(PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            || caseData.getState().equals(DECISION_OUTCOME)) {
+            HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
-                if (partyIdAndType != null) {
-                    citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
-                }
-                return citizenDocuments;
+            if (partyIdAndType != null) {
+                citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
             }
-            default:
-                return null;
+            return citizenDocuments;
         }
+        return Collections.emptyList();
     }
 
     private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, HashMap<String, String> partyIdAndType) {

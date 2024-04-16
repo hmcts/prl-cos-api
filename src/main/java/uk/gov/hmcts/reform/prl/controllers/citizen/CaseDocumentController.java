@@ -448,15 +448,10 @@ public class CaseDocumentController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
-        try {
-            CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
-            if (isNotEmpty(caseDetails)) {
-                return ResponseEntity.ok(SUCCESS);
-            } else {
-                return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Exception in submitting documents", e);
+        CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
+        if (isNotEmpty(caseDetails)) {
+            return ResponseEntity.ok(SUCCESS);
+        } else {
             return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
         }
     }

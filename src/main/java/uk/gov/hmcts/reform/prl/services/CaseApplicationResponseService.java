@@ -71,7 +71,7 @@ public class CaseApplicationResponseService {
     }
 
     public CaseDetails generateCitizenResponseFinalDocuments(CaseData caseData, CaseDetails caseDetails, String authorisation, String partyId,
-                                                             String caseId, String s2sToken) throws Exception {
+                                                             String caseId) throws Exception {
 
         List<Element<Document>> responseDocs = new ArrayList<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
