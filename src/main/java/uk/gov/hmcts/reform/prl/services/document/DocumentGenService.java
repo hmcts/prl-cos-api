@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_LETTER_WITH_ACCESS_CODE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -301,6 +302,9 @@ public class DocumentGenService {
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
+
+    @Value("${document.templates.common.cover_letter_with_access_code}")
+    protected String coverLetterWithAccessCodeTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -935,6 +939,9 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
+            case DOCUMENT_COVER_LETTER_WITH_ACCESS_CODE_HINT:
+                template = findCoverLetterWithAccessCode(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -1014,6 +1021,11 @@ public class DocumentGenService {
 
     private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
         return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
+    }
+
+    private String findCoverLetterWithAccessCode(boolean isWelsh) {
+        //Need to add welsh template once it's received
+        return coverLetterWithAccessCodeTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
