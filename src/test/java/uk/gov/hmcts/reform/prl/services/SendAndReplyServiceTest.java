@@ -84,6 +84,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1529,8 +1530,41 @@ public class SendAndReplyServiceTest {
                     .messages(messages)
                     .build())
             .build();
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
         sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
-        assertNull(null);
+        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );;
     }
 
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExist(){
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(null)
+            .respondents(null)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .externalMessageWhoToSendTo(null)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
 }
