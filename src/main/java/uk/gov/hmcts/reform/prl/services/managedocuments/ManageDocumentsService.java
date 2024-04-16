@@ -176,15 +176,13 @@ public class ManageDocumentsService {
         }
     }
 
-    private List<String> fm5StatementError(Element<ManageDocuments> element, List<String> errorList, boolean restricted) {
+    private void fm5StatementError(Element<ManageDocuments> element, List<String> errorList, boolean restricted) {
 
         boolean confidential = element.getValue().getIsConfidential().equals(YesOrNo.Yes);
         if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
             && (restricted || confidential)) {
             errorList.add(FM5_ERROR);
         }
-
-        return  errorList;
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
