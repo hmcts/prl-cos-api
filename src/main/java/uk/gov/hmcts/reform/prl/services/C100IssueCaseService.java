@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -44,6 +46,7 @@ public class C100IssueCaseService {
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
+    private final HearingService hearingService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -125,10 +128,17 @@ public class C100IssueCaseService {
         eventPublisher.publishEvent(notifyLocalCourtEvent);
     }
 
-    public boolean systemRuleLogic(CallbackRequest callbackRequest) {
+    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("CASEDATTTTT -C1A--->{}", caseData.getC1ADocument());
         log.info("CASEDATTTTT -CONSENT--->{}", caseData.getDraftConsentOrderFile());
+
+        String caseReference = String.valueOf(caseData.getId());
+        log.info("CASEDATTTTT -getID--->{}", caseReference);
+
+        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseReference);
+
+        log.info("BBBBB  {}", futureHearings);
 
         return null != caseData.getC1ADocument() && null != caseData.getDraftConsentOrderFile();
     }
