@@ -305,4 +305,12 @@ public class MiamPolicyUpgradeServiceTest {
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
     }
+
+    @Test
+    public void testUpdateMiamPolicyUpgradeDetails() {
+        CaseData caseData = CaseData.builder().miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CaseData returnedCaseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, objectMap);
+        Assert.assertNotNull(returnedCaseData);
+    }
 }
