@@ -1420,6 +1420,8 @@ public class CallbackControllerTest {
             .build();
 
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("testAuth");
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(any(), anyString())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
@@ -1578,6 +1580,8 @@ public class CallbackControllerTest {
             .build();
 
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("testAuth");
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(any(), anyString())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
@@ -1872,6 +1876,8 @@ public class CallbackControllerTest {
             .build();
 
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("testAuth");
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(any(), anyString())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))

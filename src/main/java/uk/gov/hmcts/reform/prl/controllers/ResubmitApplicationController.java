@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,9 +61,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 
 @Slf4j
 @RestController
@@ -107,16 +103,11 @@ public class ResubmitApplicationController {
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
-                if (Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
-                    && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-                    && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
-                    || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
-                    caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
-                        caseData,
-                        systemUserService.getSysUserToken()
-                    );
-                    allTabService.getMiamPolicyupgradeDocumentMap(caseData, caseDataUpdated);
-                }
+                caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
+                    caseData,
+                    systemUserService.getSysUserToken()
+                );
+                allTabService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
             }
 
             Court closestChildArrangementsCourt = courtFinderService
