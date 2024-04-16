@@ -167,13 +167,17 @@ public class ManageDocumentsService {
     }
 
     public List<String> checkIfFm5IsConfidentialOrRestricted(CallbackRequest callbackRequest) {
-        log.info("Inside check if fm5 is condfidential");
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseData {}", caseData);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);;
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
-        log.info("manageDocs {}", manageDocuments);
         for (Element<ManageDocuments> element : manageDocuments) {
-            log.info("document category is {}", element.getValue().getDocumentCategories());
+            if (element.getValue().getDocumentCategories().getValueCode().equals("fm5Statements")
+                && element.getValue().getIsRestricted().equals(YesOrNo.Yes)
+                && element.getValue().getIsConfidential().equals(YesOrNo.Yes)) {
+                log.info("inside if statement");
+            }
+            log.info("document category is {}", element.getValue().getDocumentCategories().getValueCode());
+            log.info("document is restricted {}", element.getValue().getIsRestricted());
+            log.info("document is confidential {}", element.getValue().getIsConfidential());
         }
 
         return new ArrayList<>();
