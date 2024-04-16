@@ -311,7 +311,7 @@ public class TaskListService {
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
             || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
             try {
-                if (Event.AMEND_MIAM_UPGRADE.getId().equals(callbackRequest.getEventId())
+                if (Event.AMEND_MIAM_POLICY_UPGRADE.getId().equals(callbackRequest.getEventId())
                     && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
                     && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
                     && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse)
