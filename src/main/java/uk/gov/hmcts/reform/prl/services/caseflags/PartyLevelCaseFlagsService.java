@@ -76,7 +76,7 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANT));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENT));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAOTHERPARTY));
-            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTSOLICITOR));
                 data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLICITOR));
             }
