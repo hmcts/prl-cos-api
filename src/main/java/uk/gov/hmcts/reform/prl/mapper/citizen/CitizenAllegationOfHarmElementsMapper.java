@@ -463,7 +463,7 @@ public class CitizenAllegationOfHarmElementsMapper {
             List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             newChildDetails.forEach(s -> {
-                boolean contains = Arrays.asList(abusedChildren).contains(s.getId());
+                boolean contains = Arrays.asList(abusedChildren).contains(String.valueOf(s.getId()));
                 log.info("abused children {}, {}, contains {}", abusedChildren, s.getId(), contains);
                 if (contains) {
                     valueElements.add(DynamicMultiselectListElement.builder()
