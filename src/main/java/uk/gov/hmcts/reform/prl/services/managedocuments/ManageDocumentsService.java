@@ -223,7 +223,6 @@ public class ManageDocumentsService {
                     isWaTaskSetForFirstDocumentIteration = true;
                     setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
                 }
-                log.info("Quartiane legal doc is: {}", quarantineLegalDoc);
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
