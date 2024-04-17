@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -560,19 +559,6 @@ public class CaseDocumentControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
         caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build());
-    }
-
-    @Test
-    public void testCitizenUploadDocumentThrowsJsonProcessingException() {
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build()))
-            .thenThrow(JsonProcessingException.class);
-
-        ResponseEntity<Object> responseEntity = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken,
-                                                                                              DocumentRequest.builder().build());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals("Error in submitting citizen documents", responseEntity.getBody());
     }
 
     @Test

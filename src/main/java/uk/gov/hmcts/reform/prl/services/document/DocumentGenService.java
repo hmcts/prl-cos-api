@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1393,7 +1392,7 @@ public class DocumentGenService {
         return null;
     }
 
-    public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
+    public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) {
 
         String caseId = documentRequest.getCaseId();
 
@@ -1426,7 +1425,7 @@ public class DocumentGenService {
                 quarantineLegalDocs.get(0)
             );
 
-            updatedCaseDataMap = moveCitizenDocumentsToQuarantineTab(
+            moveCitizenDocumentsToQuarantineTab(
                 quarantineLegalDocs,
                 updatedCaseData,
                 updatedCaseDataMap
@@ -1458,29 +1457,6 @@ public class DocumentGenService {
             );
         }
         return caseDataUpdated;
-    }
-
-    private CaseData moveCitizenDocumentsToCaseDocumentsTab(List<QuarantineLegalDoc> quarantineLegalDocs,
-                                                            CaseData caseData,
-                                                            Map<String, Object> caseDataUpdated,
-                                                            UserDetails userDetails) {
-        for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
-            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                .isConfidential(null)
-                .isRestricted(null)
-                .restrictedDetails(null)
-                .build();
-            //invoke common manage docs
-            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-                quarantineLegalDoc,
-                userDetails,
-                caseData,
-                caseDataUpdated,
-                CITIZEN
-            );
-            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        }
-        return caseData;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
