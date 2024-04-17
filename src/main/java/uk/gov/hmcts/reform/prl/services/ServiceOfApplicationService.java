@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -2801,22 +2799,21 @@ public class ServiceOfApplicationService {
     }
 
 
-    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) throws JsonProcessingException {
-
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("VVVVVVVVVVVV---> " + result);
+    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String caseReference = String.valueOf(caseData.getId());
-
-        log.info("getID--->{}", caseReference);
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
+        YesOrNo isChildInvolvedInMiam = No;
+        if (null != caseData.getMiamPolicyUpgradeDetails()) {
+            log.info("MiamUrgdaeDeraitls--->{}", caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
+            isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
+            log.info("isChildInvolvedInMiam--->{}",isChildInvolvedInMiam);
+        }
+        log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
         boolean isAohAvailable = isAohAvailable(caseData);
         log.info("isAohAvailable --> {}", isAohAvailable);
-
+        String caseReference = String.valueOf(caseData.getId());
         boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
         log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
 
