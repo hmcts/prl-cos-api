@@ -76,6 +76,8 @@ public class CitizenCallbackController extends AbstractCallbackController {
     public void updateCitizenApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        log.info("updateCitizenApplication 80 >>>>> ");
         CaseDetails caseDetails
                 = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

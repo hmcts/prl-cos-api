@@ -114,6 +114,8 @@ public class ListOnNoticeController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("listOnNoticeSubmission >>>> 80 : ");
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);

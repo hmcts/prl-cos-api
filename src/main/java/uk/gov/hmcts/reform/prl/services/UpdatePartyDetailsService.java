@@ -77,6 +77,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
+        log.info("updateApplicantRespondentAndChildData >>>> 80 : ");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 

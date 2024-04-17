@@ -257,6 +257,7 @@ public class TaskListService {
     }
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
+        log.info("updateTaskList 260 >>>>>");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = startAllTabsUpdateDataContent.caseData();

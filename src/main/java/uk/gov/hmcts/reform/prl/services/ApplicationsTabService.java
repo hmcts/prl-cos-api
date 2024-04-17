@@ -130,6 +130,7 @@ public class ApplicationsTabService implements TabService {
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
+        log.info("updateTab >>>> 133 : ");
 
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {

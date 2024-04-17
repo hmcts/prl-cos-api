@@ -102,6 +102,7 @@ public class HearingManagementService {
     }
 
     public CaseData updateTabsWithLatestData(Map<String, Object> fields) {
+        log.info("updateTabsWithLatestData 105 >>>>> ");
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
             (String) fields.get(SYSTEM_UPDATE_USER_ID)

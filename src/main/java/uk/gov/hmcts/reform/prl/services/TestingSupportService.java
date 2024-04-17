@@ -308,6 +308,7 @@ public class TestingSupportService {
     }
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
+        log.info("submittedCaseCreation 311 >>>>");
         if (isAuthorized(authorisation)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = tabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));

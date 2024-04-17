@@ -291,7 +291,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
+        log.info("generateDocumentSubmitApplication called >>>>>>> 294 : ");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -428,6 +428,8 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("updateApplication 432 >>>>> ");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         } else {
@@ -471,6 +473,7 @@ public class CallbackController {
 
     private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<String> previousState, List<String> stateList,
                                           Optional<YesOrNo> withdrawApplication, Map<String, Object> caseDataUpdated) {
+        log.info("updateTabsOrWithdrawFlag called >>>> 474 : ");
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
@@ -796,6 +799,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("transferCourtConfirmation 802 >>>> ");
         CaseDetails caseDetails
                 = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
