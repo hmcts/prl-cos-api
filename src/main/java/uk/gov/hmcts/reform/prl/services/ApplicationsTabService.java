@@ -144,16 +144,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-                if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
-                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
-                }
-                applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
-                applicationTab.put("miamPolicyUpgradeExemptionsTable", getMiamExemptionsTableForPolicyUpgrade(caseData));
-            } else {
-                applicationTab.put("miamTable", getMiamTable(caseData));
-                applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
-            }
+            caseData = upDateTabForMiam(caseData, applicationTab);
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
             applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
@@ -216,6 +207,20 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
         }
         return applicationTab;
+    }
+
+    private CaseData upDateTabForMiam(CaseData caseData, Map<String, Object> applicationTab) {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+            if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
+            }
+            applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
+            applicationTab.put("miamPolicyUpgradeExemptionsTable", getMiamExemptionsTableForPolicyUpgrade(caseData));
+        } else {
+            applicationTab.put("miamTable", getMiamTable(caseData));
+            applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
+        }
+        return caseData;
     }
 
     private List<Element<DomesticAbuseBehaviour>> getAllegationsOfHarmRevisedDaTable(CaseData caseData) {
