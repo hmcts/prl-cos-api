@@ -54,14 +54,8 @@ public class AutomatedHearingTransactionRequestMapper {
                                                                caseData.getRespondentsFL401()), respondentsAutomatedHearingpartyDetails);
             }
 
-            List<Element<AutomatedHearingPartyDetails>> automatedHearingOtherPartyInTheCaseRevised = new ArrayList<>();
-            List<Element<PartyDetails>> otherPartyInTheCaseRevisedList = caseData.getOtherPartyInTheCaseRevised();
-            if (otherPartyInTheCaseRevisedList != null) {
-                otherPartyInTheCaseRevisedList.forEach(otherParty -> getPartyDetailsForRequest(
-                    otherParty,
-                    automatedHearingOtherPartyInTheCaseRevised
-                ));
-            }
+            List<Element<AutomatedHearingPartyDetails>> automatedHearingOtherPartyInTheCaseRevised = getAutomatedHearingOtherPartyDetails(
+                caseData);
 
             List<CaseLinksElement<AutomatedHearingCaseLink>> automatedHearingCaseLinks = new ArrayList<>();
             List<CaseLinksElement<CaseLink>> caseLinksList = caseData.getCaseLinks();
@@ -106,6 +100,18 @@ public class AutomatedHearingTransactionRequestMapper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static List<Element<AutomatedHearingPartyDetails>> getAutomatedHearingOtherPartyDetails(CaseData caseData) {
+        List<Element<AutomatedHearingPartyDetails>> automatedHearingOtherPartyInTheCaseRevised = new ArrayList<>();
+        List<Element<PartyDetails>> otherPartyInTheCaseRevisedList = caseData.getOtherPartyInTheCaseRevised();
+        if (otherPartyInTheCaseRevisedList != null) {
+            otherPartyInTheCaseRevisedList.forEach(otherParty -> getPartyDetailsForRequest(
+                otherParty,
+                automatedHearingOtherPartyInTheCaseRevised
+            ));
+        }
+        return automatedHearingOtherPartyInTheCaseRevised;
     }
 
     private static AutomatedHearingData getHearingDataForRequest(HearingData hearingData) {
