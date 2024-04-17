@@ -91,7 +91,7 @@ public class ResubmitApplicationController {
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
             //SNI-5695 fix-- if court name is already present then do not update
-            if (StringUtils.isNotBlank(caseData.getCourtName())) {
+            if (StringUtils.isBlank(caseData.getCourtName())) {
                 Court closestChildArrangementsCourt = courtFinderService
                     .getNearestFamilyCourt(caseData);
                 caseData = assignCourtDetailsBasedOnClosestChildArrangementCourt(closestChildArrangementsCourt, caseData, caseDataUpdated);
