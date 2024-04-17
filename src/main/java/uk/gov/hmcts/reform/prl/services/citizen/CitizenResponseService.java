@@ -51,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -186,8 +187,12 @@ public class CitizenResponseService {
                     if (isNotEmpty(response.getRespondentAllegationsOfHarmData())
                             && Yes.equals(response.getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
                         log.info(" Generating C1A Final document for respondent ");
-                        Document c1aFinalDocument = generateFinalC1A(dbCaseData, authorisation, dataMap);
-                        responseDocs.add(element(c1aFinalDocument));
+                        if (documentLanguage.isGenEng()) {
+                            responseDocs.add(element(generateFinalC1A(dbCaseData, authorisation, dataMap)));
+                        }
+                        if (documentLanguage.isGenWelsh()) {
+                            responseDocs.add(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)));
+                        }
                         log.info("C1A Final document generated successfully for respondent ");
                     }
                     try {
@@ -285,6 +290,17 @@ public class CitizenResponseService {
                 SOLICITOR_C1A_FINAL_DOCUMENT,
                 false,
                 dataMap
+        );
+    }
+
+    private Document generateFinalC1AWelsh(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
+
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
+            true,
+            dataMap
         );
     }
 
