@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -60,6 +61,7 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("afl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails applicant2 = PartyDetails.builder()
             .firstName("af2").lastName("al2")
@@ -71,6 +73,7 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("rf1").lastName("rl1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("rfl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent2 = PartyDetails.builder()
             .firstName("rf2").lastName("rl2")
@@ -133,17 +136,20 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("afl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails applicant2 = PartyDetails.builder()
             .firstName("af2").lastName("al2")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeFirstName("asf2").representativeLastName("asl2")
             .solicitorEmail("asl22@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("rf1").lastName("rl1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("rfl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent2 = PartyDetails.builder()
             .firstName("rf2").lastName("rl2")
@@ -195,11 +201,13 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("afl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("rf1").lastName("rl1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("rfl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("of").lastName("ol")
@@ -242,17 +250,13 @@ public class NoticeOfChangeEventHandlerTest {
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("afl11@test.com")
-            .build();
-        PartyDetails applicant2 = PartyDetails.builder()
-            .firstName("af2").lastName("al2")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("asf2").representativeLastName("asl2")
-            .solicitorEmail("asl22@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("rf1").lastName("rl1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("rfl11@test.com")
+            .contactPreferences(ContactPreferences.email)
             .build();
         PartyDetails respondent2 = PartyDetails.builder()
             .firstName("rf2").lastName("rl2")
