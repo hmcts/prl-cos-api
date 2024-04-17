@@ -58,6 +58,7 @@ import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -155,34 +156,23 @@ public class ManageDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
 
-        if (SOLICITOR.equals(userRole)) {
-            for (Element<ManageDocuments> element : manageDocuments) {
-                boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
-                boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
-                    || element.getValue().getRestrictedDetails().isEmpty();
+        for (Element<ManageDocuments> element : manageDocuments) {
+            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean confidential = element.getValue().getIsConfidential().equals(YesOrNo.Yes);
+            boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
+                || element.getValue().getRestrictedDetails().isEmpty();
 
-                if (restricted && restrictedReasonEmpty) {
-                    errorList.add(DETAILS_ERROR_MESSAGE);
-                }
-                fm5StatementError(element, errorList, restricted);
+            if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
+                errorList.add(DETAILS_ERROR_MESSAGE);
             }
-            return errorList;
-        } else {
-            for (Element<ManageDocuments> element : manageDocuments) {
-                boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
-                fm5StatementError(element, errorList, restricted);
+
+            if (FM5_STATEMENTS.equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
+                && (restricted || confidential)) {
+                errorList.add(FM5_ERROR);
             }
-            return errorList;
         }
-    }
 
-    private void fm5StatementError(Element<ManageDocuments> element, List<String> errorList, boolean restricted) {
-
-        boolean confidential = element.getValue().getIsConfidential().equals(YesOrNo.Yes);
-        if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
-            && (restricted || confidential)) {
-            errorList.add(FM5_ERROR);
-        }
+        return errorList;
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
