@@ -9,17 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.childProtectionConcern;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.domesticAbuse;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.other;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.previousMiamAttendance;
-import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.urgency;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuOther;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5;
@@ -35,89 +37,109 @@ public class MiamPolicyUpgradeService {
 
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> populateMiamPolicyUpgradeDetails(CallbackRequest callbackRequest) {
+    public Map<String, Object> populateAmendedMiamPolicyUpgradeDetails(CallbackRequest callbackRequest) {
+        log.info("initial request of populateAmendedMiamPolicyUpgradeDetails " + callbackRequest.getCaseDetails().getData());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("initial request " + callbackRequest.getCaseDetails().getData());
         CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
+        return caseDataUpdated;
+    }
 
+    public CaseData updateMiamPolicyUpgradeDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("inside updateMiamPolicyUpgradeDetails");
+        Map<String, Object> updatedMiamPolicyUpgradeData = cleanUpMiamPolicyUpgradeDetails(
+            caseData);
+        caseDataUpdated.putAll(updatedMiamPolicyUpgradeData);
+        caseData = caseData
+            .toBuilder()
+            .miamPolicyUpgradeDetails(objectMapper.convertValue(
+                updatedMiamPolicyUpgradeData,
+                MiamPolicyUpgradeDetails.class
+            ))
+            .build();
+        return caseData;
+    }
+
+    public Map<String, Object> cleanUpMiamPolicyUpgradeDetails(CaseData caseData) {
+        log.info("inside cleanUpMiamPolicyUpgradeDetails");
+        Map<String, Object> updatedMiamPolicyUpgradeData = new HashMap<>();
         log.info("MiamPolicyUpgradeDetails from request" + caseData.getMiamPolicyUpgradeDetails());
-
-        caseDataUpdated.put(
+        updatedMiamPolicyUpgradeData.put(
             "mpuChildInvolvedInMiam",
             isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam() : null
         );
-        caseDataUpdated.put(
+        updatedMiamPolicyUpgradeData.put(
             "mpuApplicantAttendedMiam",
             isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam() : null
         );
-        caseDataUpdated.put(
+        updatedMiamPolicyUpgradeData.put(
             "mpuClaimingExemptionMiam",
             isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam() : null
         );
-        populateDataForApplicantAttendedMaim(caseDataUpdated, caseData);
+        populateDataForApplicantAttendedMaim(updatedMiamPolicyUpgradeData, caseData);
 
         boolean isClaimingMaimExemption = Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam());
-        caseDataUpdated.put(
+        updatedMiamPolicyUpgradeData.put(
             "mpuExemptionReasons",
             isClaimingMaimExemption && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons() : null
         );
 
-        populateDataForDomesticAbuseExemption(caseDataUpdated, caseData, isClaimingMaimExemption);
+        populateDataForDomesticAbuseExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
-        populateDataForChildProtectionExemption(caseDataUpdated, caseData, isClaimingMaimExemption);
+        populateDataForChildProtectionExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
-        populateDataForUrgencyExemption(caseDataUpdated, caseData, isClaimingMaimExemption);
+        populateDataForUrgencyExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
-        populateDataForPreviousMiamAttendanceExemption(caseDataUpdated, caseData, isClaimingMaimExemption);
+        populateDataForPreviousMiamAttendanceExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
-        populateDataForOtherExemption(caseDataUpdated, caseData, isClaimingMaimExemption);
+        populateDataForOtherExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
-        log.info("Final caseDataUpdated" + caseDataUpdated);
+        log.info("Final updatedMiamPolicyUpgradeData" + updatedMiamPolicyUpgradeData);
 
-        return caseDataUpdated;
+        return updatedMiamPolicyUpgradeData;
     }
 
-    private static void populateDataForUrgencyExemption(Map<String, Object> caseDataUpdated, CaseData caseData, boolean isClaimingMaimExemption) {
+    private void populateDataForUrgencyExemption(Map<String, Object> caseDataUpdated, CaseData caseData, boolean isClaimingMaimExemption) {
         caseDataUpdated.put(
             "mpuUrgencyReason",
             isClaimingMaimExemption
                 && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-                && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(urgency)
+                && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuUrgency)
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuUrgencyReason() : null
         );
     }
 
-    private static void populateDataForChildProtectionExemption(Map<String, Object> caseDataUpdated,
+    private void populateDataForChildProtectionExemption(Map<String, Object> caseDataUpdated,
                                                                 CaseData caseData, boolean isClaimingMaimExemption) {
         caseDataUpdated.put(
             "mpuChildProtectionConcernReason",
             isClaimingMaimExemption
                 && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-                && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(childProtectionConcern)
+                && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuChildProtectionConcern)
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason() : null
         );
     }
 
-    private static void populateDataForApplicantAttendedMaim(Map<String, Object> caseDataUpdated, CaseData caseData) {
+    private void populateDataForApplicantAttendedMaim(Map<String, Object> caseDataUpdated, CaseData caseData) {
         boolean isApplicantAttendedMiam = Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
         caseDataUpdated.put(
             "mediatorRegistrationNumber",
             isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber())
-                ? caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber() : null
+                ? caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber().trim() : null
         );
         caseDataUpdated.put(
             "familyMediatorServiceName",
             isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName())
-                ? caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName() : null
+                ? caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName().trim() : null
         );
         caseDataUpdated.put(
             "soleTraderName",
             isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName())
-                ? caseData.getMiamPolicyUpgradeDetails().getSoleTraderName() : null
+                ? caseData.getMiamPolicyUpgradeDetails().getSoleTraderName().trim() : null
         );
         caseDataUpdated.put(
             "miamCertificationDocumentUpload",
@@ -126,10 +148,10 @@ public class MiamPolicyUpgradeService {
         );
     }
 
-    private static void populateDataForOtherExemption(Map<String, Object> caseDataUpdated, CaseData caseData, boolean isClaimingMaimExemption) {
+    private void populateDataForOtherExemption(Map<String, Object> caseDataUpdated, CaseData caseData, boolean isClaimingMaimExemption) {
         boolean isExemptionForOther = isClaimingMaimExemption
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(other);
+            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuOther);
 
         caseDataUpdated.put(
             "mpuOtherExemptionReasons",
@@ -140,20 +162,22 @@ public class MiamPolicyUpgradeService {
             isExemptionForOther
                 && (miamPolicyUpgradeOtherGrounds_Value_3.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
                 || miamPolicyUpgradeOtherGrounds_Value_4.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1() : null);
+                && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1())
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim() : null);
 
         caseDataUpdated.put(
             "mpuApplicantUnableToAttendMiamReason2",
             isExemptionForOther
                 && miamPolicyUpgradeOtherGrounds_Value_5.equals(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2() : null);
+                && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2())
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim() : null);
     }
 
-    private static void populateDataForPreviousMiamAttendanceExemption(Map<String, Object> caseDataUpdated,
+    private void populateDataForPreviousMiamAttendanceExemption(Map<String, Object> caseDataUpdated,
                                                                        CaseData caseData, boolean isClaimingMaimExemption) {
         boolean isExemptionForPreviousMiamAttendance = isClaimingMaimExemption
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(previousMiamAttendance);
+            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance);
 
         caseDataUpdated.put(
             "mpuPreviousMiamAttendanceReason",
@@ -187,15 +211,16 @@ public class MiamPolicyUpgradeService {
             isExemptionForPreviousMiamAttendance
                 && miamPolicyUpgradePreviousAttendance_Value_2.equals(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
                 && miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails() : null
+                && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails())
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim() : null
         );
     }
 
-    private static void populateDataForDomesticAbuseExemption(Map<String, Object> caseDataUpdated,
+    private void populateDataForDomesticAbuseExemption(Map<String, Object> caseDataUpdated,
                                                               CaseData caseData, boolean isClaimingMaimExemption) {
         boolean isExemptionForDomesticAbuse = isClaimingMaimExemption
             && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
-            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(domesticAbuse);
+            && caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse);
 
         caseDataUpdated.put(
             "mpuDomesticAbuseEvidences",
@@ -216,7 +241,8 @@ public class MiamPolicyUpgradeService {
         caseDataUpdated.put(
             "mpuNoDomesticAbuseEvidenceReason",
             isExemptionForDomesticAbuse && No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())
-                ? caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason() : null
+                && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason())
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason().trim() : null
         );
     }
 }

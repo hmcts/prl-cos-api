@@ -106,15 +106,7 @@ public class SubmitAndPayChecker implements EventChecker {
             WELSH_LANGUAGE_REQUIREMENTS,
             eventsChecker.getWelshLanguageRequirementsChecker()
         );
-        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-                optionalEvents.put(MIAM_POLICY_UPGRADE, eventsChecker.getMiamPolicyUpgradeChecker());
-            }
-        } else {
-            if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-                optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
-            }
-        }
+        checksForMiam(caseData, optionalEvents);
         boolean optionalFinished;
         log.info("list of mandatory events {}", mandatoryEvents);
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
@@ -134,6 +126,18 @@ public class SubmitAndPayChecker implements EventChecker {
 
         log.info("All events completed successfully");
         return true;
+    }
+
+    private void checksForMiam(CaseData caseData, EnumMap<Event, EventChecker> optionalEvents) {
+        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
+                optionalEvents.put(MIAM_POLICY_UPGRADE, eventsChecker.getMiamPolicyUpgradeChecker());
+            }
+        } else {
+            if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
+                optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
+            }
+        }
     }
 
     private EnumMap<Event, EventChecker> getMandatoryEvents(CaseData caseData) {
