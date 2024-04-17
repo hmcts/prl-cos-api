@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AutomatedHearingCaseManagemen
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingAttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingDataApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingDataRespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingPartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -68,7 +71,7 @@ public class AutomatedHearingTransactionRequestMapper {
 
             AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingCaseData.automatedHearingCaseDataBuilder()
                 .id(caseData.getId())
-                .hearingData(hearingData)
+                .hearingData(getHearingDataForRequest(hearingData))
                 .taskListVersion(caseData.getTaskListVersion())
                 .createdDate(caseData.getCreatedDate())
                 .familymanCaseNumber(caseData.getFamilymanCaseNumber())
@@ -103,6 +106,107 @@ public class AutomatedHearingTransactionRequestMapper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static AutomatedHearingData getHearingDataForRequest(HearingData hearingData) {
+        if (hearingData != null) {
+            return AutomatedHearingData.automatedHearingDataBuilder()
+                .hearingTypes(hearingData.getHearingTypes())
+                .hearingId(hearingData.getHearingId())
+                .confirmedHearingDates(hearingData.getConfirmedHearingDates())
+                .hearingChannels(hearingData.getHearingChannels())
+                .hearingVideoChannels(hearingData.getHearingVideoChannels())
+                .hearingTelephoneChannels(hearingData.getHearingTelephoneChannels())
+                .courtList(hearingData.getCourtList())
+                .localAuthorityHearingChannel(hearingData.getLocalAuthorityHearingChannel())
+                .hearingListedLinkedCases(hearingData.getHearingListedLinkedCases())
+                .applicantSolicitorHearingChannel(hearingData.getApplicantSolicitorHearingChannel())
+                .respondentHearingChannel(hearingData.getRespondentHearingChannel())
+                .respondentSolicitorHearingChannel(hearingData.getRespondentSolicitorHearingChannel())
+                .cafcassHearingChannel(hearingData.getCafcassHearingChannel())
+                .cafcassCymruHearingChannel(hearingData.getCafcassCymruHearingChannel())
+                .applicantHearingChannel(hearingData.getApplicantHearingChannel())
+                .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
+                .additionalHearingDetails(hearingData.getAdditionalHearingDetails())
+                .instructionsForRemoteHearing(hearingData.getInstructionsForRemoteHearing())
+                .hearingDateTimes(hearingData.getHearingDateTimes())
+                .hearingEstimatedHours(hearingData.getHearingEstimatedHours())
+                .hearingEstimatedMinutes(hearingData.getHearingEstimatedMinutes())
+                .hearingEstimatedDays(hearingData.getHearingEstimatedDays())
+                .allPartiesAttendHearingSameWayYesOrNo(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())
+                .hearingAuthority(hearingData.getHearingAuthority())
+                .hearingChannelsEnum(hearingData.getHearingChannelsEnum())
+                .hearingJudgeNameAndEmail(hearingData.getHearingJudgeNameAndEmail())
+                .hearingJudgePersonalCode(hearingData.getHearingJudgePersonalCode())
+                .hearingJudgeLastName(hearingData.getHearingJudgeLastName())
+                .hearingJudgeEmailAddress(hearingData.getHearingJudgeEmailAddress())
+                .applicantName(hearingData.getApplicantName())
+                .applicantSolicitor(hearingData.getApplicantSolicitor())
+                .respondentName(hearingData.getRespondentName())
+                .respondentSolicitor(hearingData.getRespondentSolicitor())
+                .hearingSpecificDatesOptionsEnum(hearingData.getHearingSpecificDatesOptionsEnum())
+                .firstDateOfTheHearing(hearingData.getFirstDateOfTheHearing())
+                .hearingMustTakePlaceAtHour(hearingData.getHearingMustTakePlaceAtHour())
+                .hearingMustTakePlaceAtMinute(hearingData.getHearingMustTakePlaceAtMinute())
+                .earliestHearingDate(hearingData.getEarliestHearingDate())
+                .latestHearingDate(hearingData.getLatestHearingDate())
+                .hearingPriorityTypeEnum(hearingData.getHearingPriorityTypeEnum())
+                .customDetails(hearingData.getCustomDetails())
+                .isRenderingRequiredFlag(hearingData.getIsRenderingRequiredFlag())
+                .fillingFormRenderingInfo(hearingData.getFillingFormRenderingInfo())
+                .hearingdataFromHearingTab(hearingData.getHearingdataFromHearingTab())
+                .hearingDataApplicantDetails(AutomatedHearingDataApplicantDetails.automatedHearingDataApplicantDetails()
+                                                 .applicantHearingChannel1(hearingData.getApplicantHearingChannel1())
+                                                 .applicantHearingChannel2(hearingData.getApplicantHearingChannel2())
+                                                 .applicantHearingChannel3(hearingData.getApplicantHearingChannel3())
+                                                 .applicantHearingChannel4(hearingData.getApplicantHearingChannel4())
+                                                 .applicantHearingChannel5(hearingData.getApplicantHearingChannel5())
+                                                 .applicantSolicitorHearingChannel1(hearingData.getApplicantSolicitorHearingChannel1())
+                                                 .applicantSolicitorHearingChannel2(hearingData.getApplicantSolicitorHearingChannel2())
+                                                 .applicantSolicitorHearingChannel3(hearingData.getApplicantSolicitorHearingChannel3())
+                                                 .applicantSolicitorHearingChannel4(hearingData.getApplicantSolicitorHearingChannel4())
+                                                 .applicantSolicitorHearingChannel5(hearingData.getApplicantSolicitorHearingChannel5())
+                                                 .applicantName1(hearingData.getApplicantName1())
+                                                 .applicantName2(hearingData.getApplicantName2())
+                                                 .applicantName3(hearingData.getApplicantName3())
+                                                 .applicantName4(hearingData.getApplicantName4())
+                                                 .applicantName5(hearingData.getApplicantName5())
+                                                 .applicantSolicitor1(hearingData.getApplicantSolicitor1())
+                                                 .applicantSolicitor2(hearingData.getApplicantSolicitor2())
+                                                 .applicantSolicitor3(hearingData.getApplicantSolicitor3())
+                                                 .applicantSolicitor4(hearingData.getApplicantSolicitor4())
+                                                 .applicantSolicitor5(hearingData.getApplicantSolicitor5())
+                                                 .build())
+                .hearingDataRespondentDetails(AutomatedHearingDataRespondentDetails.automatedHearingDataRespondentDetails()
+                                                  .respondentHearingChannel1(hearingData.getRespondentHearingChannel1())
+                                                  .respondentHearingChannel2(hearingData.getRespondentHearingChannel2())
+                                                  .respondentHearingChannel3(hearingData.getRespondentHearingChannel3())
+                                                  .respondentHearingChannel4(hearingData.getRespondentHearingChannel4())
+                                                  .respondentHearingChannel5(hearingData.getRespondentHearingChannel5())
+                                                  .respondentSolicitorHearingChannel1(hearingData.getRespondentSolicitorHearingChannel1())
+                                                  .respondentSolicitorHearingChannel2(hearingData.getRespondentSolicitorHearingChannel2())
+                                                  .respondentSolicitorHearingChannel3(hearingData.getRespondentSolicitorHearingChannel3())
+                                                  .respondentSolicitorHearingChannel4(hearingData.getRespondentSolicitorHearingChannel4())
+                                                  .respondentSolicitorHearingChannel5(hearingData.getRespondentSolicitorHearingChannel5())
+                                                  .respondentName1(hearingData.getRespondentName1())
+                                                  .respondentName2(hearingData.getRespondentName2())
+                                                  .respondentName3(hearingData.getRespondentName3())
+                                                  .respondentName4(hearingData.getRespondentName4())
+                                                  .respondentName5(hearingData.getRespondentName5())
+                                                  .respondentSolicitor1(hearingData.getRespondentSolicitor1())
+                                                  .respondentSolicitor2(hearingData.getRespondentSolicitor2())
+                                                  .respondentSolicitor3(hearingData.getRespondentSolicitor3())
+                                                  .respondentSolicitor4(hearingData.getRespondentSolicitor4())
+                                                  .respondentSolicitor5(hearingData.getRespondentSolicitor5())
+                                                  .build())
+                .isCafcassCymru(hearingData.getIsCafcassCymru())
+                .additionalDetailsForHearingDateOptions(hearingData.getAdditionalDetailsForHearingDateOptions())
+                .build();
+        }
+        return AutomatedHearingData.automatedHearingDataBuilder()
+            .hearingDataApplicantDetails(AutomatedHearingDataApplicantDetails.automatedHearingDataApplicantDetails().build())
+            .hearingDataRespondentDetails(AutomatedHearingDataRespondentDetails.automatedHearingDataRespondentDetails().build())
+            .build();
     }
 
     private static void getPartyDetailsForRequest(Element<PartyDetails> party,
