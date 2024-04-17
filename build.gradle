@@ -592,7 +592,6 @@ def sonarExclusions = [
   "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  '**uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java',
   '**uk/gov/hmcts/reform/prl/controllers/ReturnApplicationReturnMessageController.java'
 ]
 
