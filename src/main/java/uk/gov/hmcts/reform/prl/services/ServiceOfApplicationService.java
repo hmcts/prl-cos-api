@@ -2802,97 +2802,73 @@ public class ServiceOfApplicationService {
     public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
         YesOrNo isChildInvolvedInMiam = No;
         if (null != caseData.getMiamPolicyUpgradeDetails()) {
-            log.info("MiamUrgdaeDeraitls--->{}", caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
             isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
-            log.info("isChildInvolvedInMiam--->{}",isChildInvolvedInMiam);
         }
         log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
+
         boolean isAohAvailable = isAohAvailable(caseData);
         log.info("isAohAvailable --> {}", isAohAvailable);
+
         String caseReference = String.valueOf(caseData.getId());
         boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
         log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
 
-        return null != caseData.getC1ADocument() && null != caseData.getDraftConsentOrderFile() && isFirstHearingMoreThan3WeeksAway;
+        return !isAohAvailable
+            && isChildInvolvedInMiam.equals(No)
+            && null == caseData.getDraftConsentOrderFile()
+            && isFirstHearingMoreThan3WeeksAway;
     }
 
     private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
         LocalDateTime hearingLimitDate = LocalDateTime.now().plusDays(21).withNano(1);
-
         NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
-
         return null != nextHearingDetails && nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
     }
 
     private  boolean isAohAvailable(CaseData caseData) {
 
-        log.info("AAAAAAAA ");
-
         if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-            log.info("respondent aoh checking-- quarantine ");
+            log.info("respondent aoh checking-- legal prof quarantine ");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
                 = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            List<QuarantineLegalDoc> quarantineLegalDocsRespC1A = legalProfQuarantineDocsElemList.stream()
-                .map(Element::getValue)
-                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
-                .toList();
-
-            log.info("respondent aoh checking-- quarantine -> {} ",quarantineLegalDocsRespC1A);
-            if (!quarantineLegalDocsRespC1A.isEmpty()) {
-                return true;
-            }
+            return  checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-            log.info("respondent aoh checking-- review ");
+            log.info("respondent aoh checking-- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
                 = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            List<QuarantineLegalDoc> legalProfUploadedDocsRespC1A = legalProfQuarantineUploadedDocsElemList.stream()
-                .map(Element::getValue)
-                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
-                .toList();
-            log.info("respondent aoh checking-- review {}",legalProfUploadedDocsRespC1A);
-            if (!legalProfUploadedDocsRespC1A.isEmpty()) {
-                return true;
-            }
+            return  checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
-            log.info("respondent aoh checking-- restricted ");
+            log.info("respondent aoh checking-- review restricted ");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
-            List<QuarantineLegalDoc> restrictedC1ADocuments = restrictedDocumentsElemList.stream()
-                .map(Element::getValue)
-                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
-                .toList();
-            log.info("respondent aoh checking-- restricted {}",restrictedC1ADocuments);
-            if (!restrictedC1ADocuments.isEmpty()) {
-                return true;
-            }
+            return  checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
         }
 
         if (null != caseData.getC1ADocument()) {
             log.info("applicant aoh available ");
             return true;
         }
-        log.info("BBBBBBB ");
+
         return false;
     }
 
-    /*private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList){
+    private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
 
-        List<QuarantineLegalDoc> quarantineLegalDocs = quarantineDocsElemList.stream()
+        Optional<QuarantineLegalDoc> quarantineLegalDocs = quarantineDocsElemList.stream()
             .map(Element::getValue)
             .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
-            .toList();
-        log.info("respondent aoh checking-- restricted {}",quarantineLegalDocs);
-        return  return !quarantineLegalDocs.isEmpty();
-    }*/
-
-
+            .findFirst();
+        log.info("category {}",quarantineLegalDocs);
+        return quarantineLegalDocs.isPresent();
+    }
 
 }
