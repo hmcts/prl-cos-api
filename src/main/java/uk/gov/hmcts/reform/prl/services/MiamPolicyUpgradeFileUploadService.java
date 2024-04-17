@@ -115,9 +115,9 @@ public class MiamPolicyUpgradeFileUploadService {
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         domesticAbuseDocument = manageDocumentsService.downloadAndDeleteDocument(
                             domesticAbuseDocument, systemAuthorisation);
-                        mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
-                            domesticAbuseDocument).build()));
                     }
+                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
+                        domesticAbuseDocument).build()));
                 });
             caseData = caseData.toBuilder()
                 .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
@@ -197,9 +197,9 @@ public class MiamPolicyUpgradeFileUploadService {
                     if (domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         domesticAbuseDocument = downloadAndUploadDocumentWithoutConfidential(
                             domesticAbuseDocument, systemAuthorisation);
-                        mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
-                            domesticAbuseDocument).build()));
                     }
+                    mpuConfidentialDomesticAbuseEvidenceDocument.add(element(DomesticAbuseEvidenceDocument.builder().domesticAbuseDocument(
+                        domesticAbuseDocument).build()));
                 });
             caseData = caseData.toBuilder()
                 .miamPolicyUpgradeDetails(caseData.getMiamPolicyUpgradeDetails()
