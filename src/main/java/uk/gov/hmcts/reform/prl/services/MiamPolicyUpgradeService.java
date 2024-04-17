@@ -41,7 +41,7 @@ public class MiamPolicyUpgradeService {
         log.info("initial request of populateAmendedMiamPolicyUpgradeDetails " + callbackRequest.getCaseDetails().getData());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        caseDataUpdated.putAll(cleanUpMiamPolicyUpgradeDetails(caseData));
+        updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
         return caseDataUpdated;
     }
 
