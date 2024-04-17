@@ -1,15 +1,17 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.stream.Collectors;
 import javax.json.JsonObject;
+
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 
 @Component
@@ -18,45 +20,64 @@ public class MiamPolicyUpgradeMapper {
     public JsonObject map(CaseData caseData) {
 
         return new NullAwareJsonObjectBuilder()
-            .add("applicantAttendedMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getApplicantAttendedMiam()))
-            .add("claimingExemptionMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getClaimingExemptionMiam()))
-            .add("familyMediatorMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getFamilyMediatorMiam()))
+            .add("mpuChildInvolvedInMiam", CommonUtils.getYesOrNoValue(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam()))
+            .add("mpuApplicantAttendedMiam", CommonUtils.getYesOrNoValue(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam()))
+            .add("mpuClaimingExemptionMiam", CommonUtils.getYesOrNoValue(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam()))
             .add(
-                "miamExemptionsChecklist",
-                caseData.getMiamDetails().getMiamExemptionsChecklist() != null ? caseData.getMiamDetails().getMiamExemptionsChecklist().stream()
+                "mpuExemptionReasons",
+                isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().stream()
                     .map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "))
                     : null
             )
             .add(
-                "miamDomesticViolenceChecklist",
-                caseData.getMiamDetails().getMiamDomesticViolenceChecklist() != null
-                    ? caseData.getMiamDetails().getMiamDomesticViolenceChecklist().stream()
-                        .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
+                "mpuDomesticAbuseEvidences",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidences() != null
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidences().stream()
+                        .map(MiamDomesticAbuseChecklistEnum::getDisplayedValue)
                         .collect(Collectors.joining(", ")) : null
             )
+            .add("mpuIsDomesticAbuseEvidenceProvided", CommonUtils.getYesOrNoValue(caseData.getMiamPolicyUpgradeDetails()
+                                                                                       .getMpuIsDomesticAbuseEvidenceProvided()))
+            .add("mpuNoDomesticAbuseEvidenceReason", caseData.getMiamPolicyUpgradeDetails().getMpuNoDomesticAbuseEvidenceReason())
+            .add("mpuChildProtectionConcernReason", ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+                                                                               .getMpuChildProtectionConcernReason())
+                ? caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason().getDisplayedValue() : null)
             .add(
-                "miamUrgencyReasonChecklist",
-                caseData.getMiamDetails().getMiamUrgencyReasonChecklist() != null
-                    ? caseData.getMiamDetails().getMiamUrgencyReasonChecklist().stream()
-                        .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
-                        .collect(Collectors.joining(", ")) : null
+                "mpuUrgencyReason",
+                ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuUrgencyReason())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuUrgencyReason().getDisplayedValue() : null
             )
             .add(
-                "miamPreviousAttendanceChecklist",
-                caseData.getMiamDetails().getMiamPreviousAttendanceChecklist() != null
-                    ? caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue() : null
+                "mpuPreviousMiamAttendanceReason",
+                ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason().getDisplayedValue() : null
             )
             .add(
-                "miamOtherGroundsChecklist",
-                caseData.getMiamDetails().getMiamOtherGroundsChecklist() != null
-                    ? caseData.getMiamDetails().getMiamOtherGroundsChecklist().getDisplayedValue() : null
+                "mpuTypeOfPreviousMiamAttendanceEvidence",
+                ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence().getDisplayedValue() : null
             )
-            .add("mediatorRegistrationNumber", caseData.getMiamDetails().getMediatorRegistrationNumber())
-            .add("familyMediatorServiceName", caseData.getMiamDetails().getFamilyMediatorServiceName())
-            .add("soleTraderName", caseData.getMiamDetails().getSoleTraderName())
-            .add("mediatorRegistrationNumber1", caseData.getMiamDetails().getMediatorRegistrationNumber1())
-            .add("familyMediatorServiceName1", caseData.getMiamDetails().getFamilyMediatorServiceName1())
-            .add("soleTraderName1", caseData.getMiamDetails().getSoleTraderName1())
+            .add(
+                "mpuTypeOfPreviousMiamAttendanceEvidence",
+                ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence().getDisplayedValue() : null
+            )
+            .add(
+                "mpuMediatorDetails",
+                caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails())
+            .add(
+                "mpuOtherExemptionReasons",
+                ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
+                    ? caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons().getDisplayedValue() : null
+            )
+            .add(
+                "mpuApplicantUnableToAttendMiamReason1", caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1())
+            .add(
+                "mpuApplicantUnableToAttendMiamReason2", caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2())
+            .add("mediatorRegistrationNumber", caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber())
+            .add("familyMediatorServiceName", caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName())
+            .add("soleTraderName", caseData.getMiamPolicyUpgradeDetails().getSoleTraderName())
             .build();
     }
 }

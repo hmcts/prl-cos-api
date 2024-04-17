@@ -26,13 +26,12 @@ public class ValidateMiamApplicationOrExemptionTask implements Task<WorkflowResu
     public WorkflowResult execute(TaskContext context, WorkflowResult payload) throws TaskException {
 
         Map<String, Object> caseData = payload.getCaseData();
-        if (TASK_LIST_VERSION_V3.equals(caseData.get("taskListVersion"))
+        if ((TASK_LIST_VERSION_V3.equals(caseData.get("taskListVersion"))
             && NO.equals(caseData.get(MPU_CHILD_INVOLVED_IN_MIAM))
             && NO.equals(caseData.get(MPU_APPLICANT_ATTENDED_MIAM))
-            && NO.equals(caseData.get(MPU_CLAIMING_EXEMPTION_MIAM))) {
-            payload.getErrors().add(ERROR_MSG_MIAM);
-        } else if (applicantHasNotAttendedMiam(caseData)
-            && applicantIsNotClaimingMiamExemption(caseData)) {
+            && NO.equals(caseData.get(MPU_CLAIMING_EXEMPTION_MIAM)))
+            || (applicantHasNotAttendedMiam(caseData)
+            && applicantIsNotClaimingMiamExemption(caseData))) {
             payload.getErrors().add(ERROR_MSG_MIAM);
         }
         return payload;
