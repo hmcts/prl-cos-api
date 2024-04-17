@@ -56,6 +56,7 @@ public class ManageDocumentsCategoryConstants {
     public static final String SPECIAL_MEASURES = "specialMeasures";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
     public static final String POSITION_STATEMENTS = "positionStatements";
+    public static final String FM5_STATEMENTS = "fm5Statements";
     public static final String CITIZEN_QUARANTINE = "citizenQuarantine";
     public static final String APPLICANT_STATEMENTS = "applicantStatements";
     public static final String RESPONDENT_STATEMENTS = "respondentStatements";
