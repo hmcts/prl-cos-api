@@ -67,8 +67,6 @@ public class C100IssueCaseController {
         System.out.println("VVVVVVVVVVVV---> " + result);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
-            boolean isSystemLogic = c100IssueCaseService.systemRuleLogic(callbackRequest, authorisation);
-            log.info("OUTPUTTTT --> {}",isSystemLogic);
             return CallbackResponse.builder()
                 .build();
         } else {

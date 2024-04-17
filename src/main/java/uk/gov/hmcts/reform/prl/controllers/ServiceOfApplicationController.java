@@ -83,6 +83,8 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            boolean systemLogicResult  = serviceOfApplicationService.systemRuleLogic(callbackRequest, authorisation);
+            log.info("OUTPUTTTTT--> {}", systemLogicResult);
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {

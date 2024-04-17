@@ -16,14 +16,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,28 +126,4 @@ public class C100IssueCaseService {
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
     }
-
-    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String caseReference = String.valueOf(caseData.getId());
-
-        log.info("getID--->{}", caseReference);
-        log.info("C1A--->{}", caseData.getC1ADocument());
-        log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
-
-        boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
-        log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
-
-        return null != caseData.getC1ADocument() && null != caseData.getDraftConsentOrderFile() && isFirstHearingMoreThan3WeeksAway;
-    }
-
-    public  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
-        LocalDateTime hearingLimitDate = LocalDateTime.now().plusDays(21).withNano(1);
-
-        NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
-
-        return nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
-    }
-
 }

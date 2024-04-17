@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,12 +48,14 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -266,6 +270,7 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
     private final DgsService dgsService;
+    private final HearingService hearingService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -2790,4 +2795,43 @@ public class ServiceOfApplicationService {
             .data(caseDataUpdated)
             .build();
     }
+
+
+    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) throws JsonProcessingException {
+
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        System.out.println("VVVVVVVVVVVV---> " + result);
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        String caseReference = String.valueOf(caseData.getId());
+
+        log.info("getID--->{}", caseReference);
+        log.info("C1A--->{}", caseData.getC1ADocument());
+        log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
+        log.info("respC1ADocList--->{}", caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList());
+
+        boolean isAohAvailable = isAohAvailable(caseData);
+
+        boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
+        log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
+
+        return null != caseData.getC1ADocument() && null != caseData.getDraftConsentOrderFile() && isFirstHearingMoreThan3WeeksAway;
+    }
+
+    private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
+        LocalDateTime hearingLimitDate = LocalDateTime.now().plusDays(21).withNano(1);
+
+        NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
+
+        return nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
+    }
+
+    private  boolean isAohAvailable(CaseData caseData) {
+        return true;
+    }
+
+
+
 }
