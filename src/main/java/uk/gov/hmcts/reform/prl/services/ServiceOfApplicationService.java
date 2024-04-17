@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -93,6 +94,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -2808,11 +2810,10 @@ public class ServiceOfApplicationService {
         String caseReference = String.valueOf(caseData.getId());
 
         log.info("getID--->{}", caseReference);
-        log.info("C1A--->{}", caseData.getC1ADocument());
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
-        log.info("respC1ADocList--->{}", caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList());
 
         boolean isAohAvailable = isAohAvailable(caseData);
+        log.info("isAohAvailable --> {}", isAohAvailable);
 
         boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
         log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
@@ -2829,8 +2830,66 @@ public class ServiceOfApplicationService {
     }
 
     private  boolean isAohAvailable(CaseData caseData) {
-        return true;
+
+        if (null != caseData.getC1ADocument()) {
+            log.info("applicant aoh available ");
+            return true;
+        }
+
+        if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
+            log.info("respondent aoh checking-- quarantine ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            List<QuarantineLegalDoc> quarantineLegalDocsRespC1A = legalProfQuarantineDocsElemList.stream()
+                .map(Element::getValue)
+                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
+                .toList();
+
+            log.info("respondent aoh checking-- quarantine -> {} ",quarantineLegalDocsRespC1A);
+            if (!quarantineLegalDocsRespC1A.isEmpty()) {
+                return true;
+            }
+        }
+
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+            log.info("respondent aoh checking-- review ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            List<QuarantineLegalDoc> legalProfUploadedDocsRespC1A = legalProfQuarantineUploadedDocsElemList.stream()
+                .map(Element::getValue)
+                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
+                .toList();
+            log.info("respondent aoh checking-- review {}",legalProfUploadedDocsRespC1A);
+            if (!legalProfUploadedDocsRespC1A.isEmpty()) {
+                return true;
+            }
+        }
+
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
+            log.info("respondent aoh checking-- restricted ");
+            List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
+                = caseData.getReviewDocuments().getRestrictedDocuments();
+            List<QuarantineLegalDoc> restrictedC1ADocuments = restrictedDocumentsElemList.stream()
+                .map(Element::getValue)
+                .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
+                .toList();
+            log.info("respondent aoh checking-- restricted {}",restrictedC1ADocuments);
+            if (!restrictedC1ADocuments.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
+
+    /*private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList){
+
+        List<QuarantineLegalDoc> quarantineLegalDocs = quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
+            .toList();
+        log.info("respondent aoh checking-- restricted {}",quarantineLegalDocs);
+        return  return !quarantineLegalDocs.isEmpty();
+    }*/
 
 
 
