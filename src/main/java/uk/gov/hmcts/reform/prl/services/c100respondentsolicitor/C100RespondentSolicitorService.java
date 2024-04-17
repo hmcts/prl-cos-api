@@ -109,6 +109,7 @@ public class C100RespondentSolicitorService {
     public static final String EMAIL = "email";
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
+    public static final String TASK_LIST_VERSION = "taskListVersion";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -1038,13 +1039,13 @@ public class C100RespondentSolicitorService {
         dataMap.put(COURT_SEAL_FIELD,
                     callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
                         : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
-        if (callbackRequest.getCaseDetails().getData().get("taskListVersion") != null
+        if (callbackRequest.getCaseDetails().getData().get(TASK_LIST_VERSION) != null
             && (TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(callbackRequest
                                                                          .getCaseDetails().getData().get(
-                "taskListVersion")))
+                TASK_LIST_VERSION)))
             || TASK_LIST_VERSION_V3.equalsIgnoreCase(String.valueOf(callbackRequest
                                                                         .getCaseDetails().getData().get(
-                "taskListVersion"))))) {
+                TASK_LIST_VERSION))))) {
             List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest
                 .getCaseDetails().getData().get(
                     "newChildDetails");
