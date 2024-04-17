@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenAllegationOfHarmElementsMapper {
 
-    private static final String APPLICANT = "applicant";
+    private static final String RESPONDENT = "respondent";
     private static final String CHILDREN = "children";
 
     private static final String MOTHER = "mother";
@@ -117,7 +117,7 @@ public class CitizenAllegationOfHarmElementsMapper {
 
     private YesOrNo isDomesticAbuse(List<String> whoConcernAboutList, List<String> c1AConcernAboutChild) {
 
-        if (Yes.equals(buildConcernAbout(whoConcernAboutList, APPLICANT))
+        if (Yes.equals(buildConcernAbout(whoConcernAboutList, RESPONDENT))
             || Yes.equals(checkDomesticAbuse(c1AConcernAboutChild))) {
             return Yes;
         }
@@ -496,7 +496,7 @@ public class CitizenAllegationOfHarmElementsMapper {
     }
 
     private YesOrNo buildConcernAbout(List<String> whoConcernsAboutList, String typeOfCitizen) {
-        if ((APPLICANT.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(APPLICANT))
+        if ((RESPONDENT.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(RESPONDENT))
             || (CHILDREN.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(CHILDREN))) {
             return YesOrNo.Yes;
         }
