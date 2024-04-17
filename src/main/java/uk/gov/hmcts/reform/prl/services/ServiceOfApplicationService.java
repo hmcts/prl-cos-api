@@ -2825,7 +2825,7 @@ public class ServiceOfApplicationService {
 
         NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
 
-        return nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
+        return null != nextHearingDetails && nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
     }
 
     private  boolean isAohAvailable(CaseData caseData) {
