@@ -151,7 +151,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
         if (documentLanguage.isGenEng()) {
-            log.info("buildGeneratedDocumentCaseData english " + caseDataForOrgDetails.getMiamPolicyUpgradeDetails());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
@@ -167,7 +166,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            log.info("buildGeneratedDocumentCaseData welsh " + caseDataForOrgDetails.getMiamPolicyUpgradeDetails());
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
