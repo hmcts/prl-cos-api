@@ -183,8 +183,8 @@ public class CitizenResponseService {
                     responseDocs = checkPreviousProceedings(responseDocs, response);
 
                     //TODO: AoH to be revisited
-                    if (isNotEmpty(response.getSafetyConcerns())
-                            && Yes.equals(response.getSafetyConcerns().getHaveSafetyConcerns())) {
+                    if (isNotEmpty(response.getRespondentAllegationsOfHarmData())
+                            && Yes.equals(response.getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
                         log.info(" Generating C1A Final document for respondent ");
                         Document c1aFinalDocument = generateFinalC1A(dbCaseData, authorisation, dataMap);
                         responseDocs.add(element(c1aFinalDocument));
