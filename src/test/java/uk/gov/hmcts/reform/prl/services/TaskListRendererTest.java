@@ -108,6 +108,31 @@ public class TaskListRendererTest {
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
 
+    private final List<Task> tasksResubmit = List.of(
+        Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
+        Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
+        Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(MIAM).state(NOT_STARTED).build(),
+        Task.builder().event(ALLEGATIONS_OF_HARM).state(IN_PROGRESS).build(),
+        Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).state(IN_PROGRESS).build(),
+        Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+        Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+        Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+        Task.builder().event(INTERNATIONAL_ELEMENT).state(FINISHED).build(),
+        Task.builder().event(LITIGATION_CAPACITY).state(FINISHED).build(),
+        Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+        Task.builder().event(SUBMIT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+        Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
+
 
     private final List<Task> taskC100V2 = List.of(
             Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
@@ -130,6 +155,28 @@ public class TaskListRendererTest {
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
             Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build());
+
+    private final List<Task> taskC100V2Resubmission = List.of(
+        Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
+        Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
+        Task.builder().event(CHILD_DETAILS_REVISED).state(NOT_STARTED).build(),
+        Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(OTHER_PEOPLE_IN_THE_CASE_REVISED).state(NOT_STARTED).build(),
+        Task.builder().event(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(CHILDREN_AND_APPLICANTS).state(NOT_STARTED).build(),
+        Task.builder().event(CHILDREN_AND_RESPONDENTS).state(NOT_STARTED).build(),
+        Task.builder().event(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).state(IN_PROGRESS).build(),
+        Task.builder().event(MIAM).state(NOT_STARTED).build(),
+        Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+        Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+        Task.builder().event(INTERNATIONAL_ELEMENT).state(FINISHED).build(),
+        Task.builder().event(LITIGATION_CAPACITY).state(FINISHED).build(),
+        Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(SUBMIT).state(NOT_STARTED).build());
 
     private final List<Task> taskC100V3 = List.of(
         Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
@@ -288,6 +335,18 @@ public class TaskListRendererTest {
     }
 
     @Test
+    public void shouldRenderTaskListIfResubmitted() throws IOException {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
+            .build();
+
+        String actualTaskList = taskListRenderer.render(tasksResubmit, errors, true, caseData);
+
+        assertNotNull(actualTaskList);
+    }
+
+    @Test
     public void shouldRenderTaskListWithNoErrors() throws IOException {
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
@@ -434,6 +493,19 @@ public class TaskListRendererTest {
         String actualTaskList = taskListRenderer.render(taskC100V2, errors, true, caseData);
 
         assertThat(expectedTaskList).isEqualTo(actualTaskList);
+    }
+
+    @Test
+    public void shouldRenderC100V2TaskListResubmission() throws IOException {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .build();
+
+        String actualTaskList = taskListRenderer.render(taskC100V2Resubmission, errors, true, caseData);
+
+        assertNotNull(actualTaskList);
     }
 
     @Test
