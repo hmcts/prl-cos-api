@@ -30,7 +30,7 @@ public class QuarantineLegalDoc {
     private final Document applicationsWithinProceedingsDocument;
     private final Document miamCertificateDocument;
     private final Document previousOrdersSubmittedWithApplicationDocument;
-    private final Document fm5StatementDocuments;
+    private final Document fm5StatementDocument;
     private final Document respondentApplicationDocument;
     private final Document ordersFromOtherProceedingsDocument;
     private final Document respondentC1AApplicationDocument;
