@@ -105,21 +105,31 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     }
 
     private boolean checkedForClaimedExemptions(CaseData caseData) {
-        boolean finished;
+        boolean domesticAbuseFinished = true;
+        boolean childProtectionFinished = true;
+        boolean urgencyFinished = true;
+        boolean previousMiamAttendanceFinished = true;
+        boolean otherFinished = true;
         List<MiamExemptionsChecklistEnum> miamPolicyUpgradeExemptionsChecklist
             = caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons();
 
         if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuDomesticAbuse)) {
-            finished = checkForDomesticAbuseExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuChildProtectionConcern)) {
-            finished = checkForChildProtectionConcernExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuUrgency)) {
-            finished = checkForUrgencyExemption(caseData);
-        } else if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance)) {
-            finished = checkForPreviousMiamAttendanceExemption(caseData);
-        } else {
-            finished = checkedForOtherExemptions(caseData);
+            domesticAbuseFinished = checkForDomesticAbuseExemption(caseData);
         }
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuChildProtectionConcern)) {
+            childProtectionFinished = checkForChildProtectionConcernExemption(caseData);
+        }
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuUrgency)) {
+            urgencyFinished = checkForUrgencyExemption(caseData);
+        }
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance)) {
+            previousMiamAttendanceFinished = checkForPreviousMiamAttendanceExemption(caseData);
+        }
+        if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuOther)) {
+            otherFinished = checkedForOtherExemptions(caseData);
+        }
+        boolean finished = domesticAbuseFinished && childProtectionFinished && urgencyFinished
+            && previousMiamAttendanceFinished && otherFinished;
         log.info("finished in checkedForClaimedExemptions {}", finished);
         return finished;
     }
