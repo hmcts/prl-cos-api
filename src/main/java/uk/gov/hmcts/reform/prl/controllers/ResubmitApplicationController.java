@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -89,24 +90,26 @@ public class ResubmitApplicationController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
-            Court closestChildArrangementsCourt = courtFinderService
-                .getNearestFamilyCourt(caseData);
-            if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
-                caseData = caseData.toBuilder()
-                    .courtName(closestChildArrangementsCourt.getCourtName())
-                    .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
-                    .build();
-                caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(
-                    COURT_ID_FIELD,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
-                caseDataUpdated.put(
-                    COURT_CODE_FROM_FACT,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
+            //SNI-5695 fix-- if court name is already present then do not update
+            if (StringUtils.isNotBlank(caseData.getCourtName())) {
+                Court closestChildArrangementsCourt = courtFinderService
+                    .getNearestFamilyCourt(caseData);
+                if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+                    caseData = caseData.toBuilder()
+                        .courtName(closestChildArrangementsCourt.getCourtName())
+                        .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                        .build();
+                    caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+                    caseDataUpdated.put(
+                        COURT_ID_FIELD,
+                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                    );
+                    caseDataUpdated.put(
+                        COURT_CODE_FROM_FACT,
+                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                    );
+                }
             }
-
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
