@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -148,6 +149,7 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
+        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(any(CaseData.class), anyMap())).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseEventHandler.getUpdatedTaskList(any(CaseData.class))).thenReturn("taskList");
@@ -241,10 +243,10 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
+        when(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(any(CaseData.class), anyMap())).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseEventHandler.getUpdatedTaskList(any(CaseData.class))).thenReturn("taskList");
-        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(caseData)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
