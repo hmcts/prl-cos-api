@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -32,6 +33,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
@@ -43,6 +46,8 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private final AuthorisationService authorisationService;
     private final CaseEventHandler caseEventHandler;
 
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+
     @Autowired
     public ReturnApplicationReturnMessageController(ObjectMapper objectMapper,
                                                     EventService eventPublisher,
@@ -50,13 +55,15 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
                                                     ReturnApplicationService returnApplicationService,
                                                     AllTabServiceImpl allTabsService,
                                                     AuthorisationService authorisationService,
-                                                    CaseEventHandler caseEventHandler) {
+                                                    CaseEventHandler caseEventHandler,
+                                                    MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService) {
         super(objectMapper, eventPublisher);
         this.userService = userService;
         this.returnApplicationService = returnApplicationService;
         this.allTabsService = allTabsService;
         this.authorisationService = authorisationService;
         this.caseEventHandler = caseEventHandler;
+        this.miamPolicyUpgradeFileUploadService = miamPolicyUpgradeFileUploadService;
     }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -103,6 +110,14 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             // Refreshing the page in the same event. Hence no external event call needed.
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(
+                    caseData
+                );
+                allTabsService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
+
+            }
             caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
             String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);

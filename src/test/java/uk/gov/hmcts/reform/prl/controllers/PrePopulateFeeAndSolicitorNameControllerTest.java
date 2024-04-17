@@ -27,12 +27,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
@@ -116,6 +118,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+    @Mock
+    private MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
@@ -149,6 +153,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .build();
 
         caseDataForAllegationOfHarmRevised = CaseData.builder()
@@ -262,6 +267,32 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
+
+    }
+
+    @Test
+    public void testWhenControllerCalledOneMiamUpgrade() throws Exception {
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
+            .thenReturn(court);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(Mockito.any(), Mockito.any())).thenReturn(caseData);
+
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
+
 
     }
 

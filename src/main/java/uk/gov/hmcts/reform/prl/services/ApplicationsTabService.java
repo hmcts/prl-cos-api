@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -130,6 +132,7 @@ public class ApplicationsTabService implements TabService {
     private final ObjectMapper objectMapper;
     private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -142,6 +145,9 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+                if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                    caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
+                }
                 applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
                 applicationTab.put("miamPolicyUpgradeExemptionsTable", getMiamExemptionsTableForPolicyUpgrade(caseData));
             } else {
@@ -155,7 +161,8 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateChildAndCafcassOfficerDetails(caseData));
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
                 applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
                 applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));
                 applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
@@ -173,7 +180,7 @@ public class ApplicationsTabService implements TabService {
                 applicationTab.put("allegationsOfHarmRevisedChildContactTable", getAllegationsOfHarmRevisedChildContact(caseData));
                 applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateRevisedChildAndCafcassOfficerDetails(caseData));
 
-                log.info("application tab data v2");
+                log.info("application tab data v2 & v3");
             } else {
                 applicationTab.put("childDetailsTable", getChildDetails(caseData));
                 applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
@@ -664,13 +671,20 @@ public class ApplicationsTabService implements TabService {
         }
 
         String childEvidence;
-        Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum> childCheck =
+        Optional<MiamPolicyUpgradeChildProtectionConcernEnum> childCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason());
         if (childCheck.isPresent()) {
             childEvidence = childCheck.get().getDisplayedValue();
         } else {
             childEvidence = "";
         }
+
+        YesOrNo mpuIsDomesticAbuseEvidenceProvided = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuIsDomesticAbuseEvidenceProvided())
+            ? caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided() : null;
+        String mpuTypeOfPreviousMiamAttendanceEvidence = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+                                                                                    .getMpuTypeOfPreviousMiamAttendanceEvidence())
+            ? caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence().getDisplayedValue() : null;
 
         MiamPolicyUpgradeExemptions miamExemptions = MiamPolicyUpgradeExemptions.builder()
             .mpuReasonsForMiamExemption(reasonsForMiamExemption)
@@ -679,6 +693,8 @@ public class ApplicationsTabService implements TabService {
             .mpuUrgencyEvidence(urgencyEvidence)
             .mpuPreviousAttendenceEvidence(previousAttendenceEvidence)
             .mpuOtherGroundsEvidence(otherGroundsEvidence)
+            .mpuIsDomesticAbuseEvidenceProvided(mpuIsDomesticAbuseEvidenceProvided)
+            .mpuTypeOfPreviousMiamAttendanceEvidence(mpuTypeOfPreviousMiamAttendanceEvidence)
             .build();
 
         return toMap(miamExemptions);
