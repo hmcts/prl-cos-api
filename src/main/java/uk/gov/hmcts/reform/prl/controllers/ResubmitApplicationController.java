@@ -94,21 +94,7 @@ public class ResubmitApplicationController {
             if (StringUtils.isNotBlank(caseData.getCourtName())) {
                 Court closestChildArrangementsCourt = courtFinderService
                     .getNearestFamilyCourt(caseData);
-                if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
-                    caseData = caseData.toBuilder()
-                        .courtName(closestChildArrangementsCourt.getCourtName())
-                        .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
-                        .build();
-                    caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                    caseDataUpdated.put(
-                        COURT_ID_FIELD,
-                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                    );
-                    caseDataUpdated.put(
-                        COURT_CODE_FROM_FACT,
-                        String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                    );
-                }
+                caseData = assignCourtDetailsBasedOnClosestChildArrangementCourt(closestChildArrangementsCourt, caseData, caseDataUpdated);
             }
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
@@ -172,6 +158,26 @@ public class ResubmitApplicationController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(Court closestChildArrangementsCourt,
+                                                                                  CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+            caseData = caseData.toBuilder()
+                .courtName(closestChildArrangementsCourt.getCourtName())
+                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                .build();
+            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+            caseDataUpdated.put(
+                COURT_ID_FIELD,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+            caseDataUpdated.put(
+                COURT_CODE_FROM_FACT,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+        }
+        return caseData;
     }
 
     private SolicitorNotificationEmailEvent prepareSolicitorNotificationEvent(String reSubmitEmailNotification, CallbackRequest callbackRequest) {
