@@ -505,7 +505,7 @@ public class CaseService {
                     )
                     .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList))
                     .build()
-            );
+        );
         return citizenDocuments[0];
     }
 
@@ -560,7 +560,7 @@ public class CaseService {
                         ) : getUnservedRespondentDocumentList(serviceOfApplication)
                     )
                     .build()
-            );
+        );
         return citizenDocuments[0];
     }
 
