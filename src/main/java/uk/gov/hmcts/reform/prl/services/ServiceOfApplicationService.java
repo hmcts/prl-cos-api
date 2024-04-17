@@ -2831,10 +2831,7 @@ public class ServiceOfApplicationService {
 
     private  boolean isAohAvailable(CaseData caseData) {
 
-        if (null != caseData.getC1ADocument()) {
-            log.info("applicant aoh available ");
-            return true;
-        }
+        log.info("AAAAAAAA ");
 
         if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
             log.info("respondent aoh checking-- quarantine ");
@@ -2878,6 +2875,12 @@ public class ServiceOfApplicationService {
                 return true;
             }
         }
+
+        if (null != caseData.getC1ADocument()) {
+            log.info("applicant aoh available ");
+            return true;
+        }
+        log.info("BBBBBBB ");
         return false;
     }
 
