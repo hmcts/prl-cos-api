@@ -10,10 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
@@ -47,7 +47,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
@@ -62,7 +62,7 @@ public class MiamPolicyUpgradeServiceTest {
                 .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
                     .mpuClaimingExemptionMiam(YesOrNo.Yes)
                     .mpuExemptionReasons(new ArrayList<>()).build()).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNotNull(objectMap.get("mpuClaimingExemptionMiam"));
         Assert.assertNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
@@ -83,7 +83,7 @@ public class MiamPolicyUpgradeServiceTest {
             .soleTraderName("test")
             .miamCertificationDocumentUpload(Document.builder().build())
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
             .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
             .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
             .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
@@ -91,7 +91,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNotNull(objectMap.get("mpuDomesticAbuseEvidenceDocument"));
     }
@@ -104,10 +104,10 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.domesticAbuse))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
             .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
             .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.No)
             .mpuNoDomesticAbuseEvidenceReason("test")
@@ -115,7 +115,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuNoDomesticAbuseEvidenceReason"));
     }
@@ -128,19 +128,19 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.childProtectionConcern))
-            .mpuChildProtectionConcernReason(MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuChildProtectionConcern))
+            .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
-        Assert.assertEquals(MiamChildProtectionConcernChecklistEnum
-            .MIAMChildProtectionConcernChecklistEnum_value_1, objectMap.get("mpuChildProtectionConcernReason"));
+        Assert.assertEquals(MiamPolicyUpgradeChildProtectionConcernEnum
+            .mpuChildProtectionConcern_value_1, objectMap.get("mpuChildProtectionConcernReason"));
     }
 
     @Test
@@ -151,16 +151,16 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.urgency))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
             .mpuUrgencyReason(MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(MiamUrgencyReasonChecklistEnum
             .miamPolicyUpgradeUrgencyReason_Value_1, objectMap.get("mpuUrgencyReason"));
@@ -174,17 +174,17 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
             .mpuDocFromDisputeResolutionProvider(Document.builder().build())
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(Document.builder().build(), objectMap.get("mpuDocFromDisputeResolutionProvider"));
     }
@@ -197,10 +197,10 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
             .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamAttendanceDetails)
             .mpuMediatorDetails("test")
@@ -208,7 +208,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuMediatorDetails"));
     }
@@ -221,10 +221,10 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.previousMiamAttendance))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
             .mpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2)
             .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
             .mpuCertificateByMediator(Document.builder().build())
@@ -232,7 +232,7 @@ public class MiamPolicyUpgradeServiceTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals(Document.builder().build(), objectMap.get("mpuCertificateByMediator"));
     }
@@ -245,17 +245,17 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3)
             .mpuApplicantUnableToAttendMiamReason1("test")
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
@@ -268,17 +268,17 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4)
             .mpuApplicantUnableToAttendMiamReason1("test")
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason1"));
     }
@@ -291,18 +291,26 @@ public class MiamPolicyUpgradeServiceTest {
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
             .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.other))
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuOther))
             .mpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5)
             .mpuApplicantUnableToAttendMiamReason2("test")
             .build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
                 .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails).build());
-        Map<String, Object> objectMap = miamPolicyUpgradeService.populateMiamPolicyUpgradeDetails(callbackRequest);
+        Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertEquals("test", objectMap.get("mpuApplicantUnableToAttendMiamReason2"));
+    }
+
+    @Test
+    public void testUpdateMiamPolicyUpgradeDetails() {
+        CaseData caseData = CaseData.builder().miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build()).build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CaseData returnedCaseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, objectMap);
+        Assert.assertNotNull(returnedCaseData);
     }
 }

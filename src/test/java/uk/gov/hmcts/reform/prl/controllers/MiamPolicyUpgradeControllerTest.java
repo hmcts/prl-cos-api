@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,6 +13,8 @@ import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 
 import java.util.HashMap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -30,7 +33,7 @@ public class MiamPolicyUpgradeControllerTest {
     public void testSubmitMiamPolicyUpgrade() {
         when(authorisationService.isAuthorized("test", "test")).thenReturn(true);
         when(miamPolicyUpgradeService
-            .populateMiamPolicyUpgradeDetails(CallbackRequest.builder().build())).thenReturn(new HashMap<>());
+            .populateAmendedMiamPolicyUpgradeDetails(CallbackRequest.builder().build())).thenReturn(new HashMap<>());
         Assert.assertNotNull(miamPolicyUpgradeController
             .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build()));
     }
@@ -38,7 +41,17 @@ public class MiamPolicyUpgradeControllerTest {
     @Test
     public void testSubmitMiamPolicyUpgradeInvalidAuthorisation() {
         when(authorisationService.isAuthorized("test", "test")).thenReturn(false);
-        Assert.assertThrows(RuntimeException.class, () -> miamPolicyUpgradeController
-            .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build()));
+        assertExpectedException(() -> {
+            miamPolicyUpgradeController
+                .submitMiamPolicyUpgrade("test", "test", CallbackRequest.builder().build());
+            },
+                                RuntimeException.class, "Invalid Client"
+        );
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
