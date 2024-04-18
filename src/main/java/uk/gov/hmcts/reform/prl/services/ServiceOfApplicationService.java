@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -92,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -2798,10 +2800,38 @@ public class ServiceOfApplicationService {
             .build();
     }
 
+    private  boolean isFm5DocsSubmitted(CaseData caseData) {
+
+        if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
+            log.info("fm5-- legal prof quarantine ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            return  checkByCategoryFm5(legalProfQuarantineDocsElemList);
+        }
+
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+            log.info("fm5-- legal prof -- review No");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            return  checkByCategoryFm5(legalProfQuarantineUploadedDocsElemList);
+        }
+
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
+            log.info("fm5-- legal prof -- review restricted");
+            List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
+                = caseData.getReviewDocuments().getRestrictedDocuments();
+            return  checkByCategoryFm5(restrictedDocumentsElemList);
+        }
+
+        return false;
+    }
 
     public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        boolean isFm5DocsSubmitted = isFm5DocsSubmitted(caseData);
+        log.info("isFm5DocsSubmitted --> {}", isFm5DocsSubmitted);
 
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
@@ -2869,6 +2899,26 @@ public class ServiceOfApplicationService {
             .findFirst();
         log.info("category {}",quarantineLegalDocs);
         return quarantineLegalDocs.isPresent();
+    }
+
+    private boolean checkByCategoryFm5(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
+
+        Optional<QuarantineLegalDoc> applicantFm5Docs = quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
+                && doc.getDocumentParty().equals(DocumentPartyEnum.APPLICANT.getDisplayedValue()))
+            .findFirst();
+        log.info("applicantFm5Docs--> {}",applicantFm5Docs);
+
+        Optional<QuarantineLegalDoc> respondentFm5Docs = quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
+                && doc.getDocumentParty().equals(DocumentPartyEnum.RESPONDENT.getDisplayedValue()))
+            .findFirst();
+
+        log.info("respondentFm5Docs--> {}",respondentFm5Docs);
+
+        return applicantFm5Docs.isPresent() || respondentFm5Docs.isPresent();
     }
 
 }

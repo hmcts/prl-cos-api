@@ -63,4 +63,6 @@ public class ManageDocumentsCategoryConstants {
     public static final String CASE_SUMMARY = "caseSummary";
     public static final String CAFCASS_QUARANTINE = "cafcassQuarantine";
 
+    public static final String FM5 = "FM5";
+
 }
