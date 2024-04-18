@@ -549,7 +549,7 @@ class UploadAdditionalApplicationServiceTest {
 
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .additionalApplicationFeesToPay("53")
+            .additionalApplicationFeesToPay("£232.00")
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS).build())
             .build();
