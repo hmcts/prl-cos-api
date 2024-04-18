@@ -546,7 +546,7 @@ public class UploadAdditionalApplicationService {
         String taskToBeCraeated = "No";
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData)
-            && StringUtils.isEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
+            && isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
             if (Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay()) > 0) {
                 taskToBeCraeated = "Yes";
             }
