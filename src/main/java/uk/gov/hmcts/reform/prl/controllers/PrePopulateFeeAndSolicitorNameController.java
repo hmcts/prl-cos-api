@@ -168,7 +168,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                callbackRequest.getCaseDetails(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
                 c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
             );
 
