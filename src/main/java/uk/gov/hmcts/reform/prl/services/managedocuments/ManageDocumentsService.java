@@ -89,7 +89,7 @@ public class ManageDocumentsService {
     public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
     public static final String FM5_ERROR = "The statement of position on non-court dispute resolution "
-        + "(form FM5) cannot contain confidential information or be restricted. ";
+        + "(form FM5) cannot contain confidential information or be restricted.";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
