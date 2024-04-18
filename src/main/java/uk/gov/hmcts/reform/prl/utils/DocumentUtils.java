@@ -99,7 +99,6 @@ public class DocumentUtils {
                     finalCategory = finalCategory.concat(splittedCategory[i]);
                 }
             }
-            log.info("finalCategory ia: {}", finalCategory);
             return finalCategory + "Document";
         }
         return wierdAttributeName;
