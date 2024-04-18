@@ -68,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_URGENCY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
@@ -552,16 +553,16 @@ public class UploadAdditionalApplicationService {
         return taskToBeCraeated;
     }
 
-    /*public String getValueofAWPUrgency(CaseData caseData) {
-        String taskToBeCraeated = "No";
-        if (isNotEmpty(uploadAdditionalApplicationData)
-            && StringUtils.isEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
-            if(Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())>0){
-                taskToBeCraeated ="Yes";
-            }
+    public String getValueofAwpTaskUrgency(CaseData caseData) {
+        String urgencyTiemFrame = null;
+        OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
+            .getTemporaryOtherApplicationsBundle();
+        if (isNotEmpty(temporaryOtherApplicationsBundle)) {
+            log.info("timeframe" + temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString());
+            urgencyTiemFrame =  temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
         }
-        return taskToBeCraeated;
-    }*/
+        return urgencyTiemFrame;
+    }
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
                                                                        String userAuthorisation,
@@ -592,6 +593,10 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.put(
             AWP_WA_TASK_TO_BE_CREATED,
             getValueofAwpTaskToBeCreated(caseData)
+        );
+        caseDataUpdated.put(
+            AWP_WA_URGENCY,
+            getValueofAwpTaskUrgency(caseData)
         );
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         log.info(caseDataUpdated + "*****caseDataUpdated*****");
