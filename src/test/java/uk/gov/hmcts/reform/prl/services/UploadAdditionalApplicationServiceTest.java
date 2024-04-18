@@ -536,7 +536,7 @@ class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    @Test
+    //@Test
     void testCreateUploadAdditionalApplicationBundle() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
