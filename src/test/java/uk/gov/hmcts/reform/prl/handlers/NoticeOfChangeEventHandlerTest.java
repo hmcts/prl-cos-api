@@ -210,10 +210,27 @@ public class NoticeOfChangeEventHandlerTest {
     }
 
     @Test
-    public void shouldNotSendAccessCodeToLipWhenNull() {
+    public void shouldNotSendAccessCodeToLipWhenAccessCodeNull() {
 
         noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
             .accessCode(null)
+            .build();
+
+        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
+
+        Assert.assertNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
+    }
+
+    @Test
+    public void shouldNotSendAccessCodeToLipWhenAddressIsNull() {
+        applicant1 = applicant1.toBuilder()
+            .contactPreferences(ContactPreferences.post)
+            .build();
+        caseData = caseData.toBuilder()
+            .applicants(Arrays.asList(element(applicant1), element(applicant2)))
+            .build();
+        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
+            .caseData(caseData)
             .build();
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
