@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -63,11 +64,13 @@ public class CaseDataRespondentDetailsElementsMapper {
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
             .dateOfBirth(buildDateOfBirth(respondentDetails))
+            .isDateOfBirthKnown(buildIsRealDateOfBirthKnown(respondentDetails.getPersonalDetails()))
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
             .address(buildAddress(respondentDetails.getAddress()))
             .isAtAddressLessThan5Years(buildAddressLivedLessThan5YearsDetails(respondentDetails))
+            .isAtAddressLessThan5YearsWithDontKnow(buildAddressLivedLessThan5YearsDetailsWithDontKnow(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
@@ -75,6 +78,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
     }
 
@@ -103,6 +107,20 @@ public class CaseDataRespondentDetailsElementsMapper {
         return (!"Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) ? Yes : YesOrNo.No;
     }
 
+    private static YesNoDontKnow buildAddressLivedLessThan5YearsDetailsWithDontKnow(RespondentDetails respondentDetails) {
+        if (null != respondentDetails.getAddress().getAddressHistory()) {
+            String addressHistory = respondentDetails.getAddress().getAddressHistory();
+            if (YesNoDontKnow.yes.toString().equalsIgnoreCase(addressHistory)) {
+                return YesNoDontKnow.yes;
+            } else if (YesNoDontKnow.no.toString().equalsIgnoreCase(addressHistory)) {
+                return YesNoDontKnow.no;
+            } else if (YesNoDontKnow.dontKnow.toString().equalsIgnoreCase(addressHistory)) {
+                return YesNoDontKnow.dontKnow;
+            }
+        }
+        return null;
+    }
+
     private static String buildPreviousName(RespondentDetails respondentDetails) {
 
         return "Yes".equalsIgnoreCase(respondentDetails.getPersonalDetails().getHasNameChanged())
@@ -111,6 +129,10 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
         return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
+    }
+
+    private static YesOrNo buildIsRealDateOfBirthKnown(PersonalDetails personalDetails) {
+        return !"Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? Yes : No;
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
