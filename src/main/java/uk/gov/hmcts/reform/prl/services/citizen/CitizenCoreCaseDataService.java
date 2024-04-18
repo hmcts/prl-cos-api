@@ -133,6 +133,8 @@ public class CitizenCoreCaseDataService {
 
     public CaseDetails getCase(String authorisation, String caseId) {
         String cosApis2sToken = authTokenGenerator.generate();
+        log.info("vvvvv --> {}",cosApis2sToken);
+        log.info("MMMMMM {}",caseId);
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 }
