@@ -786,4 +786,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
+
+    private String awpWaName;
+
+    private String awpWaTaskToBeCreated;
+
+    private String awpWaUrgency;
+
+
+
 }

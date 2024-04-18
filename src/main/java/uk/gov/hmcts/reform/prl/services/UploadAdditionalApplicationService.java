@@ -519,11 +519,52 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.putAll(applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData));
         return caseDataUpdated;
     }
+    public String getValueofAWPName(CaseData caseData) {
+       String awpName = null;
+        if (caseData.getUploadAdditionalApplicationData() != null) {
+           if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order ) &&  caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                    AdditionalApplicationTypeEnum.otherOrder)) {
+               awpName = AdditionalApplicationTypeEnum.otherOrder.toString() + " and " + AdditionalApplicationTypeEnum.c2Order.toString();
+           }else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+               AdditionalApplicationTypeEnum.otherOrder)){
+                awpName = AdditionalApplicationTypeEnum.otherOrder.toString();
+           }else if(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order )){
+                awpName = AdditionalApplicationTypeEnum.c2Order.toString();
+            }
+        }
+        return awpName;
+    }
+
+    public String getValueofAWPTaskToBeCreated(CaseData caseData) {
+        String taskToBeCraeated = "No";
+        if (isNotEmpty(uploadAdditionalApplicationData)
+            && StringUtils.isEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
+        if(Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())>0){
+            taskToBeCraeated ="Yes";
+        }
+        }
+        return taskToBeCraeated;
+    }
+
+    /*public String getValueofAWPUrgency(CaseData caseData) {
+        String taskToBeCraeated = "No";
+        if (isNotEmpty(uploadAdditionalApplicationData)
+            && StringUtils.isEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
+            if(Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())>0){
+                taskToBeCraeated ="Yes";
+            }
+        }
+        return taskToBeCraeated;
+    }*/
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
                                                                        String userAuthorisation,
                                                                        CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info(caseData);
+
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
@@ -541,10 +582,15 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         caseDataUpdated.put(
-            "hwfRequestedForAdditionalApplications",
-            caseData.getHwfRequestedForAdditionalApplications()
+            "awpWaName",
+            getValueofAWPName(caseData)
+        );
+        caseDataUpdated.put(
+            "awpWaTaskToBeCreated",
+            getValueofAWPTaskToBeCreated(caseData)
         );
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
+        log.info(caseDataUpdated + "*****caseDataUpdated*****");
         return caseDataUpdated;
     }
 
