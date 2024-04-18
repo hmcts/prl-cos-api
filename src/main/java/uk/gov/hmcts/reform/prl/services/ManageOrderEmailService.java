@@ -919,11 +919,12 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
-                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
-                        caseData.getManageOrders().getServeOrderAdditionalDocuments().forEach(
-                            additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
-                    }
                 });
+            //PRL-5621 - Fix not to duplicate additional document in case of multiple orders served together
+            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+                caseData.getManageOrders().getServeOrderAdditionalDocuments().forEach(
+                    additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
+            }
         }
         return orderDocuments;
     }
