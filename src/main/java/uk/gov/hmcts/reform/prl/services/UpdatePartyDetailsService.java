@@ -307,7 +307,7 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, false,
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;

@@ -51,7 +51,6 @@ public class CitizenCaseUpdateController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("KKKKKK {}",citizenUpdatedCaseData);
             CaseDetails caseDetails = citizenCaseUpdateService.updateCitizenPartyDetails(
                 authorisation,
                 caseId,

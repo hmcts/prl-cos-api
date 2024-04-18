@@ -100,7 +100,6 @@ public class LinkCitizenCaseController {
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                       @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("accessCodeRequesttttt --> {}",accessCodeRequest);
             return linkCitizenCaseService.validateAccessCode(
                 accessCodeRequest.getCaseId(),
                 accessCodeRequest.getAccessCode()
