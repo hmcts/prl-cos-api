@@ -84,6 +84,7 @@ public class QuarantineLegalDoc {
     private final Document localAuthorityOtherDocDocument;
     private final Document pathfinderDocument;
     private final Document draftOrdersDocument;
+    private final Document fm5Document;
 
     // Adding Bulk scan attributes
     public final String fileName;
