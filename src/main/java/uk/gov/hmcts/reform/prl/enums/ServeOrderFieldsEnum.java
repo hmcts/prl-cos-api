@@ -34,7 +34,6 @@ public enum ServeOrderFieldsEnum {
     emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
     isOrderCompleteToServe("isOrderCompleteToServe"),
     doesOrderClosesCase("doesOrderClosesCase");
-    //ordersHearingDetails("ordersHearingDetails");
 
     private final String value;
 
