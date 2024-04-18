@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeOfChangeEventHandler {
+    public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "PRL-LEG-REP-REMOVED.docx";
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
     private final LaunchDarklyClient launchDarklyClient;
@@ -322,7 +323,7 @@ public class NoticeOfChangeEventHandler {
             caseData,
             party,
             CaseInvite.builder().accessCode(event.getAccessCode()).build(),
-            "PRL-LEG-REP-REMOVED.docx"
+            PRL_LEGAL_REP_COVER_LETTER_TEMPLATE
             );
         if (isNotEmpty(coverLetterWithAccessCode)) {
             documents.add(coverLetterWithAccessCode);
