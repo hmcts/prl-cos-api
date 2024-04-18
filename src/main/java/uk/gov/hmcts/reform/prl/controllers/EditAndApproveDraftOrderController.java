@@ -408,9 +408,6 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
 
-            // Check for Automated Hearing Management
-            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, caseDataUpdated, manageOrderService);
-
             caseDataUpdated.put(STATE, caseData.getState());
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
@@ -443,9 +440,16 @@ public class EditAndApproveDraftOrderController {
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            // Check for Automated Hearing Management
+            AutomatedHearingUtils.automatedHearingManagementRequest(
+                authorisation,
+                caseData,
+                caseDataUpdated,
+                manageOrderService);
+
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
-                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
                     DraftOrder draftOrder = draftAnOrderService
                         .getSelectedDraftOrderDetails(
