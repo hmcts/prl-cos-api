@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
@@ -555,13 +556,35 @@ public class UploadAdditionalApplicationService {
 
     public String getValueofAwpTaskUrgency(CaseData caseData) {
         String urgencyTiemFrame = null;
+        int urgencyTiemFrameC2 = 0;
+        int urgencyTiemFrameOther = 0;
         OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
             .getTemporaryOtherApplicationsBundle();
-        if (isNotEmpty(temporaryOtherApplicationsBundle)) {
-            log.info("timeframe" + temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString());
-            urgencyTiemFrame =  temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+        C2DocumentBundle c2DocumentBundle = caseData.getUploadAdditionalApplicationData()
+            .getTemporaryC2Document();
+
+        if (temporaryOtherApplicationsBundle != null && c2DocumentBundle != null) {
+            if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(EMPTY_STRING)) {
+                urgencyTiemFrameC2 = Integer.parseInt(c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", ""));
+            }
+            if (!temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(EMPTY_STRING)) {
+                urgencyTiemFrameOther = Integer.parseInt(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
+                                                             .toString().replaceAll("[^0-9]", ""));
+            }
+            if (urgencyTiemFrameC2 > urgencyTiemFrameOther) {
+                return temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+            } else {
+                return c2DocumentBundle.getUrgencyTimeFrameType().toString();
+            }
+        } else if (temporaryOtherApplicationsBundle != null) {
+            urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+        } else if (c2DocumentBundle != null) {
+            urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
         }
+
         return urgencyTiemFrame;
+
+
     }
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
