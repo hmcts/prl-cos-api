@@ -612,9 +612,7 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
-            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
-            || !isConfidentialityRemainsSame(currentParty.getIsAddressConfidential(),
-                                             updatedParty.getIsAddressConfidential()))
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown()))
             && (StringUtils.isNotEmpty(currentAddress.getAddressLine1())
                 || StringUtils.isNotEmpty(previousAddress.getAddressLine1()));
         log.info("checkIfAddressIsChanged ===>" + flag);
