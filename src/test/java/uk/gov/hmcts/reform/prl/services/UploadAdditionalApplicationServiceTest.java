@@ -536,11 +536,22 @@ class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    //@Test
+    @Test
     void testCreateUploadAdditionalApplicationBundle() throws Exception {
+        C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
+            .document(Document.builder().build())
+            .urgencyTimeFrameType(UrgencyTimeFrameType.SAME_DAY)
+            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
+            .supplementsBundle(List.of(element(Supplement.builder().build())))
+            .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
+            .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
+            .build();
+
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .additionalApplicationFeesToPay("53")
+            .temporaryC2Document(c2DocumentBundle)
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS).build())
             .build();
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
