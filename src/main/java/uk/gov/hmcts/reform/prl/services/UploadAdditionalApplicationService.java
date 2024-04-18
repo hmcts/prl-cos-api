@@ -64,17 +64,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -582,11 +572,11 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         caseDataUpdated.put(
-            "awpWaName",
+            AWP_WA_NAME,
             getValueofAWPName(caseData)
         );
         caseDataUpdated.put(
-            "awpWaTaskToBeCreated",
+            AWP_WA_TASK_TO_BE_CREATED,
             getValueofAWPTaskToBeCreated(caseData)
         );
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
