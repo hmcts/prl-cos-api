@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class NoticeOfChangeEvent {
     private final CaseData caseData;
     private final String solicitorEmailAddress;
