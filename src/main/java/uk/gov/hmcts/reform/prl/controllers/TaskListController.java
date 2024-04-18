@@ -40,7 +40,7 @@ public class TaskListController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
-       log.info("handleSubmitted >>>>>>> 43 >>>>>>>");
+        log.info("handleSubmitted >>>>>>> 43 >>>>>>>");
         return taskListService.updateTaskList(callbackRequest, authorisation);
     }
 
