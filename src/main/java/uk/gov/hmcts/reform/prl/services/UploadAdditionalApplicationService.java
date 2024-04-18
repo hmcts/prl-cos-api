@@ -64,7 +64,19 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -509,31 +521,33 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.putAll(applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData));
         return caseDataUpdated;
     }
-    public String getValueofAWPName(CaseData caseData) {
-       String awpName = null;
+
+    public String getValueofAwpName(CaseData caseData) {
+        String awpName = null;
         if (caseData.getUploadAdditionalApplicationData() != null) {
-           if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.c2Order ) &&  caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                    AdditionalApplicationTypeEnum.otherOrder)) {
-               awpName = AdditionalApplicationTypeEnum.otherOrder.toString() + " and " + AdditionalApplicationTypeEnum.c2Order.toString();
-           }else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-               AdditionalApplicationTypeEnum.otherOrder)){
+            if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order) &&  caseData.getUploadAdditionalApplicationData()
+                .getAdditionalApplicationsApplyingFor().contains(AdditionalApplicationTypeEnum.otherOrder)) {
+                awpName = AdditionalApplicationTypeEnum.otherOrder.toString() + " and " + AdditionalApplicationTypeEnum.c2Order.toString();
+            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.otherOrder)) {
                 awpName = AdditionalApplicationTypeEnum.otherOrder.toString();
-           }else if(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.c2Order )){
+            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order)) {
                 awpName = AdditionalApplicationTypeEnum.c2Order.toString();
             }
         }
         return awpName;
     }
 
-    public String getValueofAWPTaskToBeCreated(CaseData caseData) {
+    public String getValueofAwpTaskToBeCreated(CaseData caseData) {
         String taskToBeCraeated = "No";
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData)
             && StringUtils.isEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
-        if(Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())>0){
-            taskToBeCraeated ="Yes";
-        }
+            if (Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay()) > 0) {
+                taskToBeCraeated = "Yes";
+            }
         }
         return taskToBeCraeated;
     }
@@ -553,7 +567,7 @@ public class UploadAdditionalApplicationService {
                                                                        String userAuthorisation,
                                                                        CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info(caseData);
+        log.info("****casedsata" + caseData.toString());
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
@@ -573,11 +587,11 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         caseDataUpdated.put(
             AWP_WA_NAME,
-            getValueofAWPName(caseData)
+            getValueofAwpName(caseData)
         );
         caseDataUpdated.put(
             AWP_WA_TASK_TO_BE_CREATED,
-            getValueofAWPTaskToBeCreated(caseData)
+            getValueofAwpTaskToBeCreated(caseData)
         );
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         log.info(caseDataUpdated + "*****caseDataUpdated*****");

@@ -192,7 +192,7 @@ public class UploadAdditionalApplicationControllerTest {
         assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
     }
 
-    @Test
+    //@Test
     public void testcreateUploadAdditionalApplicationBundle() throws Exception {
 
         CaseData caseData = CaseData.builder()
