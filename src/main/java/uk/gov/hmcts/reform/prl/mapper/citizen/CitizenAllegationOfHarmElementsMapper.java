@@ -66,12 +66,13 @@ public class CitizenAllegationOfHarmElementsMapper {
         if (isNotEmpty(aohData)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+            // C100 rebuild object reused here as same properties are shared.
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = null;
             try {
                 c100C100RebuildSafetyConcernsElements = mapper
                     .readValue(aohData, C100RebuildSafetyConcernsElements.class);
-                return updateSafetyConcernsElementsForCaseData(c100C100RebuildSafetyConcernsElements,
-                                                               caseData.getNewChildDetails());
+                return updateRespondentAohElementsForCaseData(c100C100RebuildSafetyConcernsElements,
+                                                              caseData.getNewChildDetails());
             } catch (JsonProcessingException e) {
                 log.error("Failed to parse json request {}", e.getMessage());
             }
@@ -79,7 +80,7 @@ public class CitizenAllegationOfHarmElementsMapper {
         return RespondentAllegationsOfHarmData.builder().build();
     }
 
-    private RespondentAllegationsOfHarmData updateSafetyConcernsElementsForCaseData(
+    private RespondentAllegationsOfHarmData updateRespondentAohElementsForCaseData(
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
         List<Element<ChildDetailsRevised>> newChildDetails) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
