@@ -222,6 +222,7 @@ public class ManageDocumentsService {
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
+
         if (restrictedKey != null) {
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
@@ -248,6 +249,7 @@ public class ManageDocumentsService {
                         .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
                         .build();
                 }
+
                 moveToConfidentialOrRestricted(
                     caseDataUpdated,
                     CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)

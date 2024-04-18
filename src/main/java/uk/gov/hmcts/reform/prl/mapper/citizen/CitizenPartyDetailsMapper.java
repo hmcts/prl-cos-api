@@ -194,10 +194,10 @@ public class CitizenPartyDetailsMapper {
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
 
-                    //if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
-                    //    reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
-                    //                                    oldCaseData, updatedRespondentPartyIndex, authorisation);
-                    //}
+                    if (CONFIRM_YOUR_DETAILS.equals(caseEvent) || KEEP_DETAILS_PRIVATE.equals(caseEvent)) {
+                        reGenerateRespondentC8Documents(caseDataMapToBeUpdated, updatedPartyElement,
+                                                        oldCaseData, updatedRespondentPartyIndex, authorisation);
+                    }
                 });
             caseData = caseData.toBuilder().respondents(respondents).build();
             caseDataMapToBeUpdated.put(C100_RESPONDENTS, caseData.getRespondents());
@@ -286,7 +286,10 @@ public class CitizenPartyDetailsMapper {
                                                                    CaseEvent caseEvent) {
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
-                return existingPartyDetails;
+                return updateCitizenPersonalDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
             }
             case KEEP_DETAILS_PRIVATE -> {
                 return updateCitizenConfidentialData(
