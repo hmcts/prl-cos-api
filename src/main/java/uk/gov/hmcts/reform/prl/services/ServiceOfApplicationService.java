@@ -2260,6 +2260,7 @@ public class ServiceOfApplicationService {
                                       CaseInvite caseInvite, String template) {
 
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        log.info("Data sent to DGS to generate document {}", dataMap);
         return fetchCoverLetter(authorisation, template, dataMap);
     }
 

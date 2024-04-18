@@ -980,6 +980,4 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
-    public static final String DOCUMENT_COVER_LETTER_WITH_ACCESS_CODE_HINT = "DOCUMENT_COVER_LETTER_WITH_ACCESS_CODE";
-
 }
