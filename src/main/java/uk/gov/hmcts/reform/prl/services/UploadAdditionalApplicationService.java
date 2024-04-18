@@ -547,7 +547,7 @@ public class UploadAdditionalApplicationService {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData)
             && isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
-            if (Integer.valueOf(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay()) > 0) {
+            if (Double.parseDouble(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay().replace("£","")) > 0) {
                 taskToBeCraeated = "Yes";
             }
         }
