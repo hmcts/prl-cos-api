@@ -167,7 +167,6 @@ public class ManageDocumentsService {
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-        log.info("MANGEDOC 2222");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
@@ -203,7 +202,6 @@ public class ManageDocumentsService {
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
-                log.info("MANGEDOC 333");
                 moveDocumentsToRespectiveCategoriesNew(
                     quarantineLegalDoc,
                     userDetails,
@@ -212,7 +210,6 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
-                log.info("MANGEDOC 444");
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
                     setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
@@ -225,9 +222,7 @@ public class ManageDocumentsService {
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
-        log.info("MANGEDOC 5555");
         if (restrictedKey != null) {
-            log.info("MANGEDOC666");
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
@@ -253,7 +248,6 @@ public class ManageDocumentsService {
                         .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
                         .build();
                 }
-                log.info("MANGEDOC 777");
                 moveToConfidentialOrRestricted(
                     caseDataUpdated,
                     CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
@@ -264,7 +258,6 @@ public class ManageDocumentsService {
                 );
             }
         } else {
-            log.info("MANGEDOC 888");
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
                 .isConfidential(null)
