@@ -168,7 +168,8 @@ public class SubmitAndPayChecker implements EventChecker {
             mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
         }
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
-        if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
+        if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null
+            || eventsChecker.getMiamPolicyUpgradeChecker().isStarted(caseData)) {
             if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
                 mandatoryEvents.put(MIAM_POLICY_UPGRADE, eventsChecker.getMiamPolicyUpgradeChecker());
             } else {

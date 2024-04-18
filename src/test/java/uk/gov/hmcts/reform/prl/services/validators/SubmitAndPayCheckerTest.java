@@ -327,6 +327,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildChecker()).thenReturn(childChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
@@ -416,6 +417,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
@@ -558,6 +560,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
@@ -660,6 +663,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
