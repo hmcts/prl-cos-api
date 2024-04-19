@@ -69,7 +69,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             MIAM_POLICY_UPGRADE_ERROR,
             MIAM_POLICY_UPGRADE_ERROR.getError()
         );
-        if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
+        if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get()) && !isStarted(caseData)) {
+            log.info("inside miampolicyupgrade error remove");
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
         log.info("nope, something is wrong");
