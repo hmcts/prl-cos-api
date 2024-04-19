@@ -2930,6 +2930,8 @@ public class ServiceOfApplicationService {
             .count();
 
         log.info("applicantFm5Docs--> {}", applicantCount);
+        log.info("countMapInitial --> {}", countMap);
+        log.info("countMapInitial 111 --> {}", countMap.get(APPLICANT_FM5_COUNT));
         countMap.put(APPLICANT_FM5_COUNT,countMap.get(APPLICANT_FM5_COUNT) + applicantCount);
         log.info("countMap --> {}", countMap);
 
