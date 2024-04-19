@@ -2801,27 +2801,40 @@ public class ServiceOfApplicationService {
     }
 
     private  boolean isFm5DocsSubmitted(CaseData caseData) {
+        Integer applicantFm5DocsCount = 0;
+        Integer respondentFm5DocsCount = 0;
+        long applicantFm5DocsCount1 = 0;
+
 
         if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
             log.info("fm5-- legal prof quarantine ");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
                 = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            return  checkByCategoryFm5(legalProfQuarantineDocsElemList);
+            checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, applicantFm5DocsCount,
+                                       respondentFm5DocsCount, applicantFm5DocsCount1);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
             log.info("fm5-- legal prof -- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
                 = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            return  checkByCategoryFm5(legalProfQuarantineUploadedDocsElemList);
+            checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, applicantFm5DocsCount,
+                                       respondentFm5DocsCount, applicantFm5DocsCount1);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
             log.info("fm5-- legal prof -- review restricted");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
-            return  checkByCategoryFm5(restrictedDocumentsElemList);
+            checkByCategoryFm5AndParty(restrictedDocumentsElemList, applicantFm5DocsCount,
+                                       respondentFm5DocsCount, applicantFm5DocsCount1);
         }
+        log.info("applicantFm5DocsCountttt {}",applicantFm5DocsCount);
+        log.info("respondentFm5DocsCounttt {}",respondentFm5DocsCount);
+        log.info("applicantFm5DocsAAAACountttttttt --> {}", applicantFm5DocsCount1);
+
+        log.info("caseData.getApplicants().size()--->{}", caseData.getApplicants().size());
+        log.info("caseData.getRespondents().size()--->{}", caseData.getRespondents().size());
 
         return false;
     }
@@ -2901,24 +2914,34 @@ public class ServiceOfApplicationService {
         return quarantineLegalDocs.isPresent();
     }
 
-    private boolean checkByCategoryFm5(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
+    private void checkByCategoryFm5AndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList,
+                                            Integer applicantFm5DocsCount,Integer respondentFm5DocsCount,long applicantFm5DocsCount1) {
 
-        Optional<QuarantineLegalDoc> applicantFm5Docs = quarantineDocsElemList.stream()
+        long applicantCount =  quarantineDocsElemList.stream()
             .map(Element::getValue)
             .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
                 && doc.getDocumentParty().equals(DocumentPartyEnum.APPLICANT.getDisplayedValue()))
-            .findFirst();
-        log.info("applicantFm5Docs--> {}",applicantFm5Docs);
+            .count();
 
-        Optional<QuarantineLegalDoc> respondentFm5Docs = quarantineDocsElemList.stream()
+        log.info("applicantFm5Docs--> {}", applicantCount);
+        applicantFm5DocsCount += Math.toIntExact(applicantCount);
+        applicantFm5DocsCount1 += applicantCount;
+        log.info("applicantFm5DocsCount11111 --> {}", applicantFm5DocsCount1);
+
+        long respondentCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
             .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
                 && doc.getDocumentParty().equals(DocumentPartyEnum.RESPONDENT.getDisplayedValue()))
-            .findFirst();
+            .count();
 
-        log.info("respondentFm5Docs--> {}",respondentFm5Docs);
+        log.info("respondentFm5Docs--> {}",respondentCount);
 
-        return applicantFm5Docs.isPresent() || respondentFm5Docs.isPresent();
+        respondentFm5DocsCount += Math.toIntExact(respondentCount);
+
+        log.info("TOTAL--> {}",applicantFm5DocsCount);
+        log.info("TOAL--> {}",respondentFm5DocsCount);
+
+
     }
 
 }
