@@ -2809,31 +2809,41 @@ public class ServiceOfApplicationService {
         countMap.put(APPLICANT_FM5_COUNT,0L);
         countMap.put(RESPONDENT_FM5_COUNT,0L);
 
-        if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-            log.info("fm5-- legal prof quarantine ");
+        if (null != caseData.getDocumentManagementDetails()) {
+            log.info("fm5--> quarantine ");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
                 = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, countMap);
+            List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
+
+            if (null != legalProfQuarantineDocsElemList) {
+                checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, countMap);
+            } else if (null != courtStaffQuarantineDocsElemList) {
+                checkByCategoryFm5AndParty(courtStaffQuarantineDocsElemList, countMap);
+            }
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-            log.info("fm5-- legal prof -- review No");
+            log.info("fm5-- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
                 = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, countMap);
+            List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
+
+            if (null != legalProfQuarantineUploadedDocsElemList) {
+                checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, countMap);
+            } else if (null != courtStaffQuarantineUploadedDocsElemList) {
+                checkByCategoryFm5AndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
+            }
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
-            log.info("fm5-- legal prof -- review restricted");
+            log.info("fm5-- review yes - restricted");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
             checkByCategoryFm5AndParty(restrictedDocumentsElemList, countMap);
         }
         log.info("FINAL MAP {}",countMap);
-        log.info("caseData.getApplicants().size()--->{}", caseData.getApplicants().size());
-        log.info("caseData.getRespondents().size()--->{}", caseData.getRespondents().size());
-
-        log.info("True or False--->{}", countMap.get(APPLICANT_FM5_COUNT) < caseData.getRespondents().size());
 
         if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()) {
             applRespondentList.add("Applicant");
@@ -2851,17 +2861,14 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         List<String> fm5DocsSubmissionPendingParties = fetchFm5DocsSubmissionPendingParties(caseData);
-        log.info("isFm5DocsSubmitted --> {}", fm5DocsSubmissionPendingParties);
+        log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
 
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
         YesOrNo isChildInvolvedInMiam = No;
-        log.info("isChildInvolvedInMiam AAAAA--->{}",isChildInvolvedInMiam);
-        log.info("isChildInvolvedInMiam BBBB--->{}",caseData.getMiamPolicyUpgradeDetails());
-        if (null != caseData.getMiamPolicyUpgradeDetails()) {
-
+        if (null != caseData.getMiamPolicyUpgradeDetails()
+            && null != caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam()) {
             isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
-            log.info("isChildInvolvedInMiam CCCCC--->{}",caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         }
         log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
 
