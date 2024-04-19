@@ -2856,8 +2856,12 @@ public class ServiceOfApplicationService {
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
         YesOrNo isChildInvolvedInMiam = No;
+        log.info("isChildInvolvedInMiam AAAAA--->{}",isChildInvolvedInMiam);
+        log.info("isChildInvolvedInMiam BBBB--->{}",caseData.getMiamPolicyUpgradeDetails());
         if (null != caseData.getMiamPolicyUpgradeDetails()) {
+
             isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
+            log.info("isChildInvolvedInMiam CCCCC--->{}",caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         }
         log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
 
