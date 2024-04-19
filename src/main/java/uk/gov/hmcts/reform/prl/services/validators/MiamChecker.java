@@ -78,7 +78,7 @@ public class MiamChecker implements EventChecker {
         }
         Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
         taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
-        if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
+        if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get()) &&  !isStarted(caseData)) {
             taskErrorService.removeError(MIAM_ERROR);
         }
         return false;
