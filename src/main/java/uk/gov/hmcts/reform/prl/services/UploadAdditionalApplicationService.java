@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -75,7 +76,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
@@ -99,6 +99,7 @@ public class UploadAdditionalApplicationService {
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     public static final String APPLICANTSOLICITOR = "[APPLICANTSOLICITOR]";
+
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -108,6 +109,7 @@ public class UploadAdditionalApplicationService {
     private final CcdDataStoreService userDataStoreService;
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -143,7 +145,7 @@ public class UploadAdditionalApplicationService {
     }
 
     private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserDetails userDetails, String partyName) {
-        String author = null;
+        String author;
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
@@ -365,7 +367,7 @@ public class UploadAdditionalApplicationService {
         if (caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
-            applicationType = getOtherApplicationType(temporaryOtherApplicationsBundle);
+            applicationType = uploadAdditionalApplicationUtils.getOtherApplicationType(temporaryOtherApplicationsBundle);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
@@ -387,20 +389,6 @@ public class UploadAdditionalApplicationService {
                 .build();
         }
         return otherApplicationsBundle;
-    }
-
-    private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
-        OtherApplicationType applicationType = null;
-        if (null != temporaryOtherApplicationsBundle.getCaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getCaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaRespondentApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaRespondentApplicationType().name());
-        }
-        return applicationType;
     }
 
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
@@ -524,74 +512,12 @@ public class UploadAdditionalApplicationService {
         return caseDataUpdated;
     }
 
-    public String getValueofAwpName(CaseData caseData) {
-        String awpName = null;
-        if (caseData.getUploadAdditionalApplicationData() != null) {
-            if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.c2Order) &&  caseData.getUploadAdditionalApplicationData()
-                .getAdditionalApplicationsApplyingFor().contains(AdditionalApplicationTypeEnum.otherOrder)) {
-                awpName = AdditionalApplicationTypeEnum.otherOrder.toString() + " and " + AdditionalApplicationTypeEnum.c2Order.toString();
-            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.otherOrder)) {
-                awpName = AdditionalApplicationTypeEnum.otherOrder.toString();
-            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.c2Order)) {
-                awpName = AdditionalApplicationTypeEnum.c2Order.toString();
-            }
-        }
-        return awpName;
-    }
 
-    public String getValueofAwpTaskToBeCreated(CaseData caseData) {
-        String taskToBeCraeated = "No";
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
-        if (isNotEmpty(uploadAdditionalApplicationData)
-            && isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
-            if (Double.parseDouble(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay().replace("£","")) > 0) {
-                taskToBeCraeated = "Yes";
-            }
-        }
-        return taskToBeCraeated;
-    }
-
-    public String getValueofAwpTaskUrgency(CaseData caseData) {
-        String urgencyTiemFrame = null;
-        int urgencyTiemFrameC2 = 0;
-        int urgencyTiemFrameOther = 0;
-        OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
-            .getTemporaryOtherApplicationsBundle();
-        C2DocumentBundle c2DocumentBundle = caseData.getUploadAdditionalApplicationData()
-            .getTemporaryC2Document();
-
-        if (temporaryOtherApplicationsBundle != null && c2DocumentBundle != null) {
-            if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(EMPTY_STRING)) {
-                urgencyTiemFrameC2 = Integer.parseInt(c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", ""));
-            }
-            if (!temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(EMPTY_STRING)) {
-                urgencyTiemFrameOther = Integer.parseInt(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
-                                                             .toString().replaceAll("[^0-9]", ""));
-            }
-            if (urgencyTiemFrameC2 > urgencyTiemFrameOther) {
-                return temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
-            } else {
-                return c2DocumentBundle.getUrgencyTimeFrameType().toString();
-            }
-        } else if (temporaryOtherApplicationsBundle != null) {
-            urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
-        } else if (c2DocumentBundle != null) {
-            urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
-        }
-
-        return urgencyTiemFrame;
-
-
-    }
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
                                                                        String userAuthorisation,
                                                                        CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("****casedsata" + caseData.toString());
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
@@ -613,20 +539,12 @@ public class UploadAdditionalApplicationService {
             "hwfRequestedForAdditionalApplications",
             caseData.getHwfRequestedForAdditionalApplications()
         );
-        caseDataUpdated.put(
-                AWP_WA_TASK_NAME,
-            getValueofAwpName(caseData)
-        );
-        caseDataUpdated.put(
-            AWP_WA_TASK_TO_BE_CREATED,
-            getValueofAwpTaskToBeCreated(caseData)
-        );
-        caseDataUpdated.put(
-            AWP_WA_TASK_URGENCY,
-            getValueofAwpTaskUrgency(caseData)
-        );
+
+        caseDataUpdated.put(AWP_WA_TASK_NAME, uploadAdditionalApplicationUtils.getAwPTaskName(caseData));
+        caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, uploadAdditionalApplicationUtils.getValueOfAwpTaskToBeCreated(caseData));
+        caseDataUpdated.put(AWP_WA_TASK_URGENCY, uploadAdditionalApplicationUtils.getValueOfAwpTaskUrgency(caseData));
+
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
-        log.info(caseDataUpdated + "*****caseDataUpdated*****");
         return caseDataUpdated;
     }
 
