@@ -451,7 +451,8 @@ public class CaseService {
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].isEmpty()) {
+                if (citizenDocuments[0].isEmpty()
+                    && servedApplicationDetails.getModeOfService() != null) {
                     if (servedApplicationDetails.getModeOfService().equals("By email")) {
                         citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
                             servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
@@ -474,7 +475,7 @@ public class CaseService {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        emailNotificationDetailsList.stream()
+        nullSafeCollection(emailNotificationDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
             .filter(emailNotificationDetails -> getPartyIds(emailNotificationDetails.getPartyIds())
@@ -504,7 +505,7 @@ public class CaseService {
                     )
                     .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList))
                     .build()
-            );
+        );
         return citizenDocuments[0];
     }
 
@@ -530,7 +531,7 @@ public class CaseService {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        bulkPrintDetailsList.stream()
+        nullSafeCollection(bulkPrintDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
             .filter(bulkPrintDetails -> getPartyIds(bulkPrintDetails.getPartyIds())
@@ -559,7 +560,7 @@ public class CaseService {
                         ) : getUnservedRespondentDocumentList(serviceOfApplication)
                     )
                     .build()
-            );
+        );
         return citizenDocuments[0];
     }
 
