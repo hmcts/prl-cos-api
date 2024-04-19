@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -184,11 +186,34 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
         List<Element<Message>> messages = caseData.getOpenMessages();
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             messages.addAll(caseData.getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (caseData.getSendOrReplyMessage() != null) {
+            if (caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null
+                || caseData.getSendOrReplyMessage().getReplyMessageObject().getApplicationsList() != null) {
+                log.info("inside***** if condition");
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                    String.valueOf(
+                        caseData.getId()),
+                    CaseEvent.COMPLETE_AWP_TASK.getValue()
+                );
+
+                allTabService.submitUpdateForSpecificUserEvent(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    String.valueOf(caseData.getId()),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataMap,
+                    startAllTabsUpdateDataContent.userDetails()
+                );
+                log.info("inside***** if condition event completed ");
+            }
+        }
 
         Message mostRecentMessage = messages.get(0).getValue();
         if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
