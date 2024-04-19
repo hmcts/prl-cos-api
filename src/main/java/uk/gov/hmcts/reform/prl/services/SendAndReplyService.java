@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -102,6 +105,7 @@ public class SendAndReplyService {
     private final ElementUtils elementUtils;
 
     private final Time dateTime;
+    private final AllTabServiceImpl allTabService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -1173,6 +1177,29 @@ public class SendAndReplyService {
             }
 
             return message != null ? message.getSelectedApplicationCode() : null;
+        }
+    }
+
+    public void closeAwPTask(CaseData caseData) {
+        if (SEND.equals(caseData.getChooseSendOrReply())
+            && caseData.getSendOrReplyMessage() != null
+            && caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
+            log.info("inside***** if condition");
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(
+                    caseData.getId()),
+                CaseEvent.ALL_AWP_IN_REVIEW.getValue()
+            );
+
+            allTabService.submitUpdateForSpecificUserEvent(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.userDetails()
+            );
+            log.info("inside***** if condition event completed ");
         }
     }
 }

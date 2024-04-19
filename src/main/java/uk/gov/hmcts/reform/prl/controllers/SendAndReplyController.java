@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -319,26 +317,9 @@ public class SendAndReplyController extends AbstractCallbackController {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
-        } else if (SEND.equals(caseData.getChooseSendOrReply())
-            && caseData.getSendOrReplyMessage() != null
-            && caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
-            log.info("inside***** if condition");
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-                String.valueOf(
-                    caseData.getId()),
-                CaseEvent.ALL_AWP_IN_REVIEW.getValue()
-            );
-
-            allTabService.submitUpdateForSpecificUserEvent(
-                startAllTabsUpdateDataContent.authorisation(),
-                String.valueOf(caseData.getId()),
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.userDetails()
-            );
-            log.info("inside***** if condition event completed ");
         }
+
+        sendAndReplyService.closeAwPTask(caseData);
 
         return ok(SubmittedCallbackResponse.builder().build());
     }

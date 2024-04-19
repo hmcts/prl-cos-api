@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +97,9 @@ public class RequestUpdateCallbackServiceTest {
 
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
+
+    @Mock
+    UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     private StartEventResponse startEventResponse;
     private CaseDetails caseDetails;
