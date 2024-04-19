@@ -237,7 +237,7 @@ public class ManageDocumentsService {
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
+                Document updatedConfidentialDocument = downloadAndDeleteDocument(document, systemUserService.getSysUserToken());
                 quarantineLegalDoc = setQuarantineDocumentForUploader(
                     ManageDocuments.builder()
                         .document(updatedConfidentialDocument)
@@ -247,25 +247,27 @@ public class ManageDocumentsService {
                 );
 
             }
+            if (quarantineLegalDoc != null) {
+                QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
+                    quarantineLegalDoc,
+                    userDetails
+                );
+                if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(
+                    quarantineLegalDoc.getDocumentParty())) {
+                    finalConfidentialDocument = finalConfidentialDocument.toBuilder()
+                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                        .build();
+                }
 
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
+                moveToConfidentialOrRestricted(
+                    caseDataUpdated,
+                    CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
+                        ? caseData.getReviewDocuments().getConfidentialDocuments()
+                        : caseData.getReviewDocuments().getRestrictedDocuments(),
+                    finalConfidentialDocument,
+                    restrictedKey
+                );
             }
-
-            moveToConfidentialOrRestricted(
-                caseDataUpdated,
-                CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
-                    ? caseData.getReviewDocuments().getConfidentialDocuments()
-                    : caseData.getReviewDocuments().getRestrictedDocuments(),
-                finalConfidentialDocument,
-                restrictedKey
-            );
         } else {
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -407,7 +409,7 @@ public class ManageDocumentsService {
     }
 
 
-    private Document downloadAndDeleteDocument(Document document) {
+    public Document downloadAndDeleteDocument(Document document, String systemAuthorisation) {
         try {
             if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                 UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
@@ -416,7 +418,7 @@ public class ManageDocumentsService {
                     documentId
                 );
                 if (null != newUploadedDocument) {
-                    caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                    caseDocumentClient.deleteDocument(systemAuthorisation,
                                                       authTokenGenerator.generate(),
                                                       documentId, true
                     );
@@ -683,7 +685,7 @@ public class ManageDocumentsService {
                     );
                     QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
 
-                    Document renamedDocument = downloadAndDeleteDocument(existingDocument);
+                    Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
                     Map tempQuarantineObjectMap =
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
                     tempQuarantineObjectMap.put(
