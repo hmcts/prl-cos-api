@@ -106,7 +106,6 @@ public class Fl401ListOnNoticeService {
 
         String fl401listOnNoticeHearingInstruction = (String) caseDataUpdated.get(
             FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION);
-        log.info("fl401listOnNoticeHearingInstruction ===> " + fl401listOnNoticeHearingInstruction);
         if (!StringUtils.isEmpty(fl401listOnNoticeHearingInstruction)) {
             CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
                 LIST_ON_NOTICE_HEARING_INSTRUCTIONS,
@@ -129,7 +128,6 @@ public class Fl401ListOnNoticeService {
         PartyDetails applicantsInCase = caseData.getApplicantsFL401();
         String fl401ReasonsForListWithoutNoticeRequested = (String) caseDataUpdated.get(
             FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED);
-        log.info("fl401ReasonsForListWithoutNoticeRequested ===> " + fl401ReasonsForListWithoutNoticeRequested);
         String confirmationBody;
         if (!StringUtils.isEmpty(fl401ReasonsForListWithoutNoticeRequested)) {
             UUID bulkPrintId = null;
@@ -200,7 +198,7 @@ public class Fl401ListOnNoticeService {
             = allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
 
         //update all tabs
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                                           String.valueOf(caseData.getId()),
                                           startAllTabsUpdateDataContent.startEventResponse(),
                                           startAllTabsUpdateDataContent.eventRequestData(),
@@ -262,7 +260,6 @@ public class Fl401ListOnNoticeService {
         dataMap.put("recipientName", applicantsInCase.getFirstName() + " " + applicantsInCase.getLastName());
         dataMap.put("reasonsForListWithoutNoticeRequested", finalReasonsForListWithoutNoticeRequested);
         dataMap.put("currentDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-        log.info("dataMap =====> " + dataMap);
         return dataMap;
     }
 
