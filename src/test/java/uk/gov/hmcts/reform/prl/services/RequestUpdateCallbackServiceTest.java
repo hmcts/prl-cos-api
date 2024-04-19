@@ -17,11 +17,15 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
@@ -235,8 +239,15 @@ public class RequestUpdateCallbackServiceTest {
                                                                             .paymentServiceRequestReferenceNumber("Paid")
                                                                             .build())
                                                      .build()));
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .additionalApplicationFeesToPay("£232.00")
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(
+                UrgencyTimeFrameType.WITHIN_2_DAYS).build())
+            .build();
         CaseData caseData = CaseData.builder().id(1L).additionalApplicationsBundle(additionalApplicationsBundle)
-            .paymentServiceRequestReferenceNumber("test-reference").build();
+            .paymentServiceRequestReferenceNumber("test-reference").uploadAdditionalApplicationData(uploadAdditionalApplicationData).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);

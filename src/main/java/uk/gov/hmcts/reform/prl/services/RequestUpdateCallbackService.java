@@ -13,10 +13,13 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
@@ -34,6 +37,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_URGENCY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 
 @Slf4j
 @Component
@@ -247,9 +254,74 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
-                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    "additionalApplicationsBundle",
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                );
             }
+            caseDataUpdated.put(
+                AWP_WA_NAME, getValueofAwpName(startEventResponseData)
+            );
+            caseDataUpdated.put(
+                AWP_WA_URGENCY, getValueofAwpTaskUrgency(startEventResponseData)
+            );
         }
         return caseDataUpdated;
+    }
+
+
+    public String getValueofAwpTaskUrgency(CaseData caseData) {
+        String urgencyTiemFrame = null;
+        int urgencyTiemFrameC2 = 0;
+        int urgencyTiemFrameOther = 0;
+        OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
+            .getTemporaryOtherApplicationsBundle();
+        C2DocumentBundle c2DocumentBundle = caseData.getUploadAdditionalApplicationData()
+            .getTemporaryC2Document();
+
+        if (temporaryOtherApplicationsBundle != null && c2DocumentBundle != null) {
+            if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(EMPTY_STRING)) {
+                urgencyTiemFrameC2 = Integer.parseInt(c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll(
+                    "[^0-9]",
+                    ""
+                ));
+            }
+            if (!temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString().replaceAll("[^0-9]", "").equals(
+                EMPTY_STRING)) {
+                urgencyTiemFrameOther = Integer.parseInt(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
+                                                             .toString().replaceAll("[^0-9]", ""));
+            }
+            if (urgencyTiemFrameC2 > urgencyTiemFrameOther) {
+                return temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+            } else {
+                return c2DocumentBundle.getUrgencyTimeFrameType().toString();
+            }
+        } else if (temporaryOtherApplicationsBundle != null) {
+            urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+        } else if (c2DocumentBundle != null) {
+            urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
+        }
+
+        return urgencyTiemFrame;
+
+
+    }
+
+    public String getValueofAwpName(CaseData caseData) {
+        String awpName = null;
+        if (caseData.getUploadAdditionalApplicationData() != null) {
+            if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order) && caseData.getUploadAdditionalApplicationData()
+                .getAdditionalApplicationsApplyingFor().contains(AdditionalApplicationTypeEnum.otherOrder)) {
+                awpName = AdditionalApplicationTypeEnum.otherOrder.toString() + " and " + AdditionalApplicationTypeEnum.c2Order.toString();
+            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.otherOrder)) {
+                awpName = AdditionalApplicationTypeEnum.otherOrder.toString();
+            } else if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+                AdditionalApplicationTypeEnum.c2Order)) {
+                awpName = AdditionalApplicationTypeEnum.c2Order.toString();
+            }
+        }
+        return awpName;
     }
 }

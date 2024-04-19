@@ -610,6 +610,10 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         caseDataUpdated.put(
+            "hwfRequestedForAdditionalApplications",
+            caseData.getHwfRequestedForAdditionalApplications()
+        );
+        caseDataUpdated.put(
             AWP_WA_NAME,
             getValueofAwpName(caseData)
         );
