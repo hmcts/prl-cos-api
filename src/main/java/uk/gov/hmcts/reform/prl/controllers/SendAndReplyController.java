@@ -191,26 +191,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             messages.addAll(caseData.getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        if (caseData.getSendOrReplyMessage() != null) {
-            if (caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
-                log.info("inside***** if condition");
-                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-                    String.valueOf(
-                        caseData.getId()),
-                    CaseEvent.ALL_AWP_IN_REVIEW.getValue()
-                );
-
-                allTabService.submitUpdateForSpecificUserEvent(
-                    startAllTabsUpdateDataContent.authorisation(),
-                    String.valueOf(caseData.getId()),
-                    startAllTabsUpdateDataContent.startEventResponse(),
-                    startAllTabsUpdateDataContent.eventRequestData(),
-                    startAllTabsUpdateDataContent.caseDataMap(),
-                    startAllTabsUpdateDataContent.userDetails()
-                );
-                log.info("inside***** if condition event completed ");
-            }
-        }
 
         Message mostRecentMessage = messages.get(0).getValue();
         if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
@@ -339,6 +319,25 @@ public class SendAndReplyController extends AbstractCallbackController {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
+        } else if (SEND.equals(caseData.getChooseSendOrReply())
+            && caseData.getSendOrReplyMessage() != null
+            && caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
+            log.info("inside***** if condition");
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(
+                    caseData.getId()),
+                CaseEvent.ALL_AWP_IN_REVIEW.getValue()
+            );
+
+            allTabService.submitUpdateForSpecificUserEvent(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.userDetails()
+            );
+            log.info("inside***** if condition event completed ");
         }
 
         return ok(SubmittedCallbackResponse.builder().build());
