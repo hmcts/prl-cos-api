@@ -93,7 +93,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
@@ -2802,7 +2802,7 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private  List<String> fetchFm5DocsSubmissionPendingParties(CaseData caseData) {
+    private  List<String> fetchFm5StatementDocsSubmissionPendingParties(CaseData caseData) {
 
         List<String> applRespondentList = new ArrayList<>();
         Map<String,Long> countMap = new HashMap<>();
@@ -2817,9 +2817,9 @@ public class ServiceOfApplicationService {
                 = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
 
             if (null != legalProfQuarantineDocsElemList) {
-                checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, countMap);
+                checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
             } else if (null != courtStaffQuarantineDocsElemList) {
-                checkByCategoryFm5AndParty(courtStaffQuarantineDocsElemList, countMap);
+                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
             }
         }
 
@@ -2831,9 +2831,9 @@ public class ServiceOfApplicationService {
                 = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
 
             if (null != legalProfQuarantineUploadedDocsElemList) {
-                checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, countMap);
+                checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
             } else if (null != courtStaffQuarantineUploadedDocsElemList) {
-                checkByCategoryFm5AndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
+                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
             }
         }
 
@@ -2841,7 +2841,7 @@ public class ServiceOfApplicationService {
             log.info("fm5-- review yes - restricted");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
-            checkByCategoryFm5AndParty(restrictedDocumentsElemList, countMap);
+            checkByCategoryFm5StatementsAndParty(restrictedDocumentsElemList, countMap);
         }
         log.info("FINAL MAP {}",countMap);
 
@@ -2860,7 +2860,7 @@ public class ServiceOfApplicationService {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        List<String> fm5DocsSubmissionPendingParties = fetchFm5DocsSubmissionPendingParties(caseData);
+        List<String> fm5DocsSubmissionPendingParties = fetchFm5StatementDocsSubmissionPendingParties(caseData);
         log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
 
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
@@ -2932,11 +2932,11 @@ public class ServiceOfApplicationService {
         return quarantineLegalDocs.isPresent();
     }
 
-    private void checkByCategoryFm5AndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList, Map<String,Long> countMap) {
+    private void checkByCategoryFm5StatementsAndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList, Map<String,Long> countMap) {
 
         long applicantCount =  quarantineDocsElemList.stream()
             .map(Element::getValue)
-            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5_STATEMENTS)
                 && doc.getDocumentParty().equals(DocumentPartyEnum.APPLICANT.getDisplayedValue()))
             .count();
 
@@ -2948,7 +2948,7 @@ public class ServiceOfApplicationService {
 
         long respondentCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
-            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5_STATEMENTS)
                 && doc.getDocumentParty().equals(DocumentPartyEnum.RESPONDENT.getDisplayedValue()))
             .count();
 
