@@ -59,9 +59,11 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class))
             .thenReturn(CaseData.builder()
-                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                    .mpuClaimingExemptionMiam(YesOrNo.Yes)
-                    .mpuExemptionReasons(new ArrayList<>()).build()).build());
+                            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                                                          .mpuChildInvolvedInMiam(YesOrNo.No)
+                                                          .mpuApplicantAttendedMiam(YesOrNo.No)
+                                                          .mpuClaimingExemptionMiam(YesOrNo.Yes)
+                                                          .mpuExemptionReasons(new ArrayList<>()).build()).build());
         Map<String, Object> objectMap = miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest);
         Assert.assertNotNull(objectMap);
         Assert.assertNotNull(objectMap.get("mpuClaimingExemptionMiam"));
@@ -75,8 +77,8 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
+            .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mediatorRegistrationNumber("123")
             .familyMediatorServiceName("test")
@@ -103,7 +105,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -127,7 +129,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -150,7 +152,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -173,7 +175,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -196,7 +198,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -220,7 +222,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -244,7 +246,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -267,7 +269,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
@@ -290,7 +292,7 @@ public class MiamPolicyUpgradeServiceTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build()).build();
         MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
             .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuChildInvolvedInMiam(YesOrNo.No)
             .mpuApplicantAttendedMiam(YesOrNo.No)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
             .mpuClaimingExemptionMiam(YesOrNo.Yes)
