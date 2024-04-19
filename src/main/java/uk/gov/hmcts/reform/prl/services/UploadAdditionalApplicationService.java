@@ -66,9 +66,9 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_URGENCY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_URGENCY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
@@ -614,7 +614,7 @@ public class UploadAdditionalApplicationService {
             caseData.getHwfRequestedForAdditionalApplications()
         );
         caseDataUpdated.put(
-            AWP_WA_NAME,
+                AWP_WA_TASK_NAME,
             getValueofAwpName(caseData)
         );
         caseDataUpdated.put(
@@ -622,7 +622,7 @@ public class UploadAdditionalApplicationService {
             getValueofAwpTaskToBeCreated(caseData)
         );
         caseDataUpdated.put(
-            AWP_WA_URGENCY,
+            AWP_WA_TASK_URGENCY,
             getValueofAwpTaskUrgency(caseData)
         );
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);

@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_URGENCY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_URGENCY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 
 @Slf4j
@@ -260,10 +260,10 @@ public class RequestUpdateCallbackService {
                 );
             }
             caseDataUpdated.put(
-                AWP_WA_NAME, getValueofAwpName(startEventResponseData)
+                AWP_WA_TASK_NAME, getValueofAwpName(startEventResponseData)
             );
             caseDataUpdated.put(
-                AWP_WA_URGENCY, getValueofAwpTaskUrgency(startEventResponseData)
+                AWP_WA_TASK_URGENCY, getValueofAwpTaskUrgency(startEventResponseData)
             );
         }
         return caseDataUpdated;

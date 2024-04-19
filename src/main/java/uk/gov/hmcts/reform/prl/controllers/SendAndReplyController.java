@@ -186,21 +186,18 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-
         List<Element<Message>> messages = caseData.getOpenMessages();
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             messages.addAll(caseData.getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         if (caseData.getSendOrReplyMessage() != null) {
-            if (caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null
-                || caseData.getSendOrReplyMessage().getReplyMessageObject().getApplicationsList() != null) {
+            if (caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
                 log.info("inside***** if condition");
                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                     String.valueOf(
                         caseData.getId()),
-                    CaseEvent.COMPLETE_AWP_TASK.getValue()
+                    CaseEvent.ALL_AWP_IN_REVIEW.getValue()
                 );
 
                 allTabService.submitUpdateForSpecificUserEvent(
@@ -208,7 +205,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                     String.valueOf(caseData.getId()),
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
-                    caseDataMap,
+                    startAllTabsUpdateDataContent.caseDataMap(),
                     startAllTabsUpdateDataContent.userDetails()
                 );
                 log.info("inside***** if condition event completed ");
