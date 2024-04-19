@@ -95,6 +95,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -111,6 +112,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
@@ -2800,51 +2802,56 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private  boolean isFm5DocsSubmitted(CaseData caseData) {
-        Integer applicantFm5DocsCount = 0;
-        Integer respondentFm5DocsCount = 0;
-        long applicantFm5DocsCount1 = 0;
+    private  List<String> fetchFm5DocsSubmissionPendingParties(CaseData caseData) {
 
+        List<String> applRespondentList = new ArrayList<>();
+        Map<String,Long> countMap = new HashMap<>();
+        countMap.put(APPLICANT_FM5_COUNT,0L);
+        countMap.put(RESPONDENT_FM5_COUNT,0L);
 
         if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
             log.info("fm5-- legal prof quarantine ");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
                 = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, applicantFm5DocsCount,
-                                       respondentFm5DocsCount, applicantFm5DocsCount1);
+            checkByCategoryFm5AndParty(legalProfQuarantineDocsElemList, countMap);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
             log.info("fm5-- legal prof -- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
                 = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, applicantFm5DocsCount,
-                                       respondentFm5DocsCount, applicantFm5DocsCount1);
+            checkByCategoryFm5AndParty(legalProfQuarantineUploadedDocsElemList, countMap);
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
             log.info("fm5-- legal prof -- review restricted");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
-            checkByCategoryFm5AndParty(restrictedDocumentsElemList, applicantFm5DocsCount,
-                                       respondentFm5DocsCount, applicantFm5DocsCount1);
+            checkByCategoryFm5AndParty(restrictedDocumentsElemList, countMap);
         }
-        log.info("applicantFm5DocsCountttt {}",applicantFm5DocsCount);
-        log.info("respondentFm5DocsCounttt {}",respondentFm5DocsCount);
-        log.info("applicantFm5DocsAAAACountttttttt --> {}", applicantFm5DocsCount1);
-
+        log.info("FINAL MAP {}",countMap);
         log.info("caseData.getApplicants().size()--->{}", caseData.getApplicants().size());
         log.info("caseData.getRespondents().size()--->{}", caseData.getRespondents().size());
 
-        return false;
+        log.info("True or False--->{}", countMap.get(APPLICANT_FM5_COUNT) < caseData.getRespondents().size());
+
+        if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()) {
+            applRespondentList.add("Applicant");
+        }
+
+        if (countMap.get(RESPONDENT_FM5_COUNT) < caseData.getRespondents().size()) {
+            applRespondentList.add("Respondent");
+        }
+
+        return applRespondentList;
     }
 
     public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        boolean isFm5DocsSubmitted = isFm5DocsSubmitted(caseData);
-        log.info("isFm5DocsSubmitted --> {}", isFm5DocsSubmitted);
+        List<String> fm5DocsSubmissionPendingParties = fetchFm5DocsSubmissionPendingParties(caseData);
+        log.info("isFm5DocsSubmitted --> {}", fm5DocsSubmissionPendingParties);
 
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
@@ -2914,8 +2921,7 @@ public class ServiceOfApplicationService {
         return quarantineLegalDocs.isPresent();
     }
 
-    private void checkByCategoryFm5AndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList,
-                                            Integer applicantFm5DocsCount,Integer respondentFm5DocsCount,long applicantFm5DocsCount1) {
+    private void checkByCategoryFm5AndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList, Map<String,Long> countMap) {
 
         long applicantCount =  quarantineDocsElemList.stream()
             .map(Element::getValue)
@@ -2924,9 +2930,8 @@ public class ServiceOfApplicationService {
             .count();
 
         log.info("applicantFm5Docs--> {}", applicantCount);
-        applicantFm5DocsCount += Math.toIntExact(applicantCount);
-        applicantFm5DocsCount1 += applicantCount;
-        log.info("applicantFm5DocsCount11111 --> {}", applicantFm5DocsCount1);
+        countMap.put("applicantCount",countMap.get("applicantCount") + applicantCount);
+        log.info("countMap --> {}", countMap);
 
         long respondentCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
@@ -2935,13 +2940,8 @@ public class ServiceOfApplicationService {
             .count();
 
         log.info("respondentFm5Docs--> {}",respondentCount);
-
-        respondentFm5DocsCount += Math.toIntExact(respondentCount);
-
-        log.info("TOTAL--> {}",applicantFm5DocsCount);
-        log.info("TOAL--> {}",respondentFm5DocsCount);
-
-
+        countMap.put("respondentCount",countMap.get("respondentCount") + respondentCount);
+        log.info("countMap --> {}", countMap);
     }
 
 }
