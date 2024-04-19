@@ -77,7 +77,7 @@ public class Fl401ListOnNoticeControllerFT {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
         MvcResult res = mockMvc.perform(post(submittedEndpoint)
-                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
                                             .content(requestBody)
