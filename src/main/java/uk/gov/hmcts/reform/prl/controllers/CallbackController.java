@@ -67,11 +67,14 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -96,6 +99,7 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
@@ -115,9 +119,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
+import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -135,6 +141,7 @@ public class CallbackController {
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
     private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
+    public static final String TASK_LIST_VERSION = "taskListVersion";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
@@ -161,6 +168,12 @@ public class CallbackController {
     private final ManageDocumentsService manageDocumentsService;
 
     private final RoleAssignmentService roleAssignmentService;
+
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -226,7 +239,9 @@ public class CallbackController {
             }
 
             Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
-
+            if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
+            }
             // Generate draft documents and set to casedataupdated.
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -315,7 +330,10 @@ public class CallbackController {
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
-
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                caseData = populateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
+            }
             Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
@@ -327,8 +345,10 @@ public class CallbackController {
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
                 //Update version V2 here to get latest data refreshed in tabs
-                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
-                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                if (launchDarklyClient.isFeatureEnabled("task-list-v3")) {
+                    caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
+                } else if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V2);
                 }
             } else {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
@@ -350,6 +370,16 @@ public class CallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseData populateMiamPolicyUpgradeDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
+        caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
+            caseData,
+            systemUserService.getSysUserToken()
+        );
+        allTabsService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
+        return caseData;
     }
 
     @PostMapping(path = "/transfer-court/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -475,7 +505,7 @@ public class CallbackController {
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
             } else {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     // Refreshing the page in the same event. Hence no external event call needed.
                     // Getting the tab fields and add it to the casedetails..
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
@@ -606,7 +636,6 @@ public class CallbackController {
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
             }
-
             // Updating the case name for FL401
             if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
                 caseDataUpdated.put(APPLICANT_CASE_NAME, caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
@@ -615,9 +644,8 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (launchDarklyClient.isFeatureEnabled("task-list-v2")
-                    && C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                if (SOLICITOR_CREATE.getId().equals(callbackRequest.getEventId())) {
+                    setTaskListVersion(caseDataUpdated);
                 }
             }
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -629,6 +657,16 @@ public class CallbackController {
             )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void setTaskListVersion(Map<String, Object> caseDataUpdated) {
+        if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+            if (launchDarklyClient.isFeatureEnabled("task-list-v3")) {
+                caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
+            } else if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V2);
+            }
         }
     }
 
@@ -691,50 +729,50 @@ public class CallbackController {
             List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
             List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
             List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
-                    ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
-                    : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
+                ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
             if (furtherEvidencesList != null) {
                 quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
-                                        .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
-                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
-                                        .notes(caseData.getGiveDetails())
-                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
-                                        .build())
-                                .id(element.getId()).build())
-                        .toList());
+                        .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
+                                   .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
+                                   .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                                   .notes(caseData.getGiveDetails())
+                                   .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
+                                   .build())
+                        .id(element.getId()).build())
+                                          .toList());
             }
             if (correspondenceList != null) {
                 quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
-                                        .documentName(element.getValue().getDocumentName())
-                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
-                                        .notes(element.getValue().getNotes())
-                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
-                                        .build())
-                                .id(element.getId()).build())
-                        .toList());
+                        .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
+                                   .documentName(element.getValue().getDocumentName())
+                                   .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
+                                   .notes(element.getValue().getNotes())
+                                   .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
+                                   .build())
+                        .id(element.getId()).build())
+                                          .toList());
             }
             List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
             if (otherDocumentsList != null) {
                 quarantineDocs.addAll(otherDocumentsList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentOther())
-                                        .documentType(element.getValue().getDocumentTypeOther().toString())
-                                        .notes(element.getValue().getNotes())
-                                        .documentName(element.getValue().getDocumentName())
-                                        .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
-                                        .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
-                                        .build())
-                                .id(element.getId()).build())
-                        .toList());
+                        .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentOther())
+                                   .documentType(element.getValue().getDocumentTypeOther().toString())
+                                   .notes(element.getValue().getNotes())
+                                   .documentName(element.getValue().getDocumentName())
+                                   .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
+                                   .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
+                                   .build())
+                        .id(element.getId()).build())
+                                          .toList());
             }
             caseData.setDocumentManagementDetails(DocumentManagementDetails.builder()
-                    .legalProfQuarantineDocsList(quarantineDocs)
-                    .build());
+                                                      .legalProfQuarantineDocsList(quarantineDocs)
+                                                      .build());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
-                    "legalProfQuarantineDocsList",
-                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                "legalProfQuarantineDocsList",
+                caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
             );
             caseDataUpdated.remove("furtherEvidences");
             caseDataUpdated.remove("correspondence");
@@ -797,7 +835,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseDetails caseDetails
-                = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,

@@ -31,15 +31,18 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -70,6 +73,8 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Value("${southampton.court.email-address}")
     protected String southamptonCourtEmailAddress;
 
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
@@ -80,6 +85,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside prePopulateSolicitorAndFees");
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
@@ -89,6 +95,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
             } else {
+                log.info("inside else block");
                 FeeResponse feeResponse = null;
                 try {
                     feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -114,7 +121,11 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
-
+                log.info("before buildGeneratedDocumentCaseData");
+                if (isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
+                    log.info("caseDataForOrgDetails.getMiamPolicyUpgradeDetails() ===> " + caseDataForOrgDetails.getMiamPolicyUpgradeDetails());
+                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataForOrgDetails, new HashMap<>());
+                }
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,
                     callbackRequest,
@@ -157,7 +168,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                callbackRequest.getCaseDetails(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
                 c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
             );
 

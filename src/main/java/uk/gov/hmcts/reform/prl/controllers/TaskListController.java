@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -40,6 +41,11 @@ public class TaskListController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
+        try {
+            log.info("/callbackRequest start json ===>" + objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return taskListService.updateTaskList(callbackRequest, authorisation);
     }
 
