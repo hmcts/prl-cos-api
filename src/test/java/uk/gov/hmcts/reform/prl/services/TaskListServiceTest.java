@@ -9,12 +9,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -30,6 +33,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
@@ -116,6 +121,18 @@ public class TaskListServiceTest {
     @Mock
     EventService eventPublisher;
 
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    RoleAssignmentApi roleAssignmentApi;
+
+    @Mock
+    RoleAssignmentServiceResponse roleAssignmentServiceResponse;
+
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Mock
@@ -129,6 +146,16 @@ public class TaskListServiceTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
+    }
 
     @Test
     public void getTasksShouldReturnListOfTasks() {
@@ -593,6 +620,11 @@ public class TaskListServiceTest {
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "senior-tribunal-caseworker");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -621,6 +653,11 @@ public class TaskListServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "ctsc");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
@@ -655,10 +692,14 @@ public class TaskListServiceTest {
                 .state(State.SUBMITTED_PAID)
                 .build();
 
-
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-solicitor");
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         //when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -696,6 +737,11 @@ public class TaskListServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> documentMap = new HashMap<>();
         stringObjectMap.putAll(documentMap);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "judge");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(authToken, authTokenGenerator.generate(), null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         when(userService.getUserDetails(authToken))
                 .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
