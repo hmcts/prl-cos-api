@@ -71,17 +71,22 @@ public class MiamPolicyUpgradeService {
         );
         updatedMiamPolicyUpgradeData.put(
             "mpuApplicantAttendedMiam",
-            isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam())
+            No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
+            && isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam() : null
         );
         updatedMiamPolicyUpgradeData.put(
             "mpuClaimingExemptionMiam",
-            isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+            No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
+            && No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam())
+            && isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
                 ? caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam() : null
         );
         populateDataForApplicantAttendedMaim(updatedMiamPolicyUpgradeData, caseData);
 
-        boolean isClaimingMaimExemption = Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam());
+        boolean isClaimingMaimExemption = No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
+            && No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam());
         updatedMiamPolicyUpgradeData.put(
             "mpuExemptionReasons",
             isClaimingMaimExemption && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
@@ -125,7 +130,9 @@ public class MiamPolicyUpgradeService {
     }
 
     private void populateDataForApplicantAttendedMaim(Map<String, Object> caseDataUpdated, CaseData caseData) {
-        boolean isApplicantAttendedMiam = Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
+        boolean isApplicantAttendedMiam =
+            No.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
         caseDataUpdated.put(
             "mediatorRegistrationNumber",
             isApplicantAttendedMiam && StringUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber())
