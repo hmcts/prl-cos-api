@@ -286,7 +286,7 @@ public class NoticeOfChangeEventHandler {
                 documents,
                 party.getValue().getLabelForDynamicList()
             );
-            log.info("Sent cover letter with access code to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
+            log.info("Remove legal rep -> Sent cover letter with access code to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
         } else {
             log.info(
                 "Couldn't post letters to party address, as address is null/empty for {}", party.getId());
