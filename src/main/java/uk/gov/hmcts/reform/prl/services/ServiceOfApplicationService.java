@@ -2930,7 +2930,7 @@ public class ServiceOfApplicationService {
             .count();
 
         log.info("applicantFm5Docs--> {}", applicantCount);
-        countMap.put("applicantCount",countMap.get("applicantCount") + applicantCount);
+        countMap.put(APPLICANT_FM5_COUNT,countMap.get(APPLICANT_FM5_COUNT) + applicantCount);
         log.info("countMap --> {}", countMap);
 
         long respondentCount = quarantineDocsElemList.stream()
@@ -2940,7 +2940,7 @@ public class ServiceOfApplicationService {
             .count();
 
         log.info("respondentFm5Docs--> {}",respondentCount);
-        countMap.put("respondentCount",countMap.get("respondentCount") + respondentCount);
+        countMap.put(RESPONDENT_FM5_COUNT,countMap.get(RESPONDENT_FM5_COUNT) + respondentCount);
         log.info("countMap --> {}", countMap);
     }
 
