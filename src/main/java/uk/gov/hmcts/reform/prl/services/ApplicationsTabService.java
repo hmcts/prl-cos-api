@@ -144,7 +144,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            caseData = upDateTabForMiam(caseData, applicationTab);
+            caseData = upTabForMiam(caseData, applicationTab);
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
             applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
@@ -209,7 +209,7 @@ public class ApplicationsTabService implements TabService {
         return applicationTab;
     }
 
-    private CaseData upDateTabForMiam(CaseData caseData, Map<String, Object> applicationTab) {
+    private CaseData upTabForMiam(CaseData caseData, Map<String, Object> applicationTab) {
         if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
@@ -619,6 +619,7 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getMiamPolicyUpgradeTable(CaseData caseData) {
         MiamPolicyUpgrade miam = objectMapper.convertValue(caseData, MiamPolicyUpgrade.class);
+        log.info("MiamPolicyUpgrade ==>" + miam);
         return toMap(miam);
     }
 
