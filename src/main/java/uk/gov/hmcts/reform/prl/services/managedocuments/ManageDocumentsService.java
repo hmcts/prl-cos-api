@@ -58,6 +58,7 @@ import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -165,7 +166,7 @@ public class ManageDocumentsService {
                 errorList.add(DETAILS_ERROR_MESSAGE);
             }
 
-            if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
+            if (FM5_STATEMENTS.equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
                 && (restricted || confidential)) {
                 errorList.add(FM5_ERROR);
             }

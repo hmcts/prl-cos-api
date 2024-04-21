@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -2849,12 +2851,15 @@ public class ServiceOfApplicationService {
         return applRespondentList;
     }
 
-    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
+    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) throws JsonProcessingException {
+
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        System.out.println("VVVVVVVVV " + result);
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-
-
+        System.out.println("caseDataaaaaaaa " + caseData);
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
         YesOrNo isChildInvolvedInMiam = No;
