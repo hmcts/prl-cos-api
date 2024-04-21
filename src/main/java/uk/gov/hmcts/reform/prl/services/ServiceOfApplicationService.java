@@ -2818,11 +2818,10 @@ public class ServiceOfApplicationService {
 
             if (null != legalProfQuarantineDocsElemList) {
                 checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
-            } else if (null != courtStaffQuarantineDocsElemList) {
+            } else if (null != courtStaffQuarantineDocsElemList) { // Might not be needed, keeping as of now
                 checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
             }
         }
-
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
             log.info("fm5-- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
@@ -2837,12 +2836,6 @@ public class ServiceOfApplicationService {
             }
         }
 
-        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
-            log.info("fm5-- review yes - restricted");
-            List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
-                = caseData.getReviewDocuments().getRestrictedDocuments();
-            checkByCategoryFm5StatementsAndParty(restrictedDocumentsElemList, countMap);
-        }
         log.info("FINAL MAP {}",countMap);
 
         if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()) {
@@ -2860,8 +2853,7 @@ public class ServiceOfApplicationService {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        List<String> fm5DocsSubmissionPendingParties = fetchFm5StatementDocsSubmissionPendingParties(caseData);
-        log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
+
 
         log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
 
@@ -2879,9 +2871,13 @@ public class ServiceOfApplicationService {
         boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
         log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
 
+        List<String> fm5DocsSubmissionPendingParties = fetchFm5StatementDocsSubmissionPendingParties(caseData);
+        log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
+
         return !isAohAvailable
             && isChildInvolvedInMiam.equals(No)
             && null == caseData.getDraftConsentOrderFile()
+            && !fm5DocsSubmissionPendingParties.isEmpty()
             && isFirstHearingMoreThan3WeeksAway;
     }
 
@@ -2893,25 +2889,47 @@ public class ServiceOfApplicationService {
 
     private  boolean isAohAvailable(CaseData caseData) {
 
-        if (null != caseData.getDocumentManagementDetails() && null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
+        if (null != caseData.getDocumentManagementDetails()) {
             log.info("respondent aoh checking-- legal prof quarantine ");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
                 = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            return  checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList);
+            List<Element<QuarantineLegalDoc>> citizenQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            //    = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(); // need to included later
+
+            if ((null != legalProfQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+                || (null != citizenQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+            ) {
+                return true;
+            }
         }
 
-        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+        if (null != caseData.getReviewDocuments()) {
             log.info("respondent aoh checking-- review No");
             List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
                 = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            return  checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList);
+            List<Element<QuarantineLegalDoc>> citizenQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            //    = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(); // need to included later
+
+            if ((null != legalProfQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineUploadedDocsElemList))
+                || (null != citizenQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
+                citizenQuarantineUploadedDocsElemList))
+            ) {
+                return true;
+            }
         }
 
         if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
             log.info("respondent aoh checking-- review restricted ");
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
-            return  checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
+            if (checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList)) {
+                return true;
+            }
         }
 
         if (null != caseData.getC1ADocument()) {
