@@ -85,7 +85,7 @@ public class ServiceOfApplicationController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
             boolean systemLogicResult  = serviceOfApplicationService.systemRuleLogic(callbackRequest, authorisation);
-            log.info("OUTPUTTTTT--> {}", systemLogicResult);
+            log.info("OUTPUTTTTT--TT> {}", systemLogicResult);
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {
