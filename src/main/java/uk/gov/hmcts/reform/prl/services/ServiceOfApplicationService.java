@@ -2894,22 +2894,7 @@ public class ServiceOfApplicationService {
 
     private  boolean isAohAvailable(CaseData caseData) {
 
-        if (null != caseData.getDocumentManagementDetails()) {
-            log.info("respondent aoh checking-- legal prof quarantine ");
-            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            List<Element<QuarantineLegalDoc>> citizenQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            //    = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(); // need to included later
 
-            if ((null != legalProfQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
-                legalProfQuarantineDocsElemList))
-                || (null != citizenQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
-                legalProfQuarantineDocsElemList))
-            ) {
-                return true;
-            }
-        }
 
         if (null != caseData.getReviewDocuments()) {
             log.info("respondent aoh checking-- review No");
@@ -2933,6 +2918,23 @@ public class ServiceOfApplicationService {
             List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
                 = caseData.getReviewDocuments().getRestrictedDocuments();
             if (checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList)) {
+                return true;
+            }
+        }
+
+        if (null != caseData.getDocumentManagementDetails()) {
+            log.info("respondent aoh checking-- legal prof quarantine ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            List<Element<QuarantineLegalDoc>> citizenQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            //    = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(); // need to included later
+
+            if ((null != legalProfQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+                || (null != citizenQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+            ) {
                 return true;
             }
         }
