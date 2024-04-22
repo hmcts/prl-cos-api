@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
@@ -14,6 +15,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
+@Component
 public class UploadAdditionalApplicationUtils {
 
     public static final String C2_APPLICATION_WITHIN_PROCEEDINGS = "C2 application within proceedings";
