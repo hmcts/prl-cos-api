@@ -58,6 +58,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -80,6 +82,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -428,19 +432,16 @@ public class CaseService {
                                                               CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
-        switch (caseData.getState()) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING,
-                 DECISION_OUTCOME: {
-                HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
+        if (caseData.getState().equals(PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            || caseData.getState().equals(DECISION_OUTCOME)) {
+            HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
-                if (partyIdAndType != null) {
-                    citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
-                }
-                return citizenDocuments;
+            if (!partyIdAndType.isEmpty()) {
+                citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
             }
-            default:
-                return null;
+            return citizenDocuments;
         }
+        return Collections.emptyList();
     }
 
     private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, HashMap<String, String> partyIdAndType) {
@@ -450,7 +451,8 @@ public class CaseService {
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].isEmpty()) {
+                if (citizenDocuments[0].isEmpty()
+                    && servedApplicationDetails.getModeOfService() != null) {
                     if (servedApplicationDetails.getModeOfService().equals("By email")) {
                         citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
                             servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
@@ -473,11 +475,11 @@ public class CaseService {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        emailNotificationDetailsList.stream()
+        nullSafeCollection(emailNotificationDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
-            .filter(emailNotificationDetails -> Arrays.asList(
-                emailNotificationDetails.getPartyIds().split("\\s*,\\s*")).contains(partyIdAndType.get(PARTY_ID)))
+            .filter(emailNotificationDetails -> getPartyIds(emailNotificationDetails.getPartyIds())
+                .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
                 emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
@@ -503,8 +505,14 @@ public class CaseService {
                     )
                     .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList))
                     .build()
-            );
+        );
         return citizenDocuments[0];
+    }
+
+    private List<String> getPartyIds(String partyIds) {
+        return null != partyIds
+            ? Arrays.stream(partyIds.trim().split(COMMA)).map(String::trim).toList()
+            : Collections.emptyList();
     }
 
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
@@ -523,11 +531,11 @@ public class CaseService {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        bulkPrintDetailsList.stream()
+        nullSafeCollection(bulkPrintDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
-            .filter(bulkPrintDetails -> Arrays.asList(
-                bulkPrintDetails.getPartyIds().split("\\s*,\\s*")).contains(partyIdAndType.get(PARTY_ID)))
+            .filter(bulkPrintDetails -> getPartyIds(bulkPrintDetails.getPartyIds())
+                .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
                 bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
@@ -552,7 +560,7 @@ public class CaseService {
                         ) : getUnservedRespondentDocumentList(serviceOfApplication)
                     )
                     .build()
-            );
+        );
         return citizenDocuments[0];
     }
 
@@ -647,7 +655,7 @@ public class CaseService {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
         HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
-        if (partyIdAndType != null) {
+        if (!partyIdAndType.isEmpty()) {
             citizenDocuments.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
@@ -778,7 +786,7 @@ public class CaseService {
             }
         }
 
-        return null;
+        return new HashMap<>();
     }
 
     private Optional<Element<PartyDetails>> getParty(List<Element<PartyDetails>> parties,

@@ -137,7 +137,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -190,7 +190,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -264,7 +264,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -339,7 +339,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -407,7 +407,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -467,7 +467,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
@@ -535,7 +535,7 @@ public class CaseApplicantResponseServiceTest {
                                                                                .isGenWelsh(true)
                                                                                .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId);
         assertNotNull(responseCaseDetails);
     }
 
