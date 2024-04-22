@@ -299,7 +299,8 @@ public class StmtOfServImplService {
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             whoIsResponsible = SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue();
-            handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails, caseTypeOfApplication);
+            handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails,
+                                                             caseTypeOfApplication);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -326,11 +327,12 @@ public class StmtOfServImplService {
             });
         } else {
             if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())) {
-                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
-                                                                                                      caseData,
-                                                                                                      element(caseData.getRespondentsFL401().getPartyId(),
-                                                                                                              caseData.getRespondentsFL401()),
-                                                                                                      Templates.PRL_LET_ENG_RE5
+                packDocs.add(element(serviceOfApplicationService
+                                         .generateCoverLetterBasedOnCaseAccess(authorization,
+                                              caseData,
+                                              element(caseData.getRespondentsFL401().getPartyId(),
+                                                      caseData.getRespondentsFL401()),
+                                              Templates.PRL_LET_ENG_RE5
                 )));
             }
         }
