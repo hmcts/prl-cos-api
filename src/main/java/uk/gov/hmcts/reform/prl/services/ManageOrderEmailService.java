@@ -468,7 +468,7 @@ public class ManageOrderEmailService {
                 party.getValue().getEmail(),
                 sengGridTemplate
             );
-        } else if (ContactPreferences.post.equals(party.getValue().getContactPreferences())){
+        } else {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
             sendOrdersToPartyAddressViaPost(
                 caseData,
