@@ -473,4 +473,5 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
         miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test");
 
     }
+
 }
