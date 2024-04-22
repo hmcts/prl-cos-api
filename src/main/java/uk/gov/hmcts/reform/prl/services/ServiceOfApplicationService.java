@@ -2820,9 +2820,9 @@ public class ServiceOfApplicationService {
             return null;
         }
         log.info("333333333");
-        if (!isFirstHearing3WeeksAway(authorization,String.valueOf(caseData.getId()))) {
-            return null;
-        }
+        //if (!isFirstHearing3WeeksAway(authorization,String.valueOf(caseData.getId()))) {
+        //    return null;
+        //}
         log.info("4444444");
 
         List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList = new ArrayList<>();
