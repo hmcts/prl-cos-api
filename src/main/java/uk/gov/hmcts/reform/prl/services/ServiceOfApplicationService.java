@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -38,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -46,12 +50,14 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -89,6 +95,9 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -105,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
@@ -267,6 +277,7 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
     private final DgsService dgsService;
+    private final HearingService hearingService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -2792,4 +2803,183 @@ public class ServiceOfApplicationService {
             .data(caseDataUpdated)
             .build();
     }
+
+    private  List<String> fetchFm5StatementDocsSubmissionPendingParties(CaseData caseData) {
+
+        List<String> applRespondentList = new ArrayList<>();
+        Map<String,Long> countMap = new HashMap<>();
+        countMap.put(APPLICANT_FM5_COUNT,0L);
+        countMap.put(RESPONDENT_FM5_COUNT,0L);
+
+        if (null != caseData.getDocumentManagementDetails()) {
+            log.info("fm5--> quarantine ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
+
+            if (null != legalProfQuarantineDocsElemList) {
+                checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
+            } else if (null != courtStaffQuarantineDocsElemList) { // Might not be needed, keeping as of now
+                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
+            }
+        }
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+            log.info("fm5-- review No");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
+
+            if (null != legalProfQuarantineUploadedDocsElemList) {
+                checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
+            } else if (null != courtStaffQuarantineUploadedDocsElemList) {
+                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
+            }
+        }
+
+        log.info("FINAL MAP {}",countMap);
+
+        if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()) {
+            applRespondentList.add("Applicant");
+        }
+
+        if (countMap.get(RESPONDENT_FM5_COUNT) < caseData.getRespondents().size()) {
+            applRespondentList.add("Respondent");
+        }
+
+        return applRespondentList;
+    }
+
+    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) throws JsonProcessingException {
+
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        System.out.println("VVVVVVVVV " + result);
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        System.out.println("caseDataaaaaaaa " + caseData);
+        log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
+
+        YesOrNo isChildInvolvedInMiam = No;
+        if (null != caseData.getMiamPolicyUpgradeDetails()
+            && null != caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam()) {
+            isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
+        }
+        log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
+
+        boolean isAohAvailable = isAohAvailable(caseData);
+        log.info("isAohAvailable --> {}", isAohAvailable);
+
+        String caseReference = String.valueOf(caseData.getId());
+        boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
+        log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
+
+        List<String> fm5DocsSubmissionPendingParties = fetchFm5StatementDocsSubmissionPendingParties(caseData);
+        log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
+
+        return !isAohAvailable
+            && isChildInvolvedInMiam.equals(No)
+            && null == caseData.getDraftConsentOrderFile()
+            && !fm5DocsSubmissionPendingParties.isEmpty()
+            && isFirstHearingMoreThan3WeeksAway;
+    }
+
+    private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
+        LocalDateTime hearingLimitDate = LocalDateTime.now().plusDays(21).withNano(1);
+        NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
+        return null != nextHearingDetails && nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
+    }
+
+    private  boolean isAohAvailable(CaseData caseData) {
+
+        if (null != caseData.getDocumentManagementDetails()) {
+            log.info("respondent aoh checking-- legal prof quarantine ");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            List<Element<QuarantineLegalDoc>> citizenQuarantineDocsElemList
+                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            //    = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(); // need to included later
+
+            if ((null != legalProfQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+                || (null != citizenQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineDocsElemList))
+            ) {
+                return true;
+            }
+        }
+
+        if (null != caseData.getReviewDocuments()) {
+            log.info("respondent aoh checking-- review No");
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            List<Element<QuarantineLegalDoc>> citizenQuarantineUploadedDocsElemList
+                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            //    = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(); // need to included later
+
+            if ((null != legalProfQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
+                legalProfQuarantineUploadedDocsElemList))
+                || (null != citizenQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
+                citizenQuarantineUploadedDocsElemList))
+            ) {
+                return true;
+            }
+        }
+
+        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
+            log.info("respondent aoh checking-- review restricted ");
+            List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
+                = caseData.getReviewDocuments().getRestrictedDocuments();
+            if (checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList)) {
+                return true;
+            }
+        }
+
+
+
+        if (null != caseData.getC1ADocument()) {
+            log.info("applicant aoh available ");
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
+
+        Optional<QuarantineLegalDoc> quarantineLegalDocs = quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
+            .findFirst();
+        log.info("category {}",quarantineLegalDocs);
+        return quarantineLegalDocs.isPresent();
+    }
+
+    private void checkByCategoryFm5StatementsAndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList, Map<String,Long> countMap) {
+
+        long applicantCount =  quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5_STATEMENTS)
+                && doc.getDocumentParty().equals(DocumentPartyEnum.APPLICANT.getDisplayedValue()))
+            .count();
+
+        log.info("applicantFm5Docs--> {}", applicantCount);
+        log.info("countMapInitial --> {}", countMap);
+        log.info("countMapInitial 111 --> {}", countMap.get(APPLICANT_FM5_COUNT));
+        countMap.put(APPLICANT_FM5_COUNT,countMap.get(APPLICANT_FM5_COUNT) + applicantCount);
+        log.info("countMap --> {}", countMap);
+
+        long respondentCount = quarantineDocsElemList.stream()
+            .map(Element::getValue)
+            .filter(doc -> doc.getCategoryId().equalsIgnoreCase(FM5_STATEMENTS)
+                && doc.getDocumentParty().equals(DocumentPartyEnum.RESPONDENT.getDisplayedValue()))
+            .count();
+
+        log.info("respondentFm5Docs--> {}",respondentCount);
+        countMap.put(RESPONDENT_FM5_COUNT,countMap.get(RESPONDENT_FM5_COUNT) + respondentCount);
+        log.info("countMap --> {}", countMap);
+    }
+
 }
