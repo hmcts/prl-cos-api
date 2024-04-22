@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -21,12 +20,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcer
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CaseApplicationResponseService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +44,9 @@ public class CaseApplicationResponseControllerTest {
 
     @Mock
     private CaseService caseService;
+
+    @Mock
+    private CaseApplicationResponseService caseApplicationResponseService;
 
     @Mock
     private AuthorisationService authorisationService;
@@ -106,8 +108,8 @@ public class CaseApplicationResponseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(coreCaseDataApi.getCase(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
-                                    Mockito.anyString(), Mockito.anyString(),Mockito.isNull()
+        when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString()
         )).thenReturn(caseDetails);
 
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
@@ -115,251 +117,31 @@ public class CaseApplicationResponseControllerTest {
     }
 
     @Test
-    public void testGenerateC7finalDocument() throws Exception {
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
-    public void testGenerateC7finalDocumentForRespondent2() throws Exception {
-        Element partyDetails1 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails2 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                       .currentRespondent(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails3 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails4 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails5 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        List<Element<PartyDetails>> elementList = new ArrayList<>();
-        elementList.add(partyDetails1);
-        elementList.add(partyDetails2);
-        elementList.add(partyDetails3);
-        elementList.add(partyDetails4);
-        elementList.add(partyDetails5);
-        caseData = caseData.toBuilder()
-            .respondents(elementList).build();
-
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
-    public void testGenerateC7finalDocumentForRespondent3() throws Exception {
-        Element partyDetails1 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails2 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails3 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                       .currentRespondent(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails4 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails5 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        List<Element<PartyDetails>> elementList = new ArrayList<>();
-        elementList.add(partyDetails1);
-        elementList.add(partyDetails2);
-        elementList.add(partyDetails3);
-        elementList.add(partyDetails4);
-        elementList.add(partyDetails5);
-        caseData = caseData.toBuilder()
-            .respondents(elementList).build();
-
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
-    public void testGenerateC7finalDocumentForRespondent4() throws Exception {
-        Element partyDetails1 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails2 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails3 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails4 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                       .currentRespondent(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails5 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        List<Element<PartyDetails>> elementList = new ArrayList<>();
-        elementList.add(partyDetails1);
-        elementList.add(partyDetails2);
-        elementList.add(partyDetails3);
-        elementList.add(partyDetails4);
-        elementList.add(partyDetails5);
-        caseData = caseData.toBuilder()
-            .respondents(elementList).build();
-
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
-    public void testGenerateC7finalDocumentForRespondent5() throws Exception {
-        Element partyDetails1 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails2 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails3 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails4 =  Element.<PartyDetails>builder()
-            .id(UUID.randomUUID())
-            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        Element partyDetails5 =  Element.<PartyDetails>builder()
-            .id(UUID.fromString(partyId))
-            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
-                       .currentRespondent(YesOrNo.Yes)
-                       .response(Response.builder().safetyConcerns(
-                           SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
-            .build();
-        List<Element<PartyDetails>> elementList = new ArrayList<>();
-        elementList.add(partyDetails1);
-        elementList.add(partyDetails2);
-        elementList.add(partyDetails3);
-        elementList.add(partyDetails4);
-        elementList.add(partyDetails5);
-        caseData = caseData.toBuilder()
-            .respondents(elementList).build();
-
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
-                                                       Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
-            Document.builder().build());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
-    public void testGenerateC7finalDocumentWithNullData() throws Exception {
-        caseDetails = null;
-        CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
-        assertNotNull(caseData1);
-    }
-
-    @Test
     public void testGenerateC7DraftDocument() throws Exception {
+        when(caseApplicationResponseService.generateC7DraftDocument(authToken, caseData, false))
+            .thenReturn(Document.builder().build());
         Document document = caseApplicationResponseController
             .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(document);
+    }
+
+    @Test
+    public void testGenerateC7FinalDocument() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        CaseData returnedCaseData = caseApplicationResponseController
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
+        assertNotNull(returnedCaseData);
+    }
+
+    @Test
+    public void testGenerateC7FinalDocumentCaseDetailsNotNull() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId))
+            .thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        CaseData returnedCaseData = caseApplicationResponseController
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
+        assertNotNull(returnedCaseData);
     }
 }
