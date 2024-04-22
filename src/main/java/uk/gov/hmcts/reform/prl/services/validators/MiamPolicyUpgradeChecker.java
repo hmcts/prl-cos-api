@@ -146,15 +146,20 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     private boolean checkedForOtherExemptions(CaseData caseData) {
         boolean finished = true;
+        Optional<String> mpuApplicantUnableToAttendMiamReason1 = ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuApplicantUnableToAttendMiamReason1());
+        Optional<String> mpuApplicantUnableToAttendMiamReason2 = ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuApplicantUnableToAttendMiamReason2());
+
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || ((MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim()))
+            && StringUtils.isEmpty(mpuApplicantUnableToAttendMiamReason1.get().trim()))
             || (MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim()))) {
+            && StringUtils.isEmpty(mpuApplicantUnableToAttendMiamReason2.get().trim()))) {
             finished = false;
         }
         log.info("finished in checkedForOtherExemptions {}", finished);
@@ -172,6 +177,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     private boolean checkForPreviousMiamAttendanceExemption(CaseData caseData) {
         boolean finished = true;
+        Optional<String> mpuMediatorDetails = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails());
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
             || (MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
@@ -183,8 +189,7 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             && ObjectUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()))
             || (miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-            && StringUtils.isEmpty(
-            caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim()))) {
+            && StringUtils.isEmpty(mpuMediatorDetails.get().trim()))) {
             finished = false;
         }
         log.info("finished in checkForPreviousMiamAttendanceExemption {}", finished);
