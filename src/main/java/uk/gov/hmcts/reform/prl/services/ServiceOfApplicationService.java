@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -2804,86 +2803,90 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private  List<String> fetchFm5StatementDocsSubmissionPendingParties(CaseData caseData) {
 
-        List<String> applRespondentList = new ArrayList<>();
-        Map<String,Long> countMap = new HashMap<>();
-        countMap.put(APPLICANT_FM5_COUNT,0L);
-        countMap.put(RESPONDENT_FM5_COUNT,0L);
 
-        if (null != caseData.getDocumentManagementDetails()) {
-            log.info("fm5--> quarantine ");
-            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
-
-            if (null != legalProfQuarantineDocsElemList) {
-                checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
-            } else if (null != courtStaffQuarantineDocsElemList) { // Might not be needed, keeping as of now
-                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
-            }
-        }
-        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-            log.info("fm5-- review No");
-            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
-                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList
-                = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-
-            if (null != legalProfQuarantineUploadedDocsElemList) {
-                checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
-            } else if (null != courtStaffQuarantineUploadedDocsElemList) {
-                checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
-            }
-        }
-
-        log.info("FINAL MAP {}",countMap);
-
-        if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()) {
-            applRespondentList.add("Applicant");
-        }
-
-        if (countMap.get(RESPONDENT_FM5_COUNT) < caseData.getRespondents().size()) {
-            applRespondentList.add("Respondent");
-        }
-
-        return applRespondentList;
-    }
-
-    public boolean systemRuleLogic(CallbackRequest callbackRequest, String authorization) throws JsonProcessingException {
-
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("VVVVVVVVV " + result);
+    public FmPendingParty systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        System.out.println("caseDataaaaaaaa " + caseData);
-        log.info("CONSENT--->{}", caseData.getDraftConsentOrderFile());
+        log.info("11111111");
+        log.info("DRAFTTT --> {}", caseData.getDraftConsentOrderFile());
 
+        if (null != caseData.getDraftConsentOrderFile()) {
+            return null;
+        }
+        log.info("22222222222");
+
+        if (isChildInvolvedInMiam(caseData).equals(Yes)) {
+            return null;
+        }
+        log.info("333333333");
+        if (!isFirstHearing3WeeksAway(authorization,String.valueOf(caseData.getId()))) {
+            return null;
+        }
+        log.info("4444444");
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList = new ArrayList<>();
+
+        if (null != caseData.getDocumentManagementDetails()) {
+            legalProfQuarantineDocsElemList = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            courtStaffQuarantineDocsElemList = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
+        }
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList = new ArrayList<>();
+
+        if (null != caseData.getReviewDocuments()) {
+            legalProfQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            courtStaffQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
+            restrictedDocumentsElemList = caseData.getReviewDocuments().getRestrictedDocuments();
+        }
+
+        if (isAohAvailable(caseData,legalProfQuarantineDocsElemList,legalProfQuarantineUploadedDocsElemList,restrictedDocumentsElemList)) {
+            return null;
+        }
+        log.info("5555555");
+        log.info("VALIDATEDDDD");
+        return fetchFm5DocsSubmissionPendingParties(caseData,
+                                                    legalProfQuarantineDocsElemList,
+                                                    courtStaffQuarantineDocsElemList,
+                                                    legalProfQuarantineUploadedDocsElemList,
+                                                    courtStaffQuarantineUploadedDocsElemList);
+
+
+
+
+    }
+
+    private  YesOrNo isChildInvolvedInMiam(CaseData caseData) {
         YesOrNo isChildInvolvedInMiam = No;
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && null != caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam()) {
             isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
         }
-        log.info("isChildInvolvedInMiam FINAL--->{}",isChildInvolvedInMiam);
+        log.info("isChildInvolvedInMiammmm --> {}",isChildInvolvedInMiam);
+        return isChildInvolvedInMiam;
+    }
 
-        boolean isAohAvailable = isAohAvailable(caseData);
-        log.info("isAohAvailable --> {}", isAohAvailable);
+    private  boolean isAohAvailable(CaseData caseData,
+                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
+                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
+                                    List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
 
-        String caseReference = String.valueOf(caseData.getId());
-        boolean isFirstHearingMoreThan3WeeksAway = isFirstHearing3WeeksAway(authorization,caseReference);
-        log.info("isFirstHearing3WeeksAway---> {}",isFirstHearingMoreThan3WeeksAway);
+        if (null != caseData.getC1ADocument()) {
+            return true;
+        }
 
-        List<String> fm5DocsSubmissionPendingParties = fetchFm5StatementDocsSubmissionPendingParties(caseData);
-        log.info("fm5DocsSubmissionPendingParties --> {}", fm5DocsSubmissionPendingParties);
+        if (!legalProfQuarantineDocsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
+            return true;
+        }
 
-        return !isAohAvailable
-            && isChildInvolvedInMiam.equals(No)
-            && null == caseData.getDraftConsentOrderFile()
-            && !fm5DocsSubmissionPendingParties.isEmpty()
-            && isFirstHearingMoreThan3WeeksAway;
+        if (!legalProfQuarantineUploadedDocsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList)) {
+            return true;
+        }
+
+        return !restrictedDocumentsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
     }
 
     private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
@@ -2892,59 +2895,46 @@ public class ServiceOfApplicationService {
         return null != nextHearingDetails && nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
     }
 
-    private  boolean isAohAvailable(CaseData caseData) {
+    private  FmPendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
+                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
+                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList,
+                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
+                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList) {
 
-        if (null != caseData.getDocumentManagementDetails()) {
-            log.info("respondent aoh checking-- legal prof quarantine ");
-            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            List<Element<QuarantineLegalDoc>> citizenQuarantineDocsElemList
-                = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            //    = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(); // need to included later
+        Map<String,Long> countMap = new HashMap<>();
+        countMap.put(APPLICANT_FM5_COUNT,0L);
+        countMap.put(RESPONDENT_FM5_COUNT,0L);
 
-            if ((null != legalProfQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
-                legalProfQuarantineDocsElemList))
-                || (null != citizenQuarantineDocsElemList && checkByCategoryRespondentC1AApplication(
-                legalProfQuarantineDocsElemList))
-            ) {
-                return true;
-            }
+        if (!legalProfQuarantineDocsElemList.isEmpty()) {
+            checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
         }
 
-        if (null != caseData.getReviewDocuments()) {
-            log.info("respondent aoh checking-- review No");
-            List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList
-                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            List<Element<QuarantineLegalDoc>> citizenQuarantineUploadedDocsElemList
-                = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            //    = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(); // need to included later
-
-            if ((null != legalProfQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
-                legalProfQuarantineUploadedDocsElemList))
-                || (null != citizenQuarantineUploadedDocsElemList && checkByCategoryRespondentC1AApplication(
-                citizenQuarantineUploadedDocsElemList))
-            ) {
-                return true;
-            }
+        if (!courtStaffQuarantineDocsElemList.isEmpty()) {
+            checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
         }
 
-        if (null != caseData.getReviewDocuments() && null != caseData.getReviewDocuments().getRestrictedDocuments()) {
-            log.info("respondent aoh checking-- review restricted ");
-            List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList
-                = caseData.getReviewDocuments().getRestrictedDocuments();
-            if (checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList)) {
-                return true;
-            }
+        if (!legalProfQuarantineUploadedDocsElemList.isEmpty()) {
+            checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
         }
 
-
-
-        if (null != caseData.getC1ADocument()) {
-            log.info("applicant aoh available ");
-            return true;
+        if (!courtStaffQuarantineUploadedDocsElemList.isEmpty()) {
+            checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
         }
 
-        return false;
+        if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()
+            && countMap.get(RESPONDENT_FM5_COUNT) < caseData.getRespondents().size()) {
+            return FmPendingParty.BOTH;
+        } else if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()
+            && countMap.get(RESPONDENT_FM5_COUNT) >= caseData.getRespondents().size()) {
+            return FmPendingParty.APPLICANT;
+        } else if (countMap.get(APPLICANT_FM5_COUNT) >= caseData.getApplicants().size()
+            && countMap.get(RESPONDENT_FM5_COUNT) < caseData.getRespondents().size()) {
+            return FmPendingParty.RESPONDENT;
+        }
+
+        log.info("6666666");
+
+        return FmPendingParty.NONE;
     }
 
     private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
@@ -2965,11 +2955,7 @@ public class ServiceOfApplicationService {
                 && doc.getDocumentParty().equals(DocumentPartyEnum.APPLICANT.getDisplayedValue()))
             .count();
 
-        log.info("applicantFm5Docs--> {}", applicantCount);
-        log.info("countMapInitial --> {}", countMap);
-        log.info("countMapInitial 111 --> {}", countMap.get(APPLICANT_FM5_COUNT));
         countMap.put(APPLICANT_FM5_COUNT,countMap.get(APPLICANT_FM5_COUNT) + applicantCount);
-        log.info("countMap --> {}", countMap);
 
         long respondentCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
@@ -2977,9 +2963,7 @@ public class ServiceOfApplicationService {
                 && doc.getDocumentParty().equals(DocumentPartyEnum.RESPONDENT.getDisplayedValue()))
             .count();
 
-        log.info("respondentFm5Docs--> {}",respondentCount);
         countMap.put(RESPONDENT_FM5_COUNT,countMap.get(RESPONDENT_FM5_COUNT) + respondentCount);
-        log.info("countMap --> {}", countMap);
     }
 
 }
