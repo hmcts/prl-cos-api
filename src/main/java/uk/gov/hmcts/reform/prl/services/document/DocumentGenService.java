@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -80,8 +81,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
@@ -104,6 +105,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -215,6 +218,14 @@ public class DocumentGenService {
     protected String solicitorC7FinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_template}")
+    protected String solicitorC7WelshDraftTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_filename}")
+    protected String solicitorC7WelshDraftFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_template}")
+    protected String solicitorC7WelshFinalTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_filename}")
+    protected String solicitorC7WelshFinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
@@ -223,6 +234,14 @@ public class DocumentGenService {
     protected String solicitorC1AFinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
     protected String solicitorC1AFinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_template}")
+    protected String solicitorC1ADraftWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_filename}")
+    protected String solicitorC1ADraftWelshFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_template}")
+    protected String solicitorC1AFinalWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_filename}")
+    protected String solicitorC1AFinalWelshFilename;
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
     @Value("${document.templates.common.prl_c1a_blank_filename}")
@@ -248,6 +267,11 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
 
+    @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
+    protected String docCoverSheetServeOrderTemplate;
+    @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
+    protected String docCoverSheetWelshServeOrderTemplate;
+
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final OrganisationService organisationService;
@@ -257,8 +281,7 @@ public class DocumentGenService {
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    @Autowired
-    private DgsApiClient dgsApiClient;
+    private final DgsApiClient dgsApiClient;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -449,11 +472,11 @@ public class DocumentGenService {
         );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
         return updatedCaseData;
@@ -714,16 +737,22 @@ public class DocumentGenService {
                 fileName = docC7FinalWelshFilename;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                fileName = solicitorC7DraftFilename;
+                fileName = findDocCoverSheetC7DraftFileName(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                fileName = solicitorC7FinalFilename;
+                fileName = findDocCoverSheetC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 fileName = solicitorC1AFinalFilename;
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                fileName = solicitorC1AFinalWelshFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftWelshFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -826,10 +855,10 @@ public class DocumentGenService {
                 template = docC7FinalWelshTemplate;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                template = solicitorC7DraftTemplate;
+                template = findDocCoverSheetC7DraftTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                template = solicitorC7FinalTemplate;
+                template = findDocCoverSheetC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 template = solicitorC1AFinalTemplate;
@@ -837,8 +866,17 @@ public class DocumentGenService {
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
                 break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                template = solicitorC1AFinalWelshTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftWelshTemplate;
+                break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
+                break;
+            case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
+                template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
             default:
                 template = "";
@@ -890,6 +928,27 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
+        //Need to replace EMPTY_STRING with received welsh template
+        return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
+    }
+    
+    private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftTemplate : solicitorC7WelshDraftTemplate;
+    }
+
+    private String findDocCoverSheetC7FinalTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalTemplate : solicitorC7WelshFinalTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftFilename : solicitorC7WelshDraftFilename;
+    }
+
+    private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -1097,7 +1156,7 @@ public class DocumentGenService {
             isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
             updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
     }
 
@@ -1141,7 +1200,7 @@ public class DocumentGenService {
                 DOCUMENT_FIELD_FINAL_WELSH,
                 getDocument(authorisation, caseData, FINAL_HINT, true)
             );
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
     }
 

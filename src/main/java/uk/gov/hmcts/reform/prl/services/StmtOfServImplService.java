@@ -43,7 +43,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -243,6 +244,9 @@ public class StmtOfServImplService {
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
+        String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
+            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
+            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
@@ -250,8 +254,8 @@ public class StmtOfServImplService {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
-                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
-                                      SOA_FL415_FILENAME)).toList())
+                                  .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                                  .toList())
                 .build();
         } else {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
@@ -270,8 +274,8 @@ public class StmtOfServImplService {
                                                          .getPackDocument().stream()
                                                          .map(Element::getValue)
                                                          .map(Document::getDocumentFileName).toList()))
-                                                     .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                                    .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                                     .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                    .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                                      .partyIds(getPartyIds(caseTypeOfApplication,
                                                                            caseData.getRespondents(),
                                                                            caseData.getRespondentsFL401()))
@@ -286,27 +290,30 @@ public class StmtOfServImplService {
                                                  .map(Element::getValue)
                                                  .map(Document::getDocumentFileName).toList()))
                                              .printDocs(unServedRespondentPack.getPackDocument())
-                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                              .partyIds(getPartyIds(caseTypeOfApplication,
                                                                    caseData.getRespondents(),
                                                                    caseData.getRespondentsFL401()))
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue();
             handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails, caseTypeOfApplication);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+        return ServedApplicationDetails.builder()
+            .emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(COURT)
+            .whoIsResponsible(whoIsResponsible)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private void handlePersonalServiceByUnrepresentedApplicantLip(CaseData caseData, String authorization, SoaPack unServedRespondentPack, List<Element<BulkPrintDetails>> bulkPrintDetails, String caseTypeOfApplication) {
+    private void handlePersonalServiceByUnrepresentedApplicantLip(CaseData caseData, String authorization, SoaPack unServedRespondentPack,
+                                                                  List<Element<BulkPrintDetails>> bulkPrintDetails, String caseTypeOfApplication) {
         List<Element<Document>> packDocs = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData.getRespondents().forEach(respondent -> {
@@ -327,7 +334,6 @@ public class StmtOfServImplService {
                 )));
             }
         }
-
         packDocs.addAll(unServedRespondentPack.getPackDocument());
         bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                          .servedParty("Applicant Lip")
@@ -336,12 +342,11 @@ public class StmtOfServImplService {
                                              .map(Element::getValue)
                                              .map(Document::getDocumentFileName).toList()))
                                          .printDocs(packDocs)
-                                         .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                         .partyIds(getPartyIds(
-                                             caseTypeOfApplication,
-                                             caseData.getRespondents(),
-                                             caseData.getRespondentsFL401()))
+                                         .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                         .partyIds(getPartyIds(caseTypeOfApplication,
+                                                               caseData.getRespondents(),
+                                                               caseData.getRespondentsFL401()))
                                          .build()));
     }
 

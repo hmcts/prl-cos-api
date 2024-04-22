@@ -18,8 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -65,6 +68,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -158,9 +162,6 @@ public class ServiceOfApplicationServiceTest {
     private LaunchDarklyClient launchDarklyClient;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private UserService userService;
 
     @Mock
@@ -174,6 +175,9 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private C100CaseInviteService c100CaseInviteService;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     @Mock
     private EmailService emailService;
@@ -465,6 +469,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
             callbackRequest
@@ -499,6 +506,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
             callbackRequest
@@ -529,6 +539,9 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
@@ -630,7 +643,7 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testsendNotificationsForUnServedRespondentPacks() {
         parties = parties.stream()
-            .peek(party -> party.getValue().setContactPreferences(ContactPreferences.digital))
+            .peek(party -> party.getValue().setContactPreferences(ContactPreferences.email))
             .collect(Collectors.toList());
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1196,7 +1209,7 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court admin", servedApplicationDetails.getWhoIsResponsible());
 
     }
 
@@ -1679,13 +1692,13 @@ public class ServiceOfApplicationServiceTest {
             .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
@@ -2372,6 +2385,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
@@ -2411,6 +2427,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -2451,6 +2470,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
@@ -2490,6 +2512,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -2562,13 +2587,13 @@ public class ServiceOfApplicationServiceTest {
             .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
@@ -2628,8 +2653,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2706,7 +2732,7 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2780,8 +2806,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2904,6 +2931,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -3075,7 +3105,7 @@ public class ServiceOfApplicationServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
 
@@ -3148,7 +3178,7 @@ public class ServiceOfApplicationServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .user(User.builder().idamId("12334566").build())
             .build();
 
@@ -3608,6 +3638,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
@@ -3646,6 +3679,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
@@ -3759,7 +3795,7 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
 
@@ -3826,7 +3862,7 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         //assertNull(servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
@@ -4045,13 +4081,13 @@ public class ServiceOfApplicationServiceTest {
             .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .canYouProvideEmailAddress(Yes)
@@ -4083,10 +4119,11 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(partyElementList)
             .respondents(partyElementList)
             .caseInvites(caseInviteList)
+            .c1ADocument(Document.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .specialArrangementsLetter(Document.builder().build())
                                                 .pd36qLetter(Document.builder().build())
