@@ -2878,15 +2878,21 @@ public class ServiceOfApplicationService {
             return true;
         }
 
-        if (!legalProfQuarantineDocsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
+        if (null != legalProfQuarantineDocsElemList
+            && !legalProfQuarantineDocsElemList.isEmpty()
+            && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
             return true;
         }
 
-        if (!legalProfQuarantineUploadedDocsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList)) {
+        if (null != legalProfQuarantineUploadedDocsElemList
+            && !legalProfQuarantineUploadedDocsElemList.isEmpty()
+            && checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList)) {
             return true;
         }
 
-        return !restrictedDocumentsElemList.isEmpty() && checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
+        return null != restrictedDocumentsElemList
+            && !restrictedDocumentsElemList.isEmpty()
+            && checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
     }
 
     private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
@@ -2905,19 +2911,19 @@ public class ServiceOfApplicationService {
         countMap.put(APPLICANT_FM5_COUNT,0L);
         countMap.put(RESPONDENT_FM5_COUNT,0L);
 
-        if (!legalProfQuarantineDocsElemList.isEmpty()) {
+        if (null != legalProfQuarantineDocsElemList && !legalProfQuarantineDocsElemList.isEmpty()) {
             checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
         }
 
-        if (!courtStaffQuarantineDocsElemList.isEmpty()) {
+        if (null != courtStaffQuarantineDocsElemList && !courtStaffQuarantineDocsElemList.isEmpty()) {
             checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
         }
 
-        if (!legalProfQuarantineUploadedDocsElemList.isEmpty()) {
+        if (null != legalProfQuarantineUploadedDocsElemList && !legalProfQuarantineUploadedDocsElemList.isEmpty()) {
             checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
         }
 
-        if (!courtStaffQuarantineUploadedDocsElemList.isEmpty()) {
+        if (null != courtStaffQuarantineUploadedDocsElemList && !courtStaffQuarantineUploadedDocsElemList.isEmpty()) {
             checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
         }
 
