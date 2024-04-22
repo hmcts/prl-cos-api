@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -381,10 +382,16 @@ public class ReturnApplicationServiceTest {
 
     @Test
     public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
+        casedata = casedata.toBuilder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .build();
         when(miamPolicyUpgradeFileUploadServices.renameMiamPolicyUpgradeDocumentWithoutConfidential(
-                 any(CaseData.class))).thenReturn(casedata);
+            any(CaseData.class))).thenReturn(casedata);
         when(allTabsService.getNewMiamPolicyUpgradeDocumentMap(any(CaseData.class), anyMap())).thenReturn(anyMap());
-        assertNotNull(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(casedata, new HashMap<>()));
+        assertNotNull(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(
+            casedata,
+            new HashMap<>()
+        ));
     }
 
 }
