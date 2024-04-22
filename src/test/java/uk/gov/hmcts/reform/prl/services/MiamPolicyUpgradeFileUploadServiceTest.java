@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
@@ -53,6 +55,12 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
     private CaseData casedataPreviousMiam;
     private CaseData caseDataMiamAttendanceReason;
     private CaseData caseData;
+
+    @Mock
+    private CaseDocumentClient caseDocumentClient;
+
+    @Mock
+    private CaseDocumentClientApi caseDocumentClientApi;
 
     Document document;
     private final String caseId = "1234567891011121";
@@ -227,7 +235,31 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
 
 
 
+    @Test
+    public void testDownloadAndUploadDocumentWithoutConfidential2() {
 
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        assertNotNull(miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test"));
+
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testDownloadAndUploadDocumentWithoutConfidential3() {
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test");
+
+    }
 
 
 
