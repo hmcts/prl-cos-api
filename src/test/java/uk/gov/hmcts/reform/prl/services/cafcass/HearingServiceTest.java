@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +188,7 @@ public class HearingServiceTest {
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
 
-        Assert.assertEquals(null, response);
+        Assert.assertEquals(Collections.emptyList(), response);
 
     }
 
