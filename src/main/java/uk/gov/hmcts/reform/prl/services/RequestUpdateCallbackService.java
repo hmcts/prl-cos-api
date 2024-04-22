@@ -51,7 +51,6 @@ public class RequestUpdateCallbackService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-        log.info("processCallback 54 >>>>> ");
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         CaseDetails caseDetails

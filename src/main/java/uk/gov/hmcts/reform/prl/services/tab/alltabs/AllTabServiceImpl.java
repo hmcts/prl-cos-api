@@ -65,7 +65,6 @@ public class AllTabServiceImpl implements AllTabsService {
      **/
     @Override
     public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
-        log.info("updateAllTabsIncludingConfTab 68 >>>>> ");
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
             return mapAndSubmitAllTabsUpdate(
@@ -182,7 +181,6 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private Map<String, Object> getCombinedMap(CaseData caseData) {
-        log.info("getCombinedMap called >>>>>>> 183 : ");
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
@@ -194,7 +192,6 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Override
     public Map<String, Object> getAllTabsFields(CaseData caseData) {
-        log.info("getAllTabsFields >>>> 195 : ");
         return getCombinedMap(caseData);
     }
 
@@ -204,7 +201,6 @@ public class AllTabServiceImpl implements AllTabsService {
                                          StartEventResponse startEventResponse,
                                          EventRequestData eventRequestData,
                                          CaseData caseData) {
-        log.info("updatePartyDetailsForNoc 205 >>>>");
         Map<String, Object> dataMap = new HashMap<>();
         Map<String, Object> combinedFieldsMap = new HashMap<>();
         if (caseData != null) {
@@ -233,7 +229,6 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private Map<String, Object> findCaseDataMap(CaseData caseData) {
-        log.info("findCaseDataMap >>>> 232 : ");
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
         combinedFieldsMap.putAll(confidentialDetails);

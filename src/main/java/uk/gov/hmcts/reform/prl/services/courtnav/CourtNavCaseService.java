@@ -211,7 +211,6 @@ public class CourtNavCaseService {
     }
 
     public void refreshTabs(String authToken, String caseId) throws Exception {
-        log.info("refreshTabs 214 >>>>> ");
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);

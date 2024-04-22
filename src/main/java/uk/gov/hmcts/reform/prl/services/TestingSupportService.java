@@ -349,7 +349,6 @@ public class TestingSupportService {
     }
 
     public AboutToStartOrSubmitCallbackResponse solicitorSubmittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
-        log.info("solicitorSubmittedCaseCreation >>>> 352 >>>>>>>");
         if (isAuthorized(authorisation)) {
             try {
                 caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);

@@ -62,7 +62,6 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-        log.info("hasMandatoryCompleted >>>>> 65 >>>>>");
         EnumMap<Event, EventChecker> mandatoryEvents = getMandatoryEvents(caseData);
         boolean mandatoryFinished;
 

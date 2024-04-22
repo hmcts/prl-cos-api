@@ -160,7 +160,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("listWithoutNoticeSubmission 163 >>>>> ");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

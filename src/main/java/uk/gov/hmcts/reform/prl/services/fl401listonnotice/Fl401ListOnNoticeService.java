@@ -116,7 +116,6 @@ public class Fl401ListOnNoticeService {
     }
 
     public Map<String, Object> fl401ListOnNoticeSubmission(CaseDetails caseDetails) {
-        log.info("fl401ListOnNoticeSubmission 119 >>>>> ");
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
