@@ -382,7 +382,7 @@ public class ReturnApplicationServiceTest {
 
     @Test
     public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
-j        casedata = casedata.toBuilder()
+        casedata = casedata.toBuilder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .build();
         when(miamPolicyUpgradeFileUploadServices.renameMiamPolicyUpgradeDocumentWithoutConfidential(
