@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -57,9 +56,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
     @PostMapping("/citizen-case-creation-callback/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
-
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        final CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         String userToken = systemUserService.getSysUserToken();
         // setting supplementary data updates to enable global search
         String caseId = String.valueOf(caseData.getId());
@@ -71,8 +68,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
         coreCaseDataApi.submitSupplementaryData(userToken, authTokenGenerator.generate(), caseId,
                                                 supplementaryData
         );
-
-        publishEvent(new CaseDataChanged(caseData));
     }
 
     @PostMapping(path = "/update-citizen-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -81,8 +76,9 @@ public class CitizenCallbackController extends AbstractCallbackController {
     public void updateCitizenApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        CaseDetails caseDetails
+                = allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         citizenEmailService.sendCitizenCaseSubmissionEmail(authorisation, caseData);
     }
 
@@ -92,7 +88,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
     public void sendNotificationsOnCaseWithdrawn(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        log.info("sending email notification on case withdraw");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         citizenEmailService.sendCitizenCaseWithdrawalEmail(authorisation, caseData);
     }

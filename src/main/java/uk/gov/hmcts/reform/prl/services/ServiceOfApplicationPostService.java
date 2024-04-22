@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
@@ -77,18 +76,20 @@ public class ServiceOfApplicationPostService {
         return sendBulkPrint(caseData, authorisation, docs, party, servedParty);
     }
 
-    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name) throws Exception {
+    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         List<Document> coversheets = new ArrayList<>();
         if (null != address && null != address.getAddressLine1()) {
-            GeneratedDocumentInfo generatedDocumentInfo = null;
             if (documentLanguage.isGenEng()) {
-                generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false);
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
+                                                                                 coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
             if (documentLanguage.isGenWelsh()) {
-                generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true);
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
+                                                                                 coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
-            coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
@@ -97,7 +98,7 @@ public class ServiceOfApplicationPostService {
 
     private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
                                                                            Address address, String name,
-                                                                           boolean isWelsh) throws Exception {
+                                                                           boolean isWelsh, String coverSheetTemplate) throws Exception {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverPagePartyName", null != name ? name : " ");
         dataMap.put("coverPageAddress", address);
@@ -107,7 +108,7 @@ public class ServiceOfApplicationPostService {
             auth, String.valueOf(caseData.getId()),
             documentGenService.getTemplate(
                 caseData,
-                DOCUMENT_COVER_SHEET_HINT, isWelsh
+                coverSheetTemplate, isWelsh
             ), dataMap
         );
         return generatedDocumentInfo;
