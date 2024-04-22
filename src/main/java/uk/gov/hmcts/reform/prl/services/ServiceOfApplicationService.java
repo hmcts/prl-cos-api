@@ -2808,22 +2808,18 @@ public class ServiceOfApplicationService {
     public FmPendingParty systemRuleLogic(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("11111111");
-        log.info("DRAFTTT --> {}", caseData.getDraftConsentOrderFile());
 
         if (null != caseData.getDraftConsentOrderFile()) {
             return null;
         }
-        log.info("22222222222");
 
         if (isChildInvolvedInMiam(caseData).equals(Yes)) {
             return null;
         }
-        log.info("333333333");
-        //if (!isFirstHearing3WeeksAway(authorization,String.valueOf(caseData.getId()))) {
-        //    return null;
-        //}
-        log.info("4444444");
+
+        if (!isFirstHearing3WeeksAway(authorization,String.valueOf(caseData.getId()))) {
+            return null;
+        }
 
         List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList = new ArrayList<>();
         List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList = new ArrayList<>();
@@ -2846,17 +2842,12 @@ public class ServiceOfApplicationService {
         if (isAohAvailable(caseData,legalProfQuarantineDocsElemList,legalProfQuarantineUploadedDocsElemList,restrictedDocumentsElemList)) {
             return null;
         }
-        log.info("5555555");
-        log.info("VALIDATEDDDD");
+
         return fetchFm5DocsSubmissionPendingParties(caseData,
                                                     legalProfQuarantineDocsElemList,
                                                     courtStaffQuarantineDocsElemList,
                                                     legalProfQuarantineUploadedDocsElemList,
                                                     courtStaffQuarantineUploadedDocsElemList);
-
-
-
-
     }
 
     private  YesOrNo isChildInvolvedInMiam(CaseData caseData) {
@@ -2865,7 +2856,6 @@ public class ServiceOfApplicationService {
             && null != caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam()) {
             isChildInvolvedInMiam = caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam();
         }
-        log.info("isChildInvolvedInMiammmm --> {}",isChildInvolvedInMiam);
         return isChildInvolvedInMiam;
     }
 
@@ -2938,8 +2928,6 @@ public class ServiceOfApplicationService {
             return FmPendingParty.RESPONDENT;
         }
 
-        log.info("6666666");
-
         return FmPendingParty.NONE;
     }
 
@@ -2949,7 +2937,6 @@ public class ServiceOfApplicationService {
             .map(Element::getValue)
             .filter(doc -> doc.getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION))
             .findFirst();
-        log.info("category {}",quarantineLegalDocs);
         return quarantineLegalDocs.isPresent();
     }
 
