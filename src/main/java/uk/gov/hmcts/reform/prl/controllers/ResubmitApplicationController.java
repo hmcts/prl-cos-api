@@ -187,6 +187,7 @@ public class ResubmitApplicationController {
             );
             caseDataUpdated.put("submitAgreeStatement", null);
         }
+    }
 
     private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(Court closestChildArrangementsCourt,
                                                                                   CaseData caseData, Map<String, Object> caseDataUpdated) {
