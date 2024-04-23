@@ -180,6 +180,7 @@ public class ResubmitApplicationController {
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForCaseResubmission(authorisation, caseData));
             caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
