@@ -48,16 +48,6 @@ public class ServiceOfApplicationEmailService {
 
     private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
 
-    public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
-                                                                              PartyDetails partyDetails,
-                                                                              List<Document> docs, String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
-                                                                                 null, caseData.getApplicantCaseName(),
-                                                                      String.valueOf(caseData.getId())),
-                                                        partyDetails.getSolicitorEmail(), docs, servedParty);
-    }
-
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
         sendGovNotifyEmail(
             LanguagePreference.english,
@@ -80,18 +70,6 @@ public class ServiceOfApplicationEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .build();
-    }
-
-    public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
-                                                                      PartyDetails partyDetails,
-                                                                      List<Document> docs,String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        EmailUtils.getEmailProps(null, false,
-                                                                                 partyDetails.getFirstName() + " "
-                                                                          + partyDetails.getLastName(),null,
-                                                                      caseData.getApplicantCaseName(),
-                                                                      String.valueOf(caseData.getId())),
-                                                        partyDetails.getEmail(), docs, servedParty);
     }
 
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
