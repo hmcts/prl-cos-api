@@ -28,6 +28,7 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCaseDataWithUploadedDocs;
 
 @Slf4j
 @Service
@@ -84,6 +85,13 @@ public class CafcassUploadDocService {
             CaseEvent.CAFCASS_ENGLAND_DOCUMENT_UPLOAD.getValue()
         );
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataUpdated.put("cafcassUploadedDocs", getCaseDataWithUploadedDocs(
+            caseId,
+            document.getOriginalFilename(),
+            typeOfDocument,
+            tempCaseData,
+            uploadResponse.getDocuments().get(0)
+        ).getCafcassUploadedDocs());
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),

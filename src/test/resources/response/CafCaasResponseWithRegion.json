@@ -60,6 +60,58 @@
         "previousAttendenceEvidence" : "In the 4 months prior to making the application, the person filed a relevant family application confirming that a MIAM exemption applied and that application related to the same or substantially the same dispute",
         "otherGroundsEvidence" : "(i) the prospective applicant is or all of the prospective respondents are subject to a disability or other inability that would prevent attendance at a MIAM unless appropriate facilities can be offered by an authorised mediator; (ii) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all have stated that they are unable to provide such facilities; and (iii)the names, postal addresses and telephone numbers or e-mail addresses for such authorised family mediators, and the dates of contact, can be provided to the court if requested."
       },
+      "cafcassUploadedDocs": [
+        {
+          "id": "a5dbc39d-6322-4abc-821a-45206b88253f",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 19:11:46 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        },
+        {
+          "id": "c05a93db-7494-41a5-bfe4-767dbc42e7d4",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 23:46:00 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        }
+      ],
       "applicants" : [ {
         "id" : "46cc0086-405a-423c-81d9-1a835ee82246",
         "value" : {

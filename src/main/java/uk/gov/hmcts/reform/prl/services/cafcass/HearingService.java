@@ -45,6 +45,7 @@ public class HearingService {
             listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
         } catch (Exception e) {
             log.error("Error while getHearingsForAllCases {}",e);
+            return null;
         }
         return listOfHearingDetails;
     }
