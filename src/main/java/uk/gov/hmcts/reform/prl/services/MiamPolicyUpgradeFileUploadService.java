@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MiamPolicyUpgradeFileUploadService {
 
-
     private final ManageDocumentsService manageDocumentsService;
 
     private final AuthTokenGenerator authTokenGenerator;
