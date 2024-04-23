@@ -153,6 +153,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -1055,7 +1056,7 @@ public class CallbackControllerTest {
                              .caseTypeId(C100_CASE_TYPE)
                              .data(caseDetails).build()).build();
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
-        when(launchDarklyClient.isFeatureEnabled("task-list-v2")).thenReturn(true);
+        when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V2_FLAG)).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
