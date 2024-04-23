@@ -310,9 +310,36 @@ public class ManageOrderEmailService {
             .build();
     }
 
+    private void testEmailJames(CaseData caseData) {
+        EmailTemplateVars emailTemplateVars = buildNotificationJames(caseData);
+        emailService.send(
+            "testJames@hmcts.net",
+            EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
+    }
+
+    private EmailTemplateVars buildNotificationJames(CaseData caseData) {
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
+
+        return ManageOrderEmail.builder()
+            .newOrder("No")
+            .finalOrder("No")
+            .newOrders("No")
+            .finalOrders("Yes")
+            .newAndFinalOrders("No")
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(caseLink)
+            .build();
+    }
+
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
+        testEmailJames(caseData);
+
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
