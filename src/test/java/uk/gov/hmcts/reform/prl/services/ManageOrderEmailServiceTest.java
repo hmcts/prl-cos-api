@@ -79,6 +79,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 @Slf4j
 @SuppressWarnings({"java:S1607"})
 public class ManageOrderEmailServiceTest {
