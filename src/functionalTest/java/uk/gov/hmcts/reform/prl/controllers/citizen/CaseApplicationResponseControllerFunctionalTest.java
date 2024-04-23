@@ -79,6 +79,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .header("serviceAuthorization", "auth")
+                            .content("{\"isWelsh\":\"false\"}")
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();

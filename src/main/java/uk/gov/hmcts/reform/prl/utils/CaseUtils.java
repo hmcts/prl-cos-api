@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -45,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -53,6 +57,8 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
@@ -387,6 +393,8 @@ public class CaseUtils {
             return CAFCASS;
         } else if (roles.contains(BULK_SCAN)) {
             return BULK_SCAN;
+        } else if (roles.contains(CITIZEN_ROLE)) {
+            return CITIZEN;
         }
 
         return CAFCASS;
@@ -486,6 +494,91 @@ public class CaseUtils {
         }
     }
 
+    public static Optional<PartyDetailsMeta> getPartyDetailsMeta(String partyId, String caseType, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType)
+            ? getC100PartyDetailsMeta(partyId, caseData)
+            : getFL401PartyDetailsMeta(partyId, caseData);
+    }
+
+    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
+        return IntStream.range(0, parties.size())
+            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index))
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
+                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
+                partyId)))
+            .findFirst()
+            .orElse(-1);
+    }
+
+    private static Optional<PartyDetailsMeta> getC100PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getApplicants());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.applicant)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getApplicants().get(partyIndex).getValue())
+                                                           .build());
+
+                return partyDetailsMeta;
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getRespondents());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.respondent)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getRespondents().get(partyIndex).getValue())
+                                                           .build());
+                return partyDetailsMeta;
+            }
+        }
+        return partyDetailsMeta;
+    }
+
+    private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
+        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
+        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
+        if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
+            && caseData.getApplicantsFL401().getUser().getIdamId().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.applicant)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getApplicantsFL401())
+                                                       .build());
+            return partyDetailsMeta;
+        }
+
+        if (ObjectUtils.isNotEmpty(caseData.getRespondentsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser().getIdamId())
+            && caseData.getRespondentsFL401().getUser().getIdamId().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.respondent)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getRespondentsFL401())
+                                                       .build());
+            return partyDetailsMeta;
+        }
+
+        return partyDetailsMeta;
+    }
+
     public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
         List<String> applicantList = new ArrayList<>();
         if (isNotEmpty(parties)) {
@@ -524,8 +617,10 @@ public class CaseUtils {
         if (null != party
             && isNotBlank(party.getRepresentativeFirstName())
             && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(party.getRepresentativeFirstName(),
-                          concat(" ", party.getRepresentativeLastName()));
+            return concat(
+                party.getRepresentativeFirstName(),
+                concat(" ", party.getRepresentativeLastName())
+            );
         }
         return null;
     }
