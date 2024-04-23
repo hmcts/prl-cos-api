@@ -2895,18 +2895,19 @@ public class ServiceOfApplicationService {
 
         Hearings hearings = hearingApiClient.getHearingDetails(authorization, authTokenGenerator.generate(), caseReference);
 
-        List<HearingDaySchedule> sortedHearingDaySche =  hearings.getCaseHearings().stream()
-            .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
-                && null != eachHearing.getHearingDaySchedule())
-            .map(CaseHearing::getHearingDaySchedule)
-            .flatMap(Collection::stream)
-            .sorted(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime, Comparator.nullsLast(Comparator.naturalOrder())))
-            .toList();
+        if (null != hearings) {
+            List<HearingDaySchedule> sortedHearingDaySche =  hearings.getCaseHearings().stream()
+                .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
+                    && null != eachHearing.getHearingDaySchedule())
+                .map(CaseHearing::getHearingDaySchedule)
+                .flatMap(Collection::stream)
+                .sorted(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
 
-        if (!sortedHearingDaySche.isEmpty()) {
-            return sortedHearingDaySche.get(0).getHearingStartDateTime().isAfter(hearingLimitDate);
+            if (!sortedHearingDaySche.isEmpty()) {
+                return sortedHearingDaySche.get(0).getHearingStartDateTime().isAfter(hearingLimitDate);
+            }
         }
-
         return false;
     }
 
