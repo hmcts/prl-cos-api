@@ -67,6 +67,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
 
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
+
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
     private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
@@ -237,6 +239,23 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+
+        mockMvc.perform(post("/edit-and-approve/submitted")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content()
+                           .string(Matchers
+                                       .containsString(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)))
+            .andReturn();
+    }
+
+    @Test
+    public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
 
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
