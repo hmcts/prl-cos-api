@@ -148,6 +148,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -2329,7 +2330,7 @@ public class ManageOrderService {
     public String getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
