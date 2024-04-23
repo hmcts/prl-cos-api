@@ -108,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUME
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -2897,7 +2898,8 @@ public class ServiceOfApplicationService {
 
         if (null != hearings) {
             List<HearingDaySchedule> sortedHearingDaySche =  hearings.getCaseHearings().stream()
-                .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
+                .filter(eachHearing -> (eachHearing.getHmcStatus().equals(LISTED)
+                    || eachHearing.getHmcStatus().equals(COMPLETED))
                     && null != eachHearing.getHearingDaySchedule())
                 .map(CaseHearing::getHearingDaySchedule)
                 .flatMap(Collection::stream)
