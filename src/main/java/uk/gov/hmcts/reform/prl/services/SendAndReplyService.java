@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -63,6 +65,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
@@ -77,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -109,6 +113,7 @@ public class SendAndReplyService {
     private final HearingDataService hearingDataService;
 
     private final RefDataService refDataService;
+    private final RoleAssignmentService roleAssignmentService;
 
     @Value("${sendandreply.category-id}")
     private String categoryId;
@@ -1174,5 +1179,31 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    public void assignCaseToJudgeIfJudgeSelectedForMessage(String authorisation, CaseDetails caseDetails, Message message) {
+        final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
+            getJudicialUserDetails(message.getSendReplyJudgeName());
+        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
+
+        if (null != judicialUsersApiResponse) {
+            RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                .judicialUser(JudicialUser.builder()
+                                  .idamId(judicialUsersApiResponse.getSidamId())
+                                  .personalCode(judicialUsersApiResponse.getPersonalCode())
+                                  .build())
+                .build();
+
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                caseDetails,
+                roleAssignmentDto,
+                ALLOCATED_JUDGE.getName(),
+                false,
+                ALLOCATE_JUDGE_ROLE
+            );
+        }
+
+
     }
 }

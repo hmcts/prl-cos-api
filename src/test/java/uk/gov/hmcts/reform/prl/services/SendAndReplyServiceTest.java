@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
@@ -73,6 +74,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,6 +90,8 @@ public class SendAndReplyServiceTest {
 
     @Mock
     UserService userService;
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -1215,6 +1219,38 @@ public class SendAndReplyServiceTest {
             emailTemplateVars,
             LanguagePreference.english
         );
+    }
+
+    @Test
+    public void testAssignCaseToJudgeIfJudgeSelectedForMessage() {
+        when(refDataUserService.getAllJudicialUserDetails(any()))
+            .thenReturn(List.of(JudicialUsersApiResponse.builder()
+                                    .emailId("test@test.com")
+                                    .personalCode("test")
+                                    .fullName("test")
+                                    .build()));
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .sendReplyJudgeName(JudicialUser.builder()
+                                    .personalCode("test")
+                                    .idamId("test")
+                                    .build())
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .build();
+
+        sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage(auth, caseDetails, message);
+
     }
 
 }
