@@ -39,6 +39,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
@@ -109,7 +110,7 @@ public class SendgridService {
         }
     }
 
-    public void sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
+    public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
@@ -118,25 +119,34 @@ public class SendgridService {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
         Mail mail = new Mail();
+        long attachDocsStartTime = System.currentTimeMillis();
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
+        log.info("*** Time taken to attach docs to mail - {} ms",
+                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
+        long startTime = System.currentTimeMillis();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
-            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                 log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
+                return true;
             }
+            return false;
         } catch (IOException ex) {
             log.info("error is {}", ex.getMessage());
             throw new IOException(ex.getMessage());
+        } finally {
+            log.info("*** Response time taken by sendgrid - {} ms",
+                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         }
     }
 
@@ -209,7 +219,7 @@ public class SendgridService {
                 request.setBody(mail.build());
                 Response response = sendGrid.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());
-                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
 
@@ -250,7 +260,7 @@ public class SendgridService {
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
                 Response response = sendGrid.api(request);
-                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
             } catch (IOException ex) {
