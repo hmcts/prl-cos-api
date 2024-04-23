@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -49,14 +50,15 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -74,7 +76,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +113,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
@@ -276,7 +281,7 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
     private final DgsService dgsService;
-    private final HearingService hearingService;
+    private final HearingApiClient hearingApiClient;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -2887,8 +2892,22 @@ public class ServiceOfApplicationService {
 
     private  boolean isFirstHearing3WeeksAway(String authorization, String caseReference) {
         LocalDateTime hearingLimitDate = LocalDateTime.now().plusDays(21).withNano(1);
-        NextHearingDetails nextHearingDetails = hearingService.getNextHearingDate(authorization, caseReference);
-        return null != nextHearingDetails && nextHearingDetails.getHearingDateTime().isAfter(hearingLimitDate);
+
+        Hearings hearings = hearingApiClient.getHearingDetails(authorization, authTokenGenerator.generate(), caseReference);
+
+        List<HearingDaySchedule> sortedHearingDaySche =  hearings.getCaseHearings().stream()
+            .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
+                && null != eachHearing.getHearingDaySchedule())
+            .map(CaseHearing::getHearingDaySchedule)
+            .flatMap(Collection::stream)
+            .sorted(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime, Comparator.nullsLast(Comparator.naturalOrder())))
+            .toList();
+
+        if (!sortedHearingDaySche.isEmpty()) {
+            return sortedHearingDaySche.get(0).getHearingStartDateTime().isAfter(hearingLimitDate);
+        }
+
+        return false;
     }
 
     private  FmPendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
