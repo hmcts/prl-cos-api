@@ -10,6 +10,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,11 +29,16 @@ public class C100DocumentTemplateFinderServiceTest {
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalWelshTemplate", "c100FinalWelshTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalTemplateV2", "c100FinalTemplateV2");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalWelshTemplateV2", "c100FinalWelshTemplateV2");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalTemplateV3", "c100FinalTemplateV3");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100FinalWelshTemplateV3", "c100FinalWelshTemplateV3");
+
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplate", "c100DraftTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplate", "c100DraftWelshTemplate");
-
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplateV2", "c100DraftTemplateV2");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplateV2", "c100DraftWelshTemplateV2");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftTemplateV3", "c100DraftTemplateV3");
+        ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100DraftWelshTemplateV3", "c100DraftWelshTemplateV3");
+
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100C8Template", "c100C8Template");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100C8DraftTemplate", "c100C8DraftTemplate");
         ReflectionTestUtils.setField(c100DocumentTemplateFinderService, "c100C8TemplateV2", "c100C8TemplateV2");
@@ -63,8 +69,20 @@ public class C100DocumentTemplateFinderServiceTest {
     }
 
     @Test
+    public void findFinalDocumentTemplateV3True() {
+        caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
+    }
+
+    @Test
     public void findFinalDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
+    }
+
+    @Test
+    public void findFinalDocumentTemplateV3False() {
+        caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
         Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
     }
 
@@ -87,8 +105,20 @@ public class C100DocumentTemplateFinderServiceTest {
     }
 
     @Test
+    public void findFinalDraftDocumentTemplateV3True() {
+        caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
+    }
+
+    @Test
     public void findFinalDraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
+    }
+
+    @Test
+    public void findFinalDraftDocumentTemplateV3False() {
+        caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V3).build();
         Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
