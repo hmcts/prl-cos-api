@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -279,7 +281,7 @@ public class CitizenResponseService {
                 caseData,
                 "c7FinalEng",
                 isWelsh
-        );
+        ).toBuilder().documentLanguage(isWelsh ? "cy" : "en").build();
     }
 
     private Document generateFinalC1A(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
@@ -290,7 +292,7 @@ public class CitizenResponseService {
                 SOLICITOR_C1A_FINAL_DOCUMENT,
                 false,
                 dataMap
-        );
+        ).toBuilder().documentLanguage("en").build();
     }
 
     private Document generateFinalC1AWelsh(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
@@ -301,7 +303,7 @@ public class CitizenResponseService {
             SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
             true,
             dataMap
-        );
+        ).toBuilder().documentLanguage("cy").build();
     }
 
     private Map<String, Object> generateC8Document(String authorisation, CaseData caseData, Element<PartyDetails> partyDetailsElement,
@@ -400,6 +402,7 @@ public class CitizenResponseService {
                                 .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                                 .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
                                 .uploaderRole(PrlAppsConstants.CITIZEN)
+                                   .documentLanguage(element.getValue().getDocumentLanguage())
                                 .build())
                         .id(element.getId()).build())
                 .toList());
