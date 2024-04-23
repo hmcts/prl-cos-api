@@ -62,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Slf4j
 @RestController
@@ -102,6 +103,7 @@ public class ResubmitApplicationController {
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
             //Populate MIAM Policy Upgrade data
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
                 caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
