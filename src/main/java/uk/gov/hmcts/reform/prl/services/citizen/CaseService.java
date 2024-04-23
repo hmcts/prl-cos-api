@@ -648,6 +648,7 @@ public class CaseService {
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
             .document(existingDocument)
+            .documentLanguage(quarantineDoc.getDocumentLanguage())
             .build();
     }
 
