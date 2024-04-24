@@ -2783,7 +2783,7 @@ public class ManageOrderService {
                                        String eventId) {
 
         String isHearingTaskNeeded = NO;
-
+        log.info("setIsHearingTaskNeeded--->");
         // If rejected by judge, then isHearingTaskNeeded should be always 'No'.
         if (null != isOrderApproved && isOrderApproved.equals(NO)) {
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
@@ -2800,10 +2800,12 @@ public class ManageOrderService {
 
         //In case if no hearings at all, then default value for isHearingTaskNeeded should be null
         if (CollectionUtils.isEmpty(ordersHearingDetails)) {
+            log.info("ordersHearingDetails---empty");
             isHearingTaskNeeded = null;
         } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
+            log.info("ordersHearingDetails---hearingList--> {}",hearingList);
             for (HearingData hearing : hearingList) {
                 if (hearing.getHearingDateConfirmOptionEnum() != null
                     && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
@@ -2841,7 +2843,6 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
@@ -2880,7 +2881,6 @@ public class ManageOrderService {
             } else {
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
-
                 if (null != caseData.getDraftOrderCollection()) {
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
@@ -2894,6 +2894,12 @@ public class ManageOrderService {
                 }
             }
         }
+        log.info("caseDataUpdated=WA_IS_ORDER_APPROVED= {}",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        log.info("caseDataUpdated=WA_WHO_APPROVED_THE_ORDER= {}",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+        log.info("caseDataUpdated=WA_IS_MULTIPLE_HEARING_SELECTED= {}",caseDataUpdated.get(WA_IS_MULTIPLE_HEARING_SELECTED));
+        log.info("caseDataUpdated=WA_HEARING_OPTION_SELECTED= {}",caseDataUpdated.get(WA_HEARING_OPTION_SELECTED));
+        log.info("caseDataUpdated=WA_IS_HEARING_TASK_NEEDED= {}",caseDataUpdated.get(WA_IS_HEARING_TASK_NEEDED));
+        log.info("caseDataUpdated=WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED= {}",caseDataUpdated.get(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED));
     }
 
 
@@ -3163,7 +3169,9 @@ public class ManageOrderService {
             performingUser = getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                log.info("caseData.getManageOrdersOptions()-----> {}",caseData.getManageOrdersOptions());
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser);
             }
 
