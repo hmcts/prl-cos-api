@@ -3388,6 +3388,7 @@ public class ManageOrderService {
         log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
         try {
             if (!hearingsList.isEmpty()) {
+                log.info("Automated Hearing Management: hearingsList: {}", hearingsList);
                 hearingsList.stream()
                     .map(Element::getValue)
                     .forEach(hearingData -> {
