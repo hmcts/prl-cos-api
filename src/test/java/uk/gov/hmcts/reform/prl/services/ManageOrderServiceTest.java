@@ -23,11 +23,13 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -5346,12 +5348,44 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
-        List<Element<HearingData>> hearingDataList = new ArrayList<>();
-        HearingData hearingdata = HearingData.builder()
-            .hearingTypes(DynamicList.builder()
-                              .value(null).build())
-            .hearingChannelsEnum(null).build();
-        hearingDataList.add(element(hearingdata));
+
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .hearingPriorityTypeEnum(HearingPriorityTypeEnum.StandardPriority)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .build();
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder()
+            .id(UUID.fromString(TEST_UUID))
+            .value(hearingData).build();
+        List<Element<HearingData>> hearingDataList = Collections.singletonList(hearingDataElement);
+
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder()
             .hearingRequestID("2000010406")
             .status("HEARING_REQUESTED")
@@ -5359,7 +5393,7 @@ public class ManageOrderServiceTest {
             .versionNumber(1)
             .build();
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
-            .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build())))
+            .mappingAutomatedHearingTransactionRequest(caseData, hearingData)))
             .thenReturn(automatedHearingResponse);
         assertNotNull(manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingDataList));
     }
@@ -5434,13 +5468,6 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
-
-        List<Element<HearingData>> hearingDataList = new ArrayList<>();
-        HearingData hearingdata = HearingData.builder()
-            .hearingTypes(DynamicList.builder()
-                              .value(null).build())
-            .hearingChannelsEnum(null).build();
-        hearingDataList.add(element(hearingdata));
 
         when(hearingService.createAutomatedHearing(authToken, null))
             .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
