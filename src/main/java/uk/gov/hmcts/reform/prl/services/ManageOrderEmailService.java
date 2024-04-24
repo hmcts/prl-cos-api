@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -34,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
@@ -46,7 +43,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -101,164 +97,6 @@ public class ManageOrderEmailService {
     private final DocumentLanguageService documentLanguageService;
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
-
-    public void sendEmail(CaseDetails caseDetails) {
-        List<String> emailList = new ArrayList<>();
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-
-        emailList.addAll(getEmailAddress(caseData.getApplicants()));
-        emailList.addAll(getEmailAddress(caseData.getRespondents()));
-        emailList.forEach(email -> emailService.send(
-            email,
-            EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
-            LanguagePreference.english
-        ));
-
-    }
-
-    public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        if (State.ALL_FINAL_ORDERS_ISSUED.equals(caseData.getState())) {
-            sendNotificationToRespondentSolicitor(caseDetails);
-            sendNotificationToRespondent(caseDetails);
-        }
-    }
-
-    private void sendNotificationToRespondent(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if (!StringUtils.isEmpty(respondent.getValue().getEmail())) {
-                    emailService.send(
-                        respondent.getValue().getEmail(),
-                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
-                        buildRespondentEmail(caseDetails, respondent.getValue()),
-                        LanguagePreference.english
-                    );
-                }
-            }
-            //send notification for applicants
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
-                    emailService.send(
-                        applicant.getValue().getEmail(),
-                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
-                        buildRespondentEmail(caseDetails, applicant.getValue()),
-                        LanguagePreference.english
-                    );
-                }
-            }
-        } else {
-            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
-                emailService.send(
-                    caseData.getRespondentsFL401().getEmail(),
-                    EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
-                    buildRespondentEmail(caseDetails, caseData.getRespondentsFL401()),
-                    LanguagePreference.english
-                );
-            }
-        }
-
-    }
-
-
-    private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
-                String solicitorEmail = resSols.keySet().toArray()[0].toString();
-                if (!StringUtils.isEmpty(solicitorEmail)) {
-                    emailService.send(
-                        solicitorEmail,
-                        EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
-                        buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                                      resSols.get(solicitorEmail).get(1)
-                        ),
-                        LanguagePreference.english
-                    );
-                }
-            }
-        }
-    }
-
-    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        return ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .applicantName(String.format("%s %s", partyDetails.getFirstName(), partyDetails.getLastName()))
-            .dashboardLink(citizenDashboardUrl)
-            .build();
-    }
-
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName,
-                                                            String respondentName) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-
-        return RespondentSolicitorEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .respondentName(respondentName)
-            .issueDate(caseData.getIssueDate())
-            .build();
-    }
-
-    private EmailTemplateVars buildEmail(CaseDetails caseDetails) {
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        String applicantNames = getApplicants(caseData).stream()
-            .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.joining(", "));
-
-        return ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(caseData.getCourtName())
-            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .courtEmail(courtEmail).build();
-    }
-
-
-    private List<PartyDetails> getApplicants(CaseData caseData) {
-        return caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-    }
-
-    private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        return caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-            .map(i -> {
-                Map<String, List<String>> temp = new HashMap<>();
-                temp.put(i.getSolicitorEmail(), List.of(
-                    i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                    i.getFirstName() + " " + i.getLastName()
-                ));
-                return temp;
-            })
-            .collect(Collectors.toList());
-    }
-
-    private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
-        return partyDetails
-            .stream()
-            .map(Element::getValue)
-            .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
-            .map(PartyDetails::getEmail)
-            .collect(Collectors.toList());
-    }
-
 
     public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
 
@@ -467,6 +305,44 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 party.getValue().getEmail(),
                 sengGridTemplate
+            );
+        } else {
+            log.info("*** Send orders to party via post using bulk print {}", party.getId());
+            sendOrdersToPartyAddressViaPost(
+                caseData,
+                authorisation,
+                orderDocuments,
+                bulkPrintOrderDetails,
+                party
+            );
+        }
+    }
+
+    private void sendGovNotifyemailToPartyLip(CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String authorisation,
+                                          Map<String, Object> dynamicDataForEmail,
+                                          List<Document> orderDocuments,
+                                          List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                          SendgridEmailTemplateNames sengGridTemplate) {
+        log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isPartyProvidedWithEmail(party.getValue())) {
+            log.info("*** Send orders to party via email using send grid {}", party.getId());
+            dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
+            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
+
+            EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .fullName(party.getValue().getLabelForDynamicList())
+                .orderLink(manageCaseUrl + "/" + caseData.getId())
+                .build();
+            emailService.send(
+                party.getValue().getEmail(),
+                EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
+                emailTemplateVars,
+                LanguagePreference.english
             );
         } else {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
@@ -861,7 +737,7 @@ public class ManageOrderEmailService {
                     );
                 } else {
                     log.info("*** Send email/post notifications to parties ***");
-                    sendNotificationsToParty(
+                    sendGovNotifyemailToPartyLip(
                         caseData,
                         partyDataOptional.get(),
                         authorisation,
