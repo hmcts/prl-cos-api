@@ -318,44 +318,6 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendGovNotifyemailToPartyLip(CaseData caseData,
-                                          Element<PartyDetails> party,
-                                          String authorisation,
-                                          Map<String, Object> dynamicDataForEmail,
-                                          List<Document> orderDocuments,
-                                          List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
-                                          SendgridEmailTemplateNames sengGridTemplate) {
-        log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
-        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-            && isPartyProvidedWithEmail(party.getValue())) {
-            log.info("*** Send orders to party via email using send grid {}", party.getId());
-            dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
-            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
-
-            EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .fullName(party.getValue().getLabelForDynamicList())
-                .orderLink(manageCaseUrl + "/" + caseData.getId())
-                .build();
-            emailService.send(
-                party.getValue().getEmail(),
-                EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
-                emailTemplateVars,
-                LanguagePreference.english
-            );
-        } else {
-            log.info("*** Send orders to party via post using bulk print {}", party.getId());
-            sendOrdersToPartyAddressViaPost(
-                caseData,
-                authorisation,
-                orderDocuments,
-                bulkPrintOrderDetails,
-                party
-            );
-        }
-    }
-
     private void handleFL401PersonalServiceNotifications(String authorisation,
                                                          CaseData caseData,
                                                          List<Document> orderDocuments,
@@ -737,15 +699,34 @@ public class ManageOrderEmailService {
                     );
                 } else {
                     log.info("*** Send email/post notifications to parties ***");
-                    sendGovNotifyemailToPartyLip(
-                        caseData,
-                        partyDataOptional.get(),
-                        authorisation,
-                        dynamicDataForEmail,
-                        orderDocuments,
-                        bulkPrintOrderDetails,
-                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
-                    );
+                    if (ContactPreferences.email.equals(partyData.getContactPreferences())
+                        && isPartyProvidedWithEmail(partyData)) {
+                        if (CaseUtils.isAccessEnabled(partyDataOptional.get())) {
+                            log.info("*** Send orders to party via email using notify {}", partyDataOptional.get().getId());
+                            dynamicDataForEmail.put("name", partyData.getLabelForDynamicList());
+                            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
+                            EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
+                                .caseReference(String.valueOf(caseData.getId()))
+                                .caseName(caseData.getApplicantCaseName())
+                                .fullName(partyData.getLabelForDynamicList())
+                                .orderLink(manageCaseUrl + "/" + caseData.getId())
+                                .build();
+                            emailService.send(partyData.getEmail(),
+                                              EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
+                                              emailTemplateVars,
+                                              LanguagePreference.english);
+                        }
+                    } else {
+                        sendNotificationsToParty(
+                            caseData,
+                            partyDataOptional.get(),
+                            authorisation,
+                            dynamicDataForEmail,
+                            orderDocuments,
+                            bulkPrintOrderDetails,
+                            SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                        );
+                    }
                 }
             }
         });

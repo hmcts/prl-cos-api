@@ -763,4 +763,9 @@ public class CaseUtils {
         }
         return "English";
     }
+
+    public static boolean isAccessEnabled(Element<PartyDetails> party) {
+        return party.getValue() != null && party.getValue().getUser() != null
+            && party.getValue().getUser().getIdamId() != null;
+    }
 }
