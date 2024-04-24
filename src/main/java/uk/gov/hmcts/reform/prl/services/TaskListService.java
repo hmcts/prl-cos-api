@@ -274,10 +274,13 @@ public class TaskListService {
                         .c8Document(updatedCaseData.getC8Document())
                         .c1ADocument(updatedCaseData.getC1ADocument())
                         .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                        .finalDocument(updatedCaseData.getFinalDocument())
-                        .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
+                        .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state) ? updatedCaseData.getFinalDocument() : null)
+                        .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state) ? updatedCaseData.getFinalWelshDocument() : null)
                         .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
                         .build();
+                
+                log.info("Final Welsh document value inside caseData is: {}", caseData.getFinalWelshDocument());
+                log.info("Final document value inside caseData is: {}", caseData.getFinalDocument());
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
