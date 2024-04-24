@@ -41,11 +41,6 @@ public class TaskListController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
-        try {
-            log.info("/callbackRequest start json ===>" + objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         return taskListService.updateTaskList(callbackRequest, authorisation);
     }
 

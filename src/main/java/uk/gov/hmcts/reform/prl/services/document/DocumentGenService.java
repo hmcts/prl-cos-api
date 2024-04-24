@@ -744,7 +744,6 @@ public class DocumentGenService {
                                                    boolean isWelsh)
         throws Exception {
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
-        log.info("MiamPolicyUpgradeDetails", caseData.getMiamPolicyUpgradeDetails());
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {

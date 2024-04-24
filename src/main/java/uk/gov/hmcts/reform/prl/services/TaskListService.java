@@ -308,7 +308,6 @@ public class TaskListService {
             );
             roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
         }
-        log.info("list of roles {}", roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
