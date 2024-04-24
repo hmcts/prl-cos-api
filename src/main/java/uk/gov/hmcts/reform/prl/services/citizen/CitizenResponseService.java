@@ -379,7 +379,7 @@ public class CitizenResponseService {
         return responseDocs;
     }
 
-    private Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData, Map<Element<Document>,String> responseDocs,
+    public Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData, Map<Element<Document>,String> responseDocs,
                                                             UserDetails userDetails) {
 
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
@@ -388,26 +388,30 @@ public class CitizenResponseService {
             quarantineDocs = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
         }
 
-        responseDocs.forEach((element,language) ->
-            Element.<QuarantineLegalDoc>builder()
-            .value(QuarantineLegalDoc
-                       .builder()
-                       .citizenQuarantineDocument(element.getValue()
-                                                      .toBuilder()
-                                                      .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                                                                       .toInstant()))
-                                                      .build())
-                       .categoryId(getCategoryId(element))
-                       .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                       .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
-                       .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
-                       .uploaderRole(PrlAppsConstants.CITIZEN)
-                       .documentLanguage(language)
-                       .build())
-            .id(element.getId()).build());
+        List<Element<QuarantineLegalDoc>> finalQuarantineDocs = quarantineDocs;
+        responseDocs.forEach((element, language) -> {
+            Element<QuarantineLegalDoc> quarantineLegalDoc = Element.<QuarantineLegalDoc>builder()
+                .value(QuarantineLegalDoc
+                           .builder()
+                           .citizenQuarantineDocument(element.getValue()
+                                                          .toBuilder()
+                                                          .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(
+                                                                  LONDON_TIME_ZONE))
+                                                                                           .toInstant()))
+                                                          .build())
+                           .categoryId(getCategoryId(element))
+                           .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                           .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+                           .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
+                           .uploaderRole(PrlAppsConstants.CITIZEN)
+                           .documentLanguage(language)
+                           .build())
+                .id(element.getId()).build();
+            finalQuarantineDocs.add(quarantineLegalDoc);
+        });
 
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
-        caseDataMapToBeUpdated.put("citizenQuarantineDocsList", quarantineDocs);
+        caseDataMapToBeUpdated.put("citizenQuarantineDocsList", finalQuarantineDocs);
 
         return caseDataMapToBeUpdated;
     }
