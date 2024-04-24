@@ -155,6 +155,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -1958,6 +1959,7 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
