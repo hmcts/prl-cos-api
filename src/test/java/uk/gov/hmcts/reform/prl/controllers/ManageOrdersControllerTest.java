@@ -3644,7 +3644,15 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents  = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(any())).thenReturn(startAllTabsUpdateDataContents);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
             .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
