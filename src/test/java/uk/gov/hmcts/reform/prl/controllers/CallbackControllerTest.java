@@ -152,6 +152,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
@@ -427,7 +428,9 @@ public class CallbackControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -1403,6 +1406,7 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .helpWithFees(No)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .taskListVersion(TASK_LIST_VERSION_V3)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
