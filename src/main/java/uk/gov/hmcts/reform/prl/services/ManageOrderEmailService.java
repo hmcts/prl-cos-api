@@ -314,7 +314,6 @@ public class ManageOrderEmailService {
 
     private void testEmailJames(CaseData caseData) {
         EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(caseData);
-        log.info("returned email data James {}", emailTemplateVars);
         emailService.send(
             "testJames@hmcts.net",
             EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
@@ -325,32 +324,32 @@ public class ManageOrderEmailService {
 
     private EmailTemplateVars buildEmailTemplateVarsApplicantLip(CaseData caseData) {
 
-        String finalOrderTitle = "No";
-        String newAndFinalOrderTitle = "No";
-        String orders = "No";
+        String finalOrderTitle = "no";
+        String newAndFinalOrderTitle = "no";
+        String orders = "no";
         String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
         if (dynamicData.containsKey(FINAL) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
-            finalOrderTitle = "Yes";
-            orders = "Yes";
+            finalOrderTitle = "yes";
+            orders = "yes";
         } else if (dynamicData.containsKey(FINAL)) {
-            finalOrderTitle = "Yes";
+            finalOrderTitle = "yes";
         } else {
-            newAndFinalOrderTitle = "Yes";
+            newAndFinalOrderTitle = "yes";
         }
 
         return ManageOrderEmailLip.builder()
-            .order(orders.equals("No") ? "Yes" : "No")
-            .orders(orders.equals("Yes") ? orders : "No")
-            .finalOrderTitle(finalOrderTitle.equals("Yes") ? finalOrderTitle : "No")
-            .newOrderTitle(finalOrderTitle.equals("No") ? "Yes" : "No")
-            .finalOrderText(finalOrderTitle.equals("Yes") && orders.equals("No") ? "Yes" : "No")
-            .finalOrdersText(finalOrderTitle.equals("Yes") && orders.equals("Yes") ? "Yes" : "No")
-            .finalOrderExplanation(finalOrderTitle.equals("Yes") || newAndFinalOrderTitle.equals("Yes") ? "Yes" : "No")
-            .newOrderText(finalOrderTitle.equals("No") && orders.equals("No") ? "Yes" : "No")
-            .newOrdersText(finalOrderTitle.equals("No") && orders.equals("Yes") ? "Yes" : "No")
-            .newOrderExplanation(finalOrderTitle.equals("No") || newAndFinalOrderTitle.equals("Yes") ? "Yes" : "No")
+            .order(orders.equals("no") ? "yes" : "no")
+            .orders(orders.equals("yes") ? orders : "no")
+            .finalOrderTitle(finalOrderTitle.equals("yes") ? finalOrderTitle : "no")
+            .newOrderTitle(finalOrderTitle.equals("no") ? "yes" : "no")
+            .finalOrderText(finalOrderTitle.equals("yes") && orders.equals("no") ? "yes" : "no")
+            .finalOrdersText(finalOrderTitle.equals("yes") && orders.equals("yes") ? "yes" : "no")
+            .finalOrderExplanation(finalOrderTitle.equals("yes") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
+            .newOrderText(finalOrderTitle.equals("no") && orders.equals("no") ? "yes" : "no")
+            .newOrdersText(finalOrderTitle.equals("no") && orders.equals("yes") ? "yes" : "no")
+            .newOrderExplanation(finalOrderTitle.equals("no") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
             .newAndFinalOrderTitle(newAndFinalOrderTitle)
             .newAndFinalOrdersText(newAndFinalOrderTitle)
             .caseName(caseData.getApplicantCaseName())
