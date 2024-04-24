@@ -23,8 +23,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,10 +42,11 @@ public class CitizenCaseUpdateController {
     private final CitizenCaseUpdateService citizenCaseUpdateService;
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private final CaseService caseService;
 
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
-    public CaseData updatePartyDetailsFromCitizen(
+    public CaseDataWithHearingResponse updatePartyDetailsFromCitizen(
         @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
@@ -58,7 +61,8 @@ public class CitizenCaseUpdateController {
                 citizenUpdatedCaseData
             );
             if (caseDetails != null) {
-                return CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseService
+                    .getCaseDataWithHearingResponse(authorisation,"Yes", caseDetails);
             } else {
                 log.error("{} event has failed for the case {}", eventId, caseId);
                 throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,11 +21,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -37,9 +36,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseController {
-    private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
     private final CitizenResponseService citizenResponseService;
+    private final CaseService caseService;
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
@@ -65,7 +64,7 @@ public class CitizenResponseController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public CaseData submitAndGenerateC7(
+    public CaseDataWithHearingResponse submitAndGenerateC7(
             @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
             @PathVariable("caseId") String caseId,
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -73,7 +72,8 @@ public class CitizenResponseController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authorisation, caseId, citizenUpdatedCaseData);
             if (caseDetails != null) {
-                return CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseService
+                    .getCaseDataWithHearingResponse(authorisation,"Yes", caseDetails);
             } else {
                 log.error("{} event has failed for the case {}", CaseEvent.REVIEW_AND_SUBMIT, caseId);
                 throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");
