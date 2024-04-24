@@ -329,7 +329,7 @@ public class ManageOrderEmailService {
         String orders = "no";
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
-        if (dynamicData.get(FINAL).equals(true) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
+        if (dynamicData.get(FINAL).equals(true) && dynamicData.get(MULTIPLE_ORDERS).equals(true)) {
             finalOrderTitle = "yes";
             orders = "yes";
         } else if (dynamicData.get(FINAL).equals(true)) {
