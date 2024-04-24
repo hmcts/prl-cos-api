@@ -17,10 +17,10 @@ public class IdamTokenGenerator {
     @Value("${idam.solicitor.password}")
     private String solicitorPassword;
 
-    @Value("${idam.systemupdate.username}")
+    @Value("${idam.system-update.username}")
     private String systemUpdateUsername;
 
-    @Value("${idam.systemupdate.password}")
+    @Value("${idam.system-update.password}")
     private String systemUpdatePassword;
 
     @Value("${idam.citizen.username}")
