@@ -327,6 +327,7 @@ public class ManageOrderEmailService {
         String finalOrderTitle = "no";
         String newAndFinalOrderTitle = "no";
         String orders = "no";
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
         if (dynamicData.get(MULTIPLE_ORDERS).equals(true)) {
@@ -340,20 +341,16 @@ public class ManageOrderEmailService {
             finalOrderTitle = "yes";
         }
 
-        log.info("dynamic data james {}", dynamicData);
-        log.info("orders james {}", orders);
-        String caseLink = manageCaseUrl + "/" + caseData.getId();
-
         return ManageOrderEmailLip.builder()
             .order(orders.equals("no") ? "yes" : "no")
             .orders(orders.equals("yes") ? orders : "no")
             .finalOrderTitle(finalOrderTitle.equals("yes") ? finalOrderTitle : "no")
-            .newOrderTitle(finalOrderTitle.equals("no") ? "yes" : "no")
+            .newOrderTitle(finalOrderTitle.equals("no") && newAndFinalOrderTitle.equals("no") ? "yes" : "no")
             .finalOrderText(finalOrderTitle.equals("yes") && orders.equals("no") ? "yes" : "no")
             .finalOrdersText(finalOrderTitle.equals("yes") && orders.equals("yes") ? "yes" : "no")
             .finalOrderExplanation(finalOrderTitle.equals("yes") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
             .newOrderText(finalOrderTitle.equals("no") && orders.equals("no") ? "yes" : "no")
-            .newOrdersText(finalOrderTitle.equals("no") && orders.equals("yes") ? "yes" : "no")
+            .newOrdersText(finalOrderTitle.equals("no") && newAndFinalOrderTitle.equals("no") && orders.equals("yes") ? "yes" : "no")
             .newOrderExplanation(finalOrderTitle.equals("no") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
             .newAndFinalOrderTitle(newAndFinalOrderTitle)
             .newAndFinalOrdersText(newAndFinalOrderTitle)
