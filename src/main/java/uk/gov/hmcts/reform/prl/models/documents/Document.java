@@ -23,8 +23,6 @@ public class Document {
     String categoryId;
     @JsonProperty("document_creation_date")
     Date documentCreatedOn;
-    String documentLanguage;
-
 
 
 
@@ -34,15 +32,13 @@ public class Document {
                     @JsonProperty("document_filename") String documentFileName,
                     @JsonProperty("document_hash") String documentHash,
                     @JsonProperty("category_id") String categoryId,
-                    Date documentCreatedOn,
-                    String documentLanguage) {
+                    Date documentCreatedOn) {
         this.documentUrl = documentUrl;
         this.documentBinaryUrl = documentBinaryUrl;
         this.documentFileName = documentFileName;
         this.documentHash = documentHash;
         this.categoryId = categoryId;
         this.documentCreatedOn = documentCreatedOn;
-        this.documentLanguage = documentLanguage;
 
     }
 

@@ -15,8 +15,11 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -42,6 +45,8 @@ public class CitizenCaseUpdateControllerTest {
 
     @Mock
     CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+    @Mock
+    CaseService caseService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -81,9 +86,18 @@ public class CitizenCaseUpdateControllerTest {
                                                                 any(),
                                                                 any(), any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        CaseData caseData = citizenCaseUpdateController.updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(),
-                                                                                      authToken, s2sToken);
-        Assert.assertEquals(1223, caseData.getId());
+        when(caseService.getCaseDataWithHearingResponse(authToken,"Yes",caseDetails))
+            .thenReturn(CaseDataWithHearingResponse.builder()
+                            .caseData(UiCitizenCaseData.builder()
+                                          .caseData(CaseData.builder()
+                                                        .id(1223)
+                                                        .build())
+                                          .build())
+                            .build());
+        CaseDataWithHearingResponse caseDataWithHearing = citizenCaseUpdateController
+            .updatePartyDetailsFromCitizen(CitizenUpdatedCaseData.builder().build(), any(), any(),
+                                           authToken, s2sToken);
+        Assert.assertEquals(1223, caseDataWithHearing.getCaseData().getCaseData().getId());
     }
 
     @Test(expected = RuntimeException.class)

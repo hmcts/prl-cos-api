@@ -195,10 +195,19 @@ public class CaseService {
     }
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
-        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        return getCaseDataWithHearingResponse(
+            authorisation,
+            hearingNeeded,
+            caseDetails
+        );
+    }
+
+    public CaseDataWithHearingResponse getCaseDataWithHearingResponse(String authorisation,
+                                                                      String hearingNeeded,
+                                                                      CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
+        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder()
             .caseData(UiCitizenCaseData.builder()
                           .caseData(caseData.toBuilder()
                                         .noOfDaysRemainingToSubmitCase(
@@ -211,7 +220,8 @@ public class CaseService {
         if ("Yes".equalsIgnoreCase(hearingNeeded)) {
             caseDataWithHearingResponse =
                 caseDataWithHearingResponse.toBuilder().hearings(
-                    hearingService.getHearings(authorisation, caseId)).build();
+                    hearingService.getHearings(authorisation, String
+                        .valueOf(caseData.getId()))).build();
         }
         return caseDataWithHearingResponse;
     }
