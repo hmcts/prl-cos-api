@@ -2868,7 +2868,7 @@ public class ServiceOfApplicationServiceTest {
                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                         .applicantLegalRepresentative.toString())
                                                                  .build())
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                         .applicantLegalRepresentative.toString())
