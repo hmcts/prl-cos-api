@@ -3094,7 +3094,7 @@ public class ServiceOfApplicationService {
         );
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
-        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
@@ -3113,12 +3113,7 @@ public class ServiceOfApplicationService {
             );
         }
         caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
-        if (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
-            && (null == caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()
-            || SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-            caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))) {
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
-        }
+        caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
