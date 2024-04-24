@@ -51,6 +51,8 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
 
+    public static final String C7_FINAL_RESPONDENT = "c7FinalEng";
+
     public static final String DRAFT_APPLICATION_DOCUMENT_FIELD = "submitAndPayDownloadApplicationLink";
 
     public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
@@ -196,6 +198,7 @@ public class PrlAppsConstants {
     public static final String CASE_ID = "caseId";
     public static final String DOCUMENT_TYPE = "documentType";
     public static final String PARTY_NAME = "partyName";
+    public static final String PARTY_TYPE = "partyType";
     public static final String DOCUMENT_ID = "documentId";
     public static final String SUBMITTED_PDF = "_submitted.pdf";
     public static final String PARENT_DOCUMENT_TYPE = "parentDocumentType";
@@ -972,6 +975,8 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
+    public static final String CITIZEN = "Citizen";
+    public static final String SUCCESS = "Success";
     public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
 
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";

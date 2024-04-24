@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 
 @Data
 @Builder(toBuilder = true)
@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CaseDataWithHearingResponse {
-    private CaseData caseData;
+
+    private UiCitizenCaseData caseData;
     private Hearings hearings;
+
 }
