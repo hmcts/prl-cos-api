@@ -809,7 +809,7 @@ public class CaseServiceTest {
     public void getCaseWithHearing() {
         when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
+        when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
         CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "yes");
         assertNotNull(caseDataWithHearingResponse.getHearings());
     }
