@@ -52,7 +52,6 @@ public class ServiceOfApplication {
 
     private final SoaPack unServedApplicantPack;
     private final SoaPack unServedRespondentPack;
-    private final SoaPack personalServiceUnServedRespondentPack;
     private final SoaPack unServedOthersPack;
     private final SoaPack unServedLaPack;
     private final SoaPack unServedCafcassCymruPack;
