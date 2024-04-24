@@ -3645,7 +3645,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForCaseResubmission(authToken, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
@@ -3677,7 +3677,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForCaseResubmission(authToken, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
