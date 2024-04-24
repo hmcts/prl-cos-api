@@ -37,7 +37,7 @@ public class ManageOrderEmailLip extends EmailTemplateVars {
 
     private final String newOrderExplanation;
 
-    private final String ginalOrderExplanation;
+    private final String finalOrderExplanation;
 
     private final String caseLink;
 
@@ -45,7 +45,7 @@ public class ManageOrderEmailLip extends EmailTemplateVars {
     public ManageOrderEmailLip(String caseName, String applicantName, String newOrderTitle, String finalOrderTitle,
                                String newAndFinalOrderTitle, String order, String orders, String newOrderText,
                                String finalOrderText, String newOrdersText, String finalOrdersText,
-                               String newAndFinalOrdersText, String newOrderExplanation, String ginalOrderExplanation,
+                               String newAndFinalOrdersText, String newOrderExplanation, String finalOrderExplanation,
                                String caseLink) {
         this.caseName = caseName;
         this.applicantName = applicantName;
@@ -60,7 +60,7 @@ public class ManageOrderEmailLip extends EmailTemplateVars {
         this.finalOrdersText = finalOrdersText;
         this.newAndFinalOrdersText = newAndFinalOrdersText;
         this.newOrderExplanation = newOrderExplanation;
-        this.ginalOrderExplanation = ginalOrderExplanation;
+        this.finalOrderExplanation = finalOrderExplanation;
         this.caseLink = caseLink;
     }
 }
