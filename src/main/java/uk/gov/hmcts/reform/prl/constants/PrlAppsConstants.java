@@ -968,6 +968,8 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
+    public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
+
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
     public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";

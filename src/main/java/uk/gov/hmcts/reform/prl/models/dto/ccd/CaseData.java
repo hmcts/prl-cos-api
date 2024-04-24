@@ -786,4 +786,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
+
+    @JsonProperty("isApplicantRepresented")
+    private String isApplicantRepresented;
 }
