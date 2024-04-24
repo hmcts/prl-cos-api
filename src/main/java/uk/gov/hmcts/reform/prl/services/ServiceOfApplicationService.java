@@ -817,6 +817,7 @@ public class ServiceOfApplicationService {
                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                     List<DynamicMultiselectListElement> selectedRespondents,
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
+        log.info("*** Respondents *** {}", selectedRespondents);
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
@@ -2799,7 +2800,7 @@ public class ServiceOfApplicationService {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                     final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                         partyIds);
-
+                    log.info("** RespondentList {}", respondentList);
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                         sendNotificationsToCitizenRespondentsC100(authorization,
@@ -2810,6 +2811,7 @@ public class ServiceOfApplicationService {
                                                                   false
                         );
                     } else {
+                        log.info("Sending docs non personal respondent pack {}", respondentDocs);
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
                         sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
                                                                            authorization,

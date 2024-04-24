@@ -131,24 +131,23 @@ public class StmtOfServImplService {
                     .servedDateTimeOption(recipient.getServedDateTimeOption())
                     .build();
             }
-            if (isNotEmpty(caseData.getServiceOfApplication())
-                && isNotEmpty(caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack())
-                && CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack()
-                                                  .getPackDocument())
-                && StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
-                .equals(caseData.getStatementOfService()
-                            .getStmtOfServiceWhatWasServed())
-            ) {
-                caseData = cleanupAndServeRespondentPacksPersonalService(caseData, authorisation);
-                caseDataUpdateMap.put(
-                    "finalServedApplicationDetailsList",
-                    caseData.getFinalServedApplicationDetailsList()
-                );
-                caseDataUpdateMap.put("unServedRespondentPack", null);
-            }
             elementList.add(element(recipient));
         }
-
+        if (isNotEmpty(caseData.getServiceOfApplication())
+            && isNotEmpty(caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack())
+            && CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack()
+                                              .getPackDocument())
+            && StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+            .equals(caseData.getStatementOfService()
+                        .getStmtOfServiceWhatWasServed())
+        ) {
+            caseData = cleanupAndServeRespondentPacksPersonalService(caseData, authorisation);
+            caseDataUpdateMap.put(
+                "finalServedApplicationDetailsList",
+                caseData.getFinalServedApplicationDetailsList()
+            );
+            caseDataUpdateMap.put("personalServiceUnServedRespondentPack", null);
+        }
         caseDataUpdateMap.put(
             "stmtOfServiceForApplication",
             appendStatementOfServiceToSoaTab(
@@ -218,7 +217,7 @@ public class StmtOfServImplService {
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
-            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedRespondentPack(null).build())
+            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().personalServiceUnServedRespondentPack(null).build())
             .build();
     }
 
@@ -244,7 +243,7 @@ public class StmtOfServImplService {
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
-        SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
         String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
             .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
@@ -255,8 +254,8 @@ public class StmtOfServImplService {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
                 .packDocument(unServedRespondentPack.getPackDocument()
                                   .stream()
-                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
-                                      SOA_FL415_FILENAME)).toList())
+                                  .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                                  .toList())
                 .build();
         } else {
             unServedRespondentPack = unServedRespondentPack.toBuilder()
@@ -299,37 +298,58 @@ public class StmtOfServImplService {
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            List<Element<Document>> packDocs = new ArrayList<>();
-            caseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
-                                                                                     Templates.PRL_LET_ENG_RE5
-                    )));
-                }
-            });
-            packDocs.addAll(unServedRespondentPack.getPackDocument());
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty("Applicant Lip")
-                                             .bulkPrintId("Respondent will be served personally by Applicant LIP")
-                                             .printedDocs(String.join(",", packDocs.stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                             .partyIds(getPartyIds(caseTypeOfApplication,
-                                                                   caseData.getRespondents(),
-                                                                   caseData.getRespondentsFL401()))
-                                             .build()));
+            whoIsResponsible = SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue();
+            handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails,
+                                                             caseTypeOfApplication);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+        return ServedApplicationDetails.builder()
+            .emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsible)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private void handlePersonalServiceByUnrepresentedApplicantLip(CaseData caseData, String authorization, SoaPack unServedRespondentPack,
+                                                                  List<Element<BulkPrintDetails>> bulkPrintDetails, String caseTypeOfApplication) {
+        List<Element<Document>> packDocs = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getRespondents().forEach(respondent -> {
+                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                          caseData, respondent,
+                                                                                                          Templates.PRL_LET_ENG_RE5
+                    )));
+                }
+            });
+        } else {
+            if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())) {
+                packDocs.add(element(serviceOfApplicationService
+                                         .generateCoverLetterBasedOnCaseAccess(authorization,
+                                              caseData,
+                                              element(caseData.getRespondentsFL401().getPartyId(),
+                                                      caseData.getRespondentsFL401()),
+                                              Templates.PRL_LET_ENG_RE5
+                )));
+            }
+        }
+        packDocs.addAll(unServedRespondentPack.getPackDocument());
+        bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                         .servedParty("Applicant Lip")
+                                         .bulkPrintId("Respondent will be served personally by Applicant LIP")
+                                         .printedDocs(String.join(",", packDocs.stream()
+                                             .map(Element::getValue)
+                                             .map(Document::getDocumentFileName).toList()))
+                                         .printDocs(packDocs)
+                                         .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                         .partyIds(getPartyIds(caseTypeOfApplication,
+                                                               caseData.getRespondents(),
+                                                               caseData.getRespondentsFL401()))
+                                         .build()));
     }
 
     private String getPartyIds(String caseTypeOfApplication,
