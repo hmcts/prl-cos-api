@@ -330,10 +330,10 @@ public class ManageOrderEmailService {
         String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
-        if (dynamicData.containsKey(FINAL) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
+        if (dynamicData.get(FINAL).equals(true) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
             finalOrderTitle = "yes";
             orders = "yes";
-        } else if (dynamicData.containsKey(FINAL)) {
+        } else if (dynamicData.get(FINAL).equals(true)) {
             finalOrderTitle = "yes";
         } else {
             newAndFinalOrderTitle = "yes";
