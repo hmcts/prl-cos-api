@@ -335,7 +335,7 @@ public class ManageOrderEmailService {
             orders = "yes";
         } else if (dynamicData.get(FINAL).equals(true)) {
             finalOrderTitle = "yes";
-        } else {
+        } else if (dynamicData.get(NEW_AND_FINAL).equals(true)) {
             newAndFinalOrderTitle = "yes";
         }
 
