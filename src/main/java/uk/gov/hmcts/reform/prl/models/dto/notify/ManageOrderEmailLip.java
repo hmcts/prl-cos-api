@@ -42,11 +42,12 @@ public class ManageOrderEmailLip extends EmailTemplateVars {
     private final String caseLink;
 
     @Builder
-    public ManageOrderEmailLip(String caseName, String applicantName, String newOrderTitle, String finalOrderTitle,
-                               String newAndFinalOrderTitle, String order, String orders, String newOrderText,
-                               String finalOrderText, String newOrdersText, String finalOrdersText,
+    public ManageOrderEmailLip(String caseReference, String caseName, String applicantName, String newOrderTitle,
+                               String finalOrderTitle, String newAndFinalOrderTitle, String order, String orders,
+                               String newOrderText, String finalOrderText, String newOrdersText, String finalOrdersText,
                                String newAndFinalOrdersText, String newOrderExplanation, String finalOrderExplanation,
                                String caseLink) {
+        super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
         this.newOrderTitle = newOrderTitle;
