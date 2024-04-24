@@ -255,7 +255,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
 
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
