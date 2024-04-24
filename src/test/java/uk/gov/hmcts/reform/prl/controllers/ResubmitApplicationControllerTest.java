@@ -110,6 +110,8 @@ public class ResubmitApplicationControllerTest {
     private CaseData caseDataIssued;
 
     private CaseData caseDataGateKeeping;
+
+    private CaseData caseDataReSubmitted;
     private AllegationOfHarm allegationOfHarm;
     @Mock
     private AuthorisationService authorisationService;
@@ -135,6 +137,7 @@ public class ResubmitApplicationControllerTest {
             .state(State.SUBMITTED_PAID)
             .allegationOfHarm(allegationOfHarm)
             .dateSubmitted(currentDate)
+            .courtId("123")
             .build();
 
         caseDataIssued = CaseData.builder()
@@ -147,6 +150,15 @@ public class ResubmitApplicationControllerTest {
             .id(12345L)
             .state(State.JUDICIAL_REVIEW)
             .allegationOfHarm(allegationOfHarm)
+            .build();
+
+        caseDataReSubmitted = CaseData.builder()
+            .id(12345L)
+            .state(State.SUBMITTED_PAID)
+            .allegationOfHarm(allegationOfHarm)
+            .dateSubmitted(currentDate)
+            .courtId("123")
+            .courtName("testcourt")
             .build();
 
         caseDetails = CaseDetails.builder()
@@ -183,11 +195,12 @@ public class ResubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseDataSubmitted)).thenReturn(court);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
-        verify(allTabService).getAllTabsFields(caseDataSubmitted);
+        verify(allTabService).getAllTabsFields(caseDataReSubmitted);
 
     }
 
