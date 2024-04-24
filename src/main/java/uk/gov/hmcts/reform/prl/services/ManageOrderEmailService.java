@@ -313,7 +313,8 @@ public class ManageOrderEmailService {
     }
 
     private void testEmailJames(CaseData caseData) {
-        EmailTemplateVars emailTemplateVars = buildNotificationJames(caseData);
+        EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(caseData);
+        log.info("returned email data James {}", emailTemplateVars);
         emailService.send(
             "testJames@hmcts.net",
             EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
@@ -322,7 +323,7 @@ public class ManageOrderEmailService {
         );
     }
 
-    private EmailTemplateVars buildNotificationJames(CaseData caseData) {
+    private EmailTemplateVars buildEmailTemplateVarsApplicantLip(CaseData caseData) {
 
         String finalOrderTitle = "No";
         String newAndFinalOrderTitle = "No";
@@ -355,6 +356,7 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .applicantName("John")
             .caseLink(caseLink)
+            .caseReference(String.valueOf(caseData.getId()))
             .build();
     }
 
