@@ -10,6 +10,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 
+import java.math.BigDecimal;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
@@ -29,7 +32,7 @@ public class UploadAdditionalApplicationUtils {
         String awpTaskNameToBe = null;
         if (caseData.getUploadAdditionalApplicationData() != null
             && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor() != null
-            && ObjectUtils.isNotEmpty(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
+            && isNotEmpty(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
             boolean c2OrderListed = false;
             boolean otherOrderListed = false;
             String awpTaskNameForOtherOrder = null;
@@ -60,12 +63,28 @@ public class UploadAdditionalApplicationUtils {
     public String getValueOfAwpTaskToBeCreated(CaseData caseData) {
         String taskToBeCraeated = NO;
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
-        if (ObjectUtils.isNotEmpty(uploadAdditionalApplicationData)
-            && ObjectUtils.isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())
-            && Double.parseDouble(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay().replace("£",
-                                                                                                              "")) > 0) {
-            taskToBeCraeated = YES;
+        log.info("uploadAdditionalApplicationData is present");
+
+        log.info("ObjectUtils.isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay():: "
+                     + isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay()));
+        log.info("ObjectUtils.isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay():: "
+                     + isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay()));
+        if (isNotEmpty(uploadAdditionalApplicationData != null)) {
+            log.info("uploadAdditionalApplicationData is present");
+            if (isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay())) {
+                log.info("uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay() is not null");
+                String feeAmount = uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay().replace("£", "");
+                log.info("uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay() is::"
+                             + uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay());
+                log.info("feeAmount is::"
+                             + feeAmount);
+                if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Long.parseLong(feeAmount))) > 0) {
+                    log.info("Its Zero amount AWP");
+                    taskToBeCraeated = YES;
+                }
+            }
         }
+
         return taskToBeCraeated;
     }
 
