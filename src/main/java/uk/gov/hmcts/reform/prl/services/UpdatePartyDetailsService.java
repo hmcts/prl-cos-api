@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -69,6 +70,7 @@ public class UpdatePartyDetailsService {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final DocumentLanguageService documentLanguageService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -409,7 +411,7 @@ public class UpdatePartyDetailsService {
                                                                        Element<PartyDetails> respondent)
         throws  Exception {
         Document c8FinalDocument;
-        Document c8FinalWelshDocument;
+        Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if (isDetailsChanged) {
@@ -426,15 +428,18 @@ public class UpdatePartyDetailsService {
                         dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
-                c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                        authorisation,
-                        caseData,
-                        caseData.getCaseTypeOfApplication()
-                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                                : C8_RESP_FL401_FINAL_HINT,
-                        true,
-                        dataMap
-                );
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                if (documentLanguage.isGenWelsh()) {
+                    c8FinalWelshDocument = documentGenService.generateSingleDocument(
+                            authorisation,
+                            caseData,
+                            caseData.getCaseTypeOfApplication()
+                                    .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                    : C8_RESP_FL401_FINAL_HINT,
+                            true,
+                            dataMap
+                    );
+                }
                 Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
                                                                                     .dateTimeCreated(LocalDateTime.now())
                                                                                     .respondentC8Document(
