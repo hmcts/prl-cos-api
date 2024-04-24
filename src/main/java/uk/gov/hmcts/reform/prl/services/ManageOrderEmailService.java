@@ -325,8 +325,8 @@ public class ManageOrderEmailService {
 
         return ManageOrderEmail.builder()
             .newOrder("No")
-            .finalOrder("No")
-            .newOrders("No")
+            .finalOrder("Yes")
+            .newOrders("Yes")
             .finalOrders("Yes")
             .newAndFinalOrders("No")
             .caseReference(String.valueOf(caseData.getId()))
