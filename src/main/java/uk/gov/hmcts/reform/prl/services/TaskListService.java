@@ -280,9 +280,6 @@ public class TaskListService {
                                                 ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
                         .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
                         .build();
-
-                log.info("Final Welsh document value inside caseData is: {}", caseData.getFinalWelshDocument());
-                log.info("Final document value inside caseData is: {}", caseData.getFinalDocument());
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
