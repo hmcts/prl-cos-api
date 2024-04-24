@@ -78,6 +78,7 @@ public class ManageOrderEmailService {
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
+    public static final String MULTIPLE_ORDERS = "multipleOrders";
     public static final String ORDERS = "#Orders";
     public static final String NAME = "name";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
@@ -323,11 +324,36 @@ public class ManageOrderEmailService {
 
     private EmailTemplateVars buildNotificationJames(CaseData caseData) {
 
+        String finalOrderTitle = "No";
+        String newAndFinalOrderTitle = "No";
+        String orders = "No";
         String caseLink = manageCaseUrl + "/" + caseData.getId();
+
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
-        log.info("Dynamic data within James call is {}", dynamicData);
+        if (dynamicData.containsKey(FINAL) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
+            finalOrderTitle = "Yes";
+            orders = "Yes";
+        } else if (dynamicData.containsKey(FINAL)) {
+            finalOrderTitle = "Yes";
+        } else {
+            newAndFinalOrderTitle = "Yes";
+        }
 
         return ManageOrderEmailLip.builder()
+            .order(orders.equals("No") ? "Yes" : "No")
+            .orders(orders.equals("Yes") ? orders : "No")
+            .finalOrderTitle(finalOrderTitle.equals("Yes") ? finalOrderTitle : "No")
+            .newOrderTitle(finalOrderTitle.equals("No") ? "Yes" : "No")
+            .finalOrderText(finalOrderTitle.equals("Yes") && orders.equals("No") ? "Yes" : "No")
+            .finalOrdersText(finalOrderTitle.equals("Yes") && orders.equals("Yes") ? "Yes" : "No")
+            .finalOrderExplanation(finalOrderTitle.equals("Yes") || newAndFinalOrderTitle.equals("Yes") ? "Yes" : "No")
+            .newOrderText(finalOrderTitle.equals("No") && orders.equals("No") ? "Yes" : "No")
+            .newOrdersText(finalOrderTitle.equals("No") && orders.equals("Yes") ? "Yes" : "No")
+            .newOrderExplanation(finalOrderTitle.equals("No") || newAndFinalOrderTitle.equals("Yes") ? "Yes" : "No")
+            .newAndFinalOrderTitle(newAndFinalOrderTitle)
+            .newAndFinalOrdersText(newAndFinalOrderTitle)
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName("John")
             .caseLink(caseLink)
             .build();
     }
@@ -716,7 +742,7 @@ public class ManageOrderEmailService {
     }
 
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
-        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
+        dynamicData.put(MULTIPLE_ORDERS, CollectionUtils.size(selectedOrderIds) > 1);
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
