@@ -37,7 +37,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -227,7 +226,7 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
                                                                   .packDocument(documentList)
@@ -358,7 +357,7 @@ public class StmtOfServImplServiceTest {
                                   .lastName("lastFl401")
                                   .build())
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtBailiff.toString())
                                                                   .packDocument(documentList)
@@ -489,7 +488,7 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
                                                                   .packDocument(documentList)
@@ -579,9 +578,8 @@ public class StmtOfServImplServiceTest {
     @Test
     public void testcheckAndServeRespondentPacksPersonalService() {
         CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(
                                                                       SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                                                                   .packDocument(List.of(element(Document.builder().build())))
