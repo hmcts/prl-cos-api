@@ -329,13 +329,15 @@ public class ManageOrderEmailService {
         String orders = "no";
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
-        if (dynamicData.get(FINAL).equals(true) && dynamicData.get(MULTIPLE_ORDERS).equals(true)) {
-            finalOrderTitle = "yes";
+        if (dynamicData.get(MULTIPLE_ORDERS).equals(true)) {
             orders = "yes";
+            if (dynamicData.get(FINAL).equals(true)) {
+                finalOrderTitle = "yes";
+            } else if (dynamicData.get(NEW_AND_FINAL).equals(true)) {
+                newAndFinalOrderTitle = "yes";
+            }
         } else if (dynamicData.get(FINAL).equals(true)) {
             finalOrderTitle = "yes";
-        } else if (dynamicData.get(NEW_AND_FINAL).equals(true)) {
-            newAndFinalOrderTitle = "yes";
         }
 
         log.info("dynamic data james {}", dynamicData);
