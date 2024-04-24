@@ -2764,16 +2764,18 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        final SoaPack personalServiceUnServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
+
         String whoIsResponsible = COURT;
-        if (unServedApplicantPack != null || unServedRespondentPack != null) {
+        if (unServedApplicantPack != null || unServedRespondentPack != null || personalServiceUnServedRespondentPack != null) {
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy()))
-                || (unServedRespondentPack != null
+                || (personalServiceUnServedRespondentPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-                unServedRespondentPack.getPersonalServiceBy()))) {
+                personalServiceUnServedRespondentPack.getPersonalServiceBy()))) {
                 EmailNotificationDetails emailNotification = sendNotificationForApplicantLegalRepPersonalService(caseData,
-                    authorization, unServedApplicantPack, unServedRespondentPack);
+                    authorization, unServedApplicantPack, personalServiceUnServedRespondentPack);
                 if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
                 }
@@ -2794,12 +2796,7 @@ public class ServiceOfApplicationService {
                             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                     }
                 }
-                if (unServedApplicantPack != null && unServedApplicantPack.getPersonalServiceBy() != null) {
-                    whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                        .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-                        ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
-                }
-                if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
+                if (unServedRespondentPack != null && CollectionUtils.isNotEmpty(unServedRespondentPack.getPackDocument())) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                     final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                         partyIds);
