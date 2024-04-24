@@ -339,6 +339,9 @@ public class ManageOrderEmailService {
             newAndFinalOrderTitle = "yes";
         }
 
+        log.info("dynamic data james {}", dynamicData);
+        log.info("orders james {}", orders);
+
         return ManageOrderEmailLip.builder()
             .order(orders.equals("no") ? "yes" : "no")
             .orders(orders.equals("yes") ? orders : "no")
