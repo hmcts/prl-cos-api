@@ -327,7 +327,6 @@ public class ManageOrderEmailService {
         String finalOrderTitle = "no";
         String newAndFinalOrderTitle = "no";
         String orders = "no";
-        String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
         if (dynamicData.get(FINAL).equals(true) && dynamicData.containsKey(MULTIPLE_ORDERS)) {
@@ -341,6 +340,7 @@ public class ManageOrderEmailService {
 
         log.info("dynamic data james {}", dynamicData);
         log.info("orders james {}", orders);
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         return ManageOrderEmailLip.builder()
             .order(orders.equals("no") ? "yes" : "no")
