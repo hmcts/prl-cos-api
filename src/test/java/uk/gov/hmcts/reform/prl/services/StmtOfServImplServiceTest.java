@@ -286,7 +286,7 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
                                                                   .packDocument(List.of(Element.<Document>builder()
@@ -419,7 +419,7 @@ public class StmtOfServImplServiceTest {
                                   .lastName("lastFl401")
                                   .build())
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtBailiff.toString())
                                                                   .packDocument(List.of(Element.<Document>builder()
@@ -548,7 +548,7 @@ public class StmtOfServImplServiceTest {
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .unServedRespondentPack(SoaPack.builder()
+                                      .personalServiceUnServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
                                                                   .packDocument(List.of(Element.<Document>builder()
