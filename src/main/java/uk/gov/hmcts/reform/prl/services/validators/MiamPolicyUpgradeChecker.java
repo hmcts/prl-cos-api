@@ -38,7 +38,6 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         log.info("verifying isFinished for miam");
         boolean finished = false;
-        log.info("MiamPolicyUpgradeDetails {}", caseData.getMiamPolicyUpgradeDetails());
 
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
@@ -47,10 +46,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         log.info("applicantAttendedMiam.isPresent() {}", applicantAttendedMiam.isPresent());
         log.info("claimingExemptionMiam.isPresent() {}", claimingExemptionMiam.isPresent());
         if (childInvolvedInMiam.isPresent() && Yes.equals(childInvolvedInMiam.get())) {
-            log.info("claimingExemptionMiam is Yes");
             finished = true;
         } else if (childInvolvedInMiam.isPresent() && No.equals(childInvolvedInMiam.get())) {
-            log.info("claimingExemptionMiam is No");
             finished = inspectChildInvolvedInMiamNoFlow(
                 caseData,
                 applicantAttendedMiam,
@@ -70,7 +67,6 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             MIAM_POLICY_UPGRADE_ERROR.getError()
         );
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get()) && !isStarted(caseData)) {
-            log.info("inside miampolicyupgrade error remove");
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
         log.info("nope, something is wrong");
@@ -235,7 +231,6 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        log.info("verifying isStarted for miam");
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         log.info("verifying isStarted for miam {}", childInvolvedInMiam.isPresent());
         return childInvolvedInMiam.isPresent();
