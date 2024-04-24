@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmailLip;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
@@ -321,16 +322,12 @@ public class ManageOrderEmailService {
     }
 
     private EmailTemplateVars buildNotificationJames(CaseData caseData) {
-        String caseLink = manageCaseUrl + "/" + caseData.getId();
 
-        return ManageOrderEmail.builder()
-            .newOrder("No")
-            .finalOrder("Yes")
-            .newOrders("Yes")
-            .finalOrders("Yes")
-            .newAndFinalOrders("No")
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
+        Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
+        log.info("Dynamic data within James call is {}", dynamicData);
+
+        return ManageOrderEmailLip.builder()
             .caseLink(caseLink)
             .build();
     }
@@ -338,8 +335,6 @@ public class ManageOrderEmailService {
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
-        testEmailJames(caseData);
-
         List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
         List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
@@ -349,6 +344,7 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            testEmailJames(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
                 handleNonPersonalServiceNotifications(
