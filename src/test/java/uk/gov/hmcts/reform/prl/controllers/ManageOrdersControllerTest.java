@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -34,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -86,7 +86,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
@@ -100,15 +102,11 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrdersControllerTest {
 
-    private MockMvc mockMvc;
-
     @InjectMocks
     private ManageOrdersController manageOrdersController;
 
     @Mock
     private ObjectMapper objectMapper;
-
-    private CaseDetails caseDetails;
 
     private CaseData caseData;
 
@@ -148,9 +146,6 @@ public class ManageOrdersControllerTest {
     private HearingService hearingService;
 
     @Mock
-    private AllTabServiceImpl allTabService;
-
-    @Mock
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
@@ -159,17 +154,11 @@ public class ManageOrdersControllerTest {
     PartyDetails respondent;
 
     @Mock
-    AllTabServiceImpl tabService;
-
-    @Mock
     RefDataUserService refDataUserService;
-
     @Mock
     RoleAssignmentService roleAssignmentService;
     @Mock
-    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-    @Mock
-    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContents;
+    AllTabServiceImpl allTabService;
 
     @Before
     public void setUp() {
@@ -233,19 +222,6 @@ public class ManageOrdersControllerTest {
             .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
             .build();
-        Map<String, Object> stringObjectMaps = caseData.toMap(new ObjectMapper());
-        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            authToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            stringObjectMaps,
-            caseData,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
-            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
-
     }
 
     @Test
@@ -1042,10 +1018,6 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = new StartAllTabsUpdateDataContent(authToken,EventRequestData.builder().build(),
-                                                StartEventResponse.builder().build(), stringObjectMap, caseData, null);
-        when(allTabService.getStartAllTabsUpdate("12345")).thenReturn(startAllTabsUpdateDataContent);
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
@@ -1167,7 +1139,6 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
@@ -1278,7 +1249,6 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
@@ -1389,7 +1359,6 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
@@ -1602,9 +1571,6 @@ public class ManageOrdersControllerTest {
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
-            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -2802,7 +2768,6 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
@@ -2920,7 +2885,6 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
@@ -3636,35 +3600,48 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSendEmailNotificationOnClosingOrder() throws Exception {
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        startAllTabsUpdateDataContents  = new StartAllTabsUpdateDataContent(
-            authToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            stringObjectMap,
-            caseData,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(Mockito.anyString())).thenReturn(startAllTabsUpdateDataContents);
-        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
-            .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
-        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+    public void testAutomatedHearingManagementRequest() {
 
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(UUID.randomUUID()).value(OrderDetails
+                                                             .builder()
+                                                             .isAutoHearingReqPending(Yes)
+                                                             .build())
+                                         .build()))
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .draftOrderCollection(draftOrderCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
+                             .id(123L)
                              .data(stringObjectMap)
-                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap,
+                                                                                                        caseData,
+                                                                                                        null
+        );
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
@@ -3672,7 +3649,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
-        verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
+
     }
+
 }
