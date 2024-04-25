@@ -3638,14 +3638,6 @@ public class ManageOrdersControllerTest {
     @Test
     public void testSendEmailNotificationOnClosingOrder() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .state(State.CASE_ISSUED.getValue())
-                             .build())
-            .build();
         startAllTabsUpdateDataContents  = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -3665,6 +3657,14 @@ public class ManageOrdersControllerTest {
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
+                             .build())
+            .build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
