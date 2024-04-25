@@ -52,12 +52,11 @@ public class MiamPolicyUpgradeFileUploadService {
     private final SystemUserService systemUserService;
 
     public CaseData renameMiamPolicyUpgradeDocumentWithConfidential(CaseData caseData, String systemAuthorisation) {
-        log.info("Inside renameMiamPolicyUpgradeDocumentWithConfidential");
         if (CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
             caseData = renameDomesticAbuseDocumentWithConfidential(caseData, systemAuthorisation);
             caseData = renamePreviousMiamAttendanceDocumentWithConfidential(caseData, systemAuthorisation);
         } else {
-            log.info("No need to rename MIAM Policy Upgrade document with Confidential for Exemptions");
+            log.info("No file to rename for MIAM Policy Upgrade with Confidential prefix for Exemptions");
         }
         return caseData;
     }
@@ -69,7 +68,6 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                log.info("Going to append Confidential prefix for previous maim attendance document for option 1");
                 Document mpuDocFromDisputeResolutionProvider = manageDocumentsService.downloadAndDeleteDocument(
                     caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider(),
                     systemAuthorisation
@@ -86,7 +84,6 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator())
                 && !caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                log.info("Going to append Confidential prefix for previous maim attendance document for option 2");
                 Document mpuCertificateByMediator = manageDocumentsService.downloadAndDeleteDocument(
                     caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator(),
                     systemAuthorisation
@@ -109,7 +106,6 @@ public class MiamPolicyUpgradeFileUploadService {
             List<Element<DomesticAbuseEvidenceDocument>> mpuConfidentialDomesticAbuseEvidenceDocument = new ArrayList<>();
             caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
-                    log.info("Going to append Confidential prefix for Domestic Abuse Evidence Document");
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (!domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         domesticAbuseDocument = manageDocumentsService.downloadAndDeleteDocument(
@@ -133,13 +129,12 @@ public class MiamPolicyUpgradeFileUploadService {
     }
 
     public CaseData renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData caseData) {
-        log.info("Inside renameMiamPolicyUpgradeDocumentWithoutConfidential");
         if (CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())) {
             String systemAuthorisation = systemUserService.getSysUserToken();
             caseData = renameDomesticAbuseDocumentWithoutConfidential(caseData, systemAuthorisation);
             caseData = renamePreviousMiamAttendanceDocumentWithoutConfidential(caseData, systemAuthorisation);
         } else {
-            log.info("No need to rename MIAM Policy Upgrade document without Confidential for Exemptions");
+            log.info("No file to rename for MIAM Policy Upgrade with Confidential prefix for Exemptions");
         }
         return caseData;
     }
@@ -151,7 +146,6 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider())
                 && caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                log.info("Going to remove Confidential prefix from previous maim attendance document for option 1");
                 Document mpuDocFromDisputeResolutionProvider = downloadAndUploadDocumentWithoutConfidential(
                     caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider(),
                     systemAuthorisation
@@ -168,7 +162,6 @@ public class MiamPolicyUpgradeFileUploadService {
                 && ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator())
                 && caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator().getDocumentFileName().startsWith(
                 CONFIDENTIAL)) {
-                log.info("Going to remove Confidential prefix from previous maim attendance document for option 2");
                 Document mpuCertificateByMediator = downloadAndUploadDocumentWithoutConfidential(
                     caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator(),
                     systemAuthorisation
@@ -191,7 +184,6 @@ public class MiamPolicyUpgradeFileUploadService {
             List<Element<DomesticAbuseEvidenceDocument>> mpuConfidentialDomesticAbuseEvidenceDocument = new ArrayList<>();
             caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
                 .stream().forEach(domesticAbuseEvidenceDocument -> {
-                    log.info("Going to remove Confidential prefix for Domestic Abuse Evidence Document");
                     Document domesticAbuseDocument = domesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
                     if (domesticAbuseDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                         domesticAbuseDocument = downloadAndUploadDocumentWithoutConfidential(
