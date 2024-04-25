@@ -77,7 +77,7 @@ public class UploadAdditionalApplicationUtils {
                              + uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay());
                 log.info("feeAmount is::"
                              + feeAmount);
-                if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Double.valueOf(feeAmount))) > 0) {
+                if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Double.valueOf(feeAmount))) < 0) {
                     log.info("Its Zero amount AWP");
                     taskToBeCraeated = YES;
                 }
