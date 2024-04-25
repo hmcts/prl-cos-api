@@ -29,8 +29,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -137,6 +139,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void shouldGenerateDraftOrderDropdown() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -144,6 +150,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
+            .applicants(List.of(applicants))
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -188,11 +195,16 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void shouldGenerateDraftOrderDropdownNoDraftOrders() {
 
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
+            .applicants(List.of(applicants))
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
 
