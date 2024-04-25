@@ -312,7 +312,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private void testEmailJames(Map<String, Object> dynamicDataForEmail, String email ) {
+    private void testEmailJames(Map<String, Object> dynamicDataForEmail, String email) {
         EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(dynamicDataForEmail);
 
         emailService.send(
@@ -325,22 +325,22 @@ public class ManageOrderEmailService {
 
     private EmailTemplateVars buildEmailTemplateVarsApplicantLip(Map<String, Object> dynamicData) {
 
-        String isFinalOrderFlag = dynamicData.get(FINAL).equals(true) ? "yes" : "no";
+        boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
+        boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
         String newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true) ? "yes" : "no";
-        String multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true) ? "yes" : "no";
 
         return ManageOrderEmailLip.builder()
-            .order(multipleOrderFlag.equals("no") ? "yes" : "no")
-            .orders(multipleOrderFlag.equals("yes") ? "yes" : "no")
-            .finalOrderTitle(isFinalOrderFlag.equals("yes") ? isFinalOrderFlag : "no")
-            .newOrderTitle(isFinalOrderFlag.equals("no") && newAndFinalOrderFlag.equals("no") ? "yes" : "no")
-            .finalOrderText(isFinalOrderFlag.equals("yes") && multipleOrderFlag.equals("no") ? "yes" : "no")
-            .finalOrdersText(isFinalOrderFlag.equals("yes") && multipleOrderFlag.equals("yes") ? "yes" : "no")
-            .finalOrderExplanation(isFinalOrderFlag.equals("yes") || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
-            .newOrderText(isFinalOrderFlag.equals("no") && multipleOrderFlag.equals("no") ? "yes" : "no")
-            .newOrdersText(isFinalOrderFlag.equals("no") && newAndFinalOrderFlag.equals("no")
-                && multipleOrderFlag.equals("yes") ? "yes" : "no")
-            .newOrderExplanation(isFinalOrderFlag.equals("no") || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
+            .order(!multipleOrderFlag ? "yes" : "no")
+            .orders(multipleOrderFlag ? "yes" : "no")
+            .finalOrderTitle(isFinalOrderFlag ? "yes" : "no")
+            .newOrderTitle(!isFinalOrderFlag && newAndFinalOrderFlag.equals("no") ? "yes" : "no")
+            .finalOrderText(isFinalOrderFlag && !multipleOrderFlag ? "yes" : "no")
+            .finalOrdersText(isFinalOrderFlag && multipleOrderFlag ? "yes" : "no")
+            .finalOrderExplanation(isFinalOrderFlag || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
+            .newOrderText(!isFinalOrderFlag && !multipleOrderFlag ? "yes" : "no")
+            .newOrdersText(!isFinalOrderFlag && newAndFinalOrderFlag.equals("no")
+                && multipleOrderFlag ? "yes" : "no")
+            .newOrderExplanation(!isFinalOrderFlag || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
             .newAndFinalOrderTitle(newAndFinalOrderFlag)
             .newAndFinalOrdersText(newAndFinalOrderFlag)
             .caseName(String.valueOf(dynamicData.get("caseName")))
