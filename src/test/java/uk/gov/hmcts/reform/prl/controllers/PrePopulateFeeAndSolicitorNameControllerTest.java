@@ -53,6 +53,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -154,6 +155,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
 
         caseDataForAllegationOfHarmRevised = CaseData.builder()

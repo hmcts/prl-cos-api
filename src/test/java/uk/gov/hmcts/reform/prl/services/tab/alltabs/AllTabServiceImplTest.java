@@ -268,4 +268,39 @@ public class AllTabServiceImplTest {
 
         verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
     }
+
+    @Test
+    public void testUpdatePartyDetailsForNocC100ApplicantforMiamPolicyupgradeDocumentMap2() {
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(Yes)
+            .mpuApplicantAttendedMiam(Yes)
+            .mpuClaimingExemptionMiam(Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+            .mpuDocFromDisputeResolutionProvider(Document.builder().build())
+            .mpuIsDomesticAbuseEvidenceProvided(Yes)
+            .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
+            .build();
+        caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication("C100")
+            .build();
+        allTabService.updatePartyDetailsForNoc(caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), caseData);
+
+        verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
+    }
 }
