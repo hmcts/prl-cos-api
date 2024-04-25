@@ -191,30 +191,30 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
     token:
       context-path: /oauth2/token
   user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+    genericpassword: ${PRL_GENERIC_PASSWORD:genericpassword}
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
     password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
   solicitor:
-    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+    username: ${IDAM_SOLICITOR_USERNAME:fprl_caseworker_solicitor@mailinator.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:Nagoya0102}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
   apigateway:
     username: ${COURTNAV_USERNAME:xxxxxx}
     password: ${COURTNAV_PASSWORD:xxxxxx}
