@@ -117,9 +117,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuOther)) {
             otherFinished = checkedForOtherExemptions(caseData);
         }
-        boolean finished = domesticAbuseFinished && childProtectionFinished && urgencyFinished
+        return domesticAbuseFinished && childProtectionFinished && urgencyFinished
             && previousMiamAttendanceFinished && otherFinished;
-        return finished;
     }
 
     private boolean checkForChildProtectionConcernExemption(CaseData caseData) {
