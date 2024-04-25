@@ -44,7 +44,7 @@ public class CafcassUploadDocumentFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
-//    @Test
+    @Test
     public void givenValidDocumentData_then200Response() throws IOException {
         final File fileToUpload = readFile("classpath:courtnav/Dummy_pdf_file.pdf");
 
