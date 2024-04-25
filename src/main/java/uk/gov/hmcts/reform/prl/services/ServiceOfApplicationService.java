@@ -998,7 +998,7 @@ public class ServiceOfApplicationService {
             }
         }
         log.info(
-            "*** Time taken to notify C100 applicants personal service - {} ms",
+            "*** Time taken to notify C100 applicants personal service - {}s",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
         );
     }
