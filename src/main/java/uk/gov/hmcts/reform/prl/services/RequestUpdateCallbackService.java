@@ -37,7 +37,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_URGENCY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 @Component
@@ -255,6 +257,7 @@ public class RequestUpdateCallbackService {
                 caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
             }
             caseDataUpdated.put(AWP_WA_TASK_NAME, uploadAdditionalApplicationUtils.getAwPTaskName(startEventResponseData));
+            caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
             caseDataUpdated.put(AWP_WA_TASK_URGENCY, uploadAdditionalApplicationUtils.getValueOfAwpTaskUrgency(startEventResponseData));
         }
         return caseDataUpdated;
