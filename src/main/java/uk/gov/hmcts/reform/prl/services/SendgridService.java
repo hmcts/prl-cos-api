@@ -124,6 +124,7 @@ public class SendgridService {
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
         mail.setFrom(getEmail(fromEmailSendgrid));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
@@ -196,6 +197,7 @@ public class SendgridService {
                     emailProps.get("solicitorName")
             ));
         }
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
         Mail mail = new Mail(new Email(fromEmailSendgrid), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
@@ -242,6 +244,7 @@ public class SendgridService {
             emailProps.get("confidentialityText"),
             emailProps.get("courtName")
         ));
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
         Mail mail = new Mail(new Email(fromEmailSendgrid), subject, new Email(toEmailAddress), content);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
