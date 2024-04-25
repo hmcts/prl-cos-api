@@ -59,7 +59,6 @@ public class MiamPolicyUpgradeService {
     }
 
     public Map<String, Object> cleanUpMiamPolicyUpgradeDetails(CaseData caseData) {
-        log.info("inside cleanUpMiamPolicyUpgradeDetails");
         Map<String, Object> updatedMiamPolicyUpgradeData = new HashMap<>();
         updatedMiamPolicyUpgradeData.put(
             "mpuChildInvolvedInMiam",
