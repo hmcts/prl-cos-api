@@ -75,7 +75,7 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
 
-    @Value("${send-grid.rpa.emailId.from}")
+    @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
     @Value("${send-grid.notification.emailId.from}")
