@@ -149,7 +149,7 @@ public class DraftOrder {
     private final SdoDetails sdoDetails;
     private final YesOrNo isOrderCreatedBySolicitor;
 
-    private final YesOrNo isAutoHearingReqPending;
+    private YesOrNo isAutoHearingReqPending;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
