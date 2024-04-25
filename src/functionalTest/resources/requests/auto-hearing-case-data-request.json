@@ -823,7 +823,7 @@
                 }
               ]
             },
-            "hearingDateConfirmOptionEnum": "dateConfirmedByListingTeam",
+            "hearingDateConfirmOptionEnum": null,
             "hearingEstimatedDays": "3",
             "hearingEstimatedHours": "3",
             "hearingEstimatedMinutes": "3",
@@ -1006,6 +1006,7 @@
         {
           "id": "1fc02153-5afd-480d-9271-13fd3e4025e7",
           "value": {
+            "isAutoHearingReqPending": true,
             "orderType": "noticeOfProceedingsParties",
             "childOption": {
               "value": null,
@@ -1514,7 +1515,7 @@
                       }
                     ]
                   },
-                  "hearingDateConfirmOptionEnum": "dateReservedWithListAssit",
+                  "hearingDateConfirmOptionEnum": "dateConfirmedByListingTeam",
                   "localAuthorityHearingChannel": {
                     "value": null,
                     "list_items": [
