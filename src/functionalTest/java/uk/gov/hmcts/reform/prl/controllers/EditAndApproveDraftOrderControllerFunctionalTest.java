@@ -160,7 +160,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("orderName", "C21");
         caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
-        Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any(),
+                                                                    ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order")

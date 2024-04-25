@@ -92,7 +92,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if(caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")){
+            if (caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateDraftOrderDocument(
                         caseData, authorisation, true, "draft id which is passed from task tab")).build();
