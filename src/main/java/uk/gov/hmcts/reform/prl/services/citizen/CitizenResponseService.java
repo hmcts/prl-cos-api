@@ -174,7 +174,7 @@ public class CitizenResponseService {
                                 PartyDetails updatedPartyDetails = citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(
                                     citizenUpdatedCaseData.getPartyDetails(),
                                     party.getValue(),
-                                    CaseEvent.REVIEW_AND_SUBMIT,dbCaseData);
+                                    CaseEvent.REVIEW_AND_SUBMIT,dbCaseData.getNewChildDetails());
                                 Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                                 int updatedRespondentPartyIndex = respondents.indexOf(party);
                                 respondents.set(updatedRespondentPartyIndex, updatedPartyElement);

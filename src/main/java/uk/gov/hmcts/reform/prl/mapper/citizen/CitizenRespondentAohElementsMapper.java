@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespDomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildPassportDetails;
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CitizenAllegationOfHarmElementsMapper {
+public class CitizenRespondentAohElementsMapper {
 
     private static final String RESPONDENT = "respondent";
     private static final String CHILDREN = "children";
@@ -62,7 +61,7 @@ public class CitizenAllegationOfHarmElementsMapper {
 
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
 
-    public RespondentAllegationsOfHarmData map(String aohData, CaseData caseData) {
+    public RespondentAllegationsOfHarmData map(String aohData, List<Element<ChildDetailsRevised>> childDetails) {
         if (isNotEmpty(aohData)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -72,7 +71,7 @@ public class CitizenAllegationOfHarmElementsMapper {
                 c100C100RebuildSafetyConcernsElements = mapper
                     .readValue(aohData, C100RebuildSafetyConcernsElements.class);
                 return updateRespondentAohElementsForCaseData(c100C100RebuildSafetyConcernsElements,
-                                                              caseData.getNewChildDetails());
+                                                              childDetails);
             } catch (JsonProcessingException e) {
                 log.error("Failed to parse json request {}", e.getMessage());
             }
