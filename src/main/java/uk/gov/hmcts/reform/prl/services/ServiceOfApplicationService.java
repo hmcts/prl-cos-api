@@ -191,6 +191,7 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
+    public static final String PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK = "personalServiceUnServedRespondentPack";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -629,7 +630,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
             .build();
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
@@ -673,7 +674,7 @@ public class ServiceOfApplicationService {
                 EUROPE_LONDON_TIME_ZONE))))
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
 
     private List<Document> getDocumentsForCaorBailiffToServeRespondents(CaseData caseData, String authorization,
@@ -941,7 +942,7 @@ public class ServiceOfApplicationService {
                 }
             });
 
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
@@ -958,7 +959,7 @@ public class ServiceOfApplicationService {
                                                              bulkPrintDetails,
                                                              packjDocs);
 
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, generateRespondentsPack(authorization, caseData, c100StaticDocs));
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, generateRespondentsPack(authorization, caseData, c100StaticDocs));
         }
     }
 
@@ -2443,7 +2444,7 @@ public class ServiceOfApplicationService {
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
                 .packCreatedDate(dateCreated)
                 .build();
-            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+            caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
                 .packDocument(wrapElements(packHDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -2456,7 +2457,7 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
                                                                                                   dateCreated, c100StaticDocs));
-            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+            caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, L, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
@@ -2495,7 +2496,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                                  .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packjDocs))
             .partyIds(isCitizen
@@ -2642,7 +2643,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(dateCreated)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
         List<Document> packcDocs = getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs);
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packcDocs))
@@ -2683,7 +2684,7 @@ public class ServiceOfApplicationService {
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .packCreatedDate(dateCreated)
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unServedRespondentPack);
         return caseDataUpdated;
     }
 
@@ -3034,6 +3035,7 @@ public class ServiceOfApplicationService {
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, null);
             caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
             caseDataMap.put(UNSERVED_OTHERS_PACK, null);
             caseDataMap.put(UNSERVED_LA_PACK, null);
@@ -3098,7 +3100,7 @@ public class ServiceOfApplicationService {
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unServedRespondentPack);
 
         if ((isNotEmpty(unServedApplicantPack) && StringUtils.isNotEmpty(unServedApplicantPack.getPersonalServiceBy()))
             || (isNotEmpty(unServedRespondentPack) && StringUtils.isNotEmpty(unServedRespondentPack.getPersonalServiceBy()))) {
