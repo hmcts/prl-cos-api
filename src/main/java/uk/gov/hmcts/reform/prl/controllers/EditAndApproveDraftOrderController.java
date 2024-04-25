@@ -92,6 +92,11 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            if(caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")){
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(draftAnOrderService.populateDraftOrderDocument(
+                        caseData, authorisation, true, "draft id which is passed from task tab")).build();
+            }
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -125,7 +130,7 @@ public class EditAndApproveDraftOrderController {
             );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
-                    caseData, authorisation)).build();
+                    caseData, authorisation, false, null)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

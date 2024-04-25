@@ -632,12 +632,20 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization) {
+    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, boolean isCallFromTaskTab, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(
-            caseData.getDraftOrderCollection(),
-            caseData.getDraftOrdersDynamicList()
-        );
+        DraftOrder selectedOrder;
+        if (isCallFromTaskTab) {
+            selectedOrder = caseData.getDraftOrderCollection().get(0).getValue();
+            //draftOrderId to be replaced above
+            caseDataMap.put("isCallFromTaskTab", Yes);
+        } else {
+            selectedOrder = getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getDraftOrdersDynamicList()
+            );
+            caseDataMap.put("isCallFromTaskTab", No);
+        }
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
