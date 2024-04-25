@@ -110,7 +110,7 @@ public class UploadAdditionalApplicationUtils {
             }
         } else if (temporaryOtherApplicationsBundle != null) {
             urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
-        } else if (c2DocumentBundle != null) {
+        } else if (c2DocumentBundle != null && c2DocumentBundle.getUrgencyTimeFrameType() != null) {
             urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
         }
 
