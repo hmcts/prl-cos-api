@@ -95,23 +95,30 @@ public class UploadAdditionalApplicationUtils {
         C2DocumentBundle c2DocumentBundle = caseData.getUploadAdditionalApplicationData()
             .getTemporaryC2Document();
 
-        if (temporaryOtherApplicationsBundle != null && c2DocumentBundle != null) {
-            if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", "").equals(EMPTY_STRING)) {
-                urgencyTiemFrameC2 = Integer.parseInt(c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", ""));
+        if (c2DocumentBundle.getUrgencyTimeFrameType() != null) {
+            if (temporaryOtherApplicationsBundle != null
+                && c2DocumentBundle != null) {
+                if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", "").equals(EMPTY_STRING)) {
+                    urgencyTiemFrameC2 = Integer.parseInt(c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll(
+                        "\\D",
+                        ""
+                    ));
+                }
+                if (!temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", "").equals(
+                    EMPTY_STRING)) {
+                    urgencyTiemFrameOther = Integer.parseInt(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
+                                                                 .toString().replaceAll("\\D", ""));
+                }
+                if (urgencyTiemFrameC2 > urgencyTiemFrameOther) {
+                    return temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+                } else {
+                    return c2DocumentBundle.getUrgencyTimeFrameType().toString();
+                }
+            } else if (temporaryOtherApplicationsBundle != null) {
+                urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
+            } else if (c2DocumentBundle != null) {
+                urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
             }
-            if (!temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", "").equals(EMPTY_STRING)) {
-                urgencyTiemFrameOther = Integer.parseInt(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
-                                                             .toString().replaceAll("\\D", ""));
-            }
-            if (urgencyTiemFrameC2 > urgencyTiemFrameOther) {
-                return temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
-            } else {
-                return c2DocumentBundle.getUrgencyTimeFrameType().toString();
-            }
-        } else if (temporaryOtherApplicationsBundle != null) {
-            urgencyTiemFrame = temporaryOtherApplicationsBundle.getUrgencyTimeFrameType().toString();
-        } else if (c2DocumentBundle != null && c2DocumentBundle.getUrgencyTimeFrameType() != null) {
-            urgencyTiemFrame = c2DocumentBundle.getUrgencyTimeFrameType().toString();
         }
 
         return urgencyTiemFrame;
