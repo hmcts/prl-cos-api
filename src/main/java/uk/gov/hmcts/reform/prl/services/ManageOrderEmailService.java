@@ -312,52 +312,41 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private void testEmailJames(CaseData caseData) {
-        EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(caseData);
+    private void testEmailJames(Map<String, Object> dynamicDataForEmail, String email ) {
+        EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(dynamicDataForEmail);
+
         emailService.send(
-            "testJames@hmcts.net",
+            email,
             EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
             emailTemplateVars,
             LanguagePreference.english
         );
     }
 
-    private EmailTemplateVars buildEmailTemplateVarsApplicantLip(CaseData caseData) {
+    private EmailTemplateVars buildEmailTemplateVarsApplicantLip(Map<String, Object> dynamicData) {
 
-        String finalOrderTitle = "no";
-        String newAndFinalOrderTitle = "no";
-        String orders = "no";
-        String caseLink = manageCaseUrl + "/" + caseData.getId();
-
-        Map<String,Object> dynamicData = getDynamicDataForEmail(caseData);
-        if (dynamicData.get(MULTIPLE_ORDERS).equals(true)) {
-            orders = "yes";
-            if (dynamicData.get(FINAL).equals(true)) {
-                finalOrderTitle = "yes";
-            } else if (dynamicData.get(NEW_AND_FINAL).equals(true)) {
-                newAndFinalOrderTitle = "yes";
-            }
-        } else if (dynamicData.get(FINAL).equals(true)) {
-            finalOrderTitle = "yes";
-        }
+        String isFinalOrderFlag = dynamicData.get(FINAL).equals(true) ? "yes" : "no";
+        String newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true) ? "yes" : "no";
+        String multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true) ? "yes" : "no";
 
         return ManageOrderEmailLip.builder()
-            .order(orders.equals("no") ? "yes" : "no")
-            .orders(orders.equals("yes") ? orders : "no")
-            .finalOrderTitle(finalOrderTitle.equals("yes") ? finalOrderTitle : "no")
-            .newOrderTitle(finalOrderTitle.equals("no") && newAndFinalOrderTitle.equals("no") ? "yes" : "no")
-            .finalOrderText(finalOrderTitle.equals("yes") && orders.equals("no") ? "yes" : "no")
-            .finalOrdersText(finalOrderTitle.equals("yes") && orders.equals("yes") ? "yes" : "no")
-            .finalOrderExplanation(finalOrderTitle.equals("yes") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
-            .newOrderText(finalOrderTitle.equals("no") && orders.equals("no") ? "yes" : "no")
-            .newOrdersText(finalOrderTitle.equals("no") && newAndFinalOrderTitle.equals("no") && orders.equals("yes") ? "yes" : "no")
-            .newOrderExplanation(finalOrderTitle.equals("no") || newAndFinalOrderTitle.equals("yes") ? "yes" : "no")
-            .newAndFinalOrderTitle(newAndFinalOrderTitle)
-            .newAndFinalOrdersText(newAndFinalOrderTitle)
-            .caseName(caseData.getApplicantCaseName())
-            .applicantName("John")
-            .caseLink(caseLink)
-            .caseReference(String.valueOf(caseData.getId()))
+            .order(multipleOrderFlag.equals("no") ? "yes" : "no")
+            .orders(multipleOrderFlag.equals("yes") ? "yes" : "no")
+            .finalOrderTitle(isFinalOrderFlag.equals("yes") ? isFinalOrderFlag : "no")
+            .newOrderTitle(isFinalOrderFlag.equals("no") && newAndFinalOrderFlag.equals("no") ? "yes" : "no")
+            .finalOrderText(isFinalOrderFlag.equals("yes") && multipleOrderFlag.equals("no") ? "yes" : "no")
+            .finalOrdersText(isFinalOrderFlag.equals("yes") && multipleOrderFlag.equals("yes") ? "yes" : "no")
+            .finalOrderExplanation(isFinalOrderFlag.equals("yes") || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
+            .newOrderText(isFinalOrderFlag.equals("no") && multipleOrderFlag.equals("no") ? "yes" : "no")
+            .newOrdersText(isFinalOrderFlag.equals("no") && newAndFinalOrderFlag.equals("no")
+                && multipleOrderFlag.equals("yes") ? "yes" : "no")
+            .newOrderExplanation(isFinalOrderFlag.equals("no") || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
+            .newAndFinalOrderTitle(newAndFinalOrderFlag)
+            .newAndFinalOrdersText(newAndFinalOrderFlag)
+            .caseName(String.valueOf(dynamicData.get("caseName")))
+            .applicantName(String.valueOf(dynamicData.get("name")))
+            .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
+            .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
     }
 
@@ -373,7 +362,6 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            testEmailJames(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
                 handleNonPersonalServiceNotifications(
@@ -487,15 +475,42 @@ public class ManageOrderEmailService {
             });
         } else {
             log.info("*** Send email/post notifications to applicants ***");
-            caseData.getApplicants().forEach(party -> sendNotificationsToParty(
+            caseData.getApplicants().forEach(party -> sendNotificationsToLipParty(
                 caseData,
                 party,
                 authorisation,
                 dynamicDataForEmail,
                 orderDocuments,
+                bulkPrintOrderDetails));
+        }
+    }
+
+    private void sendNotificationsToLipParty(CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String authorisation,
+                                          Map<String, Object> dynamicDataForEmail,
+                                          List<Document> orderDocuments,
+                                          List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isPartyProvidedWithEmail(party.getValue())) {
+            log.info("*** Send orders to party via email using send grid {}", party.getId());
+            dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
+            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
+            dynamicDataForEmail.put("caseName", caseData.getApplicantCaseName());
+            dynamicDataForEmail.put("caseReference", String.valueOf(caseData.getId()));
+
+            testEmailJames(dynamicDataForEmail, party.getValue().getEmail());
+
+        } else {
+            log.info("*** Send orders to party via post using bulk print {}", party.getId());
+            sendOrdersToPartyAddressViaPost(
+                caseData,
+                authorisation,
+                orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
-            ));
+                party
+            );
         }
     }
 
