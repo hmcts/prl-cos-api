@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum.witnessStatementNotProvided;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
@@ -384,6 +385,7 @@ public class ReturnApplicationServiceTest {
     public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
         casedata = casedata.toBuilder()
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
         when(miamPolicyUpgradeFileUploadServices.renameMiamPolicyUpgradeDocumentWithoutConfidential(
             any(CaseData.class))).thenReturn(casedata);

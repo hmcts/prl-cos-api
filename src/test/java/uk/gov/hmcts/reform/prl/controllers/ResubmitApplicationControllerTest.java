@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
@@ -191,6 +192,7 @@ public class ResubmitApplicationControllerTest {
             .caseTypeOfApplication("C100")
             .courtName("testcourt")
             .courtId("123")
+            .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
 
 

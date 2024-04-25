@@ -619,7 +619,6 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getMiamPolicyUpgradeTable(CaseData caseData) {
         MiamPolicyUpgrade miam = objectMapper.convertValue(caseData, MiamPolicyUpgrade.class);
-        log.info("MiamPolicyUpgrade ==>" + miam);
         return toMap(miam);
     }
 
