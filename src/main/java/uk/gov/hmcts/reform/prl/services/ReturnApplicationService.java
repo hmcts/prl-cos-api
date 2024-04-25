@@ -21,6 +21,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
@@ -151,6 +152,7 @@ public class ReturnApplicationService {
 
     public CaseData updateMiamPolicyUpgradeDataForConfidentialDocument(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+            && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
             caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(
                 caseData
