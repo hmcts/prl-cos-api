@@ -161,7 +161,7 @@ public class ManageOrdersUtils {
 
     private static void validateHearingData(List<String> errorList,HearingData hearingData) {
 
-        if (null == hearingData.getHearingAuthority() || StringUtils.isEmpty(hearingData.getHearingAuthority().getDisplayedValue())) {
+        if (ObjectUtils.isEmpty(hearingData.getHearingAuthority())) {
             errorList.add("You must select this hearing will be before");
         }
 
