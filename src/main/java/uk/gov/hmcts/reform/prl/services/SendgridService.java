@@ -75,8 +75,11 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
 
-    @Value("${send-grid.rpa.email.from}")
+    @Value("${send-grid.rpa.emailId.from}")
     private String fromEmail;
+
+    @Value("${send-grid.notification.emailId.from}")
+    private String fromEmailSendgrid;
 
     private final SendGrid sendGrid;
     private final DocumentGenService documentGenService;
@@ -121,7 +124,7 @@ public class SendgridService {
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
-        mail.setFrom(getEmail(fromEmail));
+        mail.setFrom(getEmail(fromEmailSendgrid));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
@@ -193,7 +196,7 @@ public class SendgridService {
                     emailProps.get("solicitorName")
             ));
         }
-        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
+        Mail mail = new Mail(new Email(fromEmailSendgrid), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         if (!listOfAttachments.isEmpty()) {
@@ -239,7 +242,7 @@ public class SendgridService {
             emailProps.get("confidentialityText"),
             emailProps.get("courtName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmailAddress), content);
+        Mail mail = new Mail(new Email(fromEmailSendgrid), subject, new Email(toEmailAddress), content);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }

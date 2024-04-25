@@ -50,3 +50,4 @@ spring:
         prl.cafcass-svc-username: CAFCASS_USERNAME
         prl.cafcass-svc-password: CAFCASS_PASSWORD
         prl.hearing-statuses-to-filter: HEARING_STATUSES_TO_FILTER
+        prl.sendgrid-notify-from-email: SENDGRID_NOTIFY_FROM_EMAIL
