@@ -478,7 +478,6 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
-        log.info("Inside generateDraftDocumentsForCaseResubmission() for C100");
         Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         boolean isConfidentialInformationPresentForC100 = isConfidentialInformationPresentForC100(caseData);
