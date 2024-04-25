@@ -60,7 +60,7 @@ public class UploadAdditionalApplicationUtils {
     }
 
     public String getValueOfAwpTaskToBeCreated(CaseData caseData) {
-        String taskToBeCraeated = YES;
+        String taskToBeCreated = YES;
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         log.info("uploadAdditionalApplicationData is present");
 
@@ -76,14 +76,14 @@ public class UploadAdditionalApplicationUtils {
                 log.info("uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay() is::"
                              + uploadAdditionalApplicationData.getAdditionalApplicationFeesToPay());
                 log.info("feeAmount is::" + feeAmount);
-                if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Double.valueOf(feeAmount))) > 0) {
+                if (BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Double.valueOf(feeAmount))) < 0) {
                     log.info("Its more than Zero amount AWP");
-                    taskToBeCraeated = NO;
+                    taskToBeCreated = NO;
                 }
             }
         }
 
-        return taskToBeCraeated;
+        return taskToBeCreated;
     }
 
     public String getValueOfAwpTaskUrgency(CaseData caseData) {
