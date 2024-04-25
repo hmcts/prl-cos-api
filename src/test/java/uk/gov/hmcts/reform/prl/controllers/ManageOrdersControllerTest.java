@@ -2577,7 +2577,6 @@ public class ManageOrdersControllerTest {
     public void testMoreThanOneHearingsSelectedValidation() throws Exception {
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-            .hearingAuthority(DioBeforeAEnum.magistrates)
             .build();
         HearingData hearingData2 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
