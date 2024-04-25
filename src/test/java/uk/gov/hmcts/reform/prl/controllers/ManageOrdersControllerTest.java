@@ -168,6 +168,8 @@ public class ManageOrdersControllerTest {
     RoleAssignmentService roleAssignmentService;
     @Mock
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+    @Mock
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContents;
 
     @Before
     public void setUp() {
@@ -3644,7 +3646,7 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContents  = new StartAllTabsUpdateDataContent(
+        startAllTabsUpdateDataContents  = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
@@ -3652,7 +3654,7 @@ public class ManageOrdersControllerTest {
             caseData,
             null
         );
-        when(allTabService.getStartAllTabsUpdate(any())).thenReturn(startAllTabsUpdateDataContents);
+        when(allTabService.getStartAllTabsUpdate(Mockito.anyString())).thenReturn(startAllTabsUpdateDataContents);
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
             .thenReturn(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build());
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -3669,6 +3671,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
     }
