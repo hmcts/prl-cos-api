@@ -530,6 +530,10 @@ public class ServiceOfApplicationService {
                     packQDocs,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 ));
+                if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    emailNotificationDetails.addAll(generateNudgeReminderSolicitor(selectedApplicants, caseData,
+                        authorization,  SERVED_PARTY_APPLICANT_SOLICITOR, packQDocs, emailNotificationDetails));
+                }
             }
             List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                 caseData.getRespondents(),
@@ -1354,8 +1358,8 @@ public class ServiceOfApplicationService {
             applicantsInCase = caseData.getApplicants();
         } else {
             applicantsInCase = List.of(Element.<PartyDetails>builder()
-                                           .id(caseData.getApplicantsFL401().getPartyId())
-                                           .value(caseData.getApplicantsFL401()).build());
+                .id(caseData.getApplicantsFL401().getPartyId())
+                .value(caseData.getApplicantsFL401()).build());
         }
 
         selectedApplicants.forEach(applicant -> {
@@ -1370,18 +1374,55 @@ public class ServiceOfApplicationService {
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailUsingTemplateWithAttachments(
-                                                                 authorization, party.get().getValue().getSolicitorEmail(),
-                                                                 packQ,
-                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                                                                 dynamicData,
-                                                                 servedParty
-                                                             )));
+                        .sendEmailUsingTemplateWithAttachments(
+                            authorization, party.get().getValue().getSolicitorEmail(),
+                            packQ,
+                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                            dynamicData,
+                            servedParty
+                        )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         });
+
+        return emailNotificationDetails;
+    }
+
+    private List<Element<EmailNotificationDetails>> generateNudgeReminderSolicitor(
+        List<DynamicMultiselectListElement> selectedApplicants, CaseData caseData,
+        String authorization, String servedParty, List<Document> packQ,
+        List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+
+        List<Element<PartyDetails>> applicantsInCase;
+        applicantsInCase = caseData.getApplicants();
+
+        selectedApplicants.forEach(applicant -> {
+            Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+            if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
+                try {
+                    log.info(
+                        "Sending the nudge reminder email notification to applicant solicitor for "
+                            + "C100 Application for caseId {}", caseData.getId()
+                    );
+                    Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                    dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
+                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                        .sendEmailUsingTemplateWithAttachments(
+                            authorization, party.get().getValue().getSolicitorEmail(),
+                            packQ,
+                            SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
+                            dynamicData,
+                            servedParty
+                        )));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         return emailNotificationDetails;
     }
 
