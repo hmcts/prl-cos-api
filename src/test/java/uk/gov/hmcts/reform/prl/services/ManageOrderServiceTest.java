@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -5389,7 +5388,7 @@ public class ManageOrderServiceTest {
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder()
             .hearingRequestID("2000010406")
             .status("HEARING_REQUESTED")
-            .timeStamp(new DateTime())
+            .timeStamp(LocalDateTime.now())
             .versionNumber(1)
             .build();
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
@@ -5517,7 +5516,7 @@ public class ManageOrderServiceTest {
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder()
             .hearingRequestID("2000010406")
             .status("HEARING_REQUESTED")
-            .timeStamp(new DateTime())
+            .timeStamp(LocalDateTime.now())
             .versionNumber(1)
             .build();
         when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
