@@ -5,6 +5,7 @@ import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -113,11 +114,12 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsNo() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails.getId()));
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -135,7 +137,7 @@ public class ConfidentialityCheckControllerFT {
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"confidentialityCheck\"");
 
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -148,7 +150,18 @@ public class ConfidentialityCheckControllerFT {
                   "data.isC8CheckNeeded", equalTo(null),
                   "data.isOccupationOrderSelected", equalTo(null))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(AboutToStartOrSubmitCallbackResponse.class);*/
+
+        mockMvc.perform(post("/confidentiality-check/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isC8CheckApproved").value("Yes"))
+            .andExpect(jsonPath("data.responsibleForService").value("Court admin"))
+            .andReturn();
 
     }
 
@@ -164,7 +177,7 @@ public class ConfidentialityCheckControllerFT {
             .replace("\"applicationServedYesNo\": \"Yes\"",
                      "\"applicationServedYesNo\": \"No\"");
 
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -177,7 +190,18 @@ public class ConfidentialityCheckControllerFT {
                   "data.isC8CheckNeeded", equalTo(null),
                   "data.isOccupationOrderSelected", equalTo(null))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(AboutToStartOrSubmitCallbackResponse.class);*/
+
+        mockMvc.perform(post("/confidentiality-check/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isC8CheckApproved").value("No"))
+            .andExpect(jsonPath("data.responsibleForService").value(IsNull.nullValue()))
+            .andReturn();
 
     }
 
@@ -268,12 +292,13 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
+        String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
 
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBody)
+                                            .content(requestBodyRevised)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
