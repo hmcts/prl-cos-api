@@ -80,8 +80,12 @@ public class DraftOrdersControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Before
-    public void setUp() {
+    public void init() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @org.junit.jupiter.api.BeforeAll
+    static void setup() {
         RestAssured.registerParser("text/html", Parser.JSON);
     }
 
