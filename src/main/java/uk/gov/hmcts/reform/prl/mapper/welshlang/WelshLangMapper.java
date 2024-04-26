@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 
@@ -678,6 +679,230 @@ public class WelshLangMapper {
         welshMap.put(
             HearingChannelsEnum.ONPPRS.getDisplayedValue(),
             "Ar bapur"
+        );
+
+        //For MIAM Policy Upgrade
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse.getDisplayedValue(),
+            "Cam-drin domestig");
+
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance.getDisplayedValue(),
+            "Wedi mynychu MIAM yn flaenorol neu ddatrys anghydfod y tu allan i’r llys");
+
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1.getDisplayedValue(),
+            "Tystiolaeth bod darpar barti wedi cael ei arestio am drosedd cam-drin domestig perthnasol.");
+
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_2.getDisplayedValue(),
+            "Tystiolaeth o rybudd heddlu perthnasol am drosedd cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_3.getDisplayedValue(),
+            "Tystiolaeth o achos troseddol perthnasol am drosedd cam-drin domestig sydd heb ddod i ben."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_4.getDisplayedValue(),
+            "Tystiolaeth o euogfarn berthnasol am drosedd cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_5.getDisplayedValue(),
+            "Gorchymyn llys yn rhwymo darpar barti mewn perthynas â throsedd cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_6.getDisplayedValue(),
+            "Hysbysiad amddiffyn rhag trais domestig a roddwyd dan adran 24 Deddf Troseddau a Diogelwch 2010 yn erbyn darpar barti."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_7.getDisplayedValue(),
+            "Hysbysiad amddiffyn rhag cam-drin domestig a roddwyd dan adran 22 Deddf Troseddau a Diogelwch 2021 yn erbyn darpar barti."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_8.getDisplayedValue(),
+            "Gwaharddeb gwarchod perthnasol."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_9.getDisplayedValue(),
+            "Ymgymeriad a roddwyd yng Nghymru a Lloegr dan adran 46 neu 63E Deddf Cyfraith Teulu 1996 (neu a roddwyd yn Yr Alban neu "
+                + "yng Ngogledd Iwerddon yn lle gwaharddeb gwarchod) gan ddarpar barti, ar yr amod na roddwyd traws-ymgymeriad mewn perthynas"
+                + " â thrais domestig neu gam-drin domestig gan ddarpar barti arall."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_10.getDisplayedValue(),
+            "Copi o ganfyddiad ffeithiol, a wnaed mewn achos yn y Deyrnas Unedig, bod cam-drin domestig wedi’i gyflawni gan ddarpar barti."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_11.getDisplayedValue(),
+            "Adroddiad arbenigwr a gyflwynwyd fel tystiolaeth mewn achos yn y Deyrnas Unedig er mwyn i lys neu dribiwnlys allu "
+                + "cadarnhau bod unigolyn sydd neu a oedd yn ymwneud yn bersonol â darpar barti, wedi’i asesu fel bod, neu mewn risg o fod, "
+                + "yn ddioddefwr cam-drin domestig gan y darpar barti hwnnw."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_12.getDisplayedValue(),
+            "Llythyr neu adroddiad gan weithiwr iechyd proffesiynol priodol yn cadarnhau - (i) bod gweithiwr proffesiynol,"
+                + " neu weithiwr iechyd proffesiynol priodol arall, wedi archwilio darpar barti yn bersonol, dros y ffôn neu drwy"
+                + " gynhadledd fideo; ac (ii) ym marn broffesiynol resymol yr awdur neu’r gweithiwr iechyd proffesiynol priodol  sy’n "
+                + "archwilio, mae gan y darpar barti hwnnw/honno anafiadau neu gyflwr, neu mae’r darpar barti wedi cael anafiadau neu "
+                + "gyflwr, sy’n gyson â bod yn ddioddefwr cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_13.getDisplayedValue(),
+            "Llythyr neu adroddiad gan (i) y gweithiwr iechyd proffesiynol priodol a wnaeth yr atgyfeiriad a ddisgrifir isod;"
+                + " (ii) weithiwr iechyd proffesiynol priodol sydd â mynediad i gofnodion meddygol y darpar barti a gyfeiriwyd ato/i isod; neu "
+                + "(iii) yr unigolyn y gwnaethpwyd yr atgyfeiriad a ddisgrifir isod iddo; yn cadarnhau bod darpar barti wedi cael ei gyfeirio gan "
+                + "weithiwr iechyd proffesiynol priodol at unigolyn sy’n darparu cefnogaeth neu gymorth arbenigol i ddioddefwyr, neu’r rhai hynny "
+                + "sydd mewn risg o ddioddef cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_14.getDisplayedValue(),
+            "Llythyr gan unrhyw unigolyn sy’n aelod o gynhadledd asesu risg amlasiantaeth (neu fforwm diogelu lleol addas arall) yn cadarnhau bod "
+                + "darpar barti, neu unigolyn y mae’r darpar barti hwnnw/honno yn ymwneud ag ef/â hi yn bersonol, yn neu wedi bod mewn risg o "
+                + "niwed o ganlyniad i gam-drin domestig gan ddarpar barti arall."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_15.getDisplayedValue(),
+            "Llythyr gan ymgynghorydd trais domestig annibynnol (IDVA) yn cadarnhau eu bod yn darparu neu eu bod wedi "
+                + "darparu cefnogaeth i ddarpar barti."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_16.getDisplayedValue(),
+            "Llythyr gan ymgynghorydd trais rhywiol annibynnol (ISVA) yn cadarnhau eu bod yn darparu neu eu bod wedi darparu cefnogaeth "
+                + "i ddarpar barti o ganlyniad i drais rhywiol gan ddarpar barti arall."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_17.getDisplayedValue(),
+            "Llythyr gan swyddog a gyflogir gan awdurdod lleol neu gymdeithas tai (neu sefydliad cyfwerth yn yr Alban neu yng Ngogledd Iwerddon)"
+                + " yn cefnogi tenantiaid sy’n cynnwys- (i) datganiad sy’n nodi, yn eu barn broffesiynol resymol nhw."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_18.getDisplayedValue(),
+            "Llythyr- (i) gan sefydliad sy’n darparu gwasanaethau cefnogi cam-drin domestig, a bod y llythyr yn cadarnhau ei fod- (a) wedi’i "
+                + "leoli yn y Deyrnas Unedig, (b) wedi bod yn gweithredu am gyfnod di-dor o chwe mis neu hirach; a’i (c) fod wedi darparu "
+                + "cefnogaeth i ddarpar barti mewn perthynas ag anghenion yr unigolyn hwnnw fel dioddefwr, neu unigolyn sydd mewn risg "
+                + "o gam-drin domestig; ac (ii) mae’n cynnwys- (a) datganiad sy’n nodi, ym marn broffesiynol resymol awdur y llythyr,"
+                + " bod y darpar barti yn, neu mewn risg o fod yn ddioddefwr cam-drin domestig; (b) disgrifiad o’r materion penodol y "
+                + "gellir dibynnu arnynt i gefnogi’r farn honno; (c) disgrifiad o’r gefnogaeth a roddwyd i’r darpar barti; a (d) datganiad"
+                + " o’r rhesymau pam bod y darpar barti angen y gefnogaeth honno."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_19.getDisplayedValue(),
+            "Llythyr neu adroddiad gan sefydliad sy’n darparu gwasanaethau cefnogi cam-drin domestig yn y Deyrnas Unedig yn cadarnhau-"
+                + " (i) bod cais am loches i unigolyn sydd, neu a oedd yn ymwneud yn bersonol â darpar barti, wedi cael ei wrthod; (ii) "
+                + "y dyddiad y cafodd y cais am loches ei wrthod; a’u (iii) bod wedi gwneud cais am loches oherwydd honiadau o gam-drin "
+                + "domestig gan y darpar barti a gyfeiriwyd ato/i ym mharagraff (i)."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_20.getDisplayedValue(),
+            "Llythyr gan awdurdod cyhoeddus yn cadarnhau bod unigolyn sydd, neu a oedd yn ymwneud yn bersonol â darpar barti,"
+                + " wedi’i asesu fel ei fod yn ddioddefwr, neu mewn risg o fod yn ddioddefwr cam-drin domestig gan y darpar "
+                + "barti hwnnw/o (neu gopi o’r asesiad hwnnw)."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_21.getDisplayedValue(),
+            "Llythyr gan Ysgrifennydd Gwladol yr Adran Gartref yn cadarnhau bod darpar barti wedi cael caniatâd i aros yn"
+                + " y Deyrnas Unedig fel dioddefwr cam-drin domestig."
+        );
+        welshMap.put(
+            MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_22.getDisplayedValue(),
+            "Tystiolaeth sy’n dangos bod darpar barti wedi bod, neu mewn risg o fod, yn ddioddefwr cam-drin domestig gan ddarpar barti arall ar "
+                + "ffurf camdriniaeth sy’n ymwneud â materion ariannol."
+        );
+
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1.getDisplayedValue(),
+            "Mae yna risg i fywyd, rhyddid neu ddiogelwch corfforol y darpar geisydd neu ei deulu/theulu neu ei gartref/chartref."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_2.getDisplayedValue(),
+            "Byddai unrhyw oedi a achosir trwy fynychu MIAM yn achosi risg o niwed i blentyn."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_3.getDisplayedValue(),
+            "Byddai unrhyw oedi a achosir trwy fynychu MIAM yn achosi risg y byddai plentyn yn cael ei gludo o’r Deyrnas Unedig yn anghyfreithlon, "
+                + "neu risg y byddai plentyn sydd y tu allan i Gymru a Lloegr ar hyn o bryd yn cael ei gadw’n anghyfreithlon."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_4.getDisplayedValue(),
+            "Byddai unrhyw oedi a achosir trwy fynychu MIAM yn achosi risg sylweddol o gamwedd cyfiawnder."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_5.getDisplayedValue(),
+            "Byddai unrhyw oedi a achosir trwy fynychu MIAM yn achosi caledi ariannol sylweddol i’r darpar geisydd."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_6.getDisplayedValue(),
+            "Byddai unrhyw oedi a achosir trwy fynychu MIAM yn achosi problemau anadferadwy wrth ddelio â’r anghydfod (gan "
+                + "gynnwys colled anadferadwy o dystiolaeth sylweddol)."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_7.getDisplayedValue(),
+            "Mae yna risg sylweddol yn y cyfnod a gymerir i drefnu a mynychu MIAM, y bydd achos mewn perthynas â’r anghydfod yn"
+                + " cael ei ddwyn gerbron llys mewn gwlad arall, lle y gall hawliad dilys i awdurdodaeth fodoli, ac y bydd llys "
+                + "yn y wlad arall honno yn gwrando ar yr anghydfod cyn llys yng Nghymru a Lloegr."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1
+                .getDisplayedValue(),
+            "Yn y 4 mis cyn gwneud y cais, mae’r unigolyn wedi mynychu MIAM neu wedi cymryd rhan mewn proses datrys anghydfod y "
+                + "tu allan i’r llys yn ymwneud â’r un anghydfod neu’r un anghydfod i raddau helaeth; a phan fu i’r ceisydd gymryd rhan mewn "
+                + "proses datrys anghydfod y tu allan i’r llys, mae yna dystiolaeth o hynny ar ffurf cadarnhad ysgrifenedig gan y darparwr"
+                + " datrys anghydfod."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2
+                .getDisplayedValue(),
+            "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac mi wnaeth y darpar geisydd fynychu MIAM cyn cychwyn yr "
+                + "achos hwnnw. Bydd angen i chi uwchlwytho tystysgrif y cyfryngwr. Os mai chi yw’r atebydd yn yr achos sydd ar y gweill, "
+                + "rhowch ddyddiad y MIAM yn ogystal ag enw a manylion cyswllt y darparwr MIAM yn y blwch testun."
+        );
+
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1
+                .getDisplayedValue(),
+            "Byddai’r cais yn cael ei wneud heb rybudd (Mae paragraff 5.1 o Gyfarwyddyd Ymarfer 18A yn nodi’r amgylchiadau"
+                + " pan ellir gwneud ceisiadau heb rybudd)."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_2
+                .getDisplayedValue(),
+            "Mae un o’r darpar bartïon yn blentyn."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3
+                .getDisplayedValue(),
+            "(i) Ni all y darpar geisydd fynychu MIAM ar-lein neu drwy gyswllt fideo a rhoddir esboniad am hyn i’r llys trwy"
+                + " ddefnyddio’r blwch testun a ddarparwyd; ac (ii) mae’r darpar geisydd wedi cysylltu â phob cyfryngwr teuluol"
+                + " awdurdodedig sydd â swyddfa o fewn 15 milltir i’w gartref neu ei chartref (neu 5 ohonynt os oes 5 neu fwy o gyfryngwyr),"
+                + " ac mae pob un ohonynt wedi datgan nad ydynt ar gael i gynnal MIAM o fewn 15 diwrnod busnes i’r dyddiad cysylltu."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4
+                .getDisplayedValue(),
+            "(i) Ni all y darpar geisydd fynychu MIAM ar-lein neu drwy gyswllt fideo a rhoddir esboniad am hyn i’r llys "
+                + "trwy ddefnyddio’r blwch testun a ddarparwyd; ac\n"
+                + "(ii) mae gan y darpar geisydd anabledd neu analluogrwydd arall a fyddai’n ei atal rhag mynychu MIAM yn "
+                + "bersonol oni bai y gellir cynnig cyfleusterau priodol gan gyfryngwr awdurdodedig, ac (iii) mae’r darpar "
+                + "geisydd wedi cysylltu â phob cyfryngwr teuluol awdurdodedig sydd â swyddfa o fewn 15 milltir i’w gartref "
+                + "neu ei chartref (neu 5 ohonynt os oes yna 5 neu fwy o gyfryngwyr), ac mae pob un ohonynt wedi datgan nad ydynt"
+                + " yn gallu darparu cyfleusterau o’r fath.");
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5
+                .getDisplayedValue(),
+            "(i) Ni all y darpar geisydd fynychu MIAM ar-lein neu drwy gyswllt fideo; ac (ii) "
+                + "nid oes yna gyfryngwr teuluol awdurdodedig sydd â swyddfa o fewn 15 milltir i gartref y darpar geisydd."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_6
+                .getDisplayedValue(),
+            "Ni all y darpar geisydd fynychu MIAM oherwydd y mae’r darpar geisydd (i) yn y carchar neu mewn unrhyw sefydliad arall"
+                + " ac y mae’n rhaid cadw’r darpar geisydd yno ac ni ellir gwneud trefniadau iddynt fynychu MIAM ar-lein neu drwy"
+                + " gyswllt fideo; neu (ii) yn destun amodau mechnïaeth sy’n eu hatal rhag cysylltu â’r unigolyn arall; neu (iii)"
+                + " yn destun trwydded gyda gofyniad i beidio â chysylltu â’r unigolyn arall."
+        );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern.getDisplayedValue(),
+            "Pryderon amddiffyn plant"
         );
 
         return welshMap;
