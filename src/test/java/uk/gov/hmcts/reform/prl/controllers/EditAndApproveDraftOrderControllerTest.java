@@ -29,8 +29,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -137,6 +139,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void shouldGenerateDraftOrderDropdown() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -144,6 +150,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
+            .applicants(List.of(applicants))
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -188,11 +195,16 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void shouldGenerateDraftOrderDropdownNoDraftOrders() {
 
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
+            .applicants(List.of(applicants))
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
 
@@ -668,6 +680,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void  shouldPopulateCommonFields() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         final String authorisation = "Bearer someAuthorisationToken";
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -678,6 +694,7 @@ public class EditAndApproveDraftOrderControllerTest {
         hearingDataCollection.add(hearingDataElement);
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
+            .applicants(List.of(applicants))
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .manageOrders(ManageOrders.builder()
@@ -729,6 +746,10 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void  shouldPopulateCommonFieldsWithDoYouWantToEditField() {
         final String authorisation = "Bearer someAuthorisationToken";
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -739,6 +760,7 @@ public class EditAndApproveDraftOrderControllerTest {
         CaseData caseData = CaseData.builder()
                 .welshLanguageRequirement(Yes)
                 .welshLanguageRequirementApplication(english)
+                .applicants(List.of(applicants))
                 .languageRequirementApplicationNeedWelsh(Yes)
                 .manageOrders(ManageOrders.builder()
                         .solicitorOrdersHearingDetails(hearingDataCollection)
@@ -789,6 +811,10 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void  shouldPopulateCommonFieldsWhereJusticesLegalAdvisorIsChosen() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         final String authorisation = "Bearer someAuthorisationToken";
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -799,6 +825,7 @@ public class EditAndApproveDraftOrderControllerTest {
         hearingDataCollection.add(hearingDataElement);
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
+            .applicants(List.of(applicants))
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .manageOrders(ManageOrders.builder()
@@ -1716,11 +1743,16 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void testPopulateCommonFieldsEditedOrder() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
         DraftOrder draftOrder = DraftOrder.builder()
             .isOrderUploadedByJudgeOrAdmin(Yes)
             .build();
         CaseData caseData = CaseData.builder()
             .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .doYouWantToEditTheOrder(Yes)
             .build();
