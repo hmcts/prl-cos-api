@@ -46,6 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -86,7 +87,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("inside prePopulateSolicitorAndFees");
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
@@ -96,7 +96,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
             } else {
-                log.info("inside else block");
                 FeeResponse feeResponse = null;
                 try {
                     feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -122,10 +121,12 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
-                log.info("before buildGeneratedDocumentCaseData");
-                if (isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
-                    log.info("caseDataForOrgDetails.getMiamPolicyUpgradeDetails() ===> " + caseDataForOrgDetails.getMiamPolicyUpgradeDetails());
-                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataForOrgDetails, new HashMap<>());
+                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
+                    && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
+                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
+                        caseDataForOrgDetails,
+                        new HashMap<>()
+                    );
                 }
                 caseData = buildGeneratedDocumentCaseData(
                     authorisation,

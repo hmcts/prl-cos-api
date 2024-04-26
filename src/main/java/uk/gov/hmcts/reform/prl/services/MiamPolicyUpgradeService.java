@@ -38,7 +38,6 @@ public class MiamPolicyUpgradeService {
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateAmendedMiamPolicyUpgradeDetails(CallbackRequest callbackRequest) {
-        log.info("initial request of populateAmendedMiamPolicyUpgradeDetails " + callbackRequest.getCaseDetails().getData());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
@@ -46,7 +45,6 @@ public class MiamPolicyUpgradeService {
     }
 
     public CaseData updateMiamPolicyUpgradeDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("inside updateMiamPolicyUpgradeDetails");
         Map<String, Object> updatedMiamPolicyUpgradeData = cleanUpMiamPolicyUpgradeDetails(
             caseData);
         caseDataUpdated.putAll(updatedMiamPolicyUpgradeData);
@@ -61,9 +59,7 @@ public class MiamPolicyUpgradeService {
     }
 
     public Map<String, Object> cleanUpMiamPolicyUpgradeDetails(CaseData caseData) {
-        log.info("inside cleanUpMiamPolicyUpgradeDetails");
         Map<String, Object> updatedMiamPolicyUpgradeData = new HashMap<>();
-        log.info("MiamPolicyUpgradeDetails from request" + caseData.getMiamPolicyUpgradeDetails());
         updatedMiamPolicyUpgradeData.put(
             "mpuChildInvolvedInMiam",
             isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())
@@ -102,8 +98,6 @@ public class MiamPolicyUpgradeService {
         populateDataForPreviousMiamAttendanceExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
 
         populateDataForOtherExemption(updatedMiamPolicyUpgradeData, caseData, isClaimingMaimExemption);
-
-        log.info("Final updatedMiamPolicyUpgradeData" + updatedMiamPolicyUpgradeData);
 
         return updatedMiamPolicyUpgradeData;
     }
