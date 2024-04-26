@@ -292,13 +292,13 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
-        String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
+        //String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
 
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBodyRevised)
+                                            .content(requestBody)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
