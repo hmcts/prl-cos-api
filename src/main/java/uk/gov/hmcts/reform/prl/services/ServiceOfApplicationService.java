@@ -1355,8 +1355,8 @@ public class ServiceOfApplicationService {
             applicantsInCase = caseData.getApplicants();
         } else {
             applicantsInCase = List.of(Element.<PartyDetails>builder()
-                .id(caseData.getApplicantsFL401().getPartyId())
-                .value(caseData.getApplicantsFL401()).build());
+                    .id(caseData.getApplicantsFL401().getPartyId())
+                    .value(caseData.getApplicantsFL401()).build());
         }
 
         selectedApplicants.forEach(applicant -> {
@@ -1371,19 +1371,18 @@ public class ServiceOfApplicationService {
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                        .sendEmailUsingTemplateWithAttachments(
-                            authorization, party.get().getValue().getSolicitorEmail(),
-                            packQ,
-                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                            dynamicData,
-                            servedParty
+                            .sendEmailUsingTemplateWithAttachments(
+                                authorization, party.get().getValue().getSolicitorEmail(),
+                                packQ,
+                                SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                dynamicData,
+                                servedParty
                         )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         });
-
         return emailNotificationDetails;
     }
 
