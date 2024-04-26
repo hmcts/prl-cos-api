@@ -306,6 +306,7 @@ document:
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
       c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_blank_nudge_document_template: PRL-BLANK-FM5-DOCUMENT.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
