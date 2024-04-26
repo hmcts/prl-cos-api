@@ -530,12 +530,6 @@ public class ServiceOfApplicationService {
                     packQDocs,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 ));
-
-                emailNotificationDetails.addAll(generateDetailsForNudgeReminderApplicantSolicitor(
-                    selectedApplicants,
-                    caseData,
-                    authorization,
-                    emailNotificationDetails));
             }
             List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                 caseData.getRespondents(),
@@ -1384,33 +1378,6 @@ public class ServiceOfApplicationService {
                             dynamicData,
                             servedParty
                         )));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        return emailNotificationDetails;
-    }
-
-    private List<Element<EmailNotificationDetails>> generateDetailsForNudgeReminderApplicantSolicitor(
-        List<DynamicMultiselectListElement> selectedApplicants, CaseData caseData,
-        String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-
-        List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
-
-        selectedApplicants.forEach(applicant -> {
-            Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
-            if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                try {
-                    log.info(
-                        "Sending the nudge reminder email notification to applicant solicitor for "
-                            + "C100 Application for caseId {}", caseData.getId()
-                    );
-                    Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                    dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
-                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
