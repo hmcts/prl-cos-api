@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -20,12 +24,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,12 +38,11 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
@@ -59,9 +62,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CaseEventHandlerTest {
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
-    @Mock
     private TaskListService taskListService;
 
     @Mock
@@ -76,8 +76,15 @@ public class CaseEventHandlerTest {
     @Mock
     private RespondentTaskErrorService respondentTaskErrorService;
 
+    @Mock
+    private AllTabServiceImpl allTabService;
+
     @InjectMocks
     private CaseEventHandler caseEventHandler;
+    @Mock
+    private  ObjectMapper objectMapper;
+
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Test
     public void shouldUpdateTaskListForCasesInOpenStateC100() {
@@ -135,6 +142,17 @@ public class CaseEventHandlerTest {
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -144,31 +162,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -216,6 +209,17 @@ public class CaseEventHandlerTest {
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -225,31 +229,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        fl410renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -329,6 +308,19 @@ public class CaseEventHandlerTest {
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -338,31 +330,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 
     @Test
@@ -552,6 +519,17 @@ public class CaseEventHandlerTest {
                 "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            stringObjectMap,
+            caseData,
+            null
+        );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -561,30 +539,5 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
-
-        verify(coreCaseDataService).triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of(
-                        "taskList",
-                        c100renderedTaskList,
-                        "respondentTaskList",
-                        "",
-                        "respondentTaskListA",
-                        "",
-                        "respondentTaskListB",
-                        "",
-                        "respondentTaskListC",
-                        "",
-                        "respondentTaskListD",
-                        "",
-                        "respondentTaskListE",
-                        "",
-                        "id",
-                        String.valueOf(caseData.getId())
-                )
-        );
     }
 }

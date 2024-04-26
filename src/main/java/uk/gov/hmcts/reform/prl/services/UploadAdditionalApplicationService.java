@@ -94,6 +94,7 @@ public class UploadAdditionalApplicationService {
     public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
+    public static final String APPLICANTSOLICITOR = "[APPLICANTSOLICITOR]";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -142,14 +143,9 @@ public class UploadAdditionalApplicationService {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
-                case CA_APPLICANT, DA_APPLICANT:
-                    author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
-                    break;
-                case CA_RESPONDENT, DA_RESPONDENT:
-                    author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
-                    break;
-                default:
-                    break;
+                case CA_APPLICANT, DA_APPLICANT -> author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
+                case CA_RESPONDENT, DA_RESPONDENT -> author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
+                default -> author = userDetails.getFullName();
             }
         } else {
             author = userDetails.getFullName();
@@ -179,8 +175,7 @@ public class UploadAdditionalApplicationService {
                 ? caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFeesNumber() : null;
             String checkHwfStatus = StringUtils.isNotEmpty(hwfReferenceNumber)
                 ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue();
-            String serviceRequestReference = paymentServiceResponse.isEmpty()
-                ? null : paymentServiceResponse.get().getServiceRequestReference();
+            String serviceRequestReference = paymentServiceResponse.map(PaymentServiceResponse::getServiceRequestReference).orElse(null);
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
                 .paymentServiceRequestReferenceNumber(serviceRequestReference)
@@ -253,11 +248,7 @@ public class UploadAdditionalApplicationService {
                 }
             }
         }
-        PartyEnum other = isOtherParty(caseData, partyElement);
-        if (other != null) {
-            return other;
-        }
-        return null;
+        return isOtherParty(caseData, partyElement);
     }
 
     private static PartyEnum isOtherParty(CaseData caseData, Element<ServedParties> partyElement) {
@@ -328,7 +319,7 @@ public class UploadAdditionalApplicationService {
             if (isNotEmpty(selectedElements)) {
                 boolean isDaCase = PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(
                     caseData));
-                selectedElements.stream().forEach(party ->
+                selectedElements.forEach(party ->
                                                       selectedParties.add(element(ServedParties.builder().partyId(
                                                               isDaCase ? getPartyIdForDaCase(
                                                                   party.getCode(),
@@ -355,7 +346,7 @@ public class UploadAdditionalApplicationService {
         String partyName = "";
         List<String> partyNames = new ArrayList<>();
         if (Objects.nonNull(selectedParties)) {
-            selectedParties.stream().forEach(party -> partyNames.add(party.getValue().getPartyName()));
+            selectedParties.forEach(party -> partyNames.add(party.getValue().getPartyName()));
             partyName = String.join(",", partyNames);
 
         }
@@ -449,10 +440,10 @@ public class UploadAdditionalApplicationService {
         List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Applications = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(temporaryC2Document.getCaReasonsForC2Application())) {
-            temporaryC2Document.getCaReasonsForC2Application().stream().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
+            temporaryC2Document.getCaReasonsForC2Application().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
                 .add(CombinedC2AdditionalOrdersRequested.getValue(reasonsForC2Application.name())));
         } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getDaReasonsForC2Application())) {
-            temporaryC2Document.getDaReasonsForC2Application().stream().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
+            temporaryC2Document.getDaReasonsForC2Application().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
                 .add(CombinedC2AdditionalOrdersRequested.getValue(reasonsForC2Application.name())));
         } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getCombinedReasonsForC2Application())) {
             combinedReasonsForC2Applications.addAll(temporaryC2Document.getCombinedReasonsForC2Application());
@@ -559,9 +550,7 @@ public class UploadAdditionalApplicationService {
 
     private void cleanOldUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
         for (UploadAdditionalApplicationsFieldsEnum field : UploadAdditionalApplicationsFieldsEnum.values()) {
-            if (caseDataUpdated.containsKey(field.getValue())) {
-                caseDataUpdated.remove(field.getValue());
-            }
+            caseDataUpdated.remove(field.getValue());
         }
     }
 
@@ -592,29 +581,26 @@ public class UploadAdditionalApplicationService {
                 authorisation
             );
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
-                if (solicitorRole.isPresent()) {
-                    switch (solicitorRole.get().getRepresenting()) {
-                        case CAAPPLICANT:
-                            representedPartyType = CAAPPLICANT.name();
-                            break;
-                        case CARESPONDENT:
-                            representedPartyType = CARESPONDENT.name();
-                            break;
-                        case DAAPPLICANT:
-                            representedPartyType = DAAPPLICANT.name();
-                            break;
-                        case DARESPONDENT:
-                            representedPartyType = DARESPONDENT.name();
-                            break;
-                        default:
-                            break;
-                    }
-                } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    && APPLICANTSOLICITOR.equalsIgnoreCase(caseUser.getCaseRole())) {
                     representedPartyType = CAAPPLICANT.name();
                 } else {
-                    representedPartyType = DAAPPLICANT.name();
+                    representedPartyType = findSolicitorRepresentedPartyType(caseUser, representedPartyType);
                 }
+            }
+        }
+        return representedPartyType;
+    }
+
+    private static String findSolicitorRepresentedPartyType(CaseUser caseUser, String representedPartyType) {
+        Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
+        if (solicitorRole.isPresent()) {
+            switch (solicitorRole.get().getRepresenting()) {
+                case CAAPPLICANT -> representedPartyType = CAAPPLICANT.name();
+                case CARESPONDENT -> representedPartyType = CARESPONDENT.name();
+                case DAAPPLICANT -> representedPartyType = DAAPPLICANT.name();
+                case DARESPONDENT -> representedPartyType = DARESPONDENT.name();
+                default -> log.info("No matching solicitor role found");
             }
         }
         return representedPartyType;
