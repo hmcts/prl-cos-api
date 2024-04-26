@@ -1440,8 +1440,9 @@ public class ServiceOfApplicationService {
                 authorisation,
                 String.valueOf(caseData.getId()),
                 template,
-                null
+                new HashMap<>()
             );
+
             return Document.builder().documentUrl(accessCodeLetter.getUrl())
                 .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
                 .documentCreatedOn(new Date())
