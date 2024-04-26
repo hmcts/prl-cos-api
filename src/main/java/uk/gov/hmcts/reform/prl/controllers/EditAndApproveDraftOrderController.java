@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -69,7 +68,6 @@ public class EditAndApproveDraftOrderController {
     private final EditReturnedOrderService editReturnedOrderService;
     private final RoleAssignmentService roleAssignmentService;
     private final AllTabServiceImpl allTabService;
-    private final HearingService hearingService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -181,22 +179,23 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                if (!OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
-                    .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
+                if (Event.EDIT_AND_APPROVE_ORDER.getId()
+                    .equalsIgnoreCase(callbackRequest.getEventId())) {
                     caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
                         .getDraftOrderNameForWA(caseData, true));
-                    manageOrderService.setHearingOptionDetailsForTask(
-                        caseData,
-                        caseDataUpdated,
-                        callbackRequest.getEventId(),
-                        loggedInUserType
-                    );
-
-                    caseDataUpdated.put(
-                        WA_ORDER_NAME_JUDGE_APPROVED,
-                        draftAnOrderService.getDraftOrderNameForWA(caseData, true)
-                    );
                 }
+
+                manageOrderService.setHearingOptionDetailsForTask(
+                    caseData,
+                    caseDataUpdated,
+                    callbackRequest.getEventId(),
+                    loggedInUserType
+                );
+
+                caseDataUpdated.put(
+                    WA_ORDER_NAME_JUDGE_APPROVED,
+                    draftAnOrderService.getDraftOrderNameForWA(caseData, true)
+                );
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
                     caseData,
                     authorisation,
@@ -406,7 +405,6 @@ public class EditAndApproveDraftOrderController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-
             CaseUtils.setCaseState(callbackRequest,caseDataUpdated);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);

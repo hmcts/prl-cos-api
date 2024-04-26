@@ -271,9 +271,7 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
-            log.info("saveOrderDetails: cleanUpSelectedManageOrderOptions: Start");
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
-            log.info("saveOrderDetails: cleanUpSelectedManageOrderOptions: End");
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
