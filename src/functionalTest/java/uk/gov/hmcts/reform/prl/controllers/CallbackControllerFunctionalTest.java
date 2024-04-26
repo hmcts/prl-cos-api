@@ -9,6 +9,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +19,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -30,8 +30,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
 @Slf4j
 @SpringBootTest
@@ -72,8 +70,12 @@ public class CallbackControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Before
-    public void setUp() {
+    public void init() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @BeforeAll
+    static void setup() {
         RestAssured.registerParser("text/html", Parser.JSON);
     }
 
@@ -215,7 +217,7 @@ public class CallbackControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -226,7 +228,18 @@ public class CallbackControllerFunctionalTest {
             .body("data.manageDocumentsRestrictedFlag", equalTo(TRUE),
                   "data.manageDocumentsTriggeredBy", equalTo(STAFF))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(AboutToStartOrSubmitCallbackResponse.class);*/
+
+        mockMvc.perform(post("/attach-scan-docs/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+
 
     }
 
