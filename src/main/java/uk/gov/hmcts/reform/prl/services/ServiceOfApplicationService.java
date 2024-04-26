@@ -531,10 +531,12 @@ public class ServiceOfApplicationService {
                     packQDocs,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 ));
-                if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    emailNotificationDetails.addAll(generateNudgeReminderSolicitor(selectedApplicants, caseData,
-                        authorization,  SERVED_PARTY_APPLICANT_SOLICITOR, packQDocs, emailNotificationDetails));
-                }
+
+                emailNotificationDetails.addAll(generateDetailsForNudgeReminderApplicantSolicitor(
+                    selectedApplicants,
+                    caseData,
+                    authorization,
+                    emailNotificationDetails));
             }
             List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                 caseData.getRespondents(),
@@ -810,6 +812,15 @@ public class ServiceOfApplicationService {
                             dynamicData,
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
                         )));
+
+                        emailNotificationDetails.add(sendNudgeEmail(
+                            caseData,
+                            authorization,
+                            emailNotificationDetails,
+                            party,
+                            dynamicData,
+                            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR));
+
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1391,16 +1402,11 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private List<Element<EmailNotificationDetails>> generateNudgeReminderSolicitor(
+    private List<Element<EmailNotificationDetails>> generateDetailsForNudgeReminderApplicantSolicitor(
         List<DynamicMultiselectListElement> selectedApplicants, CaseData caseData,
-        String authorization, String servedParty, List<Document> packQ,
-        List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
 
-        List<Document> blankNudgeDocument = new ArrayList<>();
-        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
-
-        List<Element<PartyDetails>> applicantsInCase;
-        applicantsInCase = caseData.getApplicants();
+        List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
 
         selectedApplicants.forEach(applicant -> {
             Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
@@ -1413,14 +1419,15 @@ public class ServiceOfApplicationService {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                        .sendEmailUsingTemplateWithAttachments(
-                            authorization, party.get().getValue().getSolicitorEmail(),
-                            blankNudgeDocument,
-                            SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
-                            dynamicData,
-                            servedParty
-                        )));
+
+                    emailNotificationDetails.add(sendNudgeEmail(
+                        caseData,
+                        authorization,
+                        emailNotificationDetails,
+                        party,
+                        dynamicData,
+                        SERVED_PARTY_APPLICANT_SOLICITOR));
+
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -1428,6 +1435,24 @@ public class ServiceOfApplicationService {
         });
 
         return emailNotificationDetails;
+    }
+
+    private Element<EmailNotificationDetails> sendNudgeEmail(CaseData caseData, String authorization,
+                                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                   Optional<Element<PartyDetails>> party,
+                                                                   Map<String, Object> dynamicData,
+                                                                   String servedParty) {
+        List<Document> blankNudgeDocument = new ArrayList<>();
+        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
+
+        return element(serviceOfApplicationEmailService
+            .sendEmailUsingTemplateWithAttachments(
+                authorization, party.get().getValue().getSolicitorEmail(),
+                blankNudgeDocument,
+                SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
+                dynamicData,
+                servedParty
+            ));
     }
 
     private Document generateBlankNudgeDocument(CaseData caseData, String authorisation) {
