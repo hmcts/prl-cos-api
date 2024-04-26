@@ -141,7 +141,7 @@ public class ServiceOfApplicationPostService {
             if (documentLanguage.isGenEng()) {
                 files.add(new InMemoryMultipartFile(
                     SOA_MULTIPART_FILE,
-                    SOA_FAMILY_PRESIDENTS_NOTE,
+                    "Family President\'s letter to parties.pdf",
                     APPLICATION_PDF_VALUE,
                     DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
                 ));
@@ -149,7 +149,7 @@ public class ServiceOfApplicationPostService {
             if (documentLanguage.isGenWelsh()) {
                 files.add(new InMemoryMultipartFile(
                     SOA_MULTIPART_FILE,
-                    SOA_FAMILY_PRESIDENTS_NOTE_WELSH,
+                    "Family President\'s letter to parties - Welsh.pdf",
                     APPLICATION_PDF_VALUE,
                     DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE_WELSH)
                 ));
