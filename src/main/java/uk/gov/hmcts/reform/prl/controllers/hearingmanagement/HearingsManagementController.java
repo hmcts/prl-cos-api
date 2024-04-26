@@ -94,7 +94,7 @@ public class HearingsManagementController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put("nextHearingDetails",
-                            hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
+                            hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -105,8 +105,7 @@ public class HearingsManagementController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData));
+        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(callbackRequest.getCaseDetails().getId()));
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }
