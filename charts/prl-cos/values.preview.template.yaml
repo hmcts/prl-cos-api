@@ -59,7 +59,7 @@ java:
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    HEARING_API_BASEURL : https://fis-hmc-api-pr-337.preview.platform.hmcts.net/
+    HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal

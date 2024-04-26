@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -21,7 +22,7 @@ public class AutomatedHearingResponse {
     @Size(max = 100)
     private String status;
 
-    private DateTime timeStamp;
+    private LocalDateTime timeStamp;
 
     private Number versionNumber;
 
