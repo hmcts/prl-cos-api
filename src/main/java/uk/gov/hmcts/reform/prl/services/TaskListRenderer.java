@@ -410,7 +410,6 @@ public class TaskListRenderer {
                 .stream()
                 .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
             .toList();
-        log.info("list of taskErrors {}", taskErrors);
 
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
