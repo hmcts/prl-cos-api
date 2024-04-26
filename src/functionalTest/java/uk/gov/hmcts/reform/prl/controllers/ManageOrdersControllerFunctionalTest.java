@@ -72,6 +72,8 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
+
     private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
 
     private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
@@ -196,6 +198,20 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmailForAutoHearing() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
