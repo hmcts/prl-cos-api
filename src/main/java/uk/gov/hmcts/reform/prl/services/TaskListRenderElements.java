@@ -48,7 +48,7 @@ public class TaskListRenderElements {
     }
 
     public String renderDisabledLink(Task event) {
-        return format("<a>%s</a>", event.getEvent().getName());
+        return format("%s", event.getEvent().getName());
     }
 
     public String renderRespondentDisabledLink(RespondentTask respondentTask) {
