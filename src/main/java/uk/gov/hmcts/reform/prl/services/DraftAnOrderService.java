@@ -636,6 +636,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization, boolean isCallFromTaskTab, String draftOrderId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder;
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (isCallFromTaskTab) {
             selectedOrder = caseData.getDraftOrderCollection().get(0).getValue();
             //draftOrderId to be replaced above
