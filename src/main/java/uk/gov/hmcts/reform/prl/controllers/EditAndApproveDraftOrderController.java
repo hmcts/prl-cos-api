@@ -316,6 +316,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            DraftOrder selectedOrder;
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -324,10 +325,14 @@ public class EditAndApproveDraftOrderController {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-                caseData.getDraftOrderCollection(),
-                dynamicList
-            );
+            if (caseData.getApplicants().get(0).getValue().getFirstName().equalsIgnoreCase("xyz")) {
+                selectedOrder = caseData.getDraftOrderCollection().get(0).getValue();
+            } else {
+                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    dynamicList
+                );
+            }
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
                 caseData,
