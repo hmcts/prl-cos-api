@@ -86,7 +86,6 @@ public class HearingManagementControllerFunctionalTest {
             .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
-
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
     }

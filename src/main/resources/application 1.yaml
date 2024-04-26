@@ -19,8 +19,8 @@ case:
 prl:
   environment: ${APP_ENV:preview}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
@@ -88,7 +88,7 @@ uk:
       email:
         templates:
           english:
-            SOLICITOR: ac3af68e-17e4-4e6c-9c7c-641403b461a4
+            SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
@@ -134,7 +134,6 @@ uk:
             CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
             CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC:  facea2fa-e635-4542-abd4-33f8f0ec7dab
             CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
-            CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED: d1602761-dc82-4d17-99a8-675514049bfc
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
             SEND_AND_REPLY_NOTIFICATION_OTHER: 949a9675-7232-4bab-920f-266b90d34a30
             TRANSFER_COURT_EMAIL_NOTIFICATION: 0f28438e-bdb4-4d04-866d-d0d8935b88cb
@@ -163,7 +162,7 @@ payments:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data,prl_cos_api}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -174,20 +173,12 @@ send-grid:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
-          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
-          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
-          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-26fd4bac10854d3b858dc57ee07f5bc3}
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-b5cf52c69837403dbefda498f6dae888}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
-          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-13b61732cb744f89a9489d4b3500123a}
-          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
-          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -294,14 +285,14 @@ idam:
   s2s-auth:
     url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -309,21 +300,29 @@ idam:
       context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
-  solicitor:
-    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  judge:
+    username: ${JUDGE_USER_NAME:4923952EMP-@ejudiciary.net}
+    password: ${JUDGE_PASSWORD:Hmcts1234}
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
     password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
-  judge:
-    username: ${JUDGE_USER_NAME:xxxxxx}
-    password: ${JUDGE_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:fprl_caseworker_solicitor@mailinator.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:Nagoya0102}
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+  apigateway:
+    username: ${COURTNAV_USERNAME:xxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxx}
+  cafcass:
+    username: ${CAFCASS_USERNAME:cafcass@hmcts.net}
+    password: ${CAFCASS_PASSWORD:Cafcass12}
   admin:
-    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxx}
-    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxx}
+    username: ${IDAM_COURT_ADMIN_USERNAME:prl_aat_swansea_courtadmin@justice.gov.uk}
+    password: ${IDAM_COURT_ADMIN_PASSWORD:Nagoya0102}
+  api_gw:
+    microservice: api_gw
 
 aca:
   api:
@@ -334,8 +333,8 @@ test-url: ${TEST_URL:http://localhost:4044}
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1906.preview.platform.hmcts.net/}
-
+    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1810.service.core-compute-preview.internal}
+    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1802.preview.platform.hmcts.net/}
 
 auth:
   idam:
@@ -650,7 +649,7 @@ courts:
 
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
 
 postcodelookup:
   api:
@@ -682,4 +681,3 @@ sendandreply:
 hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
   hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
-

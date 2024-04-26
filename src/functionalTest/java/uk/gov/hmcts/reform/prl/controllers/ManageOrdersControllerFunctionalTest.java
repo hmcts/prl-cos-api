@@ -193,7 +193,7 @@ public class ManageOrdersControllerFunctionalTest {
             .then().assertThat().statusCode(200);
     }
 
-    /*    @Test
+    @Test
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
@@ -205,7 +205,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then().assertThat().statusCode(200);
-    }*/
+    }
 
     @Test
     public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
