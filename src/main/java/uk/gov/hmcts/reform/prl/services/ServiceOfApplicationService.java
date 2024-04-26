@@ -81,7 +81,6 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.BLANK_FM5_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
@@ -813,14 +812,6 @@ public class ServiceOfApplicationService {
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
                         )));
 
-                        emailNotificationDetails.add(sendNudgeEmail(
-                            caseData,
-                            authorization,
-                            emailNotificationDetails,
-                            party,
-                            dynamicData,
-                            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR));
-
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1420,14 +1411,6 @@ public class ServiceOfApplicationService {
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
 
-                    emailNotificationDetails.add(sendNudgeEmail(
-                        caseData,
-                        authorization,
-                        emailNotificationDetails,
-                        party,
-                        dynamicData,
-                        SERVED_PARTY_APPLICANT_SOLICITOR));
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -1435,47 +1418,6 @@ public class ServiceOfApplicationService {
         });
 
         return emailNotificationDetails;
-    }
-
-    private Element<EmailNotificationDetails> sendNudgeEmail(CaseData caseData, String authorization,
-                                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                                   Optional<Element<PartyDetails>> party,
-                                                                   Map<String, Object> dynamicData,
-                                                                   String servedParty) {
-        List<Document> blankNudgeDocument = new ArrayList<>();
-        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
-
-        return element(serviceOfApplicationEmailService
-            .sendEmailUsingTemplateWithAttachments(
-                authorization, party.get().getValue().getSolicitorEmail(),
-                blankNudgeDocument,
-                SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
-                dynamicData,
-                servedParty
-            ));
-    }
-
-    private Document generateBlankNudgeDocument(CaseData caseData, String authorisation) {
-
-        String template = BLANK_FM5_DOCUMENT;
-
-        try {
-            log.info("generating blank fm5 document : {} for case : {}", template, caseData.getId());
-            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(caseData.getId()),
-                template,
-                new HashMap<>()
-            );
-
-            return Document.builder().documentUrl(accessCodeLetter.getUrl())
-                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
-        } catch (Exception e) {
-            log.error("*** Blank fm5 document failed for {} :: because of {}", template, e.getMessage());
-        }
-        return null;
     }
 
     private void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
