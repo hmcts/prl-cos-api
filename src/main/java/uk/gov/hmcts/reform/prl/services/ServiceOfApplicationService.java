@@ -81,6 +81,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.BLANK_FM5_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
@@ -1395,6 +1396,9 @@ public class ServiceOfApplicationService {
         String authorization, String servedParty, List<Document> packQ,
         List<Element<EmailNotificationDetails>> emailNotificationDetails) {
 
+        List<Document> blankNudgeDocument = new ArrayList<>();
+        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
+
         List<Element<PartyDetails>> applicantsInCase;
         applicantsInCase = caseData.getApplicants();
 
@@ -1412,7 +1416,7 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                         .sendEmailUsingTemplateWithAttachments(
                             authorization, party.get().getValue().getSolicitorEmail(),
-                            packQ,
+                            blankNudgeDocument,
                             SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
                             dynamicData,
                             servedParty
@@ -1424,6 +1428,28 @@ public class ServiceOfApplicationService {
         });
 
         return emailNotificationDetails;
+    }
+
+    private Document generateBlankNudgeDocument(CaseData caseData, String authorisation) {
+
+        String template = BLANK_FM5_DOCUMENT;
+
+        try {
+            log.info("generating blank fm5 document : {} for case : {}", template, caseData.getId());
+            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                template,
+                null
+            );
+            return Document.builder().documentUrl(accessCodeLetter.getUrl())
+                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+        } catch (Exception e) {
+            log.error("*** Blank fm5 document failed for {} :: because of {}", template, e.getMessage());
+        }
+        return null;
     }
 
     private void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
