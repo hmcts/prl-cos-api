@@ -490,6 +490,8 @@ public class C100RespondentSolicitorServiceTest {
         respondentDocsList.add(respondentDocsElement);
         caseData = CaseData.builder().respondents(respondentList).id(1)
                 .caseTypeOfApplication(C100_CASE_TYPE)
+                .courtSeal("courtSeal")
+                .taskListVersion("v3")
                 .respondentSolicitorData(RespondentSolicitorData.builder()
                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
@@ -2378,4 +2380,70 @@ public class C100RespondentSolicitorServiceTest {
         }
     }
 
+    @Test
+    public void testPopulateDataMapNoSolOrgForVersion() {
+        Map<String,Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest1 = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().data(objectMap).build())
+            .build();
+        respondent2 = PartyDetails.builder()
+            .user(User.builder().build())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .sendSignUpLink("test")
+            .phoneNumber("1234567890")
+            .response(Response.builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName("test")
+                                              .lastName("test")
+                                              .build())
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .permissionFromCourt(Yes)
+                                       .build())
+                          .c7ResponseSubmitted(No)
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                          .build())
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
+            .solicitorOrg(Organisation.builder().build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
+                "AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorReference("test")
+            .address(Address.builder().addressLine1("").build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent2).build();
+        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2));
+    }
 }
