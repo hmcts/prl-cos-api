@@ -55,6 +55,7 @@ public class StmtOfServImplService {
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST = "Respondent has been served personally by Court,"
         + " hence no bulk print id is generated";
     public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL = "Respondent has been served personally by Court through email";
+    public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
@@ -244,9 +245,16 @@ public class StmtOfServImplService {
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
-        String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
-            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
-            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+        String whoIsResponsible;
+        if (SoaCitizenServingRespondentsEnum.courtAdmin
+            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = PERSONAL_SERVICE_SERVED_BY_CA;
+        } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+        } else {
+            whoIsResponsible = UNREPRESENTED_APPLICANT;
+        }
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
@@ -298,7 +306,6 @@ public class StmtOfServImplService {
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            whoIsResponsible = SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getDisplayedValue();
             handlePersonalServiceByUnrepresentedApplicantLip(caseData, authorization, unServedRespondentPack, bulkPrintDetails,
                                                              caseTypeOfApplication);
         }
