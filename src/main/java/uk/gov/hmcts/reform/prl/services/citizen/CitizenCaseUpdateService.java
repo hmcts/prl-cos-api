@@ -153,7 +153,7 @@ public class CitizenCaseUpdateService {
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
-        caseDataMapToBeUpdated.remove("state");
+        // caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
