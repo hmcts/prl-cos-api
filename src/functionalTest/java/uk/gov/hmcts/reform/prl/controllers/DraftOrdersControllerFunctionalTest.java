@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -311,7 +312,7 @@ public class DraftOrdersControllerFunctionalTest {
                 "\"caseTypeOfApplication\": \"FL401\"",
                 "\"caseTypeOfApplication\": \"C100\"");
 
-        /*request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -320,16 +321,16 @@ public class DraftOrdersControllerFunctionalTest {
             .post("/selected-order")
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .assertThat().statusCode(200);*/
+            .assertThat().statusCode(200);
 
-        mockMvc.perform(post("/selected-order")
+        /*mockMvc.perform(post("/selected-order")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn();*/
 
     }
 
