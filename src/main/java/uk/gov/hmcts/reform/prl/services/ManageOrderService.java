@@ -134,6 +134,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
@@ -147,6 +148,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -2328,7 +2330,7 @@ public class ManageOrderService {
     public String getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -3323,6 +3325,7 @@ public class ManageOrderService {
 
         }
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
 
         if (null != caseData.getManageOrders().getOtherParties()) {
