@@ -17,7 +17,6 @@ import static uk.gov.hmcts.reform.prl.config.CacheConfiguration.SYS_USER_CACHE;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-@CacheConfig(cacheNames = SYS_USER_CACHE)
 public class SystemUserService {
 
     private final OAuth2Configuration auth;
