@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -229,7 +230,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_updateCitizenParty_Event_respondentMiam_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
-        request1
+        /*request1
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -243,7 +244,19 @@ public class CitizenCaseUpdateControllerFunctionalTest {
                   "applicants[0].value.response.miam.willingToAttendMiam", equalTo("Yes"),
                   "applicants[0].value.response.miam.reasonNotAttendingMiam", equalTo("No reason"))
             .extract()
-            .as(CaseData.class);
+            .as(CaseData.class);*/
+        String url = "/citizen/" + caseDetails1.getId().toString() + "/respondentMiam/update-party-details";
+        mockMvc.perform(post(url)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("applicants[0].value.response.miam.attendedMiam").value("Yes"))
+            .andExpect(jsonPath("applicants[0].value.response.miam.willingToAttendMiam").value("Yes"))
+            .andExpect(jsonPath("applicants[0].value.response.miam.reasonNotAttendingMiam").value("No reason"))
+            .andReturn();
     }
 
     @Test
@@ -270,7 +283,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_updateCitizenParty_Event_citizenAoH_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
-        request1
+        /*request1
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -285,8 +298,25 @@ public class CitizenCaseUpdateControllerFunctionalTest {
                   "applicants[0].value.response.safetyConcerns.child.physicalAbuse.isOngoingBehaviour", equalTo("Yes"),
                   "applicants[0].value.response.safetyConcerns.child.physicalAbuse.seekHelpFromPersonOrAgency", equalTo("Yes"))
             .extract()
-            .as(CaseData.class);
+            .as(CaseData.class);*/
 
+        String url = "/citizen/" + caseDetails1.getId().toString() + "/citizenRespondentAoH/update-party-details";
+        mockMvc.perform(post(url)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourDetails")
+                           .value("behaviour was not acceptable"))
+            .andExpect(jsonPath("applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourStartDate")
+                           .value("2023-07-07"))
+            .andExpect(jsonPath("applicants[0].value.response.safetyConcerns.child.physicalAbuse.isOngoingBehaviour")
+                           .value("Yes"))
+            .andExpect(jsonPath("applicants[0].value.response.safetyConcerns.child.physicalAbuse.seekHelpFromPersonOrAgency")
+                           .value("Yes"))
+            .andReturn();
     }
 
     @Test
