@@ -686,6 +686,8 @@ public class DraftAnOrderService {
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
 
+        log.info("case data map {}", caseDataMap);
+
         return caseDataMap;
     }
 
