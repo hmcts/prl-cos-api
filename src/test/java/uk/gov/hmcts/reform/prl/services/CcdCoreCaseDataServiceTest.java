@@ -119,7 +119,7 @@ public class CcdCoreCaseDataServiceTest {
 
     @Test
     public void testEventRequest() {
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.DELETE_CASE, systemUserId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.DELETE_APPLICATION, systemUserId);
         assertEquals(eventRequestData.getUserId(), systemUserId);
     }
 

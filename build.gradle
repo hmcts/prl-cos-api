@@ -278,7 +278,7 @@ dependencyCheck {
 ext['snakeyaml.version'] = '2.2'
 
 dependencies {
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
 
     implementation 'org.testng:testng:7.7.1'
@@ -589,8 +589,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
+  "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
-  '**uk/gov/hmcts/reform/prl/controllers/SystemUserRoleAssingmentController.java'
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
 ]
 
 sonarqube {

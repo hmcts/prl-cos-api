@@ -82,13 +82,15 @@ public class OrganisationService {
                     log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 } catch (Exception e) {
                     log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 }
             }
@@ -125,13 +127,15 @@ public class OrganisationService {
                     log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 } catch (Exception e) {
                     log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
-                        e.getMessage()
+                        e.getMessage(),
+                        e
                     );
                 }
             }

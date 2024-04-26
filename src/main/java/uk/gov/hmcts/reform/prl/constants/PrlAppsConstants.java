@@ -27,6 +27,10 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
+    public static final String MPU_CHILD_INVOLVED_IN_MIAM = "mpuChildInvolvedInMiam";
+    public static final String MPU_APPLICANT_ATTENDED_MIAM = "mpuApplicantAttendedMiam";
+    public static final String MPU_CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemptionMiam";
+
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
@@ -50,6 +54,10 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
+
+    public static final String DRAFT_APPLICATION_DOCUMENT_FIELD = "submitAndPayDownloadApplicationLink";
+
+    public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
 
     public static final String C7_FINAL_ENGLISH = "c7FinalEng";
 
@@ -101,6 +109,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
     public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
+    public static final String READY_FOR_DELETION_STATE = State.READY_FOR_DELETION.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
@@ -272,7 +281,7 @@ public class PrlAppsConstants {
         + "a. The ((applicant / respondent / both)) must notify the court by "
         + "4pm ((date that the deadline has been set)) whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
-        + "b. If the ((applicant / respondent)) does not intend to appoint their own qulaified leagl "
+        + "b. If the ((applicant / respondent)) does not intend to appoint their own qualified legal "
         + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
         + "must complete form EX740 and return it to the court by 4pm on ((date that the deadline has been set))";
     public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
@@ -589,7 +598,7 @@ public class PrlAppsConstants {
 
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
-    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_ACTUALS";
     public static final String CANCELLED = "CANCELLED";
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
@@ -656,8 +665,12 @@ public class PrlAppsConstants {
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
+    public static final String SOLICITOR_C7_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C7_WELSH_DRAFT";
+    public static final String SOLICITOR_C7_WELSH_FINAL_DOCUMENT = "SOLICITOR_C7_WELSH_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
     public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
+    public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
+    public static final String SOLICITOR_C1A_WELSH_FINAL_DOCUMENT = "SOLICITOR_C1A_WELSH_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
@@ -718,7 +731,7 @@ public class PrlAppsConstants {
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
 
-    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
+    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List without notice";
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
@@ -862,6 +875,7 @@ public class PrlAppsConstants {
     public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
+    public static final String  TASK_LIST_VERSION_V3 = "v3";
 
     public static final String  PHYSICAL_ABUSE = "physicalAbuse";
     public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
@@ -958,4 +972,15 @@ public class PrlAppsConstants {
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
 
     public static final String HEARINGS_TYPE = "hearingsType";
+
+    public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
+
+    public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+
+    public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
+
+    public static final String FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED = "fl401ReasonsForListWithoutNoticeRequested";
+
+    public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
+
 }

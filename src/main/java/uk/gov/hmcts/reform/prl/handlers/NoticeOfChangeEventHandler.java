@@ -40,13 +40,13 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_SOLICITOR_NOC);
 
         //PRL-3211 - notify LiP
-        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC);
+        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC, false);
 
         //PRL-3211 - notify applicants/respondents other parties except litigant
-        sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
+        sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false);
 
         //PRL-3211 - notify other persons if any
-        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
+        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false);
 
         //PRL-3211 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
@@ -71,7 +71,8 @@ public class NoticeOfChangeEventHandler {
         }
     }
 
-    private void sendEmailToOtherParties(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
+    private void sendEmailToOtherParties(CaseData caseData, NoticeOfChangeEvent event,
+                                         EmailTemplateNames emailTemplateNames, boolean isRemoveLegalRep) {
         Map<String, String> othersToNotify = CaseUtils.getOthersToNotify(caseData);
         if (!othersToNotify.isEmpty()) {
             othersToNotify.forEach(
@@ -83,6 +84,7 @@ public class NoticeOfChangeEventHandler {
                         event.getSolicitorName(),
                         value,
                         true,
+                        isRemoveLegalRep,
                         ""
                     ),
                     LanguagePreference.getPreferenceLanguage(caseData)
@@ -90,7 +92,8 @@ public class NoticeOfChangeEventHandler {
         }
     }
 
-    private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
+    private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event,
+                                                  EmailTemplateNames emailTemplateNames, boolean isRemoveLegalRep) {
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
         Map<String, String> applicantsRespondentsToNotify = new HashMap<>();
         applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(
@@ -111,6 +114,7 @@ public class NoticeOfChangeEventHandler {
                         event.getSolicitorName(),
                         value,
                         false,
+                        isRemoveLegalRep,
                         ""
                     ),
                     LanguagePreference.getPreferenceLanguage(caseData)
@@ -118,7 +122,7 @@ public class NoticeOfChangeEventHandler {
         }
     }
 
-    private void sendEmailToLitigant(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
+    private void sendEmailToLitigant(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName, boolean isRemoveLegalRep) {
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
@@ -129,6 +133,7 @@ public class NoticeOfChangeEventHandler {
                     noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(),
                                                                        partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName(),
                                                                        false,
+                                                                       isRemoveLegalRep,
                                                                        event.getAccessCode()
                     ),
                     LanguagePreference.getPreferenceLanguage(caseData)
@@ -197,13 +202,13 @@ public class NoticeOfChangeEventHandler {
         if (StringUtils.isNotEmpty(event.getAccessCode())
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
             //PRL-3215 - notify LiP
-            sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
+            sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC, true);
             //PRL-3215 - notify applicants/respondents other parties except litigant
-            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
+            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true);
         }
 
         //PRL-3215 - notify other persons if any
-        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
+        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED, true);
 
         //PRL-3215 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);

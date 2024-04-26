@@ -125,7 +125,6 @@ public class CaseDocumentController {
         return getUploadedDocumentsList(
             generateAndUploadDocumentRequest,
             authorisation,
-            s2sToken,
             caseId,
             tempCaseData,
             uploadedDocuments
@@ -134,11 +133,10 @@ public class CaseDocumentController {
     }
 
     private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                    @RequestHeader("serviceAuthorization") String s2sToken,
-                                                    String caseId,
-                                                    CaseData tempCaseData,
-                                                    UploadedDocuments uploadedDocuments) throws JsonProcessingException {
+                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                            String caseId,
+                                                            CaseData tempCaseData,
+                                                            UploadedDocuments uploadedDocuments) throws JsonProcessingException {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -159,10 +157,8 @@ public class CaseDocumentController {
             caseService.updateCase(
                 caseData,
                 authorisation,
-                s2sToken,
                 caseId,
-                CITIZEN_UPLOADED_DOCUMENT,
-                null
+                CITIZEN_UPLOADED_DOCUMENT
             );
 
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
@@ -330,10 +326,8 @@ public class CaseDocumentController {
         caseService.updateCase(
             caseData,
             authorisation,
-            s2sToken,
             caseId,
-            CITIZEN_UPLOADED_DOCUMENT,
-            null
+            CITIZEN_UPLOADED_DOCUMENT
         );
         return "SUCCESS";
     }

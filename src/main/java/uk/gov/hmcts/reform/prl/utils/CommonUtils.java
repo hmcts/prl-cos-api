@@ -50,7 +50,7 @@ public class CommonUtils {
                 return localDateTime.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -63,7 +63,7 @@ public class CommonUtils {
                 return parse.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -74,7 +74,7 @@ public class CommonUtils {
             Date date = new Date();
             return dateFormat.format(date);
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
     }
@@ -158,7 +158,7 @@ public class CommonUtils {
                 return localDate.format(DateTimeFormatter.ofPattern(pattern,  Locale.ENGLISH));
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
     }
@@ -181,7 +181,7 @@ public class CommonUtils {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
                                                                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return personalCodes;
     }
@@ -195,7 +195,7 @@ public class CommonUtils {
                 JudicialUser.class
             ).getIdamId();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return idamIds;
     }
@@ -215,7 +215,7 @@ public class CommonUtils {
                     .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + "in formatDateTime Method" + e.getMessage());
+            log.error(ERROR_STRING + "in formatDateTime Method", e);
         }
         return "";
     }

@@ -5,9 +5,12 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -38,6 +42,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
@@ -81,6 +86,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
         = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
 
+    private static final String DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-sdo-1hearing-judge-appr-request.json";
+
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY
         = "requests/judge-edit-approve-court-admin-manyhearing-judgeappr-request.json";
 
@@ -90,12 +98,37 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
         = "requests/court-admin-manage-order-noapproval-required-request.json";
 
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+
+    private static CaseDetails caseDetails;
+
+
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
     }
 
     @Test
@@ -204,6 +237,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -396,4 +430,30 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
+
+    /**
+     * Judge editApprove - approves the sdo order with one hearing which is created by court admin.
+     */
+    @Test
+    public void givenRequestBody_whenJudge_edit_approve_court_admin_Sdo_order_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
+                  "data.isOrderApproved", equalTo("Yes"),
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
 }
