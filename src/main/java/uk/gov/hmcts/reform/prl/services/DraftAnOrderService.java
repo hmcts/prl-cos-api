@@ -281,6 +281,7 @@ public class DraftAnOrderService {
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
+        caseDataMap.put("isCallFromTaskTab", No);
         return caseDataMap;
     }
 
