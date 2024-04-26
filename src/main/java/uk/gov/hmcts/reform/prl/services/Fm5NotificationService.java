@@ -43,8 +43,7 @@ public class Fm5NotificationService {
                 blankNudgeDocument,
                 SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
                 dynamicData,
-                servedParty
-            );
+                servedParty);
     }
 
     private Document generateBlankNudgeDocument(CaseData caseData, String authorisation) {
