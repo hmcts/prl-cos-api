@@ -240,13 +240,13 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
-
             }
             if (quarantineLegalDoc != null) {
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
                     userDetails
                 );
+                //This will be executed only during manage documents
                 if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(
                     quarantineLegalDoc.getDocumentParty())) {
                     finalConfidentialDocument = finalConfidentialDocument.toBuilder()
@@ -254,15 +254,6 @@ public class ManageDocumentsService {
                         .build();
                 }
 
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            //This will be executed only during manage documents
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
                 moveToConfidentialOrRestricted(
                     caseDataUpdated,
                     CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
