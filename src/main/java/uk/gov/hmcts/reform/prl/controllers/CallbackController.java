@@ -103,6 +103,7 @@ import java.util.Optional;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
@@ -663,7 +664,7 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (isNotEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
+                if (isEmpty(caseDataUpdated.get(TASK_LIST_VERSION))) {
                     setTaskListVersion(caseDataUpdated);
                 }
             }
