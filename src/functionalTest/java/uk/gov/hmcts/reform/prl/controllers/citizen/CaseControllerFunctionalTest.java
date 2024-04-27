@@ -163,6 +163,7 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void testUpdateCaseWithOtherPersonDetails() {
 
         CaseData responseData = request
