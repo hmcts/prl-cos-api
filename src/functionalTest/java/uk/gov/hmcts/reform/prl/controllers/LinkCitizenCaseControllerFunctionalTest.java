@@ -24,12 +24,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -143,7 +142,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY);
         String requestBodyRevised = requestBody
             .replace("1711626009844770", caseDetails1.getId().toString());
-        request1
+        /*request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -155,7 +154,20 @@ public class LinkCitizenCaseControllerFunctionalTest {
                   "caseInvites[0].value.accessCode", equalTo("FVJKGHF"))
             .body("caseInvites[0].value.hasLinked", equalTo(YesOrNo.Yes.toString()))
             .extract()
-            .as(CaseData.class);
+            .as(CaseData.class);*/
+
+        mockMvc.perform(post("/citizen/link-case-to-account")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("caseInvites[0].value.accessCode").value("FVJKGHF"))
+            .andExpect(jsonPath("caseInvites[0].value.hasLinked").value(YesOrNo.Yes.toString()))
+            .andReturn();
+
+
 
     }
 
@@ -165,7 +177,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY1);
         String requestBodyRevised = requestBody
             .replace("1711626009844772", caseDetails1.getId().toString());
-        String response = request1
+        /*String response = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -176,7 +188,20 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .extract()
             .asString();
         Assert.assertNotNull(response);
-        Assert.assertEquals("Linked",response);
+        Assert.assertEquals("Linked",response);*/
+
+        MvcResult res = mockMvc.perform(post("/citizen/validate-access-code")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+        Assert.assertEquals("Linked",json);
+
+
     }
 
     @Test
