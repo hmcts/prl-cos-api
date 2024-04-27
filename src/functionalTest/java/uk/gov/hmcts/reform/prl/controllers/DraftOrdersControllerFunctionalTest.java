@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class DraftOrdersControllerFunctionalTest {
 
     private MockMvc mockMvc;

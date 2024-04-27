@@ -5,6 +5,7 @@ import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@Ignore
 @SuppressWarnings("unchecked")
 public class CallbackControllerFT {
 

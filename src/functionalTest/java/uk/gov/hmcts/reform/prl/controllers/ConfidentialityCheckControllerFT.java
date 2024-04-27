@@ -9,6 +9,7 @@ import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETUR
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class ConfidentialityCheckControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";

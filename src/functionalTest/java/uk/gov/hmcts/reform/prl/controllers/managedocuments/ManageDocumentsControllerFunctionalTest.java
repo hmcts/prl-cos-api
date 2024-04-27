@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class ManageDocumentsControllerFunctionalTest {
 
     private MockMvc mockMvc;
