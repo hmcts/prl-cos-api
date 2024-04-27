@@ -195,12 +195,28 @@ public class ManageOrdersControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
+
+        String requestBodyForCreateCase = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        CaseDetails caseDetails =  request2
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyForCreateCase)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        String requestBodyRevised = requestBody
+            .replace("1701870369166430", caseDetails.getId().toString());
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
