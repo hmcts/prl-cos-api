@@ -8,7 +8,6 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -41,7 +40,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Ignore
 public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
