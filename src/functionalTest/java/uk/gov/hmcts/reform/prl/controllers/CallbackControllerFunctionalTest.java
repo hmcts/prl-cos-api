@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,16 +19,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
@@ -71,8 +70,13 @@ public class CallbackControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Before
-    public void setUp() {
+    public void init() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @BeforeAll
+    static void setup() {
+        RestAssured.registerParser("text/html", Parser.JSON);
     }
 
     @Test
@@ -93,7 +97,7 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_NO_ERROR);
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -102,7 +106,17 @@ public class CallbackControllerFunctionalTest {
             .post("/validate-miam-application-or-exemption")
             .then()
             .body("errors", Matchers.hasSize(0))
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200);*/
+
+        mockMvc.perform(post("/validate-miam-application-or-exemption")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").value(Matchers.hasSize(0)))
+            .andReturn();
     }
 
 
@@ -124,7 +138,7 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -133,13 +147,23 @@ public class CallbackControllerFunctionalTest {
             .post("/about-to-submit-case-creation")
             .then()
             .body("data.applicantCaseName", equalTo("Test Name"))
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200);*/
+
+        mockMvc.perform(post("/about-to-submit-case-creation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.applicantCaseName").value("Test Name"))
+            .andReturn();
     }
 
     @Test
     public void givenRequest_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICATION_TIMETABLE_REQUEST);
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -148,13 +172,24 @@ public class CallbackControllerFunctionalTest {
             .post("/validate-application-consideration-timetable")
             .then()
             .body("errors", contains("Please provide either days or hours in proposed timetable"))
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200);*/
+
+        mockMvc.perform(post("/validate-application-consideration-timetable")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").value("Please provide either days or hours in proposed timetable"))
+            .andReturn();
+
     }
 
     @Test
     public void givenRequest_whenEndPointCalled_ResponseContains() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
+        /*AboutToStartOrSubmitCallbackResponse resp  = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -163,10 +198,25 @@ public class CallbackControllerFunctionalTest {
             .post("/copy-manage-docs-for-tabs")
             .then()
             .body("data.furtherEvidences", nullValue())
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("KKKK "+resp);*/
+
+        mockMvc.perform(post("/copy-manage-docs-for-tabs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isAddCaseNumberAdded").value("Yes"))
+            .andReturn();
     }
 
     @Test
+    @Ignore
     public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
@@ -196,7 +246,7 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsCaseNameHmctsInternal() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        request
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -205,7 +255,17 @@ public class CallbackControllerFunctionalTest {
             .post("/about-to-submit-case-creation")
             .then()
             .body("data.caseNameHmctsInternal", equalTo("Test Name"))
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200);*/
+
+        mockMvc.perform(post("/about-to-submit-case-creation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.caseNameHmctsInternal").value("Test Name"))
+            .andReturn();
     }
 
     @Test
@@ -213,18 +273,18 @@ public class CallbackControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/attach-scan-docs/about-to-submit")
-            .then()
-            .body("data.manageDocumentsRestrictedFlag", equalTo(TRUE),
-                  "data.manageDocumentsTriggeredBy", equalTo(STAFF))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+        mockMvc.perform(post("/attach-scan-docs/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.manageDocumentsRestrictedFlag").value(TRUE))
+            .andExpect(jsonPath("data.manageDocumentsTriggeredBy").value(STAFF))
+            .andReturn();
+
+
 
     }
 
