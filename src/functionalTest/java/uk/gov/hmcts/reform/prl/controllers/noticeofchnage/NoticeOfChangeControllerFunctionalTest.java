@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchnage;
 
+import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,6 +49,11 @@ public class NoticeOfChangeControllerFunctionalTest {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @BeforeAll
+    static void setup() {
+        RestAssured.registerParser("text/html", Parser.JSON);
     }
 
     @Test
