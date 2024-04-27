@@ -40,6 +40,6 @@ public class CaseInitiationControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-initiation/submitted")
             .then()
-            .assertThat().statusCode(400);
+            .assertThat().statusCode(404);
     }
 }

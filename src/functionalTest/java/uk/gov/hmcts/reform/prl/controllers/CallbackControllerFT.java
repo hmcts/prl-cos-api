@@ -4,9 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-@Ignore
 @SuppressWarnings("unchecked")
 public class CallbackControllerFT {
 
@@ -143,7 +141,7 @@ public class CallbackControllerFT {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Before
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         RestAssured.registerParser("text/html", Parser.JSON);

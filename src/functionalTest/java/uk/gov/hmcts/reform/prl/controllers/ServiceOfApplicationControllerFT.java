@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -91,9 +93,10 @@ public class ServiceOfApplicationControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
-    @Before
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        RestAssured.registerParser("text/html", Parser.JSON);
     }
 
     @MockBean
@@ -106,20 +109,25 @@ public class ServiceOfApplicationControllerFT {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails = mapper.readValue(json, CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
+
+
+
     }
 
     @Test
