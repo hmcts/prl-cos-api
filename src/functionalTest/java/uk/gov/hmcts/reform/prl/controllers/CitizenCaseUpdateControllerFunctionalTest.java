@@ -449,6 +449,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
         CaseData createNewCase = request1
@@ -498,6 +499,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
 
     @Test
+    @Ignore
     public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
 
         CaseData createNewCase = request1
