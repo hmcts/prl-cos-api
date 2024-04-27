@@ -321,15 +321,31 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_citizenInternationalElement_then200Response() throws Exception {
+        String requestBodyCreate = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
-        request1
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBodyCreate)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
+        System.out.println("PPPPPPPP " + caseDetails);
+
+        /*request1
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
+            .pathParam(CASE_ID,caseDetails.getId().toString())
             .pathParam(EVENT_ID,"citizenInternationalElement")
             .post(updatePartyDetailsEndPoint)
             .then()
@@ -338,7 +354,26 @@ public class CitizenCaseUpdateControllerFunctionalTest {
                   "applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWl", equalTo("Yes"),
                   "applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWlDetails", equalTo("Living outside EnWl"))
             .extract()
-            .as(CaseData.class);
+            .as(CaseData.class);*/
+
+        String url = "/citizen/" + caseDetails.getId().toString() + "/citizenInternationalElement/update-party-details";
+
+        mockMvc.perform(post(url)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("applicants[0].value.response.citizenInternationalElements.childrenLiveOutsideOfEnWl")
+                           .value("Yes"))
+            .andExpect(jsonPath("applicants[0].value.response.citizenInternationalElements.childrenLiveOutsideOfEnWlDetails")
+                           .value("some children live outside"))
+            .andExpect(jsonPath("applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWl")
+                           .value("Yes"))
+            .andExpect(jsonPath("applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWlDetails")
+                           .value("Living outside EnWl"))
+            .andReturn();
     }
 
     @Test
