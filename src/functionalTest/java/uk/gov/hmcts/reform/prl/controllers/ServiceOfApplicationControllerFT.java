@@ -7,9 +7,9 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -75,8 +75,6 @@ public class ServiceOfApplicationControllerFT {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -93,7 +91,9 @@ public class ServiceOfApplicationControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
-    @BeforeAll
+    private MockMvc mockMvc;
+
+    @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         RestAssured.registerParser("text/html", Parser.JSON);

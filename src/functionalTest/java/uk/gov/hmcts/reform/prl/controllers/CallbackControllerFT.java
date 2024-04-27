@@ -4,8 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +141,7 @@ public class CallbackControllerFT {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @BeforeAll
+    @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         RestAssured.registerParser("text/html", Parser.JSON);
