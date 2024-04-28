@@ -126,6 +126,8 @@ public class TestingSupportService {
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            String taskListVersionOptions = (String) callbackRequest.getCaseDetails().getData().get("taskListVersionOptions");
+            log.info("taskListVersionOptions ==>" + taskListVersionOptions);
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())
                 || (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
