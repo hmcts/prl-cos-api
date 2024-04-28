@@ -273,8 +273,8 @@ public class TestingSupportService {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions)
-                ? ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON)
-                : ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON);
+                ? ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON)
+                : ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
         }
