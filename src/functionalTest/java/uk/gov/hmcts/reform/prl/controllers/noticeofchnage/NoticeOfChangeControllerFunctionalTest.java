@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.noticeofchnage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,6 @@ public class NoticeOfChangeControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenAboutToSubmitNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/aboutToSubmitNoCRequest")
@@ -64,7 +62,6 @@ public class NoticeOfChangeControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenSubmittedNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/submittedNoCRequest")
