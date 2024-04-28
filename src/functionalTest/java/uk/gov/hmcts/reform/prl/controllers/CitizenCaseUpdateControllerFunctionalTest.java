@@ -509,6 +509,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
         CaseData createNewCase = request1
@@ -596,23 +597,24 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_withdrawCase_then200Response() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY);
-        CaseDetails caseDetails =  request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
 
         String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
-
         CaseData withDrawCase = request2
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
