@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class NoticeOfChangeNewControllerFunctionalTest {
 
     @Autowired
@@ -36,7 +35,7 @@ public class NoticeOfChangeNewControllerFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-    private static final String VALID_REQUEST_BODY = "requests/bundle/C100-case-data.json";
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
