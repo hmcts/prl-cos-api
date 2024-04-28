@@ -280,17 +280,6 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        /*CaseDetails caseDetails1 =  request2
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);*/
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -309,16 +298,6 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails1.getId().toString());
 
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/case-order-email-notification")
-            .then()
-            .assertThat().statusCode(200);*/
-
         mockMvc.perform(post("/case-order-email-notification")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -327,8 +306,6 @@ public class ManageOrdersControllerFunctionalTest {
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
-
-
     }
 
     /**
@@ -367,7 +344,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1702636092071141", caseDetails.getId().toString());
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -452,8 +429,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("managerCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-
     }
 
     /**
@@ -479,8 +454,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-
     }
 
     @Test
@@ -529,17 +502,6 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        /*CaseDetails caseDetails =  request2
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);*/
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -728,7 +690,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
