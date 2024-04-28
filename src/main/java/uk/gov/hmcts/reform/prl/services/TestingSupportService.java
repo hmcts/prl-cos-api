@@ -124,6 +124,8 @@ public class TestingSupportService {
 
     private static final String VALID_C100_DRAFT_V3_INPUT_JSON = "C100_Dummy_Draft_CaseDetails_v3.json";
 
+    private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
+
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
             String requestBody;
@@ -135,7 +137,7 @@ public class TestingSupportService {
                 || (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation, taskListVersionOptions);
             } else {
-                requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);
+                requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData, taskListVersionOptions);
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
@@ -267,10 +269,12 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
-    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
+    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData, String taskListVersionOptions) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
+            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions)
+                ? ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON)
+                : ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
         }
