@@ -97,17 +97,6 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_NO_ERROR);
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/validate-miam-application-or-exemption")
-            .then()
-            .body("errors", Matchers.hasSize(0))
-            .assertThat().statusCode(200);*/
-
         mockMvc.perform(post("/validate-miam-application-or-exemption")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -138,16 +127,6 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/about-to-submit-case-creation")
-            .then()
-            .body("data.applicantCaseName", equalTo("Test Name"))
-            .assertThat().statusCode(200);*/
 
         mockMvc.perform(post("/about-to-submit-case-creation")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -163,16 +142,6 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequest_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICATION_TIMETABLE_REQUEST);
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/validate-application-consideration-timetable")
-            .then()
-            .body("errors", contains("Please provide either days or hours in proposed timetable"))
-            .assertThat().statusCode(200);*/
 
         mockMvc.perform(post("/validate-application-consideration-timetable")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -189,20 +158,6 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequest_whenEndPointCalled_ResponseContains() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        /*AboutToStartOrSubmitCallbackResponse resp  = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/copy-manage-docs-for-tabs")
-            .then()
-            .body("data.furtherEvidences", nullValue())
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        System.out.println("KKKK "+resp);*/
 
         mockMvc.perform(post("/copy-manage-docs-for-tabs")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -246,16 +201,6 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsCaseNameHmctsInternal() throws Exception {
         String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/about-to-submit-case-creation")
-            .then()
-            .body("data.caseNameHmctsInternal", equalTo("Test Name"))
-            .assertThat().statusCode(200);*/
 
         mockMvc.perform(post("/about-to-submit-case-creation")
                             .contentType(MediaType.APPLICATION_JSON)

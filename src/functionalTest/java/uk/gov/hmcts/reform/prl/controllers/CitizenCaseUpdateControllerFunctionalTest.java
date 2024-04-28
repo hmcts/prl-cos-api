@@ -106,38 +106,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     @Test
     public void createCcdTestCase() throws Exception {
 
-        /*String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
-        caseDetails1 =  request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());*/
-
-
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
-        /*caseDetails1 =  request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());*/
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -155,10 +124,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
         Assert.assertNotNull(caseDetails1);
         Assert.assertNotNull(caseDetails1.getId());
-
-        //assertTrue(json.contains("welshLanguageRequirementsTable"));
-
-
     }
 
     @Test
@@ -179,7 +144,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
 
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
@@ -197,25 +161,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.placeOfBirth").value("Harrow"))
             .andExpect(jsonPath("applicants[0].value.dateOfBirth").value("1997-12-12"))
             .andReturn();
-
-        //String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        /*request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"confirmYourDetails")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.email", equalTo("citizen@email.com"),
-                  "applicants[0].value.phoneNumber", equalTo("07442772347"),
-                  "applicants[0].value.placeOfBirth", equalTo("Harrow"),
-                  "applicants[0].value.dateOfBirth", equalTo("1997-12-12"))
-            .extract()
-            .as(CaseData.class);*/
     }
 
     @Test
@@ -237,8 +182,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
-
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
         String url = "/citizen/" + caseDetails.getId().toString() + "/keepYourDetailsPrivate/update-party-details";
@@ -257,36 +200,11 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.response.keepDetailsPrivate.confidentialityList[0]")
                            .value("phoneNumber"))
             .andReturn();
-
-        //
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"keepYourDetailsPrivate")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.keepDetailsPrivate.otherPeopleKnowYourContactDetails", equalTo("yes"),
-                  "applicants[0].value.response.keepDetailsPrivate.confidentiality", equalTo("Yes"),
-                  "applicants[0].value.response.keepDetailsPrivate.confidentialityList[0]", equalTo("phoneNumber"))
-            .extract()
-            .as(CaseData.class);
-
-         */
-
     }
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_consentToTheApplication_then200Response() throws Exception {
-
-
         String requestBodyCreate = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
-
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -301,8 +219,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
-
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
         String url = "/citizen/" + caseDetails.getId().toString() + "/consentToTheApplication/update-party-details";
@@ -323,48 +239,12 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.response.consent.courtOrderDetails")
                            .value("Court Order details test"))
             .andReturn();
-
-        //
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"consentToTheApplication")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.consent.consentToTheApplication", equalTo("Yes"),
-                  "applicants[0].value.response.consent.applicationReceivedDate", equalTo("2023-01-23"),
-                  "applicants[0].value.response.consent.permissionFromCourt", equalTo("Yes"),
-                  "applicants[0].value.response.consent.courtOrderDetails", equalTo("Court Order details test"))
-            .extract()
-            .as(CaseData.class);*/
-
     }
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_respondentMiam_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
-        /*request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"respondentMiam")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.miam.attendedMiam", equalTo("Yes"),
-                  "applicants[0].value.response.miam.willingToAttendMiam", equalTo("Yes"),
-                  "applicants[0].value.response.miam.reasonNotAttendingMiam", equalTo("No reason"))
-            .extract()
-            .as(CaseData.class);*/
         String url = "/citizen/" + caseDetails1.getId().toString() + "/respondentMiam/update-party-details";
         mockMvc.perform(post(url)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -381,9 +261,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_legalRepresentation_then200Response() throws Exception {
-
         String requestBodyCreate = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
-
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -398,8 +276,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
-
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
         String url = "/citizen/" + caseDetails.getId().toString() + "/legalRepresentation/update-party-details";
@@ -414,47 +290,11 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.response.legalRepresentation")
                            .value("Yes"))
             .andReturn();
-
-
-        //
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"legalRepresentation")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.legalRepresentation", equalTo("Yes"))
-            .extract()
-            .as(CaseData.class);*/
-
     }
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_citizenAoH_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        /*request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"citizenRespondentAoH")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourDetails", equalTo("behaviour was not acceptable"),
-                  "applicants[0].value.response.safetyConcerns.child.physicalAbuse.behaviourStartDate", equalTo("2023-07-07"),
-                  "applicants[0].value.response.safetyConcerns.child.physicalAbuse.isOngoingBehaviour", equalTo("Yes"),
-                  "applicants[0].value.response.safetyConcerns.child.physicalAbuse.seekHelpFromPersonOrAgency", equalTo("Yes"))
-            .extract()
-            .as(CaseData.class);*/
 
         String url = "/citizen/" + caseDetails1.getId().toString() + "/citizenRespondentAoH/update-party-details";
         mockMvc.perform(post(url)
@@ -493,24 +333,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
-
-        /*request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails.getId().toString())
-            .pathParam(EVENT_ID,"citizenInternationalElement")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.citizenInternationalElements.childrenLiveOutsideOfEnWl", equalTo("Yes"),
-                  "applicants[0].value.response.citizenInternationalElements.childrenLiveOutsideOfEnWlDetails", equalTo("some children live outside"),
-                  "applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWl", equalTo("Yes"),
-                  "applicants[0].value.response.citizenInternationalElements.parentsAnyOneLiveOutsideEnWlDetails", equalTo("Living outside EnWl"))
-            .extract()
-            .as(CaseData.class);*/
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
         String url = "/citizen/" + caseDetails.getId().toString() + "/citizenInternationalElement/update-party-details";
@@ -535,9 +357,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_citizenRemoveLegalRepresentative_then200Response() throws Exception {
-
         String requestBodyCreate = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
-
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -552,8 +372,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         CaseDetails caseDetails = mapper.readValue(json, CaseDetails.class);
-        System.out.println("PPPPPPPP " + caseDetails);
-
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
         String url = "/citizen/" + caseDetails.getId().toString() + "/citizenRemoveLegalRepresentative/update-party-details";
@@ -568,24 +386,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.isRemoveLegalRepresentativeRequested")
                            .value("Yes"))
             .andReturn();
-
-        //
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"citizenRemoveLegalRepresentative")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.isRemoveLegalRepresentativeRequested", equalTo("Yes"))
-            .extract()
-            .as(CaseData.class);*/
-
     }
 
     @Test
@@ -626,27 +426,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.response.supportYouNeed.parkingDetails")
                            .value("Need space for parking"))
             .andReturn();
-
-
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"hearingNeeds")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.supportYouNeed.helpCommunication[0]", equalTo("hearingloop"),
-                  "applicants[0].value.response.supportYouNeed.courtComfort[0]", equalTo("appropriatelighting"),
-                  "applicants[0].value.response.supportYouNeed.courtHearing[0]", equalTo("supportworker"),
-                  "applicants[0].value.response.supportYouNeed.parkingDetails", equalTo("Need space for parking"))
-            .extract()
-            .as(CaseData.class);*/
-
     }
 
     @Test
@@ -727,25 +506,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .andExpect(jsonPath("applicants[0].value.response.currentOrPreviousProceedings.courtOrderMadeForProtection")
                            .value("Yes"))
             .andReturn();
-
-        //
-
-        /*String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-
-        request1
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID,caseDetails1.getId().toString())
-            .pathParam(EVENT_ID,"citizen-case-update")
-            .post(updatePartyDetailsEndPoint)
-            .then()
-            .body("applicants[0].value.response.currentOrPreviousProceedings.haveChildrenBeenInvolvedInCourtCase", equalTo("Yes"))
-            .body("applicants[0].value.response.currentOrPreviousProceedings.courtOrderMadeForProtection", equalTo("Yes"))
-            .extract()
-            .as(CaseData.class);*/
     }
 
     @Test
@@ -795,7 +555,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
 
     }
-
 
     @Test
     public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
