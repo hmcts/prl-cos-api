@@ -6,6 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -519,33 +520,6 @@ public class ManageOrdersControllerFunctionalTest {
 
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails.getId().toString());
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/case-order-email-notification")
-            .then()
-            .body("data.postalInformationCaOnlyC47a", equalTo(null))
-            .body("data.postalInformationCA", equalTo(null))
-            .body("data.otherParties", equalTo(null))
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.cafcassCymruServedOptions", equalTo(null))
-            .body("data.emailInformationCaOnlyC47a", equalTo(null))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);*/
 
         mockMvc.perform(post("/case-order-email-notification")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -554,7 +528,23 @@ public class ManageOrdersControllerFunctionalTest {
                             .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed").value("Yes"))
+            .andExpect(jsonPath("data.postalInformationCaOnlyC47a").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.postalInformationCA").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.otherParties").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.recipientsOptions").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.cafcassCymruEmail").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.serveOrderDynamicList").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.serveOtherPartiesCA").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.cafcassCymruServedOptions").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.emailInformationCaOnlyC47a").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed")
+                           .value("Yes"))
+            .andExpect(jsonPath("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail")
+                           .value(caseDetails.getData().get("cafcassCymruEmail")))
+            .andExpect(jsonPath("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed")
+                           .value("Yes"))
+            .andExpect(jsonPath("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail")
+                           .value(caseDetails.getData().get("cafcassCymruEmail")))
             .andReturn();
 
     }
