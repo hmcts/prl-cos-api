@@ -2,141 +2,256 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.BLANK_FM5_DOCUMENT;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fm5NotificationService {
 
-    private final DgsService dgsService;
+    public static final String BLANK_FM5_FILE = "FM5_Blank.pdf";
+
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final CaseDocumentClient caseDocumentClient;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
+    private final BulkPrintService bulkPrintService;
+    private final DocumentLanguageService documentLanguageService;
+
     @Value("${xui.url}")
     private String manageCaseUrl;
+    @Value("${citizen.url}")
+    private String citizenUrl;
 
     public void checkFmPendingParties(FmPendingParty fmPendingParty, CaseData caseData, String authorization) {
         List<Element<PartyDetails>> listOfRecipientsOfNudge = new ArrayList<>();
         if (fmPendingParty.equals(FmPendingParty.APPLICANT)) {
             listOfRecipientsOfNudge.addAll(caseData.getApplicants());
-            checkWhomToSendNudgeNotification(listOfRecipientsOfNudge, caseData, authorization);
+            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
         } else if (fmPendingParty.equals(FmPendingParty.RESPONDENT)) {
             listOfRecipientsOfNudge.addAll(caseData.getRespondents());
-            checkWhomToSendNudgeNotification(listOfRecipientsOfNudge, caseData, authorization);
+            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
         } else if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
             listOfRecipientsOfNudge.addAll(caseData.getApplicants());
             listOfRecipientsOfNudge.addAll(caseData.getRespondents());
-            checkWhomToSendNudgeNotification(listOfRecipientsOfNudge, caseData, authorization);
+            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
         }
     }
 
-    private void checkWhomToSendNudgeNotification(List<Element<PartyDetails>> listOfRecipientsOfNudge, CaseData caseData, String authorization) {
-      listOfRecipientsOfNudge.forEach(recipient -> {
-          if (null != recipient.getValue().getSolicitorEmail()) {
-              prepareNudgeEmailDataSolicitor(caseData, recipient, authorization);
-          } else {
-              checkContactPreferenceForUnrepresentedRecipient(caseData, recipient, authorization);
-          }
-      });
+    private void sendFm5ReminderNotification(List<Element<PartyDetails>> listOfRecipientsOfNudge,
+                                             CaseData caseData,
+                                             String authorization) {
+        listOfRecipientsOfNudge.forEach(party -> {
+            //if represented then send reminder to solicitor
+            if (isNotEmpty(party.getValue().getSolicitorEmail())) {
+                sendFm5ReminderToSolicitor(caseData, party, authorization);
+            } else {
+                //Not represented, remind citizen LiP
+                sendFm5ReminderToCitizen(caseData, party, authorization);
+            }
+        });
     }
 
-    private void checkContactPreferenceForUnrepresentedRecipient(CaseData caseData, Element<PartyDetails> recipient, String authorization) {
-        if (null != recipient.getValue().getContactPreferences()
-            && recipient.getValue().getContactPreferences().equals(ContactPreferences.digital)
-            && null != recipient.getValue().getEmail()) {
-            prepareNudgeEmailDataCitizen(caseData, recipient, authorization);
-        } else {
-            sendNudgePost(caseData, recipient, authorization);
-        }
-    }
-
-    private void prepareNudgeEmailDataSolicitor(CaseData caseData, Element<PartyDetails> recipient, String authorization) {
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("name", recipient.getValue().getRepresentativeFullName());
-        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-
-        sendNudgeEmail(caseData, recipient, recipient.getValue().getSolicitorEmail(), authorization, dynamicData);
-    }
-
-    private void prepareNudgeEmailDataCitizen(CaseData caseData, Element<PartyDetails> recipient, String authorization) {
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("name", recipient.getValue().getRepresentativeFullName());
-        //needs tg be changed to check if recipiant has access to dashboard and to the dashboard link
-        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-
-        sendNudgeEmail(caseData, recipient, recipient.getValue().getSolicitorEmail(), authorization, dynamicData);
-    }
-
-    private void sendNudgeEmail(CaseData caseData, Element<PartyDetails> recipient, String email, String authorization,  Map<String, Object> dynamicData) {
-        List<Document> blankNudgeDocument = new ArrayList<>();
-        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
-        //need to send email
-
-    }
-
-    private void sendNudgePost(CaseData caseData, Element<PartyDetails> recipient, String authorization) {
-        List<Document> blankNudgePack = new ArrayList<>();
-        //need to add cover letter
-        blankNudgePack.add(generateBlankNudgeDocument(caseData, authorization));
-        //need to send post
-
-    }
-
-    private void sendNudgeEmail(CaseData caseData, String authorization,
-                                PartyDetails party,
-                                Map<String, Object> dynamicData,
-                                String servedParty) {
-        List<Document> blankNudgeDocument = new ArrayList<>();
-        blankNudgeDocument.add(generateBlankNudgeDocument(caseData, authorization));
+    private void sendFm5ReminderToSolicitor(CaseData caseData,
+                                            Element<PartyDetails> party,
+                                            String authorization) {
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData,
+                                                              party.getValue(),
+                                                              false);
 
         serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
-                authorization, party.getSolicitorEmail(),
-                blankNudgeDocument,
-                SendgridEmailTemplateNames.SOA_NUDGE_REMINDER_SOLICITOR,
+                authorization,
+                party.getValue().getSolicitorEmail(),
+                getBlankFm5Form(authorization),
+                SendgridEmailTemplateNames.FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR,
                 dynamicData,
-                servedParty);
+                SOLICITOR
+        );
     }
 
-    private Document generateBlankNudgeDocument(CaseData caseData, String authorisation) {
-
-        String template = BLANK_FM5_DOCUMENT;
-        try {
-            log.info("generating blank fm5 document : {} for case : {}", template, caseData.getId());
-            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(caseData.getId()),
-                template,
-                new HashMap<>()
-            );
-
-            return Document.builder().documentUrl(accessCodeLetter.getUrl())
-                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
-        } catch (Exception e) {
-            log.error("*** Blank fm5 document failed for {} :: because of {}", template, e.getMessage());
+    private void sendFm5ReminderToCitizen(CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String authorization) {
+        log.info("Contact pref is {} for party {}", party.getValue().getContactPreferences(), party.getId());
+        if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
+            && YesOrNo.Yes.equals(party.getValue().getCanYouProvideEmailAddress())) {
+            sendFm5ReminderToLipViaEmail(caseData, party, authorization);
+        } else {
+            sendFm5ReminderToLipViaPost(caseData, party, authorization);
         }
-        return null;
     }
+
+    private void sendFm5ReminderToLipViaEmail(CaseData caseData,
+                                              Element<PartyDetails> party,
+                                              String authorization) {
+        //if party has access to dashboard then send gov notify email else send grid
+        if (hasDashboardAccess(party)) {
+            //Send a gov notify email
+            serviceOfApplicationEmailService.sendGovNotifyEmail(
+                LanguagePreference.getPreferenceLanguage(caseData),
+                party.getValue().getEmail(),
+                EmailTemplateNames.FM5_REMINDER_APPLICANT_RESPONDENT,
+                buildCitizenEmailVars(
+                    caseData,
+                    party.getValue()
+                )
+            );
+        } else {
+            Map<String, Object> dynamicData = getEmailDynamicData(caseData,
+                                                                  party.getValue(),
+                                                                  true);
+            serviceOfApplicationEmailService
+                .sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    party.getValue().getEmail(),
+                    getBlankFm5Form(authorization),
+                    SendgridEmailTemplateNames.FM5_REMINDER_APPLICANT_RESPONDENT,
+                    dynamicData,
+                    SOA_CITIZEN
+            );
+        }
+    }
+
+    private EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
+                                                    PartyDetails party) {
+        return CitizenEmailVars.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .partyName(party.getLabelForDynamicList())
+            .caseLink(citizenUrl)
+            .build();
+    }
+
+    private void sendFm5ReminderToLipViaPost(CaseData caseData,
+                                             Element<PartyDetails> party,
+                                             String authorization) {
+
+        if (isNotEmpty(party.getValue().getAddress())
+            && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
+            List<Document> documents = new ArrayList<>();
+            //generate cover sheets & add to documents
+            generateCoverSheets(caseData, party.getValue(), documents);
+            //generate LTR-FM5 letter & add to documents
+            //generateCoverLetter()
+            //get blank fm5 form & add to documents
+            documents.addAll(getBlankFm5Form(authorization));
+
+
+            UUID bulkPrintId = bulkPrintService.send(
+                String.valueOf(caseData.getId()),
+                systemUserService.getSysUserToken(),
+                "FM5Reminder",
+                documents,
+                party.getValue().getLabelForDynamicList()
+            );
+            log.info("FM5 reminder -> Sent Blank FM5 form with cover sheet to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
+        } else {
+            log.info(
+                "Couldn't post letters to party address, as address is null/empty for {}", party.getId());
+        }
+    }
+
+    private List<Document> getBlankFm5Form(String authorisation) {
+        UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+            authorisation,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            List.of(
+                new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    BLANK_FM5_FILE,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + BLANK_FM5_FILE)
+                )
+            )
+        );
+        if (null != uploadResponse) {
+            return uploadResponse.getDocuments().stream()
+                .map(DocumentUtils::toPrlDocument)
+                .toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private void generateCoverSheets(CaseData caseData,
+                                 PartyDetails party,
+                                 List<Document> documents) {
+        List<Document> coverSheets = null;
+        try {
+            coverSheets = serviceOfApplicationPostService.getCoverSheets(
+                caseData,
+                systemUserService.getSysUserToken(),
+                party.getAddress(),
+                party.getLabelForDynamicList(),
+                DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+            );
+        } catch (Exception e) {
+            log.error("Error occurred in generating cover sheets", e);
+        }
+        log.info("Cover sheets generated {}", coverSheets);
+        if (CollectionUtils.isNotEmpty(coverSheets)) {
+            documents.addAll(coverSheets);
+        }
+    }
+
+    private Map<String, Object> getEmailDynamicData(CaseData caseData,
+                                                    PartyDetails party,
+                                                    boolean isCitizen) {
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put(NAME, isCitizen ? party.getLabelForDynamicList() : party.getRepresentativeFullName());
+        dynamicData.put(DASH_BOARD_LINK, isCitizen ? citizenUrl
+            : manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+
+        return dynamicData;
+    }
+
 }
