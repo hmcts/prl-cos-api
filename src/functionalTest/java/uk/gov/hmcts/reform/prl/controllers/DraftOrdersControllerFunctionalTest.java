@@ -233,18 +233,6 @@ public class DraftOrdersControllerFunctionalTest {
                 "\"caseTypeOfApplication\": \"FL401\"",
                 "\"caseTypeOfApplication\": \"C100\"");
 
-        /*AboutToStartOrSubmitCallbackResponse resp = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/selected-order")
-            .then()
-            .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .assertThat().statusCode(200).extract().as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("PPPP "+resp);*/
-
         mockMvc.perform(post("/selected-order")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -271,17 +259,6 @@ public class DraftOrdersControllerFunctionalTest {
             .replace(
                 "\"caseTypeOfApplication\": \"FL401\"",
                 "\"caseTypeOfApplication\": \"C100\"");
-
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/selected-order")
-            .then()
-            .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .assertThat().statusCode(200);*/
 
         mockMvc.perform(post("/selected-order")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -311,17 +288,6 @@ public class DraftOrdersControllerFunctionalTest {
                 "\"caseTypeOfApplication\": \"FL401\"",
                 "\"caseTypeOfApplication\": \"C100\"");
 
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/selected-order")
-            .then()
-            .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .assertThat().statusCode(200);*/
-
         mockMvc.perform(post("/selected-order")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -330,11 +296,5 @@ public class DraftOrdersControllerFunctionalTest {
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
-
     }
-
-
-
-
-
 }

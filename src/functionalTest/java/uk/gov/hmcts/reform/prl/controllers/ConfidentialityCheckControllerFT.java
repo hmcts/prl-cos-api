@@ -78,20 +78,6 @@ public class ConfidentialityCheckControllerFT {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        /*caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());*/
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
                                             .contentType(MediaType.APPLICATION_JSON)
@@ -155,21 +141,6 @@ public class ConfidentialityCheckControllerFT {
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"confidentialityCheck\"");
 
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/confidentiality-check/about-to-submit")
-            .then()
-            .body("data.isC8CheckApproved", equalTo("Yes"),
-                  "data.responsibleForService", equalTo("Court admin"),
-                  "data.isC8CheckNeeded", equalTo(null),
-                  "data.isOccupationOrderSelected", equalTo(null))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);*/
-
         mockMvc.perform(post("/confidentiality-check/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -194,21 +165,6 @@ public class ConfidentialityCheckControllerFT {
                      "\"removepersonalServiceBy\":  \"\"")
             .replace("\"applicationServedYesNo\": \"Yes\"",
                      "\"applicationServedYesNo\": \"No\"");
-
-        /*request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/confidentiality-check/about-to-submit")
-            .then()
-            .body("data.isC8CheckApproved", equalTo("No"),
-                  "data.responsibleForService", equalTo(null),
-                  "data.isC8CheckNeeded", equalTo(null),
-                  "data.isOccupationOrderSelected", equalTo(null))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);*/
 
         mockMvc.perform(post("/confidentiality-check/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)

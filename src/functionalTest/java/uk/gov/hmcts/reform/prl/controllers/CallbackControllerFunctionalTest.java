@@ -171,7 +171,6 @@ public class CallbackControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
