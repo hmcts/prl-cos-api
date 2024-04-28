@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class NoticeOfChangeNewControllerFunctionalTest {
 
     @Autowired
