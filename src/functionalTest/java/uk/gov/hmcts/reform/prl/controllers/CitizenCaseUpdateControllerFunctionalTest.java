@@ -509,7 +509,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
         CaseData createNewCase = request1
