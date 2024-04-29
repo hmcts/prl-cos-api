@@ -44,7 +44,6 @@ public class MiamPolicyUpgradeController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("inside /submit-miam-policy-upgrade");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(miamPolicyUpgradeService.populateAmendedMiamPolicyUpgradeDetails(callbackRequest)).build();
         } else {
