@@ -2810,7 +2810,7 @@ public class ServiceOfApplicationService {
                                                                   respondentList,
                                                                   caseData,
                                                                   bulkPrintDetails,
-                                                                  respondentDocs,
+                                                                  removeCoverLettersFromThePacks(respondentDocs),
                                                                   false
                         );
                     } else {
