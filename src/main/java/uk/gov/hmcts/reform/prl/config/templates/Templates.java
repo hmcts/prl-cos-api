@@ -10,7 +10,6 @@ public class Templates {
     public static String FL416_ENG = "PRL-ENG-FL416.docx";
     public static String PRIVACY_NOTICE_ENG = "PRL-PRIVACY-NOTICE-DOCUMENT.docx";
     public static String AP6_LETTER = "PRL-LET-ENG-C100-AP6.docx";
-    public static final String BLANK_FM5_DOCUMENT = "PRL-BLANK-FM5-DOCUMENT.pdf";
     public static String PRL_LET_ENG_AP2 = "PRL-LET-ENG-FL401-AP2.docx";
     public static String PRL_LET_ENG_AP8 = "PRL-LET-ENG-C100-AP8.docx";
     public static String PRL_LET_ENG_AP7 = "PRL-LET-ENG-C100-AP7.docx";
@@ -20,6 +19,7 @@ public class Templates {
     public static String PRL_LET_ENG_FL401_RE3 = "PRL-LET-ENG-FL401-RE3.docx";
     public static String PRL_LET_ENG_FL401_RE4 = "PRL-LET-ENG-FL401-RE4.docx";
     public static String PRL_LET_ENG_C100_RE6 = "PRL-LET-ENG-C100-RE6.docx";
+    public static String PRL_LTR_ENG_C100_FM5 = "PRL-LTR-ENG-C100-FM5.docx";
 
     public static String PRL_LET_ENG_LIST_WITHOUT_NOTICE = "PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx";
 

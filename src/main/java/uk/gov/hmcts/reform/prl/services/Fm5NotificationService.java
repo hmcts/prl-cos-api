@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -27,14 +27,19 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LTR_ENG_C100_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
@@ -61,6 +66,7 @@ public class Fm5NotificationService {
     private final SystemUserService systemUserService;
     private final BulkPrintService bulkPrintService;
     private final DocumentLanguageService documentLanguageService;
+    private final DgsService dgsService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -173,14 +179,12 @@ public class Fm5NotificationService {
 
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
-            List<Document> documents = new ArrayList<>();
             //generate cover sheets & add to documents
-            generateCoverSheets(caseData, party.getValue(), documents);
+            List<Document> documents = new ArrayList<>(generateCoverSheets(authorization, caseData, party.getValue()));
             //generate LTR-FM5 letter & add to documents
-            //generateCoverLetter()
+            documents.add(generateFm5CoverLetter(authorization, caseData, party));
             //get blank fm5 form & add to documents
             documents.addAll(getBlankFm5Form(authorization));
-
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
@@ -194,6 +198,38 @@ public class Fm5NotificationService {
             log.info(
                 "Couldn't post letters to party address, as address is null/empty for {}", party.getId());
         }
+    }
+
+    private Document generateFm5CoverLetter(String authorisation,
+                                            CaseData caseData,
+                                            Element<PartyDetails> party) {
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", caseData.getId());
+        dataMap.put("serviceUrl", citizenUrl);
+        dataMap.put("address", party.getValue().getAddress());
+        dataMap.put("name", party.getValue().getLabelForDynamicList());
+        dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        dataMap.put("dashboardAccess", hasDashboardAccess(party) ? YesOrNo.Yes : YesOrNo.No);
+
+        log.info("*** Generating FM5 reminder cover letter ***");
+        try {
+            GeneratedDocumentInfo fm5CoverLetter = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                PRL_LTR_ENG_C100_FM5,
+                dataMap
+            );
+            return Document.builder()
+                .documentUrl(fm5CoverLetter.getUrl())
+                .documentFileName(fm5CoverLetter.getDocName())
+                .documentBinaryUrl(fm5CoverLetter.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+        } catch (Exception e) {
+            log.error("generate FM5 cover letter failed for {} ",caseData.getId(), e);
+        }
+        return null;
     }
 
     private List<Document> getBlankFm5Form(String authorisation) {
@@ -219,14 +255,14 @@ public class Fm5NotificationService {
         return Collections.emptyList();
     }
 
-    private void generateCoverSheets(CaseData caseData,
-                                 PartyDetails party,
-                                 List<Document> documents) {
+    private List<Document> generateCoverSheets(String authorisation,
+                                     CaseData caseData,
+                                     PartyDetails party) {
         List<Document> coverSheets = null;
         try {
             coverSheets = serviceOfApplicationPostService.getCoverSheets(
                 caseData,
-                systemUserService.getSysUserToken(),
+                authorisation,
                 party.getAddress(),
                 party.getLabelForDynamicList(),
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
@@ -235,9 +271,7 @@ public class Fm5NotificationService {
             log.error("Error occurred in generating cover sheets", e);
         }
         log.info("Cover sheets generated {}", coverSheets);
-        if (CollectionUtils.isNotEmpty(coverSheets)) {
-            documents.addAll(coverSheets);
-        }
+        return coverSheets;
     }
 
     private Map<String, Object> getEmailDynamicData(CaseData caseData,
