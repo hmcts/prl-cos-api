@@ -101,7 +101,7 @@ public class SendgridService {
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
-        log.info("*** Time taken to attach docs to mail - {} ms",
+        log.info("*** Time taken to attach docs to mail - {}s",
                  TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
@@ -123,7 +123,7 @@ public class SendgridService {
             log.info("error is {}", ex.getMessage());
             throw new IOException(ex.getMessage());
         } finally {
-            log.info("*** Response time taken by sendgrid - {} ms",
+            log.info("*** Response time taken by sendgrid - {}s",
                      TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         }
     }
