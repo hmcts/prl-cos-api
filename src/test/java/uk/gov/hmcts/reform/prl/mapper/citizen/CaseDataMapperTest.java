@@ -435,6 +435,23 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrnsForASingleChild.json"})
+    void testCaseDataMapperForSafetyConcernsForASingleChild(String resourcePath) throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom(resourcePath))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
     @Test
     public void testCaseWhen_No_haveSafetyConcerns() throws IOException {
 
