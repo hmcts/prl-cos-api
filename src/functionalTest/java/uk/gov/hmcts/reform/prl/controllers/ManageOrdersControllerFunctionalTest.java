@@ -157,22 +157,6 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void createCcdTestCase() throws Exception {
 
-        /*String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());*/
-
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
 
         MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")

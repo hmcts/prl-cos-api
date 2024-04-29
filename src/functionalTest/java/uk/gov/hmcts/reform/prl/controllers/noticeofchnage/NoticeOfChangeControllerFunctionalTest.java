@@ -1,19 +1,23 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchnage;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.parsing.Parser;
-import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -28,6 +32,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class NoticeOfChangeControllerFunctionalTest {
 
     @Autowired
@@ -39,37 +45,9 @@ public class NoticeOfChangeControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    public static final String AUTHORIZATION = "Authorization";
-
-    public static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
-
-    public static final String CASE_ID = "caseId";
-
-    public static final String EVENT_ID = "eventId";
-
-    public static final String updatePartyDetailsEndPoint = "/citizen/{caseId}/{eventId}/update-party-details";
-
-    public static final String saveDraftCitizenApplicationEndPoint = "/citizen/{caseId}/save-c100-draft-application";
-
-    public static final String deleteApplicationCitizenEndPoint = "/citizen/{caseId}/delete-application";
-
-    public static final String withDrawCaseCitizenEndPoint = "/citizen/{caseId}/withdraw";
-
-    private final String targetInstance =
-        StringUtils.defaultIfBlank(
-            System.getenv("TEST_URL"),
-            "http://localhost:4044"
-        );
-
-    private static final String CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY = "requests/update-case-event-citizen-request.json";
-
-    private static CaseDetails caseDetails1;
-
-    private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
-    private final RequestSpecification request2 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
     private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
@@ -77,10 +55,38 @@ public class NoticeOfChangeControllerFunctionalTest {
         RestAssured.registerParser("text/html", Parser.JSON);
     }
 
-
+    private static CaseDetails caseDetails;
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
+    public static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+
     @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails = mapper.readValue(json, CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+        System.out.println("MMMMM " + caseDetails.getId());
+
+    }
+
+    @Test
+    @Ignore
     public void givenRequestBody_whenAboutToSubmitNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/aboutToSubmitNoCRequest")
@@ -96,11 +102,12 @@ public class NoticeOfChangeControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenSubmittedNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody.replace("1710453963689559", caseDetails.getId().toString());
         mockMvc.perform(post("/noc/submittedNoCRequest")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();

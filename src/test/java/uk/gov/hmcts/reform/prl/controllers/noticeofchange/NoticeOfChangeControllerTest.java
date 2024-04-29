@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchange;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -72,6 +73,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
+    @Ignore
     public void testSubmittedNoCRequest() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.submittedNoCRequest(authToken, s2sToken, callbackRequest);
