@@ -157,7 +157,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void createCcdTestCase() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        /*String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         caseDetails =  request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -171,7 +171,28 @@ public class ManageOrdersControllerFunctionalTest {
             .as(CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());*/
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails = mapper.readValue(json, CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
+
+
     }
 
     @Test
