@@ -27,7 +27,7 @@ public class CaseFlagsWaService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
 
-    public Map<String, Object> findIfCreatedByCTSC(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> findIfCreatedByCtsc(String authorisation, CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -45,6 +45,8 @@ public class CaseFlagsWaService {
 
         if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
             caseDataUpdated.put(WA_PERFORMING_USER, UserRoles.CTSC.name());
+        } else {
+            caseDataUpdated.put(WA_PERFORMING_USER, null);
         }
         return caseDataUpdated;
     }
