@@ -47,7 +47,7 @@ public class CaseFlagsController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(caseFlagsWaService.findIfCreatedByCTSC(authorisation, callbackRequest))
+                .data(caseFlagsWaService.findIfCreatedByCtsc(authorisation, callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
