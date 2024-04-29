@@ -105,6 +105,10 @@ allprojects {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   }
 
+  tasks.withType(Test) {
+    systemProperties['spring.test.context.cache.maxSize'] = 5
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
