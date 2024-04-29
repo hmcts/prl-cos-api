@@ -239,12 +239,11 @@ public class TestingSupportService {
             caseDataUpdated = updatedCaseDetails.getData();
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
-            log.info("initialCaseData.getApplicantCaseName() ==> " + initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
-            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME,
-                                FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())
-                                ? initialCaseData.getApplicantCaseName() : null);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+                caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
+            }
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
