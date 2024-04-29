@@ -88,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_W
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -108,6 +109,7 @@ public class C100RespondentSolicitorService {
     public static final String EMAIL = "email";
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
+    public static final String TASK_LIST_VERSION = "taskListVersion";
     private final RespondentSolicitorMiamService miamService;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
@@ -1048,19 +1050,24 @@ public class C100RespondentSolicitorService {
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        dataMap.put(COURT_SEAL_FIELD,callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
-                : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
-        if (callbackRequest.getCaseDetails().getData().get("taskListVersion") != null
-                && TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(callbackRequest
-                .getCaseDetails().getData().get("taskListVersion")))) {
+        dataMap.put(COURT_SEAL_FIELD,
+                    callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
+                        : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
+        if (callbackRequest.getCaseDetails().getData().get(TASK_LIST_VERSION) != null
+            && (TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(callbackRequest
+                                                                         .getCaseDetails().getData().get(
+                TASK_LIST_VERSION)))
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(String.valueOf(callbackRequest
+                                                                        .getCaseDetails().getData().get(
+                TASK_LIST_VERSION))))) {
             List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest
-                    .getCaseDetails().getData().get(
-                            "newChildDetails");
+                .getCaseDetails().getData().get(
+                    "newChildDetails");
             dataMap.put(CHILDREN, listOfChildren);
 
         } else {
             List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
-                    CHILDREN);
+                CHILDREN);
             dataMap.put(CHILDREN, listOfChildren);
 
         }
@@ -1069,8 +1076,8 @@ public class C100RespondentSolicitorService {
             Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
             if (solicitorRole.isPresent()) {
                 solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
-                        callbackRequest,
-                        solicitorRole.get()
+                    callbackRequest,
+                    solicitorRole.get()
                 );
             }
         }
