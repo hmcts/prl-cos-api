@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -78,12 +76,8 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public void submittedNoCRequest(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            ObjectMapper om = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-            System.out.println("RRRRRRRRRRRR ==> " + result);
             noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
