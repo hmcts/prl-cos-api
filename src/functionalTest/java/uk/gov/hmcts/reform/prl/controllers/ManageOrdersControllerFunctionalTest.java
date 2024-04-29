@@ -647,7 +647,22 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
-        request
+
+        mockMvc.perform(post("/case-order-email-notification")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.recipientsOptions").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.cafcassCymruEmail").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.serveOrderDynamicList").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.serveOtherPartiesCA").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.applicants[0].id").value("97e25c77-f915-4b4e-8436-89a0d1678813"))
+            .andReturn();
+
+        /*request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -661,7 +676,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.serveOtherPartiesCA", equalTo(null))
             .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(AboutToStartOrSubmitCallbackResponse.class);*/
 
     }
 
