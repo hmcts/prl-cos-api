@@ -76,8 +76,7 @@ public class Fl401ListOnNoticeControllerFT {
 
     /* commented below test case since it was failing in the master pipeline
     * will be fixed as part of FPET-959 */
-    /*@Test*/
-    @Ignore
+    @Test
     public void testSubmittedEvent() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
