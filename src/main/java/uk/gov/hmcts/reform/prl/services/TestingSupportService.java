@@ -48,9 +48,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -224,7 +227,8 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetails(String authorisation, CaseDetails initialCaseDetails,
-                                                  CaseData initialCaseData, boolean adminCreateApplication, CaseDetails dummyCaseDetails) {
+                                                  CaseData initialCaseData, boolean adminCreateApplication,
+                                                  CaseDetails dummyCaseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
@@ -235,6 +239,12 @@ public class TestingSupportService {
             caseDataUpdated = updatedCaseDetails.getData();
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
+            log.info("initialCaseData.getApplicantCaseName() ==> " + initialCaseData.getApplicantCaseName());
+            caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
+            caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
+            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME,
+                                FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())
+                                ? initialCaseData.getApplicantCaseName() : null);
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
