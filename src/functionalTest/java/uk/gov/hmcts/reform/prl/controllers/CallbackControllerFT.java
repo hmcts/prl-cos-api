@@ -200,7 +200,7 @@ public class CallbackControllerFT {
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("data.draftOrderDoc.document_filename").value("Draft_C100_application.pdf"))
+            .andExpect(jsonPath("data.submitAndPayDownloadApplicationLink.document_filename").value("Draft_C100_application.pdf"))
             .andExpect(jsonPath("data.isEngDocGen").value("Yes"))
             .andReturn();
     }

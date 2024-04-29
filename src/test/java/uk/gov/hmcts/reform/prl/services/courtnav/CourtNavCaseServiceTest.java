@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +56,7 @@ public class CourtNavCaseServiceTest {
     private final String eventToken = "eventToken";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-    private static final String randomAlphaNumeric = "Abc123EFGH";
+    private static final String randomAlphaNumeric = "A1b2c3EFGH";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -129,8 +130,7 @@ public class CourtNavCaseServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithEventData() throws Exception {
-        Map<String, Object> tempMap = new HashMap<>();
+    public void shouldStartAndSubmitEventWithEventData() {
         courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
                                                     Mockito.anyString(),
@@ -139,12 +139,6 @@ public class CourtNavCaseServiceTest {
 
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
-        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
-            .Document.builder()
-            .documentFileName("private-law.pdf")
-            .documentUrl(randomAlphaNumeric)
-            .documentBinaryUrl(randomAlphaNumeric)
-            .build();
         Document document = testDocument();
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -228,28 +222,14 @@ public class CourtNavCaseServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(documentGenService.generateDocuments(authToken, caseData)).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
-        when(systemUserService.getUserId(authToken)).thenReturn(systemUpdateUser);
-        when(ccdCoreCaseDataService.eventRequest(Mockito.any(),Mockito.anyString())).thenReturn(
-            EventRequestData
-                .builder()
-                .userId(systemUserId)
-                .jurisdictionId(jurisdiction)
-                .caseTypeId(caseType)
-                .eventId(eventName)
-                .build());
-        courtNavCaseService.refreshTabs(authToken,stringObjectMap, 1234567891234567L);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        courtNavCaseService.refreshTabs(authToken,"1234567891234567");
         verify(documentGenService, times(1))
             .generateDocuments(Mockito.anyString(),
                                Mockito.any(CaseData.class));
-        verify(allTabService, times(1))
-            .updateAllTabsIncludingConfTabRefactored(Mockito.anyString(),
-                                                     Mockito.anyString(),
-                                                     Mockito.any(),
-                                                     Mockito.any(),
-                                                     Mockito.any(CaseData.class));
-
     }
 
     public static Document testDocument() {
