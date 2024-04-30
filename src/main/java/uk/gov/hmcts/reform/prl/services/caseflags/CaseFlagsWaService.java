@@ -55,13 +55,13 @@ public class CaseFlagsWaService {
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
 
             );
-            allTabService.submitUpdateForSpecificUserEvent(
+
+            allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
-                caseId,
+                String.valueOf(caseId),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.userDetails()
+                startAllTabsUpdateDataContent.caseDataMap()
             );
         }
     }
