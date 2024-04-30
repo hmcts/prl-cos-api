@@ -702,7 +702,7 @@ public class CallbackController {
                     "Sorry unable to create any urgent cases now")).build();
             } else {
                 log.info("Flag enabled");
-                return AboutToStartOrSubmitCallbackResponse.builder().build();
+                return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
