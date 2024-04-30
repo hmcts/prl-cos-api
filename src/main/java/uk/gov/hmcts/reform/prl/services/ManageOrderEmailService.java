@@ -327,27 +327,74 @@ public class ManageOrderEmailService {
 
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
         boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
-        String newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true) ? "yes" : "no";
+        boolean newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true);
 
-        return ManageOrderEmailLip.builder()
-            .order(!multipleOrderFlag ? "yes" : "no")
-            .orders(multipleOrderFlag ? "yes" : "no")
-            .finalOrderTitle(isFinalOrderFlag ? "yes" : "no")
-            .newOrderTitle(!isFinalOrderFlag && newAndFinalOrderFlag.equals("no") ? "yes" : "no")
-            .finalOrderText(isFinalOrderFlag && !multipleOrderFlag ? "yes" : "no")
-            .finalOrdersText(isFinalOrderFlag && multipleOrderFlag ? "yes" : "no")
-            .finalOrderExplanation(isFinalOrderFlag || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
-            .newOrderText(!isFinalOrderFlag && !multipleOrderFlag ? "yes" : "no")
-            .newOrdersText(!isFinalOrderFlag && newAndFinalOrderFlag.equals("no")
-                && multipleOrderFlag ? "yes" : "no")
-            .newOrderExplanation(!isFinalOrderFlag || newAndFinalOrderFlag.equals("yes") ? "yes" : "no")
-            .newAndFinalOrderTitle(newAndFinalOrderFlag)
-            .newAndFinalOrdersText(newAndFinalOrderFlag)
+        return ManageOrderEmailLip
+            .builder()
+            .emailTitle(buildEmailTitleForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailText(buildEmailTextForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .orders(multipleOrderFlag || newAndFinalOrderFlag ? "yes" : "no")
+            .order(!multipleOrderFlag || !newAndFinalOrderFlag ? "yes" : "no")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(String.valueOf(dynamicData.get("name")))
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
+    }
+
+    private String buildEmailTitleForPersonalServiceApplicantLip(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+
+        if (newAndFinalOrderFLag) {
+            return "New and final court orders issued";
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return "Final court orders issued";
+            } else {
+                return "New court orders issued";
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return "Final court order issued";
+            } else {
+                return "New court order issued";
+            }
+        }
+    }
+
+    private String buildEmailTextForPersonalServiceApplicantLip(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+
+        if (newAndFinalOrderFLag) {
+            return """
+                There are new and final court orders for your case.
+                
+                An order tells you what the court has decided or what will happen next.
+                
+                A final order tells you what the court’s final decision is.""";
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return """
+                    There are final court orders for your case.
+                    
+                    A final order tells you what the court’s final decision is.""";
+            } else {
+                return """
+                There are new court orders for your case.
+                
+                An order tells you what the court has decided or what will happen next.""";
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return """
+                    There is a final court order for your case.
+                    
+                    A final order tells you what the court’s final decision is.""";
+            } else {
+                return """
+                    There is a new court order for your case.
+                    
+                    A final order tells you what the court’s final decision is.""";
+            }
+        }
     }
 
     public void sendEmailWhenOrderIsServed(String authorisation,

@@ -52,8 +52,7 @@ public class ManageOrderEmail extends EmailTemplateVars {
                             String courtEmail, String firstName,
                             String lastName, String fullName,
                             String familyManNumber, String caseUrgency, String orderLink,
-                            String issueDate, String instructions,
-                            String caseLink,
+                            String issueDate, String instructions, String caseLink,
                             String dashboardLink) {
         super(caseReference);
         this.caseName = caseName;
