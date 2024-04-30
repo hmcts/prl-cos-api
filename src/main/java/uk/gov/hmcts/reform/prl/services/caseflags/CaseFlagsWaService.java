@@ -7,19 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -29,14 +27,9 @@ public class CaseFlagsWaService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
+    private final AllTabServiceImpl allTabService;
 
-    public Map<String, Object> setUpWaTaskForCaseFlags(String authorisation, CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        try {
-            log.info("findIfCreatedByCtsc ===>" + objectMapper.writeValueAsString(caseDataUpdated));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
+    public void setUpWaTaskForCaseFlags(String authorisation, String caseId) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
             authorisation,
@@ -56,12 +49,20 @@ public class CaseFlagsWaService {
             log.info("error");
         }
         if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
-            log.info("setting CTSC");
-            caseDataUpdated.put(WA_PERFORMING_USER, UserRoles.CTSC.name());
-        } else {
-            log.info("setting null");
-            caseDataUpdated.put(WA_PERFORMING_USER, null);
+            log.info("triggered by user having CTSC role");
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificUserEvent(
+                authorisation,
+                CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue(),
+                caseId
+            );
+            allTabService.submitUpdateForSpecificUserEvent(
+                authorisation,
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap(),
+                startAllTabsUpdateDataContent.userDetails()
+            );
         }
-        return caseDataUpdated;
     }
 }

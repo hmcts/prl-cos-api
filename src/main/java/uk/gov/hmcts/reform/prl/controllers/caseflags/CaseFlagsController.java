@@ -49,11 +49,14 @@ public class CaseFlagsController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
-                log.info("/send-to-gatekeeper CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+                log.info("setUpWaTaskForCaseFlags in case controller CaseDetails start json ===>"
+                             + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            caseFlagsWaService.setUpWaTaskForCaseFlags(authorisation, callbackRequest);
+            caseFlagsWaService.setUpWaTaskForCaseFlags(authorisation,
+                                                       String.valueOf(callbackRequest.getCaseDetails().getId())
+            );
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
