@@ -519,7 +519,8 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP));
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+            ));
         }
     }
 
@@ -533,11 +534,12 @@ public class ManageOrderEmailService {
         log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue())) {
-            log.info("*** Send orders to party via email using send grid {}", party.getId());
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
+            log.info("*** Party has dashboard access {}", hasDashboardAccess(party));
             if (hasDashboardAccess(party)) {
+                log.info("*** Send email to party using notify.gov");
                 emailService.send(
                     party.getValue().getEmail(),
                     EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
@@ -545,6 +547,7 @@ public class ManageOrderEmailService {
                     LanguagePreference.english
                 );
             } else {
+                log.info("*** Send orders to party via email using send grid {}", party.getId());
                 sendEmailViaSendGrid(
                     authorisation,
                     orderDocuments,
