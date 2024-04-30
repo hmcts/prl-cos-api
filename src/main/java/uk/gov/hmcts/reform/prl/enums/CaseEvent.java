@@ -44,7 +44,8 @@ public enum CaseEvent {
     C100_ALL_DOCS_REVIEWED("c100-all-docs-reviewed"),
     ALL_AWP_IN_REVIEW("allAwPInReview"),
     FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
-    CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags");
 
     private final String value;
 
