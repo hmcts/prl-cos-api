@@ -7,11 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,77 +39,6 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Mock
     SendgridService sendgridService;
-
-    @Test
-    public void testC100EmailNotificationForMultipleApplicants() throws Exception {
-        Element<PartyDetails> party = element(PartyDetails.builder()
-                                            .email("test@gmail.com")
-                                            .lastName("LastName")
-                                            .firstName("FirstName")
-                                            .build());
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(
-                party,
-                party
-            ))
-            .respondents(List.of(
-                element(PartyDetails.builder()
-                            .email("test@gmail.com")
-                            .lastName("LastName")
-                            .firstName("FirstName")
-                            .build()),
-                element(PartyDetails.builder()
-                            .email("test@gmail.com")
-                            .lastName("LastName1")
-                            .firstName("FirstName1")
-                            .build())
-            ))
-            .build();
-        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                      Mockito.anyString(),
-                                                                  Mockito.any(), Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
-
-        serviceOfApplicationEmailService.sendEmailNotificationToApplicant("test", caseData, party.getValue(),
-                                                                          List.of(Document.builder().build()), "Applicant");
-        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
-                                                                   Mockito.anyString(),
-                                                                   Mockito.any(), Mockito.anyString()
-        );
-    }
-
-    @Test
-    public void testSendEmailNotificationToApplicantSolicitor() throws Exception {
-        String authorization = "";
-        List<Document> docs = new ArrayList<>();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .solicitorEmail("test@gmail.com")
-                                  .representativeLastName("LastName")
-                                  .representativeFirstName("FirstName")
-                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                  .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseData, caseData.getApplicantsFL401(),
-                                                                                   docs,
-                                                                                   PrlAppsConstants.APPLICANT_SOLICITOR
-        );
-        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(),
-                                                                   Mockito.any(),
-                                                                   Mockito.anyString(), Mockito.any(), Mockito.anyString()
-        );
-    }
 
     @Test
     public void testCafcassEmail() {

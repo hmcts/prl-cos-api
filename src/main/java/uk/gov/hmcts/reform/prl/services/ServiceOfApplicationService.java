@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -192,6 +191,7 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
+    public static final String PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK = "personalServiceUnServedRespondentPack";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -273,8 +273,6 @@ public class ServiceOfApplicationService {
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final C100CaseInviteService c100CaseInviteService;
-
-    @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -465,13 +463,10 @@ public class ServiceOfApplicationService {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
-                handlePersonalServiceForCitizenC100(caseData, authorization,
+                whoIsResponsibleForServing = handlePersonalServiceForCitizenC100(caseData, authorization,
                                                     emailNotificationDetails,
                                                     bulkPrintDetails, c100StaticDocs,
                                                     caseDataMap);
-                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication()
-                        .getSoaCitizenServingRespondentsOptionsCA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -480,9 +475,6 @@ public class ServiceOfApplicationService {
                 sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
             }
         } else {
-            whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication()
-                .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
             if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                 .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
                 getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
@@ -497,7 +489,11 @@ public class ServiceOfApplicationService {
                 } else {
                     generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE3);
                 }
+                whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
             } else {
+                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication()
+                                .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
                 getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
                 getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
             }
@@ -631,7 +627,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
             .build();
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
@@ -675,7 +671,7 @@ public class ServiceOfApplicationService {
                 EUROPE_LONDON_TIME_ZONE))))
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
 
     private List<Document> getDocumentsForCaorBailiffToServeRespondents(CaseData caseData, String authorization,
@@ -819,6 +815,7 @@ public class ServiceOfApplicationService {
                                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                     List<DynamicMultiselectListElement> selectedRespondents,
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
+        log.info("*** Respondents *** {}", selectedRespondents);
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
             if (party.isPresent() && CaseUtils.hasLegalRepresentation(party.get().getValue())) {
@@ -901,11 +898,14 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
+    private String handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
                                                      List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      List<Document> c100StaticDocs,
                                                      Map<String, Object> caseDataMap) {
+        String whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
+            ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
         //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
         log.info("Service of application, unrepresented applicant/citizen case");
         log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
@@ -942,13 +942,14 @@ public class ServiceOfApplicationService {
                 }
             });
 
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                 .packCreatedDate(dateCreated)
                 .build());
+            whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
         } else {
             log.info("personal service - court bailiff/court admin");
             List<Document> packjDocs = new ArrayList<>(getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs));
@@ -959,8 +960,9 @@ public class ServiceOfApplicationService {
                                                              bulkPrintDetails,
                                                              packjDocs);
 
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, generateRespondentsPack(authorization, caseData, c100StaticDocs));
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, generateRespondentsPack(authorization, caseData, c100StaticDocs));
         }
+        return whoIsResponsibleForServing;
     }
 
     private void sendNotificationsToC100ApplicantsPersonalService(String authorization,
@@ -1000,7 +1002,7 @@ public class ServiceOfApplicationService {
             }
         }
         log.info(
-            "*** Time taken to notify C100 applicants personal service - {} ms",
+            "*** Time taken to notify C100 applicants personal service - {}s",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
         );
     }
@@ -2444,7 +2446,7 @@ public class ServiceOfApplicationService {
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
                 .packCreatedDate(dateCreated)
                 .build();
-            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+            caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
                 .packDocument(wrapElements(packHDocs))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -2457,7 +2459,7 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
                                                                                                   dateCreated, c100StaticDocs));
-            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+            caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, L, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
@@ -2496,7 +2498,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                                  .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packjDocs))
             .partyIds(isCitizen
@@ -2643,7 +2645,7 @@ public class ServiceOfApplicationService {
             .packCreatedDate(dateCreated)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unservedRespondentPack);
         List<Document> packcDocs = getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs);
         final SoaPack unServedApplicantPack = SoaPack.builder()
             .packDocument(wrapElements(packcDocs))
@@ -2684,7 +2686,7 @@ public class ServiceOfApplicationService {
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .packCreatedDate(dateCreated)
             .build();
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
+        caseDataUpdated.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unServedRespondentPack);
         return caseDataUpdated;
     }
 
@@ -2765,16 +2767,18 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        final SoaPack personalServiceUnServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
+
         String whoIsResponsible = COURT;
-        if (unServedApplicantPack != null || unServedRespondentPack != null) {
+        if (unServedApplicantPack != null || unServedRespondentPack != null || personalServiceUnServedRespondentPack != null) {
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy()))
-                || (unServedRespondentPack != null
+                || (personalServiceUnServedRespondentPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-                unServedRespondentPack.getPersonalServiceBy()))) {
+                personalServiceUnServedRespondentPack.getPersonalServiceBy()))) {
                 EmailNotificationDetails emailNotification = sendNotificationForApplicantLegalRepPersonalService(caseData,
-                    authorization, unServedApplicantPack, unServedRespondentPack);
+                    authorization, unServedApplicantPack, personalServiceUnServedRespondentPack);
                 if (emailNotification != null) {
                     emailNotificationDetails.add(element(emailNotification));
                 }
@@ -2795,26 +2799,22 @@ public class ServiceOfApplicationService {
                             ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
                     }
                 }
-                if (unServedApplicantPack != null && unServedApplicantPack.getPersonalServiceBy() != null) {
-                    whoIsResponsible = SoaSolicitorServingRespondentsEnum.courtAdmin
-                        .toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-                        ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
-                }
-                if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
+                if (unServedRespondentPack != null && CollectionUtils.isNotEmpty(unServedRespondentPack.getPackDocument())) {
                     final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                     final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                         partyIds);
-
+                    log.info("** RespondentList {}", respondentList);
                     final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
                     if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                         sendNotificationsToCitizenRespondentsC100(authorization,
                                                                   respondentList,
                                                                   caseData,
                                                                   bulkPrintDetails,
-                                                                  respondentDocs,
+                                                                  removeCoverLettersFromThePacks(respondentDocs),
                                                                   false
                         );
                     } else {
+                        log.info("Sending docs non personal respondent pack {}", respondentDocs);
                         // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
                         sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
                                                                            authorization,
@@ -3037,6 +3037,7 @@ public class ServiceOfApplicationService {
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
+            caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, null);
             caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
             caseDataMap.put(UNSERVED_OTHERS_PACK, null);
             caseDataMap.put(UNSERVED_LA_PACK, null);
@@ -3098,10 +3099,10 @@ public class ServiceOfApplicationService {
         );
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
-        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getPersonalServiceUnServedRespondentPack();
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
-        caseDataMap.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
+        caseDataMap.put(PERSONAL_SERVICE_UN_SERVED_RESPONDENT_PACK, unServedRespondentPack);
 
         if ((isNotEmpty(unServedApplicantPack) && StringUtils.isNotEmpty(unServedApplicantPack.getPersonalServiceBy()))
             || (isNotEmpty(unServedRespondentPack) && StringUtils.isNotEmpty(unServedRespondentPack.getPersonalServiceBy()))) {
@@ -3117,12 +3118,7 @@ public class ServiceOfApplicationService {
             );
         }
         caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
-        if (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
-            && (null == caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()
-            || SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
-            caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))) {
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
-        }
+        caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
