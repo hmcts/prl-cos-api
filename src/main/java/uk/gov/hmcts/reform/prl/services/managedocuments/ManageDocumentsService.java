@@ -358,7 +358,8 @@ public class ManageDocumentsService {
             existingCaseDocuments.add(element(finalConfidentialDocument));
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
             log.info(finalConfidentialDocument.document.documentFileName + "final******");
-            log.info(existingCaseDocuments + "**********");
+            log.info(existingCaseDocuments + "**********existingCaseDocuments");
+            log.info(finalConfidentialDocument + "**********finalConfidentialDocument");
             if (finalConfidentialDocument.fileName.equals("C7_Document.pdf")) {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", "tom bennet");
