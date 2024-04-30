@@ -15,53 +15,29 @@ public class ManageOrderEmailLip extends EmailTemplateVars {
     @JsonProperty("applicantName")
     private final String applicantName;
 
-    private final String newOrderTitle;
+    private final String emailSubject;
 
-    private final String finalOrderTitle;
-
-    private final String newAndFinalOrderTitle;
-
-    private final String order;
+    private final String emailText;
 
     private final String orders;
 
-    private final String newOrderText;
-
-    private final String finalOrderText;
-
-    private final String newOrdersText;
-
-    private final String finalOrdersText;
-
-    private final String newAndFinalOrdersText;
-
-    private final String newOrderExplanation;
-
-    private final String finalOrderExplanation;
+    private final String order;
 
     private final String caseLink;
 
+    private final String caseReference;
+
+
     @Builder
-    public ManageOrderEmailLip(String caseReference, String caseName, String applicantName, String newOrderTitle,
-                               String finalOrderTitle, String newAndFinalOrderTitle, String order, String orders,
-                               String newOrderText, String finalOrderText, String newOrdersText, String finalOrdersText,
-                               String newAndFinalOrdersText, String newOrderExplanation, String finalOrderExplanation,
-                               String caseLink) {
-        super(caseReference);
+    public ManageOrderEmailLip(String caseName, String applicantName, String emailSubject, String emailText,
+                               String orders, String order, String caseLink, String caseReference) {
         this.caseName = caseName;
         this.applicantName = applicantName;
-        this.newOrderTitle = newOrderTitle;
-        this.finalOrderTitle = finalOrderTitle;
-        this.newAndFinalOrderTitle = newAndFinalOrderTitle;
-        this.order = order;
+        this.emailSubject = emailSubject;
+        this.emailText = emailText;
         this.orders = orders;
-        this.newOrderText = newOrderText;
-        this.finalOrderText = finalOrderText;
-        this.newOrdersText = newOrdersText;
-        this.finalOrdersText = finalOrdersText;
-        this.newAndFinalOrdersText = newAndFinalOrdersText;
-        this.newOrderExplanation = newOrderExplanation;
-        this.finalOrderExplanation = finalOrderExplanation;
+        this.order = order;
         this.caseLink = caseLink;
+        this.caseReference = caseReference;
     }
 }
