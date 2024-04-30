@@ -125,6 +125,8 @@ public class SendgridService {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
         log.info("from email sendgrid {} ", fromEmailSendgrid);
+        Email fromEmail = getEmail(fromEmailSendgrid);
+        fromEmail.setName("Sendgrid-new");
         mail.setFrom(getEmail(fromEmailSendgrid));
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
