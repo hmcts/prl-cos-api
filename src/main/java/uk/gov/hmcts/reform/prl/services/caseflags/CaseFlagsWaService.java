@@ -30,7 +30,7 @@ public class CaseFlagsWaService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> findIfCreatedByCtsc(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> setUpWaTaskForCaseFlags(String authorisation, CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         try {
             log.info("findIfCreatedByCtsc ===>" + objectMapper.writeValueAsString(caseDataUpdated));
