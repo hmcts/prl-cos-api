@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.validators.HomeChecker;
 import uk.gov.hmcts.reform.prl.services.validators.InternationalElementChecker;
 import uk.gov.hmcts.reform.prl.services.validators.LitigationCapacityChecker;
 import uk.gov.hmcts.reform.prl.services.validators.MiamChecker;
+import uk.gov.hmcts.reform.prl.services.validators.MiamPolicyUpgradeChecker;
 import uk.gov.hmcts.reform.prl.services.validators.OtherProceedingsChecker;
 import uk.gov.hmcts.reform.prl.services.validators.PdfChecker;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
@@ -56,6 +57,9 @@ public class CommonChecker {
 
     @Autowired
     private MiamChecker miamChecker;
+
+    @Autowired
+    private MiamPolicyUpgradeChecker miamPolicyUpgradeChecker;
 
     @Autowired
     private AllegationsOfHarmChecker allegationsOfHarmChecker;

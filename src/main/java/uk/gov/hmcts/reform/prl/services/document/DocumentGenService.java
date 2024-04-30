@@ -518,6 +518,91 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        boolean isConfidentialInformationPresentForC100 = isConfidentialInformationPresentForC100(caseData);
+        boolean isC1aPresentForC100 = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
+
+        updatedCaseData.putAll(generateDraftDocuments(authorisation, caseData));
+        generateDraftEngC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        generateDraftWelshC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        return updatedCaseData;
+    }
+
+    private void generateDraftWelshC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                    CaseData caseData,
+                                                                    Map<String, Object> updatedCaseData,
+                                                                    DocumentLanguage documentLanguage,
+                                                                    boolean isConfidentialInformationPresentForC100,
+                                                                    boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+            }
+        }
+    }
+
+    private void generateDraftEngC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                  CaseData caseData,
+                                                                  Map<String, Object> updatedCaseData,
+                                                                  DocumentLanguage documentLanguage,
+                                                                  boolean isConfidentialInformationPresentForC100,
+                                                                  boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C1A,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+                );
+
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
+            }
+        }
+    }
+
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
         throws Exception {
         String filename = "";
