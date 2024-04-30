@@ -314,7 +314,12 @@ public class ReviewDocumentService {
             );
 
             //remove document from quarantine
-            log.info(quarantineLegalDocElementOptional.get() + "quarantineLegalDocElementOptional******");
+            QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
+            log.info(tempQuarantineDoe.getDocument().getDocumentFileName() + "quarantineLegalDocElementOptional******");
+            if (tempQuarantineDoe.getDocument().getDocumentFileName().contains("C7_Document.pdf")) {
+                log.info(tempQuarantineDoe.getDocument().getDocumentFileName() + "inside if quarantineLegalDocElementOptional******");
+            }
+
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
