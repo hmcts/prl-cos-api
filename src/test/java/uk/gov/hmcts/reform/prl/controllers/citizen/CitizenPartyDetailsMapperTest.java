@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenAllegationOfHarmElementsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -58,7 +58,7 @@ public class CitizenPartyDetailsMapperTest {
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
     @Mock
-    CitizenAllegationOfHarmElementsMapper citizenAllegationOfHarmMapper;
+    CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
 
     @Mock
     ObjectMapper objectMapper;

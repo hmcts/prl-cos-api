@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Deprecated
 public class CaseApplicationResponseController {
     private final DocumentGenService documentGenService;
     private final CoreCaseDataApi coreCaseDataApi;
