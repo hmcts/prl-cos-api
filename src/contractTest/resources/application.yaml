@@ -123,7 +123,7 @@ uk:
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
             RETURN_APPLICATION_CONSENT_ORDER: a491189a-737c-4fbc-ae13-15d9a4e42ce7
-            FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
+            FM5_REMINDER_APPLICANT_RESPONDENT: 2aeed2b8-c145-4c26-9931-b3cbcb280941
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name

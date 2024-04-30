@@ -19,6 +19,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
+import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -73,41 +78,77 @@ public class Fm5NotificationService {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    public void checkFmPendingParties(FmPendingParty fmPendingParty, CaseData caseData, String authorization) {
-        List<Element<PartyDetails>> listOfRecipientsOfNudge = new ArrayList<>();
-        if (fmPendingParty.equals(FmPendingParty.APPLICANT)) {
-            listOfRecipientsOfNudge.addAll(caseData.getApplicants());
-            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
+    public List<Element<NotificationDetails>> sendFm5ReminderNotifications(String authorization,
+                                                                           CaseData caseData,
+                                                                           FmPendingParty fmPendingParty) {
+        List<Element<NotificationDetails>> fm5ReminderNotifications = new ArrayList<>();
+        if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
+            //send reminders to both applicants & respondents
+            caseData.getApplicants()
+                .forEach(party ->
+                             fm5ReminderNotifications.add(sendFm5ReminderNotification(
+                                 authorization,
+                                 caseData,
+                                 party,
+                                 true
+                             ))
+                );
+            caseData.getRespondents()
+                .forEach(party ->
+                             fm5ReminderNotifications.add(sendFm5ReminderNotification(
+                                 authorization,
+                                 caseData,
+                                 party,
+                                 false
+                             ))
+                );
+        } else if (fmPendingParty.equals(FmPendingParty.APPLICANT)) {
+            caseData.getApplicants()
+                .forEach(party ->
+                             fm5ReminderNotifications.add(sendFm5ReminderNotification(
+                                 authorization,
+                                 caseData,
+                                 party,
+                                 true
+                             ))
+                );
         } else if (fmPendingParty.equals(FmPendingParty.RESPONDENT)) {
-            listOfRecipientsOfNudge.addAll(caseData.getRespondents());
-            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
-        } else if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
-            listOfRecipientsOfNudge.addAll(caseData.getApplicants());
-            listOfRecipientsOfNudge.addAll(caseData.getRespondents());
-            sendFm5ReminderNotification(listOfRecipientsOfNudge, caseData, authorization);
+            caseData.getRespondents()
+                .forEach(party ->
+                             fm5ReminderNotifications.add(sendFm5ReminderNotification(
+                                 authorization,
+                                 caseData,
+                                 party,
+                                 false
+                             ))
+                );
+        }
+        return fm5ReminderNotifications;
+    }
+
+    private Element<NotificationDetails> sendFm5ReminderNotification(String authorization,
+                                             CaseData caseData,
+                                             Element<PartyDetails> party,
+                                             boolean isApplicant) {
+        //if represented then send reminder to solicitor
+        if (isNotEmpty(party.getValue().getSolicitorEmail())) {
+            return sendFm5ReminderToSolicitor(caseData, party, authorization, isApplicant);
+        } else {
+            //Not represented, remind citizen LiP
+            return sendFm5ReminderToCitizen(authorization, caseData, party, isApplicant);
         }
     }
 
-    private void sendFm5ReminderNotification(List<Element<PartyDetails>> listOfRecipientsOfNudge,
-                                             CaseData caseData,
-                                             String authorization) {
-        listOfRecipientsOfNudge.forEach(party -> {
-            //if represented then send reminder to solicitor
-            if (isNotEmpty(party.getValue().getSolicitorEmail())) {
-                sendFm5ReminderToSolicitor(caseData, party, authorization);
-            } else {
-                //Not represented, remind citizen LiP
-                sendFm5ReminderToCitizen(caseData, party, authorization);
-            }
-        });
-    }
-
-    private void sendFm5ReminderToSolicitor(CaseData caseData,
+    private Element<NotificationDetails> sendFm5ReminderToSolicitor(CaseData caseData,
                                             Element<PartyDetails> party,
-                                            String authorization) {
-        Map<String, Object> dynamicData = getEmailDynamicData(caseData,
-                                                              party.getValue(),
-                                                              false);
+                                            String authorization,
+                                            boolean isApplicantSolicitor) {
+        log.info("Send FM5 reminder to solicitor for party {}", party.getId());
+        Map<String, Object> dynamicData = getEmailDynamicData(
+            caseData,
+            party.getValue(),
+            false
+        );
 
         serviceOfApplicationEmailService
             .sendEmailUsingTemplateWithAttachments(
@@ -118,23 +159,33 @@ public class Fm5NotificationService {
                 dynamicData,
                 SOLICITOR
         );
+
+        return getNotificationDetails(party.getId(),
+                                      isApplicantSolicitor ? PartyType.APPLICANT_SOLICITOR
+                                          : PartyType.RESPONDENT_SOLICITOR,
+                                      NotificationType.SENDGRID_EMAIL,
+                                      null,
+                                      null
+        );
     }
 
-    private void sendFm5ReminderToCitizen(CaseData caseData,
-                                          Element<PartyDetails> party,
-                                          String authorization) {
+    private Element<NotificationDetails> sendFm5ReminderToCitizen(String authorization,
+                                                                  CaseData caseData,
+                                                                  Element<PartyDetails> party,
+                                                                  boolean isApplicant) {
         log.info("Contact pref is {} for party {}", party.getValue().getContactPreferences(), party.getId());
         if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
             && YesOrNo.Yes.equals(party.getValue().getCanYouProvideEmailAddress())) {
-            sendFm5ReminderToLipViaEmail(caseData, party, authorization);
+            return sendFm5ReminderToLipViaEmail(authorization, caseData, party, isApplicant);
         } else {
-            sendFm5ReminderToLipViaPost(caseData, party, authorization);
+            return sendFm5ReminderToLipViaPost(authorization, caseData, party, isApplicant);
         }
     }
 
-    private void sendFm5ReminderToLipViaEmail(CaseData caseData,
-                                              Element<PartyDetails> party,
-                                              String authorization) {
+    private Element<NotificationDetails> sendFm5ReminderToLipViaEmail(String authorization,
+                                                                      CaseData caseData,
+                                                                      Element<PartyDetails> party,
+                                                                      boolean isApplicant) {
         //if party has access to dashboard then send gov notify email else send grid
         if (hasDashboardAccess(party)) {
             //Send a gov notify email
@@ -146,6 +197,13 @@ public class Fm5NotificationService {
                     caseData,
                     party.getValue()
                 )
+            );
+
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.GOV_NOTIFY_EMAIL,
+                                          null,
+                                          null
             );
         } else {
             Map<String, Object> dynamicData = getEmailDynamicData(caseData,
@@ -160,6 +218,13 @@ public class Fm5NotificationService {
                     dynamicData,
                     SOA_CITIZEN
             );
+
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.SENDGRID_EMAIL,
+                                          null,
+                                          null
+            );
         }
     }
 
@@ -173,9 +238,10 @@ public class Fm5NotificationService {
             .build();
     }
 
-    private void sendFm5ReminderToLipViaPost(CaseData caseData,
-                                             Element<PartyDetails> party,
-                                             String authorization) {
+    private Element<NotificationDetails> sendFm5ReminderToLipViaPost(String authorization,
+                                                                     CaseData caseData,
+                                                                     Element<PartyDetails> party,
+                                                                     boolean isApplicant) {
 
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -194,10 +260,38 @@ public class Fm5NotificationService {
                 party.getValue().getLabelForDynamicList()
             );
             log.info("FM5 reminder -> Sent Blank FM5 form with cover sheet to LiP {} via bulk print id {}", party.getId(), bulkPrintId);
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.BULK_PRINT,
+                                          bulkPrintId,
+                                          null
+            );
         } else {
             log.info(
                 "Couldn't post letters to party address, as address is null/empty for {}", party.getId());
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.BULK_PRINT,
+                                          null,
+                                          "Couldn't send FM5 reminder via post as address is not present"
+            );
         }
+    }
+
+    private Element<NotificationDetails> getNotificationDetails(UUID partyId,
+                                                                PartyType partyType,
+                                                                NotificationType notificationType,
+                                                                UUID bulkPrintId,
+                                                                String remarks) {
+        return element(NotificationDetails.builder()
+                           .partyId(String.valueOf(partyId))
+                           .partyType(partyType)
+                           .notificationType(notificationType)
+                           .bulkPrintId(String.valueOf(bulkPrintId))
+                           .sentDateTime(LocalDateTime.now())
+                           .remarks(remarks)
+                           .build()
+        );
     }
 
     private Document generateFm5CoverLetter(String authorisation,
@@ -208,7 +302,7 @@ public class Fm5NotificationService {
         dataMap.put("id", caseData.getId());
         dataMap.put("serviceUrl", citizenUrl);
         dataMap.put("address", party.getValue().getAddress());
-        dataMap.put("name", party.getValue().getLabelForDynamicList());
+        dataMap.put(NAME, party.getValue().getLabelForDynamicList());
         dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
         dataMap.put("dashboardAccess", hasDashboardAccess(party) ? YesOrNo.Yes : YesOrNo.No);
 
