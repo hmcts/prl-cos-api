@@ -695,11 +695,13 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-
+            log.info("inside /about-to-start-urgent-case-creation");
             if (!launchDarklyClient.isFeatureEnabled(CREATE_URGENT_CASES_FLAG)) {
+                log.info("Flag disabled");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
                     "Sorry unable to create any urgent cases now")).build();
             } else {
+                log.info("Flag enabled");
                 return AboutToStartOrSubmitCallbackResponse.builder().build();
             }
         } else {
