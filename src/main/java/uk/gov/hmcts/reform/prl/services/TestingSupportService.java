@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -128,6 +129,8 @@ public class TestingSupportService {
     private static final String VALID_C100_DRAFT_V3_INPUT_JSON = "C100_Dummy_Draft_CaseDetails_v3.json";
 
     private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
+
+    private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
 
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
@@ -281,7 +284,7 @@ public class TestingSupportService {
     private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData, String taskListVersionOptions) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions)
+            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(taskListVersionOptions)
                 ? ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON)
                 : ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
         } else {
@@ -296,17 +299,28 @@ public class TestingSupportService {
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         if (!isCourtStaff) {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) ? ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON)
+                requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(taskListVersionOptions)
+                    ? ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON)
                     : ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
             }
         } else {
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
-            } else {
-                requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
-            }
+            requestBody = loadCaseDetailsInDraftStageForUrgentCases(initialCaseData, taskListVersionOptions);
+        }
+        return requestBody;
+    }
+
+    private static String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData,
+                                                                    String taskListVersionOptions) throws Exception {
+        String requestBody;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(
+                taskListVersionOptions)
+                ? ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON)
+                : ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
+        } else {
+            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
         }
         return requestBody;
     }
