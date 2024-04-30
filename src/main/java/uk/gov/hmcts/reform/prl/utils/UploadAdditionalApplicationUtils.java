@@ -140,7 +140,8 @@ public class UploadAdditionalApplicationUtils {
         C2DocumentBundle c2DocumentBundle = caseData.getUploadAdditionalApplicationData()
             .getTemporaryC2Document();
 
-        if (c2DocumentBundle.getUrgencyTimeFrameType() != null) {
+        if (c2DocumentBundle != null
+            && c2DocumentBundle.getUrgencyTimeFrameType() != null) {
             if (temporaryOtherApplicationsBundle != null
                 && c2DocumentBundle != null) {
                 if (!c2DocumentBundle.getUrgencyTimeFrameType().toString().replaceAll("\\D", "").equals(EMPTY_STRING)) {

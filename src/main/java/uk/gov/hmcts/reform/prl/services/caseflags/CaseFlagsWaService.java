@@ -53,12 +53,11 @@ public class CaseFlagsWaService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
-
             );
 
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
-                String.valueOf(caseId),
+                caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
                 startAllTabsUpdateDataContent.caseDataMap()
