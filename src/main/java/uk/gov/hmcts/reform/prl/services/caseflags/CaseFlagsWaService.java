@@ -50,10 +50,10 @@ public class CaseFlagsWaService {
         }
         if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CTSC.getRoles()::contains)) {
             log.info("triggered by user having CTSC role");
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificUserEvent(
-                authorisation,
-                CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue(),
-                caseId
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS.getValue()
+
             );
             allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
