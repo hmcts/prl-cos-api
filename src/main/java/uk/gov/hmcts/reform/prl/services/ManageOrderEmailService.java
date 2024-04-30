@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTIO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -312,16 +313,6 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private void seneGridEmailApplicantLip(Map<String, Object> dynamicDataForEmail, String email) {
-
-        emailService.send(
-            email,
-            EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
-            buildEmailTemplateVarsApplicantLip(dynamicDataForEmail),
-            LanguagePreference.english
-        );
-    }
-
     private EmailTemplateVars buildEmailTemplateVarsApplicantLip(Map<String, Object> dynamicData) {
 
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
@@ -521,42 +512,14 @@ public class ManageOrderEmailService {
             });
         } else {
             log.info("*** Send email/post notifications to applicants ***");
-            caseData.getApplicants().forEach(party -> sendNotificationsToLipParty(
+            caseData.getApplicants().forEach(party -> sendNotificationsToParty(
                 caseData,
                 party,
                 authorisation,
                 dynamicDataForEmail,
                 orderDocuments,
-                bulkPrintOrderDetails));
-        }
-    }
-
-    private void sendNotificationsToLipParty(CaseData caseData,
-                                          Element<PartyDetails> party,
-                                          String authorisation,
-                                          Map<String, Object> dynamicDataForEmail,
-                                          List<Document> orderDocuments,
-                                          List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
-        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-            && isPartyProvidedWithEmail(party.getValue())) {
-            log.info("*** Send orders to party via email using send grid {}", party.getId());
-            dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
-            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
-            dynamicDataForEmail.put("caseName", caseData.getApplicantCaseName());
-            dynamicDataForEmail.put("caseReference", String.valueOf(caseData.getId()));
-
-            seneGridEmailApplicantLip(dynamicDataForEmail, party.getValue().getEmail());
-
-        } else {
-            log.info("*** Send orders to party via post using bulk print {}", party.getId());
-            sendOrdersToPartyAddressViaPost(
-                caseData,
-                authorisation,
-                orderDocuments,
                 bulkPrintOrderDetails,
-                party
-            );
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP));
         }
     }
 
@@ -575,7 +538,12 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
             if (hasDashboardAccess(party)) {
-
+                emailService.send(
+                    party.getValue().getEmail(),
+                    EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
+                    buildEmailTemplateVarsApplicantLip(dynamicDataForEmail),
+                    LanguagePreference.english
+                );
             } else {
                 sendEmailViaSendGrid(
                     authorisation,
