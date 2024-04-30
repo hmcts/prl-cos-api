@@ -56,7 +56,7 @@ public class CaseFlagsWaService {
                 caseId
             );
             allTabService.submitUpdateForSpecificUserEvent(
-                authorisation,
+                startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
