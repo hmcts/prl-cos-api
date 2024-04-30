@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 
 
 @Service
@@ -26,12 +30,23 @@ public class AssignCaseAccessService {
     private final UserService userService;
     private final LaunchDarklyClient launchDarklyClient;
 
+    private final RoleAssignmentApi roleAssignmentApi;
+
 
     public void assignCaseAccess(String caseId, String authorisation) {
 
         if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             List<String> roles = userDetails.getRoles();
+            if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+                RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                    authorisation,
+                    authTokenGenerator.generate(),
+                    null,
+                    userDetails.getId()
+                );
+                roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
+            }
             boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
             String userId = userDetails.getId();
 
