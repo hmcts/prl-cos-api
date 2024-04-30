@@ -796,7 +796,7 @@ public class CaseUtils {
         return roles;
     }
 
-      public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
         return null != party.getValue()
             && null != party.getValue().getUser()
             && null != party.getValue().getUser().getIdamId();

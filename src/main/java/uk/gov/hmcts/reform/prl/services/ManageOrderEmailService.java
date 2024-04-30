@@ -67,8 +67,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTIO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -324,8 +324,7 @@ public class ManageOrderEmailService {
             .builder()
             .emailSubject(buildEmailTitleForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .emailText(buildEmailTextForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
-            .orders(multipleOrderFlag || newAndFinalOrderFlag ? "yes" : "no")
-            .order(!multipleOrderFlag || !newAndFinalOrderFlag ? "yes" : "no")
+            .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(String.valueOf(dynamicData.get("name")))
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
