@@ -151,7 +151,7 @@ uk:
             CA_AWAITING_PAYMENT: 6ddd61dc-614a-433f-9b95-c72f52fdeb02
             CA_HELP_WITH_FEES: c188d173-b90f-48f1-a432-745f7ef93734
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
-            FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
+            FM5_REMINDER_APPLICANT_RESPONDENT: 2aeed2b8-c145-4c26-9931-b3cbcb280941
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -622,6 +622,8 @@ document:
       prl_sdo_welsh_draft_filename: Welsh_Standard_Directions_Order_draft.pdf
       prl_sdo_welsh_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Final.docx
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
+      doc_cover_sheet_serve_order_template: PRL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
+      doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
