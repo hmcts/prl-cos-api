@@ -314,6 +314,7 @@ public class ReviewDocumentService {
             );
 
             //remove document from quarantine
+            log.info(quarantineLegalDocElementOptional.get() + "quarantineLegalDocElementOptional******");
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
