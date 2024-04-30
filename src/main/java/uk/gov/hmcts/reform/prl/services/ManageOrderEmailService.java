@@ -312,13 +312,12 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private void testEmailJames(Map<String, Object> dynamicDataForEmail, String email) {
-        EmailTemplateVars emailTemplateVars = buildEmailTemplateVarsApplicantLip(dynamicDataForEmail);
+    private void seneGridEmailApplicantLip(Map<String, Object> dynamicDataForEmail, String email) {
 
         emailService.send(
             email,
             EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
-            emailTemplateVars,
+            buildEmailTemplateVarsApplicantLip(dynamicDataForEmail),
             LanguagePreference.english
         );
     }
@@ -547,7 +546,7 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put("caseName", caseData.getApplicantCaseName());
             dynamicDataForEmail.put("caseReference", String.valueOf(caseData.getId()));
 
-            testEmailJames(dynamicDataForEmail, party.getValue().getEmail());
+            seneGridEmailApplicantLip(dynamicDataForEmail, party.getValue().getEmail());
 
         } else {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
@@ -575,13 +574,17 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            sendEmailViaSendGrid(
-                authorisation,
-                orderDocuments,
-                dynamicDataForEmail,
-                party.getValue().getEmail(),
-                sengGridTemplate
-            );
+            if (hasDashboardAccess(party)) {
+
+            } else {
+                sendEmailViaSendGrid(
+                    authorisation,
+                    orderDocuments,
+                    dynamicDataForEmail,
+                    party.getValue().getEmail(),
+                    sengGridTemplate
+                );
+            }
         } else {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
             sendOrdersToPartyAddressViaPost(
