@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.caseflags;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class CaseFlagsController {
     private final AuthorisationService authorisationService;
     private final CaseFlagsWaService caseFlagsWaService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate case creator to decide on the WA task")
@@ -45,6 +48,11 @@ public class CaseFlagsController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            try {
+                log.info("/send-to-gatekeeper CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(caseFlagsWaService.findIfCreatedByCtsc(authorisation, callbackRequest))
