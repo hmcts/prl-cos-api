@@ -127,7 +127,7 @@ public class SendgridService {
         log.info("from email sendgrid {} ", fromEmailSendgrid);
         Email fromEmail = getEmail(fromEmailSendgrid);
         fromEmail.setName("Sendgrid-new");
-        mail.setFrom(getEmail(fromEmailSendgrid));
+        mail.setFrom(fromEmail);
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
