@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -68,8 +71,13 @@ public class DraftOrdersControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+
+
+
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
+
+
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -87,7 +95,7 @@ public class DraftOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenReset_fields_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/reset-fields")
+        MvcResult result = mockMvc.perform(post("/reset-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -95,19 +103,29 @@ public class DraftOrdersControllerFunctionalTest {
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("200", result.getResponse().getStatus());
     }
 
     @Test
     public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/selected-order")
+        MvcResult result = mockMvc.perform(post("/selected-order")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        Assertions.assertNotNull(result);
+        log.info("Json Value ::::::: {}",json);
+        Assertions.assertEquals("200", result.getResponse().getStatus());
+
     }
 
     @Test
