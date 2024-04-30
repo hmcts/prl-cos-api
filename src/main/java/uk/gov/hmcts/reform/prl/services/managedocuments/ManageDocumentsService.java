@@ -296,6 +296,7 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
+            log.info(finalConfidentialDocument + "vfinalConfidentialDocument ?*********");
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
