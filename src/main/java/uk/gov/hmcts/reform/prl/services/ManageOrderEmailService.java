@@ -331,7 +331,7 @@ public class ManageOrderEmailService {
 
         return ManageOrderEmailLip
             .builder()
-            .emailTitle(buildEmailTitleForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailSubject(buildEmailTitleForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .emailText(buildEmailTextForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .orders(multipleOrderFlag || newAndFinalOrderFlag ? "yes" : "no")
             .order(!multipleOrderFlag || !newAndFinalOrderFlag ? "yes" : "no")
