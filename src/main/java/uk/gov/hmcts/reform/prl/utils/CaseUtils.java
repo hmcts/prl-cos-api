@@ -763,4 +763,10 @@ public class CaseUtils {
         }
         return "English";
     }
+
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+        return null != party.getValue()
+            && null != party.getValue().getUser()
+            && null != party.getValue().getUser().getIdamId();
+    }
 }
