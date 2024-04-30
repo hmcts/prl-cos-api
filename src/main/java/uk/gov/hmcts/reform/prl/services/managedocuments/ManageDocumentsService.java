@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCU
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -231,7 +232,7 @@ public class ManageDocumentsService {
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
+                Document updatedConfidentialDocument = downloadAndDeleteDocument(document, systemUserService.getSysUserToken());
                 quarantineLegalDoc = setQuarantineDocumentForUploader(
                     ManageDocuments.builder()
                         .document(updatedConfidentialDocument)
@@ -239,28 +240,29 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
-
             }
+            if (quarantineLegalDoc != null) {
+                QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
+                    quarantineLegalDoc,
+                    userDetails
+                );
+                //This will be executed only during manage documents
+                if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(
+                    quarantineLegalDoc.getDocumentParty())) {
+                    finalConfidentialDocument = finalConfidentialDocument.toBuilder()
+                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                        .build();
+                }
 
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            //This will be executed only during manage documents
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
+                moveToConfidentialOrRestricted(
+                    caseDataUpdated,
+                    CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
+                        ? caseData.getReviewDocuments().getConfidentialDocuments()
+                        : caseData.getReviewDocuments().getRestrictedDocuments(),
+                    finalConfidentialDocument,
+                    restrictedKey
+                );
             }
-
-            moveToConfidentialOrRestricted(
-                caseDataUpdated,
-                CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
-                    ? caseData.getReviewDocuments().getConfidentialDocuments()
-                    : caseData.getReviewDocuments().getRestrictedDocuments(),
-                finalConfidentialDocument,
-                restrictedKey
-            );
         } else {
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -396,7 +398,7 @@ public class ManageDocumentsService {
     }
 
 
-    private Document downloadAndDeleteDocument(Document document) {
+    public Document downloadAndDeleteDocument(Document document, String systemAuthorisation) {
         try {
             if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                 UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
@@ -405,7 +407,7 @@ public class ManageDocumentsService {
                     documentId
                 );
                 if (null != newUploadedDocument) {
-                    caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                    caseDocumentClient.deleteDocument(systemAuthorisation,
                                                       authTokenGenerator.generate(),
                                                       documentId, true
                     );
@@ -688,7 +690,7 @@ public class ManageDocumentsService {
                     );
                     QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
 
-                    Document renamedDocument = downloadAndDeleteDocument(existingDocument);
+                    Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
                     Map tempQuarantineObjectMap =
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
                     tempQuarantineObjectMap.put(
@@ -716,7 +718,7 @@ public class ManageDocumentsService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         List<String> loggedInUserType = new ArrayList<>();
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
