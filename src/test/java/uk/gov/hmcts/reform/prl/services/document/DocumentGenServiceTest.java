@@ -471,7 +471,7 @@ public class DocumentGenServiceTest {
         ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
 
         doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(), any(), any(), any());
-        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
+        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any(),any());
         doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
         doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(),any());
         doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());
@@ -3819,7 +3819,7 @@ public class DocumentGenServiceTest {
         assertNotNull(template);
         assertEquals("citizen_cover_letter_wel", template);
     }
-  
+
     @Test
     public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
 

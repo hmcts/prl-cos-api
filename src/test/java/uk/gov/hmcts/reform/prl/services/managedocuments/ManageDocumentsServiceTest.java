@@ -556,7 +556,7 @@ public class ManageDocumentsServiceTest {
 
     }
 
-    //@Test
+    @Test
     public void testCopyDocumentIfNotRestrictedWithJudgeRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -671,7 +671,7 @@ public class ManageDocumentsServiceTest {
 
     }
 
-    //@Test
+    @Test
     public void testCopyDocumentIfNotRestrictedWithLaRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -1015,7 +1015,8 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Legal adviser");
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Legal adviser",
+                                                    "authorisation");
         List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
 
         assertNotNull(confidentialDocuments);
@@ -1093,7 +1094,7 @@ public class ManageDocumentsServiceTest {
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
-    //@Test
+    @Test
     public void testCopyDocumentIfNotRestricted() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -1181,7 +1182,7 @@ public class ManageDocumentsServiceTest {
         return roleAssignmentServiceResponse;
     }
 
-    //@Test
+    @Test
     public void testCopyDocumentIfNotRestrictedAndUploadedOnBehalfOfCourt() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
@@ -1783,7 +1784,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen");
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen",any());
 
         citizenUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("citizenUploadedDocListDocTab");
 
@@ -1850,7 +1851,8 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
 
         manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCitizenRole, caseData, caseDataMapInitial, "Citizen");
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCitizenRole, caseData, caseDataMapInitial,
+                                                    "Citizen","authorisation");
         List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
 
         assertNotNull(confidentialDocuments);

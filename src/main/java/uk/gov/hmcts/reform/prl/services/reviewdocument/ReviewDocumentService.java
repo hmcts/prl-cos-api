@@ -315,12 +315,6 @@ public class ReviewDocumentService {
             );
 
             //remove document from quarantine
-            QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
-            log.info(tempQuarantineDoe + "tempQuarantineDoe******");
-            /*if (tempQuarantineDoe.getDocument().getDocumentFileName().contains("C7_Document.pdf")) {
-                log.info(tempQuarantineDoe.getDocument().getDocumentFileName() + "inside if quarantineLegalDocElementOptional******");
-            }*/
-
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
@@ -340,7 +334,7 @@ public class ReviewDocumentService {
                 .restrictedDetails(null)
                 .build();
         }
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNewAuth(
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
             caseData,

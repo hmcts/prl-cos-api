@@ -115,9 +115,6 @@ public class ManageDocumentsService {
 
     private final ManageDocumentEmailService manageDocumentEmailService;
 
-    @Value("${send-grid.rpa.email.from}")
-    private String fromEmail;
-
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
@@ -238,7 +235,8 @@ public class ManageDocumentsService {
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole
+                    userRole,
+                    authorization
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -251,65 +249,6 @@ public class ManageDocumentsService {
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
-        String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
-
-        if (restrictedKey != null) {
-            //This will be executed only during review documents
-            if (!userRole.equals(COURT_ADMIN)
-                && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-                Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document, systemUserService.getSysUserToken());
-                quarantineLegalDoc = setQuarantineDocumentForUploader(
-                    ManageDocuments.builder()
-                        .document(updatedConfidentialDocument)
-                        .build(),
-                    loggedInUserType,
-                    quarantineLegalDoc
-                );
-            }
-            if (quarantineLegalDoc != null) {
-                QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                    quarantineLegalDoc,
-                    userDetails
-                );
-                //This will be executed only during manage documents
-                if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(
-                    quarantineLegalDoc.getDocumentParty())) {
-                    finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                        .build();
-                }
-
-                moveToConfidentialOrRestricted(
-                    caseDataUpdated,
-                    CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
-                        ? caseData.getReviewDocuments().getConfidentialDocuments()
-                        : caseData.getReviewDocuments().getRestrictedDocuments(),
-                    finalConfidentialDocument,
-                    restrictedKey
-                );
-            }
-        } else {
-            // Remove these attributes for Non Confidential documents
-            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                .isConfidential(null)
-                .isRestricted(null)
-                .restrictedDetails(null)
-                .build();
-
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
-            existingCaseDocuments.add(element(finalConfidentialDocument));
-            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-        }
-    }
-
-    public void moveDocumentsToRespectiveCategoriesNewAuth(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object>
                                                                caseDataUpdated, String userRole, String authorisation) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
@@ -366,7 +305,7 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
-                uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
+                uk.gov.hmcts.reform.prl.models.documents.Document document = finalConfidentialDocument.getRespondentApplicationDocument();
                 Element<PartyDetails> applicant = caseData.getApplicants().get(0);
                 if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
                     emailAddress = applicant.getValue().getEmail();
@@ -374,7 +313,8 @@ public class ManageDocumentsService {
                 }
                 Element<PartyDetails> respondent = caseData.getRespondents().get(0);
                 respondentName = String.format("%s %s",  respondent.getValue().getFirstName(),  respondent.getValue().getLastName());
-                if (test.getDocumentFileName().equals("C7_Document.pdf") || test.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
+                if (document.getDocumentFileName().equals("C7_Document.pdf")
+                    || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("respondentName", respondentName);
                     dynamicData.put("applicantName", applicantName);

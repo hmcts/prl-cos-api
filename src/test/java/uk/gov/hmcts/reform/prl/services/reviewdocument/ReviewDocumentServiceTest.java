@@ -184,7 +184,7 @@ public class ReviewDocumentServiceTest {
         ReflectionTestUtils.setField(manageDocumentsService, "caseDocumentClient", caseDocumentClient);
 
 
-        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
+        doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any(),any());
         doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
         doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(),any());
         doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());
@@ -770,7 +770,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessOfDocumentToConfidentialTabForScanDocWhenNoIsSelected() {
 
         List<Element<ScannedDocument>> scannedDocs = new ArrayList<>();
@@ -802,7 +802,7 @@ public class ReviewDocumentServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(bulkScanQuarantineDoc);
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertTrue(caseData.getScannedDocuments().isEmpty());
@@ -818,7 +818,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessOfDocumentToConfidentialTabForScanDocWhenYesIsSelected() {
 
         List<Element<ScannedDocument>> scannedDocs = new ArrayList<>();
@@ -847,7 +847,7 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(bulkScanQuarantineDoc);
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertTrue(caseData.getScannedDocuments().isEmpty());
 
@@ -862,7 +862,7 @@ public class ReviewDocumentServiceTest {
     }
 
     //LegalProfessional
-    //@Test
+    @Test
 
     public void testReviewForLegalProfDocsMoveToConfidentialDocsInConfTab() {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
@@ -888,7 +888,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
 
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
 
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
@@ -899,7 +899,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessForLegalProfDocsMoveToRestrictedDocsInConfTab() {
 
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
@@ -925,7 +925,7 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  restrictedDocs =
@@ -935,7 +935,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessForLegalProfWhenDecisionNo() {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
@@ -953,7 +953,7 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineCaseDoc);
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
 
@@ -968,7 +968,7 @@ public class ReviewDocumentServiceTest {
     }
 
     //Court
-    //@Test
+    @Test
     public void testReviewForCourtStaffDocsMoveToConfidentialDocsInConfTab() {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -993,7 +993,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
 
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  restrictedDocs =
@@ -1040,7 +1040,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessForCourtStaffWhenDecisionNo() {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
@@ -1058,7 +1058,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
-            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any()
+            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation"
         );
 
         List<Element<QuarantineLegalDoc>>  courtStaffUploadDocListDocTab =
@@ -1071,7 +1071,7 @@ public class ReviewDocumentServiceTest {
     }
 
     //Cafcass
-    //@Test
+    @Test
     public void testReviewForCafcassDocsMoveToConfidentialDocsInConfTab() {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -1096,7 +1096,7 @@ public class ReviewDocumentServiceTest {
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
 
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"authorisation");
 
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  restrictedDocs =
@@ -1107,7 +1107,7 @@ public class ReviewDocumentServiceTest {
 
     }
 
-    //@Test
+    @Test
     public void testReviewProcessForCafcassDocsMoveToRestrictedDocsInConfTab() {
 
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
@@ -1133,7 +1133,7 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
-        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any());
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"auth");
 
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  restrictedDocs =
@@ -1143,7 +1143,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
     }
 
-    //@Test
+    @Test
     public void testReviewProcessForCafcassWhenDecisionNo() {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
@@ -1164,7 +1164,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
-            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),any()
+            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),"auth"
         );
 
         List<Element<QuarantineLegalDoc>>  cafcassUploadDocListDocTab =
