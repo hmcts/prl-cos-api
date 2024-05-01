@@ -44,8 +44,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
@@ -137,14 +138,26 @@ public class ServiceOfApplicationPostService {
                     DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME_WELSH)
                 ));
             }
+            //PRL-5360 - Remove mediation voucher & add new President note
+            if (documentLanguage.isGenEng()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_FAMILY_PRESIDENTS_NOTE,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
+                ));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                files.add(new InMemoryMultipartFile(
+                    SOA_MULTIPART_FILE,
+                    SOA_FAMILY_PRESIDENTS_NOTE_WELSH,
+                    APPLICATION_PDF_VALUE,
+                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE_WELSH)
+                ));
+            }
+
             files.addAll(
                 List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_MEDIATION_VOUCHER_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
-                    ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_NOTICE_SAFETY,
