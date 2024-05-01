@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -98,10 +99,11 @@ public class Fm5ReminderService {
     }
 
     private QueryParam buildCcdQueryParam() {
-        //C100 case type of application
-        List<Should> c100Cases = List.of(Should.builder()
+        //C100 cases where fm5 reminders are not sent already
+        List<Should> shoulds = List.of(Should.builder()
                                              .match(Match.builder()
                                                         .caseTypeOfApplication("C100")
+                                                        .fm5RemindersSent(YesOrNo.No)
                                                         .build())
                                              .build());
 
@@ -115,7 +117,7 @@ public class Fm5ReminderService {
 
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
         Bool finalFilter = Bool.builder()
-            .should(c100Cases)
+            .should(shoulds)
             .minimumShouldMatch(1)
             .must(mustFilter)
             .build();
