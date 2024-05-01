@@ -13,16 +13,13 @@
     <cve>CVE-2022-41915</cve>
     <cve>CVE-2023-33202</cve>
     <cve>CVE-2023-6378</cve>
-
-    <!--jackson-databind-->
-    <!--<cve>CVE-2023-35116</cve>-->
-
+    <cve>CVE-2023-35116</cve>
+    <cve>CVE-2023-41080</cve>
+    <cve>CVE-2023-34055</cve>
     <!--tomcat-->
-    <!--<cve>CVE-2023-41080</cve>-->
-
-    <!--spring-->
-    <!--<cve>CVE-2023-34055</cve>-->
-
+    <!--<cve>CVE-2023-42795</cve>-->
     <cve>CVE-2023-46589</cve>
+    <!--tomcat-->
+    <!--<cve>CVE-2023-45648</cve>-->
   </suppress>
 </suppressions>
