@@ -128,6 +128,10 @@ public class ManageDocumentsService {
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
+    String emailAddress = null;
+    String applicantName = null;
+    String respondentName = null;
+
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -366,9 +370,6 @@ public class ManageDocumentsService {
                 uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
                 log.info(test.getDocumentFileName());
                 log.info("********* log.info(caseData);******" + caseData);
-                String emailAddress = null;
-                String applicantName = null;
-                String respondentName = null;
                 Element<PartyDetails> applicant = caseData.getApplicants().get(0);
                 if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
                     emailAddress = applicant.getValue().getEmail();
@@ -376,6 +377,9 @@ public class ManageDocumentsService {
                 }
                 Element<PartyDetails> respondent = caseData.getRespondents().get(0);
                 respondentName = String.format("%s %s",  respondent.getValue().getFirstName(),  respondent.getValue().getLastName());
+                log.info(emailAddress + "emailAddress********");
+                log.info(applicantName + "applicantName********");
+                log.info(respondentName + "respondentName********");
                 if (test.getDocumentFileName().equals("C7_Document.pdf") || test.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("respondentName", respondentName);
