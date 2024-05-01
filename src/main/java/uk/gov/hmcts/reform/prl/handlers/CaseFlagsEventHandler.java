@@ -17,14 +17,17 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
-
 
 @Slf4j
 @Component
@@ -64,11 +67,27 @@ public class CaseFlagsEventHandler {
                 = objectMapper.convertValue(event.callbackRequest().getCaseDetailsBefore(), Map.class);
             Map<String, Object> caseDetailsAfterMap
                 = objectMapper.convertValue(event.callbackRequest().getCaseDetails(), Map.class);
+            CaseData caseDataBefore = CaseUtils.getCaseData(
+                event.callbackRequest().getCaseDetailsBefore(),
+                objectMapper
+            );
+            CaseData caseDataAfter = CaseUtils.getCaseData(event.callbackRequest().getCaseDetails(), objectMapper);
+
+            if (caseDataBefore.getCaseFlags().getDetails().size() != caseDataAfter.getCaseFlags().getDetails().size()) {
+                Element<FlagDetail> flagDetailElement = caseDataAfter.getCaseFlags().getDetails()
+                    .get(caseDataAfter.getCaseFlags().getDetails().size() - 1);
+
+                if ("Requested".equalsIgnoreCase(flagDetailElement.getValue().status)) {
+                    log.info("Status found as Requested for case flag item:: " + flagDetailElement.getValue().name);
+                } else {
+                    log.info("Status found as different for case flag item:: " + flagDetailElement.getValue().name);
+                }
+            }
 
             if (!caseDetailsBeforeMap.equals(caseDetailsAfterMap)) {
                 MapDifference<String, Object> diff = Maps.difference(caseDetailsBeforeMap, caseDetailsAfterMap);
                 try {
-                    log.info("difference in the map is ===>" + objectMapper.writeValueAsString(diff));
+                    log.info("difference in the map is ===>" + objectMapper.writeValueAsString(diff.entriesDiffering()));
                 } catch (JsonProcessingException e) {
                     log.info("error");
                 }
