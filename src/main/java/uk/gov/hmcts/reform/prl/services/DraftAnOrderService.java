@@ -756,84 +756,105 @@ public class DraftAnOrderService {
             caseData.getDraftOrdersDynamicList()
         );
         if (null != selectedOrder.getSdoDetails()) {
-            StandardDirectionOrder standardDirectionOrder;
+            StandardDirectionOrder standardDirectionOrder = null;
             try {
-                SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
-                    .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
-                                          : selectedOrder.getSdoDetails().getSdoPreamblesList())
-                    .sdoHearingsAndNextStepsList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
-                                                     : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
-                    .sdoCafcassOrCymruList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
-                                               : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
-                    .sdoLocalAuthorityList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
-                                               : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
-                    .sdoCourtList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
-                                      : selectedOrder.getSdoDetails().getSdoCourtList())
-                    .sdoDocumentationAndEvidenceList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
-                                                         : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
-                    .sdoFurtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoFurtherList()
-                                        : selectedOrder.getSdoDetails().getSdoFurtherList())
-                    .sdoOtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
-                                      : selectedOrder.getSdoDetails().getSdoOtherList())
-                    .build();
-                standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
-                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                    hearingDataService.populateHearingDynamicLists(
-                        authorisation,
-                        String.valueOf(caseData.getId()),
-                        caseData,
-                        hearings
-                    );
-                standardDirectionOrder = standardDirectionOrder.toBuilder()
-                    .sdoUrgentHearingDetails(isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())
-                                                 ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoUrgentHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoPermissionHearingDetails(isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())
+                if (!YesOrNo.Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
+                    SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
+                        .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
+                                              : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                        .sdoPreamblesTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
+                                                  : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                        .sdoHearingsAndNextStepsList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
+                                                         : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                        .sdoHearingsAndNextStepsTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
+                                                             : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                        .sdoCafcassOrCymruList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
+                                                   : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                        .sdoCafcassOrCymruTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
+                                                       : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                        .sdoLocalAuthorityList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
+                                                   : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                        .sdoLocalAuthorityTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
+                                                       : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                        .sdoCourtList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
+                                          : selectedOrder.getSdoDetails().getSdoCourtList())
+                        .sdoCourtTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
+                                              : selectedOrder.getSdoDetails().getSdoCourtList())
+                        .sdoDocumentationAndEvidenceList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
+                                                             : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                        .sdoDocumentationAndEvidenceTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
+                                                                 : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                        .sdoFurtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoFurtherList()
+                                            : selectedOrder.getSdoDetails().getSdoFurtherList())
+                        .sdoOtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
+                                          : selectedOrder.getSdoDetails().getSdoOtherList())
+                        .sdoOtherTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
+                                              : selectedOrder.getSdoDetails().getSdoOtherList())
+                        .build();
+                    standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
+                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                    HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                        hearingDataService.populateHearingDynamicLists(
+                            authorisation,
+                            String.valueOf(caseData.getId()),
+                            caseData,
+                            hearings
+                        );
+                    standardDirectionOrder = standardDirectionOrder.toBuilder()
+                        .sdoUrgentHearingDetails(isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())
                                                      ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoPermissionHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoSecondHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())
-                                                 ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoSecondHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoFhdraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())
-                                                ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoFhdraHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoDraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())
-                                              ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoDraHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoSettlementHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())
+                            standardDirectionOrder.getSdoUrgentHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoPermissionHearingDetails(isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())
+                                                         ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoPermissionHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoSecondHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())
                                                      ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoSettlementHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .sdoDirectionsForFactFindingHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
-                                                                   && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
-                                                                                     .getHearingDateConfirmOptionEnum())
-                                                                   ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
-                    .build();
-                caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
-                standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
+                            standardDirectionOrder.getSdoSecondHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoFhdraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())
+                                                    ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoFhdraHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoDraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())
+                                                  ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoDraHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoSettlementHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())
+                                                         ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoSettlementHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .sdoDirectionsForFactFindingHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+                                                                       && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                                                                                         .getHearingDateConfirmOptionEnum())
+                                                                       ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                        .build();
+                    caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
+
+                }
+                standardDirectionOrderMap = objectMapper.convertValue(
+                    ObjectUtils.isNotEmpty(standardDirectionOrder) ? standardDirectionOrder : caseData.getStandardDirectionOrder(),
+                    Map.class
+                );
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
+
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }

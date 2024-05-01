@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -68,13 +69,20 @@ import java.util.List;
 public class SdoDetails {
 
     private final List<SdoPreamblesEnum> sdoPreamblesList;
+    private final List<SdoPreamblesEnum> sdoPreamblesTempList;
     private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsList;
+    private final List<SdoHearingsAndNextStepsEnum> sdoHearingsAndNextStepsTempList;
     private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruList;
+    private final List<SdoCafcassOrCymruEnum> sdoCafcassOrCymruTempList;
     private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityList;
+    private final List<SdoLocalAuthorityEnum> sdoLocalAuthorityTempList;
     private final List<SdoCourtEnum> sdoCourtList;
+    private final List<SdoCourtEnum> sdoCourtTempList;
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
+    private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceTempList;
     private final List<SdoFurtherInstructionsEnum> sdoFurtherList;
     private final List<SdoOtherEnum> sdoOtherList;
+    private final List<SdoOtherEnum> sdoOtherTempList;
 
     private final String sdoRightToAskCourt;
     private final List<Element<PartyNameDA>> sdoPartiesRaisedAbuseCollection;
