@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -20,7 +22,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -100,11 +104,37 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private static CaseDetails caseDetails1;
 
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
+
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails1 = mapper.readValue(json, CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails1);
+        Assert.assertNotNull(caseDetails1.getId());
+    }
+
+
 
     @Test
     public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
@@ -212,12 +242,12 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails1.getId()));
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content()
