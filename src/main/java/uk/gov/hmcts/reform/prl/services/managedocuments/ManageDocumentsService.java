@@ -305,7 +305,7 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
-                uk.gov.hmcts.reform.prl.models.documents.Document document = finalConfidentialDocument.getRespondentApplicationDocument();
+                Document document = finalConfidentialDocument.getRespondentApplicationDocument();
                 Element<PartyDetails> applicant = caseData.getApplicants().get(0);
                 if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
                     emailAddress = applicant.getValue().getEmail();
