@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -614,8 +616,12 @@ public class SendAndReplyServiceTest {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
-                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder().uploadedDateTime(dateSent).build())
-                                                     .c2DocumentBundle(C2DocumentBundle.builder().uploadedDateTime(dateSent).build())
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                                  .uploadedDateTime(dateSent).build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                           .uploadedDateTime(dateSent).build())
                                                      .build()));
 
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
@@ -1284,4 +1290,79 @@ public class SendAndReplyServiceTest {
 
     }
 
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistWhileSendingMessage() {
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .sendMessageObject(Message.builder()
+                                                           .applicationsList(DynamicList.builder()
+                                                                                 .value(DynamicListElement.builder()
+                                                                                            .code(UUID.randomUUID())
+                                                                                            .label("test")
+                                                                                            .build())
+                                                                                 .build())
+                                                           .build())
+                                    .build())
+            .build();
+        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileSendingMessage() {
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .sendMessageObject(null)
+                                    .build())
+            .build();
+        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistWhileReplyingMessage() {
+        DynamicList messageReplyDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
+            .listItems(List.of(DynamicListElement.builder()
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
+            .build();
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .messageReplyDynamicList(messageReplyDynamicList)
+                                    .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                                                           Message
+                                        .builder()
+                                            .selectedApplicationCode("test-code")
+                                        .build())))
+                                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(messageReplyDynamicList, objectMapper))
+            .thenReturn(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileReplyingMessage() {
+        DynamicList messageReplyDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
+            .listItems(List.of(DynamicListElement.builder()
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
+            .build();
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .messageReplyDynamicList(messageReplyDynamicList)
+                                    .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),Message
+                                        .builder().build())))
+                                    .build())
+            .build();
+        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
 }
