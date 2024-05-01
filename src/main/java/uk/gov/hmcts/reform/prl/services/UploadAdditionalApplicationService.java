@@ -69,11 +69,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICAT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_URGENCY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -294,12 +294,10 @@ public class UploadAdditionalApplicationService {
             applicantName = otherApplicationsBundle.getApplicantName();
             reasonForApplications.add(otherApplicationsBundle.getApplicationType().getDisplayedValue());
         }
-        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(applicantName).append(
-            HYPHEN_SEPARATOR);
-        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(String.join(
-            ",",
-            reasonForApplications
-        ));
+        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty
+            .append(applicantName)
+            .append(HYPHEN_SEPARATOR)
+            .append(String.join(COMMA,reasonForApplications));
 
         return serviceReferenceResponsibleParty.toString();
     }
@@ -542,7 +540,6 @@ public class UploadAdditionalApplicationService {
 
         caseDataUpdated.put(AWP_WA_TASK_NAME, uploadAdditionalApplicationUtils.getAwPTaskName(caseData));
         caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, uploadAdditionalApplicationUtils.getValueOfAwpTaskToBeCreated(caseData));
-        caseDataUpdated.put(AWP_WA_TASK_URGENCY, uploadAdditionalApplicationUtils.getValueOfAwpTaskUrgency(caseData));
 
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;

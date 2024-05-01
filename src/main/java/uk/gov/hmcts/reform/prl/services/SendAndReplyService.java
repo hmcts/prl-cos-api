@@ -1184,22 +1184,19 @@ public class SendAndReplyService {
         if (SEND.equals(caseData.getChooseSendOrReply())
             && caseData.getSendOrReplyMessage() != null
             && caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList() != null) {
-            log.info("inside***** if condition");
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-                String.valueOf(
-                    caseData.getId()),
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(caseData.getId()),
                 CaseEvent.ALL_AWP_IN_REVIEW.getValue()
             );
 
-            allTabService.submitUpdateForSpecificUserEvent(
+            allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(caseData.getId()),
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseDataMap(),
-                startAllTabsUpdateDataContent.userDetails()
+                startAllTabsUpdateDataContent.caseDataMap()
             );
-            log.info("inside***** if condition event completed ");
         }
     }
 }
