@@ -148,6 +148,7 @@ allprojects {
             entry 'netty-handler'
             entry 'netty-resolver'
             entry 'netty-transport'
+            entry 'netty-transport-native-epoll'
         }
 
       // CVE-2019-10086
