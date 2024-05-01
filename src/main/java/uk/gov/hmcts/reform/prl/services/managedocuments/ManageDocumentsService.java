@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -364,12 +366,22 @@ public class ManageDocumentsService {
                 uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
                 log.info(test.getDocumentFileName());
                 log.info("********* log.info(caseData);******" + caseData);
+                String emailAddress = null;
+                String applicantName = null;
+                String respondentName = null;
+                Element<PartyDetails> applicant = caseData.getApplicants().get(0);
+                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                    emailAddress = applicant.getValue().getEmail();
+                    applicantName = String.format("%s %s",  applicant.getValue().getFirstName(),  applicant.getValue().getLastName());
+                }
+                Element<PartyDetails> respondent = caseData.getRespondents().get(0);
+                respondentName = String.format("%s %s",  respondent.getValue().getFirstName(),  respondent.getValue().getLastName());
                 if (test.getDocumentFileName().equals("C7_Document.pdf") || test.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                    dynamicData.put("respondentName", "James Dmith");
-                    dynamicData.put("applicantName", "Tom Bennett");
+                    dynamicData.put("respondentName", respondentName);
+                    dynamicData.put("applicantName", applicantName);
                     dynamicData.put("dashBoardLink", citizenDashboardUrl);
-                    sendEmailViaSendGrid(authorisation,  dynamicData, "anshika.nigam1@hmcts.net",
+                    sendEmailViaSendGrid(authorisation,  dynamicData, emailAddress,
                                          SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
                     );
                 }
