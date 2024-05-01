@@ -18,9 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -242,6 +244,13 @@ public class RequestUpdateCallbackServiceTest {
                                                      .builder().payment(Payment.builder()
                                                                             .paymentServiceRequestReferenceNumber("Paid")
                                                                             .build())
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus(ApplicationStatus
+                                                                                                         .SUBMITTED
+                                                                                                         .getDisplayedValue()).build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus(ApplicationStatus
+                                                                                                  .SUBMITTED.getDisplayedValue()).build())
                                                      .build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
@@ -278,6 +287,35 @@ public class RequestUpdateCallbackServiceTest {
 
     }
 
+    @Test
+    public void shouldThrowExceptionForProcessCallback() throws Exception {
+        CaseData caseData = CaseData.builder().id(1L)
+            .paymentServiceRequestReferenceNumber("test-reference").build();
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, Long.toString(caseId), eventName
+        ))
+            .thenReturn(startEventResponse);
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenThrow(new RuntimeException());
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("test-reference")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .serviceRequestStatus("Paid")
+            .build();
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
+
+    }
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
         return CaseDataContent.builder()
