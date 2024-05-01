@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -459,7 +460,8 @@ public class ReviewDocumentService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 String.valueOf(
                     caseData.getId()),
-                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) ? "c100-all-docs-reviewed" : "fl401-all-docs-reviewed"
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    ? CaseEvent.C100_ALL_DOCS_REVIEWED.getValue() : CaseEvent.FL401_ALL_DOCS_REVIEWED.getValue()
             );
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             allTabService.submitAllTabsUpdate(
