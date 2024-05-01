@@ -837,14 +837,15 @@ public class DraftAnOrderService {
                             hearingDataPrePopulatedDynamicLists,
                             caseData
                         ) : null)
-                        .sdoDirectionsForFactFindingHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
-                                                                       && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
-                                                                                         .getHearingDateConfirmOptionEnum())
-                                                                       ? hearingDataService.getHearingDataForSdo(
-                            standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
-                            hearingDataPrePopulatedDynamicLists,
-                            caseData
-                        ) : null)
+                        .sdoDirectionsForFactFindingHearingDetails(
+                            isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+                                && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                                                  .getHearingDateConfirmOptionEnum())
+                                ? hearingDataService.getHearingDataForSdo(
+                                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
+                                hearingDataPrePopulatedDynamicLists,
+                                caseData
+                            ) : null)
                         .build();
                     caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
 
