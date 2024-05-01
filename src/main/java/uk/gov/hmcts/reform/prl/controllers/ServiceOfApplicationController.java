@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
@@ -84,8 +83,6 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            FmPendingParty systemLogicResult  = serviceOfApplicationService.systemRuleLogic(callbackRequest, authorisation);
-            log.info("systemLogicResult --> {}", systemLogicResult);
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {
