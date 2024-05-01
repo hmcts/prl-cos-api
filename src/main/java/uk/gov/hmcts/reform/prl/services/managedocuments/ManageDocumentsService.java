@@ -360,10 +360,12 @@ public class ManageDocumentsService {
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
                 uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
                 log.info(test.getDocumentFileName());
+                log.info("********* log.info(caseData);******" + caseData);
                 if (test.getDocumentFileName().equals("C7_Document.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
 
-                    dynamicData.put("name", "tom bennet");
+                    dynamicData.put("respondentName", "tom bennet");
+                    dynamicData.put("applicantName", "tom bennet");
                     dynamicData.put("dashBoardLink", "citizenUrl");
                     sendEmailViaSendGrid(authorisation,  dynamicData, "anshika.nigam1@hmcts.net",
                                          SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
