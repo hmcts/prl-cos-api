@@ -382,7 +382,7 @@ public class ManageOrderEmailService {
                 return """
                     There is a new court order for your case.
                     
-                    A final order tells you what the court’s final decision is.""";
+                    An order tells you what the court has decided or what will happen next.""";
             }
         }
     }
