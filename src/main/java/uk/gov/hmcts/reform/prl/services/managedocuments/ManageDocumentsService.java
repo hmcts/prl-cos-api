@@ -209,15 +209,14 @@ public class ManageDocumentsService {
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            updatedUserDetails,
-            authorization
+            updatedUserDetails
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                          UserDetails userDetails, String authorization) {
+                                          UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
@@ -235,8 +234,7 @@ public class ManageDocumentsService {
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole,
-                    authorization
+                    userRole
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -249,8 +247,7 @@ public class ManageDocumentsService {
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                       CaseData caseData, Map<String, Object>
-                                                               caseDataUpdated, String userRole, String authorisation) {
+                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrictedKey != null) {
@@ -319,7 +316,7 @@ public class ManageDocumentsService {
                     dynamicData.put("respondentName", respondentName);
                     dynamicData.put("applicantName", applicantName);
                     dynamicData.put("dashBoardLink", citizenDashboardUrl);
-                    sendEmailViaSendGrid(authorisation,  dynamicData, emailAddress,
+                    sendEmailViaSendGrid(dynamicData, emailAddress,
                                          SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
                     );
                 }
@@ -329,7 +326,7 @@ public class ManageDocumentsService {
     }
 
 
-    private void sendEmailViaSendGrid(String authorisation,
+    private void sendEmailViaSendGrid(
                                       Map<String, Object> dynamicDataForEmail,
                                       String emailAddress,
                                       SendgridEmailTemplateNames sendgridEmailTemplateName) {
@@ -337,7 +334,6 @@ public class ManageDocumentsService {
             log.info("inside sendEmailViaSendGrid");
             manageDocumentEmailService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
-                authorisation,
                 SendgridEmailConfig.builder()
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)

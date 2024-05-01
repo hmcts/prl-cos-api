@@ -2353,7 +2353,7 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest.setEventId(event);
 
 
-            doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any(),any());
+            doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
             doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
             doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(),any());
             doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());

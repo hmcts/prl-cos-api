@@ -38,7 +38,7 @@ public class ManageDocumentEmailService {
 
 
     public void sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
-                                                      String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
+                                                       SendgridEmailConfig sendgridEmailConfig) throws IOException {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
         Map<String, Object> dynamicFields = sendgridEmailConfig.getDynamicTemplateData();
