@@ -15,7 +15,8 @@
     <cve>CVE-2023-6378</cve>
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2023-41080</cve>
-    <cve>CVE-2023-34055</cve>
+    <!--spring boot-->
+    <!--<cve>CVE-2023-34055</cve>-->
     <!--tomcat-->
     <!--<cve>CVE-2023-42795</cve>-->
     <cve>CVE-2023-46589</cve>
