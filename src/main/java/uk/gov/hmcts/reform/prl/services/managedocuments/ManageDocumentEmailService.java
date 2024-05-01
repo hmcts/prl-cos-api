@@ -56,7 +56,7 @@ public class ManageDocumentEmailService {
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
-            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                 log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
             }
         } catch (IOException ex) {
