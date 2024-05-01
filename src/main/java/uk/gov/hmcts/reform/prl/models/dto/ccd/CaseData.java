@@ -796,6 +796,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
 
     private List<Element<NotificationDetails>> fm5ReminderNotifications;
-    private YesOrNo fm5RemindersSentAlready;
+    private YesOrNo fm5RemindersSent;
 
 }
