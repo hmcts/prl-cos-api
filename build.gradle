@@ -23,7 +23,7 @@ plugins {
 
 def versions = [
   awaitility                   : '4.0.2',
-  bcpkixJdk15on                : '1.73',
+  bcpkixJdk15on                : '1.70',
   ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.7',
@@ -368,7 +368,7 @@ dependencies {
 
   implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
-  implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk15on) {
+  implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bcpkixJdk15on) {
     force = true
   }
 
