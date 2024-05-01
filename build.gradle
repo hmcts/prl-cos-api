@@ -148,7 +148,6 @@ allprojects {
             entry 'netty-handler'
             entry 'netty-resolver'
             entry 'netty-transport'
-            entry 'netty-transport-native-epoll'
         }
 
       // CVE-2019-10086
@@ -380,7 +379,7 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
     force = true
   }
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.84.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.108.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
