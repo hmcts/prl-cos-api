@@ -333,8 +333,8 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1906.preview.platform.hmcts.net/}
+    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2168.preview.platform.hmcts.net/}
 
 
 auth:

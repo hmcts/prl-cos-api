@@ -134,11 +134,12 @@ public class ServiceOfApplicationControllerFunctionalTest {
     public void givenRequestWithCaseData_Response_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails.getId()));
         mockMvc.perform(post("/service-of-application/submitted")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();

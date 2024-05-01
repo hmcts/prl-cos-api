@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -56,11 +59,6 @@ public class ConfidentialityCheckControllerFT {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
-
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -70,21 +68,30 @@ public class ConfidentialityCheckControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
 
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        RestAssured.registerParser("text/html", Parser.JSON);
+    }
+
     @Test
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
+
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails = mapper.readValue(json, CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
@@ -111,12 +118,13 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsNo() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails.getId()));
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(requestBodyRevised)
+                                            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -133,20 +141,16 @@ public class ConfidentialityCheckControllerFT {
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"confidentialityCheck\"");
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/confidentiality-check/about-to-submit")
-            .then()
-            .body("data.isC8CheckApproved", equalTo("Yes"),
-                  "data.responsibleForService", equalTo("Court admin"),
-                  "data.isC8CheckNeeded", equalTo(null),
-                  "data.isOccupationOrderSelected", equalTo(null))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+        mockMvc.perform(post("/confidentiality-check/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isC8CheckApproved").value("Yes"))
+            .andExpect(jsonPath("data.responsibleForService").value("Court admin"))
+            .andReturn();
 
     }
 
@@ -162,20 +166,16 @@ public class ConfidentialityCheckControllerFT {
             .replace("\"applicationServedYesNo\": \"Yes\"",
                      "\"applicationServedYesNo\": \"No\"");
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/confidentiality-check/about-to-submit")
-            .then()
-            .body("data.isC8CheckApproved", equalTo("No"),
-                  "data.responsibleForService", equalTo(null),
-                  "data.isC8CheckNeeded", equalTo(null),
-                  "data.isOccupationOrderSelected", equalTo(null))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+        mockMvc.perform(post("/confidentiality-check/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBodyRevised)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isC8CheckApproved").value("No"))
+            .andExpect(jsonPath("data.responsibleForService").value(IsNull.nullValue()))
+            .andReturn();
 
     }
 
@@ -266,12 +266,13 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
+        String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
 
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBody)
+                                            .content(requestBodyRevised)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();

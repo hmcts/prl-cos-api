@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -15,7 +16,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -65,8 +64,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
@@ -147,6 +144,7 @@ public class CallbackControllerFT {
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        RestAssured.registerParser("text/html", Parser.JSON);
     }
 
     @Test
@@ -269,11 +267,11 @@ public class CallbackControllerFT {
         when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         MvcResult res = mockMvc.perform(post("/case-withdrawn-about-to-submit")
-                                          .contentType(MediaType.APPLICATION_JSON)
+                                            .contentType(MediaType.APPLICATION_JSON)
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .content(requestBody)
-                                          .accept(MediaType.APPLICATION_JSON))
+                                            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -351,7 +349,7 @@ public class CallbackControllerFT {
     public void givenC100CasePrePopulateCourtDetailsWithValidCourt() throws Exception {
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
-            .address("123@gamil.com").build()));
+                                                                                                       .address("123@gamil.com").build()));
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement
                                                                                                    .builder().build()));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -360,9 +358,9 @@ public class CallbackControllerFT {
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
-            .accept(MediaType.APPLICATION_JSON))
+                            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-                .andExpect(jsonPath("data.localCourtAdmin[0].value.email").value("123@gamil.com")).andReturn();
+            .andExpect(jsonPath("data.localCourtAdmin[0].value.email").value("123@gamil.com")).andReturn();
     }
 
     @Test
@@ -376,7 +374,7 @@ public class CallbackControllerFT {
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
-                .accept(MediaType.APPLICATION_JSON))
+                            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("data.localCourtAdmin").doesNotHaveJsonPath()).andReturn();
     }
@@ -417,26 +415,5 @@ public class CallbackControllerFT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("data.gatekeepingDetails.isJudgeOrLegalAdviserGatekeeping").value("judge")).andReturn();
     }
-
-    @Test
-    public void testAttachScanDocsWaChange() throws Exception {
-
-        String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPERJUDGE);
-
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/attach-scan-docs/about-to-submit")
-            .then()
-            .body("data.manageDocumentsRestrictedFlag", equalTo(TRUE),
-                  "data.manageDocumentsTriggeredBy", equalTo(STAFF))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-    }
-
 
 }

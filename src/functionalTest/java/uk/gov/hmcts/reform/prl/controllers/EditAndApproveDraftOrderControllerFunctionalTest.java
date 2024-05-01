@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -20,8 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -31,7 +33,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -100,11 +101,10 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
 
-    private static CaseDetails caseDetails;
-
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private static CaseDetails caseDetails1;
 
     @Before
     public void setUp() {
@@ -115,21 +115,26 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails1 = mapper.readValue(json, CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails1);
+        Assert.assertNotNull(caseDetails1.getId());
     }
+
+
 
     @Test
     public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
@@ -140,7 +145,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Mockito
             .when(draftAnOrderService
                       .getDraftOrderDynamicList(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(drafOrderMap);
+            .thenReturn(drafOrderMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/populate-draft-order-dropdown")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +166,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         caseDataMap.put("orderName", "C21");
         caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
         Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(caseDataMap);
+            .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -237,12 +242,12 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails1.getId()));
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content()
@@ -258,22 +263,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("Yes"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("No"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("dateReservedWithListAssit"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
 
     /**
@@ -283,21 +285,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_many_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("Yes"),
-                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("Yes"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("Yes"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("multipleOptionSelected"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
 
     }
 
@@ -308,22 +308,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_with_no_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo(null),
-                  "data.isMultipleHearingSelected", equalTo(null),
-                  "data.hearingOptionSelected", equalTo(null),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.hearingOptionSelected").value(IsNull.nullValue()))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
 
     /**
@@ -333,22 +330,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_reject_soli_order_with_one_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"), // revamp
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isOrderApproved", equalTo("No"),
-                  "data.whoApprovedTheOrder", equalTo(null))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("No"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("No"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("dateReservedWithListAssit"))
+            .andExpect(jsonPath("data.isOrderApproved").value("No"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value(IsNull.nullValue()))
+            .andReturn();
     }
 
     //Court admin
@@ -360,22 +354,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateConfirmedByListingTeam"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("Yes"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("No"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("dateConfirmedByListingTeam"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
 
     /**
@@ -385,24 +376,20 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_with_many_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("Yes"),
-                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("Yes"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("Yes"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("multipleOptionSelected"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
-
 
     /**
      * Judge editApprove - approves the order with one hearing with
@@ -413,22 +400,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_with2ndOption_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_WITH_2ND_OPTION_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateConfirmedInHearingsTab"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("No"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("No"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("dateConfirmedInHearingsTab"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
 
     /**
@@ -438,22 +422,18 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_Sdo_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
 
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.isHearingTaskNeeded").value("Yes"))
+            .andExpect(jsonPath("data.isMultipleHearingSelected").value("No"))
+            .andExpect(jsonPath("data.hearingOptionSelected").value("dateReservedWithListAssit"))
+            .andExpect(jsonPath("data.isOrderApproved").value("Yes"))
+            .andExpect(jsonPath("data.whoApprovedTheOrder").value("SYSTEM_UPDATE"))
+            .andReturn();
     }
-
 }

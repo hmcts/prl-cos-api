@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -73,8 +75,6 @@ public class ServiceOfApplicationControllerFT {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -91,9 +91,12 @@ public class ServiceOfApplicationControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
+    private MockMvc mockMvc;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        RestAssured.registerParser("text/html", Parser.JSON);
     }
 
     @MockBean
@@ -106,20 +109,25 @@ public class ServiceOfApplicationControllerFT {
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
+        MvcResult res = mockMvc.perform(post("/testing-support/create-ccd-case-data")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+        String json = res.getResponse().getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        caseDetails = mapper.readValue(json, CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
+
+
+
     }
 
     @Test
@@ -158,11 +166,12 @@ public class ServiceOfApplicationControllerFT {
     public void givenRequestWithCaseData_Response_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody.replace("1711105989241323", String.valueOf(caseDetails.getId()));
         mockMvc.perform(post("/service-of-application/submitted")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -259,6 +268,7 @@ public class ServiceOfApplicationControllerFT {
     public void givenRequestWithFl401CaseData_Perosnal_Service_ca_cb_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_CA_CB);
+        String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
 
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
@@ -271,7 +281,7 @@ public class ServiceOfApplicationControllerFT {
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
+                            .content(requestBodyRevised)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -284,6 +294,7 @@ public class ServiceOfApplicationControllerFT {
     public void givenRequestWithFl401CaseData_Perosnal_Service_lr_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_LR);
+        String requestBodyRevised = requestBody.replace("1711117454766387", String.valueOf(caseDetails.getId()));
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
             .build();
@@ -295,7 +306,7 @@ public class ServiceOfApplicationControllerFT {
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBody)
+                                            .content(requestBodyRevised)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();

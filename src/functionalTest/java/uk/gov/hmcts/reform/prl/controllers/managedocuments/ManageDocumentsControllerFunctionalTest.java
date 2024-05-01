@@ -2,27 +2,37 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 
 import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
@@ -59,6 +69,8 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ManageDocumentsControllerFunctionalTest {
 
+    private MockMvc mockMvc;
+
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
@@ -92,8 +104,20 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @Before
+    public void init() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @BeforeAll
+    static void setup() {
+        RestAssured.registerParser("text/html", Parser.JSON);
+    }
+
     @Test
-    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -185,30 +209,28 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenManageDocuments_GiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/mid-event")
-            .then()
-            .body("errors",
-                  contains("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
-            .assertThat().statusCode(200);
+
+        mockMvc.perform(post("/manage-documents/mid-event")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").value("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
+            .andReturn();
     }
 
     @Test
     public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/mid-event")
-            .then()
-            .body("errors", equalTo(null))
-            .assertThat().statusCode(200);
+        mockMvc.perform(post("/manage-documents/mid-event")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").value(IsNull.nullValue()))
+            .andReturn();
     }
 
     // ignoring this as managedocument event is working in demo probabaly we need to update the json here
@@ -242,31 +264,29 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/mid-event")
-            .then()
-            .body("errors[0]", equalTo(DETAILS_ERROR_MESSAGE))
-            .assertThat().statusCode(200);
 
+        mockMvc.perform(post("/manage-documents/mid-event")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors[0]").value(DETAILS_ERROR_MESSAGE))
+            .andReturn();
     }
 
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
-            .then()
-            .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
-            .assertThat().statusCode(200);
+        mockMvc.perform(post("/manage-documents/copy-manage-docs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.legalProfQuarantineDocsList[0].value.document.document_filename").value("Test doc1.pdf"))
+            .andReturn();
 
     }
 
@@ -274,37 +294,30 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
-            .then()
-            .body("data.legalProfUploadDocListDocTab[0].value.categoryId",
-                  equalTo(APPLICANT_APPLICATION),
-                  "data.legalProfUploadDocListDocTab[0].value.categoryName",
-                  equalTo(APPLICANT_APPLICATION_NAME),
-                  "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename",
-                  equalTo("Test doc2.pdf")
-            )
-            .assertThat().statusCode(200);
+        mockMvc.perform(post("/manage-documents/copy-manage-docs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.legalProfUploadDocListDocTab[0].value.categoryId").value(APPLICANT_APPLICATION))
+            .andExpect(jsonPath("data.legalProfUploadDocListDocTab[0].value.categoryName").value(APPLICANT_APPLICATION_NAME))
+            .andExpect(jsonPath("data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename").value("Test doc2.pdf"))
+            .andReturn();
 
     }
 
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
-
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
-            .then()
-            .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
-            .assertThat().statusCode(200);
+        mockMvc.perform(post("/manage-documents/copy-manage-docs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename").value("Test doc1.pdf"))
+            .andReturn();
     }
 
     @Test
@@ -322,9 +335,19 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
             .assertThat().statusCode(200);
 
+        mockMvc.perform(post("/manage-documents/copy-manage-docs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.cafcassUploadDocListDocTab[0].value.categoryId").value(APPLICANT_APPLICATION))
+            .andExpect(jsonPath("data.cafcassUploadDocListDocTab[0].value.categoryName").value(APPLICANT_APPLICATION_NAME))
+            .andExpect(jsonPath("data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename").value("Test doc2.pdf"))
+            .andReturn();
+
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
@@ -353,7 +376,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .replace("\"isRestricted\": \"Yes\"",
                      "\"isRestricted\": \"No\"");
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBodyRevised)
             .when()
@@ -366,7 +389,5 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
     }
-
 }
