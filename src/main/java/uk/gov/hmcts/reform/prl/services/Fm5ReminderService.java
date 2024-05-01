@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
@@ -30,6 +31,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
@@ -59,6 +62,8 @@ public class Fm5ReminderService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final HearingApiClient hearingApiClient;
+    private final Fm5NotificationService fm5NotificationService;
+    private final AllTabServiceImpl allTabService;
 
     private final ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
 
@@ -67,20 +72,47 @@ public class Fm5ReminderService {
     public void sendFm5ReminderNotifications() {
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state
-        List<CaseDetails> cases = retrieveCasesInHearingState();
+        List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
 
-        if (isNotEmpty(cases)) {
+        if (isNotEmpty(caseDetailsList)) {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
-            for (CaseDetails details : cases) {
-                CaseData caseData = CaseUtils.getCaseData(details, objectMapper);
+            for (CaseDetails caseDetails : caseDetailsList) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Retrieved case from database, caseId {}", caseData.getId());
 
                 //Evaluate system rules
                 FmPendingParty fmPendingParty = findFm5SubmitPendingParties(caseData);
+
+                //Send fm5 reminders if needed based on system rules
+                if (!FmPendingParty.NONE.equals(fmPendingParty)) {
+                    List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
+                        caseData,
+                        fmPendingParty
+                    );
+
+                    //Persist fm5 reminder notifications details
+                    if (isNotEmpty(fm5ReminderNotifications)) {
+                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                            = allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
+                        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+
+                        caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
+                        caseDataUpdated.put("fm5RemindersSent", Yes);
+
+                        allTabService.submitAllTabsUpdate(
+                            startAllTabsUpdateDataContent.authorisation(),
+                            String.valueOf(caseData.getId()),
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            startAllTabsUpdateDataContent.eventRequestData(),
+                            caseDataUpdated);
+                    }
+                }
             }
         }
-        log.info("*** Time taken to send fm5 reminders - {}s ***",
-                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
+        log.info(
+            "*** Time taken to send fm5 reminders - {}s ***",
+            TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
+        );
     }
 
     private List<CaseDetails> retrieveCasesInHearingState() {
@@ -111,6 +143,7 @@ public class Fm5ReminderService {
         }
 
         if (null != response) {
+            log.info("Total no. of cases retrieved {}", response.getTotal());
             return response.getCases();
         }
         return Collections.emptyList();
@@ -186,6 +219,7 @@ public class Fm5ReminderService {
             restrictedDocumentsElemList = caseData.getReviewDocuments().getRestrictedDocuments();
         }
 
+        //if AOH/C1A document is available, none to remind
         if (isAohAvailable(
             caseData,
             legalProfQuarantineDocsElemList,
@@ -195,6 +229,7 @@ public class Fm5ReminderService {
             return FmPendingParty.NONE;
         }
 
+        //check & evaluate whom to send fm5 reminders
         return fetchFm5DocsSubmissionPendingParties(caseData,
                                                     legalProfQuarantineDocsElemList,
                                                     courtStaffQuarantineDocsElemList,
@@ -213,21 +248,20 @@ public class Fm5ReminderService {
         }
 
         if (isNotEmpty(legalProfQuarantineDocsElemList)
-            && isDocumentExistsByCategory(legalProfQuarantineDocsElemList)) {
+            && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
             return true;
         }
 
         if (isNotEmpty(legalProfQuarantineUploadedDocsElemList)
-            && isDocumentExistsByCategory(legalProfQuarantineUploadedDocsElemList)) {
+            && checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList)) {
             return true;
         }
 
         return isNotEmpty(restrictedDocumentsElemList)
-            && isDocumentExistsByCategory(restrictedDocumentsElemList);
+            && checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
     }
 
-    private boolean isDocumentExistsByCategory(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
-
+    private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
         return quarantineDocsElemList.stream()
             .map(Element::getValue)
             .anyMatch(doc -> RESPONDENT_C1A_APPLICATION.equals(doc.getCategoryId())

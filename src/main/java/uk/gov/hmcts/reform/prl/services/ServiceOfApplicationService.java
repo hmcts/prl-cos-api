@@ -805,7 +805,6 @@ public class ServiceOfApplicationService {
                             dynamicData,
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
                         )));
-
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

@@ -78,8 +78,7 @@ public class Fm5NotificationService {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    public List<Element<NotificationDetails>> sendFm5ReminderNotifications(String authorization,
-                                                                           CaseData caseData,
+    public List<Element<NotificationDetails>> sendFm5ReminderNotifications(CaseData caseData,
                                                                            FmPendingParty fmPendingParty) {
         List<Element<NotificationDetails>> fm5ReminderNotifications = new ArrayList<>();
         if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
@@ -87,7 +86,6 @@ public class Fm5NotificationService {
             caseData.getApplicants()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
-                                 authorization,
                                  caseData,
                                  party,
                                  true
@@ -96,7 +94,6 @@ public class Fm5NotificationService {
             caseData.getRespondents()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
-                                 authorization,
                                  caseData,
                                  party,
                                  false
@@ -106,7 +103,6 @@ public class Fm5NotificationService {
             caseData.getApplicants()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
-                                 authorization,
                                  caseData,
                                  party,
                                  true
@@ -116,7 +112,6 @@ public class Fm5NotificationService {
             caseData.getRespondents()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
-                                 authorization,
                                  caseData,
                                  party,
                                  false
@@ -126,23 +121,23 @@ public class Fm5NotificationService {
         return fm5ReminderNotifications;
     }
 
-    private Element<NotificationDetails> sendFm5ReminderNotification(String authorization,
-                                             CaseData caseData,
-                                             Element<PartyDetails> party,
-                                             boolean isApplicant) {
+    private Element<NotificationDetails> sendFm5ReminderNotification(CaseData caseData,
+                                                                     Element<PartyDetails> party,
+                                                                     boolean isApplicant) {
+        String authorization = systemUserService.getSysUserToken();
         //if represented then send reminder to solicitor
         if (isNotEmpty(party.getValue().getSolicitorEmail())) {
-            return sendFm5ReminderToSolicitor(caseData, party, authorization, isApplicant);
+            return sendFm5ReminderToSolicitor(authorization, caseData, party, isApplicant);
         } else {
             //Not represented, remind citizen LiP
             return sendFm5ReminderToCitizen(authorization, caseData, party, isApplicant);
         }
     }
 
-    private Element<NotificationDetails> sendFm5ReminderToSolicitor(CaseData caseData,
-                                            Element<PartyDetails> party,
-                                            String authorization,
-                                            boolean isApplicantSolicitor) {
+    private Element<NotificationDetails> sendFm5ReminderToSolicitor(String authorization,
+                                                                    CaseData caseData,
+                                                                    Element<PartyDetails> party,
+                                                                    boolean isApplicantSolicitor) {
         log.info("Send FM5 reminder to solicitor for party {}", party.getId());
         Map<String, Object> dynamicData = getEmailDynamicData(
             caseData,
