@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -129,6 +130,8 @@ public class ManageDocumentsService {
     String emailAddress = null;
     String applicantName = null;
     String respondentName = null;
+    
+    boolean contactPrefEmail = false;
 
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
@@ -302,45 +305,12 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
+
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
                 Document document = finalConfidentialDocument.getRespondentApplicationDocument();
-                if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    Element<PartyDetails> applicant = caseData.getApplicants().get(0);
-                    if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
-                        emailAddress = applicant.getValue().getEmail();
-                        applicantName = String.format(
-                            "%s %s",
-                            applicant.getValue().getFirstName(),
-                            applicant.getValue().getLastName()
-                        );
-                    }
-                    Element<PartyDetails> respondent = caseData.getRespondents().get(0);
-                    respondentName = String.format(
-                        "%s %s",
-                        respondent.getValue().getFirstName(),
-                        respondent.getValue().getLastName()
-                    );
-                }else{
-                    PartyDetails applicant = caseData.getApplicantsFL401();
-                    if (!StringUtils.isEmpty(applicant.getEmail())) {
-                        emailAddress = applicant.getEmail();
-                        applicantName = String.format(
-                            "%s %s",
-                            applicant.getFirstName(),
-                            applicant.getLastName()
-                        );
-
-                        PartyDetails respondent = caseData.getRespondentsFL401();
-                        respondentName = String.format(
-                            "%s %s",
-                            respondent.getFirstName(),
-                            respondent.getLastName()
-                        );
-                    }
-
-                }
-                if (document.getDocumentFileName().equals("C7_Document.pdf")
-                    || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
+                getEmailData(caseData);
+                if (contactPrefEmail && (document.getDocumentFileName().equals("C7_Document.pdf")
+                    || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("respondentName", respondentName);
                     dynamicData.put("applicantName", applicantName);
@@ -351,6 +321,35 @@ public class ManageDocumentsService {
                 }
             }
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
+        }
+    }
+
+    private void getEmailData(CaseData caseData) {
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            Element<PartyDetails> applicant = caseData.getApplicants().get(0);
+            if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                emailAddress = applicant.getValue().getEmail();
+                applicantName = applicant.getValue().getLabelForDynamicList();
+                if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
+                    contactPrefEmail = true;
+                }
+            }
+            Element<PartyDetails> respondent = caseData.getRespondents().get(0);
+            respondentName =  respondent.getValue().getLabelForDynamicList();
+        } else {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            if (!StringUtils.isEmpty(applicant.getEmail())) {
+                emailAddress = applicant.getEmail();
+                applicantName = applicant.getLabelForDynamicList();
+                if (ContactPreferences.email.equals(applicant.getContactPreferences())) {
+                    contactPrefEmail = true;
+                }
+            }
+
+                PartyDetails respondent = caseData.getRespondentsFL401();
+                respondentName = respondent.getLabelForDynamicList();
+            
+
         }
     }
 
