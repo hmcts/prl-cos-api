@@ -314,7 +314,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildEmailTemplateVarsApplicantLip(Map<String, Object> dynamicData) {
+    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData) {
 
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
         boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
@@ -322,8 +322,8 @@ public class ManageOrderEmailService {
 
         return ManageOrderEmailLip
             .builder()
-            .emailSubject(buildEmailTitleForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
-            .emailText(buildEmailTextForPersonalServiceApplicantLip(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailSubject(buildEmailTitleForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(String.valueOf(dynamicData.get("name")))
@@ -332,7 +332,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private String buildEmailTitleForPersonalServiceApplicantLip(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+    private String buildEmailTitleForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
 
         if (newAndFinalOrderFLag) {
             return "New and final court orders issued";
@@ -351,7 +351,7 @@ public class ManageOrderEmailService {
         }
     }
 
-    private String buildEmailTextForPersonalServiceApplicantLip(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+    private String buildEmailTextForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
 
         if (newAndFinalOrderFLag) {
             return """
@@ -537,17 +537,16 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            log.info("*** Party has dashboard access {}", hasDashboardAccess(party));
             if (hasDashboardAccess(party)) {
-                log.info("*** Send email to party using notify.gov");
+                //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
                     EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
-                    buildEmailTemplateVarsApplicantLip(dynamicDataForEmail),
+                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
                     LanguagePreference.english
                 );
             } else {
-                log.info("*** Send orders to party via email using send grid {}", party.getId());
+                //Send notification to party with access to dashboard using sendgrid
                 sendEmailViaSendGrid(
                     authorisation,
                     orderDocuments,
