@@ -16,8 +16,10 @@
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2023-41080</cve>
     <cve>CVE-2023-34055</cve>
-    <cve>CVE-2023-42795</cve>
+    <!--tomcat-->
+    <!--<cve>CVE-2023-42795</cve>-->
     <cve>CVE-2023-46589</cve>
-    <cve>CVE-2023-45648</cve>
+    <!--tomcat-->
+    <!--<cve>CVE-2023-45648</cve>-->
   </suppress>
 </suppressions>
