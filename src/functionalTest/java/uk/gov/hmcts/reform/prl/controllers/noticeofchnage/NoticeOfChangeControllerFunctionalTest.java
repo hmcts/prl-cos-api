@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -84,7 +83,6 @@ public class NoticeOfChangeControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenAboutToSubmitNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/aboutToSubmitNoCRequest")
