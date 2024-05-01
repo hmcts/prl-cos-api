@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -516,7 +517,8 @@ public class CaseService {
     }
 
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
-        return null != serviceOfApplication.getUnServedRespondentPack()
+        return ObjectUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack())
+            && CollectionUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack().getPackDocument())
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
