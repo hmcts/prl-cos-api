@@ -224,12 +224,12 @@ public class ManageDocumentsService {
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                 || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
             ) {
-                moveDocumentsToRespectiveCategoriesNewwithAuth(
+                moveDocumentsToRespectiveCategoriesNew(
                     quarantineLegalDoc,
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole,authorization
+                    userRole
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -296,18 +296,13 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            log.info(finalConfidentialDocument + "vfinalConfidentialDocument ?*********");
-            if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
-                uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
-                log.info(test.getDocumentFileName());
-            }
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
 
-    public void moveDocumentsToRespectiveCategoriesNewwithAuth(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                       CaseData caseData,
-                                                     Map<String, Object> caseDataUpdated, String userRole, String authorization) {
+    public void moveDocumentsToRespectiveCategoriesNewAuth(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
+                                                       CaseData caseData, Map<String, Object>
+                                                               caseDataUpdated, String userRole, String authorisation) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrictedKey != null) {
@@ -361,26 +356,31 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-            log.info(finalConfidentialDocument.getDocument().getDocumentFileName() + "final******");
-            log.info(existingCaseDocuments + "**********existingCaseDocuments");
-            log.info(finalConfidentialDocument + "**********finalConfidentialDocument");
-            if (finalConfidentialDocument.fileName.equals("C7_Document.pdf")) {
-                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                dynamicData.put("name", "tom bennet");
-                dynamicData.put("dashBoardLink", "citizenUrl");
-                sendEmailViaSendGrid(authorization,  dynamicData, "anshika.nigam1@hmcts.net",
-                                     SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
-                );
+            log.info(finalConfidentialDocument + "vfinalConfidentialDocument ?*********");
+            if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
+                uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
+                log.info(test.getDocumentFileName());
+                if (test.getDocumentFileName().equals("C7_Document.pdf")) {
+                    Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+
+                    dynamicData.put("name", "tom bennet");
+                    dynamicData.put("dashBoardLink", "citizenUrl");
+                    sendEmailViaSendGrid(authorisation,  dynamicData, "anshika.nigam1@hmcts.net",
+                                         SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
+                    );
+                }
             }
+            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
+
 
     private void sendEmailViaSendGrid(String authorisation,
                                       Map<String, Object> dynamicDataForEmail,
                                       String emailAddress,
                                       SendgridEmailTemplateNames sendgridEmailTemplateName) {
         try {
+            log.info("inside sendEmailViaSendGrid");
             manageDocumentEmailService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
                 authorisation,
