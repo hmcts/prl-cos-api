@@ -70,6 +70,7 @@ import java.util.UUID;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -303,13 +304,41 @@ public class ManageDocumentsService {
             existingCaseDocuments.add(element(finalConfidentialDocument));
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
                 Document document = finalConfidentialDocument.getRespondentApplicationDocument();
-                Element<PartyDetails> applicant = caseData.getApplicants().get(0);
-                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
-                    emailAddress = applicant.getValue().getEmail();
-                    applicantName = String.format("%s %s",  applicant.getValue().getFirstName(),  applicant.getValue().getLastName());
+                if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    Element<PartyDetails> applicant = caseData.getApplicants().get(0);
+                    if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                        emailAddress = applicant.getValue().getEmail();
+                        applicantName = String.format(
+                            "%s %s",
+                            applicant.getValue().getFirstName(),
+                            applicant.getValue().getLastName()
+                        );
+                    }
+                    Element<PartyDetails> respondent = caseData.getRespondents().get(0);
+                    respondentName = String.format(
+                        "%s %s",
+                        respondent.getValue().getFirstName(),
+                        respondent.getValue().getLastName()
+                    );
+                }else{
+                    PartyDetails applicant = caseData.getApplicantsFL401();
+                    if (!StringUtils.isEmpty(applicant.getEmail())) {
+                        emailAddress = applicant.getEmail();
+                        applicantName = String.format(
+                            "%s %s",
+                            applicant.getFirstName(),
+                            applicant.getLastName()
+                        );
+
+                        PartyDetails respondent = caseData.getRespondentsFL401();
+                        respondentName = String.format(
+                            "%s %s",
+                            respondent.getFirstName(),
+                            respondent.getLastName()
+                        );
+                    }
+
                 }
-                Element<PartyDetails> respondent = caseData.getRespondents().get(0);
-                respondentName = String.format("%s %s",  respondent.getValue().getFirstName(),  respondent.getValue().getLastName());
                 if (document.getDocumentFileName().equals("C7_Document.pdf")
                     || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
