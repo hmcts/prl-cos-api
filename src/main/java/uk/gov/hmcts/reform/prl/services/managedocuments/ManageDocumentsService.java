@@ -123,6 +123,9 @@ public class ManageDocumentsService {
         = "You must give a reason why the document should be restricted";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
+
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -361,12 +364,11 @@ public class ManageDocumentsService {
                 uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
                 log.info(test.getDocumentFileName());
                 log.info("********* log.info(caseData);******" + caseData);
-                if (test.getDocumentFileName().equals("C7_Document.pdf")) {
+                if (test.getDocumentFileName().equals("C7_Document.pdf") || test.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-
-                    dynamicData.put("respondentName", "tom bennet");
-                    dynamicData.put("applicantName", "tom bennet");
-                    dynamicData.put("dashBoardLink", "citizenUrl");
+                    dynamicData.put("respondentName", "James Dmith");
+                    dynamicData.put("applicantName", "Tom Bennett");
+                    dynamicData.put("dashBoardLink", citizenDashboardUrl);
                     sendEmailViaSendGrid(authorisation,  dynamicData, "anshika.nigam1@hmcts.net",
                                          SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
                     );
