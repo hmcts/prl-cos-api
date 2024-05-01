@@ -15,7 +15,7 @@
     <!--<cve>CVE-2022-41915</cve>-->
 
     <!--bouncycastle-->
-    <cve>CVE-2023-33202</cve>
+    <!--<cve>CVE-2023-33202</cve>-->
 
     <!--logback-->
     <cve>CVE-2023-6378</cve>
