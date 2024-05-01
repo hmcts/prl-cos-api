@@ -297,6 +297,10 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
             log.info(finalConfidentialDocument + "vfinalConfidentialDocument ?*********");
+            if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
+                uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
+                log.info(test.getDocumentFileName());
+            }
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
