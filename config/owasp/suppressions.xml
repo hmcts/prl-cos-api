@@ -10,7 +10,8 @@
     <cve>CVE-2023-34462</cve>
     <cve>CVE-2023-20862</cve>
     <cve>CVE-2023-44487</cve>
-    <cve>CVE-2022-41915</cve>
+    <!--netty-->
+    <!--<cve>CVE-2022-41915</cve>-->
     <cve>CVE-2023-33202</cve>
     <cve>CVE-2023-6378</cve>
     <cve>CVE-2023-35116</cve>
