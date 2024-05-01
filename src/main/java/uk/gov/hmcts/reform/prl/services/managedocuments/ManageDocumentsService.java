@@ -365,11 +365,8 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
-            log.info(finalConfidentialDocument + "vfinalConfidentialDocument ?*********");
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
                 uk.gov.hmcts.reform.prl.models.documents.Document test = finalConfidentialDocument.getRespondentApplicationDocument();
-                log.info(test.getDocumentFileName());
-                log.info("********* log.info(caseData);******" + caseData);
                 Element<PartyDetails> applicant = caseData.getApplicants().get(0);
                 if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
                     emailAddress = applicant.getValue().getEmail();
@@ -377,9 +374,6 @@ public class ManageDocumentsService {
                 }
                 Element<PartyDetails> respondent = caseData.getRespondents().get(0);
                 respondentName = String.format("%s %s",  respondent.getValue().getFirstName(),  respondent.getValue().getLastName());
-                log.info(emailAddress + "emailAddress********");
-                log.info(applicantName + "applicantName********");
-                log.info(respondentName + "respondentName********");
                 if (test.getDocumentFileName().equals("C7_Document.pdf") || test.getDocumentFileName().equals("Final_C7_response_Welsh.pdf")) {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("respondentName", respondentName);
