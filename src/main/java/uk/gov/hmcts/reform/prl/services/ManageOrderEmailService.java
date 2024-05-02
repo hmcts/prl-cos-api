@@ -76,6 +76,7 @@ public class ManageOrderEmailService {
     public static final String ORDERS = "#Orders";
     public static final String NAME = "name";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
+    public static final String MULTIPLE_ORDERS = "multipleOrders";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -514,7 +515,6 @@ public class ManageOrderEmailService {
                         log.info("Final order is selected to serve {}",order.getId());
                         finalOrdersExists.set(true);
                     }
-
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -531,7 +531,7 @@ public class ManageOrderEmailService {
     }
 
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
-        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
+        dynamicData.put(MULTIPLE_ORDERS, CollectionUtils.size(selectedOrderIds) > 1);
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
@@ -700,19 +700,45 @@ public class ManageOrderEmailService {
                 } else {
                     log.info("*** Send email/post notifications to parties ***");
                     if (ContactPreferences.email.equals(partyData.getContactPreferences())
-                        && isPartyProvidedWithEmail(partyData)) {
-                        if (CaseUtils.isAccessEnabled(partyDataOptional.get())) {
-                            log.info("*** Send orders to party via email using notify {}", partyDataOptional.get().getId());
-                            dynamicDataForEmail.put("name", partyData.getLabelForDynamicList());
-                            dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
-                            EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
-                                .caseReference(String.valueOf(caseData.getId()))
-                                .caseName(caseData.getApplicantCaseName())
-                                .fullName(partyData.getLabelForDynamicList())
-                                .orderLink(manageCaseUrl + "/" + caseData.getId())
-                                .build();
+                        && isPartyProvidedWithEmail(partyData) && CaseUtils.isAccessEnabled(partyDataOptional.get())) {
+                        log.info("*** Send orders to party via email using notify {}", partyDataOptional.get().getId());
+                        dynamicDataForEmail.put("name", partyData.getLabelForDynamicList());
+                        dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
+                        EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
+                            .caseReference(String.valueOf(caseData.getId()))
+                            .caseName(caseData.getApplicantCaseName())
+                            .fullName(partyData.getLabelForDynamicList())
+                            .dashboardLink(citizenDashboardUrl)
+                            .build();
+                        EmailTemplateNames emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDER;
+                        boolean newOrder = (boolean) dynamicDataForEmail.get(NEW);
+                        boolean finalOrder = (boolean) dynamicDataForEmail.get(FINAL);
+                        boolean newAndFinalOrder = (boolean) dynamicDataForEmail.get(NEW_AND_FINAL);
+                        boolean multipleOrders = (boolean) dynamicDataForEmail.get(MULTIPLE_ORDERS);
+                        boolean isWelsh = (boolean) dynamicDataForEmail.get(ENGLISH_EMAIL);
+                        if (multipleOrders) {
+                            if (newAndFinalOrder) {
+                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS;
+                            } else if (newOrder) {
+                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDERS;
+                            } else if (finalOrder) {
+                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_FINAL_ORDERS;
+                            }
+                        } else {
+                            if (newOrder) {
+                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDER;
+                            } else if (finalOrder) {
+                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_FINAL_ORDER;
+                            }
+                        }
+                        if (isWelsh) {
                             emailService.send(partyData.getEmail(),
-                                              EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
+                                              emailTemplateName,
+                                              emailTemplateVars,
+                                              LanguagePreference.welsh);
+                        } else {
+                            emailService.send(partyData.getEmail(),
+                                              emailTemplateName,
                                               emailTemplateVars,
                                               LanguagePreference.english);
                         }
