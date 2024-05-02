@@ -4,7 +4,7 @@
     <!--quartz-->
     <cve>CVE-2023-39017</cve>
     <!--spring-->
-    <cve>CVE-2023-34053</cve>
+    <!--<cve>CVE-2023-34053</cve>-->
     <!--jose4j-->
     <cve>CVE-2023-31582</cve>
     <!--unknown-->
@@ -16,8 +16,5 @@
 
     <!--spring out of memory error-->
     <cve>CVE-2023-34055</cve>
-
-    <!--tomcat-->
-    <!--<cve>CVE-2023-46589</cve>-->
   </suppress>
 </suppressions>
