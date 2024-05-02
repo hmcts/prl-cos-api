@@ -104,6 +104,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -2102,6 +2103,100 @@ public class DraftAnOrderServiceTest {
         draftAnOrderService.populateStandardDirectionOrderDefaultFields("test-token", caseData, caseDataUpdated);
 
         assertEquals(RIGHT_TO_ASK_COURT, caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+
+
+    @Test
+    public void testPopulateStandardDirectionOrderFields2() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru,
+                                           partyToProvideDetailsOnly, partyToProvideDetailsCmyru,
+                                           section7Report, safeguardingCafcassOnly, safeguardingCafcassCymru
+            ))
+            .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt, afterSecondGateKeeping, addNewPreamble))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoCourtTempList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoOtherTempList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoPreamblesTempList(List.of(SdoPreamblesEnum.rightToAskCourt, afterSecondGateKeeping, addNewPreamble))
+            .sdoLocalAuthorityTempList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoCafcassOrCymruTempList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru,
+                                               partyToProvideDetailsOnly, partyToProvideDetailsCmyru,
+                                               section7Report, safeguardingCafcassOnly, safeguardingCafcassCymru
+            ))
+            .sdoHearingsAndNextStepsTempList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceTempList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .listElementsSetToDefaultValue(Yes)
+            .sdoFhdraHearingDetails(HearingData.builder()
+                                        .additionalHearingDetails("test")
+                                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                        .hearingListedLinkedCases(DynamicList.builder()
+                                                                      .listItems(List.of(DynamicListElement
+                                                                                             .builder()
+                                                                                             .code("123")
+                                                                                             .build()))
+                                                                      .build())
+                                        .build())
+            .sdoInstructionsFilingPartiesDynamicList(DynamicList.builder()
+                                                         .listItems(List.of(DynamicListElement.builder()
+                                                                                .code("asd")
+                                                                                .build()))
+                                                         .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+        when(hearingDataService.populateHearingDynamicLists(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            any(),
+            any()
+        ))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                            .hearingListedLinkedCases(DynamicList.builder()
+                                                          .listItems(List.of(DynamicListElement.builder()
+                                                                                 .code("123")
+                                                                                 .build()))
+                                                          .build())
+                            .build());
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        draftAnOrderService.populateStandardDirectionOrderDefaultFields("test-token", caseData, caseDataUpdated);
+
+        assertNotEquals(RIGHT_TO_ASK_COURT, caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
     @Test
