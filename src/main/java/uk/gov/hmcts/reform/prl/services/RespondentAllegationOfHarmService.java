@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PHYSICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Slf4j
 @Service
@@ -288,7 +289,8 @@ public class RespondentAllegationOfHarmService {
 
     private static List<DynamicMultiselectListElement> getChildrenDynamicList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             caseData.getNewChildDetails().forEach(eachChild ->
                     listItems.add(DynamicMultiselectListElement.builder()
                             .code(eachChild.getId().toString())

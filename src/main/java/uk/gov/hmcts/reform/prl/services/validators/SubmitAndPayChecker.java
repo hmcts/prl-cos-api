@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM_POLICY_UPGRADE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
@@ -104,9 +106,7 @@ public class SubmitAndPayChecker implements EventChecker {
             WELSH_LANGUAGE_REQUIREMENTS,
             eventsChecker.getWelshLanguageRequirementsChecker()
         );
-        if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-            optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
-        }
+        checksForMiam(caseData, optionalEvents);
         boolean optionalFinished;
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(caseData) || e.getValue().hasMandatoryCompleted(caseData);
@@ -124,6 +124,18 @@ public class SubmitAndPayChecker implements EventChecker {
         return true;
     }
 
+    private void checksForMiam(CaseData caseData, EnumMap<Event, EventChecker> optionalEvents) {
+        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            if (YesOrNo.Yes.equals(caseData.getConsentOrder()) && !eventsChecker.getMiamPolicyUpgradeChecker().isStarted(caseData)) {
+                optionalEvents.put(MIAM_POLICY_UPGRADE, eventsChecker.getMiamPolicyUpgradeChecker());
+            }
+        } else {
+            if (YesOrNo.Yes.equals(caseData.getConsentOrder()) && !eventsChecker.getMiamChecker().isStarted(caseData)) {
+                optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
+            }
+        }
+    }
+
     private EnumMap<Event, EventChecker> getMandatoryEvents(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
@@ -131,8 +143,8 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
         mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
-        log.info("TASK_LIST_VERSION" + caseData.getTaskListVersion());
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
             mandatoryEvents.put(
                 CHILDREN_AND_APPLICANTS,
@@ -151,8 +163,13 @@ public class SubmitAndPayChecker implements EventChecker {
             mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
         }
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
-        if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
-            mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
+        if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null
+            || eventsChecker.getMiamPolicyUpgradeChecker().isStarted(caseData)) {
+            if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
+                mandatoryEvents.put(MIAM_POLICY_UPGRADE, eventsChecker.getMiamPolicyUpgradeChecker());
+            } else {
+                mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
+            }
         }
         return mandatoryEvents;
     }
