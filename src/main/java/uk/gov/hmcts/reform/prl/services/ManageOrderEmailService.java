@@ -319,12 +319,21 @@ public class ManageOrderEmailService {
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
         boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
         boolean newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true);
+        boolean languagePreferenceFlag = dynamicData.get(WELSH_EMAIL).equals(true);
 
         return ManageOrderEmailLip
             .builder()
-            .emailSubject(buildEmailTitleForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
-            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailSubject(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
+                newAndFinalOrderFlag, languagePreferenceFlag, false))
+            .emailTitle(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
+                newAndFinalOrderFlag, languagePreferenceFlag, true))
+            .emailTitleWelsh(languagePreferenceFlag ? buildEmailTitleWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag, languagePreferenceFlag))
+            .emailTextWelsh(languagePreferenceFlag ? buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag,
+                multipleOrderFlag, newAndFinalOrderFlag, languagePreferenceFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
+            .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(String.valueOf(dynamicData.get("name")))
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
@@ -332,57 +341,142 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private String buildEmailTitleForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+    private String multipleOrdersWelsh(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
 
-        if (newAndFinalOrderFLag) {
-            return "New and final court orders issued";
-        } else if (multipleOrderFlag) {
-            if (isFinalOrderFlag) {
-                return "Final court orders issued";
+        if (multipleOrderFlag || newAndFinalOrderFlag) {
+            return "gorchmynion";
+        } else {
+            return "gorchymyn";
+        }
+    }
+
+    private String buildEmailSubjectForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                                  boolean newAndFinalOrderFLag, boolean languagePreferenceFlag,
+                                                                  boolean isTitle) {
+
+        if (!languagePreferenceFlag || isTitle) {
+            if (newAndFinalOrderFLag) {
+                return "New and final court orders issued";
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return "Final court orders issued";
+                } else {
+                    return "New court orders issued";
+                }
             } else {
-                return "New court orders issued";
+                if (isFinalOrderFlag) {
+                    return "Final court order issued";
+                } else {
+                    return "New court order issued";
+                }
             }
         } else {
-            if (isFinalOrderFlag) {
-                return "Final court order issued";
+            if (newAndFinalOrderFLag) {
+                return "New and final court orders issued/Cyhoeddi gorchmynion llys newydd a therfynol";
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return "Final court orders issued/Cyhoeddi gorchmynion llys terfynol";
+                } else {
+                    return "New court orders issued/Cyhoeddi gorchmynion llys newydd";
+                }
             } else {
-                return "New court order issued";
+                if (isFinalOrderFlag) {
+                    return "Final court order issued/Cyhoeddi gorchymyn llys terfynol";
+                } else {
+                    return "New court order issued/Cyhoeddi gorchymyn llys newydd";
+                }
             }
         }
     }
 
-    private String buildEmailTextForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag, boolean newAndFinalOrderFLag) {
+    private String buildEmailTitleWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                                     boolean newAndFinalOrderFLag) {
 
         if (newAndFinalOrderFLag) {
-            return """
+            return "Cyhoeddi gorchmynion llys newydd a therfynol";
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return "Cyhoeddi gorchmynion llys terfynol";
+            } else {
+                return "Cyhoeddi gorchmynion llys newydd";
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return "Cyhoeddi gorchymyn llys terfynol";
+            } else {
+                return "b6ef0d18-bc9f-48f9-bd9d-29a9fd162ece";
+            }
+        }
+    }
+
+    private String buildEmailTextForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                               boolean newAndFinalOrderFLag, boolean languagePreferenceFlag) {
+
+        if (!languagePreferenceFlag) {
+            if (newAndFinalOrderFLag) {
+                return """
                 There are new and final court orders for your case.
                 
                 An order tells you what the court has decided or what will happen next.
                 
                 A final order tells you what the court’s final decision is.""";
-        } else if (multipleOrderFlag) {
-            if (isFinalOrderFlag) {
-                return """
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return """
                     There are final court orders for your case.
                     
                     A final order tells you what the court’s final decision is.""";
-            } else {
-                return """
+                } else {
+                    return """
                 There are new court orders for your case.
                 
                 An order tells you what the court has decided or what will happen next.""";
-            }
-        } else {
-            if (isFinalOrderFlag) {
-                return """
+                }
+            } else {
+                if (isFinalOrderFlag) {
+                    return """
                     There is a final court order for your case.
                     
                     A final order tells you what the court’s final decision is.""";
-            } else {
-                return """
+                } else {
+                    return """
                     There is a new court order for your case.
                     
                     An order tells you what the court has decided or what will happen next.""";
+                }
+            }
+        } else {
+            if (newAndFinalOrderFLag) {
+                return """
+                    Mae yna gorchmynion llys newydd a therfynol ar gyfer yr achos hwn.
+                                                                               
+                    Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.
+                                                                               
+                    Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return """
+                        Mae yna gorchmynion llys terfynol ar gyfer yr achos hwn.
+                                            
+                        Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+                } else {
+                    return """
+                        Mae yna gorchmynion llys newydd ar gyfer yr achos hwn.
+                                        
+                        Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
+                }
+            } else {
+                if (isFinalOrderFlag) {
+                    return """
+                        Mae gorchymyn llys terfynol ar gyfer yr achos hwn.
+                                            
+                        Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+                } else {
+                    return """
+                        Mae gorchymyn llys newydd ar gyfer yr achos hwn.
+                                            
+                        Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
+                }
             }
         }
     }
@@ -541,9 +635,9 @@ public class ManageOrderEmailService {
                 //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
-                    EmailTemplateNames.CA_APPLICANT_LIP_ORDERS,
+                    EmailTemplateNames.CA_LIP_ORDERS,
                     buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
-                    LanguagePreference.english
+                    dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
             } else {
                 //Send notification to party with access to dashboard using sendgrid
