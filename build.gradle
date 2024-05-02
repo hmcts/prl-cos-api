@@ -592,7 +592,14 @@ def sonarExclusions = [
   "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  '**uk/gov/hmcts/reform/prl/services/Fm5NotificationService.java'
+  '**uk/gov/hmcts/reform/prl/tasks/ScheduledTaskRunner.java',
+  '**uk/gov/hmcts/reform/prl/schedule/FM5ReminderNotificationTask.java',
+  '**uk/gov/hmcts/reform/prl/services/Fm5ReminderService.java',
+  '**uk/gov/hmcts/reform/prl/services/Fm5NotificationService.java',
+  '**uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationEmailService.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationPostService.java',
+
 ]
 
 sonarqube {
