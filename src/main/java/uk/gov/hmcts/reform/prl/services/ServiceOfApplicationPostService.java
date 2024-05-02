@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -58,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
+    public static final String ADDRESS_NOT_PRESENT_ERROR_MESSAGE = "ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER";
     private final BulkPrintService bulkPrintService;
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
@@ -100,7 +100,7 @@ public class ServiceOfApplicationPostService {
                 )
             );
         } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
         }
         return generatedDocumentInfo;
     }
@@ -135,7 +135,7 @@ public class ServiceOfApplicationPostService {
                 coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
         } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
         }
         return coverLetterDocs;
     }
@@ -212,8 +212,8 @@ public class ServiceOfApplicationPostService {
             );
         }
         if (null != uploadResponse) {
-            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
-                Collectors.toList());
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream()
+                .map(DocumentUtils::toPrlDocument).toList();
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
@@ -315,7 +315,7 @@ public class ServiceOfApplicationPostService {
                 coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
         } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
         }
         return coversheets;
     }
