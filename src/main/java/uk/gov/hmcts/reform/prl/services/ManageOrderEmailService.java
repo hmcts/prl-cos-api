@@ -327,7 +327,7 @@ public class ManageOrderEmailService {
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(String.valueOf(dynamicData.get("name")))
-            .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
+            .caseLink(String.valueOf(dynamicData.get(citizenDashboardUrl)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
     }
