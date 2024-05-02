@@ -111,7 +111,7 @@ public class DraftOrdersControllerFunctionalTest {
     public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
 
-         request
+        request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
