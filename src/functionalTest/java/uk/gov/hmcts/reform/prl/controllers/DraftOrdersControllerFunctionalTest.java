@@ -64,19 +64,12 @@ public class DraftOrdersControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
-
     private static final String AUTHORIZATION = "Authorization";
-
     private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
-
     private static final String SELECTED_ORDER = "/selected-order";
-
     private static final String APPLICATION_JSON = "application/json";
-
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -202,7 +195,6 @@ public class DraftOrdersControllerFunctionalTest {
 
     }
 
-
     @Test
     public void givenRequestBody_whenGenerate_doc() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
@@ -236,7 +228,6 @@ public class DraftOrdersControllerFunctionalTest {
             .assertThat().statusCode(200);
 
     }
-
 
     /**
      * When selected order id for DA case is 'FL402'.
@@ -352,7 +343,4 @@ public class DraftOrdersControllerFunctionalTest {
             .assertThat().statusCode(200);
 
     }
-
-
-
 }
