@@ -900,6 +900,10 @@ public class WelshLangMapper {
                 + " gyswllt fideo; neu (ii) yn destun amodau mechnïaeth sy’n eu hatal rhag cysylltu â’r unigolyn arall; neu (iii)"
                 + " yn destun trwydded gyda gofyniad i beidio â chysylltu â’r unigolyn arall."
         );
+        welshMap.put(
+            uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern.getDisplayedValue(),
+            "Pryderon amddiffyn plant"
+        );
 
         return welshMap;
     }

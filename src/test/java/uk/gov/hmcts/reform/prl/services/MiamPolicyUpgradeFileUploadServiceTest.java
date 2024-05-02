@@ -2,15 +2,14 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -20,14 +19,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_2;
 
@@ -40,195 +36,442 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
 
     @Mock
     ManageDocumentsService manageDocumentsService;
+
     @Mock
     private  SystemUserService systemUserService;
 
     @Mock
+    CaseDocumentClient caseDocumentClient;
+
+    @Mock
     AuthTokenGenerator authTokenGenerator;
 
-
-    private static final String USER_TOKEN = "Bearer testToken";
-
-    private CaseData caseDataconf;
-    private CaseData casedataPreviousMiam;
-    private CaseData caseDataMiamAttendanceReason;
-    private CaseData caseData;
-
-    Document document;
-    private final String caseId = "1234567891011121";
-
-
-    @Before
-    public void init() {
-        document =  Document.builder().documentFileName("test").categoryId("test").documentUrl("url").documentBinaryUrl("url").build();
-
-        List<MiamExemptionsChecklistEnum> listMiamExemptionsChecklistEnum = new ArrayList<>();
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuDomesticAbuse);
-        listMiamExemptionsChecklistEnum.add(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance);
-        DomesticAbuseEvidenceDocument domesticAbuseEvidenceDocumentConf = DomesticAbuseEvidenceDocument.builder()
-            .domesticAbuseDocument(Document.builder().documentFileName("test").categoryId("test").build()).build();
-
-        Element<DomesticAbuseEvidenceDocument> domesticAbuseEvidenceDocumentConfVal = Element
-            .<DomesticAbuseEvidenceDocument>builder().value(domesticAbuseEvidenceDocumentConf).build();
-
-
-        Document.builder().documentFileName("test").categoryId("test").build();
-        MiamPolicyUpgradeDetails miamPolicyUpgradeDetailsConf = MiamPolicyUpgradeDetails
-            .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mediatorRegistrationNumber("123")
-            .familyMediatorServiceName("test")
-            .soleTraderName("test")
-            .miamCertificationDocumentUpload(Document.builder().build())
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(listMiamExemptionsChecklistEnum)
-            .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
-            .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-            .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
-            .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
-            .mpuCertificateByMediator(document)
-            .mpuDomesticAbuseEvidenceDocument(List.of(domesticAbuseEvidenceDocumentConfVal))
-            .build();
-
-        MiamPolicyUpgradeDetails miamPolicyUpgradeDetailsConfPrevious = MiamPolicyUpgradeDetails
-            .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mediatorRegistrationNumber("123")
-            .familyMediatorServiceName("test")
-            .soleTraderName("test")
-            .miamCertificationDocumentUpload(Document.builder().build())
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(listMiamExemptionsChecklistEnum)
-            .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
-            .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-            .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
-            .mpuDocFromDisputeResolutionProvider(document)
-            .mpuDomesticAbuseEvidenceDocument(List.of(domesticAbuseEvidenceDocumentConfVal))
-            .build();
-        caseDataconf = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetailsConf)
-            .caseTypeOfApplication("C100")
-            .build();
-
-        casedataPreviousMiam = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetailsConfPrevious)
-            .caseTypeOfApplication("C100")
-            .build();
-
-        DomesticAbuseEvidenceDocument domesticAbuseEvidenceDocument = DomesticAbuseEvidenceDocument.builder()
-            .domesticAbuseDocument(Document.builder().documentFileName("test").categoryId("test").build()).build();
-
-        Element<DomesticAbuseEvidenceDocument> domesticAbuseEvidenceDocumentVal = Element
-            .<DomesticAbuseEvidenceDocument>builder().value(domesticAbuseEvidenceDocument).build();
-
-
-        Document.builder().documentFileName("test").categoryId("test").build();
-        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
-            .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mediatorRegistrationNumber("123")
-            .familyMediatorServiceName("test")
-            .soleTraderName("test")
-            .miamCertificationDocumentUpload(Document.builder().build())
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(listMiamExemptionsChecklistEnum)
-            .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
-            .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-            .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
-            .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
-            .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("Confidential_test").categoryId("test").documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15").documentBinaryUrl("https:google.com").build())
-            .mpuCertificateByMediator(Document.builder().documentFileName("Confidential_test").categoryId("test").documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15").documentBinaryUrl("https:google.com").build())
-            .mpuDomesticAbuseEvidenceDocument(List.of(domesticAbuseEvidenceDocumentVal))
-            .build();
-
-
-        caseData = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
-            .caseTypeOfApplication("C100")
-            .build();
-
-        MiamPolicyUpgradeDetails miamPolicyUpgradeDetailsMiamAttaendanceReason = MiamPolicyUpgradeDetails
-            .builder()
-            .mpuChildInvolvedInMiam(YesOrNo.Yes)
-            .mpuApplicantAttendedMiam(YesOrNo.Yes)
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mediatorRegistrationNumber("123")
-            .familyMediatorServiceName("test")
-            .soleTraderName("test")
-            .miamCertificationDocumentUpload(Document.builder().build())
-            .mpuClaimingExemptionMiam(YesOrNo.Yes)
-            .mpuExemptionReasons(listMiamExemptionsChecklistEnum)
-            .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
-            .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
-            .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
-            .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
-            .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("Confidential_test").categoryId("test").documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15").documentBinaryUrl("https:google.com").build())
-            .mpuCertificateByMediator(Document.builder().documentFileName("Confidential_test").categoryId("test").documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15").documentBinaryUrl("https:google.com").build())
-            .mpuDomesticAbuseEvidenceDocument(List.of(domesticAbuseEvidenceDocumentVal))
-            .build();
-
-
-        caseDataMiamAttendanceReason = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetailsMiamAttaendanceReason)
-            .caseTypeOfApplication("C100")
-            .build();
-
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentEmptyMpuReasons() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
     }
 
     @Test
-    public void testRenameMiamPolicyUpgradeDocumentWithConfidentialDomestic() throws Exception {
-        when(manageDocumentsService.downloadAndDeleteDocument(
-            any(), any())).thenReturn(document);
-        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(caseDataconf,
-                                                                               "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    public void testRenameMiamPolicyUpgradeDocumentPreviousAttendanceMpuReason() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
     }
 
     @Test
-    public void testRenameMiamPolicyUpgradeDocumentWithConfidentialPreviousMiam() throws Exception {
-        when(manageDocumentsService.downloadAndDeleteDocument(
-            any(), any())).thenReturn(document);
-        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(casedataPreviousMiam,
-                                                                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    public void testRenameMiamPolicyUpgradeDocumentPreviousAttendanceMpuReasonWithPreviousMiamAttendanceReason() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
     }
 
     @Test
-    public void testDownloadAndUploadDocumentWithoutConfidential() throws Exception {
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(caseData));
+    public void testRenameMiamPolicyUpgradeDocumentPreviousAttendanceMpuReasonWithPreviousMiamAttendanceReason1() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
     }
 
     @Test
-    public void testDownloadAndUploadDocumentWithoutConfidential1() throws Exception {
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(caseDataMiamAttendanceReason));
+    public void testRenameMiamPolicyUpgradeDocumentPreviousAttendanceMpuReasonWithPreviousMiamAttendanceReason1WithDoc() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("test").build())
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
     }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentPreviousAttendanceMpuReasonWithPreviousMiamAttendanceReason1WithConfidentialDoc() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("Confidential_").build())
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentMpuPreviousMiamAttendanceReason() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentMpuPreviousMiamAttendanceReasonAndCertificateChosenAsEvidence() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentMpuPreviousMiamAttendanceReasonAndCertificateUploaded() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .mpuCertificateByMediator(Document.builder().documentFileName("test").build())
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentMpuPreviousMiamAttendanceReasonAndConfidentialCertificateUploaded() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .mpuCertificateByMediator(Document.builder().documentFileName("Confidential_").build())
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
 
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentDomesticMpuReason() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
+
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentDomesticMpuReasonEvidenceProvided() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
+
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentDomesticMpuReasonEvidenceProvidedWithDoc() {
+        when(manageDocumentsService.downloadAndDeleteDocument(any(), any())).thenReturn(Document.builder().build());
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                    .mpuDomesticAbuseEvidenceDocument(List.of(Element
+                        .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
+                            .builder()
+                            .domesticAbuseDocument(Document.builder().documentFileName("test").build())
+                            .build())
+                        .build()))
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
+
+    @Test
+    public void testRenameMiamPolicyUpgradeDocumentDomesticMpuReasonEvidenceProvidedWithConfidentialDoc() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(CaseData
+                .builder()
+                .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                    .builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                    .mpuDomesticAbuseEvidenceDocument(List.of(Element
+                        .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
+                            .builder()
+                            .domesticAbuseDocument(Document.builder().documentFileName("Confidential_").build())
+                            .build())
+                        .build()))
+                    .build())
+                .build(),
+            "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialEmptyMpuReasons() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReasons() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason1() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason1WithDoc() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                .mpuDocFromDisputeResolutionProvider(Document.builder().documentFileName("test").build())
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason1WithConfidentialDoc() {
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build();
+
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                .mpuDocFromDisputeResolutionProvider(doc)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason2() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason2WithCertificate() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason2WithCertificateByMediator() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                .mpuCertificateByMediator(Document.builder().documentFileName("test").build())
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialPreviousMpuReason2WithCertificateByMediatorConfidential() {
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build();
+
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                .mpuCertificateByMediator(doc)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialDomesticMpuReasons() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialDomesticMpuReasonsWithEvidence() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialDomesticMpuReasonsWithEvidenceAndDocument() {
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                .mpuDomesticAbuseEvidenceDocument(List.of(Element
+                    .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
+                        .builder()
+                        .domesticAbuseDocument(Document.builder().documentFileName("test").build())
+                        .build())
+                    .build()))
+                .build())
+            .build()));
+    }
+
+    @Test
+    public void testRenameMiamPolicyWithoutConfidentialDomesticMpuReasonsWithEvidenceAndConfidentialDocument() {
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build();
+
+        assertNotNull(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                .mpuDomesticAbuseEvidenceDocument(List.of(Element
+                    .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
+                        .builder()
+                        .domesticAbuseDocument(doc)
+                        .build())
+                    .build()))
+                .build())
+            .build()));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRenameMiamPolicyThrowsIllegalStateException() {
+        miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithoutConfidential(CaseData
+            .builder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                .mpuDomesticAbuseEvidenceDocument(List.of(Element
+                    .<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument
+                        .builder()
+                        .domesticAbuseDocument(Document.builder().documentFileName("Confidential_").build())
+                        .build())
+                    .build()))
+                .build())
+            .build());
+    }
+
+    @Test
+    public void testDownloadAndUploadDocumentWithoutConfidential2() {
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        assertNotNull(miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test"));
+
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testDownloadAndUploadDocumentWithoutConfidential3() {
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.downloadAndUploadDocumentWithoutConfidential(doc, "test");
+
+    }
 
 }

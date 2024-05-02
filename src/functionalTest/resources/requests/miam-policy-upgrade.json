@@ -135,7 +135,7 @@
         "doYouRequireAHearingWithReducedNotice": null
       },
       "mpuExemptionReasons": [
-        "urgency"
+        "mpuUrgency"
       ],
       "respondentTaskListA": "",
       "respondentTaskListB": "",

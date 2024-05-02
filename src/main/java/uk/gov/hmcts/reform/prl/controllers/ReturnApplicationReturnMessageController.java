@@ -43,7 +43,6 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private final AuthorisationService authorisationService;
     private final CaseEventHandler caseEventHandler;
 
-
     @Autowired
     public ReturnApplicationReturnMessageController(ObjectMapper objectMapper,
                                                     EventService eventPublisher,

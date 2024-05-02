@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Slf4j
 @RestController
@@ -101,6 +103,7 @@ public class ResubmitApplicationController {
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
             //Populate MIAM Policy Upgrade data
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                 && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
                 caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
@@ -110,24 +113,12 @@ public class ResubmitApplicationController {
                 allTabService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
             }
 
-            Court closestChildArrangementsCourt = courtFinderService
-                .getNearestFamilyCourt(caseData);
-            if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
-                caseData = caseData.toBuilder()
-                    .courtName(closestChildArrangementsCourt.getCourtName())
-                    .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
-                    .build();
-                caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(
-                    COURT_ID_FIELD,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
-                caseDataUpdated.put(
-                    COURT_CODE_FROM_FACT,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
+            //SNI-5695 fix-- if court name is already present then do not update
+            if (StringUtils.isBlank(caseData.getCourtName())) {
+                Court closestChildArrangementsCourt = courtFinderService
+                    .getNearestFamilyCourt(caseData);
+                caseData = assignCourtDetailsBasedOnClosestChildArrangementCourt(closestChildArrangementsCourt, caseData, caseDataUpdated);
             }
-
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
@@ -189,6 +180,12 @@ public class ResubmitApplicationController {
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForC100CaseResubmission(
+                    authorisation,
+                    caseData
+                ));
+            }
             caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
@@ -198,6 +195,26 @@ public class ResubmitApplicationController {
             );
             caseDataUpdated.put("submitAgreeStatement", null);
         }
+    }
+
+    private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(Court closestChildArrangementsCourt,
+                                                                                  CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+            caseData = caseData.toBuilder()
+                .courtName(closestChildArrangementsCourt.getCourtName())
+                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                .build();
+            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+            caseDataUpdated.put(
+                COURT_ID_FIELD,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+            caseDataUpdated.put(
+                COURT_CODE_FROM_FACT,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+        }
+        return caseData;
     }
 
     private SolicitorNotificationEmailEvent prepareSolicitorNotificationEvent(String reSubmitEmailNotification, CallbackRequest callbackRequest) {

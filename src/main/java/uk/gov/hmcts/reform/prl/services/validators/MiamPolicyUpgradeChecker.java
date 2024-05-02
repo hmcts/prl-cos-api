@@ -36,30 +36,22 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        log.info("verifying isFinished for miam");
         boolean finished = false;
-        log.info("MiamPolicyUpgradeDetails {}", caseData.getMiamPolicyUpgradeDetails());
 
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantAttendedMiam());
         Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam());
-        log.info("childInvolvedInMiam.isPresent() {}", childInvolvedInMiam.isPresent());
-        log.info("applicantAttendedMiam.isPresent() {}", applicantAttendedMiam.isPresent());
-        log.info("claimingExemptionMiam.isPresent() {}", claimingExemptionMiam.isPresent());
         if (childInvolvedInMiam.isPresent() && Yes.equals(childInvolvedInMiam.get())) {
-            log.info("claimingExemptionMiam is Yes");
             finished = true;
         } else if (childInvolvedInMiam.isPresent() && No.equals(childInvolvedInMiam.get())) {
-            log.info("claimingExemptionMiam is No");
             finished = inspectChildInvolvedInMiamNoFlow(
                 caseData,
                 applicantAttendedMiam,
                 claimingExemptionMiam
             );
-            log.info("Dont know");
         }
+        log.info("verifying isFinished for MIAM Policy Upgrade {}", finished);
         if (finished) {
-            log.info("all done, its done");
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
             return true;
         }
@@ -70,10 +62,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             MIAM_POLICY_UPGRADE_ERROR.getError()
         );
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get()) && !isStarted(caseData)) {
-            log.info("inside miampolicyupgrade error remove");
             taskErrorService.removeError(MIAM_POLICY_UPGRADE_ERROR);
         }
-        log.info("nope, something is wrong");
         return false;
     }
 
@@ -88,7 +78,6 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
                 finished = hasClaimedExemption(caseData);
             }
         }
-        log.info("finished in inspectChildInvolvedInMiamNoFlow {}", finished);
         return finished;
     }
 
@@ -101,7 +90,6 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         } else {
             finished = checkedForClaimedExemptions(caseData);
         }
-        log.info("finished in hasClaimedExemption {}", finished);
         return finished;
     }
 
@@ -129,10 +117,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (miamPolicyUpgradeExemptionsChecklist.contains(MiamExemptionsChecklistEnum.mpuOther)) {
             otherFinished = checkedForOtherExemptions(caseData);
         }
-        boolean finished = domesticAbuseFinished && childProtectionFinished && urgencyFinished
+        return domesticAbuseFinished && childProtectionFinished && urgencyFinished
             && previousMiamAttendanceFinished && otherFinished;
-        log.info("finished in checkedForClaimedExemptions {}", finished);
-        return finished;
     }
 
     private boolean checkForChildProtectionConcernExemption(CaseData caseData) {
@@ -140,24 +126,32 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason())) {
             finished = false;
         }
-        log.info("finished in checkForChildProtectionConcernExemption {}", finished);
         return finished;
     }
 
     private boolean checkedForOtherExemptions(CaseData caseData) {
         boolean finished = true;
+        Optional<String> mpuApplicantUnableToAttendMiamReason1 = ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuApplicantUnableToAttendMiamReason1());
+        boolean mpuApplicantUnableToAttendMiamReason1Present = mpuApplicantUnableToAttendMiamReason1.isPresent()
+            && StringUtils.isNotEmpty(mpuApplicantUnableToAttendMiamReason1.get().trim());
+
+        Optional<String> mpuApplicantUnableToAttendMiamReason2 = ofNullable(caseData.getMiamPolicyUpgradeDetails()
+                                                                                .getMpuApplicantUnableToAttendMiamReason2());
+        boolean mpuApplicantUnableToAttendMiamReason2Present = mpuApplicantUnableToAttendMiamReason2.isPresent()
+            && StringUtils.isNotEmpty(mpuApplicantUnableToAttendMiamReason2.get().trim());
+
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || ((MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_3.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
             || MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_4.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons()))
-            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason1().trim()))
+            && !mpuApplicantUnableToAttendMiamReason1Present)
             || (MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_5.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons())
-            && StringUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuApplicantUnableToAttendMiamReason2().trim()))) {
+            && !mpuApplicantUnableToAttendMiamReason2Present)) {
             finished = false;
         }
-        log.info("finished in checkedForOtherExemptions {}", finished);
         return finished;
     }
 
@@ -166,12 +160,15 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuUrgencyReason())) {
             finished = false;
         }
-        log.info("finished in checkForUrgencyExemption {}", finished);
         return finished;
     }
 
     private boolean checkForPreviousMiamAttendanceExemption(CaseData caseData) {
         boolean finished = true;
+        Optional<String> mpuMediatorDetails = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails());
+        boolean mpuMediatorDetailsPresent = mpuMediatorDetails.isPresent()
+            && StringUtils.isNotEmpty(mpuMediatorDetails.get().trim());
+
         if (ObjectUtils.isEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
             || (MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1.equals(
             caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason())
@@ -183,11 +180,9 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             && ObjectUtils.isEmpty(
             caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()))
             || (miamAttendanceDetails.equals(caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence())
-            && StringUtils.isEmpty(
-            caseData.getMiamPolicyUpgradeDetails().getMpuMediatorDetails().trim()))) {
+            && !mpuMediatorDetailsPresent)) {
             finished = false;
         }
-        log.info("finished in checkForPreviousMiamAttendanceExemption {}", finished);
         return finished;
     }
 
@@ -201,12 +196,10 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
             caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided())) {
             finished = false;
         }
-        log.info("finished in checkForDomesticAbuseExemption {}", finished);
         return finished;
     }
 
     private static boolean hasProvidedMiamCertificate(CaseData caseData) {
-        log.info("inside hasProvidedMiamCertificate");
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getMiamPolicyUpgradeDetails().getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getMiamPolicyUpgradeDetails().getSoleTraderName());
@@ -222,9 +215,8 @@ public class MiamPolicyUpgradeChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        log.info("verifying isStarted for miam");
         Optional<YesOrNo> childInvolvedInMiam = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam());
-        log.info("verifying isStarted for miam {}", childInvolvedInMiam.isPresent());
+        log.info("verifying isStarted for MIAM Policy Upgrade {}", childInvolvedInMiam.isPresent());
         return childInvolvedInMiam.isPresent();
     }
 

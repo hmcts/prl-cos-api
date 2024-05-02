@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
@@ -108,20 +109,20 @@ public class TaskListService {
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
-            .map(event -> Task.builder()
-                .event(event)
-                .state(getTaskState(caseData, event))
-                .build())
-            .toList();
+                .map(event -> Task.builder()
+                        .event(event)
+                        .state(getTaskState(caseData, event))
+                        .build())
+                .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
         return getRespondentsEvents(caseData).stream()
-            .map(event -> RespondentTask.builder()
-                .event(event)
-                .state(getRespondentTaskState(event, respondingParty))
-                .build())
-            .toList();
+                .map(event -> RespondentTask.builder()
+                        .event(event)
+                        .state(getRespondentTaskState(event, respondingParty))
+                        .build())
+                .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
@@ -149,7 +150,7 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? getFL401Events(caseData) : getC100Events(caseData);
+                ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
     public List<Event> getC100Events(CaseData caseData) {
@@ -298,7 +299,7 @@ public class TaskListService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -307,7 +308,6 @@ public class TaskListService {
             );
             roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
         }
-        log.info("list of roles {}", roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))

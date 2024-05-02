@@ -619,23 +619,20 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getMiamPolicyUpgradeTable(CaseData caseData) {
         MiamPolicyUpgrade miam = objectMapper.convertValue(caseData, MiamPolicyUpgrade.class);
-        log.info("MiamPolicyUpgrade ==>" + miam);
         return toMap(miam);
     }
 
     public Map<String, Object> getMiamExemptionsTableForPolicyUpgrade(CaseData caseData) {
         Optional<List<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum>> miamExemptionsCheck
             = ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons());
-        String reasonsForMiamExemption;
+        String reasonsForMiamExemption = PrlAppsConstants.EMPTY_STRING;
         if (miamExemptionsCheck.isPresent()) {
             reasonsForMiamExemption = caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons()
                 .stream().map(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining(", "));
-        } else {
-            reasonsForMiamExemption = "";
         }
 
-        String domesticAbuseEvidence;
+        String domesticAbuseEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<List<MiamDomesticAbuseChecklistEnum>> domesticAbuseCheck
             = ofNullable(caseData.getMiamPolicyUpgradeDetails()
                              .getMpuDomesticAbuseEvidences());
@@ -644,45 +641,35 @@ public class ApplicationsTabService implements TabService {
                 .getMpuDomesticAbuseEvidences()
                 .stream().map(MiamDomesticAbuseChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
-        } else {
-            domesticAbuseEvidence = "";
         }
 
-        String urgencyEvidence;
+        String urgencyEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum> urgencyCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails()
                            .getMpuUrgencyReason());
         if (urgencyCheck.isPresent()) {
             urgencyEvidence = urgencyCheck.get().getDisplayedValue();
-        } else {
-            urgencyEvidence = "";
         }
 
-        String previousAttendenceEvidence;
+        String previousAttendenceEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum> prevCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuPreviousMiamAttendanceReason());
         if (prevCheck.isPresent()) {
             previousAttendenceEvidence = prevCheck.get().getDisplayedValue();
-        } else {
-            previousAttendenceEvidence = "";
         }
 
-        String otherGroundsEvidence;
+        String otherGroundsEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum> othCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuOtherExemptionReasons());
         if (othCheck.isPresent()) {
             otherGroundsEvidence = othCheck.get().getDisplayedValue();
-        } else {
-            otherGroundsEvidence = "";
         }
 
-        String childEvidence;
+        String childEvidence = PrlAppsConstants.EMPTY_STRING;
         Optional<MiamPolicyUpgradeChildProtectionConcernEnum> childCheck =
             ofNullable(caseData.getMiamPolicyUpgradeDetails().getMpuChildProtectionConcernReason());
         if (childCheck.isPresent()) {
             childEvidence = childCheck.get().getDisplayedValue();
-        } else {
-            childEvidence = "";
         }
 
         YesOrNo mpuIsDomesticAbuseEvidenceProvided = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()

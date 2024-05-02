@@ -70,7 +70,6 @@ public class TaskListControllerTest {
 
     @Test
     public void handleSubmitted() throws JsonProcessingException {
-        when(objectMapper.writeValueAsString(callbackRequest)).thenThrow(new JsonProcessingException("Error"){});
         when(taskListService.updateTaskList(callbackRequest, auth))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
         Assert.assertNotNull(taskListController.handleSubmitted(callbackRequest, auth));;
