@@ -794,6 +794,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
+    //For case documents tab
+    private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
     private List<Element<NotificationDetails>> fm5ReminderNotifications;
     private YesOrNo fm5RemindersSent;

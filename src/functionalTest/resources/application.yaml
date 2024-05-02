@@ -292,11 +292,11 @@ document:
     c100:
       c100_final_template: FL-PRL-APP-ENG-C100-Final.docx
       c100_final_template_v2: FL-PRL-APP-ENG-C100-Final-V2.docx
-      c100_final_template_v4: FL-PRL-APP-ENG-C100-Final-V4.docx
+      c100_final_template_v3: FL-PRL-APP-ENG-C100-Final-V3.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_template_v2: FL-PRL-APP-ENG-C100-DRAFT-V2.docx
-      c100_draft_template_v4: FL-PRL-APP-ENG-C100-DRAFT-V4.docx
+      c100_draft_template_v3: FL-PRL-APP-ENG-C100-DRAFT-V3.docx
       c100_draft_filename: Draft_C100_application.pdf
       c100_c8_template: FL-PRL-APP-ENG-C100-C8-Final.docx
       c100_c8_template_v2: FL-PRL-CON-ENG-C8-Final-V2.docx
@@ -322,11 +322,11 @@ document:
       c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_template_v2: FL-PRL-APP-WEL-C100-Final-V2.docx
-      c100_final_welsh_template_v4: FL-PRL-APP-WEL-C100-Final-V4.docx
+      c100_final_welsh_template_v3: FL-PRL-APP-WEL-C100-Final-V3.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_template_v2: FL-PRL-APP-WEL-C100-Draft-V2.docx
-      c100_draft_welsh_template_v4: FL-PRL-APP-WEL-C100-Draft-V4.docx
+      c100_draft_welsh_template_v3: FL-PRL-APP-WEL-C100-Draft-V3.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
       c100_c8_welsh_template: PRL-C8-WelshLang.docx
       c100_c8_welsh_template_v2: FL-PRL-CON-WEL-C8-Final-V2.docx

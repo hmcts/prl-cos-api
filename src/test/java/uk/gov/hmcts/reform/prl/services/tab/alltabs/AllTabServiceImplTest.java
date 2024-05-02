@@ -44,6 +44,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -256,6 +257,42 @@ public class AllTabServiceImplTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication("C100")
+            .build();
+        allTabService.updatePartyDetailsForNoc(caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), caseData);
+
+        verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocC100ApplicantforMiamPolicyupgradeDocumentMap2() {
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(Yes)
+            .mpuApplicantAttendedMiam(Yes)
+            .mpuClaimingExemptionMiam(Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+            .mpuDocFromDisputeResolutionProvider(Document.builder().build())
+            .mpuIsDomesticAbuseEvidenceProvided(Yes)
+            .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
+            .build();
+        caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
+            .taskListVersion(TASK_LIST_VERSION_V3)
             .caseTypeOfApplication("C100")
             .build();
         allTabService.updatePartyDetailsForNoc(caseInvites,
