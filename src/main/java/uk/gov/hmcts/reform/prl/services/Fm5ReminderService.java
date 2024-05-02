@@ -264,8 +264,7 @@ public class Fm5ReminderService {
     private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
         return quarantineDocsElemList.stream()
             .map(Element::getValue)
-            .anyMatch(doc -> RESPONDENT_C1A_APPLICATION.equals(doc.getCategoryId())
-                && null != doc.getRespondentC1AApplicationDocument());
+            .anyMatch(doc -> RESPONDENT_C1A_APPLICATION.equals(doc.getCategoryId()));
     }
 
     private FmPendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
