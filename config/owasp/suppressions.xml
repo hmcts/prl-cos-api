@@ -3,11 +3,10 @@
   <suppress>
     <cve>CVE-2023-39017</cve>
     <cve>CVE-2023-34053</cve>
-    <cve>CVE-2022-41881</cve>
-    <!--unknown-->
-    <!--<cve>CVE-2023-31582</cve>-->
-    <!--json-->
-    <!--<cve>CVE-2023-5072</cve>-->
+    <!--netty-->
+    <!--<cve>CVE-2022-41881</cve>-->
+    <!--jose4j-->
+    <cve>CVE-2023-31582</cve>
     <!--spring security-->
     <cve>CVE-2023-34034</cve>
     <!--spring-security-->
