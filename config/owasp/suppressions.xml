@@ -13,11 +13,7 @@
     <cve>CVE-2023-33202</cve>
     <!--logback-->
     <cve>CVE-2023-6378</cve>
-
     <!--spring out of memory error-->
     <cve>CVE-2023-34055</cve>
-
-    <!--tomcat-->
-    <!--<cve>CVE-2023-46589</cve>-->
   </suppress>
 </suppressions>
