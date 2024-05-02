@@ -848,6 +848,7 @@ public class DraftAnOrderService {
                             ) : null)
                         .build();
                     caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
+                    standardDirectionOrderMap.put("editedOrderHasDefaultCaseFields", Yes);
 
                 }
                 standardDirectionOrderMap = objectMapper.convertValue(
