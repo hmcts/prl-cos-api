@@ -139,6 +139,7 @@ uk:
             SEND_AND_REPLY_NOTIFICATION_OTHER: 949a9675-7232-4bab-920f-266b90d34a30
             TRANSFER_COURT_EMAIL_NOTIFICATION: 0f28438e-bdb4-4d04-866d-d0d8935b88cb
             LIST_ON_NOTICE_EMAIL_NOTIFICATION: 21ede4dc-cce4-4198-b63e-cd0f775299d5
+            FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
@@ -150,6 +151,7 @@ uk:
             CA_AWAITING_PAYMENT: 6ddd61dc-614a-433f-9b95-c72f52fdeb02
             CA_HELP_WITH_FEES: c188d173-b90f-48f1-a432-745f7ef93734
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
+            FM5_REMINDER_APPLICANT_RESPONDENT: 2aeed2b8-c145-4c26-9931-b3cbcb280941
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -179,6 +181,8 @@ send-grid:
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
           SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
+          FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
+          FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
@@ -618,6 +622,8 @@ document:
       prl_sdo_welsh_draft_filename: Welsh_Standard_Directions_Order_draft.pdf
       prl_sdo_welsh_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Final.docx
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
+      doc_cover_sheet_serve_order_template: PRL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
+      doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
