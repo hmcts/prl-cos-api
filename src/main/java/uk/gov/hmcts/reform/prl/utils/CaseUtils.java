@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,6 +40,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -653,6 +657,34 @@ public class CaseUtils {
         } else {
             return newConfidentiality.equals(oldConfidentiality);
         }
+    }
+
+    public static List<String> mapAmUserRolesToIdamRoles(RoleAssignmentServiceResponse roleAssignmentServiceResponse,
+                                                   String authorisation,
+                                                   UserDetails userDetails) {
+        //This would check for user roles from AM for Judge/Legal advisor/Court admin
+        //and then return the corresponding idam role base on that
+        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
+
+        String idamRole;
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+            idamRole = Roles.JUDGE.getValue();
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+            idamRole = Roles.LEGAL_ADVISER.getValue();
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+            idamRole = Roles.COURT_ADMIN.getValue();
+        } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            idamRole = Roles.SOLICITOR.getValue();
+        } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+            idamRole = Roles.CITIZEN.getValue();
+        } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+            idamRole = Roles.SYSTEM_UPDATE.getValue();
+        } else {
+            idamRole = "";
+        }
+
+        roles = new ArrayList<>(Collections.singleton(idamRole));
+        return roles;
     }
 
 }

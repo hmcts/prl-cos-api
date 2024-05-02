@@ -19,9 +19,14 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -39,6 +44,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -224,5 +232,75 @@ public class AllTabServiceImplTest {
         CaseDetails caseDetails1 = allTabService.submitUpdateForSpecificUserEvent(authToken, caseId, startEventResponse,
             EventRequestData.builder().build(), new HashMap<>(), UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build());
         assertNotNull(caseDetails1);
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocC100ApplicantforMiamPolicyupgradeDocumentMap() {
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(YesOrNo.Yes)
+            .mpuApplicantAttendedMiam(YesOrNo.Yes)
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(YesOrNo.Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+            .mpuDomesticAbuseEvidences(List.of(MiamDomesticAbuseChecklistEnum.miamDomesticAbuseChecklistEnum_Value_1))
+            .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+            .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
+            .build();
+        caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication("C100")
+            .build();
+        allTabService.updatePartyDetailsForNoc(caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), caseData);
+
+        verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocC100ApplicantforMiamPolicyupgradeDocumentMap2() {
+        MiamPolicyUpgradeDetails miamPolicyUpgradeDetails = MiamPolicyUpgradeDetails
+            .builder()
+            .mpuChildInvolvedInMiam(Yes)
+            .mpuApplicantAttendedMiam(Yes)
+            .mpuClaimingExemptionMiam(Yes)
+            .mediatorRegistrationNumber("123")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(Document.builder().build())
+            .mpuClaimingExemptionMiam(Yes)
+            .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+            .mpuDocFromDisputeResolutionProvider(Document.builder().build())
+            .mpuIsDomesticAbuseEvidenceProvided(Yes)
+            .mpuDomesticAbuseEvidenceDocument(List.of(Element.<DomesticAbuseEvidenceDocument>builder().build()))
+            .build();
+        caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .miamPolicyUpgradeDetails(miamPolicyUpgradeDetails)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .caseTypeOfApplication("C100")
+            .build();
+        allTabService.updatePartyDetailsForNoc(caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), caseData);
+
+        verify(ccdCoreCaseDataService, Mockito.times(1)).submitUpdate(anyString(), any(), any(), anyString(),anyBoolean());
     }
 }
