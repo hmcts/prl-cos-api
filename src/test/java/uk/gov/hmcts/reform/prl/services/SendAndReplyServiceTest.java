@@ -84,6 +84,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -107,6 +109,8 @@ public class SendAndReplyServiceTest {
 
     @Mock
     EmailService emailService;
+
+    private static final String randomAlphaNumeric = "Abc123EFGH";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -700,6 +704,112 @@ public class SendAndReplyServiceTest {
                                                                     caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals(null,message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForJudge() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .roles(List.of(JUDGE_ROLE))
+                                                              .build());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForLegalAdvisor() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList.toBuilder()
+                                                        .value(DynamicListElement.builder()
+                                                                   .code(UUID.randomUUID())
+                                                                   .label("test-document")
+                                                                   .build())
+                                                        .build())
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .roles(List.of(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        when(caseDocumentClient
+                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+            .thenReturn(testDocument());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForNoRolesinUserDetails() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .build());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
     }
 
     @Test
@@ -1364,5 +1474,38 @@ public class SendAndReplyServiceTest {
                                     .build())
             .build();
         Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+    @Test
+    public void testGetFutureHearingDynamicList() {
+        Hearings futureHearings =
+            Hearings.hearingsWith()
+                .caseRef("1234")
+                .hmctsServiceCode("ABA5")
+                .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                          .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                          .hearingDayScheduleWith()
+                                                                          .build()))
+                                          .build()))
+                .build();
+        when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
+        Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
+    }
+
+    public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = randomAlphaNumeric;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = randomAlphaNumeric;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        links.binary = binaryLink;
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        document.links = links;
+        document.originalDocumentName = randomAlphaNumeric;
+
+        return document;
     }
 }
