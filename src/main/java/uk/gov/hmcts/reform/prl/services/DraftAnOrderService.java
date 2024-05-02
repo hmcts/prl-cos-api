@@ -1607,7 +1607,7 @@ public class DraftAnOrderService {
             rightToAskCourt)
         ) {
             caseDataUpdated.put(
-                "sdoRightToAskCourt",
+                SDO_RIGHT_TO_ASK_COURT,
                 RIGHT_TO_ASK_COURT
             );
         }
