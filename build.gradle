@@ -345,10 +345,10 @@ dependencies {
   implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.7.5'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.7.12'
 //  implementation group: 'org.springframework.security', name: 'spring-security-config'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.7.5'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.7.12'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
