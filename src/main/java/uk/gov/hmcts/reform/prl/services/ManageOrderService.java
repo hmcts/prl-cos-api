@@ -1838,7 +1838,7 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
-            log.error("Error occured while generating Draft document 1841 ==> ", ex);
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -1927,7 +1927,7 @@ public class ManageOrderService {
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
-            log.error("Error occured while generating Draft document 1930 ==> ", ex);
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
