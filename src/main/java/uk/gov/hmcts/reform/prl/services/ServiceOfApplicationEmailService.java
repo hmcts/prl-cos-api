@@ -178,4 +178,15 @@ public class ServiceOfApplicationEmailService {
         }
         return null;
     }
+
+    public void sendGovNotifyEmail(LanguagePreference languagePreference,
+                                   String email,
+                                   EmailTemplateNames template,
+                                   EmailTemplateVars emailTemplateVars) {
+        //send gov notify email
+        emailService.sendSoa(email,
+                             template,
+                             emailTemplateVars,
+                             languagePreference);
+    }
 }

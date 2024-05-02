@@ -300,4 +300,41 @@ public class ServiceOfApplicationPostService {
             .timeStamp(currentDate).build();
     }
 
+    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        List<Document> coversheets = new ArrayList<>();
+        if (null != address && null != address.getAddressLine1()) {
+            if (documentLanguage.isGenEng()) {
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
+                                                                                                       coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
+                                                                                                       coverSheetTemplate);
+                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
+            }
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+        }
+        return coversheets;
+    }
+
+    private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
+                                                                           Address address, String name,
+                                                                           boolean isWelsh, String coverSheetTemplate) throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverPagePartyName", null != name ? name : " ");
+        dataMap.put("coverPageAddress", address);
+        dataMap.put("id", String.valueOf(caseData.getId()));
+        GeneratedDocumentInfo generatedDocumentInfo;
+        generatedDocumentInfo = dgsService.generateDocument(
+            auth, String.valueOf(caseData.getId()),
+            documentGenService.getTemplate(
+                caseData,
+                coverSheetTemplate, isWelsh
+            ), dataMap
+        );
+        return generatedDocumentInfo;
+    }
 }
