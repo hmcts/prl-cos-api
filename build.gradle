@@ -181,6 +181,18 @@ allprojects {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
+
+      dependencySet(group: 'org.springframework', version: '6.0.19') {
+        entry 'spring-aop'
+        entry 'spring-beans'
+        entry 'spring-context'
+        entry 'spring-context-support'
+        entry 'spring-core'
+        entry 'spring-expression'
+        entry 'spring-jcl'
+        entry 'spring-tx'
+        entry 'spring-webmvc'
+      }
     }
   }
 }
@@ -307,7 +319,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '6.0.11'
+  implementation group: 'org.springframework', name: 'spring-context-support', version: '6.0.19'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
