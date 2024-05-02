@@ -329,9 +329,9 @@ public class ManageOrderEmailService {
                 newAndFinalOrderFlag, languagePreferenceFlag, true))
             .emailTitleWelsh(languagePreferenceFlag ? buildEmailTitleWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
                 multipleOrderFlag, newAndFinalOrderFlag) : "")
-            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag, languagePreferenceFlag))
-            .emailTextWelsh(languagePreferenceFlag ? buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag,
-                multipleOrderFlag, newAndFinalOrderFlag, languagePreferenceFlag) : "")
+            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailTextWelsh(languagePreferenceFlag ? buildEmailTextWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
@@ -404,79 +404,80 @@ public class ManageOrderEmailService {
             if (isFinalOrderFlag) {
                 return "Cyhoeddi gorchymyn llys terfynol";
             } else {
-                return "b6ef0d18-bc9f-48f9-bd9d-29a9fd162ece";
+                return "Cyhoeddi gorchymyn llys newydd";
             }
         }
     }
 
     private String buildEmailTextForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
-                                                               boolean newAndFinalOrderFLag, boolean languagePreferenceFlag) {
+                                                               boolean newAndFinalOrderFLag) {
 
-        if (!languagePreferenceFlag) {
-            if (newAndFinalOrderFLag) {
+        if (newAndFinalOrderFLag) {
+            return """
+               There are new and final court orders for your case.
+                
+               An order tells you what the court has decided or what will happen next.
+                
+               A final order tells you what the court’s final decision is.""";
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
                 return """
-                There are new and final court orders for your case.
-                
-                An order tells you what the court has decided or what will happen next.
-                
-                A final order tells you what the court’s final decision is.""";
-            } else if (multipleOrderFlag) {
-                if (isFinalOrderFlag) {
-                    return """
-                    There are final court orders for your case.
+                   There are final court orders for your case.
                     
-                    A final order tells you what the court’s final decision is.""";
-                } else {
-                    return """
-                There are new court orders for your case.
-                
-                An order tells you what the court has decided or what will happen next.""";
-                }
+                   A final order tells you what the court’s final decision is.""";
             } else {
-                if (isFinalOrderFlag) {
-                    return """
-                    There is a final court order for your case.
-                    
-                    A final order tells you what the court’s final decision is.""";
-                } else {
-                    return """
-                    There is a new court order for your case.
-                    
+                return """
+                    There are new court orders for your case.
+                
                     An order tells you what the court has decided or what will happen next.""";
-                }
             }
         } else {
-            if (newAndFinalOrderFLag) {
+            if (isFinalOrderFlag) {
                 return """
+                   There is a final court order for your case.
+                    
+                   A final order tells you what the court’s final decision is.""";
+            } else {
+                return """
+                   There is a new court order for your case.
+                    
+                   An order tells you what the court has decided or what will happen next.""";
+            }
+        }
+    }
+
+    private String buildEmailTextWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                               boolean newAndFinalOrderFLag) {
+        if (newAndFinalOrderFLag) {
+            return """
                     Mae yna gorchmynion llys newydd a therfynol ar gyfer yr achos hwn.
                                                                                
                     Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.
                                                                                
                     Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
-            } else if (multipleOrderFlag) {
-                if (isFinalOrderFlag) {
-                    return """
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return """
                         Mae yna gorchmynion llys terfynol ar gyfer yr achos hwn.
                                             
                         Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
-                } else {
-                    return """
+            } else {
+                return """
                         Mae yna gorchmynion llys newydd ar gyfer yr achos hwn.
                                         
                         Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
-                }
-            } else {
-                if (isFinalOrderFlag) {
-                    return """
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return """
                         Mae gorchymyn llys terfynol ar gyfer yr achos hwn.
                                             
                         Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
-                } else {
-                    return """
+            } else {
+                return """
                         Mae gorchymyn llys newydd ar gyfer yr achos hwn.
                                             
                         Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
-                }
             }
         }
     }
