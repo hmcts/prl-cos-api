@@ -141,7 +141,7 @@ allprojects {
 
       dependencySet(
         group: 'org.quartz-scheduler',
-        version: '2.5.0-rc1'
+        version: '2.3.2'
       ) {
         entry 'quartz'
       }
