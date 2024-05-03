@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
   <suppress>
+    <!--quartz-->
+    <!-- The Quartz scheduler doesn't have a stable release fixing this yet: -->
+    <cve>CVE-2023-39017</cve>
     <!--spring-->
     <cve>CVE-2023-34053</cve>
     <!--jose4j-->
