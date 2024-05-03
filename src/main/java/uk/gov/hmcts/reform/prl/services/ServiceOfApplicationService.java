@@ -1140,10 +1140,16 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
-            caseDataMap.put(APPLICANTS, caseData.getApplicants());
+        if (caseData.getServiceOfApplication() != null) {
+            if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                caseDataMap.put(APPLICANTS, caseData.getApplicants());
+            } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                caseDataMap.put(PrlAppsConstants.FL401_APPLICANTS, caseData.getApplicantsFL401());
+            }
         }
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
