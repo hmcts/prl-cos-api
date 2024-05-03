@@ -15,7 +15,15 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamDomesticAbuseChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
@@ -199,6 +207,64 @@ public class CafCassCaseData {
         }
     }
 
+    //MIAM policy upgrade changes start
+
+    private YesOrNo mpuChildInvolvedInMiam;
+    private YesOrNo mpuApplicantAttendedMiam;
+    private YesOrNo mpuClaimingExemptionMiam;
+    private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
+    private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
+    private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
+    private List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument;
+    private String mpuNoDomesticAbuseEvidenceReason;
+    private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
+    private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument mpuDocFromDisputeResolutionProvider;
+    private TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence;
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument mpuCertificateByMediator;
+    private String mpuMediatorDetails;
+    private MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons;
+    private String mpuApplicantUnableToAttendMiamReason1;
+    private String mpuApplicantUnableToAttendMiamReason2;
+    @Setter(AccessLevel.NONE)
+    private CafCassDocument miamCertificationDocumentUpload;
+    private MiamPolicyUpgradeChildProtectionConcernEnum mpuChildProtectionConcernReason;
+
+    public void setMiamCertificationDocumentUpload(CafCassDocument miamCertificationDocumentUpload) throws MalformedURLException {
+        if (miamCertificationDocumentUpload != null
+            && StringUtils.hasText(miamCertificationDocumentUpload.getDocumentUrl())) {
+            URL url = new URL(miamCertificationDocumentUpload.getDocumentUrl());
+            miamCertificationDocumentUpload.setDocumentId(getDocumentId(url));
+            miamCertificationDocumentUpload.setDocumentUrl(null);
+        }
+        this.miamCertificationDocumentUpload = miamCertificationDocumentUpload;
+    }
+
+    public void setMpuCertificateByMediator(CafCassDocument mpuCertificateByMediator) throws MalformedURLException {
+        if (mpuCertificateByMediator != null
+            && StringUtils.hasText(mpuCertificateByMediator.getDocumentUrl())) {
+            URL url = new URL(mpuCertificateByMediator.getDocumentUrl());
+            mpuCertificateByMediator.setDocumentId(getDocumentId(url));
+            mpuCertificateByMediator.setDocumentUrl(null);
+        }
+        this.mpuCertificateByMediator = mpuCertificateByMediator;
+    }
+
+    public void setMpuDocFromDisputeResolutionProvider(CafCassDocument mpuDocFromDisputeResolutionProvider) throws MalformedURLException {
+        if (mpuDocFromDisputeResolutionProvider != null
+            && StringUtils.hasText(mpuDocFromDisputeResolutionProvider.getDocumentUrl())) {
+            URL url = new URL(mpuDocFromDisputeResolutionProvider.getDocumentUrl());
+            mpuDocFromDisputeResolutionProvider.setDocumentId(getDocumentId(url));
+            mpuDocFromDisputeResolutionProvider.setDocumentUrl(null);
+        }
+        this.mpuDocFromDisputeResolutionProvider = mpuDocFromDisputeResolutionProvider;
+    }
+
+    private Map<String, Object> miamPolicyUpgradeTable;
+    private Map<String, Object> miamPolicyUpgradeExemptionsTable;
+    //Miam upgrade policy changes end
     @Getter(AccessLevel.NONE)
     private Map<String, Object> miamTable;
 
