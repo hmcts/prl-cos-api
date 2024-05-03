@@ -846,10 +846,9 @@ public class DraftAnOrderService {
                                 hearingDataPrePopulatedDynamicLists,
                                 caseData
                             ) : null)
+                        .editedOrderHasDefaultCaseFields(Yes)
                         .build();
                     caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
-                    standardDirectionOrderMap.put("editedOrderHasDefaultCaseFields", Yes);
-
                 }
                 standardDirectionOrderMap = objectMapper.convertValue(
                     ObjectUtils.isNotEmpty(standardDirectionOrder) ? standardDirectionOrder : caseData.getStandardDirectionOrder(),
