@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -43,7 +44,7 @@ public class HearingsManagementController {
     private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
-    private final AllTabServiceImpl allTabsService;
+    private final AllTabServiceImpl allTabService;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
@@ -94,7 +95,7 @@ public class HearingsManagementController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put("nextHearingDetails",
-                            hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
+                            hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -104,9 +105,13 @@ public class HearingsManagementController {
     public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
+                                          String.valueOf(callbackRequest.getCaseDetails().getId()),
+                                          startAllTabsUpdateDataContent.startEventResponse(),
+                                          startAllTabsUpdateDataContent.eventRequestData(),
+                                          startAllTabsUpdateDataContent.caseDataMap());
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }
