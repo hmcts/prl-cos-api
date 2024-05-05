@@ -541,6 +541,7 @@ public class SendAndReplyService {
                                                       .concat(UNDERSCORE)
                                                       .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .label(otherApplicationLabel
+                                                       .concat(otherApplicationsBundle.getApplicationType().getDisplayedValue())
                                                        .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .build());
             }
