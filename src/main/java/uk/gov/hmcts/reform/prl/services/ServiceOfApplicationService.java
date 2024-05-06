@@ -1763,8 +1763,8 @@ public class ServiceOfApplicationService {
         docs.addAll(staticDocs);
         docs = docs.stream()
                 .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
-                || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.DOCUMENT_FIELD_C1A)
-            || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH)))
+                || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_FILENAME)
+            || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_WELSH_FILENAME)))
                 .toList();
         return docs;
     }
