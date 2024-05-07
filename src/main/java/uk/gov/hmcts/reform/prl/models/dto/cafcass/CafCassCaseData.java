@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChe
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.TypeOfMiamAttendanceEvidenceEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
@@ -31,7 +30,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -85,8 +83,7 @@ public class CafCassCaseData {
 
     private String getDocumentId(URL url) {
         String path = url.getPath();
-        String documentId = path.split("/")[path.split("/").length - 1];
-        return documentId;
+        return path.split("/")[path.split("/").length - 1];
     }
 
     private String familymanCaseNumber;
@@ -118,7 +115,7 @@ public class CafCassCaseData {
         try {
             if (otherDocuments != null) {
                 List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
-                    .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).collect(Collectors.toList());
+                    .map(this :: updateElementDocumentId).toList();
                 this.otherDocuments = updatedOtherDocumentList;
             }
         } catch (Exception e) {
@@ -215,7 +212,37 @@ public class CafCassCaseData {
     private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
     private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
     private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
+    @Setter(AccessLevel.NONE)
     private List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument;
+
+    public void setMpuDomesticAbuseEvidenceDocument(List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument) {
+        try {
+            if (mpuDomesticAbuseEvidenceDocument != null) {
+                List<Element<DomesticAbuseEvidenceDocument>> updatedMpuDocumentList = mpuDomesticAbuseEvidenceDocument.stream()
+                    .map(this::updateMpuDocumentId).toList();
+                this.mpuDomesticAbuseEvidenceDocument = updatedMpuDocumentList;
+            }
+        } catch (Exception e) {
+            this.mpuDomesticAbuseEvidenceDocument = mpuDomesticAbuseEvidenceDocument;
+        }
+    }
+
+    private Element<DomesticAbuseEvidenceDocument> updateMpuDocumentId(Element<DomesticAbuseEvidenceDocument> mpuDomesticAbuseEvidenceDocument) {
+        try {
+            if (mpuDomesticAbuseEvidenceDocument != null
+                && !ObjectUtils.isEmpty(mpuDomesticAbuseEvidenceDocument.getValue())
+                && !ObjectUtils.isEmpty(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument())
+                && StringUtils.hasText(mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument().getDocumentUrl())) {
+                Document documentOther = mpuDomesticAbuseEvidenceDocument.getValue().getDomesticAbuseDocument();
+                URL url = new URL(documentOther.getDocumentUrl());
+                documentOther.setDocumentUrl(getDocumentId(url));
+                mpuDomesticAbuseEvidenceDocument.getValue().setDomesticAbuseDocument(documentOther);
+            }
+        } catch (Exception e) {
+            return mpuDomesticAbuseEvidenceDocument;
+        }
+        return mpuDomesticAbuseEvidenceDocument;
+    }
     private String mpuNoDomesticAbuseEvidenceReason;
     private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
     private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;

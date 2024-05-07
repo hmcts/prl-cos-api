@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.filter.cafcaas;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class CafCassFilterTest {
 
     @InjectMocks

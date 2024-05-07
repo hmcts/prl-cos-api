@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,7 +32,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class CafCassControllerTest {
 
     @InjectMocks
