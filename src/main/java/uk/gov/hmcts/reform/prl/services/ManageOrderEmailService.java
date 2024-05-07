@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.OrderEmailConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -34,7 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmailLip;
+import uk.gov.hmcts.reform.prl.models.dto.notify.OrderEmailNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
@@ -321,7 +322,7 @@ public class ManageOrderEmailService {
         boolean newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true);
         boolean languagePreferenceFlag = dynamicData.get(WELSH_EMAIL).equals(true);
 
-        return ManageOrderEmailLip
+        return OrderEmailNotification
             .builder()
             .emailSubject(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
                 newAndFinalOrderFlag, languagePreferenceFlag, false))
@@ -344,9 +345,9 @@ public class ManageOrderEmailService {
     private String multipleOrdersWelsh(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
 
         if (multipleOrderFlag || newAndFinalOrderFlag) {
-            return "gorchmynion";
+            return OrderEmailConstants.ORDERS_WELSH;
         } else {
-            return "gorchymyn";
+            return OrderEmailConstants.ORDER_WELSH;
         }
     }
 
@@ -356,34 +357,34 @@ public class ManageOrderEmailService {
 
         if (!languagePreferenceFlag || isTitle) {
             if (newAndFinalOrderFLag) {
-                return "New and final court orders issued";
+                return OrderEmailConstants.ORDER_SUBJECT_ENG_NEW_AND_FINAL;
             } else if (multipleOrderFlag) {
                 if (isFinalOrderFlag) {
-                    return "Final court orders issued";
+                    return OrderEmailConstants.ORDERS_SUBJECT_ENG_FINAL;
                 } else {
-                    return "New court orders issued";
+                    return OrderEmailConstants.ORDERS_SUBJECT_ENG_NEW;
                 }
             } else {
                 if (isFinalOrderFlag) {
-                    return "Final court order issued";
+                    return OrderEmailConstants.ORDER_SUBJECT_ENG_FINAL;
                 } else {
-                    return "New court order issued";
+                    return OrderEmailConstants.ORDER_SUBJECT_ENG_NEW;
                 }
             }
         } else {
             if (newAndFinalOrderFLag) {
-                return "New and final court orders issued/Cyhoeddi gorchmynion llys newydd a therfynol";
+                return OrderEmailConstants.ORDER_SUBJECT_WEL_NEW_AND_FINAL;
             } else if (multipleOrderFlag) {
                 if (isFinalOrderFlag) {
-                    return "Final court orders issued/Cyhoeddi gorchmynion llys terfynol";
+                    return OrderEmailConstants.ORDERS_SUBJECT_WEL_FINAL;
                 } else {
-                    return "New court orders issued/Cyhoeddi gorchmynion llys newydd";
+                    return OrderEmailConstants.ORDERS_SUBJECT_WEL_NEW;
                 }
             } else {
                 if (isFinalOrderFlag) {
-                    return "Final court order issued/Cyhoeddi gorchymyn llys terfynol";
+                    return OrderEmailConstants.ORDER_SUBJECT_WEL_FINAL;
                 } else {
-                    return "New court order issued/Cyhoeddi gorchymyn llys newydd";
+                    return OrderEmailConstants.ORDER_SUBJECT_WEL_NEW;
                 }
             }
         }
@@ -393,18 +394,18 @@ public class ManageOrderEmailService {
                                                                      boolean newAndFinalOrderFLag) {
 
         if (newAndFinalOrderFLag) {
-            return "Cyhoeddi gorchmynion llys newydd a therfynol";
+            return OrderEmailConstants.ORDER_TITLE_WEL_NEW_AND_FINAL;
         } else if (multipleOrderFlag) {
             if (isFinalOrderFlag) {
-                return "Cyhoeddi gorchmynion llys terfynol";
+                return OrderEmailConstants.ORDERS_TITLE_WEL_FINAL;
             } else {
-                return "Cyhoeddi gorchmynion llys newydd";
+                return OrderEmailConstants.ORDERS_TITLE_WEL_NEW;
             }
         } else {
             if (isFinalOrderFlag) {
-                return "Cyhoeddi gorchymyn llys terfynol";
+                return OrderEmailConstants.ORDER_TITLE_WEL_FINAL;
             } else {
-                return "Cyhoeddi gorchymyn llys newydd";
+                return OrderEmailConstants.ORDER_TITLE_WEL_NEW;
             }
         }
     }
@@ -413,35 +414,18 @@ public class ManageOrderEmailService {
                                                                boolean newAndFinalOrderFLag) {
 
         if (newAndFinalOrderFLag) {
-            return """
-               There are new and final court orders for your case.
-                
-               An order tells you what the court has decided or what will happen next.
-                
-               A final order tells you what the court’s final decision is.""";
+            return OrderEmailConstants.ORDER_ENG_NEW_AND_FINAL;
         } else if (multipleOrderFlag) {
             if (isFinalOrderFlag) {
-                return """
-                   There are final court orders for your case.
-                    
-                   A final order tells you what the court’s final decision is.""";
+                return OrderEmailConstants.ORDERS_ENG_FINAL;
             } else {
-                return """
-                    There are new court orders for your case.
-                
-                    An order tells you what the court has decided or what will happen next.""";
+                return OrderEmailConstants.ORDERS_ENG_NEW;
             }
         } else {
             if (isFinalOrderFlag) {
-                return """
-                   There is a final court order for your case.
-                    
-                   A final order tells you what the court’s final decision is.""";
+                return OrderEmailConstants.ORDER_ENG_FINAL;
             } else {
-                return """
-                   There is a new court order for your case.
-                    
-                   An order tells you what the court has decided or what will happen next.""";
+                return OrderEmailConstants.ORDER_ENG_NEW;
             }
         }
     }
@@ -449,35 +433,18 @@ public class ManageOrderEmailService {
     private String buildEmailTextWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
                                                                boolean newAndFinalOrderFLag) {
         if (newAndFinalOrderFLag) {
-            return """
-                    Mae yna gorchmynion llys newydd a therfynol ar gyfer yr achos hwn.
-                                                                               
-                    Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.
-                                                                               
-                    Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+            return OrderEmailConstants.ORDER_WEL_NEW_AND_FINAL;
         } else if (multipleOrderFlag) {
             if (isFinalOrderFlag) {
-                return """
-                        Mae yna gorchmynion llys terfynol ar gyfer yr achos hwn.
-                                            
-                        Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+                return OrderEmailConstants.ORDERS_WEL_FINAL;
             } else {
-                return """
-                        Mae yna gorchmynion llys newydd ar gyfer yr achos hwn.
-                                        
-                        Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
+                return OrderEmailConstants.ORDERS_WEL_NEW;
             }
         } else {
             if (isFinalOrderFlag) {
-                return """
-                        Mae gorchymyn llys terfynol ar gyfer yr achos hwn.
-                                            
-                        Mae gorchymyn terfynol yn dweud wrthych beth yw penderfyniad terfynol y llys.""";
+                return OrderEmailConstants.ORDER_WEL_FINAL;
             } else {
-                return """
-                        Mae gorchymyn llys newydd ar gyfer yr achos hwn.
-                                            
-                        Mae gorchymyn yn dweud wrthych beth mae’r llys wedi ei benderfynu neu beth fydd yn digwydd nesaf.""";
+                return OrderEmailConstants.ORDER_WEL_NEW;
             }
         }
     }
