@@ -755,10 +755,10 @@ public class DraftAnOrderService {
             caseData.getDraftOrderCollection(),
             caseData.getDraftOrdersDynamicList()
         );
-        log.info("edited order has default fields {}",caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields());
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder = null;
             try {
+                log.info("edited order has default fields {}",caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields());
                 if (!YesOrNo.Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
                         .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
