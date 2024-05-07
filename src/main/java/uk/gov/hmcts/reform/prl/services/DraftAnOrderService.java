@@ -755,6 +755,7 @@ public class DraftAnOrderService {
             caseData.getDraftOrderCollection(),
             caseData.getDraftOrdersDynamicList()
         );
+        log.info("edited order has default fields {}",caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields());
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder = null;
             try {
@@ -762,34 +763,20 @@ public class DraftAnOrderService {
                     SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
                         .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
                                               : selectedOrder.getSdoDetails().getSdoPreamblesList())
-                        .sdoPreamblesTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
-                                                  : selectedOrder.getSdoDetails().getSdoPreamblesList())
                         .sdoHearingsAndNextStepsList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
                                                          : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
-                        .sdoHearingsAndNextStepsTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
-                                                             : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
                         .sdoCafcassOrCymruList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
                                                    : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
-                        .sdoCafcassOrCymruTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
-                                                       : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
                         .sdoLocalAuthorityList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
                                                    : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
-                        .sdoLocalAuthorityTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
-                                                       : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
                         .sdoCourtList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
                                           : selectedOrder.getSdoDetails().getSdoCourtList())
-                        .sdoCourtTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
-                                              : selectedOrder.getSdoDetails().getSdoCourtList())
                         .sdoDocumentationAndEvidenceList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
                                                              : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
-                        .sdoDocumentationAndEvidenceTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
-                                                                 : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
                         .sdoFurtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoFurtherList()
                                             : selectedOrder.getSdoDetails().getSdoFurtherList())
                         .sdoOtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
                                           : selectedOrder.getSdoDetails().getSdoOtherList())
-                        .sdoOtherTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
-                                              : selectedOrder.getSdoDetails().getSdoOtherList())
                         .build();
                     standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -847,6 +834,20 @@ public class DraftAnOrderService {
                                 caseData
                             ) : null)
                         .editedOrderHasDefaultCaseFields(Yes)
+                        .sdoPreamblesTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
+                                                   : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                        .sdoHearingsAndNextStepsTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
+                                                             : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                        .sdoCafcassOrCymruTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
+                                                       : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                        .sdoLocalAuthorityTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
+                                                       : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                        .sdoCourtTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
+                                              : selectedOrder.getSdoDetails().getSdoCourtList())
+                        .sdoDocumentationAndEvidenceTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
+                                                                 : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                        .sdoOtherTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
+                                              : selectedOrder.getSdoDetails().getSdoOtherList())
                         .build();
                     caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
                 }
@@ -854,7 +855,10 @@ public class DraftAnOrderService {
                     ObjectUtils.isNotEmpty(standardDirectionOrder) ? standardDirectionOrder : caseData.getStandardDirectionOrder(),
                     Map.class
                 );
+                log.info("standard direction order map before dfaut values {}",standardDirectionOrderMap);
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
+                log.info("standard direction order map after  dfaut values {}",standardDirectionOrderMap);
+
 
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
