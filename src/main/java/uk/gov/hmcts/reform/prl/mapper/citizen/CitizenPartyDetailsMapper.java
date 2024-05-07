@@ -351,6 +351,12 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case CITIZEN_RESPONSE_TO_AOH -> {
+                return updateCitizenResponseToAohDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             default -> {
                 //For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseDataForOtherEvents(
@@ -359,6 +365,15 @@ public class CitizenPartyDetailsMapper {
                 );
             }
         }
+    }
+
+    private PartyDetails updateCitizenResponseToAohDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .responseToAllegationsOfHarm(citizenProvidedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
+                          .build())
+            .build();
     }
 
     private PartyDetails updateCitizenContactPreferenceDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
