@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class CaseFlagsEventHandlerTest {
 
     public static final String TEST_AUTH = "test-auth";
+    public static final String SERVICE_TOKEN = "service-token";
     @Mock
     private UserService userService;
     @Mock
@@ -54,7 +55,7 @@ public class CaseFlagsEventHandlerTest {
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("ctsc");
         roleAssignmentResponses.add(roleAssignmentResponse);
-        Mockito.when(authTokenGenerator.generate()).thenReturn("service-token");
+        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
         Mockito.when(roleAssignmentApi
                          .getRoleAssignments(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
                 .thenReturn(RoleAssignmentServiceResponse.builder()
@@ -82,6 +83,43 @@ public class CaseFlagsEventHandlerTest {
         Mockito.verify(allTabService,
                        Mockito.times(1)).getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any());
         Mockito.verify(allTabService,Mockito.times(1)).submitAllTabsUpdate(
+            Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any(),Mockito.anyMap());
+    }
+
+    @Test
+    public void testTriggerDummyEventForWhenNotCTscUser() {
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("admin");
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(SERVICE_TOKEN);
+        Mockito.when(roleAssignmentApi
+                         .getRoleAssignments(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(roleAssignmentResponses)
+                            .build());
+        Mockito.when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = new StartAllTabsUpdateDataContent(TEST_AUTH, EventRequestData.builder().build(),
+                                                StartEventResponse.builder().build(), caseDataMap, caseData, null);
+        Mockito.when(allTabService
+                         .getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any())).thenReturn(
+            startAllTabsUpdateDataContent);
+        CaseFlagsEvent caseFlagsEvent = new CaseFlagsEvent(CallbackRequest.builder()
+                                                               .caseDetails(CaseDetails.builder()
+                                                                                .id(123L).build())
+                                                               .build(), TEST_AUTH);
+        caseFlagsEventHandler.triggerDummyEventForCaseFlags(caseFlagsEvent);
+
+        Mockito.verify(allTabService,
+                       Mockito.times(0)).getStartUpdateForSpecificEvent(Mockito.any(),Mockito.any());
+        Mockito.verify(allTabService,Mockito.times(0)).submitAllTabsUpdate(
             Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any(),Mockito.anyMap());
     }
 }
