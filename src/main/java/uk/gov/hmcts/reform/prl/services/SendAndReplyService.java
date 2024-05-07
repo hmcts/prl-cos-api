@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
@@ -542,6 +543,7 @@ public class SendAndReplyService {
                                                       .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .label(otherApplicationLabel
                                                        .concat(otherApplicationsBundle.getApplicationType().getDisplayedValue())
+                                                       .concat(HYPHEN_SEPARATOR)
                                                        .concat(otherApplicationsBundle.getUploadedDateTime()))
                                             .build());
             }
