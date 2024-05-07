@@ -1399,7 +1399,7 @@ public class SendAndReplyServiceTest {
                                                                                                         stringObjectMap, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         sendAndReplyService.closeAwPTask(caseData);
-
+        Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
     }
 
     @Test
