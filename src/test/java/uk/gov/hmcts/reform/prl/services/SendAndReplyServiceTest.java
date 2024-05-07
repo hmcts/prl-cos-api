@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -622,6 +623,7 @@ public class SendAndReplyServiceTest {
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
                                                      .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                                                                   .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                                  .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
                                                                                   .uploadedDateTime(dateSent).build())
                                                      .c2DocumentBundle(C2DocumentBundle.builder()
                                                                            .applicationStatus(AWP_STATUS_SUBMITTED)
