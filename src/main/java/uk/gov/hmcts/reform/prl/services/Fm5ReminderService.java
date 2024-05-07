@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -18,16 +19,18 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -36,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +53,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -65,10 +68,9 @@ public class Fm5ReminderService {
     private final Fm5NotificationService fm5NotificationService;
     private final AllTabServiceImpl allTabService;
 
-    private final ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+    private final ObjectMapper objectMapper;
 
 
-    @Async
     public void sendFm5ReminderNotifications() {
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state
@@ -129,9 +131,9 @@ public class Fm5ReminderService {
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 userToken,
-                searchString,
                 s2sToken,
-                CASE_TYPE
+                CASE_TYPE,
+                searchString
             );
 
             response = objectMapper.convertValue(
@@ -154,7 +156,7 @@ public class Fm5ReminderService {
         List<Should> shoulds = List.of(Should.builder()
                                              .match(Match.builder()
                                                         .caseTypeOfApplication("C100")
-                                                        .fm5RemindersSent(No)
+                                                        //.fm5RemindersSent(No)
                                                         .build())
                                              .build());
 
@@ -165,12 +167,18 @@ public class Fm5ReminderService {
                                                        .build())
                                 .build()))
             .build();
-
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
+
+        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(10).toString())
+            .build();
+        Range range = Range.builder().lastModified(lastModified).build();
+        Filter filter = Filter.builder().range(range).build();
+
         Bool finalFilter = Bool.builder()
             .should(shoulds)
             .minimumShouldMatch(1)
             .must(mustFilter)
+            .filter(filter)
             .build();
 
         return QueryParam.builder()
