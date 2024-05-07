@@ -115,7 +115,7 @@ public class CafCassCaseData {
         try {
             if (otherDocuments != null) {
                 List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
-                    .map(this :: updateElementDocumentId).toList();
+                    .map(this:: updateElementDocumentId).toList();
                 this.otherDocuments = updatedOtherDocumentList;
             }
         } catch (Exception e) {
@@ -243,6 +243,7 @@ public class CafCassCaseData {
         }
         return mpuDomesticAbuseEvidenceDocument;
     }
+
     private String mpuNoDomesticAbuseEvidenceReason;
     private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
     private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
