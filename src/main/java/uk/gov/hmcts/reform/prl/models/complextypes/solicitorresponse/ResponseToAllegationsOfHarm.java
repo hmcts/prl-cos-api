@@ -14,4 +14,5 @@ public class ResponseToAllegationsOfHarm {
     private final YesOrNo responseToAllegationsOfHarmYesOrNoResponse;
     private final Document responseToAllegationsOfHarmDocument;
     private final String respondentResponseToAllegationOfHarm;
+    private final Document responseToAllegationsOfHarmWelshDocument;
 }
