@@ -1783,8 +1783,12 @@ public class ServiceOfApplicationService {
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         // Annex Y to be excluded
-        docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
+        docs.addAll(staticDocs);
+        docs = docs.stream()
+                .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_FILENAME)
+            || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_WELSH_FILENAME)))
+                .toList();
         return docs;
     }
 
@@ -2482,7 +2486,7 @@ public class ServiceOfApplicationService {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
                                                                                                   dateCreated, c100StaticDocs));
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
-                .packDocument(wrapElements(getNotificationPack(caseData, L, c100StaticDocs)))
+                .packDocument(wrapElements(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
