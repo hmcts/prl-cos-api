@@ -836,6 +836,8 @@ public class PrlAppsConstants {
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
+    public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";
+    public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String C1A_BLANK_DOCUMENT_WELSH_FILENAME = "C1A_Blank_Welsh.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
