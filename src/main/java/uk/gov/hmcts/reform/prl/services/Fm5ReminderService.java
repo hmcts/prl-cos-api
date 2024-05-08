@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -33,15 +34,19 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +57,10 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -73,6 +80,7 @@ public class Fm5ReminderService {
 
 
     public void sendFm5ReminderNotifications() {
+        log.info("*** FM5 reminder notifications ***");
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
@@ -207,8 +215,8 @@ public class Fm5ReminderService {
         Hearings hearings = hearingApiClient.getHearingDetails(systemUserService.getSysUserToken(),
                                                                authTokenGenerator.generate(),
                                                                String.valueOf(caseData.getId()));
-        //if first hearing is before 3 weeks, none to remind
-        if (HearingUtils.isFirstHearingBefore(hearings, 21)) {
+        //Check if first LISTED hearing is away for 18 days
+        if (!isFirstListedHearingAwayForDays(hearings, 18)) {
             return FmPendingParty.NONE;
         }
 
@@ -249,12 +257,34 @@ public class Fm5ReminderService {
         );
     }
 
+    public boolean isFirstListedHearingAwayForDays(Hearings hearings,
+                                                   long days) {
+        if (null != hearings) {
+            List<HearingDaySchedule> sortedHearingDaySchedules = nullSafeCollection(hearings.getCaseHearings()).stream()
+                .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED)
+                    && null != eachHearing.getHearingDaySchedule())
+                .map(CaseHearing::getHearingDaySchedule)
+                .flatMap(Collection::stream)
+                .sorted(Comparator.comparing(
+                    HearingDaySchedule::getHearingStartDateTime,
+                    Comparator.nullsLast(Comparator.naturalOrder())
+                ))
+                .toList();
+
+            if (CollectionUtils.isNotEmpty(sortedHearingDaySchedules)) {
+                return LocalDate.from(LocalDateTime.now()).plusDays(days)
+                    .equals(LocalDate.from(sortedHearingDaySchedules.get(0).getHearingStartDateTime()));
+            }
+        }
+        return false;
+    }
+
     private  boolean isAohAvailable(CaseData caseData,
                                     List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
                                     List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
                                     List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
 
-        if (null != caseData.getC1ADocument()) {
+        if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
             return true;
         }
 
