@@ -26,7 +26,6 @@ public class Document {
 
 
 
-
     @JsonCreator
     public Document(@JsonProperty("document_url") String documentUrl,
                     @JsonProperty("document_binary_url") String documentBinaryUrl,

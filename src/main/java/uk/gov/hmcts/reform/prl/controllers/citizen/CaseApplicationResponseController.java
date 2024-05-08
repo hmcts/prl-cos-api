@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Deprecated
 public class CaseApplicationResponseController {
     public static final String C_1_ARESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
