@@ -608,7 +608,7 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
             } else {
-                //Send notification to party with access to dashboard using sendgrid
+                //Send notification to party without access to dashboard using sendgrid
                 sendEmailViaSendGrid(
                     authorisation,
                     orderDocuments,
