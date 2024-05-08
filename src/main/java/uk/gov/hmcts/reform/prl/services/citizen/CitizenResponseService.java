@@ -36,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,11 +48,13 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -68,6 +71,11 @@ public class CitizenResponseService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyyy");
+    public static final String C_1_ARESPONSE = "C1Aresponse";
+    public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
+
 
     public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
@@ -175,6 +183,13 @@ public class CitizenResponseService {
                                     citizenUpdatedCaseData.getPartyDetails(),
                                     party.getValue(),
                                     CaseEvent.REVIEW_AND_SUBMIT,dbCaseData.getNewChildDetails());
+                                updatedPartyDetails = generateRespondentC1aResponseDocument(
+                                    updatedPartyDetails,
+                                    documentLanguage,
+                                    dataMap,
+                                    dbCaseData,
+                                    authorisation
+                                );
                                 Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                                 int updatedRespondentPartyIndex = respondents.indexOf(party);
                                 respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -251,6 +266,56 @@ public class CitizenResponseService {
                     + " for the case id "
                     + caseId);
         }
+    }
+
+    private PartyDetails generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
+                                                               DocumentLanguage documentLanguage,
+                                                               Map<String, Object> dataMap,
+                                                               CaseData caseData, String authorisation) {
+
+        Document c1aFinalResponseEngDocument = null;
+        log.info("inside generateRespondentC1aResponseDocuments()");
+        if (isNotEmpty(updatedPartyDetails.getResponse())
+            && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
+            && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                              .getResponseToAllegationsOfHarmYesOrNoResponse())) {
+            String fileName = updatedPartyDetails.getLabelForDynamicList()
+                + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
+                LONDON_TIME_ZONE)).format(dateTimeFormatter);
+            dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
+            log.info("generating respondent C1A response documents");
+            try {
+                if (documentLanguage.isGenEng()) {
+                    c1aFinalResponseEngDocument = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        C1A_FINAL_RESPONSE_DOCUMENT,
+                        false,
+                        dataMap
+                    );
+                }
+                if (isNotEmpty(c1aFinalResponseEngDocument)) {
+                    log.info("generated respondent C1A response documents");
+                    updatedPartyDetails = updatedPartyDetails.toBuilder()
+                        .response(updatedPartyDetails.getResponse().toBuilder()
+                                      .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                                                                       .toBuilder()
+                                                                       .responseToAllegationsOfHarmDocument(
+                                                                           c1aFinalResponseEngDocument)
+                                                                       .build())
+                                      .build())
+                        .build();
+                }
+            } catch (Exception e) {
+                log.info(
+                    "Failed to generate Respondent C1A response document for party {}",
+                    updatedPartyDetails.getLabelForDynamicList()
+                );
+            } finally {
+                dataMap.remove(DYNAMIC_FILE_NAME);
+            }
+        }
+        return updatedPartyDetails;
     }
 
     private CaseData findAndSetCurrentRespondentForC7GenerationOnly(CitizenUpdatedCaseData citizenUpdatedCaseData, CaseData caseData) {
