@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +104,8 @@ public class Fm5ReminderService {
                             String.valueOf(caseData.getId()),
                             startAllTabsUpdateDataContent.startEventResponse(),
                             startAllTabsUpdateDataContent.eventRequestData(),
-                            caseDataUpdated);
+                            caseDataUpdated
+                        );
                     }
                 }
             }
@@ -154,11 +153,11 @@ public class Fm5ReminderService {
     private QueryParam buildCcdQueryParam() {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(Should.builder()
-                                             .match(Match.builder()
-                                                        .caseTypeOfApplication("C100")
-                                                        //.fm5RemindersSent(No)
-                                                        .build())
-                                             .build());
+                                           .match(Match.builder()
+                                                      .caseTypeOfApplication("C100")
+                                                      //.fm5RemindersSent(No)
+                                                      .build())
+                                           .build());
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
@@ -201,9 +200,11 @@ public class Fm5ReminderService {
         }
 
         //Fetch hearings
-        Hearings hearings = hearingApiClient.getHearingDetails(systemUserService.getSysUserToken(),
-                                                               authTokenGenerator.generate(),
-                                                               String.valueOf(caseData.getId()));
+        Hearings hearings = hearingApiClient.getHearingDetails(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            String.valueOf(caseData.getId())
+        );
         //if first hearing is before 3 weeks, none to remind
         if (HearingUtils.isFirstHearingBefore(hearings, 21)) {
             return FmPendingParty.NONE;
@@ -238,18 +239,19 @@ public class Fm5ReminderService {
         }
 
         //check & evaluate whom to send fm5 reminders
-        return fetchFm5DocsSubmissionPendingParties(caseData,
-                                                    legalProfQuarantineDocsElemList,
-                                                    courtStaffQuarantineDocsElemList,
-                                                    legalProfQuarantineUploadedDocsElemList,
-                                                    courtStaffQuarantineUploadedDocsElemList
+        return fetchFm5DocsSubmissionPendingParties(
+            caseData,
+            legalProfQuarantineDocsElemList,
+            courtStaffQuarantineDocsElemList,
+            legalProfQuarantineUploadedDocsElemList,
+            courtStaffQuarantineUploadedDocsElemList
         );
     }
 
-    private  boolean isAohAvailable(CaseData caseData,
-                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
-                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
-                                    List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
+    private boolean isAohAvailable(CaseData caseData,
+                                   List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
+                                   List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
+                                   List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
 
         if (null != caseData.getC1ADocument()) {
             return true;
@@ -276,14 +278,14 @@ public class Fm5ReminderService {
     }
 
     private FmPendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
-                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList) {
+                                                                List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
+                                                                List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList,
+                                                                List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
+                                                                List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList) {
 
-        Map<String,Long> countMap = new HashMap<>();
-        countMap.put(APPLICANT_FM5_COUNT,0L);
-        countMap.put(RESPONDENT_FM5_COUNT,0L);
+        Map<String, Long> countMap = new HashMap<>();
+        countMap.put(APPLICANT_FM5_COUNT, 0L);
+        countMap.put(RESPONDENT_FM5_COUNT, 0L);
 
         if (isNotEmpty(legalProfQuarantineDocsElemList)) {
             checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
@@ -316,8 +318,8 @@ public class Fm5ReminderService {
     }
 
     private void checkByCategoryFm5StatementsAndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList,
-                                                      Map<String,Long> countMap) {
-        long applicantCount =  quarantineDocsElemList.stream()
+                                                      Map<String, Long> countMap) {
+        long applicantCount = quarantineDocsElemList.stream()
             .map(Element::getValue)
             .filter(doc -> FM5_STATEMENTS.equalsIgnoreCase(doc.getCategoryId())
                 && DocumentPartyEnum.APPLICANT.getDisplayedValue().equals(doc.getDocumentParty()))
