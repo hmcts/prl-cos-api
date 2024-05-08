@@ -207,7 +207,6 @@ public class Fm5ReminderService {
         Hearings hearings = hearingApiClient.getHearingDetails(systemUserService.getSysUserToken(),
                                                                authTokenGenerator.generate(),
                                                                String.valueOf(caseData.getId()));
-        //ADD FILTER, LISTED HEARINGS
         //if first hearing is before 3 weeks, none to remind
         if (HearingUtils.isFirstHearingBefore(hearings, 21)) {
             return FmPendingParty.NONE;
