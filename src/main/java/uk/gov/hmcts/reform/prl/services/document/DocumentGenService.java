@@ -305,6 +305,9 @@ public class DocumentGenService {
     @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
     protected String citizenC1aFinalResponseTemplate;
 
+    @Value("${document.templates.common.prl_citizen_c1a_final_response_welsh_template}")
+    protected String citizenC1aFinalResponseWelshTemplate;
+
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final OrganisationService organisationService;
@@ -1024,7 +1027,7 @@ public class DocumentGenService {
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
             case C1A_FINAL_RESPONSE_DOCUMENT:
-                template = citizenC1aFinalResponseTemplate;
+                template = getRespondentC1aResponseFinalTemplate(isWelsh);
                 break;
             default:
                 template = "";
@@ -1038,6 +1041,10 @@ public class DocumentGenService {
 
     private String getC7CitizenDraftTemplate(boolean isWelsh) {
         return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
+    }
+
+    private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
+        return !isWelsh ? citizenC1aFinalResponseTemplate : citizenC1aFinalResponseWelshTemplate;
     }
 
     private String findDraftTemplate(boolean isWelsh, CaseData caseData) {

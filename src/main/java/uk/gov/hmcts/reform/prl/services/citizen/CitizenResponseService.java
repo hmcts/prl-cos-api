@@ -274,6 +274,7 @@ public class CitizenResponseService {
                                                                CaseData caseData, String authorisation) {
 
         Document c1aFinalResponseEngDocument = null;
+        Document c1aFinalResponseWelDocument = null;
         log.info("inside generateRespondentC1aResponseDocuments()");
         updatedPartyDetails = updatedPartyDetails.toBuilder()
             .response(updatedPartyDetails.getResponse().toBuilder()
@@ -297,10 +298,10 @@ public class CitizenResponseService {
             String fileName = updatedPartyDetails.getLabelForDynamicList()
                 + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
                 LONDON_TIME_ZONE)).format(dateTimeFormatter);
-            dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
             log.info("generating respondent C1A response documents");
             try {
                 if (documentLanguage.isGenEng()) {
+                    dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
                     c1aFinalResponseEngDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
@@ -309,18 +310,29 @@ public class CitizenResponseService {
                         dataMap
                     );
                 }
-                if (isNotEmpty(c1aFinalResponseEngDocument)) {
-                    log.info("generated respondent C1A response documents");
-                    updatedPartyDetails = updatedPartyDetails.toBuilder()
-                        .response(updatedPartyDetails.getResponse().toBuilder()
-                                      .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-                                                                       .toBuilder()
-                                                                       .responseToAllegationsOfHarmDocument(
-                                                                           c1aFinalResponseEngDocument)
-                                                                       .build())
-                                      .build())
-                        .build();
+                if (documentLanguage.isGenWelsh) {
+                    dataMap.put(DYNAMIC_FILE_NAME, fileName + "_Welsh.pdf");
+                    c1aFinalResponseWelDocument = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        C1A_FINAL_RESPONSE_DOCUMENT,
+                        true,
+                        dataMap
+                    );
                 }
+                log.info("generated respondent C1A response documents");
+                updatedPartyDetails = updatedPartyDetails.toBuilder()
+                    .response(updatedPartyDetails.getResponse().toBuilder()
+                                  .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                                                                   .toBuilder()
+                                                                   .responseToAllegationsOfHarmDocument(isNotEmpty(
+                                                                       c1aFinalResponseEngDocument) ? c1aFinalResponseEngDocument : null)
+                                                                   .responseToAllegationsOfHarmWelshDocument(isNotEmpty(
+                                                                       c1aFinalResponseWelDocument) ? c1aFinalResponseWelDocument : null)
+                                                                   .build())
+                                  .build())
+                    .build();
+
             } catch (Exception e) {
                 log.info(
                     "Failed to generate Respondent C1A response document for party {}",
