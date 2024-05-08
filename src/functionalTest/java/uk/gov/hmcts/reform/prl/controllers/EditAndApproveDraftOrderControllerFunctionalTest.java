@@ -142,16 +142,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                       .getDraftOrderDynamicList(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(drafOrderMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/populate-draft-order-dropdown")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.draftOrder1").value("SDO"))
-            .andExpect(jsonPath("data.draftOrder2").value("C21"))
-            .andReturn();
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/populate-draft-order-dropdown")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.draftOrder1", equalTo("SDO"),
+                  "data.draftOrder2", equalTo("C21"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
