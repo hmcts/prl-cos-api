@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,26 +32,19 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -62,8 +54,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Deprecated
 public class CaseApplicationResponseController {
-    public static final String C_1_ARESPONSE = "C1Aresponse";
-    public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
     private final DocumentGenService documentGenService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
@@ -71,8 +61,6 @@ public class CaseApplicationResponseController {
     private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final IdamClient idamClient;
-
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyyy");
 
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
@@ -210,8 +198,6 @@ public class CaseApplicationResponseController {
                 );
             }
 
-            caseData = generateRespondentC1aResponseDocuments(authorisation, caseData, currentRespondent, partyName, dataMap);
-
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
 
             if (dataMap.containsKey("isConfidentialDataPresent")) {
@@ -259,61 +245,6 @@ public class CaseApplicationResponseController {
             }
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
-        }
-        return caseData;
-    }
-
-    private CaseData generateRespondentC1aResponseDocuments(String authorisation,
-                                             CaseData caseData,
-                                             Optional<Element<PartyDetails>> currentRespondent,
-                                             String partyName,
-                                             Map<String, Object> dataMap) throws Exception {
-        Document c1aEngFinalResponseDocument;
-        log.info("inside generateRespondentC1aResponseDocuments()");
-        if (isNotEmpty(currentRespondent.get().getValue().getResponse())
-            && isNotEmpty(currentRespondent.get().getValue().getResponse().getResponseToAllegationsOfHarm())
-            && Yes.equals(currentRespondent.get().getValue().getResponse().getResponseToAllegationsOfHarm()
-                              .getResponseToAllegationsOfHarmYesOrNoResponse())) {
-            String fileName = partyName + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
-                LONDON_TIME_ZONE)).format(dateTimeFormatter);
-            dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
-            log.info("generating respondent C1A response documents");
-            c1aEngFinalResponseDocument = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C1A_FINAL_RESPONSE_DOCUMENT,
-                false,
-                dataMap
-            );
-            if (CollectionUtils.isNotEmpty(caseData.getRespondents()) && isNotEmpty(c1aEngFinalResponseDocument)) {
-                log.info("generated respondent C1A response documents");
-                Optional<Element<PartyDetails>> respondentElement = caseData.getRespondents().stream().filter(
-                        element -> element.getId()
-                            .toString()
-                            .equalsIgnoreCase(currentRespondent.get().getId().toString()))
-                    .findFirst();
-                if (respondentElement.isPresent()) {
-                    log.info("setting respondent C1A response documents");
-                    caseData.getRespondents().set(
-                        caseData.getRespondents().indexOf(respondentElement.get()),
-                        ElementUtils.element(
-                            respondentElement.get().getId(),
-                            respondentElement.get().getValue().toBuilder()
-                                .response(respondentElement.get().getValue().getResponse()
-                                              .toBuilder()
-                                              .responseToAllegationsOfHarm(respondentElement.get().getValue().getResponse()
-                                                                               .getResponseToAllegationsOfHarm()
-                                                                               .toBuilder()
-                                                                               .responseToAllegationsOfHarmDocument(
-                                                                                   c1aEngFinalResponseDocument)
-                                                                               .build())
-                                              .build())
-                                .build()
-                        )
-                    );
-                }
-            }
-            dataMap.remove(DYNAMIC_FILE_NAME);
         }
         return caseData;
     }
