@@ -216,7 +216,7 @@ public class Fm5ReminderService {
                                                                authTokenGenerator.generate(),
                                                                String.valueOf(caseData.getId()));
         //Check if first LISTED hearing is away for 18 days
-        if (!isFirstListedHearingAwayForDays(hearings, 18)) {
+        if (!isFirstListedHearingAwayForDays(hearings, 20)) {
             return FmPendingParty.NONE;
         }
 
