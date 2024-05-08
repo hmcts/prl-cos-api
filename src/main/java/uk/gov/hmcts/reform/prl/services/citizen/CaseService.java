@@ -195,10 +195,19 @@ public class CaseService {
     }
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
-        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        return getCaseDataWithHearingResponse(
+            authorisation,
+            hearingNeeded,
+            caseDetails
+        );
+    }
+
+    public CaseDataWithHearingResponse getCaseDataWithHearingResponse(String authorisation,
+                                                                      String hearingNeeded,
+                                                                      CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
+        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder()
             .caseData(UiCitizenCaseData.builder()
                           .caseData(caseData.toBuilder()
                                         .noOfDaysRemainingToSubmitCase(
@@ -211,7 +220,8 @@ public class CaseService {
         if ("Yes".equalsIgnoreCase(hearingNeeded)) {
             caseDataWithHearingResponse =
                 caseDataWithHearingResponse.toBuilder().hearings(
-                    hearingService.getHearings(authorisation, caseId)).build();
+                    hearingService.getHearings(authorisation, String
+                        .valueOf(caseData.getId()))).build();
         }
         return caseDataWithHearingResponse;
     }
@@ -312,7 +322,7 @@ public class CaseService {
         try {
             log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
         } catch (JsonProcessingException e) {
-            log.info(ERROR);
+            log.info("error");
         }
 
         Flags flags = objectMapper.convertValue(
@@ -322,7 +332,7 @@ public class CaseService {
         try {
             log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
         } catch (JsonProcessingException e) {
-            log.info(ERROR);
+            log.info("error");
         }
         flags = flags.toBuilder()
             .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
@@ -330,7 +340,7 @@ public class CaseService {
         try {
             log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
         } catch (JsonProcessingException e) {
-            log.info(ERROR);
+            log.info("error");
         }
         Map<String, Object> externalCaseFlagMap = new HashMap<>();
         externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
@@ -343,7 +353,7 @@ public class CaseService {
         try {
             log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
         } catch (JsonProcessingException e) {
-            log.info(ERROR);
+            log.info("error");
         }
 
         ccdCoreCaseDataService.submitUpdate(
@@ -648,6 +658,7 @@ public class CaseService {
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
             .document(existingDocument)
+            .documentLanguage(quarantineDoc.getDocumentLanguage())
             .build();
     }
 
