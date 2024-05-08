@@ -69,6 +69,7 @@ public class Fm5ReminderService {
     private final ObjectMapper objectMapper;
 
 
+
     public void sendFm5ReminderNotifications() {
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state
@@ -79,7 +80,6 @@ public class Fm5ReminderService {
             for (CaseDetails caseDetails : caseDetailsList) {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Retrieved case from database, caseId {}", caseData.getId());
-
                 //Evaluate system rules
                 FmPendingParty fmPendingParty = findFm5SubmitPendingParties(caseData);
 
@@ -124,6 +124,9 @@ public class Fm5ReminderService {
         QueryParam ccdQueryParam = buildCcdQueryParam();
 
         try {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
 
             String userToken = systemUserService.getSysUserToken();
@@ -168,16 +171,15 @@ public class Fm5ReminderService {
             .build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(10).toString())
-            .build();
+        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(10).toString()).build();
         Range range = Range.builder().lastModified(lastModified).build();
         Filter filter = Filter.builder().range(range).build();
 
         Bool finalFilter = Bool.builder()
+            .filter(filter)
             .should(shoulds)
             .minimumShouldMatch(1)
             .must(mustFilter)
-            .filter(filter)
             .build();
 
         return QueryParam.builder()
