@@ -72,6 +72,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
@@ -300,6 +301,9 @@ public class DocumentGenService {
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
+
+    @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
+    protected String citizenC1aFinalResponseTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -1018,6 +1022,9 @@ public class DocumentGenService {
                 break;
             case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
+                break;
+            case C1A_FINAL_RESPONSE_DOCUMENT:
+                template = citizenC1aFinalResponseTemplate;
                 break;
             default:
                 template = "";

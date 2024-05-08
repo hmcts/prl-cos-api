@@ -997,4 +997,6 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String C1A_FINAL_RESPONSE_DOCUMENT = "C1A_FINAL_RESPONSE_DOCUMENT";
+
 }
