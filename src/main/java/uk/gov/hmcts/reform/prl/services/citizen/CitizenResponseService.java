@@ -275,6 +275,21 @@ public class CitizenResponseService {
 
         Document c1aFinalResponseEngDocument = null;
         log.info("inside generateRespondentC1aResponseDocuments()");
+        updatedPartyDetails = updatedPartyDetails.toBuilder()
+            .response(updatedPartyDetails.getResponse().toBuilder()
+                          .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                                                           .toBuilder()
+                                                           .responseToAllegationsOfHarmYesOrNoResponse(Yes)
+                                                           .respondentResponseToAllegationOfHarm("test")
+                                                           .build())
+                          .build())
+            .build();
+        log.info("responseToAllegationsOfHarm options {}"
+                     + updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+            .getResponseToAllegationsOfHarmYesOrNoResponse());
+        log.info("responseToAllegationsOfHarm text {}"
+                     + updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+            .getRespondentResponseToAllegationOfHarm());
         if (isNotEmpty(updatedPartyDetails.getResponse())
             && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
             && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
