@@ -28,7 +28,7 @@ public class Document {
     @JsonProperty("document_creation_date")
     Date documentCreatedOn;
     @JsonProperty("upload_timestamp")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSSSSS][.SSSSSS]")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSSSSSSSS]")
     LocalDateTime uploadTimeStamp;
 
 
