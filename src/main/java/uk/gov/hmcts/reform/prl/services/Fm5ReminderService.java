@@ -90,31 +90,32 @@ public class Fm5ReminderService {
             HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
 
             //Iterate all cases to evaluate rules to trigger FM5 reminder
-            for (CaseDetails caseDetails : caseDetailsList) {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-                log.info("Retrieved case from database, caseId {}", caseData.getId());
 
 
-                qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseData);
+                qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
+
+
                 qualifiedCasesAndPartiesBeforeHearing.forEach(
                     (key, value) -> {
+                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                            = allTabService.getStartAllTabsUpdate(String.valueOf(key));
+                        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
-                            caseData,
+                            startAllTabsUpdateDataContent.caseData(),
                             value
                         );
 
                         //Persist fm5 reminder notifications details
                         if (isNotEmpty(fm5ReminderNotifications)) {
-                            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                                = allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()));
-                            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+
 
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
                             caseDataUpdated.put("fm5RemindersSent", Yes);
 
                             allTabService.submitAllTabsUpdate(
                                 startAllTabsUpdateDataContent.authorisation(),
-                                String.valueOf(caseData.getId()),
+                                String.valueOf(key),
                                 startAllTabsUpdateDataContent.startEventResponse(),
                                 startAllTabsUpdateDataContent.eventRequestData(),
                                 caseDataUpdated
@@ -122,7 +123,7 @@ public class Fm5ReminderService {
                         }
                     }
                 );
-            }
+
         }
 
         log.info(
@@ -132,13 +133,22 @@ public class Fm5ReminderService {
     }
 
 
-    private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(CaseData caseData) {
+    private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList) {
+
         List<String> caseIdsForHearing = new ArrayList<>();
         HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
-        HashMap<String, FmPendingParty> filteredCaseAndParties = validateNonHearingSystemRules(caseData);
+        HashMap<String, FmPendingParty> filteredCaseAndParties = new HashMap<>();
 
-        if (!filteredCaseAndParties.get(caseData.getId()).equals(FmPendingParty.NONE)) {
-            caseIdsForHearing.add(String.valueOf(caseData.getId()));
+        for (CaseDetails caseDetails : caseDetailsList) {
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info("Retrieved case from database, caseId {}", caseData.getId());
+
+            filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
+
+            if (!filteredCaseAndParties.get(caseData.getId()).equals(FmPendingParty.NONE)) {
+                caseIdsForHearing.add(String.valueOf(caseData.getId()));
+            }
+
         }
 
         List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
