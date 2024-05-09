@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -80,6 +81,7 @@ public class Fm5NotificationService {
 
     public List<Element<NotificationDetails>> sendFm5ReminderNotifications(CaseData caseData,
                                                                            FmPendingParty fmPendingParty) {
+        long startTime = System.currentTimeMillis();
         List<Element<NotificationDetails>> fm5ReminderNotifications = new ArrayList<>();
         if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
             //send reminders to both applicants & respondents
@@ -118,6 +120,10 @@ public class Fm5NotificationService {
                              ))
                 );
         }
+        log.info(
+            "*** Time taken to send fm5 reminders for case {} - {}s ***", caseData.getId(),
+            TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
+        );
         return fm5ReminderNotifications;
     }
 
