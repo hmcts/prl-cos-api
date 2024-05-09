@@ -419,7 +419,8 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP,
+                EmailTemplateNames.CA_LIP_ORDERS
             ));
         }
     }
@@ -430,7 +431,8 @@ public class ManageOrderEmailService {
                                           Map<String, Object> dynamicDataForEmail,
                                           List<Document> orderDocuments,
                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
-                                          SendgridEmailTemplateNames sengGridTemplate) {
+                                          SendgridEmailTemplateNames sengGridTemplate,
+                                          EmailTemplateNames emailTemplate) {
         log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue())) {
@@ -441,7 +443,7 @@ public class ManageOrderEmailService {
                 //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
-                    EmailTemplateNames.CA_LIP_ORDERS,
+                    emailTemplate,
                     buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
                     dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
@@ -499,7 +501,8 @@ public class ManageOrderEmailService {
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
-                SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP
+                SendgridEmailTemplateNames.SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP,
+                EmailTemplateNames.CA_LIP_ORDERS
             );
         }
     }
@@ -532,7 +535,8 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
-                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                    EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                 ));
             } else if (isNotEmpty(party.getSolicitorEmail())) {
                 log.info("*** courtAdmin/courtBailiff: Sending email to applicant LR");
@@ -548,7 +552,8 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
-                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                    EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                 );
             }
         }
@@ -855,7 +860,8 @@ public class ManageOrderEmailService {
                         dynamicDataForEmail,
                         orderDocuments,
                         bulkPrintOrderDetails,
-                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                        EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
                     );
                 }
             }
