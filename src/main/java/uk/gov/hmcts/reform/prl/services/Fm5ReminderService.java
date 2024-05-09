@@ -286,66 +286,6 @@ public class Fm5ReminderService {
             .build();
     }
 
-
-    private FmPendingParty findFm5SubmitPendingParties(CaseData caseData) {
-
-        //if consent order is present, none to remind
-        if (null != caseData.getDraftConsentOrderFile()) {
-            return FmPendingParty.NONE;
-        }
-
-        //if no emergency care proceedings, none to remind
-        if (null != caseData.getMiamPolicyUpgradeDetails()
-            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
-            return FmPendingParty.NONE;
-        }
-
-        //Fetch hearings
-        Hearings hearings = hearingApiClient.getHearingDetails(systemUserService.getSysUserToken(),
-                                                               authTokenGenerator.generate(),
-                                                               String.valueOf(caseData.getId()));
-        //Check if first LISTED hearing is away for 18 days
-        if (!isFirstListedHearingAwayForDays(hearings, 20)) {
-            return FmPendingParty.NONE;
-        }
-
-        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList = new ArrayList<>();
-
-        if (null != caseData.getDocumentManagementDetails()) {
-            legalProfQuarantineDocsElemList = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            courtStaffQuarantineDocsElemList = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
-        }
-
-        List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList = new ArrayList<>();
-
-        if (null != caseData.getReviewDocuments()) {
-            legalProfQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            courtStaffQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-            restrictedDocumentsElemList = caseData.getReviewDocuments().getRestrictedDocuments();
-        }
-
-        //if AOH/C1A document is available, none to remind
-        if (isAohAvailable(
-            caseData,
-            legalProfQuarantineDocsElemList,
-            legalProfQuarantineUploadedDocsElemList,
-            restrictedDocumentsElemList
-        )) {
-            return FmPendingParty.NONE;
-        }
-
-        //check & evaluate whom to send fm5 reminders
-        return fetchFm5DocsSubmissionPendingParties(caseData,
-                                                    legalProfQuarantineDocsElemList,
-                                                    courtStaffQuarantineDocsElemList,
-                                                    legalProfQuarantineUploadedDocsElemList,
-                                                    courtStaffQuarantineUploadedDocsElemList
-        );
-    }
-
     public boolean isFirstListedHearingAwayForDays(Hearings hearings,
                                                    long days) {
         if (null != hearings) {
