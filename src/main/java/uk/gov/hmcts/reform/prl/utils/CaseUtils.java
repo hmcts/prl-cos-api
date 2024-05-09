@@ -800,10 +800,4 @@ public class CaseUtils {
         roles = new ArrayList<>(Collections.singleton(idamRole));
         return roles;
     }
-
-    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
-        return null != party.getValue()
-            && null != party.getValue().getUser()
-            && null != party.getValue().getUser().getIdamId();
-    }
 }

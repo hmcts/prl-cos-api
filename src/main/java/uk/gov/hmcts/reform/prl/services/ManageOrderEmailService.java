@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.isAccessEnabled;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -437,7 +437,7 @@ public class ManageOrderEmailService {
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            if (hasDashboardAccess(party)) {
+            if (isAccessEnabled(party)) {
                 //Send notification to party with access to dashboard using notify.gov
                 emailService.send(
                     party.getValue().getEmail(),
@@ -848,60 +848,15 @@ public class ManageOrderEmailService {
                     );
                 } else {
                     log.info("*** Send email/post notifications to parties ***");
-                    if (ContactPreferences.email.equals(partyData.getContactPreferences())
-                        && isPartyProvidedWithEmail(partyData) && CaseUtils.isAccessEnabled(partyDataOptional.get())) {
-                        log.info("*** Send orders to party via email using notify {}", partyDataOptional.get().getId());
-                        dynamicDataForEmail.put("name", partyData.getLabelForDynamicList());
-                        dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
-                        EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
-                            .caseReference(String.valueOf(caseData.getId()))
-                            .caseName(caseData.getApplicantCaseName())
-                            .fullName(partyData.getLabelForDynamicList())
-                            .dashboardLink(citizenDashboardUrl)
-                            .build();
-                        EmailTemplateNames emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDER;
-                        boolean newOrder = (boolean) dynamicDataForEmail.get(NEW);
-                        boolean finalOrder = (boolean) dynamicDataForEmail.get(FINAL);
-                        boolean newAndFinalOrder = (boolean) dynamicDataForEmail.get(NEW_AND_FINAL);
-                        boolean multipleOrders = (boolean) dynamicDataForEmail.get(MULTIPLE_ORDERS);
-                        boolean isWelsh = (boolean) dynamicDataForEmail.get(ENGLISH_EMAIL);
-                        if (multipleOrders) {
-                            if (newAndFinalOrder) {
-                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS;
-                            } else if (newOrder) {
-                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDERS;
-                            } else if (finalOrder) {
-                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_FINAL_ORDERS;
-                            }
-                        } else {
-                            if (newOrder) {
-                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_ORDER;
-                            } else if (finalOrder) {
-                                emailTemplateName = EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_FINAL_ORDER;
-                            }
-                        }
-                        if (isWelsh) {
-                            emailService.send(partyData.getEmail(),
-                                              emailTemplateName,
-                                              emailTemplateVars,
-                                              LanguagePreference.welsh);
-                        } else {
-                            emailService.send(partyData.getEmail(),
-                                              emailTemplateName,
-                                              emailTemplateVars,
-                                              LanguagePreference.english);
-                        }
-                    } else {
-                        sendNotificationsToParty(
-                            caseData,
-                            partyDataOptional.get(),
-                            authorisation,
-                            dynamicDataForEmail,
-                            orderDocuments,
-                            bulkPrintOrderDetails,
-                            SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
-                        );
-                    }
+                    sendNotificationsToParty(
+                        caseData,
+                        partyDataOptional.get(),
+                        authorisation,
+                        dynamicDataForEmail,
+                        orderDocuments,
+                        bulkPrintOrderDetails,
+                        SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT
+                    );
                 }
             }
         });
