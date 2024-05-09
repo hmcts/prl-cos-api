@@ -49,7 +49,8 @@ public enum CaseEvent {
     FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
-    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    CITIZEN_PCQ_UPDATE("citizenPcqUpdate");
 
     private final String value;
 
