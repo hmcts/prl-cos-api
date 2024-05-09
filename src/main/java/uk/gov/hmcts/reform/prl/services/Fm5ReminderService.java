@@ -82,26 +82,27 @@ public class Fm5ReminderService {
     public void sendFm5ReminderNotifications() {
         log.info("*** FM5 reminder notifications ***");
         long startTime = System.currentTimeMillis();
-        //Fetch all cases in Hearing state
-        List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
+        //Fetch all cases in Hearing state pending fm5 reminder notifications
+        List<CaseDetails> caseDetailsList = retrieveCasesInHearingStatePendingFm5Reminders();
 
 
         if (isNotEmpty(caseDetailsList)) {
-            HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
+            //Iterate all cases to evaluate rules to trigger FM5 reminder
+            HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing =
+                getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
 
-            qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
-
+            //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
-                (key, value) -> {
+                (key, fmPendingParty) -> {
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                         = allTabService.getStartAllTabsUpdate(String.valueOf(key));
                     Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
-                    if (value.equals(FmPendingParty.NOTIFICATION_NOT_REQUIRED)) {
+                    if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
                         caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
                     } else {
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
-                            value
+                            fmPendingParty
                         );
                         if (isNotEmpty(fm5ReminderNotifications)) {
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
@@ -109,6 +110,7 @@ public class Fm5ReminderService {
                         }
                     }
 
+                    //Save case data
                     allTabService.submitAllTabsUpdate(
                         startAllTabsUpdateDataContent.authorisation(),
                         String.valueOf(key),
@@ -122,7 +124,7 @@ public class Fm5ReminderService {
         }
 
         log.info(
-            "*** Time taken to send fm5 reminders - {}s ***",
+            "*** Total time taken to send fm5 reminders - {}s ***",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
         );
     }
@@ -136,11 +138,10 @@ public class Fm5ReminderService {
 
         for (CaseDetails caseDetails : caseDetailsList) {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("Retrieved case from database, caseId {}", caseData.getId());
 
             filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
 
-            if (!filteredCaseAndParties.get(String.valueOf(caseData.getId())).equals(FmPendingParty.NOTIFICATION_NOT_REQUIRED)) {
+            if (!FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(filteredCaseAndParties.get(String.valueOf(caseData.getId())))) {
                 caseIdsForHearing.add(String.valueOf(caseData.getId()));
             } else {
                 qualifiedCasesAndPartiesBeforeHearing.put(
@@ -150,35 +151,46 @@ public class Fm5ReminderService {
             }
         }
 
-        List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
-            systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
-            caseIdsForHearing
-        );
-        hearingsForAllCaseIdsWithCourtVenue.stream().forEach(
-            hearing -> {
-                if (isFirstListedHearingAwayForDays(hearing, 19)) {
-                    qualifiedCasesAndPartiesBeforeHearing.put(
-                        hearing.getCaseRef(),
-                        filteredCaseAndParties.get(hearing.getCaseRef())
-                    );
-                }
+        if (isNotEmpty(caseIdsForHearing)) {
+            List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                caseIdsForHearing
+            );
+
+            if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
+                hearingsForAllCaseIdsWithCourtVenue.forEach(
+                    hearing -> {
+                        if (isFirstListedHearingAwayForDays(hearing, 20)) {
+                            qualifiedCasesAndPartiesBeforeHearing.put(
+                                hearing.getCaseRef(),
+                                filteredCaseAndParties.get(hearing.getCaseRef())
+                            );
+                        }
+                    }
+                );
             }
-        );
+        }
         return qualifiedCasesAndPartiesBeforeHearing;
     }
 
     private HashMap<String, FmPendingParty> validateNonHearingSystemRules(CaseData caseData) {
         HashMap<String, FmPendingParty> caseIdPendingPartyMapping = new HashMap<>();
-        //if consent order is present, none to remind
+        //if consent order is present, no need to remind
         if (null != caseData.getDraftConsentOrderFile()) {
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
-        //if no emergency care proceedings, none to remind
+        //if no emergency care proceedings, no need to remind
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
+            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
+            return caseIdPendingPartyMapping;
+        }
+
+        //if applicant AOH is present, no need to remind
+        if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
@@ -201,9 +213,8 @@ public class Fm5ReminderService {
             restrictedDocumentsElemList = caseData.getReviewDocuments().getRestrictedDocuments();
         }
 
-        //if AOH/C1A document is available, none to remind
-        if (isAohAvailable(
-            caseData,
+        //if respondent AOH is available, no need to remind
+        if (isPartyAohAvailable(
             legalProfQuarantineDocsElemList,
             legalProfQuarantineUploadedDocsElemList,
             restrictedDocumentsElemList
@@ -221,10 +232,9 @@ public class Fm5ReminderService {
             courtStaffQuarantineUploadedDocsElemList
         ));
         return caseIdPendingPartyMapping;
-
     }
 
-    private List<CaseDetails> retrieveCasesInHearingState() {
+    private List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
 
         SearchResultResponse response = SearchResultResponse.builder()
             .cases(new ArrayList<>()).build();
@@ -317,15 +327,9 @@ public class Fm5ReminderService {
         return false;
     }
 
-    private  boolean isAohAvailable(CaseData caseData,
-                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
-                                    List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
-                                    List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
-
-        if (null != caseData.getC1ADocument() || null != caseData.getC1AWelshDocument()) {
-            return true;
-        }
-
+    private  boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
+                                         List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
+                                         List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
         if (isNotEmpty(legalProfQuarantineDocsElemList)
             && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
             return true;
