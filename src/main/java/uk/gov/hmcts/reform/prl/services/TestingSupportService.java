@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -264,7 +265,7 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
-                                                             CourtNavFl401 dummyCaseDetails) throws Exception {
+                                                             CourtNavFl401 dummyCaseDetails) throws NotFoundException {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
@@ -284,9 +285,7 @@ public class TestingSupportService {
     private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData, String taskListVersionOptions) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(taskListVersionOptions)
-                ? ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON)
-                : ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
         }
@@ -315,10 +314,7 @@ public class TestingSupportService {
                                                                     String taskListVersionOptions) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(
-                taskListVersionOptions)
-                ? ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON)
-                : ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
         }
