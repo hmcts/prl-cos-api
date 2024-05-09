@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,6 +66,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseService {
 
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
     private final ObjectMapper objectMapper;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final AllTabServiceImpl allTabService;
@@ -107,6 +111,7 @@ public class CitizenResponseService {
                 && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
             Map<Element<Document>, String> responseDocs = new HashMap<>();
+            Map<Document, String> respondentC1aResponseDocuments = new HashMap<>();
 
             // initiate the event
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
@@ -137,11 +142,11 @@ public class CitizenResponseService {
             log.info(" Generating C7 Final document for respondent ");
             if (documentLanguage.isGenEng()) {
                 log.info(" Generating C7 English Final document for respondent");
-                responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false)),"en");
+                responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false)), ENGLISH);
             }
             if (documentLanguage.isGenWelsh()) {
                 log.info(" Generating C7 Welsh Final document for respondent");
-                responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true)), "cy");
+                responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true)), WELSH);
             }
             log.info("C7 Final document generated successfully for respondent ");
 
@@ -188,7 +193,8 @@ public class CitizenResponseService {
                                     documentLanguage,
                                     dataMap,
                                     dbCaseData,
-                                    authorisation
+                                    authorisation,
+                                    respondentC1aResponseDocuments
                                 );
                                 Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                                 int updatedRespondentPartyIndex = respondents.indexOf(party);
@@ -203,10 +209,10 @@ public class CitizenResponseService {
                             && Yes.equals(response.getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
                         log.info(" Generating C1A Final document for respondent ");
                         if (documentLanguage.isGenEng()) {
-                            responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)),"en");
+                            responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)), ENGLISH);
                         }
                         if (documentLanguage.isGenWelsh()) {
-                            responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)),"cy");
+                            responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)), WELSH);
                         }
                         log.info("C1A Final document generated successfully for respondent ");
                     }
@@ -219,7 +225,8 @@ public class CitizenResponseService {
                     caseDataMapToBeUpdated.putAll(addCitizenDocumentsToTheQuarantineList(
                             dbCaseData,
                             responseDocs,
-                            startAllTabsUpdateDataContent.userDetails()
+                            startAllTabsUpdateDataContent.userDetails(),
+                            respondentC1aResponseDocuments
                     ));
                     try {
                         log.info("******* after docs added caseDataMapToBeUpdated json ===>"
@@ -271,7 +278,8 @@ public class CitizenResponseService {
     private PartyDetails generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
                                                                DocumentLanguage documentLanguage,
                                                                Map<String, Object> dataMap,
-                                                               CaseData caseData, String authorisation) {
+                                                               CaseData caseData, String authorisation,
+                                                               Map<Document, String> respondentC1aResponseDocuments) {
 
         Document c1aFinalResponseEngDocument = null;
         Document c1aFinalResponseWelDocument = null;
@@ -291,6 +299,7 @@ public class CitizenResponseService {
         log.info("responseToAllegationsOfHarm text {}"
                      + updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
             .getRespondentResponseToAllegationOfHarm());
+        respondentC1aResponseDocuments = null != respondentC1aResponseDocuments ? respondentC1aResponseDocuments : new HashMap<>();
         if (isNotEmpty(updatedPartyDetails.getResponse())
             && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
             && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
@@ -309,6 +318,7 @@ public class CitizenResponseService {
                         false,
                         dataMap
                     );
+                    respondentC1aResponseDocuments.put(c1aFinalResponseEngDocument, ENGLISH);
                 }
                 if (documentLanguage.isGenWelsh) {
                     dataMap.put(DYNAMIC_FILE_NAME, fileName + "_Welsh.pdf");
@@ -319,6 +329,7 @@ public class CitizenResponseService {
                         true,
                         dataMap
                     );
+                    respondentC1aResponseDocuments.put(c1aFinalResponseWelDocument, WELSH);
                 }
                 log.info("generated respondent C1A response documents");
                 updatedPartyDetails = updatedPartyDetails.toBuilder()
@@ -466,13 +477,16 @@ public class CitizenResponseService {
                 .filter(otherProceedingDetailsElement -> isNotEmpty(otherProceedingDetailsElement.getValue())
                         && null != otherProceedingDetailsElement.getValue().getOrderDocument())
                 .map(otherProceedingDetailsElement ->
-                    responseDocs.put(element(otherProceedingDetailsElement.getValue().getOrderDocument()),"en"));
+                    responseDocs.put(element(otherProceedingDetailsElement.getValue().getOrderDocument()), ENGLISH));
 
         return responseDocs;
     }
 
-    public Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData, Map<Element<Document>,String> responseDocs,
-                                                            UserDetails userDetails) {
+    public Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData,
+                                                                      Map<Element<Document>,
+                                                                          String> responseDocs,
+                                                                      UserDetails userDetails,
+                                                                      Map<Document, String> respondentC1aResponseDocuments) {
 
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
         if (null != caseData.getDocumentManagementDetails() && null != caseData
@@ -501,6 +515,31 @@ public class CitizenResponseService {
                 .id(element.getId()).build();
             finalQuarantineDocs.add(quarantineLegalDoc);
         });
+
+        if (MapUtils.isNotEmpty(respondentC1aResponseDocuments)) {
+            log.info("Added respondent response document to quarantine docs list");
+            respondentC1aResponseDocuments.forEach((document, language) -> {
+                Element<QuarantineLegalDoc> quarantineLegalDoc = Element.<QuarantineLegalDoc>builder()
+                    .value(QuarantineLegalDoc
+                               .builder()
+                               .citizenQuarantineDocument(document
+                                                              .toBuilder()
+                                                              .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(
+                                                                      LONDON_TIME_ZONE))
+                                                                                               .toInstant()))
+                                                              .build())
+                               .categoryId("respondentC1AResponse")
+                               .categoryName("Respondent C1A response")
+                               .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                               .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+                               .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
+                               .uploaderRole(PrlAppsConstants.CITIZEN)
+                               .documentLanguage(language)
+                               .build())
+                    .id(CommonUtils.generateUuid()).build();
+                finalQuarantineDocs.add(quarantineLegalDoc);
+            });
+        }
 
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         caseDataMapToBeUpdated.put("citizenQuarantineDocsList", finalQuarantineDocs);

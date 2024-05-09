@@ -148,7 +148,7 @@ public class CommonUtils {
         }
     }
 
-    private static UUID generateUuid() {
+    public static UUID generateUuid() {
         return UUID.randomUUID();
     }
 
