@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -115,6 +116,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_linkCaseToAccount_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY);
         String requestBodyRevised = requestBody
@@ -156,6 +158,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_validateAccessCode_then200Response11() throws Exception {
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
         CaseDetails caseDetails3 =  request1

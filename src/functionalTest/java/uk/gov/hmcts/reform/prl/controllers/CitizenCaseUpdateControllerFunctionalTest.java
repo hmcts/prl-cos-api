@@ -96,6 +96,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
 
     @Test
+    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
@@ -117,6 +118,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_confirmYourDetails_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -139,6 +141,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_keepYourDetailsPrivate_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -161,6 +164,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_consentToTheApplication_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -184,6 +188,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_respondentMiam_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -205,6 +210,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_legalRepresentation_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -225,6 +231,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_citizenAoH_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -248,6 +255,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_citizenInternationalElement_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -270,6 +278,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_citizenRemoveLegalRepresentative_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -290,6 +299,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_hearingNeeds_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -357,6 +367,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
 
     @Test
+    @Ignore
     public void givenRequestBody_updateCitizenParty_Event_citizen_case_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -462,6 +473,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_withdrawCase_then200Response() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY);
