@@ -150,9 +150,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/populate-draft-order-dropdown")
             .then()
-            .assertThat().statusCode(200)
             .body("data.draftOrder1", equalTo("SDO"),
                   "data.draftOrder2", equalTo("C21"))
+            .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
@@ -166,16 +166,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/judge-or-admin-populate-draft-order")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.orderName").value("C21"))
-            .andExpect(jsonPath("data.orderUploadedAsDraftFlag").value("Yes"))
-            .andReturn();
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-populate-draft-order")
+            .then()
+            .body("data.orderName", equalTo("C21"),
+                  "data.orderUploadedAsDraftFlag", equalTo("Yes"))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
