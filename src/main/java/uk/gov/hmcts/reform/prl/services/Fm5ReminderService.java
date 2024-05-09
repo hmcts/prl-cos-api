@@ -96,27 +96,27 @@ public class Fm5ReminderService {
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                         = allTabService.getStartAllTabsUpdate(String.valueOf(key));
                     Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+                    if (value.equals(FmPendingParty.NOTIFICATION_NOT_REQUIRED)) {
+                        caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
+                    } else {
+                        List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
+                            startAllTabsUpdateDataContent.caseData(),
+                            value
+                        );
+                        if (isNotEmpty(fm5ReminderNotifications)) {
+                            caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
+                            caseDataUpdated.put("fm5RemindersSent", "YES");
+                        }
+                    }
 
-                    List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
-                        startAllTabsUpdateDataContent.caseData(),
-                        value
+                    allTabService.submitAllTabsUpdate(
+                        startAllTabsUpdateDataContent.authorisation(),
+                        String.valueOf(key),
+                        startAllTabsUpdateDataContent.startEventResponse(),
+                        startAllTabsUpdateDataContent.eventRequestData(),
+                        caseDataUpdated
                     );
 
-                    //Persist fm5 reminder notifications details
-                    if (isNotEmpty(fm5ReminderNotifications)) {
-
-
-                        caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
-                        caseDataUpdated.put("fm5RemindersSent", Yes);
-
-                        allTabService.submitAllTabsUpdate(
-                            startAllTabsUpdateDataContent.authorisation(),
-                            String.valueOf(key),
-                            startAllTabsUpdateDataContent.startEventResponse(),
-                            startAllTabsUpdateDataContent.eventRequestData(),
-                            caseDataUpdated
-                        );
-                    }
                 }
             );
         }
@@ -140,10 +140,14 @@ public class Fm5ReminderService {
 
             filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
 
-            if (!filteredCaseAndParties.get(String.valueOf(caseData.getId())).equals(FmPendingParty.NONE)) {
+            if (!filteredCaseAndParties.get(String.valueOf(caseData.getId())).equals(FmPendingParty.NOTIFICATION_NOT_REQUIRED)) {
                 caseIdsForHearing.add(String.valueOf(caseData.getId()));
+            } else {
+                qualifiedCasesAndPartiesBeforeHearing.put(
+                    String.valueOf(caseData.getId()),
+                    FmPendingParty.NOTIFICATION_NOT_REQUIRED
+                );
             }
-
         }
 
         List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
@@ -168,14 +172,14 @@ public class Fm5ReminderService {
         HashMap<String, FmPendingParty> caseIdPendingPartyMapping = new HashMap<>();
         //if consent order is present, none to remind
         if (null != caseData.getDraftConsentOrderFile()) {
-            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NONE);
+            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
         //if no emergency care proceedings, none to remind
         if (null != caseData.getMiamPolicyUpgradeDetails()
             && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuChildInvolvedInMiam())) {
-            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NONE);
+            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
@@ -204,7 +208,7 @@ public class Fm5ReminderService {
             legalProfQuarantineUploadedDocsElemList,
             restrictedDocumentsElemList
         )) {
-            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NONE);
+            caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
         }
 
@@ -379,7 +383,7 @@ public class Fm5ReminderService {
             return FmPendingParty.RESPONDENT;
         }
 
-        return FmPendingParty.NONE;
+        return FmPendingParty.NOTIFICATION_NOT_REQUIRED;
     }
 
     private void checkByCategoryFm5StatementsAndParty(List<Element<QuarantineLegalDoc>> quarantineDocsElemList,
