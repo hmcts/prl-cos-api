@@ -76,7 +76,7 @@ public class CitizenResponseService {
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyyy");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
     public static final String C_1_ARESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
 
