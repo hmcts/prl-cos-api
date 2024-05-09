@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_C
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -98,7 +99,7 @@ public class Fm5ReminderService {
                         = allTabService.getStartAllTabsUpdate(String.valueOf(key));
                     Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
                     if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
-                        caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
+                        caseDataUpdated.put("fm5RemindersSent", No);
                     } else {
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
@@ -106,7 +107,7 @@ public class Fm5ReminderService {
                         );
                         if (isNotEmpty(fm5ReminderNotifications)) {
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
-                            caseDataUpdated.put("fm5RemindersSent", "YES");
+                            caseDataUpdated.put("fm5RemindersSent", Yes);
                         }
                     }
 
