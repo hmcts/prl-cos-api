@@ -284,21 +284,10 @@ public class CitizenResponseService {
         Document c1aFinalResponseEngDocument = null;
         Document c1aFinalResponseWelDocument = null;
         log.info("inside generateRespondentC1aResponseDocuments()");
-        updatedPartyDetails = updatedPartyDetails.toBuilder()
-            .response(updatedPartyDetails.getResponse().toBuilder()
-                          .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-                                                           .toBuilder()
-                                                           .responseToAllegationsOfHarmYesOrNoResponse(Yes)
-                                                           .respondentResponseToAllegationOfHarm("test")
-                                                           .build())
-                          .build())
-            .build();
-        log.info("responseToAllegationsOfHarm options {}"
-                     + updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-            .getResponseToAllegationsOfHarmYesOrNoResponse());
-        log.info("responseToAllegationsOfHarm text {}"
-                     + updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
-            .getRespondentResponseToAllegationOfHarm());
+        log.info("responseToAllegationsOfHarm options {}",
+                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+        log.info("responseToAllegationsOfHarm text {}",
+                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm());
         respondentC1aResponseDocuments = null != respondentC1aResponseDocuments ? respondentC1aResponseDocuments : new HashMap<>();
         if (isNotEmpty(updatedPartyDetails.getResponse())
             && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
@@ -517,7 +506,6 @@ public class CitizenResponseService {
         });
 
         if (MapUtils.isNotEmpty(respondentC1aResponseDocuments)) {
-            log.info("Added respondent response document to quarantine docs list");
             respondentC1aResponseDocuments.forEach((document, language) -> {
                 Element<QuarantineLegalDoc> quarantineLegalDoc = Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc
@@ -538,6 +526,7 @@ public class CitizenResponseService {
                                .build())
                     .id(CommonUtils.generateUuid()).build();
                 finalQuarantineDocs.add(quarantineLegalDoc);
+                log.info("Added respondent C1A response document to quarantine docs list");
             });
         }
 
