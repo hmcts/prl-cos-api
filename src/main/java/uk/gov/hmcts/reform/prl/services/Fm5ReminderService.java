@@ -88,33 +88,14 @@ public class Fm5ReminderService {
 
         if (isNotEmpty(caseDetailsList)) {
             HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
-            List<String> caseIdsForHearing = new ArrayList<>();
+
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             for (CaseDetails caseDetails : caseDetailsList) {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Retrieved case from database, caseId {}", caseData.getId());
 
-                HashMap<String, FmPendingParty> filteredCaseAndParties = validateNonHearingSystemRules(caseData);
-                if (!filteredCaseAndParties.get(caseData.getId()).equals(FmPendingParty.NONE)) {
-                    caseIdsForHearing.add(String.valueOf(caseData.getId()));
-                }
 
-                List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
-                    systemUserService.getSysUserToken(),
-                    authTokenGenerator.generate(),
-                    caseIdsForHearing
-                );
-                hearingsForAllCaseIdsWithCourtVenue.stream().forEach(
-                    hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing, 20)) {
-                            qualifiedCasesAndPartiesBeforeHearing.put(
-                                hearing.getCaseRef(),
-                                filteredCaseAndParties.get(hearing.getCaseRef())
-                            );
-                        }
-                    }
-                );
-
+                qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseData);
                 qualifiedCasesAndPartiesBeforeHearing.forEach(
                     (key, value) -> {
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
@@ -150,6 +131,33 @@ public class Fm5ReminderService {
         );
     }
 
+
+    private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(CaseData caseData) {
+        List<String> caseIdsForHearing = new ArrayList<>();
+        HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
+        HashMap<String, FmPendingParty> filteredCaseAndParties = validateNonHearingSystemRules(caseData);
+
+        if (!filteredCaseAndParties.get(caseData.getId()).equals(FmPendingParty.NONE)) {
+            caseIdsForHearing.add(String.valueOf(caseData.getId()));
+        }
+
+        List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            caseIdsForHearing
+        );
+        hearingsForAllCaseIdsWithCourtVenue.stream().forEach(
+            hearing -> {
+                if (isFirstListedHearingAwayForDays(hearing, 20)) {
+                    qualifiedCasesAndPartiesBeforeHearing.put(
+                        hearing.getCaseRef(),
+                        filteredCaseAndParties.get(hearing.getCaseRef())
+                    );
+                }
+            }
+        );
+        return qualifiedCasesAndPartiesBeforeHearing;
+    }
 
     private HashMap<String, FmPendingParty> validateNonHearingSystemRules(CaseData caseData) {
         HashMap<String, FmPendingParty> caseIdPendingPartyMapping = new HashMap<>();
