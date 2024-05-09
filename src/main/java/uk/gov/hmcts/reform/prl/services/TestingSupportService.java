@@ -466,4 +466,5 @@ public class TestingSupportService {
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
+
 }
