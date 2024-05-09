@@ -65,8 +65,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
@@ -307,31 +305,6 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitSolicitorCaseCreationWithDummyC100DataV3() throws Exception {
-        caseData = CaseData.builder()
-            .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V3);
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION.getId())
-            .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
-
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test
     public void testAboutToSubmitSolicitorCaseCreationWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
                 .id(12345678L)
@@ -339,7 +312,6 @@ public class TestingSupportServiceTest {
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V2);
         caseDetails = CaseDetails.builder()
                 .id(12345678L)
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -420,7 +392,6 @@ public class TestingSupportServiceTest {
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                 .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V2);
         caseDetails = CaseDetails.builder()
                 .id(12345678L)
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
@@ -430,30 +401,6 @@ public class TestingSupportServiceTest {
                 .caseDetails(caseDetails)
                 .eventId(TS_ADMIN_APPLICATION_NOC.getId())
                 .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test
-    public void testAboutToSubmitAdminCaseCreationWithDummyC100DataV3() throws Exception {
-        caseData = CaseData.builder()
-            .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V3);
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
-            .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
@@ -659,34 +606,6 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitSolicitorCaseCreationForAdminWithDummyC100DataV3() throws Exception {
-        caseData = CaseData.builder()
-            .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V3);
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .eventId(TS_CA_URGENT_CASE.getId())
-            .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(COURT_ADMIN_ROLE))
-                                                                     .build());
-
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Test
     public void testAboutToSubmitSolicitorCaseCreationForAdminWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
@@ -694,7 +613,6 @@ public class TestingSupportServiceTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("taskListVersionOptions", TASK_LIST_VERSION_V2);
         caseDetails = CaseDetails.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
