@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -69,7 +68,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
@@ -138,13 +136,12 @@ public class TestingSupportService {
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            String taskListVersionOptions = (String) callbackRequest.getCaseDetails().getData().get("taskListVersionOptions");
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())
                 || (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
-                requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation, taskListVersionOptions);
+                requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation);
             } else {
-                requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData, taskListVersionOptions);
+                requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
@@ -282,7 +279,7 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
-    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData, String taskListVersionOptions) throws Exception {
+    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V3_INPUT_JSON);
@@ -292,7 +289,7 @@ public class TestingSupportService {
         return requestBody;
     }
 
-    private String loadCaseDetailsInDraftStage(CaseData initialCaseData, String authorisation, String taskListVersionOptions) throws Exception {
+    private String loadCaseDetailsInDraftStage(CaseData initialCaseData, String authorisation) throws Exception {
         String requestBody;
         List<String> roles = userService.getUserDetails(authorisation).getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
@@ -303,13 +300,12 @@ public class TestingSupportService {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
             }
         } else {
-            requestBody = loadCaseDetailsInDraftStageForUrgentCases(initialCaseData, taskListVersionOptions);
+            requestBody = loadCaseDetailsInDraftStageForUrgentCases(initialCaseData);
         }
         return requestBody;
     }
 
-    private static String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData,
-                                                                    String taskListVersionOptions) throws Exception {
+    private static String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON);
