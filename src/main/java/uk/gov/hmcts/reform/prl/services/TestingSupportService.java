@@ -298,9 +298,7 @@ public class TestingSupportService {
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         if (!isCourtStaff) {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                requestBody = TASK_LIST_VERSION_V3.equals(taskListVersionOptions) || StringUtils.isEmpty(taskListVersionOptions)
-                    ? ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON)
-                    : ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
+                requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
             }
@@ -314,7 +312,7 @@ public class TestingSupportService {
                                                                     String taskListVersionOptions) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
+            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
         }
