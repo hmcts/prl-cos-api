@@ -89,41 +89,36 @@ public class Fm5ReminderService {
         if (isNotEmpty(caseDetailsList)) {
             HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
 
-            //Iterate all cases to evaluate rules to trigger FM5 reminder
+            qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
+
+            qualifiedCasesAndPartiesBeforeHearing.forEach(
+                (key, value) -> {
+                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                        = allTabService.getStartAllTabsUpdate(String.valueOf(key));
+                    Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+
+                    List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
+                        startAllTabsUpdateDataContent.caseData(),
+                        value
+                    );
+
+                    //Persist fm5 reminder notifications details
+                    if (isNotEmpty(fm5ReminderNotifications)) {
 
 
-                qualifiedCasesAndPartiesBeforeHearing = getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
+                        caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
+                        caseDataUpdated.put("fm5RemindersSent", Yes);
 
-
-                qualifiedCasesAndPartiesBeforeHearing.forEach(
-                    (key, value) -> {
-                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                            = allTabService.getStartAllTabsUpdate(String.valueOf(key));
-                        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
-
-                        List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
-                            startAllTabsUpdateDataContent.caseData(),
-                            value
+                        allTabService.submitAllTabsUpdate(
+                            startAllTabsUpdateDataContent.authorisation(),
+                            String.valueOf(key),
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            startAllTabsUpdateDataContent.eventRequestData(),
+                            caseDataUpdated
                         );
-
-                        //Persist fm5 reminder notifications details
-                        if (isNotEmpty(fm5ReminderNotifications)) {
-
-
-                            caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
-                            caseDataUpdated.put("fm5RemindersSent", Yes);
-
-                            allTabService.submitAllTabsUpdate(
-                                startAllTabsUpdateDataContent.authorisation(),
-                                String.valueOf(key),
-                                startAllTabsUpdateDataContent.startEventResponse(),
-                                startAllTabsUpdateDataContent.eventRequestData(),
-                                caseDataUpdated
-                            );
-                        }
                     }
-                );
-
+                }
+            );
         }
 
         log.info(
@@ -145,7 +140,7 @@ public class Fm5ReminderService {
 
             filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
 
-            if (!filteredCaseAndParties.get(caseData.getId()).equals(FmPendingParty.NONE)) {
+            if (!filteredCaseAndParties.get(String.valueOf(caseData.getId())).equals(FmPendingParty.NONE)) {
                 caseIdsForHearing.add(String.valueOf(caseData.getId()));
             }
 
@@ -158,7 +153,7 @@ public class Fm5ReminderService {
         );
         hearingsForAllCaseIdsWithCourtVenue.stream().forEach(
             hearing -> {
-                if (isFirstListedHearingAwayForDays(hearing, 20)) {
+                if (isFirstListedHearingAwayForDays(hearing, 19)) {
                     qualifiedCasesAndPartiesBeforeHearing.put(
                         hearing.getCaseRef(),
                         filteredCaseAndParties.get(hearing.getCaseRef())
