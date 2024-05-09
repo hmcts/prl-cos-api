@@ -17,6 +17,6 @@ import java.util.List;
 public class FM5ReminderNotificationDetails {
 
     private List<Element<NotificationDetails>> fm5ReminderNotifications;
-    private YesOrNo fm5RemindersSent;
+    private String fm5RemindersSent;
 
 }
