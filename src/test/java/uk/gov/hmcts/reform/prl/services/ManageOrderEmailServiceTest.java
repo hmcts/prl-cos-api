@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -941,7 +940,6 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(dataMap.get("orderCollection"));
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_General_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -996,14 +994,13 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class)));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_two_Orders() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1064,17 +1061,15 @@ public class ManageOrderEmailServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
 
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
     }
 
-
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServed_Interim_Order() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1128,7 +1123,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class)));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
 
@@ -1225,7 +1220,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1265,7 +1259,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(0)).send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
+        Mockito.verifyNoInteractions(emailService);
     }
 
     @Test
