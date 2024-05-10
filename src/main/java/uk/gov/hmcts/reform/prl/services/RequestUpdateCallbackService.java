@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,6 +35,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 @Component
@@ -49,6 +54,7 @@ public class RequestUpdateCallbackService {
     private final CourtFinderService courtFinderService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -248,6 +254,10 @@ public class RequestUpdateCallbackService {
                         );
                 }
                 caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    AWP_WA_TASK_NAME,
+                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(updatedAdditionalApplicationsBundleElement));
+                caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
             }
         }
         return caseDataUpdated;
