@@ -179,57 +179,10 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                if (Event.EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId())) {
-                    caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
-                        .getDraftOrderNameForWA(caseData, true));
-                }
-
-                manageOrderService.setHearingOptionDetailsForTask(
-                    caseData,
-                    caseDataUpdated,
-                    callbackRequest.getEventId(),
-                    loggedInUserType
-                );
-
-                caseDataUpdated.put(
-                    WA_ORDER_NAME_JUDGE_APPROVED,
-                    draftAnOrderService.getDraftOrderNameForWA(caseData, true)
-                );
-                caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
-                    caseData,
-                    authorisation,
-                    callbackRequest.getEventId()
-                ));
+                editAndApproveOrder(authorisation, callbackRequest, caseDataUpdated, caseData, loggedInUserType);
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
-                if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-                    Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
-                        .getSolicitorOrdersHearingDetails()
-                        .stream()
-                        .filter(
-                            e -> e.getValue().getHearingJudgeNameAndEmail() != null
-                        )
-                        .findFirst();
-
-                    JudicialUser judicialUser = null;
-                    if (hearingDataElement.isPresent()) {
-                        judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
-                    }
-
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judicialUser(judicialUser)
-                        .build();
-                    roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        callbackRequest.getCaseDetails(),
-                        roleAssignmentDto,
-                        DRAFT_AN_ORDER.getName(),
-                        false,
-                        HEARING_JUDGE_ROLE
-                    );
-                }
+                editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData);
 
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -239,6 +192,62 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void editAndReturnOrder(String authorisation, CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, CaseData caseData) {
+        caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
+        if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+            Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
+                .getSolicitorOrdersHearingDetails()
+                .stream()
+                .filter(
+                    e -> e.getValue().getHearingJudgeNameAndEmail() != null
+                )
+                .findFirst();
+
+            JudicialUser judicialUser = null;
+            if (hearingDataElement.isPresent()) {
+                judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
+            }
+
+            RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                .judicialUser(judicialUser)
+                .build();
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                roleAssignmentDto,
+                DRAFT_AN_ORDER.getName(),
+                false,
+                HEARING_JUDGE_ROLE
+            );
+        }
+    }
+
+    private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
+                                     Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
+        if (Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId())) {
+            caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
+                .getDraftOrderNameForWA(caseData, true));
+        }
+
+        manageOrderService.setHearingOptionDetailsForTask(
+            caseData,
+            caseDataUpdated,
+            callbackRequest.getEventId(),
+            loggedInUserType
+        );
+
+        caseDataUpdated.put(
+            WA_ORDER_NAME_JUDGE_APPROVED,
+            draftAnOrderService.getDraftOrderNameForWA(caseData, true)
+        );
+        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            authorisation,
+            callbackRequest.getEventId()
+        ));
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
