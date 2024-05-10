@@ -318,7 +318,8 @@ public enum ManageOrderFieldsEnum {
     sdoCourtTempList("sdoCourtTempList"),
     sdoDocumentationAndEvidenceTempList("sdoDocumentationAndEvidenceTempList"),
     sdoOtherTempList("sdoOtherTempList"),
-    listElementsSetToDefaultValue("listElementsSetToDefaultValue");
+    listElementsSetToDefaultValue("listElementsSetToDefaultValue"),
+    editedOrderHasDefaultCaseFields("editedOrderHasDefaultCaseFields");
 
     private final String value;
 
