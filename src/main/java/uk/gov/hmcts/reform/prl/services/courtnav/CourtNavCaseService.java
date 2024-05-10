@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -61,9 +62,17 @@ public class CourtNavCaseService {
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final SystemUserService systemUserService;
+    public static final String FL401_DEFAULT_BASE_LOCATION_NAME = "Swansea Civil Justice Centre";
+    public static final String FL401_DEFAULT_BASE_LOCATION_ID = "234946";
+    public static final String FL401_DEFAULT_REGION_NAME = "Wales";
+    public static final String FL401_DEFAULT_REGION_ID = "7";
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
+            .region(FL401_DEFAULT_REGION_ID)
+            .baseLocation(FL401_DEFAULT_BASE_LOCATION_ID).regionName(FL401_DEFAULT_REGION_NAME)
+            .baseLocationName(FL401_DEFAULT_BASE_LOCATION_NAME).build());
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()
