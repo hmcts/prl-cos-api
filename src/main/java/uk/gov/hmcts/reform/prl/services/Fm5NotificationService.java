@@ -175,7 +175,7 @@ public class Fm5NotificationService {
                                                                   Element<PartyDetails> party,
                                                                   boolean isApplicant) {
         log.info("Contact pref is {} for party {}", party.getValue().getContactPreferences(), party.getId());
-        if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && YesOrNo.Yes.equals(party.getValue().getCanYouProvideEmailAddress())) {
             return sendFm5ReminderToLipViaEmail(authorization, caseData, party, isApplicant);
         } else {

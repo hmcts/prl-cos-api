@@ -300,11 +300,6 @@ public class DocumentGenService {
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
 
-    @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
-    protected String docCoverSheetServeOrderTemplate;
-    @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
-    protected String docCoverSheetWelshServeOrderTemplate;
-
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final OrganisationService organisationService;
@@ -1102,11 +1097,6 @@ public class DocumentGenService {
 
     private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
         return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
-    }
-
-    private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
-        //Need to replace EMPTY_STRING with received welsh template
-        return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
