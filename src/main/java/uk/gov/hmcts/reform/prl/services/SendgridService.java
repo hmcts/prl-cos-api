@@ -78,6 +78,9 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
+    @Value("${send-grid.notification.emailId.from}")
+    private String fromEmailSendgrid;
+
     private final SendGrid sendGrid;
     private final DocumentGenService documentGenService;
     private final AuthTokenGenerator authTokenGenerator;
@@ -121,7 +124,10 @@ public class SendgridService {
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
-        mail.setFrom(getEmail(fromEmail));
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
+        Email fromEmail = getEmail(fromEmailSendgrid);
+        fromEmail.setName("Sendgrid-new");
+        mail.setFrom(fromEmail);
         mail.addPersonalization(personalization);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         Request request = new Request();
@@ -193,7 +199,8 @@ public class SendgridService {
                     emailProps.get("solicitorName")
             ));
         }
-        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
+        Mail mail = new Mail(new Email(fromEmailSendgrid), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         if (!listOfAttachments.isEmpty()) {
@@ -239,7 +246,8 @@ public class SendgridService {
             emailProps.get("confidentialityText"),
             emailProps.get("courtName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmailAddress), content);
+        log.info("from email sendgrid {} ", fromEmailSendgrid);
+        Mail mail = new Mail(new Email(fromEmailSendgrid), subject, new Email(toEmailAddress), content);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }

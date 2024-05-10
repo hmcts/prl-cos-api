@@ -31,6 +31,7 @@ def secrets = [
           secret("send-grid-api-key", "SEND_GRID_API_KEY"),
           secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
           secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
+          secret("sendgrid-notify-from-email", "SENDGRID_NOTIFY_FROM_EMAIL"),
           secret("cafcass-svc-username", "CAFCASS_USERNAME"),
           secret("cafcass-svc-password", "CAFCASS_PASSWORD"),
           secret("citizen-user", "IDAM_CITIZEN_USERNAME"),
