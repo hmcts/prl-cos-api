@@ -107,13 +107,14 @@ public class CaseApplicationResponseControllerFunctionalTest {
             .body("")
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .post("/" + id + "/"+respondents.stream().findFirst().get().get("id")+"/generate-c7document")
+            .post("/" + id + "/" + respondents.stream().findFirst().get().get("id") + "/generate-c7document")
             .then()
             .assertThat().statusCode(200)
             .extract()
             .as(Document.class);
 
     }
+
     public RequestSpecification getMultipleAuthHeaders() {
         return SerenityRest.with()
             .relaxedHTTPSValidation()
