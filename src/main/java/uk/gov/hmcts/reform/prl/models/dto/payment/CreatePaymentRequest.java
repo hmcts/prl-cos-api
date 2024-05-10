@@ -14,6 +14,5 @@ import lombok.NoArgsConstructor;
 public class CreatePaymentRequest {
     String caseId;
     String returnUrl;
-    String applicantCaseName;
     String hwfRefNumber;
 }
