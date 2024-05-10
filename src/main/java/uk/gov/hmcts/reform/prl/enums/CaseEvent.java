@@ -45,7 +45,8 @@ public enum CaseEvent {
     FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
     ALL_AWP_IN_REVIEW("allAwPInReview"),
-    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags");
+    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
+    FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate");
 
     private final String value;
 
