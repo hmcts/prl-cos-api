@@ -329,6 +329,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             ).build());
         }
 
+        sendAndReplyService.closeAwPTask(caseData);
+
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
