@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -379,8 +380,19 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
                 && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())
+                    && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
+                    draftAnOrderService.populateStandardDirectionOrderDefaultFields(
+                        authorisation,
+                        caseData,
+                        caseDataUpdated
+                    );
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDataUpdated).build();
+                }
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
             } else {
