@@ -195,29 +195,31 @@ public class Fm5ReminderService {
             return caseIdPendingPartyMapping;
         }
 
-        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList = new ArrayList<>();
 
         if (null != caseData.getDocumentManagementDetails()) {
-            legalProfQuarantineDocsElemList = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            courtStaffQuarantineDocsElemList = caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList();
+            legalProfQuarantineDocsList = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            citizenQuarantineDocsList = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
         }
 
-        List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList = new ArrayList<>();
-        List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> restrictedDocumentsList = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
-            legalProfQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            courtStaffQuarantineUploadedDocsElemList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-            restrictedDocumentsElemList = caseData.getReviewDocuments().getRestrictedDocuments();
+            legalProfUploadedCaseDocsList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
+            citizenUploadedCaseDocsList = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab();
+            restrictedDocumentsList = caseData.getReviewDocuments().getRestrictedDocuments();
         }
 
         //if respondent AOH is available, no need to remind
         if (isPartyAohAvailable(
-            legalProfQuarantineDocsElemList,
-            legalProfQuarantineUploadedDocsElemList,
-            restrictedDocumentsElemList
+            legalProfQuarantineDocsList,
+            legalProfUploadedCaseDocsList,
+            citizenQuarantineDocsList,
+            citizenUploadedCaseDocsList,
+            restrictedDocumentsList
         )) {
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), FmPendingParty.NOTIFICATION_NOT_REQUIRED);
             return caseIdPendingPartyMapping;
@@ -226,10 +228,8 @@ public class Fm5ReminderService {
         //check & evaluate whom to send fm5 reminders
         caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), fetchFm5DocsSubmissionPendingParties(
             caseData,
-            legalProfQuarantineDocsElemList,
-            courtStaffQuarantineDocsElemList,
-            legalProfQuarantineUploadedDocsElemList,
-            courtStaffQuarantineUploadedDocsElemList
+            legalProfUploadedCaseDocsList,
+            citizenUploadedCaseDocsList
         ));
         return caseIdPendingPartyMapping;
     }
@@ -331,21 +331,33 @@ public class Fm5ReminderService {
         return false;
     }
 
-    private  boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
-                                         List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
-                                         List<Element<QuarantineLegalDoc>> restrictedDocumentsElemList) {
-        if (isNotEmpty(legalProfQuarantineDocsElemList)
-            && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsElemList)) {
+    private  boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList,
+                                         List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                         List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList,
+                                         List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList,
+                                         List<Element<QuarantineLegalDoc>> restrictedDocumentsList) {
+        if (isNotEmpty(legalProfQuarantineDocsList)
+            && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsList)) {
             return true;
         }
 
-        if (isNotEmpty(legalProfQuarantineUploadedDocsElemList)
-            && checkByCategoryRespondentC1AApplication(legalProfQuarantineUploadedDocsElemList)) {
+        if (isNotEmpty(legalProfUploadedCaseDocsList)
+            && checkByCategoryRespondentC1AApplication(legalProfUploadedCaseDocsList)) {
             return true;
         }
 
-        return isNotEmpty(restrictedDocumentsElemList)
-            && checkByCategoryRespondentC1AApplication(restrictedDocumentsElemList);
+        if (isNotEmpty(citizenQuarantineDocsList)
+            && checkByCategoryRespondentC1AApplication(citizenQuarantineDocsList)) {
+            return true;
+        }
+
+        if (isNotEmpty(citizenUploadedCaseDocsList)
+            && checkByCategoryRespondentC1AApplication(citizenUploadedCaseDocsList)) {
+            return true;
+        }
+
+        return isNotEmpty(restrictedDocumentsList)
+            && checkByCategoryRespondentC1AApplication(restrictedDocumentsList);
     }
 
     private boolean checkByCategoryRespondentC1AApplication(List<Element<QuarantineLegalDoc>> quarantineDocsElemList) {
@@ -355,29 +367,19 @@ public class Fm5ReminderService {
     }
 
     private FmPendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
-                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> legalProfQuarantineUploadedDocsElemList,
-                                                                 List<Element<QuarantineLegalDoc>> courtStaffQuarantineUploadedDocsElemList) {
+                                                                List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                                                List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList) {
 
         Map<String,Long> countMap = new HashMap<>();
         countMap.put(APPLICANT_FM5_COUNT,0L);
         countMap.put(RESPONDENT_FM5_COUNT,0L);
 
-        if (isNotEmpty(legalProfQuarantineDocsElemList)) {
-            checkByCategoryFm5StatementsAndParty(legalProfQuarantineDocsElemList, countMap);
+        if (isNotEmpty(legalProfUploadedCaseDocsList)) {
+            checkByCategoryFm5StatementsAndParty(legalProfUploadedCaseDocsList, countMap);
         }
 
-        if (null != courtStaffQuarantineDocsElemList && !courtStaffQuarantineDocsElemList.isEmpty()) {
-            checkByCategoryFm5StatementsAndParty(courtStaffQuarantineDocsElemList, countMap);
-        }
-
-        if (null != legalProfQuarantineUploadedDocsElemList && !legalProfQuarantineUploadedDocsElemList.isEmpty()) {
-            checkByCategoryFm5StatementsAndParty(legalProfQuarantineUploadedDocsElemList, countMap);
-        }
-
-        if (null != courtStaffQuarantineUploadedDocsElemList && !courtStaffQuarantineUploadedDocsElemList.isEmpty()) {
-            checkByCategoryFm5StatementsAndParty(courtStaffQuarantineUploadedDocsElemList, countMap);
+        if (isNotEmpty(citizenUploadedCaseDocsList)) {
+            checkByCategoryFm5StatementsAndParty(citizenUploadedCaseDocsList, countMap);
         }
 
         if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()
