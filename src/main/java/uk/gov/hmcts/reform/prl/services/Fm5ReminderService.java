@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_FM5_C
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.FM5_NOTIFICATION_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -96,8 +97,8 @@ public class Fm5ReminderService {
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fmPendingParty) -> {
                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                        = allTabService.getStartAllTabsUpdate(String.valueOf(key));
-                    Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+                        = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
+                    Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
                         caseDataUpdated.put("fm5RemindersSent", No);
                     } else {
@@ -110,16 +111,14 @@ public class Fm5ReminderService {
                             caseDataUpdated.put("fm5RemindersSent", Yes);
                         }
                     }
-
                     //Save case data
                     allTabService.submitAllTabsUpdate(
                         startAllTabsUpdateDataContent.authorisation(),
-                        String.valueOf(key),
+                        key,
                         startAllTabsUpdateDataContent.startEventResponse(),
                         startAllTabsUpdateDataContent.eventRequestData(),
                         caseDataUpdated
                     );
-
                 }
             );
         }
@@ -162,7 +161,7 @@ public class Fm5ReminderService {
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing, 20)) {
+                        if (isFirstListedHearingAwayForDays(hearing, 18)) {
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
@@ -277,9 +276,13 @@ public class Fm5ReminderService {
         List<Should> shoulds = List.of(Should.builder()
                                              .match(Match.builder()
                                                         .caseTypeOfApplication("C100")
-                                                        //.fm5RemindersSent(No)
                                                         .build())
-                                             .build());
+                                             .build(),
+                                       Should.builder()
+                                           .match(Match.builder()
+                                                      .fm5RemindersSent(No)
+                                                      .build())
+                                           .build());
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
