@@ -94,7 +94,7 @@ public class CitizenCallbackControllerFunctionalTest {
             .as(CaseDetails.class);
 
 
-         RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
