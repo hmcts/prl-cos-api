@@ -756,7 +756,7 @@ public class DraftAnOrderService {
             caseData.getDraftOrdersDynamicList()
         );
         if (null != selectedOrder.getSdoDetails()) {
-            StandardDirectionOrder standardDirectionOrder;
+            StandardDirectionOrder standardDirectionOrder = null;
             try {
                 SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
                     .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
@@ -822,14 +822,30 @@ public class DraftAnOrderService {
                         hearingDataPrePopulatedDynamicLists,
                         caseData
                     ) : null)
-                    .sdoDirectionsForFactFindingHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
-                                                                   && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
-                                                                                     .getHearingDateConfirmOptionEnum())
-                                                                   ? hearingDataService.getHearingDataForSdo(
-                        standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    ) : null)
+                    .sdoDirectionsForFactFindingHearingDetails(
+                        isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+                            && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                                              .getHearingDateConfirmOptionEnum())
+                            ? hearingDataService.getHearingDataForSdo(
+                            standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
+                            hearingDataPrePopulatedDynamicLists,
+                            caseData
+                        ) : null)
+                    .editedOrderHasDefaultCaseFields(Yes)
+                    .sdoPreamblesTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
+                                              : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                    .sdoHearingsAndNextStepsTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
+                                                         : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                    .sdoCafcassOrCymruTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
+                                                   : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                    .sdoLocalAuthorityTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
+                                                   : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                    .sdoCourtTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
+                                          : selectedOrder.getSdoDetails().getSdoCourtList())
+                    .sdoDocumentationAndEvidenceTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
+                                                             : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                    .sdoOtherTempList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
+                                          : selectedOrder.getSdoDetails().getSdoOtherList())
                     .build();
                 caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
                 standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
@@ -1584,7 +1600,7 @@ public class DraftAnOrderService {
             rightToAskCourt)
         ) {
             caseDataUpdated.put(
-                "sdoRightToAskCourt",
+                SDO_RIGHT_TO_ASK_COURT,
                 RIGHT_TO_ASK_COURT
             );
         }
