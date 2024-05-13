@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,7 +63,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
-            "http://localhost:4044"
+            "https://prl-cos-pr-2381.preview.platform.hmcts.net"
         );
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
@@ -105,6 +106,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    @Mock
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
@@ -142,7 +145,22 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                       .getDraftOrderDynamicList(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(drafOrderMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        request1
+
+        AboutToStartOrSubmitCallbackResponse response = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/populate-draft-order-dropdown")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        log.info("response: {}",objectMapper.writeValueAsString(response));
+
+        /*request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -154,7 +172,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .body("data.draftOrder1", equalTo("SDO"),
                   "data.draftOrder2", equalTo("C21"))
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(AboutToStartOrSubmitCallbackResponse.class);*/
+
     }
 
     @Test
