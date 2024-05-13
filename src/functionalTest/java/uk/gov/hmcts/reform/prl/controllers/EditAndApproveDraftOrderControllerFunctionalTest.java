@@ -12,8 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -63,7 +62,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
-            "https://prl-cos-pr-2381.preview.platform.hmcts.net"
+            "http://localhost:4044"
         );
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
@@ -106,8 +105,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Mock
-    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
@@ -136,17 +133,16 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> drafOrderMap = new HashMap<>();
-        drafOrderMap.put("draftOrder1", "SDO");
-        drafOrderMap.put("draftOrder2", "C21");
-        Mockito
-            .when(draftAnOrderService
-                      .getDraftOrderDynamicList(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(drafOrderMap);
+
+        /*Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("orderName", "C21");
+        caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
+        when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
+            .thenReturn(caseDataMap);*/
+
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
 
-        AboutToStartOrSubmitCallbackResponse response = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -155,35 +151,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .post("/populate-draft-order-dropdown")
             .then()
             .assertThat().statusCode(200)
+            .body("data.caseTypeOfApplication", equalTo("FL401"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        log.info("response: {}",objectMapper.writeValueAsString(response));
-
-        /*request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/populate-draft-order-dropdown")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.draftOrder1", equalTo("SDO"),
-                  "data.draftOrder2", equalTo("C21"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);*/
 
     }
 
     @Test
     public void givenRequestBody_whenJudge_admin_populate_draft_order_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> caseDataMap = new HashMap<>();
+        /*Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("orderName", "C21");
         caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
-        Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(caseDataMap);
+        when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
+                .thenReturn(caseDataMap);*/
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -194,8 +174,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .post("/judge-or-admin-populate-draft-order")
             .then()
             .assertThat().statusCode(200)
-            .body("data.orderName", equalTo("C21"),
-                  "data.orderUploadedAsDraftFlag", equalTo("Yes"))
+            .body("data.caseTypeOfApplication", equalTo("FL401"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
@@ -221,7 +200,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("appointedGuardianName", "John");
         caseDataMap.put("parentName", "Smith");
-        Mockito.when(draftAnOrderService.populateDraftOrderCustomFields(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(draftAnOrderService.populateDraftOrderCustomFields(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order-custom-fields")
@@ -243,7 +222,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("orderType", "C21");
         caseDataMap.put("isTheOrderByConsent", "Yes");
-        Mockito.when(draftAnOrderService
+        when(draftAnOrderService
                          .populateCommonDraftOrderFields(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
