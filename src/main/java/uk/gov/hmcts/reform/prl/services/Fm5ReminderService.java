@@ -81,7 +81,7 @@ public class Fm5ReminderService {
 
 
 
-    public void sendFm5ReminderNotifications() {
+    public void sendFm5ReminderNotifications(Long hearingAwayDays) {
         log.info("*** FM5 reminder notifications ***");
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state pending fm5 reminder notifications
@@ -91,7 +91,7 @@ public class Fm5ReminderService {
         if (isNotEmpty(caseDetailsList)) {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing =
-                getQualifiedCasesAndHearingsForNotifications(caseDetailsList);
+                getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
 
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
@@ -130,7 +130,8 @@ public class Fm5ReminderService {
     }
 
 
-    private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList) {
+    private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
+                                                                                         Long hearingAwayDays) {
 
         List<String> caseIdsForHearing = new ArrayList<>();
         HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
@@ -161,7 +162,8 @@ public class Fm5ReminderService {
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
                 hearingsForAllCaseIdsWithCourtVenue.forEach(
                     hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing, 18)) {
+                        if (isFirstListedHearingAwayForDays(hearing,
+                                                            null != hearingAwayDays ? hearingAwayDays : 18)) {
                             qualifiedCasesAndPartiesBeforeHearing.put(
                                 hearing.getCaseRef(),
                                 filteredCaseAndParties.get(hearing.getCaseRef())
