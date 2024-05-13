@@ -68,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -524,6 +525,9 @@ public class NoticeOfChangePartiesService {
                                          ? legalRepresentativeSolicitorDetails.getFirstName() : null)
             .representativeLastName(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                         ? legalRepresentativeSolicitorDetails.getLastName() : null)
+            .solicitorPartyId(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                  && null == partyDetails.getSolicitorPartyId() ? UUID.randomUUID()
+                                  : partyDetails.getSolicitorPartyId())
             .response(null != partyDetails.getResponse()
                           && YesOrNo.Yes.equals(partyDetails.getResponse().getC7ResponseSubmitted())
                           ? partyDetails.getResponse() : Response.builder().build())
