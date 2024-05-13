@@ -62,7 +62,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
-            "https://prl-cos-pr-2381.preview.platform.hmcts.net"
+            "http://localhost:4044"
         );
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
