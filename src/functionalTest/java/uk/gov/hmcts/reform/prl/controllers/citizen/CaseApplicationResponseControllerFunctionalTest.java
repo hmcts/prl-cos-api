@@ -5,15 +5,14 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -34,8 +33,8 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CaseApplicationResponseControllerFunctionalTest {
 
     private MockMvc mockMvc;
@@ -75,7 +74,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
-    @Before
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
