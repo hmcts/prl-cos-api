@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -93,6 +94,9 @@ public class CourtNavCaseServiceTest {
 
     @Mock
     SystemUserService systemUserService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
 
     private Map<String, Object> caseDataMap = new HashMap<>();
