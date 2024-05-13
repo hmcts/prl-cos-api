@@ -29,7 +29,7 @@ public class FM5ReminderNotificationTask implements Runnable {
         log.info("*** FM5 reminder scheduled task is started ***");
 
         //Invoke fm5 reminder service to evaluate & notify if needed
-        fm5ReminderService.sendFm5ReminderNotifications();
+        fm5ReminderService.sendFm5ReminderNotifications(18L);
 
         log.info("*** FM5 reminder scheduled task is completed ***");
     }
