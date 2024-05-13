@@ -1172,7 +1172,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         //PRL-5566 - Set FM5 notification flag to No during SOA
-        caseDataMap.put("fm5RemindersSent", No);
+        caseDataMap.put("fm5RemindersSent", "NO");
         return caseDataMap;
     }
 
