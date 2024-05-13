@@ -471,7 +471,7 @@ dependencies {
   contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
   contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
-  testImplementation 'org.apiguardian:apiguardian-api:1.0.0'
+  testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
 
   contractTestImplementation sourceSets.main.runtimeClasspath
