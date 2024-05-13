@@ -23,7 +23,7 @@ public class Fm5ReminderController {
     /**
      * TEMP API TO TEST FM5 REMINDER NOTIFICATIONS.
      */
-    @PostMapping("/reminder-notifications")
+    @PostMapping("/reminder-notifications/{hearingAwayDays}")
     public void sendFm5ReminderNotifications(@PathVariable("hearingAwayDays") Long hearingAwayDays) {
         log.info("*** FM5 reminder notifications ***");
         fm5ReminderService.sendFm5ReminderNotifications(hearingAwayDays);
