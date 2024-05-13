@@ -434,7 +434,7 @@ public class CaseService {
 
         //PRL-5565 - FM5 dashboard notification
         if (null != caseData.getFm5ReminderNotificationDetails()
-            && YesOrNo.Yes.equals(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
+            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
             && !isFm5UploadedByParty(citizenDocumentsManagement.getCitizenDocuments(), userDetails)) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(true).build());
         }
