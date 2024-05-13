@@ -4,8 +4,9 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration
 public class CitizenCallbackControllerFunctionalTest {
     private MockMvc mockMvc;
@@ -71,7 +73,7 @@ public class CitizenCallbackControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @Before
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
