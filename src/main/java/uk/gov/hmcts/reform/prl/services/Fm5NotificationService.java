@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -132,8 +131,7 @@ public class Fm5NotificationService {
                                                                      boolean isApplicant) {
         String authorization = systemUserService.getSysUserToken();
         //if represented then send reminder to solicitor
-        if (YesNoDontKnow.yes.equals(party.getValue().getDoTheyHaveLegalRepresentation())
-            && isNotEmpty(party.getValue().getSolicitorEmail())) {
+        if (isNotEmpty(party.getValue().getSolicitorEmail())) {
             return sendFm5ReminderToSolicitor(authorization, caseData, party, isApplicant);
         } else {
             //Not represented, remind citizen LiP
