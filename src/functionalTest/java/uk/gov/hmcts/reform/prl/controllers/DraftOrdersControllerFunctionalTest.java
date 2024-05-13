@@ -5,17 +5,14 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -36,9 +33,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
@@ -47,7 +41,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @ContextConfiguration
 public class DraftOrdersControllerFunctionalTest {
 
-    private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
     @MockBean
@@ -79,35 +72,39 @@ public class DraftOrdersControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String SELECTED_ORDER = "/selected-order";
 
     @Test
     public void givenRequestBody_whenReset_fields_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/reset-fields")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/reset-fields")
+            .then()
+            .body("data.caseTypeOfApplication", equalTo("C100"))
+            .assertThat().statusCode(200);
     }
 
     @Test
     public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/selected-order")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post(SELECTED_ORDER)
+            .then()
+            .body("errors[0]", equalTo("This order is not available to be drafted"))
+            .assertThat().statusCode(200);
     }
 
     @Test
@@ -119,27 +116,66 @@ public class DraftOrdersControllerFunctionalTest {
             .caseTypeOfApplication(FL401_CASE_TYPE).id(Long.parseLong("1647373355918192"))
             .build();
         when(manageOrderService.populateCustomOrderFields(any(), any())).thenReturn(caseData);
-        mockMvc.perform(post("/populate-draft-order-fields")
+        /*mockMvc.perform(post("/populate-draft-order-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn();*/
+
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/populate-draft-order-fields")
+            .then()
+            .body("data.id", equalTo(1705065178030549L),
+                  "data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401"),
+                  "data.manageOrdersOptions", equalTo("createAnOrder"),
+                  "data.createSelectOrderOptions", equalTo("standardDirectionsOrder"),
+                  "data.draftOrderOptions", equalTo("draftAnOrder"),
+                  "data.c21OrderOptions", equalTo("c21ApplicationRefused"),
+                  "data.draftOrdersDynamicList", equalTo("fa632e84-bc22-4d74-bd36-b37cd27095d3"))
+            .assertThat().statusCode(200);
     }
 
     @Test
     public void givenRequestBody_whenPopulate_standard_direction_order_fields() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/populate-standard-direction-order-fields")
+        /*mockMvc.perform(post("/populate-standard-direction-order-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn();*/
+
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/populate-standard-direction-order-fields")
+            .then()
+            .body("data.id", equalTo(1705065178030549L),
+                  "data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401"),
+                  "data.manageOrdersOptions", equalTo("createAnOrder"),
+                  "data.createSelectOrderOptions", equalTo("standardDirectionsOrder"),
+                  "data.draftOrderOptions", equalTo("draftAnOrder"),
+                  "data.c21OrderOptions", equalTo("c21ApplicationRefused"),
+                  "data.isCafcassCymru", equalTo("Yes"),
+                  "data.isFL401RespondentPresent", equalTo("Yes"),
+                  "data.isApplicant1Present", equalTo("Yes"),
+                  "data.isFL401ApplicantPresent", equalTo("Yes"))
+            .assertThat().statusCode(200);
     }
 
     @Test
@@ -151,14 +187,19 @@ public class DraftOrdersControllerFunctionalTest {
            any(CallbackRequest.class)
         )).thenReturn(caseDataMap);
 
-        mockMvc.perform(post("/about-to-submit")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/about-to-submit")
+            .then()
+            .body("data.id", equalTo(1705065178030549L),
+                  "data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401"),
+                  "data.draftOrdersDynamicList", equalTo("fa632e84-bc22-4d74-bd36-b37cd27095d3"))
+            .assertThat().statusCode(200);
     }
 
     @Ignore
@@ -177,14 +218,31 @@ public class DraftOrdersControllerFunctionalTest {
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         )).thenReturn(caseDataMap);
 
-        mockMvc.perform(post("/generate-doc")
+        /*mockMvc.perform(post("/generate-doc")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn();*/
+
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/generate-doc")
+            .then()
+            .body("data.id", equalTo(1705065178030549L),
+                  "data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401"),
+                  "data.manageOrdersOptions", equalTo("createAnOrder"),
+                  "data.createSelectOrderOptions", equalTo("standardDirectionsOrder"),
+                  "data.draftOrderOptions", equalTo("draftAnOrder"),
+                  "data.c21OrderOptions", equalTo("c21ApplicationRefused"))
+            .assertThat().statusCode(200);
     }
 
 
