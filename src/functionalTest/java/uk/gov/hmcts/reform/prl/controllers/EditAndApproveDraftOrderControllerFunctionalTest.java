@@ -150,9 +150,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/populate-draft-order-dropdown")
             .then()
+            .assertThat().statusCode(200)
             .body("data.draftOrder1", equalTo("SDO"),
                   "data.draftOrder2", equalTo("C21"))
-            .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
@@ -174,9 +174,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-populate-draft-order")
             .then()
+            .assertThat().statusCode(200)
             .body("data.orderName", equalTo("C21"),
                   "data.orderUploadedAsDraftFlag", equalTo("Yes"))
-            .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
