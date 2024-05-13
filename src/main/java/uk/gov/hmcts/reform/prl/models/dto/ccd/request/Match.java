@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +20,6 @@ public class Match {
     private String caseTypeOfApplication;
 
     @JsonProperty("data.fm5RemindersSent")
-    private YesOrNo fm5RemindersSent;
+    private String fm5RemindersSent;
 
 }

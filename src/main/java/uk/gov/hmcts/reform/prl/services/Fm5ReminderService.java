@@ -60,7 +60,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.FM5_NOTIFICATION_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -100,7 +99,7 @@ public class Fm5ReminderService {
                         = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
-                        caseDataUpdated.put("fm5RemindersSent", No);
+                        caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
                     } else {
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
@@ -108,7 +107,7 @@ public class Fm5ReminderService {
                         );
                         if (isNotEmpty(fm5ReminderNotifications)) {
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
-                            caseDataUpdated.put("fm5RemindersSent", Yes);
+                            caseDataUpdated.put("fm5RemindersSent", "YES");
                         }
                     }
                     //Save case data
@@ -282,7 +281,7 @@ public class Fm5ReminderService {
                                              .build(),
                                        Should.builder()
                                            .match(Match.builder()
-                                                      .fm5RemindersSent(No)
+                                                      .fm5RemindersSent("NO")
                                                       .build())
                                            .build());
 
