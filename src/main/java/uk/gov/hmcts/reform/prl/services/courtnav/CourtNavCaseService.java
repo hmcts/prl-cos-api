@@ -76,6 +76,7 @@ public class CourtNavCaseService {
                 .region(FL401_DEFAULT_REGION_ID)
                 .baseLocation(FL401_DEFAULT_BASE_LOCATION_ID).regionName(FL401_DEFAULT_REGION_NAME)
                 .baseLocationName(FL401_DEFAULT_BASE_LOCATION_NAME).build());
+            caseDataMap.put("courtName", FL401_DEFAULT_BASE_LOCATION_NAME);
         }
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
