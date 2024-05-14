@@ -54,6 +54,7 @@ public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
     protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -71,7 +72,7 @@ public class CourtNavCaseService {
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        if (launchDarklyClient.isFeatureEnabled("courtnav-swansea-court-mapping")) {
+        if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING)) {
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(FL401_DEFAULT_REGION_ID)
                 .baseLocation(FL401_DEFAULT_BASE_LOCATION_ID).regionName(FL401_DEFAULT_REGION_NAME)

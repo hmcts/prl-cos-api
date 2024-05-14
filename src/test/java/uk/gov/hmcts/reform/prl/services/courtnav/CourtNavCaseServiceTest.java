@@ -150,6 +150,7 @@ public class CourtNavCaseServiceTest {
                                                     Mockito.anyString(),
                                                     Mockito.any(CaseDataContent.class), Mockito.anyBoolean());
     }
+
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
         Document document = testDocument();
