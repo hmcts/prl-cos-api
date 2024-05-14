@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenChildProtectionConcernEnum;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenDomesti
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenOtherGroundsChecklistEnum.canNotAccessMediator;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenOtherGroundsChecklistEnum.disability;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenOtherGroundsChecklistEnum.noAppointmentAvailable;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamCitizenPreviousAttendanceReasonEnum.fourMonthsPriorAttended;
 
 
 public class CaseDataMiamElementsMapper {
@@ -48,7 +50,7 @@ public class CaseDataMiamElementsMapper {
     private CaseDataMiamElementsMapper() {
     }
 
-    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
+    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder<?, ?> caseDataBuilder,
                                                      C100RebuildMiamElements c100RebuildMiamElements) {
 
         caseDataBuilder
@@ -70,23 +72,36 @@ public class CaseDataMiamElementsMapper {
                                               c100RebuildMiamElements.getMiamDetailsOfDomesticAbuseEvidence())
                                                                                 ? c100RebuildMiamElements
                                               .getMiamDetailsOfDomesticAbuseEvidence().trim() : null)
-                                          .mpuDomesticAbuseEvidenceDocument(buildDomesticAbuseEvidenceDocuments(c100RebuildMiamElements))
+                                          .mpuDomesticAbuseEvidenceDocument(buildDomesticAbuseEvidenceDocuments(
+                                              c100RebuildMiamElements))
                                           .mpuChildProtectionConcernReason(buildMiamChildProtectionConcernList(
                                               c100RebuildMiamElements))
                                           .mpuUrgencyReason(buildMiamUrgencyReasonChecklist(
                                               c100RebuildMiamElements))
-                                          .mpuPreviousMiamAttendanceReason(buildMiamPreviousAttendanceChecklist(c100RebuildMiamElements))
-                                          .mpuDocFromDisputeResolutionProvider(isNotEmpty(c100RebuildMiamElements
-                                                                                              .getMiamPreviousAttendanceEvidenceDoc())
-                                          ? c100RebuildMiamElements.getMiamPreviousAttendanceEvidenceDoc() : null)
-                                          //mpuCertificateByMediator
+                                          .mpuPreviousMiamAttendanceReason(buildMiamPreviousAttendanceChecklist(
+                                              c100RebuildMiamElements))
+                                          .mpuDocFromDisputeResolutionProvider(fourMonthsPriorAttended.toString()
+                                                                                   .equalsIgnoreCase(
+                                                                                       c100RebuildMiamElements.getMiamPreviousAttendance())
+                                                                                   && isNotEmpty(c100RebuildMiamElements
+                                                                                                     .getMiamPreviousAttendanceEvidenceDoc())
+                                                                                   ? c100RebuildMiamElements.getMiamPreviousAttendanceEvidenceDoc()
+                                                                                   : null)
+                                          .mpuCertificateByMediator(YesOrNo.Yes.equals(c100RebuildMiamElements
+                                                                                           .getMiamHaveDocSignedByMediatorForPrevAttendance())
+                                                                        && isNotEmpty(c100RebuildMiamElements.getMiamPreviousAttendanceEvidenceDoc())
+                                                                        ? c100RebuildMiamElements.getMiamPreviousAttendanceEvidenceDoc() : null)
                                           .mpuMediatorDetails(StringUtils.isNotEmpty(c100RebuildMiamElements.getMiamDetailsOfEvidence())
                                                                   ? c100RebuildMiamElements.getMiamDetailsOfEvidence().trim() : null)
-                                          .mpuTypeOfPreviousMiamAttendanceEvidence(buildTypeOfPreviousMiamAttendanceEvidence(c100RebuildMiamElements))
-                                          .mpuOtherExemptionReasons(buildMiamOtherGroundsChecklist(c100RebuildMiamElements))
-                                          .mpuApplicantUnableToAttendMiamReason1(buildApplicantUnableToAttendMiamReason1(c100RebuildMiamElements))
-                                          .mpuApplicantUnableToAttendMiamReason2(StringUtils.isNotEmpty(c100RebuildMiamElements
-                                                                                                            .getMiamNoMediatorIn15mileDetails())
+                                          .mpuTypeOfPreviousMiamAttendanceEvidence(
+                                              buildTypeOfPreviousMiamAttendanceEvidence(c100RebuildMiamElements))
+                                          .mpuOtherExemptionReasons(buildMiamOtherGroundsChecklist(
+                                              c100RebuildMiamElements))
+                                          .mpuApplicantUnableToAttendMiamReason1(buildApplicantUnableToAttendMiamReason1(
+                                              c100RebuildMiamElements))
+                                          .mpuApplicantUnableToAttendMiamReason2(StringUtils.isNotEmpty(
+                                              c100RebuildMiamElements
+                                                  .getMiamNoMediatorIn15mileDetails())
                                                                                      ? c100RebuildMiamElements
                                               .getMiamNoMediatorIn15mileDetails().trim() : null)
                                           .miamCertificationDocumentUpload(buildDocument(c100RebuildMiamElements.getMiamCertificate()))
@@ -94,7 +109,7 @@ public class CaseDataMiamElementsMapper {
     }
 
     private static TypeOfMiamAttendanceEvidenceEnum buildTypeOfPreviousMiamAttendanceEvidence(C100RebuildMiamElements c100RebuildMiamElements) {
-        if (isNotEmpty(c100RebuildMiamElements.getMiamHaveDocSignedByMediatorForPrevAttendance())) {
+        if (ObjectUtils.isEmpty(c100RebuildMiamElements.getMiamHaveDocSignedByMediatorForPrevAttendance())) {
             return null;
         } else {
             return YesOrNo.Yes.equals(c100RebuildMiamElements.getMiamHaveDocSignedByMediatorForPrevAttendance())
@@ -134,7 +149,7 @@ public class CaseDataMiamElementsMapper {
             || c100RebuildMiamElements.getMiamNotAttendingReasons().equalsIgnoreCase(NONE)) {
             return null;
         } else {
-            MiamCitizenOtherGroundsChecklistEnum miamCitizenPreviousAttendanceReasons = null;
+            MiamCitizenOtherGroundsChecklistEnum miamCitizenPreviousAttendanceReasons;
             if (c100RebuildMiamElements.getMiamNotAttendingReasons().equalsIgnoreCase(canNotAccessMediator.toString())
                 && StringUtils.isNotEmpty(c100RebuildMiamElements.getMiamNoMediatorReasons())
                 && !c100RebuildMiamElements.getMiamNoMediatorReasons().equalsIgnoreCase(NONE)) {
@@ -183,8 +198,7 @@ public class CaseDataMiamElementsMapper {
         }
     }
 
-    private static MiamPolicyUpgradeChildProtectionConcernEnum
-        buildMiamChildProtectionConcernList(C100RebuildMiamElements c100RebuildMiamElements) {
+    private static MiamPolicyUpgradeChildProtectionConcernEnum buildMiamChildProtectionConcernList(C100RebuildMiamElements c100RebuildMiamElements) {
         if (StringUtils.isEmpty(c100RebuildMiamElements.getMiamChildProtectionEvidence())
             || c100RebuildMiamElements.getMiamChildProtectionEvidence().equalsIgnoreCase(NONE)) {
             return null;
@@ -200,9 +214,10 @@ public class CaseDataMiamElementsMapper {
     }
 
     private static List<MiamDomesticAbuseChecklistEnum> buildMiamDomesticAbuseChecklist(C100RebuildMiamElements
-                                                                                                      c100RebuildMiamElements) {
+                                                                                            c100RebuildMiamElements) {
         List<String> domesticAbuses = new java.util.ArrayList<>(nonNull(c100RebuildMiamElements.getMiamDomesticAbuse())
-                ? List.of(c100RebuildMiamElements.getMiamDomesticAbuse()) : Collections.emptyList());
+                                                                    ? List.of(c100RebuildMiamElements.getMiamDomesticAbuse())
+                                                                    : Collections.emptyList());
 
         if (domesticAbuses.isEmpty() || domesticAbuses.contains(NONE)) {
             return Collections.emptyList();
@@ -225,12 +240,13 @@ public class CaseDataMiamElementsMapper {
 
             if (domesticAbuseHeads.contains(ILRDuetoDomesticAbuse.toString())) {
                 domesticAbusesList.add(ILRDuetoDomesticAbuse.toString());
-            } else if (domesticAbuseHeads.contains(financialAbuse.toString())) {
+            }
+            if (domesticAbuseHeads.contains(financialAbuse.toString())) {
                 domesticAbusesList.add(financialAbuse.toString());
             }
 
             List<MiamCitizenDomesticAbuseReasonEnum> miamCitizenDomesticAbuseReasons = domesticAbusesList.stream().map(
-                    value -> MiamCitizenDomesticAbuseReasonEnum.valueOf(value))
+                    MiamCitizenDomesticAbuseReasonEnum::valueOf)
                 .toList();
             if (miamCitizenDomesticAbuseReasons.isEmpty()) {
                 return Collections.emptyList();
@@ -268,8 +284,8 @@ public class CaseDataMiamElementsMapper {
         if (miamNonAttendanceReasons.isEmpty() || miamNonAttendanceReasons.contains(NONE)) {
             return Collections.emptyList();
         } else {
-            List<MiamCitizenExemptionsReasonEnum> miamCitizenExemptionsReasonList = miamNonAttendanceReasons.stream().map(
-                    value -> MiamCitizenExemptionsReasonEnum.valueOf(value))
+            List<MiamCitizenExemptionsReasonEnum> miamCitizenExemptionsReasonList = miamNonAttendanceReasons.stream()
+                .map(MiamCitizenExemptionsReasonEnum::valueOf)
                 .toList();
             if (miamCitizenExemptionsReasonList.isEmpty()) {
                 return Collections.emptyList();
@@ -284,10 +300,10 @@ public class CaseDataMiamElementsMapper {
     private static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document maimDocument) {
         if (isNotEmpty(maimDocument)) {
             return Document.builder()
-                    .documentUrl(maimDocument.getUrl())
-                    .documentBinaryUrl(maimDocument.getBinaryUrl())
-                    .documentFileName(maimDocument.getFilename())
-                    .build();
+                .documentUrl(maimDocument.getUrl())
+                .documentBinaryUrl(maimDocument.getBinaryUrl())
+                .documentFileName(maimDocument.getFilename())
+                .build();
         }
         return null;
     }

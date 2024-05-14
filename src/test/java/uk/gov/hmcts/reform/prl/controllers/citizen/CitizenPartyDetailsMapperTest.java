@@ -380,7 +380,7 @@ public class CitizenPartyDetailsMapperTest {
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
             .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
             .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
-            //.c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam.json"))
+            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam.json"))
             .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
             .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))

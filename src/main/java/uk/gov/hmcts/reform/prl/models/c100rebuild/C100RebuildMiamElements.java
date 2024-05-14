@@ -39,13 +39,13 @@ public class C100RebuildMiamElements {
     private String[] miamDomesticAbuse;
     @JsonProperty("miam_domesticAbuse_policeInvolvement_subfields")
     private String[] miamDomesticAbusePoliceInvolvementSubfields;
-    @JsonProperty("miam_domesticabuse_courtInvolvement_subfields")
+    @JsonProperty("miam_domesticAbuse_courtInvolvement_subfields")
     private String[] miamDomesticAbuseCourtInvolvementSubfields;
-    @JsonProperty("miam_domesticabuse_letterOfBeingVictim_subfields")
+    @JsonProperty("miam_domesticAbuse_letterOfBeingVictim_subfields")
     private String[] miamDomesticAbuseLetterOfBeingVictimSubfields;
-    @JsonProperty("miam_domesticabuse_letterFromAuthority_subfields")
+    @JsonProperty("miam_domesticAbuse_letterFromAuthority_subfields")
     private String[] miamDomesticAbuseLetterFromAuthoritySubfields;
-    @JsonProperty("miam_domesticabuse_letterFromSupportService_subfields")
+    @JsonProperty("miam_domesticAbuse_letterFromSupportService_subfields")
     private String[] miamDomesticAbuseLetterFromSupportServiceSubfields;
     @JsonProperty("miam_canProvideDomesticAbuseEvidence")
     private YesOrNo miamCanProvideDomesticAbuseEvidence;
