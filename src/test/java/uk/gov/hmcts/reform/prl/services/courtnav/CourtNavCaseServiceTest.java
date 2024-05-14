@@ -96,7 +96,7 @@ public class CourtNavCaseServiceTest {
     SystemUserService systemUserService;
 
     @Mock
-    private LaunchDarklyClient launchDarklyClient;
+    LaunchDarklyClient launchDarklyClient;
 
 
     private Map<String, Object> caseDataMap = new HashMap<>();
@@ -135,12 +135,21 @@ public class CourtNavCaseServiceTest {
 
     @Test
     public void shouldStartAndSubmitEventWithEventData() {
+        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
         courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
                                                     Mockito.anyString(),
                                                     Mockito.any(CaseDataContent.class), Mockito.anyBoolean());
     }
 
+    @Test
+    public void shouldStartAndSubmitEventWithEventDataWhenLaunchDarklyFlagTrue() {
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(true);
+        courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
+        verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
+                                                    Mockito.anyString(),
+                                                    Mockito.any(CaseDataContent.class), Mockito.anyBoolean());
+    }
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
         Document document = testDocument();
