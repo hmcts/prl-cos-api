@@ -62,6 +62,7 @@ public class CitizenRespondentAohElementsMapper {
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
 
     public RespondentAllegationsOfHarmData map(String aohData, List<Element<ChildDetailsRevised>> childDetails) {
+        log.info("inside RespondentAllegationsOfHarmData map()");
         if (isNotEmpty(aohData)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -83,7 +84,7 @@ public class CitizenRespondentAohElementsMapper {
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
         List<Element<ChildDetailsRevised>> newChildDetails) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
-
+        log.info("AOH data" + c100RebuildSafetyConcernsElements.getHaveSafetyConcerns());
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             respondentAllegationsOfHarmData = respondentAllegationsOfHarmData.toBuilder()
                 .respAohYesOrNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
