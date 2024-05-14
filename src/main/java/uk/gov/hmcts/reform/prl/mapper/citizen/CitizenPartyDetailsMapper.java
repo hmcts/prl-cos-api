@@ -443,6 +443,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails,
                                                            List<Element<ChildDetailsRevised>> childDetails) {
+        log.info("inside updateCitizenSafetyConcernDetails");
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
