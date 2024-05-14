@@ -3,17 +3,15 @@ package uk.gov.hmcts.reform.prl.schedule;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.services.Fm5ReminderService;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FM5ReminderNotificationTask implements Runnable {
+public class Fm5ReminderNotificationTask implements Runnable {
 
-    @Autowired
-    private Fm5ReminderService fm5ReminderService;
+    private final Fm5ReminderService fm5ReminderService;
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
