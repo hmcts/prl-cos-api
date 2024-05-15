@@ -94,6 +94,7 @@ public class AmendDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
             ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
@@ -122,11 +123,13 @@ public class AmendDraftOrderController {
 
             log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
             log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getDraftOrdersDynamicList());
+            log.info("  ---> patel Before caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
 
             List<Element<DraftOrder>> draftOrderCollection = amendDraftOrderService.amendSelectedDraftOrder(caseData);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("  ---> patel draftOrderCollection {}", draftOrderCollection);
+            log.info("  ---> patel after caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
             caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
