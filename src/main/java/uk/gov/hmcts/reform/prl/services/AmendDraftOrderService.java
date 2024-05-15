@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,21 +63,12 @@ public class AmendDraftOrderService {
         if (ObjectUtils.isNotEmpty(caseData.getDraftOrdersDynamicList())
             && ObjectUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
 
-            DraftOrder selectedOrder = getSelectedDraftOrderDetails(
-                caseData.getDraftOrderCollection(),
-                caseData.getDraftOrdersDynamicList()
-            );
-            caseData.getDraftOrderCollection().remove(selectedOrder);
+            UUID orderId = elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper);
+            List<Element<DraftOrder>>  amendDraftOrderCollection = caseData.getDraftOrderCollection().stream()
+                .filter(element -> element.getId().equals(orderId)).collect(Collectors.toList());
+
+            caseData.getDraftOrderCollection().removeAll(amendDraftOrderCollection);
         }
         return caseData.getDraftOrderCollection();
-    }
-
-    private DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 }
