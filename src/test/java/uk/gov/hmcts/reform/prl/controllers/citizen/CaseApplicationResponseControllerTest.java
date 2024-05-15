@@ -137,7 +137,7 @@ public class CaseApplicationResponseControllerTest {
     @Test
     public void testGenerateC7FinalDocumentCaseDetailsNotNull() throws Exception {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken))
+        when(caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId))
             .thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData returnedCaseData = caseApplicationResponseController

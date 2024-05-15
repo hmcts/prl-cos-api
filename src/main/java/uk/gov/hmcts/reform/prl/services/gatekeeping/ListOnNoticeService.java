@@ -93,7 +93,7 @@ public class ListOnNoticeService {
         }
     }
 
-    private EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName, String selectedAndAdditionalReasons) {
+    public EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName, String selectedAndAdditionalReasons) {
 
         return ListOnNoticeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
