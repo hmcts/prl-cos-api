@@ -81,7 +81,6 @@ public class Fm5ReminderService {
 
 
     public void sendFm5ReminderNotifications(Long hearingAwayDays) {
-        log.info("*** FM5 reminder notifications ***");
         long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingStatePendingFm5Reminders();
@@ -91,6 +90,7 @@ public class Fm5ReminderService {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
             HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
+            log.info("Qualified cases meeting all system rules {}", qualifiedCasesAndPartiesBeforeHearing);
 
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
@@ -99,13 +99,16 @@ public class Fm5ReminderService {
                         = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
+                        log.info("FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED", key);
                         caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
                     } else {
+                        log.info("*** Sending FM5 reminders for caseId {}", key);
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
                             fmPendingParty
                         );
                         if (isNotEmpty(fm5ReminderNotifications)) {
+                            log.info("FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES", key);
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
                             caseDataUpdated.put("fm5RemindersSent", "YES");
                         }
@@ -123,7 +126,7 @@ public class Fm5ReminderService {
         }
 
         log.info(
-            "*** Total time taken to send fm5 reminders - {}s ***",
+            "*** Total time taken to run fm5 reminders task - {}s ***",
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
         );
     }
@@ -131,7 +134,7 @@ public class Fm5ReminderService {
 
     private HashMap<String, FmPendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
                                                                                          Long hearingAwayDays) {
-
+        log.info("Running system rules on the cases");
         List<String> caseIdsForHearing = new ArrayList<>();
         HashMap<String, FmPendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
         HashMap<String, FmPendingParty> filteredCaseAndParties = new HashMap<>();
@@ -152,6 +155,7 @@ public class Fm5ReminderService {
         }
 
         if (isNotEmpty(caseIdsForHearing)) {
+            log.info("Fetching hearings for cases {}", caseIdsForHearing);
             List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
@@ -304,7 +308,7 @@ public class Fm5ReminderService {
         Bool finalFilter = Bool.builder()
             .filter(filter)
             .should(shoulds)
-            .minimumShouldMatch(1)
+            .minimumShouldMatch(2)
             .must(mustFilter)
             .build();
 
