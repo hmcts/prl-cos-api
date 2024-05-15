@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -97,6 +98,9 @@ public class CourtNavCaseServiceTest {
 
     @Mock
     LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    LocationRefDataService locationRefDataService;
 
 
     private Map<String, Object> caseDataMap = new HashMap<>();
