@@ -239,7 +239,7 @@ public class HearingManagementServiceTest {
 
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
@@ -271,7 +271,7 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
@@ -303,7 +303,7 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
@@ -388,7 +388,7 @@ public class HearingManagementServiceTest {
 
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
@@ -461,7 +461,7 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
@@ -530,7 +530,7 @@ public class HearingManagementServiceTest {
             .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, DECISION_OUTCOME);
 
-        verify(ccdCoreCaseDataService, times(2)).startUpdate(Mockito.anyString(),
+        verify(ccdCoreCaseDataService, times(1)).startUpdate(Mockito.anyString(),
                                                              Mockito.any(),
                                                              Mockito.anyString(),
                                                              Mockito.anyBoolean()
