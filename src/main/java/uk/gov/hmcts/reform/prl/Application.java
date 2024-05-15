@@ -36,7 +36,9 @@ import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
     "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
     "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",
     "uk.gov.hmcts.reform.sendletter.api",
-    "uk.gov.hmcts.reform.prl.clients"})
+    "uk.gov.hmcts.reform.prl.clients",
+    "uk.gov.hmcts.reform.prl.schedule",
+    "uk.gov.hmcts.reform.prl.tasks"})
 @Slf4j
 @EnableScheduling
 public class Application implements CommandLineRunner {
@@ -70,9 +72,8 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("*** Running tasks: {}", args);
         if (System.getenv(TASK_NAME) != null) {
-            log.info("*** Running scheduled task {}: ", System.getenv(TASK_NAME));
+            log.info("*** Running scheduled task: {} ", System.getenv(TASK_NAME));
             scheduledTaskRunner.run(System.getenv(TASK_NAME));
         }
     }

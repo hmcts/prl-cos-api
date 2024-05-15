@@ -601,7 +601,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
   '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
   '**uk/gov/hmcts/reform/prl/tasks/ScheduledTaskRunner.java',
-  '**uk/gov/hmcts/reform/prl/schedule/FM5ReminderNotificationTask.java',
+  '**uk/gov/hmcts/reform/prl/schedule/Fm5ReminderNotificationTask.java',
   '**uk/gov/hmcts/reform/prl/services/Fm5ReminderService.java',
   '**uk/gov/hmcts/reform/prl/services/Fm5NotificationService.java',
   '**uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',

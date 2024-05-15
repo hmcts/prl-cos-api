@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.services.Fm5ReminderService;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FM5ReminderNotificationTask implements Runnable {
+public class Fm5ReminderNotificationTask implements Runnable {
 
     private final Fm5ReminderService fm5ReminderService;
 
