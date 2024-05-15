@@ -365,4 +365,6 @@ public class StandardDirectionOrder implements MappableObject {
     private String sdoAllocateDecisionJudgeFullName;
     @JsonProperty("listElementsSetToDefaultValue")
     private YesOrNo listElementsSetToDefaultValue;
+    @JsonProperty("editedOrderHasDefaultCaseFields")
+    private YesOrNo editedOrderHasDefaultCaseFields;
 }
