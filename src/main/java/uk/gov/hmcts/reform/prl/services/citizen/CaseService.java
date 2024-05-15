@@ -424,7 +424,6 @@ public class CaseService {
     public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
-        List<CitizenNotification> citizenNotifications = new ArrayList<>();
 
         CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()
             .citizenDocuments(getCitizenDocuments(userDetails, caseData))
@@ -432,18 +431,15 @@ public class CaseService {
             .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
             .build();
 
-        //PRL-5565 - FM5 dashboard notification
-        if (null != caseData.getFm5ReminderNotificationDetails()
-            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
-            && !isFm5UploadedByParty(citizenDocumentsManagement.getCitizenDocuments(), userDetails)) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(true).build());
-        }
-
+        //Citizen dashboard notification enable/disable flags
+        List<CitizenNotification> citizenNotifications =
+            getAllCitizenDashboardNotifications(caseData, citizenDocumentsManagement, userDetails);
         if (CollectionUtils.isNotEmpty(citizenNotifications)) {
             citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
                 .citizenNotifications(citizenNotifications)
                 .build();
         }
+
         return citizenDocumentsManagement;
     }
 
@@ -814,6 +810,23 @@ public class CaseService {
             .filter(element -> null != element.getValue().getUser()
                 && userDetails.getId().equalsIgnoreCase(element.getValue().getUser().getIdamId()))
             .findFirst();
+    }
+
+    private List<CitizenNotification> getAllCitizenDashboardNotifications(CaseData caseData,
+                                                                          CitizenDocumentsManagement citizenDocumentsManagement,
+                                                                          UserDetails userDetails) {
+        List<CitizenNotification> citizenNotifications = new ArrayList<>();
+
+        //PRL-5565 - FM5 dashboard notification
+        if (null != caseData.getFm5ReminderNotificationDetails()
+            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
+            && !isFm5UploadedByParty(citizenDocumentsManagement.getCitizenDocuments(), userDetails)) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(false).build());
+        }
+
+        return citizenNotifications;
     }
 
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
