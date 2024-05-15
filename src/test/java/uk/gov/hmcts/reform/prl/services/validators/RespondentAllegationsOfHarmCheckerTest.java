@@ -407,14 +407,14 @@ public class RespondentAllegationsOfHarmCheckerTest {
     @Test
     public void whenNoDataIsSectionsFinishedReturnFalse() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
-        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, false, false, false));
+        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, false));
     }
 
     @Test
     public void whenIsSectionsFinishedTrue() {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
 
-        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, true, true, true));
+        assertFalse(respondentAllegationsOfHarmChecker.isSectionsFinished(respondentAllegationsOfHarmData, true));
     }
 
     @Test

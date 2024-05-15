@@ -252,6 +252,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final MiamDetails miamDetails;
 
     /**
+     * MIAM.
+     */
+    @JsonUnwrapped
+    private final MiamPolicyUpgradeDetails miamPolicyUpgradeDetails;
+
+    /**
      * Allegations of harm.
      */
 
@@ -791,4 +797,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<Document>> dssUploadedAdditionalDocuments;
     @JsonProperty("edgeCaseTypeOfApplication")
     private final String edgeCaseTypeOfApplication;
+    //For case documents tab
+    private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 }

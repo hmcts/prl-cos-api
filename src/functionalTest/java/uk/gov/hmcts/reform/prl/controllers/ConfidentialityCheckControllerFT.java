@@ -111,13 +111,11 @@ public class ConfidentialityCheckControllerFT {
     public void givenRequestWithCaseData_ResponseContainsNo() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        String requestBodyRevised = requestBody
-            .replace("1702638919767299", caseDetails.getId().toString());
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBodyRevised)
+                            .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -269,14 +267,11 @@ public class ConfidentialityCheckControllerFT {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
 
-        String requestBodyRevised = requestBody
-            .replace("1687443551969082", caseDetails.getId().toString());
-
         MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
                                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                                             .contentType(MediaType.APPLICATION_JSON)
-                                            .content(requestBodyRevised)
+                                            .content(requestBody)
                                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
