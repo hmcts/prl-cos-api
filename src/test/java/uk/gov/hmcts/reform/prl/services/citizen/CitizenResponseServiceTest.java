@@ -15,11 +15,17 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -34,8 +40,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenResponseServiceTest {
@@ -75,6 +86,17 @@ public class CitizenResponseServiceTest {
         PartyDetails activeRespondent = PartyDetails.builder()
             .partyId(UUID.fromString(uuid))
             .user(User.builder().idamId(uuid).build())
+            .response(Response.builder()
+                .c7ResponseSubmitted(YesOrNo.Yes)
+                .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder().respAohYesOrNo(YesOrNo.Yes).build())
+                .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                    .builder()
+                    .proceedingsList(List.of(element(Proceedings
+                        .builder()
+                        .proceedingDetails(List.of(element(OtherProceedingDetails.builder().orderDocument(Document.builder().build()).build())))
+                        .build())))
+                    .build())
+                .build())
             .build();
         PartyDetails respondent = PartyDetails.builder()
             .partyId(uuid2)
@@ -104,6 +126,8 @@ public class CitizenResponseServiceTest {
             .build();
         noneActiveStartAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), arrayMap, noneActiveCaseData, null);
+        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), arrayMap, caseData, null);
     }
 
     @Test
@@ -135,16 +159,32 @@ public class CitizenResponseServiceTest {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
             .thenReturn(noneActiveStartAllTabsUpdateDataContent);
         when(documentLanguageService.docGenerateLang(noneActiveCaseData)).thenReturn(DocumentLanguage.builder()
-            .isGenEng(true).isGenWelsh(true).build());
-        when(documentGenService.generateSingleDocument(authToken, noneActiveCaseData,  "c7FinalEng", true))
-            .thenReturn(Document.builder().documentFileName("testDoc").build());
-        when(documentGenService.generateSingleDocument(authToken, noneActiveCaseData,  "c7FinalEng", false))
-            .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
+            .isGenEng(false).isGenWelsh(false).build());
         when(allTabService.submitUpdateForSpecificUserEvent(noneActiveStartAllTabsUpdateDataContent.authorisation(),
             caseId,  noneActiveStartAllTabsUpdateDataContent
             .startEventResponse(),  noneActiveStartAllTabsUpdateDataContent.eventRequestData(), new HashMap<>(),
-            noneActiveStartAllTabsUpdateDataContent.userDetails()))
-            .thenReturn(caseDetails);
+            noneActiveStartAllTabsUpdateDataContent.userDetails())).thenReturn(caseDetails);
+        CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
+            citizenUpdatedCaseData);
+        Assert.assertNotNull(returnedCaseDetails);
+        Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
+    }
+
+    @Test
+    public void testGenerateAndSubmitCitizenResponseForActiveCitizen() throws Exception {
+        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder()
+            .isGenEng(true).isGenWelsh(true).build());
+        when(documentGenService.generateSingleDocument(authToken, caseData,  "c7FinalEng", false))
+            .thenReturn(Document.builder().documentFileName("testDoc").build());
+        when(documentGenService.generateSingleDocument(authToken, caseData,  "c7FinalEng", true))
+            .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
+        when(allTabService.submitUpdateForSpecificUserEvent(any(), anyString(), any(), any(), any(), any())).thenReturn(caseDetails);
+        when(documentGenService.generateSingleDocument(authToken, caseData,   SOLICITOR_C1A_FINAL_DOCUMENT, false, new HashMap<>()))
+            .thenReturn(Document.builder().documentFileName("testDoc").build());
+        when(documentGenService.generateSingleDocument(authToken, caseData,   SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, true, new HashMap<>()))
+            .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);
         Assert.assertNotNull(returnedCaseDetails);
