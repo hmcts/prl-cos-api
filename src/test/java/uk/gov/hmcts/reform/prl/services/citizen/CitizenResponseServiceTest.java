@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -43,6 +44,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
@@ -127,7 +129,7 @@ public class CitizenResponseServiceTest {
         noneActiveStartAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), arrayMap, noneActiveCaseData, null);
         startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), arrayMap, caseData, null);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), arrayMap, caseData, UserDetails.builder().build());
     }
 
     @Test
@@ -174,17 +176,28 @@ public class CitizenResponseServiceTest {
     public void testGenerateAndSubmitCitizenResponseForActiveCitizen() throws Exception {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
             .thenReturn(startAllTabsUpdateDataContent);
+
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder()
             .isGenEng(true).isGenWelsh(true).build());
-        when(documentGenService.generateSingleDocument(authToken, caseData,  "c7FinalEng", false))
-            .thenReturn(Document.builder().documentFileName("testDoc").build());
-        when(documentGenService.generateSingleDocument(authToken, caseData,  "c7FinalEng", true))
+        when(documentGenService.generateSingleDocument(authToken, caseData, "c7FinalEng", false))
+            .thenReturn(Document.builder().documentFileName("C7_Document.pdf").build());
+        when(documentGenService.generateSingleDocument(authToken, caseData, "c7FinalEng", true))
             .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
+
+        Map<String, Object> returnedMap = new HashMap<>();
+        returnedMap.put("isConfidentialDataPresent", "yes");
+        when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(returnedMap);
+
         when(allTabService.submitUpdateForSpecificUserEvent(any(), anyString(), any(), any(), any(), any())).thenReturn(caseDetails);
-        when(documentGenService.generateSingleDocument(authToken, caseData,   SOLICITOR_C1A_FINAL_DOCUMENT, false, new HashMap<>()))
+        when(documentGenService.generateSingleDocument(authToken, caseData, SOLICITOR_C1A_FINAL_DOCUMENT, false, returnedMap))
+            .thenReturn(Document.builder().documentFileName("C1A_allegation_of_harm.pdf").build());
+        when(documentGenService.generateSingleDocument(authToken, caseData, SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, true, returnedMap))
+            .thenReturn(Document.builder().build());
+
+
+        when(documentGenService.generateSingleDocument(authToken, caseData, C8_RESP_FINAL_HINT, false, returnedMap))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
-        when(documentGenService.generateSingleDocument(authToken, caseData,   SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, true, new HashMap<>()))
-            .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
+
         CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
             citizenUpdatedCaseData);
         Assert.assertNotNull(returnedCaseDetails);
