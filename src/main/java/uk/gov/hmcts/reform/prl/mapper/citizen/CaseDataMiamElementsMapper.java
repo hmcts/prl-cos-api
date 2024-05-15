@@ -104,7 +104,9 @@ public class CaseDataMiamElementsMapper {
                                                   .getMiamNoMediatorIn15mileDetails())
                                                                                      ? c100RebuildMiamElements
                                               .getMiamNoMediatorIn15mileDetails().trim() : null)
-                                          .miamCertificationDocumentUpload(buildDocument(c100RebuildMiamElements.getMiamCertificate()))
+                                          .miamCertificationDocumentUpload(YesOrNo.Yes.equals(c100RebuildMiamElements
+                                                                                                  .getMiamHaveDocSigned())
+                                                                               ? buildDocument(c100RebuildMiamElements.getMiamCertificate()) : null)
                                           .build());
     }
 
