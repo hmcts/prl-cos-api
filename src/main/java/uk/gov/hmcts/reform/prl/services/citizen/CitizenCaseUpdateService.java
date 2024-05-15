@@ -5,21 +5,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Arrays;
@@ -31,6 +38,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -46,6 +54,8 @@ public class CitizenCaseUpdateService {
     private final AllTabServiceImpl allTabService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     private final ObjectMapper objectMapper;
+    private final AddCaseNoteService addCaseNoteService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -55,6 +65,7 @@ public class CitizenCaseUpdateService {
 
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     public static final String CASE_STATUS = "caseStatus";
+    public static final String LANG_SUPPORT_NEED_SUBJECT = "Support needs request";
 
     public CaseDetails updateCitizenPartyDetails(String authorisation,
                                                  String caseId,
@@ -144,7 +155,7 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-        return allTabService.submitUpdateForSpecificUserEvent(
+        CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
@@ -152,6 +163,8 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
+
+        return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
@@ -210,5 +223,56 @@ public class CitizenCaseUpdateService {
         );
 
         return allTabService.updateAllTabsIncludingConfTab(caseId);
+    }
+
+    public ResponseEntity<Object> addLanguageSupportCaseNotes(
+        String caseId,
+        String authorisation,
+        LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest) {
+        log.info("Inside addLanguageSupportCaseNotes for caseId {}", caseId);
+        log.info(
+            "Inside addLanguageSupportCaseNotes languageSupportCaseNotesRequest {}",
+            languageSupportCaseNotesRequest
+        );
+
+        if (StringUtils.isEmpty(languageSupportCaseNotesRequest.getPartyIdamId())
+            || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(
+            caseId,
+            CaseEvent.CITIZEN_LANG_SUPPORT_NOTES.getValue(),
+            authorisation
+        );
+        CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
+
+        CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+            LANG_SUPPORT_NEED_SUBJECT,
+            languageSupportCaseNotesRequest.getLanguageSupportNotes(),
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        Map<String, Object> caseNotesMap = new HashMap<>();
+        caseNotesMap.put(
+            CASE_NOTES,
+            addCaseNoteService.getCaseNoteDetails(dbCaseData, currentCaseNoteDetails)
+        );
+
+        try {
+            log.info("CaseDataContent ===>" + objectMapper.writeValueAsString(caseNotesMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseNotesMap,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
     }
 }
