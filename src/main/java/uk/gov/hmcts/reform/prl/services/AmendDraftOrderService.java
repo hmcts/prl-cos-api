@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,6 +27,8 @@ public class AmendDraftOrderService {
     public static final String DRAFT_ORDERS_DYNAMIC_LIST = "draftOrdersDynamicList";
 
     private final ManageOrderService manageOrderService;
+    private final ElementUtils elementUtils;
+    private final ObjectMapper objectMapper;
 
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
@@ -50,5 +55,28 @@ public class AmendDraftOrderService {
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
         return caseDataMap;
+    }
+
+    public List<Element<DraftOrder>> amendSelectedDraftOrder(CaseData caseData) {
+
+        if (ObjectUtils.isNotEmpty(caseData.getDraftOrdersDynamicList())
+            && ObjectUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
+
+            DraftOrder selectedOrder = getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                caseData.getDraftOrdersDynamicList()
+            );
+            caseData.getDraftOrderCollection().remove(selectedOrder);
+        }
+        return caseData.getDraftOrderCollection();
+    }
+
+    private DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
+        return draftOrderCollection.stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 }

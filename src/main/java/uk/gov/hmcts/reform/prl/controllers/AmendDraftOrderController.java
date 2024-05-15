@@ -20,11 +20,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AmendDraftOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -39,6 +42,7 @@ public class AmendDraftOrderController {
     private final AmendDraftOrderService amendDraftOrderService;
     private final AuthorisationService authorisationService;
 
+    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     public static final String CONFIRMATION_HEADER = "# Order removed";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n We will send this order to admin.
@@ -96,6 +100,38 @@ public class AmendDraftOrderController {
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
 
             return responseEntity;
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/amend-draft-order/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove draft order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleAmendDraftOrderAboutToSubmitted(
+        @RequestHeader("Authorization")
+        @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+
+            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
+            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getDraftOrdersDynamicList());
+
+            List<Element<DraftOrder>> draftOrderCollection = amendDraftOrderService.amendSelectedDraftOrder(caseData);
+
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("  ---> patel draftOrderCollection {}", draftOrderCollection);
+            caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated).build();
+
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
