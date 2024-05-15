@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.prl.tasks;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,11 @@ import static java.lang.Character.toLowerCase;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ScheduledTaskRunner {
 
-    private final ApplicationContext context;
+    @Autowired
+    ApplicationContext context;
 
     public void run(String taskName) {
         final var beanName = toLowerCase(taskName.charAt(0)) + taskName.substring(1);
