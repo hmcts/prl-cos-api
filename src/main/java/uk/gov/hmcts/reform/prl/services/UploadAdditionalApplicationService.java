@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -66,10 +67,13 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -95,6 +99,7 @@ public class UploadAdditionalApplicationService {
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     public static final String APPLICANTSOLICITOR = "[APPLICANTSOLICITOR]";
+
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -104,6 +109,7 @@ public class UploadAdditionalApplicationService {
     private final CcdDataStoreService userDataStoreService;
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -139,7 +145,7 @@ public class UploadAdditionalApplicationService {
     }
 
     private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserDetails userDetails, String partyName) {
-        String author = null;
+        String author;
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
@@ -290,12 +296,10 @@ public class UploadAdditionalApplicationService {
             applicantName = otherApplicationsBundle.getApplicantName();
             reasonForApplications.add(otherApplicationsBundle.getApplicationType().getDisplayedValue());
         }
-        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(applicantName).append(
-            HYPHEN_SEPARATOR);
-        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(String.join(
-            ",",
-            reasonForApplications
-        ));
+        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty
+            .append(applicantName)
+            .append(HYPHEN_SEPARATOR)
+            .append(String.join(COMMA,reasonForApplications));
 
         return serviceReferenceResponsibleParty.toString();
     }
@@ -363,7 +367,7 @@ public class UploadAdditionalApplicationService {
         if (caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
-            applicationType = getOtherApplicationType(temporaryOtherApplicationsBundle);
+            applicationType = uploadAdditionalApplicationUtils.getOtherApplicationType(temporaryOtherApplicationsBundle);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
@@ -385,20 +389,6 @@ public class UploadAdditionalApplicationService {
                 .build();
         }
         return otherApplicationsBundle;
-    }
-
-    private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
-        OtherApplicationType applicationType = null;
-        if (null != temporaryOtherApplicationsBundle.getCaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getCaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaRespondentApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaRespondentApplicationType().name());
-        }
-        return applicationType;
     }
 
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
@@ -522,10 +512,13 @@ public class UploadAdditionalApplicationService {
         return caseDataUpdated;
     }
 
+
+
     public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
                                                                        String userAuthorisation,
                                                                        CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
@@ -546,6 +539,10 @@ public class UploadAdditionalApplicationService {
             "hwfRequestedForAdditionalApplications",
             caseData.getHwfRequestedForAdditionalApplications()
         );
+
+        caseDataUpdated.put(AWP_WA_TASK_NAME, uploadAdditionalApplicationUtils.getAwPTaskName(caseData));
+        caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, uploadAdditionalApplicationUtils.getValueOfAwpTaskToBeCreated(caseData));
+
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;
     }
