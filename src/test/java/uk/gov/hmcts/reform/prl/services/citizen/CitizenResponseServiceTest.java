@@ -28,7 +28,11 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -116,8 +120,8 @@ public class CitizenResponseServiceTest {
 
     @Test(expected = RuntimeException.class)
     public void testGenerateAndSubmitCitizenResponseFL401() throws Exception {
-       citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
-           .caseTypeOfApplication("FL401").build());
+        citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication("FL401").build());
     }
 
     @Test(expected = RuntimeException.class)
@@ -130,15 +134,19 @@ public class CitizenResponseServiceTest {
     public void testGenerateAndSubmitCitizenResponse() throws Exception {
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authToken))
             .thenReturn(noneActiveStartAllTabsUpdateDataContent);
-        when(documentLanguageService.docGenerateLang(noneActiveCaseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build());
+        when(documentLanguageService.docGenerateLang(noneActiveCaseData)).thenReturn(DocumentLanguage.builder()
+            .isGenEng(true).isGenWelsh(true).build());
         when(documentGenService.generateSingleDocument(authToken, noneActiveCaseData,  "c7FinalEng", true))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
         when(documentGenService.generateSingleDocument(authToken, noneActiveCaseData,  "c7FinalEng", false))
             .thenReturn(Document.builder().documentFileName("testDocWelsh").build());
-        when(allTabService.submitUpdateForSpecificUserEvent( noneActiveStartAllTabsUpdateDataContent.authorisation(), caseId,  noneActiveStartAllTabsUpdateDataContent
-            .startEventResponse(),  noneActiveStartAllTabsUpdateDataContent.eventRequestData(), new HashMap<>(),  noneActiveStartAllTabsUpdateDataContent.userDetails()))
+        when(allTabService.submitUpdateForSpecificUserEvent(noneActiveStartAllTabsUpdateDataContent.authorisation(),
+            caseId,  noneActiveStartAllTabsUpdateDataContent
+            .startEventResponse(),  noneActiveStartAllTabsUpdateDataContent.eventRequestData(), new HashMap<>(),
+            noneActiveStartAllTabsUpdateDataContent.userDetails()))
             .thenReturn(caseDetails);
-        CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId, citizenUpdatedCaseData);
+        CaseDetails returnedCaseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authToken, caseId,
+            citizenUpdatedCaseData);
         Assert.assertNotNull(returnedCaseDetails);
         Assert.assertEquals(new HashMap<>(), returnedCaseDetails.getData());
     }
