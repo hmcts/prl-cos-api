@@ -44,7 +44,6 @@ public class CaseDataMapper {
     private CaseDataMapper() {
     }
 
-
     public static final String COMMA_SEPARATOR = ", ";
     public static final String HYPHEN_SEPARATOR = " - ";
 
@@ -145,5 +144,4 @@ public class CaseDataMapper {
 
         return caseDataBuilder.build();
     }
-
 }

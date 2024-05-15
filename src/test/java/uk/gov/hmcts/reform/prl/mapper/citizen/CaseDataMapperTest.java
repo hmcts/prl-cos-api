@@ -1,9 +1,7 @@
-/*
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -201,7 +199,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         assertNull(updatedCaseData.getOtherChildren());
     }
 
-    @Ignore
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
     void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
@@ -420,7 +417,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
-    @Ignore
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
         "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
@@ -456,7 +452,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
     }
 
-    @Ignore
     @Test
     public void testCaseWhen_No_haveSafetyConcerns() throws IOException {
 
@@ -477,4 +472,3 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
     }
 
 }
-*/
