@@ -25,6 +25,7 @@ public class Fm5ReminderController {
      */
     @PostMapping("/reminder-notifications/{hearingAwayDays}")
     public void sendFm5ReminderNotifications(@PathVariable("hearingAwayDays") Long hearingAwayDays) {
+        log.info("*** Trigger FM5 reminder notifications via API ***");
         fm5ReminderService.sendFm5ReminderNotifications(hearingAwayDays);
     }
 }
