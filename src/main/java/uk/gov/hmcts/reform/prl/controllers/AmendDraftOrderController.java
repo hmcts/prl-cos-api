@@ -21,8 +21,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AmendDraftOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class AmendDraftOrderController {
 
     private final ObjectMapper objectMapper;
-    private final DraftAnOrderService draftAnOrderService;
+    private final AmendDraftOrderService amendDraftOrderService;
     private final AuthorisationService authorisationService;
 
     public static final String CONFIRMATION_HEADER = "# Order removed";
@@ -55,6 +55,8 @@ public class AmendDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("generateAmendDraftOrderDropDown -->");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -63,7 +65,7 @@ public class AmendDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(
+                    .data(amendDraftOrderService.getDraftOrderDynamicList(
                         caseData,
                         callbackRequest.getEventId(),
                         authorisation
