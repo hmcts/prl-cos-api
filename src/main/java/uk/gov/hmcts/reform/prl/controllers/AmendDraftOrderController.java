@@ -46,12 +46,12 @@ public class AmendDraftOrderController {
         """;
 
 
-    @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Populate draft order dropdown")
+    @PostMapping(path = "/populate-amend-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Populate amend draft order dropdown")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
+        @ApiResponse(responseCode = "200", description = "Callback to populate amend draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
+    public AboutToStartOrSubmitCallbackResponse generateAmendDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
