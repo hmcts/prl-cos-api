@@ -12,18 +12,21 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_BASE_LOCATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_BASE_LOCATION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_REGION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_REGION_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
+import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.MIDLANDS;
 import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.SCOTLAND;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -47,6 +50,7 @@ public class LocationRefDataServiceTest {
         when(authTokenGenerator.generate()).thenReturn("");
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
         ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "1:email,2:email,3:email,4:email");
+        ReflectionTestUtils.setField(locationRefDataService,"caDefaultCourtEpimmsID", "12345");
     }
 
     @Test
@@ -266,5 +270,32 @@ public class LocationRefDataServiceTest {
                             .build());
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
         assertTrue(courtVenue.isPresent());
+    }
+
+    @Test
+    public void testDefaultCourtForCA() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region(MIDLANDS).regionId("id").courtName("Stoke")
+                                                     .siteName("test").postcode("123")
+                                                     .venueName("CTSC Stoke")
+                                                     .courtEpimmsId("12345")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        CaseManagementLocation caseManagementLocation = locationRefDataService.getDefaultCourtForCA("test");
+        assertEquals("CTSC Stoke", caseManagementLocation.getBaseLocationName());
+        assertEquals(MIDLANDS, caseManagementLocation.getRegionName());
+        assertEquals("id", caseManagementLocation.getRegion());
+    }
+
+    @Test
+    public void returnNullWhenDefaultCourtForCaIsNotConfigured() {
+        CaseManagementLocation defaultCaseManagementLocation = CaseManagementLocation.builder()
+            .region(C100_DEFAULT_REGION_ID)
+            .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+            .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build();
+        ReflectionTestUtils.setField(locationRefDataService,"caDefaultCourtEpimmsID", null);
+        CaseManagementLocation caseManagementLocation = locationRefDataService.getDefaultCourtForCA("test");
+        assertEquals(defaultCaseManagementLocation, caseManagementLocation);
     }
 }
