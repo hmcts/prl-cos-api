@@ -73,18 +73,18 @@ public class CitizenCaseUpdateService {
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        log.info("Case event is :: "+eventId);
+        log.info("Case event is :: " + eventId);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
-        log.info("Case event is triggered:: "+eventId);
+        log.info("Case event is triggered:: " + eventId);
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
             citizenPartyDetailsMapper.mapUpdatedPartyDetails(
                 dbCaseData, citizenUpdatedCaseData,
                 caseEvent,
                 startAllTabsUpdateDataContent.authorisation()
             ));
-        log.info("Data processing is done, ready to submit to ccd:: "+eventId);
+        log.info("Data processing is done, ready to submit to ccd:: " + eventId);
         if (citizenUpdatePartyDataContent.isPresent()) {
             try {
                 log.info("case data updated map is::" + objectMapper.writeValueAsString(citizenUpdatePartyDataContent.get().updatedCaseDataMap()));
