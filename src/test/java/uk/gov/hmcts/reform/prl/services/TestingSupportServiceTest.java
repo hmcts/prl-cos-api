@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -45,10 +46,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyoune
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -63,6 +68,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
@@ -114,6 +122,14 @@ public class TestingSupportServiceTest {
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseInitiationService caseInitiationService;
+
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private FL401ApplicationMapper fl401ApplicationMapper;
+    @Mock
+    private CourtNavCaseService courtNavCaseService;
 
     @Mock
     private TaskListService taskListService;
@@ -597,6 +613,44 @@ public class TestingSupportServiceTest {
 
         CaseData updatedCaseData = testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
         assertEquals(12345678L, updatedCaseData.getId());
+    }
+
+    @Test
+    public void testCourtNavCreatedCase() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.SUBMITTED_PAID)
+            .fl401StmtOfTruth(StatementOfTruth.builder().build())
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .caseTypeId("FL401")
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
+            .build();
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(CourtNavFl401
+                                                                                   .builder()
+                                                                                   .build());
+        when(systemUserService.getSysUserToken()).thenReturn(s2sAuth);
+        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+            .thenReturn(caseData);
+        when(courtNavCaseService.createCourtNavCase(any(),any()))
+            .thenReturn(caseDetails);
+        Map<String,Object> casDateMap =
+            testingSupportService.initiateCaseCreationForCourtNav(auth,callbackRequest);
+        assertEquals(12345678L,caseDataMap.get(CASE_DATA_ID));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception{
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+        testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
     }
 
     @Test(expected = RuntimeException.class)

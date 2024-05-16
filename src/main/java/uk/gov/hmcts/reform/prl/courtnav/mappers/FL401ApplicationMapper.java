@@ -227,9 +227,8 @@ public class FL401ApplicationMapper {
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .build();
 
-        Optional<CourtVenue> courtVenue = Optional.empty();
-        String epmsId = courtNavCaseData.getMetaData().getCourtSpecialRequirements();
-        caseData = populateCourtDetailsForCourtNaveCase(authorization, caseData, courtVenue, epmsId);
+        caseData = populateCourtDetailsForCourtNaveCase(authorization, caseData,
+                                                        courtNavCaseData.getMetaData().getCourtSpecialRequirements());
         caseData = caseData.setDateSubmittedDate();
 
         return caseData;
@@ -237,21 +236,19 @@ public class FL401ApplicationMapper {
     }
 
     private CaseData populateCourtDetailsForCourtNaveCase(String authorization, CaseData caseData,
-                                                          Optional<CourtVenue> courtVenue,
                                                           String epmsId) throws NotFoundException {
+        Optional<CourtVenue> courtVenue = Optional.empty();
+        //1. get court details from provided epmsId request
         if (!StringUtils.isEmpty(epmsId)) {
             courtVenue = getCourtVenue(authorization, epmsId);
         }
+        //2. if not found check launchdarkly flag and populate default Swansea court Id
         if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING) && courtVenue.isEmpty()) {
             epmsId = FL401_DEFAULT_BASE_LOCATION_ID;
             courtVenue = getCourtVenue(authorization, epmsId);
         }
-        if (courtVenue.isEmpty()) {
-            caseData = caseData.toBuilder()
-                .courtName(getCourtName(caseData))
-                .courtEmailAddress(getCourtEmailAddress(court))
-                .build();
-        } else {
+        //3. if court details found then populate cour information and cas management location
+        if (!courtVenue.isEmpty()) {
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
@@ -261,6 +258,12 @@ public class FL401ApplicationMapper {
                                             .baseLocationName(courtVenue.get().getCourtName()).build())
                 .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
                 .courtId(epmsId)
+                .build();
+        } else {
+            // 4. populate court details from fact-finder Api.
+            caseData = caseData.toBuilder()
+                .courtName(getCourtName(caseData))
+                .courtEmailAddress(getCourtEmailAddress(court))
                 .build();
         }
         return caseData;
