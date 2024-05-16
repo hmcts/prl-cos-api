@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -271,6 +272,7 @@ public class CaseUtils {
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
         return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                                       ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
             .map(Element::getValue)
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
@@ -688,6 +690,7 @@ public class CaseUtils {
 
     public static List<Element<PartyDetails>> getOthersToNotifyInCase(CaseData caseData) {
         return TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
     }
 
@@ -796,4 +799,9 @@ public class CaseUtils {
         return roles;
     }
 
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+        return null != party.getValue()
+            && null != party.getValue().getUser()
+            && null != party.getValue().getUser().getIdamId();
+    }
 }
