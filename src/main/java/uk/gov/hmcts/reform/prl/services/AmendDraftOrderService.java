@@ -64,10 +64,9 @@ public class AmendDraftOrderService {
             && ObjectUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
 
             UUID orderId = elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper);
-            List<Element<DraftOrder>>  amendDraftOrderCollection = caseData.getDraftOrderCollection().stream()
-                .filter(element -> element.getId().equals(orderId)).collect(Collectors.toList());
+            return caseData.getDraftOrderCollection().stream()
+                .filter(element -> !element.getId().equals(orderId)).collect(Collectors.toList());
 
-            caseData.getDraftOrderCollection().removeAll(amendDraftOrderCollection);
         }
         return caseData.getDraftOrderCollection();
     }
