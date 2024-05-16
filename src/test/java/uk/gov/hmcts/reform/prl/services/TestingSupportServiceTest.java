@@ -644,7 +644,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception{
+    public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
         testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
     }
