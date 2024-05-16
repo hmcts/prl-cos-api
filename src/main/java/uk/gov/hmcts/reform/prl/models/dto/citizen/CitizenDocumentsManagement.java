@@ -25,6 +25,11 @@ public class CitizenDocumentsManagement {
     @JsonProperty("citizenApplicationPacks")
     public List<CitizenDocuments> citizenApplicationPacks;
 
+    /**
+     * This is for citizen dashboard notification flags.
+     */
+    private List<CitizenNotification> citizenNotifications;
+
     public static final List<String> unReturnedCategoriesForUI =
         List.of(
             "safeguardingLetter",
