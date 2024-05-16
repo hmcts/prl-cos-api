@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -155,17 +156,7 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseDataToSubmit))) {
-            if (ObjectUtils.isNotEmpty(caseDataToSubmit.getApplicants().get(0).getValue().getUser())) {
-                caseDataToSubmit.getApplicants().get(0).getValue().getUser().setPcqId(citizenUpdatedCaseData.getC100RebuildData()
-                                                                                          .getApplicantPcqId());
-            } else {
-                caseDataToSubmit.getApplicants().get(0).getValue().setUser(User.builder()
-                                                                               .pcqId(citizenUpdatedCaseData.getC100RebuildData()
-                                                                                          .getApplicantPcqId())
-                                                                               .build());
-            }
-        }
+        updatePcqIdForMainApplicant(citizenUpdatedCaseData, caseDataToSubmit);
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
@@ -180,6 +171,26 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    public void updatePcqIdForMainApplicant(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
+        if (StringUtils.isNotEmpty(citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseDataToSubmit))) {
+                checkAndupdatePcqIdForParty(caseDataToSubmit.getApplicants().get(0).getValue(), citizenUpdatedCaseData);
+            } else {
+                checkAndupdatePcqIdForParty(caseDataToSubmit.getApplicantsFL401(), citizenUpdatedCaseData);
+            }
+        }
+    }
+
+    private void checkAndupdatePcqIdForParty(PartyDetails party, CaseData citizenData) {
+        if (ObjectUtils.isNotEmpty(party.getUser())) {
+            if (StringUtils.isEmpty(party.getUser().getPcqId())) {
+                party.getUser().setPcqId(citizenData.getC100RebuildData().getApplicantPcqId());
+            }
+        } else {
+            party.setUser(User.builder().pcqId(citizenData.getC100RebuildData().getApplicantPcqId()).build());
+        }
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
