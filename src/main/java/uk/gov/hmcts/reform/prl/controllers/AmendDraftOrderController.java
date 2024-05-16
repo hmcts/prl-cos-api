@@ -43,7 +43,8 @@ public class AmendDraftOrderController {
     private final AuthorisationService authorisationService;
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
-    public static final String CONFIRMATION_HEADER = "# Order removed";
+    public static final String AMEND_DRAFT_ORDER_TEXT = "amendDraftOrderText";
+    public static final String CONFIRMATION_HEADER = "# Draft order removed";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n We will send this order to admin.
         \nIf you have included further directions, admin will also receive them.
@@ -121,17 +122,11 @@ public class AmendDraftOrderController {
                 CaseData.class
             );
 
-            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
-            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getDraftOrdersDynamicList());
-            log.info("  ---> patel Before caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
-            log.info("  ---> patel Before caseData.getDraftOrderCollection() {}", caseData.getAmendDraftOrderText());
-
             List<Element<DraftOrder>> draftOrderCollection = amendDraftOrderService.amendSelectedDraftOrder(caseData);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("  ---> patel draftOrderCollection {}", draftOrderCollection);
-            log.info("  ---> patel after caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
             caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+            caseDataUpdated.put(AMEND_DRAFT_ORDER_TEXT, caseData.getAmendDraftOrderText());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
