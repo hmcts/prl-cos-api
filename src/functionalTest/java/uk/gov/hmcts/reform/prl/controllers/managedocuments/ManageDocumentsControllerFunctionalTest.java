@@ -93,7 +93,6 @@ public class ManageDocumentsControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
-    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -113,7 +112,6 @@ public class ManageDocumentsControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
@@ -324,7 +322,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
@@ -342,7 +339,6 @@ public class ManageDocumentsControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
-    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
