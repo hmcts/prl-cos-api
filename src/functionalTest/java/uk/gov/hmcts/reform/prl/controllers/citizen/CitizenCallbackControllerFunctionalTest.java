@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,8 @@ public class CitizenCallbackControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
 
         RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)
