@@ -259,7 +259,7 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
-        UserDetails userDetails = UserDetails
+        userDetails = UserDetails
             .builder()
             .roles(List.of(COURT_ADMIN_ROLE))
             .email("test@gmail.com")
