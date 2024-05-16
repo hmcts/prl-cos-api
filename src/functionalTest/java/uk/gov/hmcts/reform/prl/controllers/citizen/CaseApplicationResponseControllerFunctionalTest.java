@@ -5,6 +5,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -95,6 +96,9 @@ public class CaseApplicationResponseControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+
         Long id = caseDetails.getId();
         List<Map> respondents = (List) caseDetails.getData().get("respondents");
 
@@ -112,6 +116,9 @@ public class CaseApplicationResponseControllerFunctionalTest {
             .extract()
             .as(Document.class);
 
+        Assert.assertNotNull(response1.getDocumentHash());
+        Assert.assertNotNull(response1.getDocumentBinaryUrl());
+        Assert.assertNotNull(response1.getDocumentUrl());
     }
 
     public RequestSpecification getMultipleAuthHeaders() {
