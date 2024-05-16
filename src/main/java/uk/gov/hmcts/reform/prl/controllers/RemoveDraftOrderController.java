@@ -23,8 +23,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.AmendDraftOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.RemoveDraftOrderService;
 
 import java.util.List;
 import java.util.Map;
@@ -36,25 +36,22 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SuppressWarnings({"squid:S5665"})
 @RestController
 @RequiredArgsConstructor
-public class AmendDraftOrderController {
+public class RemoveDraftOrderController {
 
     private final ObjectMapper objectMapper;
-    private final AmendDraftOrderService amendDraftOrderService;
+    private final RemoveDraftOrderService removeDraftOrderService;
     private final AuthorisationService authorisationService;
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
-    public static final String AMEND_DRAFT_ORDER_TEXT = "amendDraftOrderText";
+    public static final String REMOVED_DRAFT_ORDER_TEXT = "removeDraftOrderText";
     public static final String CONFIRMATION_HEADER = "# Draft order removed";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n We will send this order to admin.
-        \nIf you have included further directions, admin will also receive them.
-        """;
+        ### What happens next \n We will delete this order.""";
 
-
-    @PostMapping(path = "/populate-amend-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Populate amend draft order dropdown")
+    @PostMapping(path = "/populate-remove-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Populate remove draft order dropdown")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback to populate amend draft order dropdown"),
+        @ApiResponse(responseCode = "200", description = "Callback to populate remove draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse generateAmendDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -70,7 +67,7 @@ public class AmendDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(amendDraftOrderService.getDraftOrderDynamicList(
+                    .data(removeDraftOrderService.getDraftOrderDynamicList(
                         caseData,
                         callbackRequest.getEventId(),
                         authorisation
@@ -84,7 +81,7 @@ public class AmendDraftOrderController {
     }
 
 
-    @PostMapping(path = "/amend-draft-order/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/remove-draft-order/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to remove draft order")
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<SubmittedCallbackResponse> handleAmendDraftOrderSubmitted(
@@ -107,7 +104,7 @@ public class AmendDraftOrderController {
         }
     }
 
-    @PostMapping(path = "/amend-draft-order/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/remove-draft-order/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to remove draft order")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAmendDraftOrderAboutToSubmitted(
@@ -122,11 +119,11 @@ public class AmendDraftOrderController {
                 CaseData.class
             );
 
-            List<Element<DraftOrder>> draftOrderCollection = amendDraftOrderService.amendSelectedDraftOrder(caseData);
+            List<Element<DraftOrder>> draftOrderCollection = removeDraftOrderService.removeSelectedDraftOrder(caseData);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
-            caseDataUpdated.put(AMEND_DRAFT_ORDER_TEXT, caseData.getAmendDraftOrderText());
+            caseDataUpdated.put(REMOVED_DRAFT_ORDER_TEXT, caseData.getRemoveDraftOrderText());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
