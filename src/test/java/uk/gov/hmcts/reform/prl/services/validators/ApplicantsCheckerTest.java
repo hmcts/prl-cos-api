@@ -119,7 +119,7 @@ public class ApplicantsCheckerTest {
 
     @Test
     public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalseForCourtAdmin() {
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
             .applicants(null)
