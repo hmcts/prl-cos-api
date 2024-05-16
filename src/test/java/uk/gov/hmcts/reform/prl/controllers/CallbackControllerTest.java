@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
@@ -77,6 +78,8 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -154,6 +157,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SOLICITOR_CREATE;
@@ -308,6 +312,9 @@ public class CallbackControllerTest {
     private static final Map<String, Object> fl401DraftMap = new HashMap<>();
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
     private CourtVenue courtVenue;
+
+    @Mock
+    private RoleAssignmentApi roleAssignmentApi;
 
     @Before
     public void setUp() {
@@ -1088,13 +1095,24 @@ public class CallbackControllerTest {
             .applicantOrganisationPolicy(
             applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("hearing-centre-admin");
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("Bearer TestAuthToken", "serviceAuthToken", null, null)).thenReturn(
+            roleAssignmentServiceResponse);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -3342,6 +3360,4 @@ public class CallbackControllerTest {
             .populatePartyInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicants"));
     }
-
-
 }
