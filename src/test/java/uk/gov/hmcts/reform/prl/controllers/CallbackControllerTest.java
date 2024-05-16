@@ -157,6 +157,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.CREATE_URGENT_CASES_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
@@ -3360,4 +3361,48 @@ public class CallbackControllerTest {
             .populatePartyInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicants"));
     }
+
+    @Test
+    public void validateUrgentCaseCreation() {
+
+        Map<String, Object> caseData = new HashMap<>();
+        Organisations org = Organisations.builder().name("testOrg")
+            .organisationIdentifier("abcd")
+            .build();
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(null);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        CaseData caseDataUpdated = CaseData.builder().id(123L)
+            .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of(
+            CITIZEN_ROLE)).build());
+        doNothing().when(ccdDataStoreService).removeCreatorRole(anyString(), anyString());
+        when(authTokenGenerator.generate()).thenReturn("Generate");
+        doNothing().when(assignCaseAccessClient)
+            .assignCaseAccess(anyString(), anyString(), anyBoolean(), any());
+        when(launchDarklyClient.isFeatureEnabled(CREATE_URGENT_CASES_FLAG)).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .validateUrgentCaseCreation(authToken, s2sToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
+    }
+
+    @Test
+    public void validateUrgentCaseCreationError() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .validateUrgentCaseCreation(authToken, s2sToken, CallbackRequest.builder().build());
+        assertEquals("Sorry unable to create any urgent cases now",
+                     aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
+
 }
