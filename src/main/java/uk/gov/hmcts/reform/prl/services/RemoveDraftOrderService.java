@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings({"java:S3776", "java:S6204"})
-public class AmendDraftOrderService {
+public class RemoveDraftOrderService {
 
     public static final String DRAFT_ORDERS_DYNAMIC_LIST = "draftOrdersDynamicList";
 
@@ -43,7 +43,7 @@ public class AmendDraftOrderService {
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
                 log.info(" ---> eventId {}", eventId);
-                if (Event.AMEND_DRAFT_ORDER.getId().equalsIgnoreCase(eventId)) {
+                if (Event.REMOVE_DRAFT_ORDER.getId().equalsIgnoreCase(eventId)) {
                     supportedDraftOrderList.add(draftOrderElement);
                 }
             }
@@ -58,12 +58,12 @@ public class AmendDraftOrderService {
         return caseDataMap;
     }
 
-    public List<Element<DraftOrder>> amendSelectedDraftOrder(CaseData caseData) {
+    public List<Element<DraftOrder>> removeSelectedDraftOrder(CaseData caseData) {
 
         if (ObjectUtils.isNotEmpty(caseData.getDraftOrdersDynamicList())
             && ObjectUtils.isNotEmpty(caseData.getDraftOrderCollection())) {
 
-            UUID orderId = elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper);
+            UUID orderId = elementUtils.getDynamicListSelectedValue(caseData.getRemoveDraftOrdersDynamicList(), objectMapper);
             return caseData.getDraftOrderCollection().stream()
                 .filter(element -> !element.getId().equals(orderId)).collect(Collectors.toList());
 

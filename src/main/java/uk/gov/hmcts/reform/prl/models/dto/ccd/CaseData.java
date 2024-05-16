@@ -797,5 +797,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
     //Amend Draft order
-    private String amendDraftOrderText;
+    private String removeDraftOrderText;
+
+    private Object removeDraftOrdersDynamicList;
 }
