@@ -124,6 +124,7 @@ public class AmendDraftOrderController {
             log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
             log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getDraftOrdersDynamicList());
             log.info("  ---> patel Before caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
+            log.info("  ---> patel Before caseData.getDraftOrderCollection() {}", caseData.getAmendDraftOrderText());
 
             List<Element<DraftOrder>> draftOrderCollection = amendDraftOrderService.amendSelectedDraftOrder(caseData);
 
