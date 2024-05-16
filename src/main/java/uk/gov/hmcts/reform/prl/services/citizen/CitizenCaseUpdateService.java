@@ -72,6 +72,11 @@ public class CitizenCaseUpdateService {
                                                  String eventId,
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
+        try {
+            log.info("CitizenUpdatedCaseData is::" + objectMapper.writeValueAsString(citizenUpdatedCaseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("Case event is :: " + eventId);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
@@ -86,8 +91,16 @@ public class CitizenCaseUpdateService {
             ));
         log.info("Data processing is done, ready to submit to ccd:: " + eventId);
         if (citizenUpdatePartyDataContent.isPresent()) {
+            Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
             try {
-                log.info("case data updated map is::" + objectMapper.writeValueAsString(citizenUpdatePartyDataContent.get().updatedCaseDataMap()));
+                log.info("case data updated map is::" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
+
+            Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+            try {
+                log.info("case data updated map is now::" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
@@ -96,7 +109,7 @@ public class CitizenCaseUpdateService {
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
-                citizenUpdatePartyDataContent.get().updatedCaseDataMap(),
+                caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
             );
             log.info("Data processing is completed:: ");
