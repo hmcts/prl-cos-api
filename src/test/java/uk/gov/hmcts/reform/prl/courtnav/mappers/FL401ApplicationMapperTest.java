@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedR
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -92,6 +94,10 @@ public class FL401ApplicationMapperTest {
     private CourtNavStmtOfTruth stmtOfTruth;
     private GoingToCourt goingToCourt;
     private CourtNavMetaData courtNavMetaData;
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+    @Mock
+    private LocationRefDataService locationRefDataService;
 
     @Before
     public void setUp() {
@@ -424,7 +430,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
@@ -463,7 +469,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
         assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
@@ -514,7 +520,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -562,7 +568,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -611,7 +617,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -662,7 +668,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -718,7 +724,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -771,7 +777,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -844,7 +850,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -894,7 +900,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -940,7 +946,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -987,7 +993,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1036,7 +1042,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1085,7 +1091,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1142,7 +1148,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1195,7 +1201,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1260,7 +1266,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1325,7 +1331,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1371,7 +1377,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
         assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant());
@@ -1418,7 +1424,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 

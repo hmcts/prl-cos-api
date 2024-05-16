@@ -256,8 +256,8 @@ public class TestingSupportService {
                                                              CourtNavFl401 dummyCaseDetails) throws NotFoundException {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
-            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
             String systemAuthorisation = systemUserService.getSysUserToken();
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails,systemAuthorisation);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 systemAuthorisation,
                 fl401CourtNav

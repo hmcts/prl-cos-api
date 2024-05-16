@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.courtnav.mappers;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
@@ -47,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
@@ -69,6 +73,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutc
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -88,9 +94,13 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class FL401ApplicationMapper {
 
     private final CourtFinderService courtFinderService;
+    private final LaunchDarklyClient launchDarklyClient;
+    public static final String FL401_DEFAULT_BASE_LOCATION_ID = "234946";
+    private final LocationRefDataService locationRefDataService;
     private Court court = null;
+    public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
 
-    public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
+    public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
         CaseData caseData = null;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
@@ -217,15 +227,52 @@ public class FL401ApplicationMapper {
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .build();
 
-        caseData = caseData.toBuilder()
-            .courtName(getCourtName(caseData))
-            .courtEmailAddress(getCourtEmailAddress(court))
-            .build();
-
+        Optional<CourtVenue> courtVenue = Optional.empty();
+        String epmsId = courtNavCaseData.getMetaData().getCourtSpecialRequirements();
+        caseData = populateCourtDetailsForCourtNaveCase(authorization, caseData, courtVenue, epmsId);
         caseData = caseData.setDateSubmittedDate();
 
         return caseData;
 
+    }
+
+    private CaseData populateCourtDetailsForCourtNaveCase(String authorization, CaseData caseData,
+                                                          Optional<CourtVenue> courtVenue,
+                                                          String epmsId) throws NotFoundException {
+        if (!StringUtils.isEmpty(epmsId)) {
+            courtVenue = getCourtVenue(authorization, epmsId);
+        }
+        if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING) && courtVenue.isEmpty()) {
+            epmsId = FL401_DEFAULT_BASE_LOCATION_ID;
+            courtVenue = getCourtVenue(authorization, epmsId);
+        }
+        if (courtVenue.isEmpty()) {
+            caseData = caseData.toBuilder()
+                .courtName(getCourtName(caseData))
+                .courtEmailAddress(getCourtEmailAddress(court))
+                .build();
+        } else {
+            caseData = caseData.toBuilder()
+                .courtName(courtVenue.get().getCourtName())
+                .caseManagementLocation(CaseManagementLocation.builder()
+                                            .region(courtVenue.get().getRegionId())
+                                            .baseLocation(epmsId)
+                                            .regionName(courtVenue.get().getRegion())
+                                            .baseLocationName(courtVenue.get().getCourtName()).build())
+                .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
+                .courtId(epmsId)
+                .build();
+        }
+        return caseData;
+    }
+
+    private Optional<CourtVenue> getCourtVenue(String authToken, String epmsId) {
+        Optional<CourtVenue> courtVenue;
+        courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
+            epmsId,
+            authToken
+        );
+        return courtVenue;
     }
 
     private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {

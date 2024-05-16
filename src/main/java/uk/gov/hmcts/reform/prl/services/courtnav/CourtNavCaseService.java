@@ -20,16 +20,13 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -43,7 +40,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
@@ -56,7 +52,6 @@ public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
     protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
-    public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -66,19 +61,9 @@ public class CourtNavCaseService {
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final SystemUserService systemUserService;
-    private final LaunchDarklyClient launchDarklyClient;
-    public static final String FL401_DEFAULT_BASE_LOCATION_ID = "234946";
-    private final LocationRefDataService locationRefDataService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING)) {
-            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-                FL401_DEFAULT_BASE_LOCATION_ID,
-                authToken
-            );
-            caseDataMap.putAll(CaseUtils.getCourtDetails(courtVenue, FL401_DEFAULT_BASE_LOCATION_ID));
-        }
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()

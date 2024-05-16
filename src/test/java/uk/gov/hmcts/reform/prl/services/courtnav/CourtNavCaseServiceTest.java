@@ -26,10 +26,8 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -96,12 +94,6 @@ public class CourtNavCaseServiceTest {
     @Mock
     SystemUserService systemUserService;
 
-    @Mock
-    LaunchDarklyClient launchDarklyClient;
-
-    @Mock
-    LocationRefDataService locationRefDataService;
-
 
     private Map<String, Object> caseDataMap = new HashMap<>();
     private CaseData caseData;
@@ -139,16 +131,6 @@ public class CourtNavCaseServiceTest {
 
     @Test
     public void shouldStartAndSubmitEventWithEventData() {
-        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
-        courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
-        verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
-                                                    Mockito.anyString(),
-                                                    Mockito.any(CaseDataContent.class), Mockito.anyBoolean());
-    }
-
-    @Test
-    public void shouldStartAndSubmitEventWithEventDataWhenLaunchDarklyFlagTrue() {
-        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(true);
         courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
                                                     Mockito.anyString(),
