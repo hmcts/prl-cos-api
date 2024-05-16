@@ -3366,9 +3366,6 @@ public class CallbackControllerTest {
     public void validateUrgentCaseCreation() {
 
         Map<String, Object> caseData = new HashMap<>();
-        Organisations org = Organisations.builder().name("testOrg")
-            .organisationIdentifier("abcd")
-            .build();
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
