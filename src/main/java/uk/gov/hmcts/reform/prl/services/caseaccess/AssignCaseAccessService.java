@@ -50,8 +50,6 @@ public class AssignCaseAccessService {
             boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
             String userId = userDetails.getId();
 
-            log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
-
             if (!isCourtStaff) {
                 String serviceToken = authTokenGenerator.generate();
                 assignCaseAccessClient.assignCaseAccess(
@@ -62,8 +60,6 @@ public class AssignCaseAccessService {
                 );
             }
             ccdDataStoreService.removeCreatorRole(caseId, authorisation);
-
-            log.info("CaseId: {} assigned case access to user {}", caseId, userId);
         }
     }
 
