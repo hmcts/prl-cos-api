@@ -1471,6 +1471,44 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
+    public void testCourtnavCaseDataWhenCourtDetailFoundForEpmsId() throws NotFoundException {
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+        when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
+            .thenReturn(Optional.of(CourtVenue.builder()
+                                        .courtName("Swansea Family court")
+                                        .region("Wales")
+                                        .regionId("7")
+                                        .build()));
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+
+        assertEquals(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor(), caseData.getTypeOfApplicationOrders().getOrderType());
+        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedFor());
+        assertNotNull(courtNavFl401.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason());
+        assertEquals("Swansea Family court", caseData.getCourtName());
+    }
+
+    @Test
     public void testCourtnavCaseDataWhenPopulateDefaultCaseFlagIsOff() throws NotFoundException {
 
         courtNavFl401 = CourtNavFl401.builder()
