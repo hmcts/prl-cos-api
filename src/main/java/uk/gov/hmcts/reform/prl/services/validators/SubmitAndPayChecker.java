@@ -69,7 +69,8 @@ public class SubmitAndPayChecker implements EventChecker {
         boolean mandatoryFinished;
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             optionalEvents.put(
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
