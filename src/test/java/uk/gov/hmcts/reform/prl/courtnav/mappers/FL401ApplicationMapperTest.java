@@ -1486,7 +1486,9 @@ public class FL401ApplicationMapperTest {
                        .statementOfTruth(stmtOfTruth)
                        .goingToCourt(goingToCourt)
                        .build())
-            .metaData(courtNavMetaData)
+            .metaData(courtNavMetaData.toBuilder()
+                          .courtSpecialRequirements(null)
+                          .build())
             .build();
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
