@@ -48,10 +48,10 @@ java:
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2190-aac-manage-case-assignment
     BUNDLE_URL: http://prl-ccd-definitions-pr-2190-em-ccdorc
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
-    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-1971-ccd-data-store-api
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1971-cdam
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1971-aac-manage-case-assignment
-    BUNDLE_URL: http://prl-ccd-definitions-pr-1971-em-ccdorc
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-1779-ccd-data-store-api
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1779-cdam
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1779-aac-manage-case-assignment
+    BUNDLE_URL: http://prl-ccd-definitions-pr-1779-em-ccdorc
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
