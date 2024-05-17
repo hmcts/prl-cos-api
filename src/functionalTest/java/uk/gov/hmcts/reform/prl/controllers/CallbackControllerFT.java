@@ -324,8 +324,6 @@ public class CallbackControllerFT {
 
     @Test
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
-        String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
-
         UserDetails userDetails = UserDetails.builder().forename("test").build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -341,6 +339,7 @@ public class CallbackControllerFT {
             .thenReturn(RoleAssignmentServiceResponse.builder()
                             .roleAssignmentResponse(List.of(roleAssignmentResponse))
                             .build());
+        String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
         mockMvc.perform(post("/about-to-submit-case-creation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
