@@ -35,8 +35,8 @@ class Fm5ReminderControllerTest {
 
     @Test
     void test_Fm5ReminderNotification() {
-        fm5ReminderController.sendFm5ReminderNotifications();
-        verify(fm5ReminderService, times(1)).sendFm5ReminderNotifications();
+        fm5ReminderController.sendFm5ReminderNotifications(2L);
+        verify(fm5ReminderService, times(1)).sendFm5ReminderNotifications(2L);
     }
 
 }
