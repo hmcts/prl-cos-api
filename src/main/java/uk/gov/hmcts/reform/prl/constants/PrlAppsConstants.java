@@ -1002,5 +1002,14 @@ public class PrlAppsConstants {
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
     public static final String C1A_FINAL_RESPONSE_DOCUMENT = "C1A_FINAL_RESPONSE_DOCUMENT";
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
 
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+
+    //Citizen dashboard notifications
+    public static final String CAN_10_FM5 = "CAN_10";
 }
