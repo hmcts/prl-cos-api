@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class RemoveDraftOrderService {
 
-    public static final String DRAFT_ORDERS_DYNAMIC_LIST = "draftOrdersDynamicList";
+    public static final String REMOVE_DRAFT_ORDERS_DYNAMIC_LIST = "removeDraftOrdersDynamicList";
 
     private final ManageOrderService manageOrderService;
     private final ElementUtils elementUtils;
@@ -48,7 +48,7 @@ public class RemoveDraftOrderService {
                 }
             }
         );
-        caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
+        caseDataMap.put(REMOVE_DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
             DraftOrder::getLabelForOrdersDynamicList
