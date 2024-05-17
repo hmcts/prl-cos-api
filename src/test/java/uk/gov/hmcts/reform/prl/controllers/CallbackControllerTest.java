@@ -3402,4 +3402,81 @@ public class CallbackControllerTest {
                      aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
     }
 
+    @Test
+    public void testNullFl401CaseName() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals(caseDetails, callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getData());
+    }
+
+    @Test
+    public void testNullC100CaseName() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals(caseDetails, callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getData());
+    }
+
+    @Test
+    public void testFl401CaseNameWithHtml() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "<p><a href=\"https://www.google.com/\">Google</a></p>");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals("You have entered an invalid character. Special characters <,>,{,} are not allowed.",
+            callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getErrors().get(0));
+    }
+
+    @Test
+    public void testC100CaseNameWithHtml() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantCaseName", "<p><a href=\"https://www.google.com/\">Google</a></p>");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals("You have entered an invalid character. Special characters <,>,{,} are not allowed.",
+            callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getErrors().get(0));
+    }
+
+    @Test
+    public void testAcceptedFl401CaseName() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "test");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals(caseDetails, callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getData());;
+    }
+
+    @Test
+    public void testAcceptedC100CaseName() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantCaseName", "test");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(1L)
+                .data(caseDetails).build()).build();
+        assertEquals(caseDetails, callbackController.checkCasenameForHtmlInjection(authToken, s2sToken, callbackRequest).getData());;
+    }
 }
