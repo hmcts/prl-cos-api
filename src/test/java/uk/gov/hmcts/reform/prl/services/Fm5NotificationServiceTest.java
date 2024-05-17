@@ -9,10 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
@@ -31,6 +33,9 @@ public class Fm5NotificationServiceTest {
     private CaseData caseData;
     PartyDetails applicant;
     PartyDetails respondent;
+
+
+    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
 
     @InjectMocks
     private Fm5NotificationService fm5NotificationService;
@@ -60,8 +65,16 @@ public class Fm5NotificationServiceTest {
     private DocumentLanguageService documentLanguageService;
 
     @Mock
+    private DocumentLanguage documentLanguage;
+
+    @Mock
     private DgsService dgsService;
 
+    @Mock
+    private GeneratedDocumentInfo generatedDocumentInfo;
+
+    @Mock
+    DgsApiClient dgsApiClient;
 
     @Before
     public void setUp() {
@@ -92,9 +105,16 @@ public class Fm5NotificationServiceTest {
             .respondents(List.of(element(respondent)))
             .build();
 
+        generatedDocumentInfo = GeneratedDocumentInfo.builder().url("test")
+            .build();
+
         when(systemUserService.getSysUserToken()).thenReturn("authToken");
         when(documentLanguageService.docGenerateLang(any(CaseData.class)))
             .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build());
+
+        /* when(dgsService.generateDocument(anyString(),anyString(),anyString(),any()))
+            .thenReturn(GeneratedDocumentInfo.builder().url("testUrl").docName("test").mimeType("mime").binaryUrl("testbinary").build());
+        */
     }
 
     @Test
@@ -108,4 +128,52 @@ public class Fm5NotificationServiceTest {
         Assert.assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
         Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
     }
+
+    @Test
+    public void sendFm5ReminderForRespondentSolicitors() {
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+    }
+
+    @Test
+    public void sendFm5ReminderForBothApplicantRespondentSolicitors() {
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH);
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        Assert.assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(1).getValue().getPartyType());
+        Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+    }
+
+    @Test
+    public void sendFm5ReminderForNoApplicantRespondentSolicitorsNotification() {
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService
+            .sendFm5ReminderNotifications(caseData, FmPendingParty.NOTIFICATION_NOT_REQUIRED);
+
+        //verify
+        Assert.assertTrue(notifications.isEmpty());
+        Assert.assertEquals(0, notifications.size());
+    }
+
+    /* @Test
+    public void sendFm5ReminderForNoApplicantEmail() {
+        applicant = applicant.toBuilder().solicitorEmail("").build();
+        caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
+
+        //verify
+        Assert.assertTrue(notifications.isEmpty());
+        Assert.assertEquals(0, notifications.size());
+    }*/
 }
