@@ -25,19 +25,16 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class RemoveDraftOrderService {
 
-    public static final String REMOVE_DRAFT_ORDERS_DYNAMIC_LIST = "removeDraftOrdersDynamicList";
+    private static final String REMOVE_DRAFT_ORDERS_DYNAMIC_LIST = "removeDraftOrdersDynamicList";
 
-    private final ManageOrderService manageOrderService;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
-
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
-
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
                                                         String eventId,
                                                         String authorisation) {
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(

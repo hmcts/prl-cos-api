@@ -53,12 +53,12 @@ public class RemoveDraftOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback to populate remove draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse generateAmendDraftOrderDropDown(
+    public AboutToStartOrSubmitCallbackResponse generateRemoveDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("generateAmendDraftOrderDropDown -->");
+        log.info("generateRemoveDraftOrderDropDown -->");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -84,7 +84,7 @@ public class RemoveDraftOrderController {
     @PostMapping(path = "/remove-draft-order/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to remove draft order")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<SubmittedCallbackResponse> handleAmendDraftOrderSubmitted(
+    public ResponseEntity<SubmittedCallbackResponse> handleRemoveDraftOrderSubmitted(
         @RequestHeader("Authorization")
         @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
@@ -107,7 +107,7 @@ public class RemoveDraftOrderController {
     @PostMapping(path = "/remove-draft-order/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to remove draft order")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAmendDraftOrderAboutToSubmitted(
+    public AboutToStartOrSubmitCallbackResponse handleRemoveDraftOrderAboutToSubmitted(
         @RequestHeader("Authorization")
         @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
@@ -119,14 +119,7 @@ public class RemoveDraftOrderController {
                 CaseData.class
             );
 
-            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
-            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getRemoveDraftOrdersDynamicList());
-            log.info("  ---> patel Before caseData.getRemoveDraftOrderText() {}", caseData.getRemoveDraftOrderText());
-
             List<Element<DraftOrder>> draftOrderCollection = removeDraftOrderService.removeSelectedDraftOrder(caseData);
-
-            log.info("  ---> patel draftOrderCollection {}", draftOrderCollection.size());
-            log.info("  ---> patel after caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
