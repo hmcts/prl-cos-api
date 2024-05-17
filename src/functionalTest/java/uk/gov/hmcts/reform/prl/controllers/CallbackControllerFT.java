@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -333,6 +334,13 @@ public class CallbackControllerFT {
 
         when(organisationService.findUserOrganisation(any(String.class))).thenReturn(organisation);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse roleAssignmentResponse =
+            new uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-magistrate");
+        when(roleAssignmentApi.getRoleAssignments(any(),any(),any(),any()))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(List.of(roleAssignmentResponse))
+                            .build());
         mockMvc.perform(post("/about-to-submit-case-creation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
