@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
@@ -174,13 +173,8 @@ public class Fm5NotificationService {
                                                                   CaseData caseData,
                                                                   Element<PartyDetails> party,
                                                                   boolean isApplicant) {
-        log.info("Contact pref is {} for party {}", party.getValue().getContactPreferences(), party.getId());
-        if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
-            && YesOrNo.Yes.equals(party.getValue().getCanYouProvideEmailAddress())) {
-            return sendFm5ReminderToLipViaEmail(authorization, caseData, party, isApplicant);
-        } else {
-            return sendFm5ReminderToLipViaPost(authorization, caseData, party, isApplicant);
-        }
+        log.info("Sending reminder to LiP via bulk print for party {}", party.getId());
+        return sendFm5ReminderToLipViaPost(authorization, caseData, party, isApplicant);
     }
 
     private Element<NotificationDetails> sendFm5ReminderToLipViaEmail(String authorization,
