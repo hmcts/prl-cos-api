@@ -9,8 +9,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -38,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
@@ -75,10 +80,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -98,6 +104,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -124,6 +132,13 @@ public class DocumentGenService {
     protected String c100C8DraftFilename;
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template}")
+    protected String fl401RespC8Template;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
+    protected String fl401RespC8TemplateWelsh;
+
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
     protected String c100RespC8DraftTemplate;
     @Value("${document.templates.c100.c100_resp_c8_filename}")
@@ -202,6 +217,14 @@ public class DocumentGenService {
     protected String solicitorC7FinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_template}")
+    protected String solicitorC7WelshDraftTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_draft_filename}")
+    protected String solicitorC7WelshDraftFilename;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_template}")
+    protected String solicitorC7WelshFinalTemplate;
+    @Value("${document.templates.common.prl_solicitor_c7_welsh_final_filename}")
+    protected String solicitorC7WelshFinalFilename;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
@@ -210,6 +233,14 @@ public class DocumentGenService {
     protected String solicitorC1AFinalTemplate;
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
     protected String solicitorC1AFinalFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_template}")
+    protected String solicitorC1ADraftWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_draft_filename}")
+    protected String solicitorC1ADraftWelshFilename;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_template}")
+    protected String solicitorC1AFinalWelshTemplate;
+    @Value("${document.templates.common.prl_solicitor_c1a_welsh_final_filename}")
+    protected String solicitorC1AFinalWelshFilename;
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
     @Value("${document.templates.common.prl_c1a_blank_filename}")
@@ -230,6 +261,10 @@ public class DocumentGenService {
     protected String daListOnNoticeFl404bTemplate;
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_template}")
+    protected String respC8TemplateWelsh;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
+    protected String respC8FilenameWelsh;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -240,6 +275,12 @@ public class DocumentGenService {
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
+    @Autowired
+    private DgsApiClient dgsApiClient;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -273,16 +314,13 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
-
-        Map<String, Object> updatedCaseData = new HashMap<>();
-
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
+        Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
@@ -429,20 +467,111 @@ public class DocumentGenService {
         );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
         return updatedCaseData;
     }
 
+    public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        boolean isConfidentialInformationPresentForC100 = isConfidentialInformationPresentForC100(caseData);
+        boolean isC1aPresentForC100 = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
+
+        updatedCaseData.putAll(generateDraftDocuments(authorisation, caseData));
+        generateDraftEngC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        generateDraftWelshC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        return updatedCaseData;
+    }
+
+    private void generateDraftWelshC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                    CaseData caseData,
+                                                                    Map<String, Object> updatedCaseData,
+                                                                    DocumentLanguage documentLanguage,
+                                                                    boolean isConfidentialInformationPresentForC100,
+                                                                    boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+            }
+        }
+    }
+
+    private void generateDraftEngC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                  CaseData caseData,
+                                                                  Map<String, Object> updatedCaseData,
+                                                                  DocumentLanguage documentLanguage,
+                                                                  boolean isConfidentialInformationPresentForC100,
+                                                                  boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C1A,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+                );
+
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
+            }
+        }
+    }
+
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
         throws Exception {
+        String filename = "";
+        if (respondentDetails.containsKey("dynamic_fileName")) {
+            filename = String.valueOf(respondentDetails.get("dynamic_fileName"));
+        } else {
+            filename = getFileName(caseData, hint, isWelsh);
+        }
         return generateDocumentField(
-            getFileName(caseData, hint, isWelsh),
+            filename,
             generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh, respondentDetails)
         );
     }
@@ -652,7 +781,7 @@ public class DocumentGenService {
                 fileName = c100RespC8DraftFilename;
                 break;
             case C8_RESP_FINAL_HINT:
-                fileName = c100RespC8Filename;
+                fileName = findFinalRespondentC8FileName(isWelsh);
                 break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
@@ -688,16 +817,22 @@ public class DocumentGenService {
                 fileName = docC7FinalWelshFilename;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                fileName = solicitorC7DraftFilename;
+                fileName = findDocCoverSheetC7DraftFileName(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                fileName = solicitorC7FinalFilename;
+                fileName = findDocCoverSheetC7FinalFileName(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 fileName = solicitorC1AFinalFilename;
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                fileName = solicitorC1AFinalWelshFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftWelshFilename;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
@@ -758,7 +893,10 @@ public class DocumentGenService {
                 template = c100RespC8DraftTemplate;
                 break;
             case C8_RESP_FINAL_HINT:
-                template = c100RespC8Template;
+                template = findFinalRespondentC8Template(isWelsh);
+                break;
+            case C8_RESP_FL401_FINAL_HINT:
+                template = findFinalDaRespondentC8Template(isWelsh);
                 break;
             case C1A_HINT:
                 template = c100DocumentTemplateFinderService.findC1ATemplate(caseData,isWelsh);
@@ -797,16 +935,22 @@ public class DocumentGenService {
                 template = docC7FinalWelshTemplate;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                template = solicitorC7DraftTemplate;
+                template = findDocCoverSheetC7DraftTemplate(isWelsh);
                 break;
             case SOLICITOR_C7_FINAL_DOCUMENT:
-                template = solicitorC7FinalTemplate;
+                template = findDocCoverSheetC7FinalTemplate(isWelsh);
                 break;
             case SOLICITOR_C1A_FINAL_DOCUMENT:
                 template = solicitorC1AFinalTemplate;
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                template = solicitorC1AFinalWelshTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftWelshTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
@@ -845,10 +989,38 @@ public class DocumentGenService {
         return template;
     }
 
+    private String findFinalRespondentC8Template(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Template  : respC8TemplateWelsh;
 
+    }
+
+    private String findFinalDaRespondentC8Template(boolean isWelsh) {
+        return !isWelsh ? fl401RespC8Template  : fl401RespC8TemplateWelsh;
+    }
+
+    private String findFinalRespondentC8FileName(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Filename  : respC8FilenameWelsh;
+
+    }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftTemplate : solicitorC7WelshDraftTemplate;
+    }
+
+    private String findDocCoverSheetC7FinalTemplate(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalTemplate : solicitorC7WelshFinalTemplate;
+    }
+
+    private String findDocCoverSheetC7DraftFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7DraftFilename : solicitorC7WelshDraftFilename;
+    }
+
+    private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
+        return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -857,8 +1029,8 @@ public class DocumentGenService {
 
         boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
 
-        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
-
+        return isPartyDetailsConfidential(partyDetails)
+            || isChildrenConfidential;
     }
 
     private boolean isChildrenDetailsConfidentiality(CaseData caseData,
@@ -883,19 +1055,19 @@ public class DocumentGenService {
         return childrenConfidentiality;
     }
 
-    private boolean isApplicantDetailsConfidential(PartyDetails applicant) {
+    private boolean isPartyDetailsConfidential(PartyDetails partyDetails) {
 
-        boolean isApplicantInformationConfidential = false;
-        if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+        boolean isPartyInformationConfidential = false;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsAddressConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsEmailAddressConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
-            isApplicantInformationConfidential = true;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsPhoneNumberConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        return isApplicantInformationConfidential;
+        return isPartyInformationConfidential;
     }
 
     public Document generateSingleDocument(String authorisation,
@@ -995,7 +1167,7 @@ public class DocumentGenService {
                                                                              .build()).build();
 
         } catch (Exception e) {
-            log.error("Error while uploading document ." + e.getMessage());
+            log.error("Error while uploading document .", e);
             throw e;
         }
     }
@@ -1010,7 +1182,7 @@ public class DocumentGenService {
             return DocumentResponse.builder().status("Success").build();
 
         } catch (Exception e) {
-            log.error("Error while deleting  document ." + e.getMessage());
+            log.error("Error while deleting  document .", e);
             throw e;
         }
     }
@@ -1023,7 +1195,7 @@ public class DocumentGenService {
             );
 
         } catch (Exception e) {
-            log.error("Error while downloading  document ." + e.getMessage());
+            log.error("Error while downloading  document .", e);
             throw e;
         }
     }
@@ -1056,7 +1228,7 @@ public class DocumentGenService {
             isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
             updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
     }
 
@@ -1100,7 +1272,7 @@ public class DocumentGenService {
                 DOCUMENT_FIELD_FINAL_WELSH,
                 getDocument(authorisation, caseData, FINAL_HINT, true)
             );
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
     }
 
@@ -1153,5 +1325,57 @@ public class DocumentGenService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    private boolean checkFileFormat(String fileName) {
+        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
+        String format = "";
+        if (null != fileName) {
+            int i = fileName.lastIndexOf('.');
+            if (i >= 0) {
+                format = fileName.substring(i + 1);
+            }
+            String finalFormat = format;
+            return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
+        } else {
+            return false;
+        }
+    }
+
+    public Document convertToPdf(String authorisation, Document document) {
+        String filename = document.getDocumentFileName();
+        if (checkFileFormat(document.getDocumentFileName())) {
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            byte[] docInBytes = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name " + filename, e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", docInBytes);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                    .builder().template(DUMMY).values(tempCaseDetails).build()
+            );
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
     }
 }

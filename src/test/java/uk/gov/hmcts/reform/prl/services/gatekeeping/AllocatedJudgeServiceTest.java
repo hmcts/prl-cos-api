@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.Appointment;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -27,7 +28,9 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LA_NEEDED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AllocatedJudgeServiceTest {
@@ -47,7 +50,9 @@ public class AllocatedJudgeServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isSpecificJudgeOrLegalAdviserNeeded","No");
         stringObjectMap.put("tierOfJudiciary","circuitJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue());
@@ -61,6 +66,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","districtJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.DISTRICT_JUDGE.getDisplayedValue());
@@ -74,6 +80,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","highCourtJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.HIGHCOURT_JUDGE.getDisplayedValue());
@@ -87,6 +94,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","magistrates");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.MAGISTRATES.getDisplayedValue());
@@ -115,7 +123,9 @@ public class AllocatedJudgeServiceTest {
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
-        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname")
+                                .appointments(List.of(Appointment.builder().appointment("Circuit Judge").build()))
+                                .build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.judge);
         stringObjectMap.put("judgeNameAndEmail", JudicialUser.builder().idamId("123").personalCode("123456").build());
@@ -128,7 +138,31 @@ public class AllocatedJudgeServiceTest {
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
         assertEquals("test@Email.com",actualResponse.getJudgeEmail());
         assertEquals("testSurname",actualResponse.getJudgeName());
+        assertEquals("Circuit Judge", actualResponse.getTierOfJudge());
+    }
 
+    @Test
+    public void testWhenJudgeTierNotPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname")
+                                .build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.judge);
+        stringObjectMap.put("judgeNameAndEmail", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+                                                              .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        AllocatedJudge actualResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,refDataUserService);
+        assertNotNull(actualResponse);
+        assertEquals(AllocatedJudgeTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviser());
+        assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
+        assertEquals("test@Email.com",actualResponse.getJudgeEmail());
+        assertEquals("testSurname",actualResponse.getJudgeName());
+        assertNull(actualResponse.getTierOfJudge());
     }
 
     @Test

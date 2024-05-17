@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class DgsService {
 
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
+    private final HearingDataService hearingDataService;
+
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
@@ -45,7 +48,6 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
-        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
@@ -56,6 +58,10 @@ public class DgsService {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
@@ -117,6 +123,10 @@ public class DgsService {
         });
         caseDataMap.put("case_data", caseDataValues);
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {

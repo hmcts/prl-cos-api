@@ -14,11 +14,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -54,6 +59,8 @@ public class CitizenCallbackControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenUpdate_citizen_application_then200Response() throws Exception {
 
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(Map.of("id", 1)).build();
+        when(allTabsService.updateAllTabsIncludingConfTab(any())).thenReturn(caseDetails);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/update-citizen-application")
                             .contentType(MediaType.APPLICATION_JSON)
