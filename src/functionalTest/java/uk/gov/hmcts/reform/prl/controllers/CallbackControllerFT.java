@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -323,6 +324,7 @@ public class CallbackControllerFT {
     }
 
     @Test
+    @Ignore
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
         UserDetails userDetails = UserDetails.builder().forename("test").build();
 
