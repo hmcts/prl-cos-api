@@ -701,7 +701,7 @@ public class TestingSupportServiceTest {
             .thenReturn(caseData);
         when(courtNavCaseService.createCourtNavCase(any(),any()))
             .thenReturn(caseDetails);
-        Map<String,Object> casDateMap =
+        Map<String,Object> caseDataMap =
             testingSupportService.initiateCaseCreationForCourtNav(auth,callbackRequest);
         assertEquals(12345678L,caseDataMap.get(CASE_DATA_ID));
     }

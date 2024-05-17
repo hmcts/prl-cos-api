@@ -522,7 +522,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -570,7 +570,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -619,7 +619,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -670,7 +670,7 @@ public class FL401ApplicationMapperTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
 
-        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
+        fl401ApplicationMapper.mapCourtNavData(courtNavFl401,"Bearer:test");
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
@@ -1030,11 +1030,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1077,11 +1072,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1136,11 +1126,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1187,11 +1172,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1254,11 +1234,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1317,11 +1292,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1525,11 +1495,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
             .build();
         when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(true);
         when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
