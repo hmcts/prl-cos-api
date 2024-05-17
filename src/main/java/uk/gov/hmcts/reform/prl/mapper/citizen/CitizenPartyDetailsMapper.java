@@ -115,8 +115,16 @@ public class CitizenPartyDetailsMapper {
             ));
         }
 
+        try {
+            log.info("citizenUpdatePartyDataContent is after::" + objectMapper.writeValueAsString(citizenUpdatePartyDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         if (citizenUpdatePartyDataContent.isPresent()) {
+            log.info("citizenUpdatePartyDataContent is present");
             if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+                log.info("event satisfied");
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
@@ -129,13 +137,18 @@ public class CitizenPartyDetailsMapper {
 
     private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
         CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
+        log.info("case type is::" + caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("c100 case type it is");
+            log.info("party type is::" + partyType);
             if (PartyEnum.respondent.equals(partyType)) {
+                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CARESPONDENT
                 ));
             } else {
+                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CAAPPLICANT
@@ -143,16 +156,25 @@ public class CitizenPartyDetailsMapper {
             }
         } else {
             if (PartyEnum.respondent.equals(partyType)) {
+                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DARESPONDENT
                 ));
             } else {
+                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DAAPPLICANT
                 ));
             }
+        }
+
+        try {
+            log.info("citizenUpdatePartyDataContent is after::"
+                         + objectMapper.writeValueAsString(citizenUpdatePartyDataContent.updatedCaseDataMap()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
         }
     }
 
