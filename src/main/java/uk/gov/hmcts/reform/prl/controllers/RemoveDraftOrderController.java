@@ -120,12 +120,12 @@ public class RemoveDraftOrderController {
             );
 
             log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getId());
-            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getDraftOrdersDynamicList());
+            log.info("  ---> patel /amend-draft-order/about-to-submit {}", caseData.getRemoveDraftOrdersDynamicList());
             log.info("  ---> patel Before caseData.getRemoveDraftOrderText() {}", caseData.getRemoveDraftOrderText());
 
             List<Element<DraftOrder>> draftOrderCollection = removeDraftOrderService.removeSelectedDraftOrder(caseData);
 
-            log.info("  ---> patel draftOrderCollection {}", draftOrderCollection);
+            log.info("  ---> patel draftOrderCollection {}", draftOrderCollection.size());
             log.info("  ---> patel after caseData.getDraftOrderCollection() {}", caseData.getDraftOrderCollection());
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
