@@ -1458,11 +1458,6 @@ public class FL401ApplicationMapperTest {
                        .build())
             .metaData(courtNavMetaData)
             .build();
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("test court address")
-            .description("court desc")
-            .explanation("court explanation")
-            .build();
         when(launchDarklyClient.isFeatureEnabled(anyString())).thenReturn(false);
         when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(),anyString()))
             .thenReturn(Optional.of(CourtVenue.builder()
