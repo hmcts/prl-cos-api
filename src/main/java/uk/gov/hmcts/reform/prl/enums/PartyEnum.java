@@ -12,8 +12,12 @@ public enum PartyEnum {
 
     @JsonProperty("applicant")
     applicant("Applicant"),
+    @JsonProperty("applicant_solicitor")
+    applicant_solicitor("Applicant solicitor"),
     @JsonProperty("respondent")
     respondent("Respondent"),
+    @JsonProperty("respondent_solicitor")
+    respondent_solicitor("Respondent solicitor"),
     @JsonProperty("other")
     other("Other people in the case");
 

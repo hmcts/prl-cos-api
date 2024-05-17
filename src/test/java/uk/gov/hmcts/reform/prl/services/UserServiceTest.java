@@ -107,4 +107,14 @@ public class UserServiceTest {
 
         assertEquals(userDetails, userDetails1);
     }
+
+    @Test
+    public void testToCheckGetUsersByEmailId() {
+
+        when(idamClient.searchUsers(authToken,"email:")).thenReturn(List.of(userDetails));
+
+        List<UserDetails> userDetails1 = userService.getUserByEmailId(authToken, "");
+
+        assertEquals(List.of(userDetails), userDetails1);
+    }
 }

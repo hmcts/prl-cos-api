@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.enums.manageorders;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;

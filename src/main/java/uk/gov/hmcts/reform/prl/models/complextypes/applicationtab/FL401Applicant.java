@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class FL401Applicant {
 

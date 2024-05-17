@@ -4,6 +4,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -138,8 +139,8 @@ public class CaseDataApplicantElementsMapper {
         return KeepDetailsPrivate
             .builder()
             .otherPeopleKnowYourContactDetails(I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
-                                                   ? YesNoDontKnow.dontKnow :
-                                                   YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
+                                                   ? YesNoIDontKnow.dontKnow :
+                                                   YesNoIDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
             .confidentiality(isNotEmpty(applicantDto.getStart())
                                  ? YesOrNo.getValue(applicantDto.getStart())
                                  : YesOrNo.getValue(applicantDto.getStartAlternative()))

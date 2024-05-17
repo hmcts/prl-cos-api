@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
+                .taskListVersion("v2")
                 .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -420,6 +421,23 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
     @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
         "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
      void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom(resourcePath))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrnsForASingleChild.json"})
+    void testCaseDataMapperForSafetyConcernsForASingleChild(String resourcePath) throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()

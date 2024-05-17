@@ -5,14 +5,19 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ApproveAndServeClearFieldsEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -55,6 +60,11 @@ public class ManageOrdersUtils {
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
+
+    public static final String[] PROHIBITED_ORDER_IDS_FOR_SOLICITORS = {"noticeOfProceedings","noticeOfProceedingsParties",
+        "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue"};
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
@@ -65,7 +75,7 @@ public class ManageOrdersUtils {
         singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList);
+        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings);
 
         return errorList;
     }
@@ -79,9 +89,6 @@ public class ManageOrdersUtils {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
                     errorList.add("Please provide at least one hearing details");
-                } else if (ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
-                    errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
             } else if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
@@ -95,15 +102,14 @@ public class ManageOrdersUtils {
     }
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
-                                                                  List<String> errorList) {
+                                                                  List<String> errorList,
+                                                                  boolean isSolicitorOrdersHearings) {
         if (isNotEmpty(ordersHearingDetails)) {
             ordersHearingDetails.stream()
                 .map(Element::getValue)
                 .forEach(hearingData -> {
-                    //hearingType validation
-                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                        && HearingDateConfirmOptionEnum.dateReservedWithListAssit
-                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                    //validate for manage orders, draft & edit returned order
+                    if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
                         errorList.add("You must select a hearing type");
@@ -112,6 +118,12 @@ public class ManageOrdersUtils {
                     validateHearingEstimatedTimings(errorList, hearingData);
                 });
         }
+    }
+
+    private static boolean isDateReservedWithListAssist(HearingData hearingData) {
+        return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+            && HearingDateConfirmOptionEnum.dateReservedWithListAssit
+            .equals(hearingData.getHearingDateConfirmOptionEnum());
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
@@ -155,6 +167,15 @@ public class ManageOrdersUtils {
         if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
             validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
+        }
+        if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
+            && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.factFindingHearing)
+            && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+            && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails().getHearingDateConfirmOptionEnum())) {
+            validateHearingEstimatedTimings(
+                errorList,
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+            );
         }
         return errorList;
     }
@@ -301,18 +322,22 @@ public class ManageOrdersUtils {
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-            || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_C100);
+                || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
+                    errorList.add("This order is not available to be created");
+                }
+                if (!Arrays.stream(VALID_ORDER_IDS_FOR_C100)
+                        .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    errorList.add(ORDER_NOT_AVAILABLE_C100);
+                }
+
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                    .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
-
         return !errorList.isEmpty();
     }
 
@@ -331,4 +356,42 @@ public class ManageOrdersUtils {
         }
         return " ";
     }
+
+    public static String getOrderName(DraftOrder selectedOrder) {
+        if (null != selectedOrder.getC21OrderOptions()) {
+            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+        } else if (null != selectedOrder.getOrderType()) {
+            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+        }
+        return null;
+    }
+
+    public static void clearFieldsAfterApprovalAndServe(Map<String, Object> caseDataUpdated) {
+        for (ApproveAndServeClearFieldsEnum field : ApproveAndServeClearFieldsEnum.values()) {
+            caseDataUpdated.remove(field.getValue());
+        }
+    }
+
+    public static boolean isOrderEdited(CaseData caseData, String eventId) {
+        boolean isOrderEdited = false;
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())
+                || (caseData.getManageOrders() != null
+                && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                isOrderEdited = true;
+            }
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+            isOrderEdited = true;
+        } else if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            isOrderEdited = true;//default true for edit returned order
+        }
+        return isOrderEdited;
+    }
 }
+

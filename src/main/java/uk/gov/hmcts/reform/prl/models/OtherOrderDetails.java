@@ -20,6 +20,7 @@ public class OtherOrderDetails {
     private final String approvalDate;
     private final String status;
     private final String orderCreatedBy;
+    private String orderCreatedByEmailId;
     private final String additionalRequirementsForHearingReq;
 
 }

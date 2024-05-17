@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +15,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
@@ -29,6 +34,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -49,17 +56,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@SuppressWarnings("unchecked")
 public class CallbackControllerFT {
 
     private MockMvc mockMvc;
@@ -75,6 +87,9 @@ public class CallbackControllerFT {
 
     @MockBean
     private CaseEventService caseEventService;
+
+    @MockBean
+    private RoleAssignmentApi roleAssignmentApi;
 
     @MockBean
     private SolicitorEmailService solicitorEmailService;
@@ -121,6 +136,13 @@ public class CallbackControllerFT {
     private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
     private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
 
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Before
     public void setUp() {
@@ -178,7 +200,7 @@ public class CallbackControllerFT {
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("data.draftOrderDoc.document_filename").value("Draft_C100_application.pdf"))
+            .andExpect(jsonPath("data.submitAndPayDownloadApplicationLink.document_filename").value("Draft_C100_application.pdf"))
             .andExpect(jsonPath("data.isEngDocGen").value("Yes"))
             .andReturn();
     }
@@ -269,6 +291,10 @@ public class CallbackControllerFT {
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
+            .thenReturn(RoleAssignmentResponse.builder().build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -363,6 +389,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -379,6 +407,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -387,4 +417,26 @@ public class CallbackControllerFT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("data.gatekeepingDetails.isJudgeOrLegalAdviserGatekeeping").value("judge")).andReturn();
     }
+
+    @Test
+    public void testAttachScanDocsWaChange() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPERJUDGE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/attach-scan-docs/about-to-submit")
+            .then()
+            .body("data.manageDocumentsRestrictedFlag", equalTo(TRUE),
+                  "data.manageDocumentsTriggeredBy", equalTo(STAFF))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+
 }

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -56,6 +57,8 @@ public class RefDataUserService {
     private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
 
+    private CaseFlag caseFlag;
+
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
             ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
@@ -63,13 +66,11 @@ public class RefDataUserService {
                 Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
                     RD_STAFF_TOTAL_RECORDS_HEADER));
                 int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-                log.info("Total no. of records: {} ", totalRecords);
                 if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
                     return onlyLegalAdvisor(response.getBody());
                 } else {
                     List<DynamicListElement> listOfLegalAdvisors = onlyLegalAdvisor(response.getBody());
                     int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                    log.info("No. of pages: {} ", noOfPages);
                     for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
                         listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
                     }
@@ -78,7 +79,7 @@ public class RefDataUserService {
 
             }
         } catch (Exception e) {
-            log.error("Staff details Lookup Failed - {}", e.getMessage());
+            log.error("Staff details Lookup Failed - {}", e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -138,9 +139,25 @@ public class RefDataUserService {
             );
 
         } catch (Exception e) {
-            log.error("Category Values look up failed {} ", e.getMessage());
+            log.error("Category Values look up failed {} ", e);
         }
         return commonDataResponse;
+    }
+
+
+    public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
+        log.info("retrieve case flags for flag type{} ", flagType);
+        try {
+            caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
+                authorization,
+                authTokenGenerator.generate(),
+                SERVICE_ID,
+                flagType
+            );
+        } catch (Exception e) {
+            log.error("Case flags Values look up failed {} ", e);
+        }
+        return caseFlag;
     }
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {

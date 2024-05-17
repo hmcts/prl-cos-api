@@ -37,7 +37,9 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -123,7 +125,6 @@ public class CaseDocumentController {
         return getUploadedDocumentsList(
             generateAndUploadDocumentRequest,
             authorisation,
-            s2sToken,
             caseId,
             tempCaseData,
             uploadedDocuments
@@ -132,11 +133,10 @@ public class CaseDocumentController {
     }
 
     private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                    @RequestHeader("serviceAuthorization") String s2sToken,
-                                                    String caseId,
-                                                    CaseData tempCaseData,
-                                                    UploadedDocuments uploadedDocuments) throws JsonProcessingException {
+                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                            String caseId,
+                                                            CaseData tempCaseData,
+                                                            UploadedDocuments uploadedDocuments) throws JsonProcessingException {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -150,15 +150,15 @@ public class CaseDocumentController {
 
             CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList)
-                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                               .build())
                 .build();
             caseService.updateCase(
                 caseData,
                 authorisation,
-                s2sToken,
                 caseId,
-                CITIZEN_UPLOADED_DOCUMENT,
-                null
+                CITIZEN_UPLOADED_DOCUMENT
             );
 
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
@@ -248,7 +248,10 @@ public class CaseDocumentController {
             CaseData caseData = CaseData.builder()
                 .id(Long.parseLong(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList)
-                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                               .build())
+
                 .build();
 
             StartEventResponse startEventResponse =
@@ -316,15 +319,15 @@ public class CaseDocumentController {
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList)
-            .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                           .build())
             .build();
         caseService.updateCase(
             caseData,
             authorisation,
-            s2sToken,
             caseId,
-            CITIZEN_UPLOADED_DOCUMENT,
-            null
+            CITIZEN_UPLOADED_DOCUMENT
         );
         return "SUCCESS";
     }
@@ -345,7 +348,8 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+        DocumentResponse docResp = documentGenService.uploadDocument(authorisation, file);
+        return ResponseEntity.ok(docResp);
     }
 
     @DeleteMapping("/{documentId}/delete")
