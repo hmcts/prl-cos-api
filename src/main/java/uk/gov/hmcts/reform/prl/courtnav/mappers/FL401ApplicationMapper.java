@@ -242,12 +242,12 @@ public class FL401ApplicationMapper {
         if (!StringUtils.isEmpty(epmsId)) {
             courtVenue = getCourtVenue(authorization, epmsId);
         }
-        //2. if not found check launchdarkly flag and populate default Swansea court Id
+        //2. if not found check launch-darkly flag and populate default Swansea court Id.
         if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING) && courtVenue.isEmpty()) {
             epmsId = FL401_DEFAULT_BASE_LOCATION_ID;
             courtVenue = getCourtVenue(authorization, epmsId);
         }
-        //3. if court details found then populate cour information and cas management location
+        //3. if court details found then populate court information and case management location.
         if (!courtVenue.isEmpty()) {
             caseData = caseData.toBuilder()
                 .courtName(courtVenue.get().getCourtName())
