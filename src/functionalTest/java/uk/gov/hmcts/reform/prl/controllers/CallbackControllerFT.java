@@ -324,7 +324,6 @@ public class CallbackControllerFT {
     }
 
     @Test
-    @Ignore
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
         UserDetails userDetails = UserDetails.builder().forename("test").build();
 
