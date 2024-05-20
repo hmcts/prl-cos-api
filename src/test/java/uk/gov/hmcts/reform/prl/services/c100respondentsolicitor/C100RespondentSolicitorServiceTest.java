@@ -915,7 +915,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
@@ -957,7 +957,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
@@ -998,7 +998,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                 .eventId("c100ResSolConsentingToApplicationA")
@@ -1033,7 +1033,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build()).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(Mockito.any())).thenReturn(true);
+        when(responseSubmitChecker.isFinished(Mockito.any(), Mockito.anyBoolean())).thenReturn(true);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -1302,7 +1302,7 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
@@ -1327,7 +1327,7 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent3, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
@@ -1610,7 +1610,7 @@ public class C100RespondentSolicitorServiceTest {
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
         when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
@@ -1721,7 +1721,7 @@ public class C100RespondentSolicitorServiceTest {
                         .build())
                 .build();
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(mandatoryFinished);
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
@@ -1857,7 +1857,7 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -1928,7 +1928,7 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -2011,7 +2011,7 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
                 .url("TestUrl")
                 .binaryUrl("binaryUrl")
@@ -2063,7 +2063,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
@@ -2143,7 +2143,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(respondent, true)).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         assertExpectedException(() -> {
