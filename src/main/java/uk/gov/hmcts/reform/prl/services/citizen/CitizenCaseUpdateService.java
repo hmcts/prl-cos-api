@@ -175,7 +175,6 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-        updatePcqIdForMainApplicant(citizenUpdatedCaseData, caseDataToSubmit);
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
@@ -190,26 +189,6 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
-    }
-
-    public void updatePcqIdForMainApplicant(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
-        if (StringUtils.isNotEmpty(citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseDataToSubmit))) {
-                checkAndupdatePcqIdForParty(caseDataToSubmit.getApplicants().get(0).getValue(), citizenUpdatedCaseData);
-            } else {
-                checkAndupdatePcqIdForParty(caseDataToSubmit.getApplicantsFL401(), citizenUpdatedCaseData);
-            }
-        }
-    }
-
-    private void checkAndupdatePcqIdForParty(PartyDetails party, CaseData citizenData) {
-        if (ObjectUtils.isNotEmpty(party.getUser())) {
-            if (StringUtils.isEmpty(party.getUser().getPcqId())) {
-                party.getUser().setPcqId(citizenData.getC100RebuildData().getApplicantPcqId());
-            }
-        } else {
-            party.setUser(User.builder().pcqId(citizenData.getC100RebuildData().getApplicantPcqId()).build());
-        }
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
