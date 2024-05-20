@@ -10,14 +10,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -74,27 +72,6 @@ public class RemoveDraftOrderController {
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-
-    @PostMapping(path = "/remove-draft-order/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to remove draft order")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<SubmittedCallbackResponse> handleRemoveDraftOrderSubmitted(
-        @RequestHeader("Authorization")
-        @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-
-            return ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
-
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
