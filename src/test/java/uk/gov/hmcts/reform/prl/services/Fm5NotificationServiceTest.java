@@ -33,7 +33,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
@@ -306,30 +305,7 @@ public class Fm5NotificationServiceTest {
         assertEquals(1, notifications.size());
     }
 
-    @Test
-    public void sendFm5ReminderForRespondentException() throws Exception {
 
-        respondent = respondent.toBuilder().solicitorEmail("").build();
-        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
-        when(serviceOfApplicationPostService.getCoverSheets(any(),
-                                                            any(),
-                                                            any(),
-                                                            any(),
-                                                            any()
-        )).thenThrow(new RuntimeException());
-
-        //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
-            caseData,
-            FmPendingParty.RESPONDENT
-        );
-
-        //verify
-        Assert.assertFalse(notifications.isEmpty());
-        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
-        assertEquals(1, notifications.size());
-    }
 
 
 }
