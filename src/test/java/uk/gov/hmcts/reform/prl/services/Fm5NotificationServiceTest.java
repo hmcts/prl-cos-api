@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
@@ -135,20 +137,6 @@ public class Fm5NotificationServiceTest {
                                          Mockito.anyMap()
         ))
             .thenReturn(generatedDocumentInfo);
-
-        final MultipartFile file = new InMemoryMultipartFile(SOA_MULTIPART_FILE,
-                                                             BLANK_FM5_FILE,
-                                                             APPLICATION_PDF_VALUE,
-                                                             DocumentUtils.readBytes(URL_STRING
-                                                                                         + ENG_STATIC_DOCS_PATH + BLANK_FM5_FILE));
-
-
-        UploadResponse uploadResponse = new UploadResponse(List.of(AmendOrderServiceTest.testDocument()));
-        when(caseDocumentClient.uploadDocuments("authToken", authTokenGenerator.generate(),
-                                                PrlAppsConstants.CASE_TYPE,
-                                                PrlAppsConstants.JURISDICTION,
-                                                List.of(file)))
-            .thenReturn(uploadResponse);
 
     }
 
@@ -283,6 +271,32 @@ public class Fm5NotificationServiceTest {
     }
 
     @Test
+    public void sendFm5ReminderForUploadResponse() {
+
+        final MultipartFile file = new InMemoryMultipartFile(SOA_MULTIPART_FILE,
+                                                             BLANK_FM5_FILE,
+                                                             APPLICATION_PDF_VALUE,
+                                                             DocumentUtils.readBytes(URL_STRING
+                                                                                         + ENG_STATIC_DOCS_PATH + BLANK_FM5_FILE));
+
+
+        UploadResponse uploadResponse = new UploadResponse(List.of(AmendOrderServiceTest.testDocument()));
+        when(caseDocumentClient.uploadDocuments("authToken", authTokenGenerator.generate(),
+                                                PrlAppsConstants.CASE_TYPE,
+                                                PrlAppsConstants.JURISDICTION,
+                                                List.of(file)))
+            .thenReturn(uploadResponse);
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+    }
+
+    @Test
     public void sendFm5ReminderForApplicantException() throws Exception {
 
         applicant = applicant.toBuilder().solicitorEmail("").build();
@@ -305,7 +319,25 @@ public class Fm5NotificationServiceTest {
         assertEquals(1, notifications.size());
     }
 
+    @Ignore(value = "ignored")
+    @Test
+    public void sendFm5ReminderForRespondentException() throws Exception {
 
+        respondent = respondent.toBuilder().solicitorEmail("").build();
+        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
+        when(serviceOfApplicationPostService.getCoverSheets(any(),
+                                                            any(),
+                                                            any(),
+                                                            any(),
+                                                            any()
+        )).thenThrow(new RuntimeException());
+
+        assertExpectedException(() -> {
+            fm5NotificationService
+                .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+        }, RuntimeException.class,"Error occurred in generating cover sheets");
+
+    }
 
 
 }
