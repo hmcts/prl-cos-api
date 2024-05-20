@@ -188,7 +188,7 @@ public class EditReturnedOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDataMap, caseData);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDataMap, caseData, null);
         when(allTabsService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         ResponseEntity<SubmittedCallbackResponse> responseEntity = editReturnedOrderController

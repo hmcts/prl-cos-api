@@ -11,9 +11,11 @@ public enum CaseEvent {
     CITIZEN_CASE_UPDATE("citizen-case-update"),
     CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
-    DELETE_CASE("deleteApplication"),
+    CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
+    DELETE_APPLICATION("deleteApplication"),
+    CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
-    EVENT_RESPONDENT_SAFETY_CONCERNS("citizenSafetyConcerns"),
+    EVENT_RESPONDENT_AOH("citizenRespondentAoH"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
@@ -38,7 +40,12 @@ public enum CaseEvent {
     CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
     CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService"),
-    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CITIZEN_CONTACT_PREFERENCE("citizenContactPreference"),
+    C100_ALL_DOCS_REVIEWED("c100-all-docs-reviewed"),
+    FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
+    CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    ALL_AWP_IN_REVIEW("allAwPInReview"),
+    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags");
 
     private final String value;
 
