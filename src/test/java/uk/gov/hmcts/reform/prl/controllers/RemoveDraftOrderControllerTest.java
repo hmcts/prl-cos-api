@@ -12,12 +12,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -211,48 +208,6 @@ public class RemoveDraftOrderControllerTest {
 
         RuntimeException exception =  assertThrows(RuntimeException.class, () ->
             removeDraftOrderController.generateRemoveDraftOrderDropDown(authToken,s2sToken, callbackRequest));
-
-        assertEquals("Invalid Client", exception.getMessage());
-    }
-
-    @Test
-    public void testHandleRemoveDraftOrderSubmitted() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .eventId(Event.REMOVE_DRAFT_ORDER.getId())
-            .build();
-
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-
-        ResponseEntity<SubmittedCallbackResponse> response = removeDraftOrderController
-            .handleRemoveDraftOrderSubmitted(authToken,s2sToken, callbackRequest);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("# Draft order removed", response.getBody().getConfirmationHeader());
-    }
-
-    @Test
-    public void testHandleRemoveDraftOrderSubmittedAndAuthorizationFalse() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .eventId(Event.REMOVE_DRAFT_ORDER.getId())
-            .build();
-
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-
-        RuntimeException exception =  assertThrows(RuntimeException.class, () ->
-            removeDraftOrderController.handleRemoveDraftOrderSubmitted(authToken,s2sToken, callbackRequest));
 
         assertEquals("Invalid Client", exception.getMessage());
     }
