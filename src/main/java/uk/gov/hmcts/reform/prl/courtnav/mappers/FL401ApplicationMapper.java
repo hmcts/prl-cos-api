@@ -94,10 +94,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ApplicationMapper {
 
+    public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
+
     private final CourtFinderService courtFinderService;
     private final LaunchDarklyClient launchDarklyClient;
-    public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
     private final LocationRefDataService locationRefDataService;
+
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
