@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
@@ -90,6 +91,8 @@ public class Fm5NotificationServiceTest {
 
     @Mock
     private DocumentUtils documentUtils;
+
+
 
 
     @Mock
@@ -209,7 +212,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForNoRespondentEmail() {
 
-        respondent = respondent.toBuilder().solicitorEmail("").build();
+        respondent = respondent.toBuilder().user(User.builder().idamId("123").build()).solicitorEmail("").build();
         caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
 
         //invoke
