@@ -55,18 +55,24 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         boolean optionalFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
+            log.info("mandatory events" );
             mandatoryFinished = e.getValue().isFinished(respondingParty);
+            log.info("event {} mandatoryFinished {}", e.getKey(), mandatoryFinished);
             if (!mandatoryFinished) {
+                log.info("returning false");
                 return false;
             }
         }
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : optionalEvents.entrySet()) {
+            log.info("optional events");
             optionalFinished = e.getValue().isFinished(respondingParty) || !(e.getValue().isStarted(respondingParty));
+            log.info("event {} optionalFinished {}", e.getKey(), optionalFinished);
             if (!optionalFinished) {
+                log.info("returning false");
                 return false;
             }
         }
-
+        log.info("returning true");
         return true;
     }
 }
