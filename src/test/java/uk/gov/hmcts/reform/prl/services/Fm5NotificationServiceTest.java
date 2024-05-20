@@ -217,6 +217,25 @@ public class Fm5NotificationServiceTest {
     }
 
     @Test
+    public void sendFm5ReminderForNoRespondentEmail() {
+
+        respondent = respondent.toBuilder().solicitorEmail("").build();
+        caseData = caseData.toBuilder().applicants(List.of(element(respondent))).build();
+
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            FmPendingParty.RESPONDENT
+        );
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        Assert.assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(1, notifications.size());
+    }
+
+    @Test
     public void sendFm5ReminderForNoApplicantAddress() {
 
         applicant = applicant.toBuilder().solicitorEmail("").address(null).build();
