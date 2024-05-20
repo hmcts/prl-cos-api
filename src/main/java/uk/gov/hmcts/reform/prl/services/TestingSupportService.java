@@ -251,7 +251,7 @@ public class TestingSupportService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             String systemAuthorisation = systemUserService.getSysUserToken();
-            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails,systemAuthorisation);
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails, systemAuthorisation);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 systemAuthorisation,
                 fl401CourtNav
