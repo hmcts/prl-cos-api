@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -116,6 +117,7 @@ public class ManageDocumentsService {
 
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
+    @Lazy
     private final SendgridService sendgridService;
 
     public static final String CONFIDENTIAL = "Confidential_";
