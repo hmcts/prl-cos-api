@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -323,8 +324,6 @@ public class CallbackControllerFT {
 
     @Test
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
-        String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
-
         UserDetails userDetails = UserDetails.builder().forename("test").build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -333,6 +332,14 @@ public class CallbackControllerFT {
 
         when(organisationService.findUserOrganisation(any(String.class))).thenReturn(organisation);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse roleAssignmentResponse =
+            new uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-magistrate");
+        when(roleAssignmentApi.getRoleAssignments(any(),any(),any(),any()))
+            .thenReturn(RoleAssignmentServiceResponse.builder()
+                            .roleAssignmentResponse(List.of(roleAssignmentResponse))
+                            .build());
+        String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
         mockMvc.perform(post("/about-to-submit-case-creation")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())

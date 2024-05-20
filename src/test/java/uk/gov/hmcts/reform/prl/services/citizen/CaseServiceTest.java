@@ -58,6 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -258,10 +259,17 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
+        userDetails = UserDetails
+            .builder()
+            .roles(List.of(COURT_ADMIN_ROLE))
+            .email("test@gmail.com")
+            .build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseRepository.createCase(authToken, caseData)).thenReturn(caseDetails);
 
         //When
