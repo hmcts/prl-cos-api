@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,6 +64,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    private static final String APPLICANTS = "applicants";
+    private static final String RESPONDENTS = "respondents";
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -69,6 +73,7 @@ public class UpdatePartyDetailsService {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final DocumentLanguageService documentLanguageService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -78,6 +83,7 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get(APPLICANTS));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -104,7 +110,7 @@ public class UpdatePartyDetailsService {
                                                   caseData,
                                                   List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
-                log.error("Failed to generate C8 document for Fl401 case {}",e);
+                log.error("Failed to generate C8 document for Fl401 case {}", e);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
@@ -115,10 +121,8 @@ public class UpdatePartyDetailsService {
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-            if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                                                         ElementUtils.unwrapElements(applicantList.get()).get(0));
-            }
+            applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
+                    ElementUtils.unwrapElements(elements).get(0)));
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,
@@ -276,7 +280,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
             }
-            caseDetails.put("applicants", applicantsWrapped);
+            caseDetails.put(APPLICANTS, applicantsWrapped);
         }
     }
 
@@ -291,7 +295,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
             }
-            caseDetails.put("respondents", respondentsWrapped);
+            caseDetails.put(RESPONDENTS, respondentsWrapped);
         }
     }
 
@@ -299,6 +303,8 @@ public class UpdatePartyDetailsService {
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
+        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
@@ -307,30 +313,29 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, checkIfConfidentialityDetailsChangedRespondent(callbackRequest,respondent),
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;
         }
     }
 
-    public Boolean checkIfConfidentialityDetailsChangedRespondent(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
-        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
-        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+    public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
+        log.info("inside checkIfConfidentialityDetailsChangedRespondent");
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
-                    .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                            && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
-                            || CaseUtils.isPhoneNumberChanged(respondent.getValue(),resp1.getValue())
-                            || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                            .getLabelForDynamicList()))).toList();
+                .filter(resp1 -> resp1.getId().equals(respondent.getId())
+                    && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
+                    || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
+                    .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
-                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
-                    || (CaseUtils.isPhoneNumberChanged(respondent.getValue(),respondentDetailsFL401))
+                || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
+                || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
                 .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
@@ -342,14 +347,15 @@ public class UpdatePartyDetailsService {
             return true;
         }
         log.info("respondent data not changed");
-        return  false;
+        return false;
     }
 
 
 
-    private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+    public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
+        log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
@@ -405,15 +411,14 @@ public class UpdatePartyDetailsService {
     private List<Element<ResponseDocuments>> getOrCreateC8DocumentList(String authorisation, CaseData caseData,
                                                                        Map<String, Object> dataMap,
                                                                        List<Element<ResponseDocuments>> c8Documents,
-                                                                       Boolean isDetailsChanged,
+                                                                       boolean isDetailsChanged,
                                                                        Element<PartyDetails> respondent)
         throws  Exception {
         Document c8FinalDocument;
-        Document c8FinalWelshDocument;
+        Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
-            if ((isDetailsChanged
-                || CollectionUtils.isEmpty(c8Documents))) {
+            if (isDetailsChanged) {
                 String fileName = C_8_OF + partyName
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");
@@ -427,15 +432,18 @@ public class UpdatePartyDetailsService {
                         dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
-                c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                        authorisation,
-                        caseData,
-                        caseData.getCaseTypeOfApplication()
-                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                                : C8_RESP_FL401_FINAL_HINT,
-                        true,
-                        dataMap
-                );
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                if (documentLanguage.isGenWelsh()) {
+                    c8FinalWelshDocument = documentGenService.generateSingleDocument(
+                            authorisation,
+                            caseData,
+                            caseData.getCaseTypeOfApplication()
+                                    .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                    : C8_RESP_FL401_FINAL_HINT,
+                            true,
+                            dataMap
+                    );
+                }
                 Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
                                                                                     .dateTimeCreated(LocalDateTime.now())
                                                                                     .respondentC8Document(
@@ -466,5 +474,37 @@ public class UpdatePartyDetailsService {
             newC8Documents.add(newC8Document);
             return newC8Documents;
         }
+    }
+
+    public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+            applicants = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            applicants.add(partyDetails);
+            caseDataUpdated.put(APPLICANTS, applicants);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(APPLICANTS, caseData.getApplicants());
+        return caseDataUpdated;
+
+    }
+
+    public Map<String, Object> setDefaultEmptyRespondentForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+            respondents = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            respondents.add(partyDetails);
+            caseDataUpdated.put(RESPONDENTS, respondents);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(RESPONDENTS, caseData.getRespondents());
+        return caseDataUpdated;
+
     }
 }
