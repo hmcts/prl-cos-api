@@ -8,9 +8,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -21,10 +26,16 @@ import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.services.Fm5NotificationService.BLANK_FM5_FILE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -33,9 +44,6 @@ public class Fm5NotificationServiceTest {
     private CaseData caseData;
     PartyDetails applicant;
     PartyDetails respondent;
-
-
-    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
 
     @InjectMocks
     private Fm5NotificationService fm5NotificationService;
@@ -72,6 +80,13 @@ public class Fm5NotificationServiceTest {
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+
+    @Mock
+    private Document document;
+
+    @Mock
+    private DocumentUtils documentUtils;
+
 
     @Mock
     DgsApiClient dgsApiClient;
@@ -117,6 +132,20 @@ public class Fm5NotificationServiceTest {
                                          Mockito.anyMap()
         ))
             .thenReturn(generatedDocumentInfo);
+
+        final MultipartFile file = new InMemoryMultipartFile(SOA_MULTIPART_FILE,
+                                                             BLANK_FM5_FILE,
+                                                             APPLICATION_PDF_VALUE,
+                                                             DocumentUtils.readBytes(URL_STRING
+                                                                                         + ENG_STATIC_DOCS_PATH + BLANK_FM5_FILE));
+
+
+        UploadResponse uploadResponse = new UploadResponse(List.of(AmendOrderServiceTest.testDocument()));
+        when(caseDocumentClient.uploadDocuments("authToken", authTokenGenerator.generate(),
+                                                PrlAppsConstants.CASE_TYPE,
+                                                PrlAppsConstants.JURISDICTION,
+                                                List.of(file)))
+            .thenReturn(uploadResponse);
 
     }
 
