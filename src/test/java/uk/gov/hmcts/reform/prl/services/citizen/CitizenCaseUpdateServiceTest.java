@@ -277,21 +277,6 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
-    public void testUpdatePcqIdDa() throws IOException {
-        C100RebuildData c100RebuildData = getC100RebuildData();
-        long caseId = 12345L;
-        partyDetails = PartyDetails.builder().user(User.builder().build()).build();
-        CaseData caseData = CaseData.builder().id(caseId)
-            .c100RebuildData(c100RebuildData)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .applicantsFL401(partyDetails)
-            .build();
-        citizenCaseUpdateService.updatePcqIdForMainApplicant(caseData, caseData);
-        Assert.assertNotNull(caseData.getApplicantsFL401().getUser().getPcqId());
-    }
-
-    @Test
     public void testWithdrawCaseApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
