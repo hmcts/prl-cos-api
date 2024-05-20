@@ -85,6 +85,13 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     }
 
     @Test
+    public void isStartedTest_scenario3() {
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, false);
+
+        assertTrue(anyNonEmpty);
+    }
+
+    @Test
     public void isStartedNotTest() {
         respondent1 = null;
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, true);
@@ -104,6 +111,13 @@ public class ResponseToAllegationsOfHarmCheckerTest {
         respondent1 = null;
         boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, true);
         assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasMandatoryCompletedTestWithoutC1A() {
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, false);
+
+        assertTrue(anyNonEmpty);
     }
 
 }
