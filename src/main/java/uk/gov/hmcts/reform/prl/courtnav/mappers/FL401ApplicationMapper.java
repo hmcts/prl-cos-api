@@ -227,7 +227,7 @@ public class FL401ApplicationMapper {
             .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .build();
 
-        caseData = populateCourtDetailsForCourtNaveCase(authorization, caseData,
+        caseData = populateCourtDetailsForCourtNavCase(authorization, caseData,
                                                         courtNavCaseData.getMetaData().getCourtSpecialRequirements());
         caseData = caseData.setDateSubmittedDate();
 
@@ -235,7 +235,7 @@ public class FL401ApplicationMapper {
 
     }
 
-    private CaseData populateCourtDetailsForCourtNaveCase(String authorization, CaseData caseData,
+    private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
                                                           String epimsId) throws NotFoundException {
         Optional<CourtVenue> courtVenue = Optional.empty();
         //1. get court details from provided epimsId request
