@@ -61,7 +61,7 @@ public class RestrictedCaseAccessController {
         log.info("dataClassification::" + dataClassification);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            //.dataClassification(dataClassification)
+            .dataClassification(dataClassification)
             .securityClassification("RESTRICTED")
             .build();
         log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
