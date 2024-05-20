@@ -53,7 +53,7 @@ public enum CaseEvent {
     CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
-    CITIZEN_PCQ_UPDATE("citizenPcqUpdate"),
+    CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate");
 
     private final String value;
