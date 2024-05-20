@@ -94,6 +94,8 @@ public class CitizenPartyDetailsMapper {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private final ObjectMapper objectMapper;
+    private final CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -115,8 +117,16 @@ public class CitizenPartyDetailsMapper {
             ));
         }
 
+        try {
+            log.info("citizenUpdatePartyDataContent is after::" + objectMapper.writeValueAsString(citizenUpdatePartyDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         if (citizenUpdatePartyDataContent.isPresent()) {
+            log.info("citizenUpdatePartyDataContent is present");
             if (CONFIRM_YOUR_DETAILS.equals(caseEvent)) {
+                log.info("event satisfied");
                 generateAnswersForNoc(citizenUpdatePartyDataContent.get(), citizenUpdatedCaseData.getPartyType());
                 //check if anything needs to do for citizen flags like RA amend journey
             }
@@ -129,13 +139,18 @@ public class CitizenPartyDetailsMapper {
 
     private void generateAnswersForNoc(CitizenUpdatePartyDataContent citizenUpdatePartyDataContent, PartyEnum partyType) {
         CaseData caseData = citizenUpdatePartyDataContent.updatedCaseData();
+        log.info("case type is::" + caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("c100 case type it is");
+            log.info("party type is::" + partyType);
             if (PartyEnum.respondent.equals(partyType)) {
+                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CARESPONDENT
                 ));
             } else {
+                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     CAAPPLICANT
@@ -143,16 +158,25 @@ public class CitizenPartyDetailsMapper {
             }
         } else {
             if (PartyEnum.respondent.equals(partyType)) {
+                log.info("generating for::" + PartyEnum.respondent);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DARESPONDENT
                 ));
             } else {
+                log.info("generating for::" + partyType);
                 citizenUpdatePartyDataContent.updatedCaseDataMap().putAll(noticeOfChangePartiesService.generate(
                     caseData,
                     DAAPPLICANT
                 ));
             }
+        }
+
+        try {
+            log.info("citizenUpdatePartyDataContent is after::"
+                         + objectMapper.writeValueAsString(citizenUpdatePartyDataContent.updatedCaseDataMap()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
         }
     }
 
@@ -162,6 +186,7 @@ public class CitizenPartyDetailsMapper {
                                                                  String authorisation) {
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         if (PartyEnum.applicant.equals(citizenUpdatedCaseData.getPartyType())) {
+            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();// child details only
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
                 .filter(party -> Objects.equals(
@@ -172,7 +197,7 @@ public class CitizenPartyDetailsMapper {
                 .ifPresent(party -> {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
-                                                                                          caseEvent);
+                                                                                          caseEvent, childDetails);
 
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
@@ -182,6 +207,7 @@ public class CitizenPartyDetailsMapper {
         } else if (PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
             CaseData oldCaseData = caseData;
+            List<Element<ChildDetailsRevised>> childDetails = caseData.getNewChildDetails();
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -191,7 +217,7 @@ public class CitizenPartyDetailsMapper {
                 .ifPresent(party -> {
                     PartyDetails updatedPartyDetails = getUpdatedPartyDetailsBasedOnEvent(citizenUpdatedCaseData.getPartyDetails(),
                                                                                           party.getValue(),
-                                                                                          caseEvent);
+                                                                                          caseEvent, childDetails);
                     Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                     int updatedRespondentPartyIndex = respondents.indexOf(party);
                     respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -261,7 +287,7 @@ public class CitizenPartyDetailsMapper {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
                     citizenUpdatedCaseData.getPartyDetails(),
                     caseData.getApplicantsFL401(),
-                    caseEvent
+                    caseEvent, caseData.getNewChildDetails()
                 );
                 caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
@@ -273,7 +299,7 @@ public class CitizenPartyDetailsMapper {
                 partyDetails = getUpdatedPartyDetailsBasedOnEvent(
                     citizenUpdatedCaseData.getPartyDetails(),
                     caseData.getRespondentsFL401(),
-                    caseEvent
+                    caseEvent, caseData.getNewChildDetails()
                 );
                 caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
                 caseDataMapToBeUpdated.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
@@ -283,9 +309,10 @@ public class CitizenPartyDetailsMapper {
         return null;
     }
 
-    private PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
+    public PartyDetails getUpdatedPartyDetailsBasedOnEvent(PartyDetails citizenProvidedPartyDetails,
                                                                    PartyDetails existingPartyDetails,
-                                                                   CaseEvent caseEvent) {
+                                                                   CaseEvent caseEvent,
+                                                           List<Element<ChildDetailsRevised>> childDetails) {
         switch (caseEvent) {
             case CONFIRM_YOUR_DETAILS -> {
                 return updateCitizenPersonalDetails(
@@ -320,7 +347,7 @@ public class CitizenPartyDetailsMapper {
             case EVENT_RESPONDENT_AOH -> {
                 return updateCitizenSafetyConcernDetails(
                     existingPartyDetails,
-                    citizenProvidedPartyDetails
+                    citizenProvidedPartyDetails, childDetails
                 );
             }
             case EVENT_INTERNATIONAL_ELEMENT -> {
@@ -359,12 +386,30 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
-            default -> {
-                //For citizen-case-update - currentOrPreviousProceedings
-                return updateCitizenResponseDataForOtherEvents(
+            case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
+                // For citizen-case-update - currentOrPreviousProceedings
+                return updateCitizenResponseForProceedings(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
                 );
+            }
+            case REVIEW_AND_SUBMIT -> {
+                try {
+                    log.info("******* citizenProvidedPartyDetails json ===>" + objectMapper.writeValueAsString(citizenProvidedPartyDetails));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+
+                try {
+                    log.info("******* existingPartyDetails json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                return updateCitizenC7Response(existingPartyDetails, citizenProvidedPartyDetails);
+            }
+            default -> {
+                //return existing party details - no event
+                return existingPartyDetails;
             }
         }
     }
@@ -410,11 +455,15 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails,
+                                                           List<Element<ChildDetailsRevised>> childDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
-                          .safetyConcerns(citizenProvidedPartyDetails.getResponse().getSafetyConcerns())
+                          .respondingCitizenAoH(citizenProvidedPartyDetails.getResponse().getRespondingCitizenAoH())
+                          .respondentAllegationsOfHarmData(citizenAllegationOfHarmMapper
+                                                               .map(citizenProvidedPartyDetails.getResponse()
+                                                                        .getRespondingCitizenAoH(), childDetails))
                           .build())
             .build();
     }
@@ -446,7 +495,7 @@ public class CitizenPartyDetailsMapper {
             .build();
     }
 
-    private PartyDetails updateCitizenResponseDataForOtherEvents(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+    private PartyDetails updateCitizenResponseForProceedings(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()
@@ -809,5 +858,23 @@ public class CitizenPartyDetailsMapper {
         }
 
         return caseName;
+    }
+
+    private PartyDetails updateCitizenC7Response(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        if (null != citizenProvidedPartyDetails.getResponse()) {
+            return existingPartyDetails.toBuilder()
+                    .response(existingPartyDetails.getResponse().toBuilder()
+                            .c7ResponseSubmitted(Yes)
+                            .build())
+                    .currentRespondent(null)
+                    .build();
+        }
+        try {
+            log.info("******* existingPartyDetails after updated json ===>" + objectMapper.writeValueAsString(existingPartyDetails));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        return existingPartyDetails;
     }
 }
