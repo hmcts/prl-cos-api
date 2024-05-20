@@ -48,6 +48,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -361,6 +362,80 @@ public class Fm5ReminderServiceTest {
         legalProfUploadDocListDocTabInitial.add(element(
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
             quarantineLegalDoc));
+
+        caseData = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(new ArrayList<>())
+                                           .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .legalProfUploadDocListDocTab(legalProfUploadDocListDocTabInitial)
+                                 .courtStaffUploadDocListDocTab(courtStaffUploadDocListDocTabInitial)
+                                 .restrictedDocuments(quarantineList).build())
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsWithEmptyList() {
+        SearchResult searchResult = SearchResult.builder()
+            .total(0)
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(0)
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToNoneParties() {
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
+
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .categoryId(FM5_STATEMENTS)
+            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
+            .build();
+        QuarantineLegalDoc quarantineLegalDocRespondent = QuarantineLegalDoc.builder()
+            .document(document)
+            .categoryId(FM5_STATEMENTS)
+            .documentParty(DocumentPartyEnum.RESPONDENT.getDisplayedValue())
+            .build();
+
+        legalProfUploadDocListDocTabInitial.add(element(quarantineLegalDoc));
+        courtStaffUploadDocListDocTabInitial.add(element(quarantineLegalDocRespondent));
+
+        List<Element<QuarantineLegalDoc>> quarantineList = new ArrayList<>();
 
         caseData = caseData.toBuilder()
             .documentManagementDetails(DocumentManagementDetails.builder()
