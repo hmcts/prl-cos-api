@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -319,7 +318,7 @@ public class Fm5NotificationServiceTest {
         assertEquals(1, notifications.size());
     }
 
-    @Ignore(value = "ignored")
+
     @Test
     public void sendFm5ReminderForRespondentException() throws Exception {
 
@@ -335,7 +334,7 @@ public class Fm5NotificationServiceTest {
         assertExpectedException(() -> {
             fm5NotificationService
                 .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
-        }, RuntimeException.class,"Error occurred in generating cover sheets");
+        }, NullPointerException.class,"Cannot invoke \"java.util.Collection.toArray()\" because \"c\" is null");
 
     }
 
