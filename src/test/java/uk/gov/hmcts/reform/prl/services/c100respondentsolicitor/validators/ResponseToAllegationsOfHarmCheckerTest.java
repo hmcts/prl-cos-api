@@ -72,14 +72,14 @@ public class ResponseToAllegationsOfHarmCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1);
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void isStartedTest_scenario2() {
-        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent2);
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent2, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -87,14 +87,14 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     @Test
     public void isStartedNotTest() {
         respondent1 = null;
-        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1);
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isStarted(respondent1, true);
 
         assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1);
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -102,7 +102,7 @@ public class ResponseToAllegationsOfHarmCheckerTest {
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
         respondent1 = null;
-        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1);
+        boolean anyNonEmpty = responseToAllegationsOfHarmChecker.isFinished(respondent1, true);
         assertFalse(anyNonEmpty);
     }
 
