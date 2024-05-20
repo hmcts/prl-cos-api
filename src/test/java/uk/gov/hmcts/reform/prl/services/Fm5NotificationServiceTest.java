@@ -231,7 +231,7 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
         Assert.assertEquals(1, notifications.size());
     }
 
@@ -272,5 +272,6 @@ public class Fm5NotificationServiceTest {
         Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
         Assert.assertEquals(1, notifications.size());
     }
+
 
 }
