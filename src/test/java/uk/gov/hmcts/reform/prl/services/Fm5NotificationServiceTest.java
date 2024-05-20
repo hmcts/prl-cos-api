@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -109,12 +109,10 @@ public class Fm5NotificationServiceTest {
             .build();
 
         when(systemUserService.getSysUserToken()).thenReturn("authToken");
-        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
-            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build());
 
-        /* when(dgsService.generateDocument(anyString(),anyString(),anyString(),any()))
-            .thenReturn(GeneratedDocumentInfo.builder().url("testUrl").docName("test").mimeType("mime").binaryUrl("testbinary").build());
-        */
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
     }
 
     @Test
@@ -165,15 +163,30 @@ public class Fm5NotificationServiceTest {
         Assert.assertEquals(0, notifications.size());
     }
 
-    /* @Test
-    public void sendFm5ReminderForNoApplicantEmail() {
+    @Test
+    public void sendFm5ReminderForNoApplicantEmail() throws Exception {
+
         applicant = applicant.toBuilder().solicitorEmail("").build();
         caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
+
+        when(dgsService.generateDocument(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap()
+        ))
+            .thenReturn(generatedDocumentInfo);
+
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            FmPendingParty.APPLICANT
+        );
 
         //verify
-        Assert.assertTrue(notifications.isEmpty());
-        Assert.assertEquals(0, notifications.size());
-    }*/
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        Assert.assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(1, notifications.size());
+    }
 }
