@@ -55,7 +55,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         boolean optionalFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
-            log.info("mandatory events" );
+            log.info("mandatory events");
             mandatoryFinished = e.getValue().isFinished(respondingParty);
             log.info("event {} mandatoryFinished {}", e.getKey(), mandatoryFinished);
             if (!mandatoryFinished) {
