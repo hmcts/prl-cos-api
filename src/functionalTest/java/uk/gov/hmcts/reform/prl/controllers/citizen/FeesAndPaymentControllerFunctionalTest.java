@@ -3,16 +3,14 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
@@ -27,7 +25,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 public class FeesAndPaymentControllerFunctionalTest {
 
@@ -53,7 +50,7 @@ public class FeesAndPaymentControllerFunctionalTest {
     protected String cosApiUrl;
 
 
-    @Before
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
