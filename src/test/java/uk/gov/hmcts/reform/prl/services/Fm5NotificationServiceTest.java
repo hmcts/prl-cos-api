@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,6 +31,9 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
@@ -157,8 +161,8 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
     }
 
     @Test
@@ -169,8 +173,8 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
     }
 
     @Test
@@ -181,9 +185,9 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(1).getValue().getPartyType());
-        Assert.assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
+        assertEquals(PartyType.APPLICANT_SOLICITOR, notifications.get(0).getValue().getPartyType());
+        assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(1).getValue().getPartyType());
+        assertEquals(NotificationType.SENDGRID_EMAIL, notifications.get(0).getValue().getNotificationType());
     }
 
     @Test
@@ -194,7 +198,7 @@ public class Fm5NotificationServiceTest {
 
         //verify
         Assert.assertTrue(notifications.isEmpty());
-        Assert.assertEquals(0, notifications.size());
+        assertEquals(0, notifications.size());
     }
 
     @Test
@@ -212,15 +216,15 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(1, notifications.size());
+        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
     }
 
     @Test
     public void sendFm5ReminderForNoRespondentEmail() {
 
         respondent = respondent.toBuilder().solicitorEmail("").build();
-        caseData = caseData.toBuilder().applicants(List.of(element(respondent))).build();
+        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
 
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
@@ -231,8 +235,8 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(1, notifications.size());
+        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
     }
 
     @Test
@@ -250,15 +254,15 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(1, notifications.size());
+        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
     }
 
     @Test
     public void sendFm5ReminderForNoRespondentAddress() {
 
         respondent = respondent.toBuilder().solicitorEmail("").address(Address.builder().addressLine1(null).build()).build();
-        caseData = caseData.toBuilder().applicants(List.of(element(respondent))).build();
+        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
 
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
@@ -269,8 +273,62 @@ public class Fm5NotificationServiceTest {
         //verify
         Assert.assertFalse(notifications.isEmpty());
         Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
-        Assert.assertEquals(PartyType.RESPONDENT_SOLICITOR, notifications.get(0).getValue().getPartyType());
-        Assert.assertEquals(1, notifications.size());
+        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void sendFm5ReminderForApplicantException() throws Exception {
+
+        applicant = applicant.toBuilder().solicitorEmail("").build();
+        caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(),Mockito.anyString(),
+                                         Mockito.anyMap()
+        )).thenThrow(new RuntimeException());
+
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            FmPendingParty.APPLICANT
+        );
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
+    }
+
+    @Test
+    public void sendFm5ReminderForRespondentException() throws Exception {
+
+        respondent = respondent.toBuilder().solicitorEmail("").build();
+        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
+        when(serviceOfApplicationPostService.getCoverSheets(any(),
+                                                            any(),
+                                                            any(),
+                                                            any(),
+                                                            any()
+        )).thenThrow(new RuntimeException());
+
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            FmPendingParty.RESPONDENT
+        );
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
     }
 
 
