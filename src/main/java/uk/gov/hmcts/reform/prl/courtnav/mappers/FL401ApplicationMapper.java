@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
@@ -95,10 +96,9 @@ public class FL401ApplicationMapper {
 
     private final CourtFinderService courtFinderService;
     private final LaunchDarklyClient launchDarklyClient;
-    public static final String FL401_DEFAULT_BASE_LOCATION_ID = "234946";
+    public static final String COURTNAV_DUMMY_BASE_LOCATION_ID = "234946";
     private final LocationRefDataService locationRefDataService;
     private Court court = null;
-    public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData, String authorization) throws NotFoundException {
         CaseData caseData = null;
@@ -236,16 +236,17 @@ public class FL401ApplicationMapper {
     }
 
     private CaseData populateCourtDetailsForCourtNaveCase(String authorization, CaseData caseData,
-                                                          String epmsId) throws NotFoundException {
+                                                          String epimsId) throws NotFoundException {
         Optional<CourtVenue> courtVenue = Optional.empty();
-        //1. get court details from provided epmsId request
-        if (!StringUtils.isEmpty(epmsId)) {
-            courtVenue = getCourtVenue(authorization, epmsId);
+        //1. get court details from provided epimsId request
+        if (!StringUtils.isEmpty(epimsId)) {
+            courtVenue = getCourtVenue(authorization, epimsId);
         }
         //2. if not found check launch-darkly flag and populate default Swansea court Id.
-        if (launchDarklyClient.isFeatureEnabled(COURTNAV_SWANSEA_COURT_MAPPING) && courtVenue.isEmpty()) {
-            epmsId = FL401_DEFAULT_BASE_LOCATION_ID;
-            courtVenue = getCourtVenue(authorization, epmsId);
+        if (launchDarklyClient.isFeatureEnabled(PrlLaunchDarklyFlagConstants.COURTNAV_SWANSEA_COURT_MAPPING)
+            && courtVenue.isEmpty()) {
+            epimsId = COURTNAV_DUMMY_BASE_LOCATION_ID;
+            courtVenue = getCourtVenue(authorization, epimsId);
         }
         //3. if court details found then populate court information and case management location.
         if (!courtVenue.isEmpty()) {
@@ -253,11 +254,11 @@ public class FL401ApplicationMapper {
                 .courtName(courtVenue.get().getCourtName())
                 .caseManagementLocation(CaseManagementLocation.builder()
                                             .region(courtVenue.get().getRegionId())
-                                            .baseLocation(epmsId)
+                                            .baseLocation(epimsId)
                                             .regionName(courtVenue.get().getRegion())
                                             .baseLocationName(courtVenue.get().getCourtName()).build())
                 .isCafcass(CaseUtils.cafcassFlag(courtVenue.get().getRegionId()))
-                .courtId(epmsId)
+                .courtId(epimsId)
                 .build();
         } else {
             // 4. populate court details from fact-finder Api.
