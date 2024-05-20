@@ -80,6 +80,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_FL401_SUBMISSION_TO_HMCTS;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
@@ -299,15 +301,7 @@ public class TaskListService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                authorisation,
-                authTokenGenerator.generate(),
-                null,
-                userDetails.getId()
-            );
-            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
-        }
+        roles = mapAmToIdamUserRoles(authorisation, userDetails, roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
@@ -322,13 +316,15 @@ public class TaskListService {
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
-                    .c8Document(updatedCaseData.getC8Document())
-                    .c1ADocument(updatedCaseData.getC1ADocument())
-                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
-                    .finalDocument(updatedCaseData.getFinalDocument())
-                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
-                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
-                    .build();
+                        .c8Document(updatedCaseData.getC8Document())
+                        .c1ADocument(updatedCaseData.getC1ADocument())
+                        .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+                        .finalDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                                           ? updatedCaseData.getFinalDocument() : caseData.getFinalDocument())
+                        .finalWelshDocument(!JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)
+                                                ? updatedCaseData.getFinalWelshDocument() : caseData.getFinalWelshDocument())
+                        .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                        .build();
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
@@ -342,9 +338,24 @@ public class TaskListService {
             caseData
         );
 
-        if (!isCourtStaff) {
+        if (!isCourtStaff
+            || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
+            || AWAITING_FL401_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)))) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private List<String> mapAmToIdamUserRoles(String authorisation, UserDetails userDetails, List<String> roles) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorisation,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
+        }
+        return roles;
     }
 }
