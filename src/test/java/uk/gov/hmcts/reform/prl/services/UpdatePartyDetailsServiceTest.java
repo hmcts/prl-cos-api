@@ -1399,6 +1399,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
         assertNotNull(updatedCaseData.get("respondents"));
     }
+    
     @Test
     public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
         Child child1 = Child.builder()
