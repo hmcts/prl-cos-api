@@ -3819,6 +3819,7 @@ public class DocumentGenServiceTest {
         assertNotNull(template);
         assertEquals("citizen_cover_letter_wel", template);
     }
+
     @Test
     public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
 

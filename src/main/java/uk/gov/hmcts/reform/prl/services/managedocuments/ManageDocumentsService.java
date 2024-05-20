@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -46,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -71,7 +71,6 @@ import java.util.UUID;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -117,7 +116,7 @@ public class ManageDocumentsService {
 
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
-    private final ManageDocumentEmailService manageDocumentEmailService;
+    private final SendgridService sendgridService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -128,13 +127,6 @@ public class ManageDocumentsService {
 
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
-
-    String emailAddress = null;
-    String applicantName = null;
-    String respondentName = null;
-    
-    boolean contactPrefEmail = false;
-
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -316,48 +308,24 @@ public class ManageDocumentsService {
 
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
                 Document document = finalConfidentialDocument.getRespondentApplicationDocument();
-                getEmailData(caseData);
-                if (contactPrefEmail && (document.getDocumentFileName().equals("C7_Document.pdf")
-                    || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
-                    Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                    dynamicData.put("respondentName", respondentName);
-                    dynamicData.put("applicantName", applicantName);
-                    dynamicData.put("dashBoardLink", citizenDashboardUrl);
-                    sendEmailViaSendGrid(dynamicData, emailAddress,
-                                         SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
-                    );
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .toList();
+                for (PartyDetails applicant : applicants) {
+                    Element<PartyDetails> respondent = caseData.getRespondents().get(0);
+                    if (ContactPreferences.email.equals(applicant.getContactPreferences())
+                        && (document.getDocumentFileName().equals("C7_Document.pdf")
+                        || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("respondentName", respondent.getValue().getLabelForDynamicList());
+                        dynamicData.put("applicantName",  applicant.getLabelForDynamicList());
+                        sendEmailViaSendGrid(dynamicData, applicant.getEmail(),
+                                             SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
+                        );
+                    }
                 }
             }
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
-        }
-    }
-
-    private void getEmailData(CaseData caseData) {
-        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            Element<PartyDetails> applicant = caseData.getApplicants().get(0);
-            if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
-                emailAddress = applicant.getValue().getEmail();
-                applicantName = applicant.getValue().getLabelForDynamicList();
-                if (ContactPreferences.email.equals(applicant.getValue().getContactPreferences())) {
-                    contactPrefEmail = true;
-                }
-            }
-            Element<PartyDetails> respondent = caseData.getRespondents().get(0);
-            respondentName =  respondent.getValue().getLabelForDynamicList();
-        } else {
-            PartyDetails applicant = caseData.getApplicantsFL401();
-            if (!StringUtils.isEmpty(applicant.getEmail())) {
-                emailAddress = applicant.getEmail();
-                applicantName = applicant.getLabelForDynamicList();
-                if (ContactPreferences.email.equals(applicant.getContactPreferences())) {
-                    contactPrefEmail = true;
-                }
-            }
-
-                PartyDetails respondent = caseData.getRespondentsFL401();
-                respondentName = respondent.getLabelForDynamicList();
-            
-
         }
     }
 
@@ -368,8 +336,9 @@ public class ManageDocumentsService {
                                       SendgridEmailTemplateNames sendgridEmailTemplateName) {
         try {
             log.info("inside sendEmailViaSendGrid");
-            manageDocumentEmailService.sendEmailUsingTemplateWithAttachments(
+            sendgridService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
+                null,
                 SendgridEmailConfig.builder()
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
