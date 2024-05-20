@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +90,7 @@ public class Fm5ReminderServiceTest {
     Fm5NotificationService fm5NotificationService;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
 
@@ -183,6 +182,74 @@ public class Fm5ReminderServiceTest {
         //verify
         verify(fm5NotificationService, times(1))
             .sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToApplicant() {
+
+        CaseData caseDatas = CaseData.builder()
+            .id(123L)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .applicants(List.of(element(applicant)))
+            .respondents(new ArrayList<>())
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseDatas.toMap(objectMapper))
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDatas);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseDatas.toMap(objectMapper),
+                                                                                                        caseDatas, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
+        fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseDatas, FmPendingParty.APPLICANT)).thenReturn(fm5ReminderNotifications);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verify(fm5NotificationService, times(1))
+            .sendFm5ReminderNotifications(caseDatas, FmPendingParty.APPLICANT);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToRespondent() {
+
+        CaseData caseDatas = CaseData.builder()
+            .id(123L)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .applicants(new ArrayList<>())
+            .respondents(List.of(element(respondent)))
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseDatas.toMap(objectMapper))
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDatas);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseDatas.toMap(objectMapper),
+                                                                                                        caseDatas, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
+
+        fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseDatas, FmPendingParty.RESPONDENT)).thenReturn(fm5ReminderNotifications);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verify(fm5NotificationService, times(1))
+            .sendFm5ReminderNotifications(caseDatas, FmPendingParty.RESPONDENT);
     }
 
 
