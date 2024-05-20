@@ -34,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +64,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    private static final String APPLICANTS = "applicants";
+    private static final String RESPONDENTS = "respondents";
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -80,6 +83,7 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get(APPLICANTS));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -276,7 +280,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
             }
-            caseDetails.put("applicants", applicantsWrapped);
+            caseDetails.put(APPLICANTS, applicantsWrapped);
         }
     }
 
@@ -291,7 +295,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
             }
-            caseDetails.put("respondents", respondentsWrapped);
+            caseDetails.put(RESPONDENTS, respondentsWrapped);
         }
     }
 
@@ -470,5 +474,37 @@ public class UpdatePartyDetailsService {
             newC8Documents.add(newC8Document);
             return newC8Documents;
         }
+    }
+
+    public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+            applicants = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            applicants.add(partyDetails);
+            caseDataUpdated.put(APPLICANTS, applicants);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(APPLICANTS, caseData.getApplicants());
+        return caseDataUpdated;
+
+    }
+
+    public Map<String, Object> setDefaultEmptyRespondentForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+            respondents = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            respondents.add(partyDetails);
+            caseDataUpdated.put(RESPONDENTS, respondents);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(RESPONDENTS, caseData.getRespondents());
+        return caseDataUpdated;
+
     }
 }
