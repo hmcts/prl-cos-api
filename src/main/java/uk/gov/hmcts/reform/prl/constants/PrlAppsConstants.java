@@ -836,6 +836,8 @@ public class PrlAppsConstants {
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
+    public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";
+    public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String C1A_BLANK_DOCUMENT_WELSH_FILENAME = "C1A_Blank_Welsh.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
@@ -939,6 +941,10 @@ public class PrlAppsConstants {
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
@@ -994,4 +1000,15 @@ public class PrlAppsConstants {
     public static final String FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED = "fl401ReasonsForListWithoutNoticeRequested";
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
+
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+
+    //Citizen dashboard notifications
+    public static final String CAN_10_FM5 = "CAN_10";
 }

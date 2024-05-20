@@ -1401,7 +1401,7 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             new HashMap<>()
         );
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
 
     @Test
@@ -3794,7 +3794,7 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
         assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
