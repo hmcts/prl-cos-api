@@ -77,7 +77,7 @@ public class Fm5NotificationServiceTest {
     DgsApiClient dgsApiClient;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         applicant = PartyDetails.builder()
             .firstName("app FN")
             .lastName("app LN")
@@ -112,6 +112,11 @@ public class Fm5NotificationServiceTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(),Mockito.anyString(),
+                                         Mockito.anyMap()
+        ))
+            .thenReturn(generatedDocumentInfo);
 
     }
 
@@ -169,13 +174,24 @@ public class Fm5NotificationServiceTest {
         applicant = applicant.toBuilder().solicitorEmail("").build();
         caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
 
-        when(dgsService.generateDocument(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap()
-        ))
-            .thenReturn(generatedDocumentInfo);
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            FmPendingParty.APPLICANT
+        );
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        Assert.assertEquals(PartyType.APPLICANT, notifications.get(0).getValue().getPartyType());
+        Assert.assertEquals(1, notifications.size());
+    }
+
+    @Test
+    public void sendFm5ReminderForNoApplicantAddress() {
+
+        applicant = applicant.toBuilder().solicitorEmail("").address(null).build();
+        caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
 
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
