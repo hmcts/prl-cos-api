@@ -110,7 +110,7 @@ public class Fm5NotificationServiceTest {
 
         when(systemUserService.getSysUserToken()).thenReturn("authToken");
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(),Mockito.anyString(),
@@ -169,7 +169,7 @@ public class Fm5NotificationServiceTest {
     }
 
     @Test
-    public void sendFm5ReminderForNoApplicantEmail() throws Exception {
+    public void sendFm5ReminderForNoApplicantEmail() {
 
         applicant = applicant.toBuilder().solicitorEmail("").build();
         caseData = caseData.toBuilder().applicants(List.of(element(applicant))).build();
