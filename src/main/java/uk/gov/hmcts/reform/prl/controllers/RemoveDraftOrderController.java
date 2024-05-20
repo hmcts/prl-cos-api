@@ -41,9 +41,6 @@ public class RemoveDraftOrderController {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     public static final String REMOVED_DRAFT_ORDER_TEXT = "removeDraftOrderText";
-    public static final String CONFIRMATION_HEADER = "# Draft order removed";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n We will delete this order.""";
 
     @PostMapping(path = "/populate-remove-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate remove draft order dropdown")

@@ -39,7 +39,6 @@ public class RemoveDraftOrderService {
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
-                log.info(" ---> eventId {}", eventId);
                 if (Event.REMOVE_DRAFT_ORDER.getId().equalsIgnoreCase(eventId)) {
                     supportedDraftOrderList.add(draftOrderElement);
                 }
