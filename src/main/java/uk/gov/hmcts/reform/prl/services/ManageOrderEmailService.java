@@ -583,6 +583,21 @@ public class ManageOrderEmailService {
                 bulkPrintOrderDetails,
                 SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
             ));
+            log.info("Sending email to respondent");
+            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
+        }
+    }
+
+    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isPartyProvidedWithEmail(party.getValue()) && hasDashboardAccess(party)) {
+            log.info("Sending email to respondent, inside if statement");
+            emailService.send(
+                party.getValue().getEmail(),
+                EmailTemplateNames.CA_LIP_ORDERS,
+                buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
+                dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
+            );
         }
     }
 
