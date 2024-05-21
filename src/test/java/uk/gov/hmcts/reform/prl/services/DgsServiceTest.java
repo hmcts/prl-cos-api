@@ -257,7 +257,7 @@ public class DgsServiceTest {
 
 
     @Test
-    public void testToGenerateCoverLetterDocumentThrowsException() throws Exception {
+    public void testToGenerateCoverLetterDocumentThrowsException() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverLetter", "test.pdf");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -275,7 +275,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateWelshDocumentThrowsException() throws Exception {
+    public void testToGenerateWelshDocumentThrowsException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -305,7 +305,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithCaseDataThrowsExcetion() throws Exception {
+    public void testToGenerateDocumentWithCaseDataThrowsExcetion() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
