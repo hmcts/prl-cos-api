@@ -589,8 +589,7 @@ public class ManageOrderEmailService {
     }
 
     private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
-        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-            && isPartyProvidedWithEmail(party.getValue()) && hasDashboardAccess(party)) {
+        if (isPartyProvidedWithEmail(party.getValue()) && hasDashboardAccess(party)) {
             log.info("Sending email to respondent, inside if statement");
             emailService.send(
                 party.getValue().getEmail(),
