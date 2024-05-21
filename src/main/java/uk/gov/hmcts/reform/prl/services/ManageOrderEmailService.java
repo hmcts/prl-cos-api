@@ -315,7 +315,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData) {
+    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData, Element<PartyDetails> party) {
 
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
         boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
@@ -336,7 +336,7 @@ public class ManageOrderEmailService {
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
-            .applicantName(String.valueOf(dynamicData.get("name")))
+            .applicantName(party.getValue().getFirstName() + party.getValue().getLastName())
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
@@ -595,7 +595,7 @@ public class ManageOrderEmailService {
             emailService.send(
                 party.getValue().getEmail(),
                 EmailTemplateNames.CA_LIP_ORDERS,
-                buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
+                buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                 dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
             );
         }
@@ -619,7 +619,7 @@ public class ManageOrderEmailService {
                 emailService.send(
                     party.getValue().getEmail(),
                     EmailTemplateNames.CA_LIP_ORDERS,
-                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
+                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                     dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
             } else {
