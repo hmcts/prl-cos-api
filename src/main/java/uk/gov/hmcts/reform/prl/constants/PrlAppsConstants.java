@@ -27,6 +27,10 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
+    public static final String MPU_CHILD_INVOLVED_IN_MIAM = "mpuChildInvolvedInMiam";
+    public static final String MPU_APPLICANT_ATTENDED_MIAM = "mpuApplicantAttendedMiam";
+    public static final String MPU_CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemptionMiam";
+
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
@@ -658,6 +662,7 @@ public class PrlAppsConstants {
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
+    public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
@@ -832,12 +837,15 @@ public class PrlAppsConstants {
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
+    public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";
+    public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String C1A_BLANK_DOCUMENT_WELSH_FILENAME = "C1A_Blank_Welsh.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER_WELSH = "Welsh_Notice_Of_Proceeding_Order_C6a.pdf";
 
-    public static final String SOA_MEDIATION_VOUCHER_FILENAME = "Mediation-voucher.pdf";
+    public static final String SOA_FAMILY_PRESIDENTS_NOTE = "Family President's letter to parties.pdf";
+    public static final String SOA_FAMILY_PRESIDENTS_NOTE_WELSH = "Family President's letter to parties - Welsh.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
@@ -878,6 +886,7 @@ public class PrlAppsConstants {
     public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
+    public static final String  TASK_LIST_VERSION_V3 = "v3";
 
     public static final String  PHYSICAL_ABUSE = "physicalAbuse";
     public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
@@ -933,6 +942,10 @@ public class PrlAppsConstants {
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
@@ -989,4 +1002,14 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+
+    //Citizen dashboard notifications
+    public static final String CAN_10_FM5 = "CAN_10";
 }
