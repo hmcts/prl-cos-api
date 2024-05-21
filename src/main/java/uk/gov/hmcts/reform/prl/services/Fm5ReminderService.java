@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_FM5_COUNT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.FM5_NOTIFICATION_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -95,18 +96,23 @@ public class Fm5ReminderService {
             //Send FM5 reminders to cases meeting all system rules, else update not needed
             qualifiedCasesAndPartiesBeforeHearing.forEach(
                 (key, fmPendingParty) -> {
-                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                        = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
+                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
                     Map<String, Object> caseDataUpdated = new HashMap<>();
                     if (FmPendingParty.NOTIFICATION_NOT_REQUIRED.equals(fmPendingParty)) {
                         log.info("FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED", key);
+                        startAllTabsUpdateDataContent
+                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE.getValue());
                         caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
                     } else {
                         log.info("*** Sending FM5 reminders for caseId {}", key);
+                        startAllTabsUpdateDataContent
+                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
+
                         List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
                             startAllTabsUpdateDataContent.caseData(),
                             fmPendingParty
                         );
+
                         if (isNotEmpty(fm5ReminderNotifications)) {
                             log.info("FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES", key);
                             caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
