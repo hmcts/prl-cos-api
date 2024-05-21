@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -50,7 +47,6 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
@@ -86,8 +82,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -96,7 +90,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_C
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.services.StmtOfServImplService.RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseServiceTest {
@@ -107,8 +100,6 @@ public class CaseServiceTest {
     public static final String eventId = "1234567891234567";
 
     public static final String accessCode = "123456";
-    private final String eventToken = "eventToken";
-    private final String systemUserId = "systemUserID";
 
     @InjectMocks
     private CaseService caseService;
@@ -302,13 +293,6 @@ public class CaseServiceTest {
     }
 
     @Test
-    @Ignore
-    public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","citizen-case-submit");
-        assertNotNull(caseDetailsAfterUpdate);
-    }
-
-    @Test
     public void shouldCreateCase() {
         //Given
         CaseData caseData = CaseData.builder()
@@ -330,70 +314,6 @@ public class CaseServiceTest {
 
         //When
         CaseDetails actualCaseDetails =  caseService.createCase(caseData, authToken);
-
-        //Then
-        assertThat(actualCaseDetails).isEqualTo(caseDetails);
-    }
-
-    @Ignore
-    @Test
-    public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException {
-        //Given
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
-            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
-            .build();
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
-
-        //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT.getValue());
-
-        //Then
-        assertThat(actualCaseDetails).isEqualTo(caseDetails);
-    }
-
-    @Ignore
-    @Test
-    public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException {
-        //Given
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
-            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
-            .build();
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
-
-        //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
-                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue());
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
@@ -480,206 +400,6 @@ public class CaseServiceTest {
         Assert.assertNotNull(applicantExternalFlag);
         Assert.assertEquals(applicant1PartyFlags, applicantExternalFlag);
     }
-
-    //    @Test
-    //    public void testUpdateCitizenRaFlags() throws JsonProcessingException {
-    //        User user1 = User.builder().idamId("applicant-1").build();
-    //        User user2 = User.builder().idamId("respondent-1").build();
-    //        User user3 = User.builder().idamId("respondent-2").build();
-    //        PartyDetails applicant = PartyDetails.builder().user(user1).email("testappl@hmcts.net").firstName(
-    //            "Applicant 1 FN").lastName("Applicant 1 LN").build();
-    //        PartyDetails respondent1 = PartyDetails.builder().user(user2).email("testresp1@hmcts.net").firstName(
-    //            "Respondent 1 FN").lastName("Respondent 1 LN").build();
-    //        PartyDetails respondent2 = PartyDetails.builder().user(user3).email("testresp2@hmcts.net").firstName(
-    //            "Respondent 2 FN").lastName("Respondent 2 LN").build();
-    //
-    //        FlagDetail flagDetailRequestForFillingForms = FlagDetail.builder()
-    //            .name("Support filling in forms")
-    //            .name_cy("Cymorth i lenwi ffurflenni")
-    //            .hearingRelevant(No)
-    //            .flagCode("RA0018")
-    //            .status("Requested")
-    //            .dateTimeCreated(LocalDateTime.parse(
-    //                "2023-11-11T12:12:12.000Z",
-    //                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    //            ))
-    //            .availableExternally(Yes)
-    //            .build();
-    //        FlagDetail flagDetailRequestForHearing = FlagDetail.builder()
-    //            .name("Private waiting area")
-    //            .name_cy("Ystafell aros breifat")
-    //            .hearingRelevant(Yes)
-    //            .flagCode("RA0033")
-    //            .status("Requested")
-    //            .dateTimeCreated(LocalDateTime.parse(
-    //                "2023-11-11T12:13:02.000Z",
-    //                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    //            ))
-    //            .availableExternally(Yes)
-    //            .build();
-    //
-    //
-    //        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-    //        when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(citizenUpdatedCaseData);
-    //        when(caseRepository.updateCase(authToken, caseId, citizenUpdatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
-    //
-    //        Element<FlagDetailRequest>  updateFlagDetailRequestForHearing = element(FlagDetailRequest.builder()
-    //            .name("Private waiting area")
-    //            .name_cy("Ystafell aros breifat")
-    //            .hearingRelevant(Yes)
-    //            .flagCode("RA0033")
-    //            .status("Inactive")
-    //            .dateTimeCreated(LocalDateTime.parse(
-    //                "2023-11-11T12:13:02.000Z",
-    //                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    //            ))
-    //            .dateTimeModified(LocalDateTime.parse(
-    //                "2023-11-12T10:09:21.000Z",
-    //                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-    //            ))
-    //            .availableExternally(Yes)
-    //            .build());
-    //
-    //        Flags applicant1PartyFlags = Flags.builder().roleOnCase("Applicant 1").partyName("Applicant 1 FN Applicant 1 LN").details(
-    //            Collections.singletonList(element(flagDetailRequestForFillingForms))).build();
-    //        Flags respondent1PartyFlags = Flags.builder().roleOnCase("Respondent 1").partyName(
-    //            "Respondent 1 FN Respondent 1 LN").details(Collections.singletonList(element(flagDetailRequestForHearing))).build();
-    //        Flags respondent2PartyFlags = Flags.builder().roleOnCase("Respondent 2").partyName(
-    //            "Respondent 2 FN Respondent 2 LN").details(Arrays.asList(
-    //            element(flagDetailRequestForFillingForms),
-    //            element(flagDetailRequestForHearing)
-    //        )).build();
-    //        CitizenPartyFlagsRequest updatePartyFlagsRequest;
-    //        updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-    //            .caseTypeOfApplication("C100")
-    //            .partyIdamId("respondent-1")
-    //            .partyExternalFlags(FlagsRequest.builder()
-    //                                    .details(Arrays.asList(
-    //                                        updateFlagDetailRequestForFillingForms,
-    //                                        updateFlagDetailRequestForHearing
-    //                                    )).build()).build();
-    //
-    //        CaseData caseData = CaseData.builder()
-    //            .id(1234567891234567L)
-    //            .caseTypeOfApplication("C100")
-    //            .applicants(Collections.singletonList(element(applicant)))
-    //            .respondents(Arrays.asList(element(respondent1), element(respondent2)))
-    //            .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(applicant1PartyFlags).caRespondent1ExternalFlags(
-    //                respondent1PartyFlags).caRespondent2ExternalFlags(respondent2PartyFlags).build())
-    //            .build();
-    //        ObjectMapper mapper = new ObjectMapper();
-    //        mapper.registerModule(new JavaTimeModule());
-    //        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    //        Map<String, Object> stringObjectMap = caseData.toMap(mapper);
-    //        CaseDetails caseDetails = CaseDetails.builder()
-    //            .id(1234567891234567L)
-    //            .data(stringObjectMap)
-    //            .build();
-    //        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-    //
-    //        when(coreCaseDataService.eventRequest(CaseEvent.fromValue("c100RequestSupport"), systemUserId)).thenReturn(
-    //            EventRequestData.builder().build());
-    //        StartEventResponse startEventResponse = StartEventResponse.builder().eventId("c100RequestSupport")
-    //            .caseDetails(caseDetails)
-    //            .token(eventToken).build();
-    //        // when(coreCaseDataService.startUpdate(
-    //        //    authToken,
-    //        //    EventRequestData.builder().build(),
-    //        //    caseId,
-    //        //    false
-    //        //)).thenReturn(
-    //        //    startEventResponse);
-    //        when(coreCaseDataService.startUpdate(
-    //            Mockito.anyString(),
-    //            Mockito.any(),
-    //            Mockito.anyString(),
-    //            Mockito.anyBoolean()
-    //        )).thenReturn(
-    //            startEventResponse);
-    //        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
-    //
-    //        // Happy path 1 - when the request is valid and respondent party external flags is updated in the response.
-    //        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(respondent1PartyFlags);
-    //        when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-    //            "C100",
-    //            PartyRole.Representing.CARESPONDENT,
-    //            0
-    //        )).thenReturn("caRespondent1ExternalFlags");
-    //        ResponseEntity<Object> updatePartyFlagsResponse;
-    //        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
-    //            caseId,
-    //            "c100RequestSupport",
-    //            authToken,
-    //            updatePartyFlagsRequest
-    //        );
-    //        assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //
-    //        // Happy path 2 - when the request is valid and applicant party external flags is updated in the response.
-    //        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(applicant1PartyFlags);
-    //        when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-    //            "C100",
-    //            PartyRole.Representing.CAAPPLICANT,
-    //            0
-    //        )).thenReturn("caApplicant1ExternalFlags");
-    //        updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-    //            .caseTypeOfApplication("C100")
-    //            .partyIdamId("applicant-1")
-    //            .partyExternalFlags(FlagsRequest.builder()
-    //                                    .details(Arrays.asList(
-    //                                        updateFlagDetailRequestForFillingForms,
-    //                                        updateFlagDetailRequestForHearing
-    //                                    )).build()).build();
-    //        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
-    //            caseId,
-    //            "c100RequestSupport",
-    //            authToken,
-    //            updatePartyFlagsRequest
-    //        );
-    //        assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-    //
-    //        // Unhappy path 1 - when the request is not valid.
-    //        updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-    //            .caseTypeOfApplication("C100")
-    //            .partyIdamId("respondent-1").build();
-    //        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
-    //            caseId,
-    //            "c100RequestSupport",
-    //            authToken,
-    //            updatePartyFlagsRequest
-    //        );
-    //        assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    //
-    //        // Unhappy path 2 - when the request is valid, but party details is invalid.
-    //        updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-    //            .caseTypeOfApplication("C100")
-    //            .partyIdamId("respondent-3").partyExternalFlags(FlagsRequest.builder().build()).build();
-    //        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
-    //            caseId,
-    //            "c100RequestSupport",
-    //            authToken,
-    //            updatePartyFlagsRequest
-    //        );
-    //        assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    //        assertThat(updatePartyFlagsResponse.getBody()).isEqualTo("party details not found");
-    //
-    //        // Unhappy path 3 - when the request is valid, but party external flag details not present in the case data.
-    //        when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-    //            "C100",
-    //            PartyRole.Representing.CARESPONDENT,
-    //            6
-    //        )).thenReturn("caRespondent7ExternalFlags");
-    //        updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
-    //            .caseTypeOfApplication("C100")
-    //            .partyIdamId("respondent-2").partyExternalFlags(FlagsRequest.builder().build()).build();
-    //        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
-    //            caseId,
-    //            "c100RequestSupport",
-    //            authToken,
-    //            updatePartyFlagsRequest
-    //        );
-    //        assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    //        assertThat(updatePartyFlagsResponse.getBody()).isEqualTo("party external flag details not found");
-    //    }
 
     @Test
     public void shouldUpdateCaseWithCaseName() throws IOException {
@@ -886,7 +606,6 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder()
             .id("00000000-0000-0000-0000-000000000000")
             .roles(List.of(Roles.CITIZEN.getValue())).build();
-        Map<String, Object> map = new HashMap<>();
 
         //When
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
