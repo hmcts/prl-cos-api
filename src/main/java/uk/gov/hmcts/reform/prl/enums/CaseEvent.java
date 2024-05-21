@@ -54,7 +54,8 @@ public enum CaseEvent {
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
-    FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate");
+    FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
+    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
 
     private final String value;
 

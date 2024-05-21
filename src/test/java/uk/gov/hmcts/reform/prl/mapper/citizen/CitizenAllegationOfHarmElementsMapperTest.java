@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -16,14 +20,15 @@ import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CitizenAllegationOfHarmElementsMapperTest {
+@ExtendWith(MockitoExtension.class)
+class CitizenAllegationOfHarmElementsMapperTest {
 
     @InjectMocks
-    private CitizenRespondentAohElementsMapper citizenAllegationOfHarmElementsMapper;
+    CitizenRespondentAohElementsMapper citizenAllegationOfHarmElementsMapper;
 
     List<Element<ChildDetailsRevised>> childrenList;
 
-    @Before
+    @BeforeEach
     public void setup() {
         childrenList  = new ArrayList<>();
         childrenList.add(Element.<ChildDetailsRevised>builder()
@@ -63,28 +68,11 @@ public class CitizenAllegationOfHarmElementsMapperTest {
                                   .build());
     }
 
-    @Test
-    public void shouldMapAllegationOfHarmDataWithYesOption() throws Exception {
-        String aohData = TestUtil.readFileFrom("classpath:./respondentaohdata.json");
-        RespondentAllegationsOfHarmData respondentAllegationsOfHarmData =
-            citizenAllegationOfHarmElementsMapper.map(aohData, childrenList);
-        Assert.assertNotNull(respondentAllegationsOfHarmData);
-        Assert.assertEquals("Yes", respondentAllegationsOfHarmData.getRespAohYesOrNo().getDisplayedValue());
-    }
-
-    @Test
-    public void shouldMapAllegationOfHarmDataWithYesOptionNoRespondentAndChildrenConcerned() throws Exception {
-        String aohData = TestUtil.readFileFrom("classpath:./aohwithabuductiondata.json");
-        RespondentAllegationsOfHarmData respondentAllegationsOfHarmData =
-            citizenAllegationOfHarmElementsMapper.map(aohData, childrenList);
-        Assert.assertNotNull(respondentAllegationsOfHarmData);
-        Assert.assertEquals("Yes", respondentAllegationsOfHarmData.getRespAohYesOrNo().getDisplayedValue());
-    }
-
-    @Test
-    public void shouldMapAllegationOfHarmDataWithYesOptionWithNoChildAbduction() throws Exception {
-        String aohData = TestUtil.readFileFrom("classpath:./respondentaohdatanoad.json");
-
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:./respondentaohdata.json", "classpath:./aohwithabuductiondata.json",
+        "classpath:./respondentaohdatanoad.json"})
+    void shouldMapAllegationOfHarmDataWithYesOption(String fileName) throws Exception {
+        String aohData = TestUtil.readFileFrom(fileName);
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData =
             citizenAllegationOfHarmElementsMapper.map(aohData, childrenList);
         Assert.assertNotNull(respondentAllegationsOfHarmData);
@@ -106,7 +94,7 @@ public class CitizenAllegationOfHarmElementsMapperTest {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData =
             citizenAllegationOfHarmElementsMapper.map(aohData, childrenList);
         Assert.assertNotNull(respondentAllegationsOfHarmData);
-        Assert.assertEquals(null, respondentAllegationsOfHarmData.getRespAohYesOrNo());
+        Assert.assertNull(respondentAllegationsOfHarmData.getRespAohYesOrNo());
     }
 
 }
