@@ -85,7 +85,6 @@ public class CitizenAllegationOfHarmElementsMapperTest {
     public void shouldMapAllegationOfHarmDataWithYesOptionWithNoChildAbduction() throws Exception {
         String aohData = TestUtil.readFileFrom("classpath:./respondentaohdatanoad.json");
 
-        List<Element<ChildDetailsRevised>> childListElements =  new ArrayList<>();
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData =
             citizenAllegationOfHarmElementsMapper.map(aohData, childrenList);
         Assert.assertNotNull(respondentAllegationsOfHarmData);
