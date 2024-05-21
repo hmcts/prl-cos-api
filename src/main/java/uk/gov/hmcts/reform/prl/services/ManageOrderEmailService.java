@@ -336,7 +336,7 @@ public class ManageOrderEmailService {
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
-            .applicantName(party.getValue().getFirstName() + party.getValue().getLastName())
+            .applicantName(party.getValue().getFirstName() + " " + party.getValue().getLastName())
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
