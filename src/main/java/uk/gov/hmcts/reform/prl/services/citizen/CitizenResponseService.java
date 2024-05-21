@@ -182,7 +182,7 @@ public class CitizenResponseService {
                     startAllTabsUpdateDataContent.userDetails()
             );
         } else {
-            throw new RuntimeException("Invalid case type or party type for the event request "
+            throw new IllegalArgumentException("Invalid case type or party type for the event request "
                     + CaseEvent.REVIEW_AND_SUBMIT.getValue()
                     + " for the case id "
                     + caseId);
@@ -336,8 +336,8 @@ public class CitizenResponseService {
                 .flatMap(proceedings -> proceedings.getProceedingDetails().stream())
                 .filter(otherProceedingDetailsElement -> isNotEmpty(otherProceedingDetailsElement.getValue())
                         && null != otherProceedingDetailsElement.getValue().getOrderDocument())
-                .map(otherProceedingDetailsElement ->
-                    responseDocs.put(element(otherProceedingDetailsElement.getValue().getOrderDocument()),"en"));
+                .forEach(otherProceedingDetailsElement ->
+                             responseDocs.put(element(otherProceedingDetailsElement.getValue().getOrderDocument()),"en"));
 
         return responseDocs;
     }

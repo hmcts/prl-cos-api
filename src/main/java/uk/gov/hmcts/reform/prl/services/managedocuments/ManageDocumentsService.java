@@ -556,27 +556,15 @@ public class ManageDocumentsService {
         }
 
         switch (userRole) {
-            case SOLICITOR -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("legalProfUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
-                }
-            }
-            case CAFCASS -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("cafcassUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("cafcassQuarantineDocsList", quarantineDocs);
-                }
-            }
-            case COURT_STAFF -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
-                }
-            }
+            case SOLICITOR ->
+                caseDataUpdated.put(isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
+                                    quarantineDocs);
+            case CAFCASS ->
+                caseDataUpdated.put(isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
+                                    quarantineDocs);
+            case COURT_STAFF ->
+                caseDataUpdated.put(isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
+                                    quarantineDocs);
             case COURT_ADMIN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
@@ -587,13 +575,9 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
             }
-            case CITIZEN -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("citizenUploadedDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("citizenQuarantineDocsList", quarantineDocs);
-                }
-            }
+            case CITIZEN ->
+                caseDataUpdated.put(isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
+                                    quarantineDocs);
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
