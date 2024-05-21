@@ -368,7 +368,7 @@ public class StmtOfServImplService {
             List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication = new ArrayList<>();
             updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
-            if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(sosObject.getIsOrder())) {
+            if (YesOrNo.No.equals(sosObject.getIsOrder())) {
                 List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
                 List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
                 finalServedApplicationDetailsList = updateFinalListOfServedApplications(
@@ -378,8 +378,8 @@ public class StmtOfServImplService {
                     bulkPrintDetails
                 );
                 updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+                updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
             }
-            updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
         }
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -404,10 +404,11 @@ public class StmtOfServImplService {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
                                                           updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+
                     serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
                         updatedCaseData,
                         authorization,
-                        unwrapElements(packDocs),
+                        new ArrayList<>(),
                         bulkPrintDetails,
                         respondent,
                         coverLetter,
@@ -428,7 +429,7 @@ public class StmtOfServImplService {
                 serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
                     updatedCaseData,
                     authorization,
-                    unwrapElements(packDocs),
+                    new ArrayList<>(),
                     bulkPrintDetails,
                     element(updatedCaseData.getRespondentsFL401().getPartyId(),
                             updatedCaseData.getRespondentsFL401()),
@@ -467,16 +468,16 @@ public class StmtOfServImplService {
 
     private void updateStatementOfServiceCollection(CitizenSos sosObject, CaseData updatedCaseData,
                                                     List<Element<StmtOfServiceAddRecipient>> stmtOfServiceforApplication) {
-        String[] partiesList = sosObject.getPartiesServed().split(",");
+        List<String> partiesList = sosObject.getPartiesServed();
         List<String> partiesServed = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
             updatedCaseData.getRespondents().forEach(respondent -> {
-                if (Arrays.asList(partiesList).contains(respondent.getId().toString())) {
+                if (partiesList.contains(String.valueOf(respondent.getId()))) {
                     partiesServed.add(respondent.getValue().getLabelForDynamicList());
                 }
             });
         } else {
-            if (Arrays.asList(partiesList).contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
+            if (partiesList.contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
                 partiesServed.add(updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
             }
         }
@@ -497,6 +498,8 @@ public class StmtOfServImplService {
                                                                                    .documentBinaryUrl(sosObject.getCitizenSosDocs()
                                                                                                           .getDocumentBinaryUrl())
                                                                                    .build())
+                                                        .selectedPartyId(String.join(",", partiesList))
+                                                        .selectedPartyName(String.join(",", partiesServed))
                                                       .build()));
         } catch (ParseException e) {
             log.error("Error while building Sos Object {}", e.getMessage());
