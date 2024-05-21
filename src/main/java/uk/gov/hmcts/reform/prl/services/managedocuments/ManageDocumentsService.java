@@ -318,6 +318,7 @@ public class ManageDocumentsService {
                     log.info(respondent.getUser().getIdamId() + "***********" + uploadedByIdamID);
                     if (respondent.getUser().getIdamId().equals(uploadedByIdamID)) {
                         dynamicData.put("respondentName", respondent.getLabelForDynamicList());
+                        break;
                     }
                 }
 
