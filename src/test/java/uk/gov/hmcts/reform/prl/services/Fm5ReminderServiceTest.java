@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -402,11 +403,7 @@ public class Fm5ReminderServiceTest {
             .total(0)
             .build();
         when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
-
-        SearchResultResponse response = SearchResultResponse.builder()
-            .total(0)
-            .build();
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(null);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
@@ -468,6 +465,17 @@ public class Fm5ReminderServiceTest {
 
         //verify
         verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsWithException() throws JsonProcessingException {
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("") {});
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+
     }
 
 }
