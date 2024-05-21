@@ -118,7 +118,7 @@ public class ManageDocumentsService {
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
     @Lazy
-    private final SendgridService sendgridService;
+    private final ManageDocumentEmailService sendgridService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -340,7 +340,6 @@ public class ManageDocumentsService {
             log.info("inside sendEmailViaSendGrid");
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
-                null,
                 SendgridEmailConfig.builder()
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
