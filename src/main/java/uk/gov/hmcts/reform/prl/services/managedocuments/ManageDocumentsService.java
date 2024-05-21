@@ -304,17 +304,28 @@ public class ManageDocumentsService {
             existingCaseDocuments.add(element(finalConfidentialDocument));
 
             if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
+                String uploadedByIdamID = finalConfidentialDocument.getUploadedByIdamId();
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 Document document = finalConfidentialDocument.getRespondentApplicationDocument();
                 List<PartyDetails> applicants = caseData.getApplicants().stream()
                     .map(Element::getValue)
                     .toList();
+
+                List<PartyDetails> respondents = caseData.getRespondents().stream()
+                    .map(Element::getValue)
+                    .toList();
+                for (PartyDetails respondent : respondents) {
+                    log.info(respondent.getUser().getIdamId() + "***********" + uploadedByIdamID);
+                    if (respondent.getUser().getIdamId().equals(uploadedByIdamID)) {
+                        dynamicData.put("respondentName", respondent.getLabelForDynamicList());
+                    }
+                }
+
+
                 for (PartyDetails applicant : applicants) {
-                    Element<PartyDetails> respondent = caseData.getRespondents().get(0);
                     if (ContactPreferences.email.equals(applicant.getContactPreferences())
                         && (document.getDocumentFileName().equals("C7_Document.pdf")
                         || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
-                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                        dynamicData.put("respondentName", respondent.getValue().getLabelForDynamicList());
                         dynamicData.put("applicantName",  applicant.getLabelForDynamicList());
                         sendEmailViaSendGrid(dynamicData, applicant.getEmail(),
                                              SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
