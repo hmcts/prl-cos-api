@@ -241,7 +241,7 @@ public class CitizenRespondentAohElementsMapper {
         String[] physicallyAbusedChildren = physicalAbuse.getChildrenConcernedAbout();
 
         return respondentAllegationsOfHarmData.toBuilder()
-            .respChildPhysicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,physicalAbuse))
+            .respChildPhysicalAbuse(mapToChildAbuseIndividually(physicalAbuse))
             .respAllChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskAbuses(physicallyAbusedChildren,
                                                                             newChildDetails))
             .respWhichChildrenAreRiskPhysicalAbuse(buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, newChildDetails))
@@ -256,7 +256,7 @@ public class CitizenRespondentAohElementsMapper {
         String[] psychologicallyAbusedChildren = psychologicalAbuse.getChildrenConcernedAbout();
 
         return respondentAllegationsOfHarmData.toBuilder()
-            .respChildPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,psychologicalAbuse))
+            .respChildPsychologicalAbuse(mapToChildAbuseIndividually(psychologicalAbuse))
             .respAllChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren,
                                                                                  newChildDetails))
             .respWhichChildrenAreRiskPsychologicalAbuse(buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren,
@@ -272,7 +272,7 @@ public class CitizenRespondentAohElementsMapper {
         String[] sexuallyAbusedChildren = sexualAbuse.getChildrenConcernedAbout();
 
         return respondentAllegationsOfHarmData.toBuilder()
-            .respChildSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,sexualAbuse))
+            .respChildSexualAbuse(mapToChildAbuseIndividually(sexualAbuse))
             .respAllChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbuses(sexuallyAbusedChildren,
                                                                           newChildDetails))
             .respWhichChildrenAreRiskSexualAbuse(buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren,
@@ -288,7 +288,7 @@ public class CitizenRespondentAohElementsMapper {
         String[] emotionallyAbusedChildren = emotionalAbuse.getChildrenConcernedAbout();
 
         return respondentAllegationsOfHarmData.toBuilder()
-            .respChildEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,emotionalAbuse))
+            .respChildEmotionalAbuse(mapToChildAbuseIndividually(emotionalAbuse))
             .respAllChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbuses(emotionallyAbusedChildren,
                                                                              newChildDetails))
             .respWhichChildrenAreRiskEmotionalAbuse(buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren,
@@ -305,7 +305,7 @@ public class CitizenRespondentAohElementsMapper {
         String[] financiallyAbusedChildren = financialAbuse.getChildrenConcernedAbout();
 
         return respondentAllegationsOfHarmData.toBuilder()
-            .respChildFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,financialAbuse))
+            .respChildFinancialAbuse(mapToChildAbuseIndividually(financialAbuse))
             .respAllChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbuses(financiallyAbusedChildren,
                                                                              newChildDetails))
             .respWhichChildrenAreRiskFinancialAbuse(buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren,
@@ -424,7 +424,7 @@ public class CitizenRespondentAohElementsMapper {
 
     }
 
-    private RespChildAbuse mapToChildAbuseIndividually(ChildAbuseEnum abuseType, AbuseDto abuseDto) {
+    private RespChildAbuse mapToChildAbuseIndividually(AbuseDto abuseDto) {
 
         return RespChildAbuse.builder()
             .respAbuseNatureDescription(abuseDto.getBehaviourDetails())
