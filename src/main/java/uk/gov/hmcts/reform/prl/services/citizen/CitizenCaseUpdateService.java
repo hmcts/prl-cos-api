@@ -72,38 +72,20 @@ public class CitizenCaseUpdateService {
                                                  String eventId,
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
-        try {
-            log.info("CitizenUpdatedCaseData is::" + objectMapper.writeValueAsString(citizenUpdatedCaseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        log.info("Case event is :: " + eventId);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
-        log.info("Case event is triggered:: " + eventId);
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
             citizenPartyDetailsMapper.mapUpdatedPartyDetails(
                 dbCaseData, citizenUpdatedCaseData,
                 caseEvent,
                 startAllTabsUpdateDataContent.authorisation()
             ));
-        log.info("Data processing is done, ready to submit to ccd:: " + eventId);
         if (citizenUpdatePartyDataContent.isPresent()) {
             Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
-            try {
-                log.info("case data updated map is::" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
 
             Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
-            try {
-                log.info("case data updated map is now::" + objectMapper.writeValueAsString(caseDataMapToBeUpdated));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -112,9 +94,7 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
             );
-            log.info("Data processing is completed:: ");
             if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
-                log.info("inside all tab refresh loop:: ");
                 return allTabService.updateAllTabsIncludingConfTab(caseId);
             }
         }
@@ -248,12 +228,6 @@ public class CitizenCaseUpdateService {
         String caseId,
         String authorisation,
         LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest) {
-        log.info("Inside addLanguageSupportCaseNotes for caseId {}", caseId);
-        log.info(
-            "Inside addLanguageSupportCaseNotes languageSupportCaseNotesRequest {}",
-            languageSupportCaseNotesRequest
-        );
-
         if (StringUtils.isEmpty(languageSupportCaseNotesRequest.getPartyIdamId())
             || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
@@ -277,12 +251,6 @@ public class CitizenCaseUpdateService {
             CASE_NOTES,
             addCaseNoteService.getCaseNoteDetails(dbCaseData, currentCaseNoteDetails)
         );
-
-        try {
-            log.info("CaseDataContent ===>" + objectMapper.writeValueAsString(caseNotesMap));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
 
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
