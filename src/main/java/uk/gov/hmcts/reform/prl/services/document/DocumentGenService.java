@@ -295,7 +295,6 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
-
     @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
@@ -1490,10 +1489,8 @@ public class DocumentGenService {
 
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
-
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
 
-            //move all documents to citizen quarantine
             List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
                 .map(document -> getCitizenQuarantineDocument(
                     document,
@@ -1503,18 +1500,32 @@ public class DocumentGenService {
                 ))
                 .toList();
 
-            manageDocumentsService.setFlagsForWaTask(
-                updatedCaseData,
-                updatedCaseDataMap,
-                CITIZEN,
-                quarantineLegalDocs.get(0)
-            );
+            if (category.equals(DocumentCategory.FM5_STATEMENTS)) {
+                for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+                    String userRole = CaseUtils.getUserRole(userDetails);
+                    manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                        quarantineLegalDoc,
+                        userDetails,
+                        updatedCaseData,
+                        updatedCaseDataMap,
+                        userRole
+                    );
+                }
+            } else {
+                //move all documents to citizen quarantine except fm5 documents
+                manageDocumentsService.setFlagsForWaTask(
+                    updatedCaseData,
+                    updatedCaseDataMap,
+                    CITIZEN,
+                    quarantineLegalDocs.get(0)
+                );
 
-            moveCitizenDocumentsToQuarantineTab(
-                quarantineLegalDocs,
-                updatedCaseData,
-                updatedCaseDataMap
-            );
+                moveCitizenDocumentsToQuarantineTab(
+                    quarantineLegalDocs,
+                    updatedCaseData,
+                    updatedCaseDataMap
+                );
+            }
 
             //update all tabs
             return allTabService.submitAllTabsUpdate(

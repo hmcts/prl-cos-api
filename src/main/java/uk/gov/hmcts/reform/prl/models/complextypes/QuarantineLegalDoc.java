@@ -110,6 +110,7 @@ public class QuarantineLegalDoc {
     // These fields are neeeded when Respondent solicitor uploads response on behalf of party
     private final String solicitorRepresentedPartyName;
     private final String solicitorRepresentedPartyId;
+    private final String documentLanguage;
 
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {

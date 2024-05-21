@@ -13,7 +13,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -47,8 +46,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -57,7 +54,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,7 +79,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SuppressWarnings({"java:S1607"})
 public class ManageOrderEmailServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
-    private static final String URGENT_CASE = "Urgent ";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -270,8 +265,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -292,22 +285,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         manageOrderEmailService.sendEmail(caseDetails);
@@ -351,8 +330,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -395,34 +372,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -463,8 +418,6 @@ public class ManageOrderEmailServiceTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -508,34 +461,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -578,8 +509,6 @@ public class ManageOrderEmailServiceTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -629,34 +558,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -666,7 +573,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssued() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssued() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -695,7 +602,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() throws  Exception {
+    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -723,7 +630,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmail() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -754,7 +661,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("Fl401")
@@ -858,22 +765,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -977,15 +870,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testServeOrdersToOtherOrganisationServeOrderDetailsNull() {
-        PostalInformation address = PostalInformation.builder()
-            .postalAddress(Address.builder()
-                               .addressLine1("Made Up Street").build())
-            .postalName("Test")
-            .build();
-        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
-            .id(uuid)
-            .value(address).build();
-
         OrderDetails orderDetails = OrderDetails.builder()
             .orderTypeId("abc")
             .dateCreated(LocalDateTime.now())
@@ -1419,7 +1303,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1530,7 +1413,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1584,7 +1466,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401Welsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1639,7 +1520,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1690,7 +1570,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNullWelsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1742,7 +1621,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1792,7 +1670,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOtherWelsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1844,7 +1721,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServed() {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -2068,11 +1944,6 @@ public class ManageOrderEmailServiceTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
                                .label("John (Child 1)")
@@ -2112,21 +1983,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2154,9 +2012,6 @@ public class ManageOrderEmailServiceTest {
             .data(dataMap)
             .build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .build();
         manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(caseDetails, DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder().orderCreatedBy("Solicitor name").build()).build());
         verify(emailService, times(1)).getCaseData(caseDetails);
@@ -2200,11 +2055,6 @@ public class ManageOrderEmailServiceTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
                                .label("John (Child 1)")
@@ -2244,22 +2094,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -2352,10 +2188,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -2448,10 +2282,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -2544,7 +2376,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -2639,7 +2470,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -2734,7 +2564,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -2829,7 +2658,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -2838,57 +2666,6 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
-
-
-    /*@Test
-    public void sendEmailWhenOrderIsServedToCafcassCymru() throws IOException {
-
-        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
-            .builder()
-            .code(uuid.toString())
-            .build();
-        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(serveOrderDynamicMultiselectListElement))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
-        ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.Yes)
-            .cafcassCymruServedOptions(YesOrNo.Yes)
-            .otherParties(dynamicMultiSelectList)
-            .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-            .cafcassCymruEmail("test@cafcasscymru.com")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
-            .courtName("testcourt")
-            .manageOrders(manageOrders)
-            .build();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(dataMap)
-            .build();
-        String applicantNames = "TestFirst TestLast";
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
-    }*/
 
     @Test
     public void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
@@ -2931,7 +2708,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -3029,7 +2805,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3125,7 +2900,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -3221,7 +2995,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3321,7 +3094,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -3576,7 +3348,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() {
         //Given
         PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
@@ -3609,7 +3381,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() {
         //Given
         PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
@@ -3680,7 +3452,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() {
         //Given
         PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
@@ -3783,7 +3555,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() {
         //Given
         PartyDetails applicant = PartyDetails.builder()
             .partyId(uuid)
