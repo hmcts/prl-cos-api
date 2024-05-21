@@ -236,7 +236,6 @@ public class CitizenResponseService {
             log.info("generating respondent C1A response documents");
             try {
                 if (documentLanguage.isGenEng()) {
-                    log.info("generating english respondent C1A response documents");
                     dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
                     c1aFinalResponseEngDocument = documentGenService.generateSingleDocument(
                         authorisation,
@@ -248,7 +247,6 @@ public class CitizenResponseService {
                     respondentC1aResponseDocuments.put(c1aFinalResponseEngDocument, ENGLISH);
                 }
                 if (documentLanguage.isGenWelsh) {
-                    log.info("generating welsh respondent C1A response documents");
                     dataMap.put(DYNAMIC_FILE_NAME, fileName + "_Welsh.pdf");
                     c1aFinalResponseWelDocument = documentGenService.generateSingleDocument(
                         authorisation,
