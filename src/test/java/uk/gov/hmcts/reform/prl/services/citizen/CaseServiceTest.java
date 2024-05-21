@@ -367,11 +367,11 @@ public class CaseServiceTest {
                 respondent1PartyFlags).caRespondent2ExternalFlags(respondent2PartyFlags).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails caseDetailsCaseFlags = CaseDetails.builder()
             .id(1234567891234567L)
             .data(stringObjectMap)
             .build();
-        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetailsCaseFlags);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         // Unhappy path - when the request is valid, but party details is invalid.
