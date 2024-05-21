@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_DUMMY_UPLOAD_FILE;
