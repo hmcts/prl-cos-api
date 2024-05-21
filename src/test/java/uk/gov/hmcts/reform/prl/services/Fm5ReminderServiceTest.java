@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -189,69 +190,54 @@ public class Fm5ReminderServiceTest {
     @Test
     public void testSendFm5ReminderNotificationsToApplicant() {
 
-        CaseData caseDatas = CaseData.builder()
-            .id(123L)
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
-            .applicants(List.of(element(applicant)))
+        caseData = caseData.toBuilder()
             .respondents(new ArrayList<>())
             .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseDatas.toMap(objectMapper))
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDatas);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        caseDatas.toMap(objectMapper),
-                                                                                                        caseDatas, null);
+                                                                                                        caseData.toMap(objectMapper),
+                                                                                                        caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
-        when(fm5NotificationService.sendFm5ReminderNotifications(caseDatas, FmPendingParty.APPLICANT)).thenReturn(fm5ReminderNotifications);
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT)).thenReturn(fm5ReminderNotifications);
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
         //verify
         verify(fm5NotificationService, times(1))
-            .sendFm5ReminderNotifications(caseDatas, FmPendingParty.APPLICANT);
+            .sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
     }
 
     @Test
     public void testSendFm5ReminderNotificationsToRespondent() {
 
-        CaseData caseDatas = CaseData.builder()
-            .id(123L)
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+        caseData = caseData.toBuilder()
             .applicants(new ArrayList<>())
-            .respondents(List.of(element(respondent)))
-            .build();
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseDatas.toMap(objectMapper))
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDatas);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(s2sAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        caseDatas.toMap(objectMapper),
-                                                                                                        caseDatas, null);
+                                                                                                        caseData.toMap(objectMapper),
+                                                                                                        caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
-        when(fm5NotificationService.sendFm5ReminderNotifications(caseDatas, FmPendingParty.RESPONDENT)).thenReturn(fm5ReminderNotifications);
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT)).thenReturn(fm5ReminderNotifications);
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
         //verify
         verify(fm5NotificationService, times(1))
-            .sendFm5ReminderNotifications(caseDatas, FmPendingParty.RESPONDENT);
+            .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
     }
 
 
@@ -476,6 +462,85 @@ public class Fm5ReminderServiceTest {
         //verify
         verifyNoInteractions(fm5NotificationService);
 
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToNonePartiesWhenlegalProfQuarantineDocsListAvailable() {
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .categoryId(RESPONDENT_C1A_APPLICATION)
+            .restrictedDetails("test details")
+            .build();
+        legalProfUploadDocListDocTabInitial.add(element(quarantineLegalDoc));
+
+        caseData = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(legalProfUploadDocListDocTabInitial)
+                                           .build())
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToNonePartiesWhenRestrictedDocumentsListAvailable() {
+
+        List<Element<QuarantineLegalDoc>> quarantineList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .categoryId(RESPONDENT_C1A_APPLICATION)
+            .restrictedDetails("test details")
+            .build();
+        quarantineList.add(element(quarantineLegalDoc));
+
+        caseData = caseData.toBuilder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .restrictedDocuments(quarantineList).build())
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
     }
 
 }
