@@ -868,4 +868,75 @@ public class ServiceOfApplicationPostServiceTest {
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
         assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
     }
+
+    @Test
+    public void testGetCoverSheetsForWelsh() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        final Address address = Address.builder().addressLine1("157").addressLine2("London")
+            .postCode("SE1 234").country("UK").build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverSheets(caseData,
+                                          AUTH, address, "test name","DOCUMENT_COVER_SHEET_SERVE_ORDER"));
+
+    }
+
+    @Test
+    public void testGetCoverSheets() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        final Address address = Address.builder().addressLine1("157").addressLine2("London")
+            .postCode("SE1 234").country("UK").build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverSheets(caseData,
+                                          AUTH, address, "test name","DOCUMENT_COVER_SHEET_SERVE_ORDER"));
+    }
+
+    @Test
+    public void testGetCoverSheetsForNoAddress() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverSheets(caseData,
+                                          AUTH, null, "test name","DOCUMENT_COVER_SHEET_SERVE_ORDER"));
+
+    }
 }
