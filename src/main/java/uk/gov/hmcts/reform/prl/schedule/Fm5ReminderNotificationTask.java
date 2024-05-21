@@ -28,7 +28,6 @@ public class Fm5ReminderNotificationTask implements Runnable {
     @Override
     public void run() {
         log.info("*** FM5 reminder scheduled task is started ***");
-        log.info("HearingAwayDays from the environment variable {}", System.getenv(HEARING_AWAY_DAYS));
         //Invoke fm5 reminder service to evaluate & notify if needed
         fm5ReminderService.sendFm5ReminderNotifications(null != System.getenv(HEARING_AWAY_DAYS)
                                                             ? Long.parseLong(System.getenv(HEARING_AWAY_DAYS))
