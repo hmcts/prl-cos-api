@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -3683,6 +3684,24 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetServeOrderTemplate", "citizen_cover_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_en", template);
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetWelshServeOrderTemplate", "citizen_cover_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("citizen_cover_letter_wel", template);
     }
 }
 
