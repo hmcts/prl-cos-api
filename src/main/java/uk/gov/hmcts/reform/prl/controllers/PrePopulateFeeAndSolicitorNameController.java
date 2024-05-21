@@ -121,6 +121,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
+                // setting fee amount to populate in draft document
+                caseDataForOrgDetails = caseDataForOrgDetails.toBuilder().feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString()).build();
                 if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
                     && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
                     caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
