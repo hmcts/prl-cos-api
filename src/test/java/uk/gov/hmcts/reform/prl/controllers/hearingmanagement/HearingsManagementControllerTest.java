@@ -167,7 +167,7 @@ public class HearingsManagementControllerTest {
     }
 
     @Test
-    public void testUpdateAllTabsAfterHmcCaseState() throws Exception {
+    public void testUpdateAllTabsAfterHmcCaseState() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
