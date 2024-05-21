@@ -94,7 +94,7 @@ public class DgsService {
                 dataMap.put(k, updatedWelshObj);
             }
         });
-
+        log.info("inside generateWelshDocument ===>" + dataMap);
         return generateDocument(authorisation, caseId, templateName,
                                 dataMap
         );

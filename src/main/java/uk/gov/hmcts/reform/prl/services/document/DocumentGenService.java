@@ -617,6 +617,7 @@ public class DocumentGenService {
         } else {
             filename = getFileName(caseData, hint, isWelsh);
         }
+        log.info("isWelsh {}", isWelsh);
         return generateDocumentField(
             filename,
             generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh, respondentDetails)
@@ -780,6 +781,7 @@ public class DocumentGenService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
+            log.info("Generating document for {} ", template);
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 String.valueOf(caseData.getId()),
