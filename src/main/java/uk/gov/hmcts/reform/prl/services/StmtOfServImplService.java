@@ -23,16 +23,21 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
+import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -48,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
@@ -55,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSO
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -70,6 +78,7 @@ public class StmtOfServImplService {
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final AllTabServiceImpl allTabService;
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -155,7 +164,7 @@ public class StmtOfServImplService {
                     "finalServedApplicationDetailsList",
                     caseData.getFinalServedApplicationDetailsList()
                 );
-                caseDataUpdateMap.put("unServedRespondentPack", null);
+                caseDataUpdateMap.put(UN_SERVED_RESPONDENT_PACK, null);
             }
             elementList.add(element(recipient));
         }
@@ -367,15 +376,13 @@ public class StmtOfServImplService {
             updateStatementOfServiceCollection(sosObject, updatedCaseData, stmtOfServiceforApplication);
             updatedCaseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, stmtOfServiceforApplication);
             if (YesOrNo.No.equals(sosObject.getIsOrder())) {
-                List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-                List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-                finalServedApplicationDetailsList = updateFinalListOfServedApplications(
+                updateFinalListOfServedApplications(
                     authorisation,
                     startAllTabsUpdateDataContent.authorisation(),
                     updatedCaseData,
-                    bulkPrintDetails
+                    sosObject.getPartiesServed(),
+                    updatedCaseDataMap
                 );
-                updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
                 updatedCaseDataMap.put(UN_SERVED_RESPONDENT_PACK, null);
             }
         }
@@ -388,56 +395,29 @@ public class StmtOfServImplService {
         );
     }
 
-    private List<Element<ServedApplicationDetails>> updateFinalListOfServedApplications(String authorisation, String authorization,
-                                                                                        CaseData updatedCaseData,
-                                                                                        List<Element<BulkPrintDetails>> bulkPrintDetails) {
+    private void updateFinalListOfServedApplications(String authorisation, String authorization,
+                                                     CaseData updatedCaseData, List<String> partiesList, Map<String, Object> updatedCaseDataMap) {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        List<Element<Document>> packDocs;
+        List<Element<Document>> packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument();
+        List<String> partiesServed = new ArrayList<>();
+        List<Element<NotificationDetails>> notifications = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
-            packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
-                .stream()
-                .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-                .toList();
             updatedCaseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
-                                                          updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
-                    serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
-                        updatedCaseData,
-                        authorization,
-                        new ArrayList<>(),
-                        bulkPrintDetails,
-                        respondent,
-                        coverLetter,
-                        respondent.getValue().getLabelForDynamicList());
+                if (partiesList.contains(String.valueOf(respondent.getId()))) {
+                    partiesServed.add(respondent.getValue().getLabelForDynamicList());
                 }
+                sendCoverLetterToRespondent(authorization, updatedCaseData, notifications, respondent);
             });
         } else {
-            packDocs = updatedCaseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument()
-                .stream()
-                .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-                .toList();
-            if (!CaseUtils.hasLegalRepresentation(updatedCaseData.getRespondentsFL401())) {
-                Document coverLetter = getCoverLetter(authorization, updatedCaseData,
-                                                      element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                                                                                              updatedCaseData.getRespondentsFL401()),
-                                                      updatedCaseData.getApplicantsFL401().getLabelForDynamicList());
-
-                serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
-                    updatedCaseData,
-                    authorization,
-                    new ArrayList<>(),
-                    bulkPrintDetails,
-                    element(updatedCaseData.getRespondentsFL401().getPartyId(),
-                            updatedCaseData.getRespondentsFL401()),
-                    coverLetter,
-                    updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
+            if (partiesList.contains(String.valueOf(updatedCaseData.getRespondentsFL401().getPartyId()))) {
+                partiesServed.add(updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
             }
+            sendCoverLetterToRespondent(authorization, updatedCaseData, notifications,
+                                        element(updatedCaseData.getRespondentsFL401().getPartyId(),
+                                                updatedCaseData.getRespondentsFL401()));
+
         }
-
         log.info("pack docs {}", packDocs);
-
-
         if (updatedCaseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = updatedCaseData.getFinalServedApplicationDetailsList();
         } else {
@@ -450,8 +430,55 @@ public class StmtOfServImplService {
                                                                         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
                                                           .modeOfService(BY_POST)
                                                           .whoIsResponsible("Applicant Lip")
-                                                          .bulkPrintDetails(bulkPrintDetails).build()));
-        return finalServedApplicationDetailsList;
+                                                          .bulkPrintDetails(List.of(element(BulkPrintDetails.builder()
+                                                                                .bulkPrintId("Application personally served by applicant Lip")
+                                                                                .servedParty(String.join(",", partiesServed))
+                                                                                .printedDocs(String.join(",", unwrapElements(packDocs).stream()
+                                                                                    .filter(Objects::nonNull)
+                                                                                    .map(Document::getDocumentFileName)
+                                                                                    .toList()))
+                                                                                .recipientsName(String.join(",", partiesServed))
+                                                                                .printDocs(unwrapElements(packDocs).stream()
+                                                                                               .map(ElementUtils::element)
+                                                                                               .toList())
+                                                                                .partyIds(String.join(",", partiesList))
+                                                                                .build()))).build()));
+        updatedCaseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+        updatedCaseDataMap.put("accessCodeNotifications", notifications);
+    }
+
+    private void sendCoverLetterToRespondent(String authorization, CaseData updatedCaseData, List<Element<NotificationDetails>> notifications,
+                                             Element<PartyDetails> respondent) {
+        if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+            Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
+                                                  updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+            List<Document> docs = null;
+            try {
+                docs = new ArrayList<>(serviceOfApplicationPostService
+                                                          .getCoverSheets(updatedCaseData, authorization,
+                                                                          respondent.getValue().getAddress(),
+                                                                          respondent.getValue().getLabelForDynamicList(),
+                                                                          DOCUMENT_COVER_SHEET_HINT
+                                                          ));
+                docs.add(coverLetter);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            BulkPrintDetails bulkPrintDetails1 = serviceOfApplicationPostService.sendPostNotificationToParty(
+                updatedCaseData,
+                authorization,
+                respondent,
+                docs,
+                respondent.getValue().getLabelForDynamicList()
+            );
+            notifications.add(element(NotificationDetails.builder()
+                                          .bulkPrintId(bulkPrintDetails1.getBulkPrintId())
+                                          .notificationType(NotificationType.BULK_PRINT)
+                                          .partyId(String.valueOf(respondent.getId()))
+                                          .partyType(PartyType.RESPONDENT)
+                                          .sentDateTime(LocalDateTime.now())
+                                          .build()));
+        }
     }
 
     private Document getCoverLetter(String authorization, CaseData updatedCaseData, Element<PartyDetails> respondent, String applicantName) {
