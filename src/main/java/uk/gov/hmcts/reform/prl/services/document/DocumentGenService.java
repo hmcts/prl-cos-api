@@ -295,7 +295,6 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
-
     @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
@@ -516,6 +515,91 @@ public class DocumentGenService {
         }
 
         return updatedCaseData;
+    }
+
+    public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        boolean isConfidentialInformationPresentForC100 = isConfidentialInformationPresentForC100(caseData);
+        boolean isC1aPresentForC100 = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && (caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+            || (caseData.getAllegationOfHarmRevised() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
+
+        updatedCaseData.putAll(generateDraftDocuments(authorisation, caseData));
+        generateDraftEngC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        generateDraftWelshC1aAndC8DocumentsForResubmission(
+            authorisation,
+            caseData,
+            updatedCaseData,
+            documentLanguage,
+            isConfidentialInformationPresentForC100,
+            isC1aPresentForC100
+        );
+        return updatedCaseData;
+    }
+
+    private void generateDraftWelshC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                    CaseData caseData,
+                                                                    Map<String, Object> updatedCaseData,
+                                                                    DocumentLanguage documentLanguage,
+                                                                    boolean isConfidentialInformationPresentForC100,
+                                                                    boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+                );
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+            }
+        }
+    }
+
+    private void generateDraftEngC1aAndC8DocumentsForResubmission(String authorisation,
+                                                                  CaseData caseData,
+                                                                  Map<String, Object> updatedCaseData,
+                                                                  DocumentLanguage documentLanguage,
+                                                                  boolean isConfidentialInformationPresentForC100,
+                                                                  boolean isC1aPresentForC100) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            if (isConfidentialInformationPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                );
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8, null);
+            }
+            if (isC1aPresentForC100) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C1A,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+                );
+
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
+            }
+        }
     }
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
@@ -1405,10 +1489,8 @@ public class DocumentGenService {
 
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
-
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
 
-            //move all documents to citizen quarantine
             List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
                 .map(document -> getCitizenQuarantineDocument(
                     document,
@@ -1418,18 +1500,32 @@ public class DocumentGenService {
                 ))
                 .toList();
 
-            manageDocumentsService.setFlagsForWaTask(
-                updatedCaseData,
-                updatedCaseDataMap,
-                CITIZEN,
-                quarantineLegalDocs.get(0)
-            );
+            if (category.equals(DocumentCategory.FM5_STATEMENTS)) {
+                for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+                    String userRole = CaseUtils.getUserRole(userDetails);
+                    manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                        quarantineLegalDoc,
+                        userDetails,
+                        updatedCaseData,
+                        updatedCaseDataMap,
+                        userRole
+                    );
+                }
+            } else {
+                //move all documents to citizen quarantine except fm5 documents
+                manageDocumentsService.setFlagsForWaTask(
+                    updatedCaseData,
+                    updatedCaseDataMap,
+                    CITIZEN,
+                    quarantineLegalDocs.get(0)
+                );
 
-            moveCitizenDocumentsToQuarantineTab(
-                quarantineLegalDocs,
-                updatedCaseData,
-                updatedCaseDataMap
-            );
+                moveCitizenDocumentsToQuarantineTab(
+                    quarantineLegalDocs,
+                    updatedCaseData,
+                    updatedCaseDataMap
+                );
+            }
 
             //update all tabs
             return allTabService.submitAllTabsUpdate(

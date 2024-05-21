@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenNotification;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -67,7 +69,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
@@ -195,10 +199,19 @@ public class CaseService {
     }
 
     public CaseDataWithHearingResponse getCaseWithHearing(String authorisation, String caseId, String hearingNeeded) {
-        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder().build();
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
+        return getCaseDataWithHearingResponse(
+            authorisation,
+            hearingNeeded,
+            caseDetails
+        );
+    }
+
+    public CaseDataWithHearingResponse getCaseDataWithHearingResponse(String authorisation,
+                                                                      String hearingNeeded,
+                                                                      CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseDataWithHearingResponse = caseDataWithHearingResponse.toBuilder()
+        CaseDataWithHearingResponse caseDataWithHearingResponse = CaseDataWithHearingResponse.builder()
             .caseData(UiCitizenCaseData.builder()
                           .caseData(caseData.toBuilder()
                                         .noOfDaysRemainingToSubmitCase(
@@ -211,14 +224,13 @@ public class CaseService {
         if ("Yes".equalsIgnoreCase(hearingNeeded)) {
             caseDataWithHearingResponse =
                 caseDataWithHearingResponse.toBuilder().hearings(
-                    hearingService.getHearings(authorisation, caseId)).build();
+                    hearingService.getHearings(authorisation, String
+                        .valueOf(caseData.getId()))).build();
         }
         return caseDataWithHearingResponse;
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
-        log.info("Inside getPartyCaseFlags caseId {}", caseId);
-        log.info("Inside getPartyCaseFlags partyId {}", partyId);
         CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
@@ -227,18 +239,9 @@ public class CaseService {
             caseData
         );
 
-        if (partyDetailsMeta.isPresent()) {
-            log.info("Party details meta {}", partyDetailsMeta.get().getPartyDetails());
-            log.info(
-                "Party details meta labelForDynamicList {}",
-                partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList()
-            );
-        }
-
         if (partyDetailsMeta.isPresent()
             && partyDetailsMeta.get().getPartyDetails() != null
             && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
-            log.info("Party details meta is valid ");
             Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
                 caseData.getCaseTypeOfApplication(),
                 partyDetailsMeta.get().getPartyType(),
@@ -246,9 +249,6 @@ public class CaseService {
             );
 
             if (partyExternalCaseFlagField.isPresent()) {
-                log.info("partyExternalCaseFlagField is present:: {}", partyExternalCaseFlagField.get());
-                log.info("data is present as well:: {}", caseDetails.getData().get(partyExternalCaseFlagField.get()));
-                log.info(" validating the data with entire case details:: {}", caseDetails.getData());
                 return objectMapper.convertValue(
                     caseDetails.getData().get(partyExternalCaseFlagField.get()),
                     Flags.class
@@ -261,10 +261,6 @@ public class CaseService {
 
     public ResponseEntity<Object> updateCitizenRAflags(
         String caseId, String eventId, String authToken, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
-        log.info("Inside updateCitizenRAflags caseId {}", caseId);
-        log.info("Inside updateCitizenRAflags eventId {}", eventId);
-        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {}", citizenPartyFlagsRequest);
-
         if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
             citizenPartyFlagsRequest.getPartyExternalFlags())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
@@ -309,29 +305,14 @@ public class CaseService {
                 partyExternalCaseFlagField.get()))) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
         }
-        try {
-            log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
-        } catch (JsonProcessingException e) {
-            log.info(ERROR);
-        }
 
         Flags flags = objectMapper.convertValue(
             updatedCaseData.get(partyExternalCaseFlagField.get()),
             Flags.class
         );
-        try {
-            log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
-        } catch (JsonProcessingException e) {
-            log.info(ERROR);
-        }
         flags = flags.toBuilder()
             .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
             .build();
-        try {
-            log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
-        } catch (JsonProcessingException e) {
-            log.info(ERROR);
-        }
         Map<String, Object> externalCaseFlagMap = new HashMap<>();
         externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
 
@@ -339,12 +320,6 @@ public class CaseService {
             startEventResponse,
             externalCaseFlagMap
         );
-
-        try {
-            log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
-        } catch (JsonProcessingException e) {
-            log.info(ERROR);
-        }
 
         ccdCoreCaseDataService.submitUpdate(
             authToken,
@@ -421,11 +396,22 @@ public class CaseService {
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
 
-        return CitizenDocumentsManagement.builder()
+        CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()
             .citizenDocuments(getCitizenDocuments(userDetails, caseData))
             .citizenOrders(getCitizenOrders(userDetails, caseData))
             .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
             .build();
+
+        //Citizen dashboard notification enable/disable flags
+        List<CitizenNotification> citizenNotifications =
+            getAllCitizenDashboardNotifications(caseData, citizenDocumentsManagement, userDetails);
+        if (CollectionUtils.isNotEmpty(citizenNotifications)) {
+            citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
+                .citizenNotifications(citizenNotifications)
+                .build();
+        }
+
+        return citizenDocumentsManagement;
     }
 
     private List<CitizenDocuments> getCitizenApplicationPacks(UserDetails userDetails,
@@ -648,6 +634,7 @@ public class CaseService {
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
             .document(existingDocument)
+            .documentLanguage(quarantineDoc.getDocumentLanguage())
             .build();
     }
 
@@ -666,7 +653,6 @@ public class CaseService {
                                                             HashMap<String, String> partyIdAndType,
                                                             String idamId) {
         String partyId = partyIdAndType.get(PARTY_ID);
-        log.info("*** partyId from idamId {}", partyId);
 
         return nullSafeCollection(caseData.getOrderCollection()).stream()
             .map(Element::getValue)
@@ -749,9 +735,7 @@ public class CaseService {
     private HashMap<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
         HashMap<String, String> partyIdAndTypeMap = new HashMap<>();
-        log.info("*** Inside find partyId method ***");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("*** C100 case type");
             Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
             if (applicantOptional.isPresent()) {
                 partyIdAndTypeMap.put(PARTY_ID, String.valueOf(applicantOptional.get().getId()));
@@ -769,7 +753,6 @@ public class CaseService {
             }
 
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("*** FL401 case type");
             if (null != caseData.getApplicantsFL401().getUser()
                 && userDetails.getId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
                 partyIdAndTypeMap.put(PARTY_ID, String.valueOf(caseData.getApplicantsFL401().getPartyId()));
@@ -795,5 +778,29 @@ public class CaseService {
             .filter(element -> null != element.getValue().getUser()
                 && userDetails.getId().equalsIgnoreCase(element.getValue().getUser().getIdamId()))
             .findFirst();
+    }
+
+    private List<CitizenNotification> getAllCitizenDashboardNotifications(CaseData caseData,
+                                                                          CitizenDocumentsManagement citizenDocumentsManagement,
+                                                                          UserDetails userDetails) {
+        List<CitizenNotification> citizenNotifications = new ArrayList<>();
+
+        //PRL-5565 - FM5 dashboard notification
+        if (null != caseData.getFm5ReminderNotificationDetails()
+            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
+            && !isFm5UploadedByParty(citizenDocumentsManagement.getCitizenDocuments(), userDetails)) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(false).build());
+        }
+
+        return citizenNotifications;
+    }
+
+    private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
+                                         UserDetails userDetails) {
+        return nullSafeCollection(citizenDocuments).stream()
+            .anyMatch(citizenDocument -> FM5_STATEMENTS.equals(citizenDocument.getCategoryId())
+                && citizenDocument.getPartyId().equals(userDetails.getId()));
     }
 }
