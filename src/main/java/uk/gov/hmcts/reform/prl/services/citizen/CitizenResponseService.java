@@ -182,7 +182,7 @@ public class CitizenResponseService {
                     startAllTabsUpdateDataContent.userDetails()
             );
         } else {
-            throw new RuntimeException("Invalid case type or party type for the event request "
+            throw new IllegalArgumentException("Invalid case type or party type for the event request "
                     + CaseEvent.REVIEW_AND_SUBMIT.getValue()
                     + " for the case id "
                     + caseId);
