@@ -115,10 +115,7 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
 
-    private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
-
-    @Lazy
-    private final ManageDocumentEmailService sendgridService;
+    private final SendgridService sendgridService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -340,6 +337,7 @@ public class ManageDocumentsService {
             log.info("inside sendEmailViaSendGrid");
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
+                null,
                 SendgridEmailConfig.builder()
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)

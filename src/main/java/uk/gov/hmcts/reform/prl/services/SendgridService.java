@@ -14,27 +14,32 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import javax.json.JsonObject;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
@@ -59,7 +64,7 @@ public class SendgridService {
     private String fromEmail;
 
     private final SendGrid sendGrid;
-    private final DocumentGenService documentGenService;
+    private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
@@ -185,8 +190,7 @@ public class SendgridService {
         String s2sToken = authTokenGenerator.generate();
         documents.parallelStream().forEach(document -> {
             Attachments attachments = new Attachments();
-            String documentAsString = Base64.getEncoder().encodeToString(documentGenService
-                                                                      .getDocumentBytes(
+            String documentAsString = Base64.getEncoder().encodeToString(getDocumentBytes(
                                                                           document.getDocumentUrl(),
                                                                           authorization,
                                                                           s2sToken
@@ -197,6 +201,27 @@ public class SendgridService {
             attachments.setContent(documentAsString);
             mail.addAttachments(attachments);
         });
+    }
+
+    public byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
+
+        String fileName = FilenameUtils.getName(docUrl);
+        ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
+            authToken,
+            s2sToken,
+            docUrl
+        );
+
+        return Optional.ofNullable(resourceResponseEntity)
+            .map(ResponseEntity::getBody)
+            .map(resource -> {
+                try {
+                    return resource.getInputStream().readAllBytes();
+                } catch (IOException e) {
+                    throw new InvalidResourceException("Doc name " + fileName, e);
+                }
+            })
+            .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
 }
