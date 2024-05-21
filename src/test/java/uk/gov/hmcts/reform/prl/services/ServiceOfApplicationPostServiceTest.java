@@ -100,7 +100,7 @@ public class ServiceOfApplicationPostServiceTest {
     private DynamicMultiSelectList dynamicMultiSelectList;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().label("standardDirectionsOrder").build())).build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
