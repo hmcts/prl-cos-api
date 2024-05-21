@@ -37,7 +37,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSO
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -404,7 +402,6 @@ public class StmtOfServImplService {
                 if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     Document coverLetter = getCoverLetter(authorization, updatedCaseData, respondent,
                                                           updatedCaseData.getApplicants().get(0).getValue().getLabelForDynamicList());
-
                     serviceOfApplicationService.sendPostWithAccessCodeLetterToParty(
                         updatedCaseData,
                         authorization,

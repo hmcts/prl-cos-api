@@ -643,7 +643,7 @@ public class StmtOfServImplServiceTest {
             .thenReturn(Document.builder().build());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
-                .partiesServed(TEST_UUID)
+                .partiesServed(List.of("123", "234", "1234"))
                 .partiesServedDate("2020-08-01")
                 .citizenSosDocs(Document.builder().documentFileName("test").build())
             .build());
@@ -681,7 +681,7 @@ public class StmtOfServImplServiceTest {
             .thenReturn(Document.builder().build());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
         stmtOfServImplService.saveCitizenSos("","", authToken, CitizenSos.builder()
-            .partiesServed(TEST_UUID)
+            .partiesServed(List.of("123", "234", "1234"))
             .partiesServedDate("2020-08-01")
             .citizenSosDocs(Document.builder().documentFileName("test").build())
             .build());

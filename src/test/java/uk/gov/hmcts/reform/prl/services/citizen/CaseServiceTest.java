@@ -205,7 +205,7 @@ public class CaseServiceTest {
                                         .solicitorRepresented(Yes)
                                         .build())
                               .citizenSosObject(CitizenSos.builder()
-                                                    .partiesServed("123,234,1234")
+                                                    .partiesServed(List.of("123", "234", "1234"))
                                                     .build())
                               .build())
             .partyType(PartyEnum.applicant)
