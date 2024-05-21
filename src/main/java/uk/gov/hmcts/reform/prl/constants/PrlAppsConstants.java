@@ -662,6 +662,7 @@ public class PrlAppsConstants {
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
+    public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
@@ -941,6 +942,10 @@ public class PrlAppsConstants {
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
@@ -997,4 +1002,14 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+
+    //Citizen dashboard notifications
+    public static final String CAN_10_FM5 = "CAN_10";
 }

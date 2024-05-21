@@ -14,6 +14,7 @@ public enum CaseEvent {
     CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
     DELETE_APPLICATION("deleteApplication"),
     CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),
+    CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS("citizenCurrentOrPreviousProceeding"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
     EVENT_RESPONDENT_AOH("citizenRespondentAoH"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
@@ -48,8 +49,11 @@ public enum CaseEvent {
     C100_ALL_DOCS_REVIEWED("c100-all-docs-reviewed"),
     FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
     CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    ALL_AWP_IN_REVIEW("allAwPInReview"),
+    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
-    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate");
 
     private final String value;
 
