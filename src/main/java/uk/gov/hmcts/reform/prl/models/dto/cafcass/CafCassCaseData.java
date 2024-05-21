@@ -290,8 +290,6 @@ public class CafCassCaseData {
         this.mpuDocFromDisputeResolutionProvider = mpuDocFromDisputeResolutionProvider;
     }
 
-    private Map<String, Object> miamPolicyUpgradeTable;
-    private Map<String, Object> miamPolicyUpgradeExemptionsTable;
     //Miam upgrade policy changes end
     @Getter(AccessLevel.NONE)
     private Map<String, Object> miamTable;
