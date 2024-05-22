@@ -327,8 +327,7 @@ public class Fm5NotificationServiceTest {
 
         respondent = respondent.toBuilder().solicitorEmail("").build();
         caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
-        when(serviceOfApplicationPostService.getCoverSheets(any(),
-                                                            any(),
+        when(serviceOfApplicationPostService.getCoverLetter(any(),
                                                             any(),
                                                             any(),
                                                             any()
