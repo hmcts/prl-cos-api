@@ -13,7 +13,9 @@ public enum SdoScheduleOfAllegationsEnum {
 
     @JsonProperty("includeScheduleAllegationAndResponse")
     includeScheduleAllegationAndResponse("includeScheduleAllegationAndResponse",
-                                         "Include example of schedule of allegation and responses for fact finding");
+                                         "Include example of schedule of allegation and responses for fact-finding"),
+    @JsonProperty("other")
+    other("other","Other direction for example schedule of allegations and responses for fact-finding");
 
     private final String id;
     private final String displayedValue;

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -172,6 +173,59 @@ public class FeesAndPaymentCitizenControllerTest {
         //Then
         assertThrows(RuntimeException.class, () -> feesAndPaymentCitizenController
             .retrievePaymentStatus(authToken, s2sToken, PAYMENT_REFERENCE,TEST_CASE_ID));
+    }
+
+    @Test
+    public void fetchFeeCodeSuccessfully() throws Exception {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
+        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenReturn(feeResponseForCitizen);
+
+        //When
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFeeCode(authToken, s2sToken, feeRequest);
+        //Then
+        assertEquals(feeResponseForCitizen, actualResponse);
+    }
+
+    @Test
+    public void fetchFeeCodeException() throws Exception {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
+        when(feeService.fetchFeeCode(feeRequest,authToken,s2sToken)).thenThrow(new RuntimeException());
+
+        //When
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFeeCode(authToken, s2sToken, feeRequest);
+        //Then
+        assertEquals(feeResponseForCitizen.getErrorRetrievingResponse(), actualResponse.getErrorRetrievingResponse());
+
+    }
+
+    @Test
+    public void fetchFeeCodeWithInvalidClient() throws Exception {
+        //Given
+        feeResponseForCitizen = FeeResponseForCitizen.builder().errorRetrievingResponse("Invalid Client").build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
+        FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController
+            .fetchFeeCode(authToken, s2sToken, feeRequest);
+
+        //Then
+        assertEquals(feeResponseForCitizen.getErrorRetrievingResponse(), actualResponse.getErrorRetrievingResponse());
+
     }
 
 

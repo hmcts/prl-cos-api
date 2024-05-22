@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
-
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +9,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -40,7 +34,6 @@ public class CcdDataStoreServiceTest {
 
     private CaseData caseData;
     private UserDetails userDetails;
-    private CaseUser caseUser;
 
     @Before
     public void setup() {
@@ -71,19 +64,10 @@ public class CcdDataStoreServiceTest {
     }
 
     @Test
-    public void testFindUserCaseRolesRole() {
-
-        CaseUser caseUser = CaseUser.builder()
-            .caseId("42")
-            .userId("123")
-            .caseRole("[CREATOR]")
-            .build();
-
-        List<CaseUser> caseUserList = new ArrayList<>();
-        caseUserList.add(caseUser);
-
-        this.ccdDataStoreService.findUserCaseRoles("42", "ABC123");
+    public void testFindUserCaseRoles() {
+        this.ccdDataStoreService.findUserCaseRoles("42", "test");
         verify(this.userService, times(1)).getUserDetails(Mockito.anyString());
+        verify(this.caseRoleClient, times(1)).findUserCaseRoles(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         verify(this.authTokenGenerator, times(1)).generate();
     }
 }

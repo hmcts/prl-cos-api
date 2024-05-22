@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 
 import java.time.LocalDateTime;
@@ -24,5 +25,11 @@ public class OtherDraftOrderDetails {
     private final AmendOrderCheckEnum reviewRequiredBy;
     private final String nameOfJudgeForReview;
     private final String nameOfLaForReview;
-
+    private final String nameOfJudgeForReviewOrder;
+    private final String nameOfLaForReviewOrder;
+    private final YesOrNo isJudgeApprovalNeeded;
+    private final String orderCreatedBy;
+    private String orderCreatedByEmailId;
+    private final String additionalRequirementsForHearingReq;
+    private final String instructionsToLegalRepresentative;
 }

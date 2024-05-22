@@ -23,7 +23,7 @@ public class RespondentPolicyConvertorTest {
     @Test
     public void generatePolicyTest() {
 
-        SolicitorRole solicitorRole = SolicitorRole.SOLICITORA;
+        SolicitorRole solicitorRole = SolicitorRole.C100RESPONDENTSOLICITOR1;
 
         Organisation organisation = Organisation.builder().build();
 
@@ -36,8 +36,25 @@ public class RespondentPolicyConvertorTest {
         Optional<Element<PartyDetails>> optionalRespondentElement = Optional.of(wrappedRespondents);
 
         OrganisationPolicy organisationPolicy = respondentPolicyConverter
-            .generate(solicitorRole, optionalRespondentElement);
+            .caGenerate(solicitorRole, optionalRespondentElement);
 
-        assertEquals("[SOLICITORA]", organisationPolicy.getOrgPolicyCaseAssignedRole());
+        assertEquals("[C100RESPONDENTSOLICITOR1]", organisationPolicy.getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void generatePolicyForDaTest() {
+        SolicitorRole solicitorRole = SolicitorRole.FL401RESPONDENTSOLICITOR;
+
+        Organisation organisation = Organisation.builder().build();
+
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .solicitorOrg(organisation)
+            .build();
+
+        OrganisationPolicy organisationPolicy = respondentPolicyConverter
+            .daGenerate(solicitorRole, respondent);
+
+        assertEquals("[FL401RESPONDENTSOLICITOR]", organisationPolicy.getOrgPolicyCaseAssignedRole());
     }
 }

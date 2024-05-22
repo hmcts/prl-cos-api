@@ -13,9 +13,11 @@ public enum SdoPreamblesEnum {
 
     @JsonProperty("rightToAskCourt")
     rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
+    @JsonProperty("afterSecondGateKeeping")
+    afterSecondGateKeeping("afterSecondGateKeeping", "After second gatekeeping appointment"),
+    @JsonProperty("addNewPreamble")
+    addNewPreamble("addNewPreamble", "Add a new preamble");
 
-    @JsonProperty("partyRaisedDomesticAbuse")
-    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party/parties raised domestic abuse issues");
 
     private final String id;
     private final String displayedValue;

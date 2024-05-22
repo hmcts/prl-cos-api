@@ -26,7 +26,15 @@
       },
       "parentialResponsibility":{
         "statement":"test11"
-      }
+      },
+      "liveWith":[
+        {
+          "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
+          "firstName":"applicantFN1",
+          "lastName":"applicantLN1",
+          "partyType":"applicant"
+        }
+      ]
     },
     {
       "id":"ce9a93c4-8d7d-4aeb-8ac5-619de4d91a8c",
@@ -54,7 +62,15 @@
       },
       "parentialResponsibility":{
         "statement":"test22"
-      }
+      },
+      "liveWith":[
+        {
+          "id":"188b7c9e-4780-44c8-9252-36b1402726d5",
+          "firstName":"applicantFN1",
+          "lastName":"applicantLN1",
+          "partyType":"applicant"
+        }
+      ]
     }
   ],
   "cd_childrenKnownToSocialServices":"Yes",

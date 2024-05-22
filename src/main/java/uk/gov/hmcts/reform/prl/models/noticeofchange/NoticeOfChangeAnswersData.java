@@ -8,14 +8,16 @@ import lombok.Value;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class NoticeOfChangeAnswersData {
-    NoticeOfChangeParties respondent0;
-    NoticeOfChangeParties respondent1;
-    NoticeOfChangeParties respondent2;
-    NoticeOfChangeParties respondent3;
-    NoticeOfChangeParties respondent4;
-    NoticeOfChangeParties respondent5;
-    NoticeOfChangeParties respondent6;
-    NoticeOfChangeParties respondent7;
-    NoticeOfChangeParties respondent8;
-    NoticeOfChangeParties respondent9;
+    NoticeOfChangeParties caApplicant1;
+    NoticeOfChangeParties caApplicant2;
+    NoticeOfChangeParties caApplicant3;
+    NoticeOfChangeParties caApplicant4;
+    NoticeOfChangeParties caApplicant5;
+    NoticeOfChangeParties caRespondent1;
+    NoticeOfChangeParties caRespondent2;
+    NoticeOfChangeParties caRespondent3;
+    NoticeOfChangeParties caRespondent4;
+    NoticeOfChangeParties caRespondent5;
+    NoticeOfChangeParties daApplicant;
+    NoticeOfChangeParties daRespondent;
 }

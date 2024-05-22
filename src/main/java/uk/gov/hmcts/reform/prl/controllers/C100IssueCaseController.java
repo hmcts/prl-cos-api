@@ -1,102 +1,68 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static java.util.Objects.requireNonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class C100IssueCaseController {
-
-    private final CaseWorkerEmailService caseWorkerEmailService;
-    private final ObjectMapper objectMapper;
-    private final AllTabServiceImpl allTabsService;
-    private final DocumentGenService documentGenService;
-    private final SendgridService sendgridService;
-    private final C100JsonMapper c100JsonMapper;
-    private final LocationRefDataService locationRefDataService;
+    private final C100IssueCaseService c100IssueCaseService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(c100IssueCaseService.issueAndSendToLocalCourt(
+                authorisation,
+                callbackRequest
+            )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
+    @PostMapping(path = "/issue-and-send-to-local-court-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Issue and send to local court notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public CallbackResponse issueAndSendToLocalCourtNotification(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
+            return CallbackResponse.builder()
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
-            String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
-            String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
-            String[] venueDetails = key.split("-");
-            String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-            String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-            String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-            String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-            caseDataUpdated.put("courtName", courtName);
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
-                .baseLocationName(baseLocationName).build());
-            String courtEmail = "";
-            if (idEmail.length > 1) {
-                courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
-            }
-            caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
-                                                               .value(LocalCourtAdminEmail.builder().email(courtEmail)
-                                                                          .build()).build()));
-            caseData.setCourtName(caseDataUpdated.get("courtName").toString());
-        }
-        caseData.setIssueDate();
-        // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-        // Refreshing the page in the same event. Hence no external event call needed.
-        // Getting the tab fields and add it to the casedetails..
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-        caseDataUpdated.put("issueDate", LocalDate.now());
-        caseDataUpdated.putAll(allTabsFields);
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(caseDataUpdated).build());
-        } catch (Exception ex) {
-            log.error("Email notification could not be sent", ex);
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import java.util.List;
@@ -50,6 +52,9 @@ public class CourtNavCaseControllerTest {
     private CourtNavCaseService courtNavCaseService;
 
     @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
     private FL401ApplicationMapper fl401ApplicationMapper;
 
     @Mock
@@ -59,6 +64,9 @@ public class CourtNavCaseControllerTest {
 
     @Mock
     private CafcassUploadDocService cafcassUploadDocService;
+
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Before
     public void setUp() {

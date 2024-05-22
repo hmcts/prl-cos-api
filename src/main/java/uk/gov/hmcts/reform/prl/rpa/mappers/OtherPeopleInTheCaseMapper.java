@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
@@ -31,7 +30,7 @@ public class OtherPeopleInTheCaseMapper {
         }
         List<PartyDetails> otherPeopleInTheCaseList = otherPeopleInTheCase.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return otherPeopleInTheCaseList.stream().map(otherPeople -> new NullAwareJsonObjectBuilder()
             .add("firstName", otherPeople.getFirstName())
             .add("lastName", otherPeople.getLastName())
@@ -69,7 +68,7 @@ public class OtherPeopleInTheCaseMapper {
         }
         List<OtherPersonRelationshipToChild> otherPeopleInTheCaseList = otherPersonRelationshipToChildren.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         return otherPeopleInTheCaseList.stream().map(other -> new NullAwareJsonObjectBuilder().add(
             "personRelationshipToChild",

@@ -5,7 +5,7 @@ package uk.gov.hmcts.reform.prl.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
@@ -32,13 +32,15 @@ public class TaskListRenderElements {
                       event.getId(), event.getId(), event.getName());
     }
 
-    public String renderRespondentSolicitorLink(RespondentTask respondentTask) {
-        return renderRespondentSolicitorLink(respondentTask.getEvent());
+    public String renderRespondentSolicitorLink(RespondentTask respondentTask, String respondent) {
+        return renderRespondentSolicitorLink(respondentTask.getEvent(), respondent);
     }
 
-    public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents) {
+    public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents, String respondent) {
         return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
-                      respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventName());
+                      respondentSolicitorEvents.getEventId() + respondent,
+                      respondentSolicitorEvents.getEventId() + respondent,
+                      respondentSolicitorEvents.getEventName());
     }
 
     public String renderImage(String imageName, String title) {
@@ -46,7 +48,11 @@ public class TaskListRenderElements {
     }
 
     public String renderDisabledLink(Task event) {
-        return format("<a>%s</a>", event.getEvent().getName());
+        return format("%s", event.getEvent().getName());
+    }
+
+    public String renderRespondentDisabledLink(RespondentTask respondentTask) {
+        return format("%s", respondentTask.getEvent().getEventName());
     }
 
     public String renderHint(String text) {

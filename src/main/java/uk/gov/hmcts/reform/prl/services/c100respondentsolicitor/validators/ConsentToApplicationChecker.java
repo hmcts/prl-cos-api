@@ -1,55 +1,68 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONSENT_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConsentToApplicationChecker implements RespondentEventChecker {
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getConsent()
-        )).isPresent();
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+
+        if (response.isPresent()) {
+            return ofNullable(response.get().getConsent())
+                .filter(consent -> anyNonEmpty(
+                    consent.getConsentToTheApplication(),
+                    consent.getNoConsentReason(),
+                    consent.getApplicationReceivedDate(),
+                    consent.getPermissionFromCourt(),
+                    consent.getCourtOrderDetails()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
-        boolean mandatoryInfo = false;
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-
-        if (activeRespondent.isPresent()) {
-            Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
-                                                                .getValue()
-                                                                .getResponse()
-                                                                .getConsent());
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+        boolean isFinished;
+        if (response.isPresent()) {
+            Optional<Consent> consent = Optional.ofNullable(response.get().getConsent());
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
-                mandatoryInfo = true;
+                respondentTaskErrorService.removeError(CONSENT_ERROR);
+                isFinished = true;
+            } else {
+                isFinished = addErrorAndReturn();
             }
+        } else {
+            isFinished = addErrorAndReturn();
         }
-        return mandatoryInfo;
+        return isFinished;
+    }
+
+    private boolean addErrorAndReturn() {
+        respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
+        return false;
     }
 
     private boolean checkConsentMandatoryCompleted(Optional<Consent> consent) {
@@ -58,13 +71,13 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
         if (consent.isPresent()) {
             Optional<YesOrNo> getConsentToApplication = ofNullable(consent.get().getConsentToTheApplication());
             fields.add(getConsentToApplication);
-            if (getConsentToApplication.isPresent() && getConsentToApplication.equals(Optional.of((YesOrNo.No)))) {
+            if (getConsentToApplication.isPresent() && YesOrNo.No.equals(getConsentToApplication.get())) {
                 fields.add(ofNullable(consent.get().getNoConsentReason()));
             }
             fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
             Optional<YesOrNo> getPermission = ofNullable(consent.get().getPermissionFromCourt());
             fields.add(getPermission);
-            if (getPermission.isPresent() && getPermission.equals(Optional.of((YesOrNo.Yes)))) {
+            if (getPermission.isPresent() && YesOrNo.Yes.equals(getPermission.get())) {
                 fields.add(ofNullable(consent.get().getCourtOrderDetails()));
             }
         }

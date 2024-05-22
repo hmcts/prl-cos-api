@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.UrgentHearingReasonEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,7 +21,7 @@ public class CaseDataUrgencyElementsMapper {
     private static final String CASE_URGENCY_TIME = "Case Urgency Time - ";
     private static final String CASE_URGENCY_REASONS = " Case Urgency Reasons - ";
 
-    public static void updateUrgencyElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateUrgencyElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                       C100RebuildUrgencyElements c100RebuildUrgencyElements) {
         caseDataBuilder
                 .isCaseUrgent(c100RebuildUrgencyElements.getUrgentHearingRequired())
@@ -30,16 +31,19 @@ public class CaseDataUrgencyElementsMapper {
     }
 
     private static String buildCaseUrgencyTimeAndReason(C100RebuildUrgencyElements c100RebuildUrgencyElements) {
-        List<String> riskList = nonNull(c100RebuildUrgencyElements.getReasonOfUrgentHearing())
+        if (YesOrNo.Yes.equals(c100RebuildUrgencyElements.getUrgentHearingRequired())) {
+            List<String> riskList = nonNull(c100RebuildUrgencyElements.getReasonOfUrgentHearing())
                 ? List.of(c100RebuildUrgencyElements.getReasonOfUrgentHearing()) : Collections.emptyList();
 
-        List<String> riskList1 = riskList.stream().map(value -> UrgentHearingReasonEnum.valueOf(value)
+            List<String> riskList1 = riskList.stream().map(value -> UrgentHearingReasonEnum.valueOf(value)
                 .getDisplayedValue()).collect(Collectors.toList());
 
-        if (isNotEmpty(c100RebuildUrgencyElements.getOtherRiskDetails())) {
-            riskList1.add(c100RebuildUrgencyElements.getOtherRiskDetails());
-        }
-        return CASE_URGENCY_TIME + c100RebuildUrgencyElements.getTimeOfHearingDetails()
+            if (isNotEmpty(c100RebuildUrgencyElements.getOtherRiskDetails())) {
+                riskList1.add(c100RebuildUrgencyElements.getOtherRiskDetails());
+            }
+            return CASE_URGENCY_TIME + c100RebuildUrgencyElements.getTimeOfHearingDetails()
                 + CASE_URGENCY_REASONS + String.join(COMMA_SEPARATOR, riskList1);
+        }
+        return null;
     }
 }

@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
@@ -17,10 +19,10 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR
 
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentBehaviourChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -77,6 +79,11 @@ public class RespondentBehaviourChecker implements EventChecker {
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
         return otherReason.isPresent() && applicantStopRespondentList.isPresent();
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

@@ -55,7 +55,6 @@ public class AmendedOrderStamper {
             );
         }
 
-        log.info("Attempting to download document for amending");
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
                                                                                            authTokenGenerator.generate(),
                                                                                            original.getDocumentUrl());
@@ -83,7 +82,7 @@ public class AmendedOrderStamper {
 
             // build message
             final LocalDate now = time.now().toLocalDate();
-            final String message = "Amended under the slip rule - " + now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.UK));
+            final String message = "Amended under the slip rule - " + now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH));
 
             // message properties
             final PDRectangle pageSize = page.getMediaBox();

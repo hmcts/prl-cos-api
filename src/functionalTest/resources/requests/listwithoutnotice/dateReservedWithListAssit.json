@@ -472,7 +472,9 @@
             "respondentSolicitor": null,
             "hearingDateTimes": [
               {
-                "value": "1988-03-09T00:00:00",
+                "value": {
+                  "hearingDateTimes": "1988-03-09T00:00:00"
+                },
                 "id": "f6adc8b9-f2c6-4630-a852-6d6269b23a65"
               }
             ],

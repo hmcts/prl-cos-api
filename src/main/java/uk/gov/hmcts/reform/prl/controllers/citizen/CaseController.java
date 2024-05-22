@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,35 +22,33 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    CaseService caseService;
-
-    @Autowired
-    AuthorisationService authorisationService;
-
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final ObjectMapper objectMapper;
+    private final HearingService hearingService;
+    private final CaseService caseService;
+    private final AuthorisationService authorisationService;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
@@ -57,9 +58,8 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        CaseDetails caseDetails = null;
-        if (isAuthorized(userToken, s2sToken)) {
-            caseDetails = caseService.getCase(userToken, caseId);
+        if (authorisationService.isAuthorized(userToken, s2sToken)) {
+            CaseDetails caseDetails = caseService.getCase(userToken, caseId);
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
@@ -68,9 +68,19 @@ public class CaseController {
         }
     }
 
-    private boolean isAuthorized(String authorisation, String s2sToken) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+    @GetMapping(path = "/retrieve-case-and-hearing/{caseId}/{hearingNeeded}", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the data")
+    public CaseDataWithHearingResponse retrieveCaseWithHearing(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("hearingNeeded") String hearingNeeded,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return caseService.getCaseWithHearing(authorisation, caseId, hearingNeeded);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -83,20 +93,17 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) throws JsonProcessingException {
-        if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            String cosApis2sToken = authTokenGenerator.generate();
-            caseDetails = caseService.updateCase(
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.updateCase(
                 caseData,
                 authorisation,
-                cosApis2sToken,
                 caseId,
-                eventId,
-                accessCode
+                eventId
             );
-            return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
-
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -109,7 +116,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -122,41 +129,16 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         List<CaseData> caseDataList;
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return caseDataList.stream().map(this::buildCitizenCaseData).collect(Collectors.toList());
+        return caseDataList.stream().map(this::buildCitizenCaseData).toList();
     }
 
     private CitizenCaseData buildCitizenCaseData(CaseData caseData) {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
-    }
-
-    @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode,
-                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
-    }
-
-    @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                     @RequestHeader(value = "caseId", required = true)
-                                         String caseId,
-                                     @RequestHeader(value = "accessCode", required = true)
-                                         String accessCode) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            String cosApis2sToken = authTokenGenerator.generate();
-            return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
     }
 
     @PostMapping("/case/create")
@@ -169,13 +151,47 @@ public class CaseController {
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
-        CaseDetails caseDetails = null;
-
-        if (isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.createCase(caseData, authorisation);
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.createCase(caseData, authorisation);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+                PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "/hearing/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get hearing details for a case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public Hearings getAllHearingsForCitizenCase(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @PathVariable("caseId") String caseId) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return hearingService.getHearings(authorisation, caseId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/fetchIdam-Am-roles/{emailId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get hearing details for a case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public Map<String, String> fetchIdamAmRoles(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @PathVariable("emailId") String emailId) {
+        boolean isAuthorised = authorisationService.authoriseUser(authorisation);
+        if (isAuthorised) {
+            return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -25,10 +26,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
-
-import javax.validation.Valid;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -47,6 +47,7 @@ public class CourtNavCaseController {
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
     private  final CafcassUploadDocService cafcassUploadDocService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Third party to call this service to create a case in CCD")
@@ -70,7 +71,7 @@ public class CourtNavCaseController {
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
+            courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
@@ -94,13 +95,12 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
             if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
-                cafcassUploadDocService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             } else {
                 courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             }

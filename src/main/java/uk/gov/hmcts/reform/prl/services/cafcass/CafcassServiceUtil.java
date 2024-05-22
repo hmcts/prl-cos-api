@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_PARTY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 public class CafcassServiceUtil {
@@ -31,15 +32,15 @@ public class CafcassServiceUtil {
     public static CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                  CaseData caseData, Document document) {
         String partyName = caseData.getApplicantCaseName() != null
-            ? caseData.getApplicantCaseName() : "CAFCASS";
+            ? caseData.getApplicantCaseName() : CAFCASS_PARTY;
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
-                        .uploadedBy("CAFCASS")
+                        .uploadedBy(CAFCASS_PARTY)
                         .documentDetails(DocumentDetails.builder().documentName(fileName)
                                              .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant("CAFCASS")
+                        .partyName(partyName).isApplicant(CAFCASS_PARTY)
                         .parentDocumentType("Safe_guarding_Letter")
                         .cafcassDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                              .documentUrl(document.links.self.href)
@@ -53,7 +54,9 @@ public class CafcassServiceUtil {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return CaseData.builder().id(Long.valueOf(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
+        return CaseData.builder().id(Long.parseLong(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
     }
 
+    private CafcassServiceUtil() {
+    }
 }

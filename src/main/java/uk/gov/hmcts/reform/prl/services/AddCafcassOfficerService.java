@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -31,10 +33,23 @@ public class AddCafcassOfficerService {
 
     private final ApplicationsTabService applicationsTabService;
 
+    private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
+
     public Map<String, Object> populateCafcassOfficerDetails(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+            resetExistingCafcassOfficerDetailsChildRevised(caseData);
+            for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
+                caseDataUpdated.putAll(populateCafcassOfficerRevisedForCA(caseData, cafcassOfficer));
+            }
+            caseDataUpdated.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
+            caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, applicationsTabService.prePopulateRevisedChildAndCafcassOfficerDetails(caseData));
+            return caseDataUpdated;
+        }
+
         resetExistingCafcassOfficerDetails(caseData);
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             caseDataUpdated.putAll(populateCafcassOfficerForCA(caseData, cafcassOfficer));
@@ -60,6 +75,22 @@ public class AddCafcassOfficerService {
         }
     }
 
+    private  void resetExistingCafcassOfficerDetailsChildRevised(CaseData caseData) {
+        List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+        if (children != null) {
+            caseData.getNewChildDetails().stream().forEach(childElement -> {
+                ChildDetailsRevised amendedChild = childElement.getValue().toBuilder()
+                        .cafcassOfficerName(BLANK_STRING)
+                        .cafcassOfficerPosition(null)
+                        .cafcassOfficerOtherPosition(BLANK_STRING)
+                        .cafcassOfficerEmailAddress(BLANK_STRING)
+                        .cafcassOfficerPhoneNo(BLANK_STRING)
+                        .build();
+                children.set(children.indexOf(childElement), element(childElement.getId(), amendedChild));
+            });
+        }
+    }
+
     private Map<String, Object> populateCafcassOfficerForCA(CaseData caseData,
                                             Element<ChildAndCafcassOfficer> cafcassOfficer) {
         Map<String, Object> childDetailsMap = new HashMap<>();
@@ -78,6 +109,28 @@ public class AddCafcassOfficerService {
                 children.set(children.indexOf(child), element(child.getId(), amendedChild));
             });
         childDetailsMap.put(CHILDREN, children);
+
+        return childDetailsMap;
+    }
+
+    private Map<String, Object> populateCafcassOfficerRevisedForCA(CaseData caseData,
+                                                            Element<ChildAndCafcassOfficer> cafcassOfficer) {
+        Map<String, Object> childDetailsMap = new HashMap<>();
+        List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+        children.stream()
+                .filter(child -> Objects.equals(child.getId().toString(), cafcassOfficer.getValue().getChildId()))
+                .findFirst()
+                .ifPresent(child -> {
+                    ChildDetailsRevised amendedChild = child.getValue().toBuilder()
+                            .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
+                            .cafcassOfficerPosition(cafcassOfficer.getValue().getCafcassOfficerPosition())
+                            .cafcassOfficerOtherPosition(cafcassOfficer.getValue().getCafcassOfficerOtherPosition())
+                            .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
+                            .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
+                            .build();
+                    children.set(children.indexOf(child), element(child.getId(), amendedChild));
+                });
+        childDetailsMap.put("newChildDetails", children);
 
         return childDetailsMap;
     }

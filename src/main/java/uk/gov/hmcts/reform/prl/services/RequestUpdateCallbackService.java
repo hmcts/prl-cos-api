@@ -3,84 +3,151 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RequestUpdateCallbackService {
 
-    public static final String PAYMENT_SUCCESS_CALLBACK = "paymentSuccessCallback";
-    public static final String PAYMENT_FAILURE_CALLBACK = "paymentFailureCallback";
     public static final String PAID = "Paid";
-    private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
-    private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
-    private final UserService userService;
     private final AllTabServiceImpl allTabService;
-    private final C100JsonMapper c100JsonMapper;
     private final CourtFinderService courtFinderService;
+    private final CcdCoreCaseDataService coreCaseDataService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        CaseDetails caseDetails
+            = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
 
-        log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
-                 serviceRequestUpdateDto.getServiceRequestStatus()
+        boolean isCasePayment = verifyCaseCreationPaymentReference(
+            caseDetails,
+            serviceRequestUpdateDto.getServiceRequestReference()
         );
-        String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
-        log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        CaseEvent caseEvent;
+        if (isCasePayment) {
+            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
+                ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
+        } else {
+            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
+                ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
+        }
+
+        log.info("Following case event will be triggered {}", caseEvent.getValue());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                systemAuthorisation,
+                eventRequestData,
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                true
+            );
+
+        CaseDataContent caseDataContent;
+        if (isCasePayment) {
+            caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                setCaseData(
+                    serviceRequestUpdateDto
+                )
+            );
+        } else {
+            caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                setAwPPaymentCaseData(
+                    startEventResponse,
+                    serviceRequestUpdateDto
+                )
+            );
+        }
+
+        coreCaseDataService.submitUpdate(
+            systemAuthorisation,
+            eventRequestData,
+            caseDataContent,
+            serviceRequestUpdateDto.getCcdCaseNumber(),
+            true
         );
 
-        CaseDetails caseDetails = coreCaseDataApi.getCase(
-            userToken,
-            authTokenGenerator.generate(),
-            serviceRequestUpdateDto.getCcdCaseNumber()
-        );
+        partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
 
-        if (!Objects.isNull(caseDetails.getId())) {
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (isCasePayment) {
+            EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
+                CaseEvent.UPDATE_ALL_TABS,
+                systemUpdateUserId
+            );
+            StartEventResponse allTabsUpdateStartEventResponse =
+                coreCaseDataService.startUpdate(
+                    systemAuthorisation,
+                    allTabsUpdateEventRequestData,
+                    serviceRequestUpdateDto.getCcdCaseNumber(),
+                    true
+                );
+
+            CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+                allTabsUpdateStartEventResponse,
+                objectMapper
+            );
             log.info(
-                "Refreshing tab based on the payment response for caseid {} ",
+                "Refreshing tab based on the payment response for caseId {} ",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-            caseData = getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-            log.info("Court details: " + caseData.getCourtName() + "  , ID:" + caseData.getCourtId());
+            allTabsUpdateCaseData = getCaseDataWithStateAndDateSubmitted(
+                serviceRequestUpdateDto,
+                allTabsUpdateCaseData
+            );
+            log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
-            allTabService.updateAllTabsIncludingConfTab(caseData);
-
-            log.info(
-                "Refreshed the tab for caseid {} ",
-                serviceRequestUpdateDto.getCcdCaseNumber()
+            allTabService.mapAndSubmitAllTabsUpdate(
+                systemAuthorisation,
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                allTabsUpdateStartEventResponse,
+                allTabsUpdateEventRequestData,
+                allTabsUpdateCaseData
             );
 
             log.info(
@@ -88,20 +155,17 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
 
-            createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
-                        serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
-                            ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
-            );
-
             if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
-                solicitorEmailService.sendEmail(caseDetails);
-                caseWorkerEmailService.sendEmail(caseDetails);
+                solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
+                caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
             }
-
-        } else {
-            log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
-            throw new CaseNotFoundException("Case not present");
         }
+    }
+
+    private boolean verifyCaseCreationPaymentReference(CaseDetails caseDetails, String serviceRequestReference) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        return !StringUtils.isEmpty(serviceRequestReference)
+                && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
     private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
@@ -123,50 +187,17 @@ public class RequestUpdateCallbackService {
             if (closestChildArrangementsCourt != null) {
                 caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
                     closestChildArrangementsCourt.getCountyLocationCode())).build();
+                caseData.setCourtCodeFromFact(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
             }
         } catch (Exception e) {
-            log.error("Error while populating case date in payment request call {}", caseData.getId());
+            log.error("Error while populating case date in payment request call {}", caseData.getId(), e);
         }
         return caseData;
     }
 
-
-    private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, String eventId) {
-        CaseData caseData = setCaseData(serviceRequestUpdateDto);
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            serviceRequestUpdateDto.getCcdCaseNumber(),
-            eventId
-        );
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(caseData)
-            .build();
-
-        coreCaseDataApi.submitEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            serviceRequestUpdateDto.getCcdCaseNumber(),
-            true,
-            caseDataContent
-        );
-    }
-
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         return CaseData.builder()
-            .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+            .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
                                                      .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
@@ -174,13 +205,61 @@ public class RequestUpdateCallbackService {
                                                      .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
                                                      .callBackUpdateTimestamp(LocalDateTime.now())
                                                      .payment(CcdPayment.builder().paymentAmount(
-                                                         serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
                                                                   .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
                                                                   .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                   .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                   .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                   .build()).build()).build();
+    }
 
+    private Map<String, Object> setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (startEventResponseData.getAdditionalApplicationsBundle() != null) {
+            Optional<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleElement
+                = startEventResponseData.getAdditionalApplicationsBundle()
+                .stream()
+                .filter(x -> null != x.getValue().getPayment()
+                    && x.getValue().getPayment().getPaymentServiceRequestReferenceNumber().equalsIgnoreCase(
+                    serviceRequestUpdateDto.getServiceRequestReference()))
+                .findFirst();
 
+            if (additionalApplicationsBundleElement.isPresent()
+                && PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
+                AdditionalApplicationsBundle updatedAdditionalApplicationsBundleElement = additionalApplicationsBundleElement.get()
+                    .getValue()
+                    .toBuilder()
+                    .payment(additionalApplicationsBundleElement.get().getValue().getPayment().toBuilder()
+                                 .status(PaymentStatus.PAID.getDisplayedValue())
+                                 .build())
+                    .c2DocumentBundle(null != additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle()
+                                          ? additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle().toBuilder().applicationStatus(
+                        ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                    .otherApplicationsBundle(null != additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
+                                                 ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
+                        .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                    .build();
+
+                int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
+                    additionalApplicationsBundleElement.get());
+                if (index != -1) {
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                        .set(
+                            index,
+                            ElementUtils.element(
+                                additionalApplicationsBundleElement.get().getId(),
+                                updatedAdditionalApplicationsBundleElement
+                            )
+                        );
+                }
+                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    AWP_WA_TASK_NAME,
+                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(updatedAdditionalApplicationsBundleElement));
+                caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
+            }
+        }
+        return caseDataUpdated;
     }
 }

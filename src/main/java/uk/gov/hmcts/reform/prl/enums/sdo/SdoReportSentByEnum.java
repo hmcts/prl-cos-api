@@ -15,8 +15,8 @@ public enum SdoReportSentByEnum {
     cafcass("cafcass", "Cafcass"),
     @JsonProperty("cafcassCymru")
     cafcassCymru("cafcassCymru", "Cafcass Cymru"),
-    @JsonProperty("nameOfCouncil")
-    nameOfCouncil("nameOfCouncil", "Name of council");
+    @JsonProperty("localAuthority")
+    localAuthority("localAuthority", "Local authority");
 
     private final String id;
     private final String displayedValue;

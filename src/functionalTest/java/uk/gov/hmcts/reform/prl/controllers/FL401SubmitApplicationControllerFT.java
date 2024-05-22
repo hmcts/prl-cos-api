@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -33,6 +35,12 @@ public class FL401SubmitApplicationControllerFT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @MockBean
     private CourtFinderService courtFinderService;
@@ -61,7 +69,8 @@ public class FL401SubmitApplicationControllerFT {
 
         mockMvc.perform(post("/fl401-submit-application-validation")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -83,7 +92,8 @@ public class FL401SubmitApplicationControllerFT {
 
         mockMvc.perform(post("/fl401-submit-application-send-notification")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

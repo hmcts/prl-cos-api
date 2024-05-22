@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Jacksonized
 public class StatementOfTruth {
     @JsonProperty("applicantConsent")

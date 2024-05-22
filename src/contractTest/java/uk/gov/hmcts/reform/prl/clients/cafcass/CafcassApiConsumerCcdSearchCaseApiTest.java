@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
@@ -51,6 +52,24 @@ import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CCD_STORE_SEARC
 @ContextConfiguration(
         classes = {CafcassSearchCaseApiConsumerApplication.class}
 )
+@TestPropertySource(
+    properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
+        "fis_hearing.api.url=localhost:5000",
+        "refdata.api.url=",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "fis_hearing.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=",
+        "amRoleAssignment.api.url="
+    }
+)
+
 public class CafcassApiConsumerCcdSearchCaseApiTest {
     @BeforeEach
     public void setupEachTest() {

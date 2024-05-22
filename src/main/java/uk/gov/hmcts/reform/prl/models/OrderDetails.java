@@ -7,8 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDateTime;
@@ -30,6 +35,7 @@ public class OrderDetails {
     private final String orderType;
     private final String orderTypeId;
     private final YesOrNo isTheOrderAboutChildren;
+    private final YesOrNo isTheOrderAboutAllChildren;
     private final String childrenList;
     private final YesOrNo orderClosesCase;
     private final Document orderDocument;
@@ -40,7 +46,30 @@ public class OrderDetails {
     private final ServeOrderDetails serveOrderDetails;
     @JsonProperty("manageOrderHearingDetails")
     private final List<Element<HearingData>> manageOrderHearingDetails;
+    //PRL-3254 - Added for storing selected hearing dropdown
+    private String selectedHearingType;
 
+    private final SdoDetails sdoDetails;
+    private final YesOrNo cafcassServedOptions;
+    private final String cafcassEmailId;
+    private final YesOrNo cafcassCymruServedOptions;
+    private final String cafcassCymruEmail;
+    private final YesOrNo isOrderCreatedBySolicitor;
+    private final String typeOfChildArrangementsOrder;
+    //Mi compliance
+    private final C21OrderOptionsEnum c21OrderOptions;
+    @JsonProperty("childArrangementsOrdersToIssue")
+    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
+    @JsonProperty("childOption")
+    private final DynamicMultiSelectList childOption;
+
+    @JsonProperty("isOrderUploaded")
+    private final YesOrNo isOrderUploaded;
+
+    //PRL-4225 - serve order & additional docs to other person
+    @JsonProperty("bulkPrintOrderDetails")
+    private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;
 
     @JsonIgnore
     public String getLabelForDynamicList() {

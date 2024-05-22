@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
@@ -17,12 +18,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 
 import java.util.List;
 
@@ -46,20 +44,11 @@ public class Response {
     private final SafetyConcerns safetyConcerns;
     private final ReasonableAdjustmentsSupport supportYouNeed;
 
-    //Applicable only for C100 solicitor respondent
-    @JsonUnwrapped
-    @Builder.Default
-    private final SolicitorKeepDetailsPrivate solicitorKeepDetailsPriate;
-
-    @JsonUnwrapped
-    @Builder.Default
-    private final SolicitorMiam solicitorMiam;
-
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
     @JsonUnwrapped
     @Builder.Default
-    private final SolicitorAbilityToParticipateInProceedings abilityToParticipate;
+    private final AbilityToParticipate abilityToParticipate;
     private final AttendToCourt attendToCourt;
 
     @JsonUnwrapped
@@ -68,9 +57,10 @@ public class Response {
 
     @JsonUnwrapped
     @Builder.Default
-    private final ResSolInternationalElements resSolInternationalElements;
+    private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
-    private final YesOrNo activeRespondent;
     private final YesOrNo c7ResponseSubmitted;
     private final YesOrNo c1AResponseSubmitted;
+
+    private final YesOrNo activeRespondent;
 }

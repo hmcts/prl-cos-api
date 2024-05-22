@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,54 +18,38 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.service.notify.NotificationClient;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SolicitorEmailService {
-
-    private final NotificationClient notificationClient;
-    private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
-    private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private EmailService emailService;
-
+    private final EmailService emailService;
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
-
-    @Value("${uk.gov.notify.email.application.court-name}")
-    private String courtName;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
+    private  final CourtFinderService courtLocatorService;
 
-    @Autowired
-    private CourtFinderService courtLocatorService;
-
-    public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails, boolean isC100PendingPaymentSolEmail) {
         try {
             CaseData caseData = emailService.getCaseData(caseDetails);
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             List<String> applicantNamesList = applicants.stream()
-                .map(element -> element.getFirstName() + " " + element.getLastName())
-                .collect(Collectors.toList());
+                .map(PartyDetails::getLabelForDynamicList)
+                .toList();
 
             String applicantNames = String.join(", ", applicantNamesList);
+            Court court = courtLocatorService.getNearestFamilyCourt(caseData);
 
-            Court court = null;
-            court = courtLocatorService.getNearestFamilyCourt(caseData);
+            String caseLink = manageCaseUrl + "/" + caseDetails.getId();
 
             return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
@@ -74,10 +57,12 @@ public class SolicitorEmailService {
                 .applicantName(applicantNames)
                 .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
-                .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+                .caseLink(caseLink + (isC100PendingPaymentSolEmail ? "#Service%20Request" : ""))
+                .solicitorName(caseData.getSolicitorName())
                 .build();
+
         } catch (NotFoundException e) {
-            log.error("Cannot send email");
+            log.error("Cannot send email", e);
         }
         return null;
     }
@@ -89,7 +74,7 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, false),
             LanguagePreference.english
         );
 
@@ -101,11 +86,44 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, false),
             LanguagePreference.english
         );
 
     }
+
+    public void sendAwaitingPaymentEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.CA_AWAITING_PAYMENT,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build(), true),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
+        );
+
+    }
+
+    public void sendHelpWithFeesEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.CA_HELP_WITH_FEES,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build(), false),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
+        );
+
+    }
+
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
 
@@ -123,11 +141,11 @@ public class SolicitorEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantSolicitorEmailList = applicants.stream()
             .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
@@ -203,11 +221,11 @@ public class SolicitorEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantSolicitorEmailList = applicants.stream()
             .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(

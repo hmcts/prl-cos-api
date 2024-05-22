@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.pin;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,22 +16,20 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInviteEmailService {
 
-    public static final String CITIZEN_HOME = "/citizen-home";
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 
 
     public EmailTemplateVars buildCaseInviteEmail(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
         return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()),
-                                   partyDetails, manageCaseUrl, citizenSignUpLink + CITIZEN_HOME, caseData
+                                   partyDetails, manageCaseUrl, citizenSignUpLink, caseData
         );
     }
 

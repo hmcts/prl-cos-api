@@ -9,21 +9,29 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioDisclosureDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioNextStepsAllocationEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioRemoteHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioUrgentHearingRefusedCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioWithoutNoticeFirstHearingCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioWithoutNoticeHearingRefusedCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.OtherDirectionPositionStatementEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -79,6 +87,8 @@ public class DirectionOnIssue {
     private final String dioHearingUrgentCourtConsider;
     @JsonProperty("dioHearingUrgentTimeShortened")
     private final String dioHearingUrgentTimeShortened;
+    @JsonProperty("dioHearingUrgentDayShortened")
+    private final String dioHearingUrgentDayShortened;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dioHearingUrgentMustBeServedBy;
     @JsonProperty("dioHearingUrgentByWayOf")
@@ -110,7 +120,7 @@ public class DirectionOnIssue {
     @JsonProperty("dioPositionStatementWritten")
     private final SdoWrittenStatementEnum dioPositionStatementWritten;
     @JsonProperty("dioMiamAttendingPerson")
-    private final String dioMiamAttendingPerson;
+    private final List<Element<MiamAttendingPersonName>> dioMiamAttendingPerson;
 
     @JsonProperty("dioPersonWhoRequiresInterpreter")
     private final String dioPersonWhoRequiresInterpreter;
@@ -141,4 +151,51 @@ public class DirectionOnIssue {
     @JsonProperty("dioApplicationToApplyPermission")
     private final List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermission;
 
+    @JsonProperty("dioPermissionHearingDirections")
+    private final String dioPermissionHearingDirections;
+    @JsonProperty("dioCaseReviewHearingDetails")
+    private final HearingData dioCaseReviewHearingDetails;
+    @JsonProperty("dioFhdraHearingDetails")
+    private final HearingData dioFhdraHearingDetails;
+    @JsonProperty("dioPermissionHearingDetails")
+    private final HearingData dioPermissionHearingDetails;
+    @JsonProperty("dioUrgentFirstHearingDetails")
+    private final HearingData dioUrgentFirstHearingDetails;
+    @JsonProperty("dioUrgentHearingDetails")
+    private final HearingData dioUrgentHearingDetails;
+    @JsonProperty("dioWithoutNoticeHearingDetails")
+    private final HearingData dioWithoutNoticeHearingDetails;
+
+    @JsonProperty("dioPositionStatementDetails")
+    private final String dioPositionStatementDetails;
+
+    @JsonProperty("dioPositionStatementOtherCheckDetails")
+    private final OtherDirectionPositionStatementEnum dioPositionStatementOtherCheckDetails;
+    @JsonProperty("dioPositionStatementOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioPositionStatementOtherDetails;
+
+    @JsonProperty("dioMiamOtherCheckDetails")
+    private final MiamOtherDirectionEnum dioMiamOtherCheckDetails;
+    @JsonProperty("dioMiamOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioMiamOtherDetails;
+
+    @JsonProperty("dioInterpreterOtherDetailsCheck")
+    private final DioOtherDirectionEnum dioInterpreterOtherDetailsCheck;
+    @JsonProperty("dioInterpreterOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioInterpreterOtherDetails;
+
+    @JsonProperty("dioLocalAuthorityDetailsCheck")
+    private final DioLocalAuthorityDirectionEnum dioLocalAuthorityDetailsCheck;
+    @JsonProperty("dioLocalAuthorityDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioLocalAuthorityDetails;
+
+    @JsonProperty("dioTransferCourtDetailsCheck")
+    private final DioTransferCourtDirectionEnum dioTransferCourtDetailsCheck;
+    @JsonProperty("dioTransferCourtDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioTransferCourtDetails;
+
+    @JsonProperty("dioDisclosureOtherDetailsCheck")
+    private final DioDisclosureDirectionEnum dioDisclosureOtherDetailsCheck;
+    @JsonProperty("dioDisclosureOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> dioDisclosureOtherDetails;
 }

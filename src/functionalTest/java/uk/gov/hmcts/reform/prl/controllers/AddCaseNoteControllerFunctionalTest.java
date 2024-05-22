@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 
 @Slf4j
@@ -24,6 +25,9 @@ public class AddCaseNoteControllerFunctionalTest {
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller-add-casenote-request.json";
 
@@ -40,6 +44,7 @@ public class AddCaseNoteControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -51,6 +56,8 @@ public class AddCaseNoteControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")

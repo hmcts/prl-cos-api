@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -10,27 +11,22 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationControllerTest {
@@ -42,103 +38,180 @@ public class ServiceOfApplicationControllerTest {
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
-    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
-
-    @Mock
     AllTabServiceImpl allTabService;
 
     @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("first")
-            .lastName("last")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("first")
-            .representativeLastName("last")
-            .build();
-        Map<String, Object> caseData = new HashMap<>();
-        CaseData caseData1 = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(partyDetails)))
-            .respondents(List.of(element(partyDetails)))
-            .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder()
-                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
-                                                    .orderType("Test").build())
-                                         .build()))
-            .build();
-        caseData.put("serviceOfApplicationHeader","TestHeader");
-        caseData.put("option1","1");
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
 
-        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
-        List<String> createdOrders = new ArrayList<>();
-        createdOrders.add("Standard directions order");
+        Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-
-
-        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.anyString(),Mockito.any(CaseDetails.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
-        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
-        assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
-        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
+            .handleAboutToStart(authToken,s2sToken,callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
-    public void testServiceOfApplicationAboutToStartWithEmptyCollection() throws Exception {
-
+    public void testHandleAboutToSubmit() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
-        CaseData caseData1 = CaseData.builder()
-            .caseTypeOfApplication("FL401")
-            .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder()
-                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
-                                                    .orderType("Test").build())
-                                         .build()))
-            .build();
-        caseData.put("serviceOfApplicationHeader","TestHeader");
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-
-        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
-        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
-        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
-        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+
+        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
+            .thenReturn(caseData);
+        assertNotNull(serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest).getData());
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    public void testHandleSubmitted() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+            SubmittedCallbackResponse.builder().confirmationHeader(
+                "").confirmationBody(
+                "").build()));
+        assertNotNull(serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleSubmittedInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleAboutToStartInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testExceptionForHandleAboutToSubmit() {
         CaseData cd = CaseData.builder()
             .caseInvites(Collections.emptyList())
             .build();
 
         Map<String, Object> caseData = new HashMap<>();
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest);
-        verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
+        assertExpectedException(() -> {
+            serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
 
+    @Test
+    public void handleAboutToSubmit() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(CaseDetails
+                             .builder().data(caseData)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
+            .handleAboutToSubmit("","", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void handleValidateSoa() {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(CaseDetails
+                             .builder().data(caseData)
+                             .build())
+            .build();
+        when(serviceOfApplicationService.soaValidation(Mockito.any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
+            .soaValidation("","", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testExceptionForSoaValidation() throws Exception {
+
+        final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(new HashMap<>()).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        assertExpectedException(() -> {
+            serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }

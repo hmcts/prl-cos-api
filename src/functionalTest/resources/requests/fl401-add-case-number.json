@@ -1,0 +1,32 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "id": "1684145006977692",
+      "caseTypeOfApplication": "FL401"
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 1684145006977692,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

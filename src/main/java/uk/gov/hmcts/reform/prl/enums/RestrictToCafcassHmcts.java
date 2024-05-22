@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RestrictToCafcassHmcts {
     @JsonProperty("restrictToGroup")
-    restrictToGroup("Yes - restrict to this group");
+    restrictToGroup("Yes, restrict access.");
 
     private final String displayedValue;
 

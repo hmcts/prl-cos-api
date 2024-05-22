@@ -20,13 +20,18 @@ public enum State {
     SUBMITTED_NOT_PAID("SUBMITTED_NOT_PAID", "Pending"),
     SUBMITTED_PAID("SUBMITTED_PAID", "Submitted"),
     AWAITING_RESUBMISSION_TO_HMCTS("AWAITING_RESUBMISSION_TO_HMCTS", "Returned"),
-    CASE_ISSUE("CASE_ISSUE", "Case Issued"),
+    CASE_ISSUED("CASE_ISSUED", "Case Issued"),
     CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
-    GATE_KEEPING("GATE_KEEPING", "Gatekeeping"),
+    JUDICIAL_REVIEW("JUDICIAL_REVIEW", "Gatekeeping"),
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED", "Closed"),
-    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Prepare for hearing"),
+    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Hearing"),
     DELETED("DELETED", "Deleted"),
-    DECISION_OUTCOME("DECISION_OUTCOME","Hearing outcome");
+    REQUESTED_FOR_DELETION("REQUESTED_FOR_DELETION", "Requested for deletion"),
+    READY_FOR_DELETION("READY_FOR_DELETION", "Ready for deletion"),
+    DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome"),
+    PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM",
+                                "Proceeding in offline mode in familyman system");
+
     private final String value;
     private final String label;
 

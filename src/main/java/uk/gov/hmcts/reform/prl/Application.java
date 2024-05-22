@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -7,10 +8,13 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 
-import javax.annotation.PostConstruct;
 
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client",
+                                    "uk.gov.hmcts.reform.prl.clients",
+                                    "uk.gov.hmcts.reform.ccd.client","uk.gov.hmcts.reform.authorisation"
+})
 /*
  I don't know why this was not working, but I did what was suggested here:
  https://stackoverflow.com/questions/26889970/
@@ -21,10 +25,14 @@ import javax.annotation.PostConstruct;
       }
     )
  */
+@EnableAsync
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
-    "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document"})
+    "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
+    "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",
+    "uk.gov.hmcts.reform.sendletter.api",
+    "uk.gov.hmcts.reform.prl.clients"})
 @Slf4j
 public class Application {
 

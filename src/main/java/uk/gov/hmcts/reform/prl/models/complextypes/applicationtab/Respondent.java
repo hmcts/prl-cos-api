@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Respondent {
 
@@ -39,6 +39,9 @@ public class Respondent {
     private final String dxNumber;
     private final Organisation solicitorOrg;
 
+    private final YesOrNo isAddressConfidential;
+    private final YesOrNo isEmailAddressConfidential;
+    private final YesOrNo isPhoneNumberConfidential;
 
 
 }

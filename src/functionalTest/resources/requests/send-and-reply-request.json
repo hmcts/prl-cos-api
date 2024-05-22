@@ -2,18 +2,46 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
+      "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
       "chooseSendOrReply": "SEND",
+      "messageReply": {
+        "isReplying": "Yes",
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      },
+      "respondToMessage": "Yes",
+      "openMessages": [{
+        "id": "559c3c44-a2fc-475d-9822-42747c29469c",
+        "value": {
+          "senderEmail": "sender@email.com",
+          "recipientEmail": "recipient@email.com",
+          "messageContent": "testContet",
+          "messageUrgency": "testUrgnecy",
+          "messageSubject": "testSubject",
+          "sendReplyJudgeName": {
+            "idamId": "testIdamId"
+          },
+          "status": "OPEN",
+          "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com",
+          "updatedTime": "2022-12-12T12:12:12.000000",
+          "latestMessage": "latestMessage"
+        }
+      }],
       "messageObject": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": null,
         "messageSubject": null,
-        "messageUrgency": null
+        "messageUrgency": null,
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
       }
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
-    "id": 0,
+    "id": "1701870369166430",
     "jurisdiction": "string",
     "last_modified": "2022-03-15T15:02:33.880Z",
     "locked_by_user_id": 0,
@@ -23,7 +51,9 @@
   },
   "case_details_before": {
     "callback_response_status": "string",
-    "case_data": {},
+    "case_data": {
+      "applicantCaseName": "John Smith"
+    },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
     "id": 0,

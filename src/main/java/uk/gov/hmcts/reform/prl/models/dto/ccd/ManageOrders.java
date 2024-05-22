@@ -10,6 +10,8 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -19,17 +21,21 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -40,7 +46,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ManageOrders {
+public class ManageOrders implements MappableObject {
 
     private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassOfficeDetails")
@@ -137,6 +143,9 @@ public class ManageOrders {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
@@ -173,39 +182,38 @@ public class ManageOrders {
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
+    @Builder.Default
+    @JsonProperty("serveOrderDynamicList")
     private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
     private final YesOrNo serveToRespondentOptions;
-    private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    @JsonProperty("servingOptionsForNonLegalRep")
+    private final SoaCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
+    private final String cafcassEmailId;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
-    private final DeliveryByEnum deliveryByOptionsCA;
-    @JsonProperty("emailInformationCA")
-    private final List<Element<EmailInformation>> emailInformationCA;
-    @JsonProperty("postalInformationCA")
-    private final List<Element<PostalInformation>> postalInformationCA;
+    @JsonProperty("serveOrgDetailsList")
+    private final List<Element<ServeOrgDetails>> serveOrgDetailsList;
 
-    private final ServingRespondentsEnum servingRespondentsOptionsDA;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
     private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
-    private final DeliveryByEnum deliveryByOptionsDA;
-    @JsonProperty("emailInformationDA")
-    private final List<Element<EmailInformation>> emailInformationDA;
-    @JsonProperty("postalInformationDA")
-    private final List<Element<PostalInformation>> postalInformationDA;
+
     @JsonProperty("withdrawnOrRefusedOrder")
     private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
     @JsonProperty("ordersNeedToBeServed")
     private final YesOrNo ordersNeedToBeServed;
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
+    @JsonProperty("isTheOrderAboutAllChildren")
+    private final YesOrNo isTheOrderAboutAllChildren;
     @JsonProperty("loggedInUserType")
     private final String loggedInUserType;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
@@ -219,6 +227,10 @@ public class ManageOrders {
     private final String nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
+    @JsonProperty("nameOfJudgeToReviewOrder")
+    private final JudicialUser nameOfJudgeToReviewOrder;
+    @JsonProperty("nameOfLaToReviewOrder")
+    private final DynamicList nameOfLaToReviewOrder;
 
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
@@ -236,23 +248,65 @@ public class ManageOrders {
     private final C21OrderOptionsEnum c21OrderOptions;
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
+
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
-
     private final YesOrNo serveToRespondentOptionsOnlyC47a;
-    private final ServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
     private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
-    @JsonProperty("serveOtherPartiesCaOnlyC47a")
-    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
+
+    @JsonProperty("ordersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private List<Element<HearingData>> ordersHearingDetails;
+
+    @JsonProperty("solicitorOrdersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private List<Element<HearingData>> solicitorOrdersHearingDetails;
+
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private YesOrNo hasJudgeProvidedHearingDetails;
+
+    @JsonProperty("markedToServeEmailNotification")
+    private YesOrNo markedToServeEmailNotification;
+
+    //PRL-3254 - Added for populating hearing dropdown
+    private DynamicList hearingsType;
+
+    //PRL-4216 - serve order additional documents
+    @JsonProperty("additionalOrderDocuments")
+    private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
+
+    @JsonProperty("whatToDoWithOrderSolicitor")
+    private OrderApprovalDecisionsForSolicitorOrderEnum whatToDoWithOrderSolicitor;
+    @JsonProperty("whatToDoWithOrderCourtAdmin")
+    private OrderApprovalDecisionsForCourtAdminOrderEnum whatToDoWithOrderCourtAdmin;
+    @JsonProperty("instructionsToLegalRepresentative")
+    private String instructionsToLegalRepresentative;
+
+    private Object rejectedOrdersDynamicList;
+    private String editOrderTextInstructions;
+
+    @JsonProperty("displayLegalRepOption")
+    private String displayLegalRepOption;
+
     private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
     @JsonProperty("emailInformationCaOnlyC47a")
     private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
     @JsonProperty("postalInformationCaOnlyC47a")
     private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
-
-    @JsonProperty("ordersHearingDetails")
-    @JsonUnwrapped
-    @Builder.Default
-    private final List<Element<HearingData>> ordersHearingDetails;
+    private final DeliveryByEnum deliveryByOptionsDA;
+    @JsonProperty("emailInformationDA")
+    private final List<Element<EmailInformation>> emailInformationDA;
+    @JsonProperty("postalInformationDA")
+    private final List<Element<PostalInformation>> postalInformationDA;
+    @JsonProperty("serveOtherPartiesCaOnlyC47a")
+    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
+    private final DeliveryByEnum deliveryByOptionsCA;
+    @JsonProperty("emailInformationCA")
+    private final List<Element<EmailInformation>> emailInformationCA;
+    @JsonProperty("postalInformationCA")
+    private final List<Element<PostalInformation>> postalInformationCA;
 }

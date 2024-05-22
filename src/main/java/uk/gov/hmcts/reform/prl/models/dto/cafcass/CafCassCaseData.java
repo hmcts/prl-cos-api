@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.ObjectUtils;
@@ -19,7 +20,9 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -80,6 +83,7 @@ public class CafCassCaseData {
 
     private String familymanCaseNumber;
     private String dateSubmitted;
+    private String issueDate;
     private String caseTypeOfApplication;
 
     @Setter(AccessLevel.NONE)
@@ -168,6 +172,36 @@ public class CafCassCaseData {
 
     private MiamExemptions miamExemptionsTable;
 
+    private String claimingExemptionMiam;
+
+    private String applicantAttendedMiam;
+
+    private String familyMediatorMiam;
+
+    //New Miam added
+    private YesOrNo otherProceedingsMiam;
+
+    private String applicantConsentMiam;
+
+    private String mediatorRegistrationNumber;
+
+    private String familyMediatorServiceName;
+
+    private String soleTraderName;
+
+    public void setMiamTable(Map<String, Object> miamTable) {
+        if (miamTable != null) {
+            this.claimingExemptionMiam = miamTable.get("claimingExemptionMiam") != null ? miamTable.get(
+                "claimingExemptionMiam").toString() : null;
+            this.applicantAttendedMiam = miamTable.get("applicantAttendedMiam") != null ? miamTable.get(
+                "applicantAttendedMiam").toString() : null;
+            this.familyMediatorMiam = miamTable.get("familyMediatorMiam") != null ? miamTable.get("familyMediatorMiam").toString() : null;
+        }
+    }
+
+    @Getter(AccessLevel.NONE)
+    private Map<String, Object> miamTable;
+
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
     private List<Element<ApplicantDetails>> applicants;
@@ -179,6 +213,10 @@ public class CafCassCaseData {
     private String applicantSolicitorEmailAddress;
 
     private String solicitorName;
+
+    private String courtEpimsId;
+
+    private String courtTypeId;
 
     private String courtName;
 
@@ -212,9 +250,184 @@ public class CafCassCaseData {
 
     private List<Element<ManageOrderCollection>> manageOrderCollection;
 
-    //private List<Element<HearingData>> hearingData;
     private Hearings hearingData;
 
     @Setter(AccessLevel.NONE)
     private List<Element<CaseOrder>> orderCollection;
+
+    @Setter(AccessLevel.NONE)
+    private CaseManagementLocation caseManagementLocation;
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<ChildDetailsCafcass>> newChildDetails;
+
+    public void setNewChildDetails(List<Element<ChildDetailsCafcass>> newChildDetails) {
+        if (this.children == null) {
+            this.children = new ArrayList<>();
+        }
+        if (newChildDetails != null) {
+            newChildDetails.stream().forEach(
+                newChildDetail -> {
+                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
+                    this.children.add(Element.<Child>builder()
+                                          .id(newChildDetail.getId())
+                                          .value(Child.builder()
+                                                     .firstName(childDetailsRevised.getFirstName())
+                                                     .lastName(childDetailsRevised.getLastName())
+                                                     .gender(childDetailsRevised.getGender())
+                                                     .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                                     .otherGender(childDetailsRevised.getOtherGender())
+                                                     .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                                     .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                                     .build())
+                                          .build());
+
+                }
+            );
+        }
+
+        this.newChildDetails = newChildDetails;
+    }
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<ApplicantDetails>> otherPartyInTheCaseRevised;
+
+    public void setOtherPartyInTheCaseRevised(List<Element<ApplicantDetails>> otherPartyInTheCaseRevised) {
+        if (this.otherPeopleInTheCaseTable == null) {
+            this.otherPeopleInTheCaseTable = new ArrayList<>();
+        }
+
+        if (otherPartyInTheCaseRevised != null) {
+            otherPartyInTheCaseRevised.stream().forEach(
+                otherPartyInTheCase -> {
+                    ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
+                    this.otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
+                                                           .id(otherPartyInTheCase.getId())
+                                                           .value(OtherPersonInTheCase.builder()
+                                                                      .firstName(partyDetails.getFirstName())
+                                                                      .lastName(partyDetails.getLastName())
+                                                                      .previousName(partyDetails.getPreviousName())
+                                                                      .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
+                                                                      .dateOfBirth(partyDetails.getDateOfBirth())
+                                                                      .gender(partyDetails.getGender().getDisplayedValue())
+                                                                      .otherGender(partyDetails.getOtherGender())
+                                                                      .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
+                                                                      .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
+                                                                      .address(
+                                                                          partyDetails.getAddress() != null
+                                                                              ? Address.builder()
+                                                                              .addressLine1(partyDetails.getAddress().getAddressLine1())
+                                                                              .addressLine2(partyDetails.getAddress().getAddressLine2())
+                                                                              .addressLine3(partyDetails.getAddress().getAddressLine3())
+                                                                              .country(partyDetails.getAddress().getCountry())
+                                                                              .county(partyDetails.getAddress().getCounty())
+                                                                              .postCode(partyDetails.getAddress().getPostCode())
+                                                                              .postTown(partyDetails.getAddress().getPostTown())
+                                                                              .build() : null
+                                                                      )
+                                                                      .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
+                                                                      .email(partyDetails.getEmail())
+                                                                      .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
+                                                                      .phoneNumber(partyDetails.getPhoneNumber())
+                                                                      .build())
+                                                           .build());
+                }
+            );
+        }
+        this.otherPartyInTheCaseRevised = otherPartyInTheCaseRevised;
+    }
+
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndApplicantRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        if (this.childAndApplicantRelations != null) {
+            this.childAndApplicantRelations.stream()
+                .forEach(
+                    childAndApplicantRelationsElement -> {
+                        RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                        updatedRelationshipToParties.add(
+                            Element.<RelationshipToPartiesCafcass>builder()
+                                .id(childAndApplicantRelationsElement.getId())
+                                .value(RelationshipToPartiesCafcass.builder()
+                                           .partyId(tempRelationship.getApplicantId())
+                                           .partyFullName(tempRelationship.getApplicantFullName())
+                                           .partyType(PartyTypeEnum.APPLICANT)
+                                           .childId(tempRelationship.getChildId())
+                                           .childFullName(tempRelationship.getChildFullName())
+                                           .relationType(tempRelationship.getChildAndApplicantRelation())
+                                           .otherRelationDetails(tempRelationship.getChildAndApplicantRelationOtherDetails())
+                                           .childLivesWith(tempRelationship.getChildLivesWith())
+                                           .build())
+                                .build()
+                        );
+
+                    }
+                );
+        }
+        return updatedRelationshipToParties;
+    }
+
+    private List<Element<RelationshipToPartiesCafcass>> childAndApplicantRelations;
+
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndRespondentRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        if (this.childAndRespondentRelations != null) {
+            this.childAndRespondentRelations.stream()
+                .forEach(
+                    childAndApplicantRelationsElement -> {
+                        RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                        updatedRelationshipToParties.add(
+                            Element.<RelationshipToPartiesCafcass>builder()
+                                .id(childAndApplicantRelationsElement.getId())
+                                .value(RelationshipToPartiesCafcass.builder()
+                                           .partyId(tempRelationship.getRespondentId())
+                                           .partyFullName(tempRelationship.getRespondentFullName())
+                                           .partyType(PartyTypeEnum.RESPONDENT)
+                                           .childId(tempRelationship.getChildId())
+                                           .childFullName(tempRelationship.getChildFullName())
+                                           .relationType(tempRelationship.getChildAndRespondentRelation())
+                                           .otherRelationDetails(tempRelationship.getChildAndRespondentRelationOtherDetails())
+                                           .childLivesWith(tempRelationship.getChildLivesWith())
+                                           .build())
+                                .build()
+                        );
+
+                    }
+                );
+        }
+        return updatedRelationshipToParties;
+    }
+
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndOtherPeopleRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        if (this.childAndOtherPeopleRelations != null) {
+            this.childAndOtherPeopleRelations.stream()
+                .forEach(
+                    childAndApplicantRelationsElement -> {
+                        RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                        updatedRelationshipToParties.add(
+                            Element.<RelationshipToPartiesCafcass>builder()
+                                .id(childAndApplicantRelationsElement.getId())
+                                .value(RelationshipToPartiesCafcass.builder()
+                                           .partyId(tempRelationship.getOtherPeopleId())
+                                           .partyFullName(tempRelationship.getOtherPeopleFullName())
+                                           .partyType(PartyTypeEnum.OTHERPEOPLE)
+                                           .childId(tempRelationship.getChildId())
+                                           .childFullName(tempRelationship.getChildFullName())
+                                           .relationType(tempRelationship.getChildAndOtherPeopleRelation())
+                                           .otherRelationDetails(tempRelationship.getChildAndOtherPeopleRelationOtherDetails())
+                                           .childLivesWith(tempRelationship.getChildLivesWith())
+                                           .build())
+                                .build()
+                        );
+
+                    }
+                );
+        }
+        return updatedRelationshipToParties;
+    }
+
+    private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
+
+    private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
+
 }

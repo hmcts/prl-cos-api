@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Optional;
@@ -19,10 +21,9 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ApplicationTypeChecker implements EventChecker {
-
-    @Autowired
-    private TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(
@@ -80,6 +81,11 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             FL401_TYPE_OF_APPLICATION_ERROR.getError()
         );
         return false;
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

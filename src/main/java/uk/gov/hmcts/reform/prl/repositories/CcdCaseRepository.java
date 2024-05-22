@@ -16,11 +16,6 @@ public class CcdCaseRepository implements CaseRepository {
     CcdCaseApi ccdCaseApi;
 
     @Override
-    public void linkDefendant(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
-        ccdCaseApi.linkCitizenToCase(authorisation, anonymousUserToken, caseId, caseData);
-    }
-
-    @Override
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
         return ccdCaseApi.updateCase(authorisation, caseId, caseData, caseEvent);
     }
@@ -31,7 +26,7 @@ public class CcdCaseRepository implements CaseRepository {
     }
 
     @Override
-    public CaseDetails getCase(String authorisation, String  caseId) {
+    public CaseDetails getCase(String authorisation, String caseId) {
         return ccdCaseApi.getCase(authorisation, caseId);
     }
 }

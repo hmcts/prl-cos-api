@@ -7,9 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -17,8 +22,8 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -28,17 +33,15 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtFinderService {
-
     public static final String FAMILY_COURT = "Family Courts";
     public static final String FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE = "Family public law (children in care)";
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
-    @Autowired
-    private CourtFinderApi courtFinderApi;
+    private final CourtFinderApi courtFinderApi;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
@@ -56,7 +59,7 @@ public class CourtFinderService {
                             : getCorrectPartyPostcode(caseData));
             }
         } catch (Exception e) {
-            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : ",e.getMessage());
+            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
         if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {
@@ -72,7 +75,65 @@ public class CourtFinderService {
         return courtFinderApi.getCourtDetails(courtSlug);
     }
 
+    public String getCorrectPartyPostcodeV2(CaseData caseData) throws NotFoundException {
+        //current requirements use the first child if multiple children present
+        Optional<ChildDetailsRevised> childOptional = caseData.getNewChildDetails()
+            .stream()
+            .map(Element::getValue)
+            .findFirst();
+
+        if (childOptional.isEmpty()) {
+            throw new NotFoundException("No child details found");
+        }
+
+        Optional<List<Element<PartyDetails>>> othersPerson = Optional.ofNullable(caseData.getOtherPartyInTheCaseRevised());
+
+        Optional<PartyDetails> partyDetails = othersPerson.flatMap(elements -> elements.stream()
+                .map(Element::getValue)
+                .findFirst());
+
+        List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
+        List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
+        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = childAndApplicantRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+
+        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = childAndRespondentRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional
+                .ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
+                .stream()
+                .map(Element::getValue)
+                .findFirst() : Optional.empty();
+
+        if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
+            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        } else if (!childrenAndRespondentRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndRespondentRelation.get().getChildLivesWith())) {
+            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
+            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())) {
+            if (partyDetails.isPresent() && getPostCodeOtherPerson(partyDetails.get()).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
+            if (!partyDetails.isEmpty()) {
+                return getPostCodeOtherPerson(partyDetails.get());
+            }
+        }
+        //default to the applicant postcode
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+    }
+
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+            return getCorrectPartyPostcodeV2(caseData);
+        }
         //current requirements use the first child if multiple children present
         Optional<Child> childOptional = caseData.getChildren()
             .stream()
@@ -101,9 +162,17 @@ public class CourtFinderService {
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
 
+
     public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
         return ofNullable(otherPerson)
             .map(OtherPersonWhoLivesWithChild::getAddress)
+            .map(Address::getPostCode)
+            .orElse("");
+    }
+
+    public String getPostCodeOtherPerson(PartyDetails otherPerson) {
+        return ofNullable(otherPerson)
+            .map(PartyDetails::getAddress)
             .map(Address::getPostCode)
             .orElse("");
     }
@@ -126,7 +195,7 @@ public class CourtFinderService {
         return c.getPersonWhoLivesWithChild()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList())
+            .toList()
             .get(0);
 
     }
@@ -184,5 +253,4 @@ public class CourtFinderService {
             .filter(p -> (FAMILY_COURT.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
-
 }

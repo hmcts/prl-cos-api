@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
 
 @Data
 @Builder(toBuilder = true)

@@ -14,13 +14,15 @@ public enum SdoCourtEnum {
     @JsonProperty("transferApplication")
     transferApplication("transferApplication", "Transfer application to another family court"),
     @JsonProperty("crossExaminationProhibition")
-    crossExaminationProhibition("crossExaminationProhibition", "Cross examination prohibition applies"),
+    crossExaminationProhibition("crossExaminationProhibition", "Cross-examination prohibition applies"),
     @JsonProperty("crossExaminationEx740")
-    crossExaminationEx740("crossExaminationEx740", "Cross examination prohibition: EX740"),
+    crossExaminationEx740("crossExaminationEx740", "Cross-examination prohibition: EX740"),
+    @JsonProperty("crossExaminationEx741")
+    crossExaminationEx741("crossExaminationEx741", "Cross-examination prohibition: EX741"),
     @JsonProperty("crossExaminationQualifiedLegal")
     crossExaminationQualifiedLegal(
         "crossExaminationQualifiedLegal",
-        "Cross examination prohibition: Qualified legal representative to be appointed"
+        "Cross-examination prohibition: Qualified legal representative to be appointed"
     );
 
     private final String id;

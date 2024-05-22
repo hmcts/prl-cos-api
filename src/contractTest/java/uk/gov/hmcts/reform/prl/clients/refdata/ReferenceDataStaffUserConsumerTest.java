@@ -23,6 +23,8 @@ import java.util.List;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,7 +34,21 @@ import static org.testng.AssertJUnit.assertNotNull;
     classes = {StaffResponseDetailsApiConsumerApplicaton.class, IdamApiConsumerApplication.class}
 )
 @TestPropertySource(
-    properties = {"staffDetails.api.url=http://localhost:8899", "idam.api.url=localhost:5000"}
+    properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=http://localhost:8899",
+        "fis_hearing.api.url=localhost:5000",
+        "refdata.api.url=",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "fis_hearing.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=localhost:8894",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=http://localhost:8899",
+        "amRoleAssignment.api.url="
+    }
 )
 @PactFolder("pacts")
 public class ReferenceDataStaffUserConsumerTest {
@@ -56,7 +72,7 @@ public class ReferenceDataStaffUserConsumerTest {
             .method("GET")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/internal/staff/usersByServiceName")
-            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC")
+            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC&page_size=250&page_number=0")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")
@@ -70,8 +86,12 @@ public class ReferenceDataStaffUserConsumerTest {
         List<StaffResponse> staffResponseList = staffResponseDetailsApi.getAllStaffResponseDetails(
             AUTHORIZATION_TOKEN,
             SERVICE_AUTH_TOKEN,
-            "PRIVATELAW","lastName","ASC"
-        );
+            "PRIVATELAW",
+            "lastName",
+            "ASC",
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        ).getBody();
         assertNotNull(staffResponseList);
         assertEquals("Rama",staffResponseList.get(0).getStaffProfile().getLastName());
         assertEquals("crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",staffResponseList.get(0).getStaffProfile().getEmailId());

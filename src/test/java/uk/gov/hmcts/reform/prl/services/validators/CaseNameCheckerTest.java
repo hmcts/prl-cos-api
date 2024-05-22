@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 
 public class CaseNameCheckerTest {
 
@@ -66,5 +67,11 @@ public class CaseNameCheckerTest {
         CaseNameChecker caseNameChecker = new CaseNameChecker();
 
         assertFalse(caseNameChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        CaseNameChecker caseNameChecker = new CaseNameChecker();
+        assertNotNull(caseNameChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

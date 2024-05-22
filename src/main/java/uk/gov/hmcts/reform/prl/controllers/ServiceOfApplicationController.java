@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,102 +17,93 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @RequestMapping("/service-of-application")
 @Slf4j
+@RequiredArgsConstructor
 public class ServiceOfApplicationController {
 
-    @Autowired
-    private ServiceOfApplicationService serviceOfApplicationService;
+    private final ServiceOfApplicationService serviceOfApplicationService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    AllTabServiceImpl allTabService;
-
-    @Autowired
-    DynamicMultiSelectListService dynamicMultiSelectListService;
-
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number submit event")
+    @Operation(description = "about to start callback for service of application event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        caseDataUpdated.put(
-            "serviceOfApplicationScreen1",
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
-        );
-
-        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
-            .getApplicantsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
-        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
-        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
-            .getRespondentsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
-        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
-
-        ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
-            .applicantsList(DynamicMultiSelectList.builder()
-                                .listItems(applicantList)
-                                .build())
-            .applicantSolicitorList(DynamicMultiSelectList.builder()
-                                        .listItems(applicantSolicitorList)
-                                        .build())
-            .respondentsList(DynamicMultiSelectList.builder()
-                                 .listItems(respondentList)
-                                 .build())
-            .respondentSolicitorList(DynamicMultiSelectList.builder()
-                                         .listItems(respondentSolicitorList)
-                                         .build())
-            .otherPeopleList(DynamicMultiSelectList.builder()
-                                 .listItems(otherPeopleList)
-                                 .build())
-            .build();
-        caseDataUpdated.put("confirmRecipients",confirmRecipients);
-        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
+                                                                           .getSoaCaseFieldsMap(authorisation,
+                callbackRequest.getCaseDetails())).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Serve Parties Email Notification")
+    @Operation(description = "about to submit callback for service of application event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
+                callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "submitted callback for service of application event.Serve Parties Email and Post Notification")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
-        serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("caseInvites", caseData.getCaseInvites());
-        Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
-        updatedCaseData.putAll(allTabsFields);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return serviceOfApplicationService
+                .handleSoaSubmitted(authorisation, callbackRequest);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/soa-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to check C6A Order Existence For Soa Parties")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "C6A order existence for Soa Parties"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse soaValidation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return serviceOfApplicationService.soaValidation(callbackRequest);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }

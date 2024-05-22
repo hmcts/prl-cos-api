@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,5 +30,14 @@ public class UserService {
             .emailAddress(idamClientUserDetails.getEmail())
             .role(roleName.name())
             .build();
+    }
+
+    public UserDetails getUserByUserId(String bearerToken, String userId) {
+        return idamClient.getUserByUserId(bearerToken, userId);
+    }
+
+    public List<UserDetails> getUserByEmailId(String bearerToken, String emailId) {
+        String searchQuery = "email:".concat(emailId);
+        return idamClient.searchUsers(bearerToken, searchQuery);
     }
 }

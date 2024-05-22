@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -24,11 +26,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AllegationsOfHarmChecker implements EventChecker {
 
-
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -63,9 +64,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarmYesNo = ofNullable(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
 
         boolean isFinished;
-
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-
             boolean behavioursCompleted = true;
 
             if (abusePresent(caseData)) {
@@ -99,7 +98,6 @@ public class AllegationsOfHarmChecker implements EventChecker {
             );
 
             isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
-
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }
@@ -440,5 +438,9 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
     }
 
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
+    }
 
 }

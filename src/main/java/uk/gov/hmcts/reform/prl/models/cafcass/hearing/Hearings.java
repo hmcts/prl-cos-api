@@ -23,4 +23,8 @@ public class Hearings {
 
     private List<CaseHearing> caseHearings;
 
+    private String courtTypeId;
+
+    private String courtName;
+
 }

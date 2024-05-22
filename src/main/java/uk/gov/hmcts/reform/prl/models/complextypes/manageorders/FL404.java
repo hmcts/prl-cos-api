@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder(toBuilder = true)
@@ -30,7 +32,8 @@ public class FL404 {
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
     private final String fl404bDateOrderMade;
-    private final String fl404bDateOrderEnd;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
 
     private final String fl404bMentionedProperty;
@@ -78,8 +81,10 @@ public class FL404 {
     private final List<String> fl404bRespondentOtherInstructions;
     private final String fl404bAddAnotherInstructions;
     private final String fl404bIsPowerOfArrest6;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private final String fl404bOccupationDate1;
     private final String fl404bOccupationTime1;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private final String fl404bOccupationDate2;
     private final String fl404bOccupationTime2;
     private final String fl404bDateOfNextHearing;
@@ -88,5 +93,9 @@ public class FL404 {
     //Draft order changes
     @JsonProperty("addDirections")
     private final List<Element<DirectionDetails>> addDirections;
+
+    private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime orderSpecifiedDateTime;
 
 }

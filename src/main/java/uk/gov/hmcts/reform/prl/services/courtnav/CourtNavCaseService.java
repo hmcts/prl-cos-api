@@ -9,21 +9,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -32,9 +37,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NA_COURTNAV;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -42,29 +50,30 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtNavCaseService {
 
-    public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
     protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
-    private final CoreCaseDataApi coreCaseDataApi;
+    private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
     private final AllTabServiceImpl allTabService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final SystemUserService systemUserService;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
+    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("****************Creating courtnav case***************");
-        StartEventResponse startEventResponse =
-            coreCaseDataApi.startForCaseworker(
-                authToken,
-                authTokenGenerator.generate(),
-                idamClient.getUserInfo(authToken).getUid(),
-                PrlAppsConstants.JURISDICTION,
-                PrlAppsConstants.CASE_TYPE,
-                "courtnav-case-creation"
-            );
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            CaseEvent.COURTNAV_CASE_CREATION,
+            idamClient.getUserInfo(authToken).getUid()
+        );
+        StartEventResponse startEventResponse = coreCaseDataService.startSubmitCreate(
+            authToken,
+            authTokenGenerator.generate(),
+            eventRequestData,
+            true
+        );
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
@@ -73,14 +82,12 @@ public class CourtNavCaseService {
                        .build())
             .data(caseDataMap).build();
 
-        return coreCaseDataApi.submitForCaseworker(
+        return coreCaseDataService.submitCreate(
             authToken,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authToken).getUid(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            true,
-            caseDataContent
+            caseDataContent,
+            true
         );
     }
 
@@ -89,13 +96,17 @@ public class CourtNavCaseService {
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {
-            CaseDetails tempCaseDetails = checkIfCasePresent(caseId, authorisation);
-            if (tempCaseDetails == null) {
+            EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+                CaseEvent.COURTNAV_DOCUMENT_UPLOAD_EVENT_ID,
+                idamClient.getUserInfo(authorisation).getUid()
+            );
+            StartEventResponse startEventResponse = checkIfCasePresent(caseId, authorisation, eventRequestData);
+            if (startEventResponse == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
-            CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
+            CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
             if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
-                && Integer.valueOf(tempCaseData.getNumberOfAttachments())
+                && Integer.parseInt(tempCaseData.getNumberOfAttachments())
                 <= tempCaseData.getCourtNavUploadedDocs().size()) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -105,80 +116,61 @@ public class CourtNavCaseService {
                 authTokenGenerator.generate(),
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
-                Arrays.asList(document)
+                List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            CaseData caseData = getCaseDataWithUploadedDocs(
-                caseId,
+            CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
                 document.getOriginalFilename(),
                 typeOfDocument,
                 tempCaseData,
                 uploadResponse.getDocuments().get(0)
             );
 
-            StartEventResponse startEventResponse =
-                coreCaseDataApi.startEventForCaseWorker(
-                    authorisation,
-                    authTokenGenerator.generate(),
-                    idamClient.getUserInfo(authorisation).getUid(),
-                    PrlAppsConstants.JURISDICTION,
-                    PrlAppsConstants.CASE_TYPE,
-                    caseId,
-                    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID
-                );
+            Map<String, Object> fields = new HashMap<>();
 
+            fields.put("courtNavUploadedDocs", updatedCaseData.getCourtNavUploadedDocs());
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(caseData).build();
+                .data(fields).build();
 
-            coreCaseDataApi.submitEventForCaseWorker(
-                authorisation,
-                authTokenGenerator.generate(),
-                idamClient.getUserInfo(authorisation).getUid(),
-                PrlAppsConstants.JURISDICTION,
-                PrlAppsConstants.CASE_TYPE,
-                caseId,
-                true,
-                caseDataContent
-            );
+            coreCaseDataService.submitUpdate(authorisation,
+                                             eventRequestData,
+                                             caseDataContent,
+                                             caseId,
+                                             true);
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
-
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 
-    public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
+    public StartEventResponse checkIfCasePresent(String caseId, String authorisation, EventRequestData eventRequestData) {
         try {
-            return coreCaseDataApi.getCase(
-                authorisation,
-                authTokenGenerator.generate(),
-                caseId
-            );
+            return coreCaseDataService.startUpdate(authorisation, eventRequestData, caseId, true);
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }
 
-    private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
-                                                 CaseData tempCaseData, Document document) {
+    private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
+                                                CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
-            ? tempCaseData.getApplicantCaseName() : "COURTNAV";
+            ? tempCaseData.getApplicantCaseName() : COURTNAV;
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
-                        .uploadedBy("COURTNAV")
+                        .uploadedBy(COURTNAV)
                         .documentDetails(DocumentDetails.builder().documentName(fileName)
                                              .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant("NA_COURTNAV")
-                        .parentDocumentType("NA_COURTNAV")
+                        .partyName(partyName).isApplicant(NA_COURTNAV)
+                        .parentDocumentType(NA_COURTNAV)
                         .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                              .documentUrl(document.links.self.href)
                                              .documentBinaryUrl(document.links.binary.href)
@@ -191,7 +183,10 @@ public class CourtNavCaseService {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return CaseData.builder().id(Long.valueOf(caseId)).courtNavUploadedDocs(uploadedDocumentsList).build();
+
+        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
+
+        return tempCaseData;
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {
@@ -215,12 +210,20 @@ public class CourtNavCaseService {
         }
     }
 
-    public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
-        data.put("id", String.valueOf(id));
+    public void refreshTabs(String authToken, String caseId) throws Exception {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+        Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
+        data.put("id", caseId);
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
-        log.info("**********************Tab refresh and Courtnav case creation complete**************************");
+        allTabService.mapAndSubmitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseData
+        );
+        log.info("**********************Tab refresh and CourtNav case creation complete**************************");
     }
 }
 

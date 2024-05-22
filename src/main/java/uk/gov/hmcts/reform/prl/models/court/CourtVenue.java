@@ -39,4 +39,6 @@ public class CourtVenue {
     private String mrdBuildingLocationId;
     @JsonProperty("mrd_venue_id")
     private String mrdVenueId;
+    @JsonProperty("fact_url")
+    private String factUrl;
 }

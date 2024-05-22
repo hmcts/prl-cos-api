@@ -5,16 +5,16 @@ import java.util.List;
 public enum CaseRole {
     CREATOR,
     APPLICANTSOLICITOR,
-    SOLICITORA,
-    SOLICITORB,
-    SOLICITORC,
-    SOLICITORD,
-    SOLICITORE,
-    SOLICITORF,
-    SOLICITORG,
-    SOLICITORH,
-    SOLICITORI,
-    SOLICITORJ;
+    C100APPLICANTSOLICITOR1,
+    C100APPLICANTSOLICITOR2,
+    C100APPLICANTSOLICITOR3,
+    C100APPLICANTSOLICITOR4,
+    C100APPLICANTSOLICITOR5,
+    C100RESPONDENTSOLICITOR1,
+    C100RESPONDENTSOLICITOR2,
+    C100RESPONDENTSOLICITOR3,
+    C100RESPONDENTSOLICITOR4,
+    C100RESPONDENTSOLICITOR5;
 
     private final String formattedName;
 
@@ -31,30 +31,20 @@ public enum CaseRole {
     }
 
     public static List<CaseRole> representativeSolicitors() {
-        return List.of(SOLICITORA,
-                       SOLICITORB,
-                       SOLICITORC,
-                       SOLICITORD,
-                       SOLICITORE,
-                       SOLICITORF,
-                       SOLICITORG,
-                       SOLICITORH,
-                       SOLICITORI,
-                       SOLICITORJ
+        return List.of(C100APPLICANTSOLICITOR1,
+                       C100APPLICANTSOLICITOR2,
+                       C100APPLICANTSOLICITOR3,
+                       C100APPLICANTSOLICITOR4,
+                       C100APPLICANTSOLICITOR5
         );
     }
 
     public static List<CaseRole> respondentSolicitors() {
-        return List.of(SOLICITORA,
-                       SOLICITORB,
-                       SOLICITORC,
-                       SOLICITORD,
-                       SOLICITORE,
-                       SOLICITORF,
-                       SOLICITORG,
-                       SOLICITORH,
-                       SOLICITORI,
-                       SOLICITORJ
+        return List.of(C100RESPONDENTSOLICITOR1,
+                       C100RESPONDENTSOLICITOR2,
+                       C100RESPONDENTSOLICITOR3,
+                       C100RESPONDENTSOLICITOR4,
+                       C100RESPONDENTSOLICITOR5
         );
     }
 
