@@ -12,9 +12,25 @@
         "baseName": "1",
         "email": "test1@test.com"
       },
+      "markedToServeEmailNotification": "Yes",
+      "serveToRespondentOptions": "No",
+      "recipientsOptions": {
+        "value": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "7663081e-778d-4317-b278-7642b740d317",
+            "label": "John Doe (Applicant 1)"
+          }
+        ]
+      },
       "applicants": [
         {
-          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+          "id": "7663081e-778d-4317-b278-7642b740d317",
           "value": {
             "firstName": "test",
             "lastName": "data",
@@ -67,6 +83,89 @@
             "sendSignUpLink": null,
             "solicitorEmail": null
           }
+        }
+      ],
+      "orderCollection": [
+        {
+          "value": {
+            "dateCreated": "2023-12-14T18:25:54.290951",
+            "isWithdrawnRequestApproved": "",
+            "typeOfOrder": "Interim",
+            "orderType": "Blank order or directions (C21)",
+            "orderTypeId": "blankOrderOrDirections",
+            "isTheOrderAboutAllChildren": "Yes",
+            "childrenList": "Joe Doe, Simon Anderson, Lilly Anderson, Charlotte Saxon, Selena Lees",
+            "orderDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/87b044fb-6cf4-4210-9312-9f4bb83b94d7",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/87b044fb-6cf4-4210-9312-9f4bb83b94d7/binary",
+              "document_filename": "Blank_Order_Directions_C21.pdf",
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "orderDocumentWelsh": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/885f08f3-2c68-4780-84d3-eae201b8a27f",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/885f08f3-2c68-4780-84d3-eae201b8a27f/binary",
+              "document_filename": "Blank_Order_Directions_C21_Welsh.pdf",
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "otherDetails": {
+              "createdBy": "kj",
+              "orderCreatedDate": "14 Dec 2023",
+              "orderMadeDate": "14 Dec 2023",
+              "orderRecipients": "",
+              "orderServedDate": "14 Dec 2023",
+              "status": "Created by Admin"
+            },
+            "serveOrderDetails": {
+              "serveOnRespondent": "No",
+              "recipientsOptions": "John Doe",
+              "otherParties": "",
+              "cafcassServed": "No",
+              "cafcassCymruServed": "No",
+              "otherPartiesServed": "No",
+              "cafcassOrCymruNeedToProvideReport": "No",
+              "orderEndsInvolvementOfCafcassOrCymru": "No",
+              "servedParties": [
+                {
+                  "value": {
+                    "partyId": "7663081e-778d-4317-b278-7642b740d317",
+                    "partyName": "John Doe (Applicant 1)"
+                  },
+                  "id": "6aa80ead-bf71-49ea-86c8-5adcf0e02e30"
+                }
+              ]
+            },
+            "typeOfChildArrangementsOrder": "",
+            "c21OrderOptions": "c21ApplicationRefused",
+            "childOption": {
+              "value": null,
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "isOrderUploaded": "No"
+          },
+          "id": "f75b410a-0370-4b87-b095-48121804c07f"
         }
       ],
       "children": [

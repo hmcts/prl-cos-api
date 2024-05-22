@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -34,7 +33,7 @@ public class CaseDataOtherProceedingsElementsMapper {
     private CaseDataOtherProceedingsElementsMapper() {
     }
 
-    public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                  C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements) {
         caseDataBuilder
                 .previousOrOngoingProceedingsForChildren(buildPreviousOrOngoingProceedingsForChildren(c100RebuildOtherProceedingsElements))
@@ -74,7 +73,7 @@ public class CaseDataOtherProceedingsElementsMapper {
 
             for (List<Order> orderList : ordersLists) {
                 ordersElements.addAll(orderList.stream()
-                        .map(order -> mapToProceedingDetails(order, order.getTypeOfOrderEnum())).collect(Collectors.toList()));
+                        .map(order -> mapToProceedingDetails(order, order.getTypeOfOrderEnum())).toList());
             }
 
             return ordersElements;
@@ -85,97 +84,97 @@ public class CaseDataOtherProceedingsElementsMapper {
     private static List<Order> getOtherOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getOtherOrders()) ? orderDetails
                 .getOtherOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .otherOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .otherOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getUndertakingOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getUndertakingOrders()) ? orderDetails
                 .getUndertakingOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .undertakingInPlaceOfAnOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .undertakingInPlaceOfAnOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getOtherInjuctionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getOtherInjuctionOrders()) ? orderDetails
                 .getOtherInjuctionOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .otherInjunctiveOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .otherInjunctiveOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getRestrainingOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getRestrainingOrders()) ? orderDetails
                 .getRestrainingOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .restrainingOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .restrainingOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getForcedMarriageProtectionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getForcedMarriageProtectionOrders()) ? orderDetails
                 .getForcedMarriageProtectionOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .fmpo).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .fmpo).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getOccupationOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getOccupationOrders()) ? orderDetails
                 .getOccupationOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .occupationOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .occupationOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getNonMolestationOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getNonMolestationOrders()) ? orderDetails
                 .getNonMolestationOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .nonMolestationOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .nonMolestationOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getFinancialOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getFinancialOrders()) ? orderDetails
                 .getFinancialOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .childrenAct1989).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .childrenAct1989).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getChildMaintenanceOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getChildMaintenanceOrders()) ? orderDetails
                 .getChildMaintenanceOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .orderRelatingToChildMaintainance).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .orderRelatingToChildMaintainance).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getContactOrdersForAdoption(OrderDetails orderDetails) {
         return nonNull(orderDetails.getContactOrdersForAdoption()) ? orderDetails
                 .getContactOrdersForAdoption().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .contactOrResidenceOrderWithAdoption).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .contactOrResidenceOrderWithAdoption).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getContactOrdersForDivorce(OrderDetails orderDetails) {
         return nonNull(orderDetails.getContactOrdersForDivorce()) ? orderDetails
                 .getContactOrdersForDivorce().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .contactOrResidenceOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .contactOrResidenceOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getChildAbductionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getChildAbductionOrders()) ? orderDetails
                 .getChildAbductionOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .childAbduction).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .childAbduction).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getChildArrangementsOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getChildArrangementOrders()) ? orderDetails
                 .getChildArrangementOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .childArrangementsOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .childArrangementsOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getEmergencyProtectionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getEmergencyProtectionOrders()) ? orderDetails
                 .getEmergencyProtectionOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                        .emergencyProtectionOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .emergencyProtectionOrder).build()).toList() : Collections.emptyList();
     }
 
     private static List<Order> getCareOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getCareOrders()) ? orderDetails.getCareOrders()
                 .stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum.careOrder).build())
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .toList() : Collections.emptyList();
     }
 
     private static List<Order> getChildSupervisionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getSupervisionOrders()) ? orderDetails.getSupervisionOrders()
                 .stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum.supervisionOrder).build())
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .toList() : Collections.emptyList();
     }
 
     private static Element<ProceedingDetails> mapToProceedingDetails(Order order, TypeOfOrderEnum typeOfOrderEnum) {

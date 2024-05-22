@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -99,9 +100,13 @@ public class DraftOrder {
     @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
     private final String manageOrdersCaseNo;
+    @JsonProperty("manageOrdersApplicant")
     private final String manageOrdersApplicant;
+    @JsonProperty("manageOrdersApplicantReference")
     private final String manageOrdersApplicantReference;
+    @JsonProperty("manageOrdersRespondent")
     private final String manageOrdersRespondent;
+    @JsonProperty("manageOrdersRespondentReference")
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate manageOrdersRespondentDob;
@@ -118,6 +123,9 @@ public class DraftOrder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final String orderSelectionType;
@@ -135,7 +143,6 @@ public class DraftOrder {
     private final C21OrderOptionsEnum c21OrderOptions;
     //PRL-3318 - Added for storing hearing dropdown
     private DynamicList hearingsType;
-
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
 
@@ -144,7 +151,6 @@ public class DraftOrder {
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
-        log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
             "%s - %s",
             this.orderTypeId,

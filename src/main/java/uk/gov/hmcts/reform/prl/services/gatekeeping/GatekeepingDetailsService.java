@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +12,23 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class GatekeepingDetailsService {
+
+    private final RoleAssignmentService roleAssignmentService;
 
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                     RefDataUserService refDataUserService) {
@@ -36,16 +40,20 @@ public class GatekeepingDetailsService {
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
-            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
+            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
                 && null != caseDataUpdated.get("judgeName")) {
                 String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME));
+
                 List<JudicialUsersApiResponse> judgeDetails =
                     refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                     .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))).build());
+                                                                     .personalCode(getPersonalCode(caseDataUpdated.get(
+                                                                         JUDGE_NAME))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.judge));
-                if (null != judgeDetails && judgeDetails.size() > 0) {
+                if (null != judgeDetails && !judgeDetails.isEmpty()) {
                     gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
+                                                            .idamId(getIdamId(caseDataUpdated.get(JUDGE_NAME))[0])
                                                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]).build());
                     gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
 
@@ -59,16 +67,6 @@ public class GatekeepingDetailsService {
         return gatekeepingDetailsBuilder.build();
     }
 
-    private String[] getPersonalCode(Object judgeDetails) {
-        String[] personalCodes = new String[3];
-        try {
-            personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
-                                                                .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return personalCodes;
-    }
 
 }
 

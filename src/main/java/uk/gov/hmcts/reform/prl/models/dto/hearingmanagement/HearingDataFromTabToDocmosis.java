@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @Builder(toBuilder = true)
 public class HearingDataFromTabToDocmosis {
 
+    private String hearingType;
     private String hearingDate;
     private String hearingTime;
     private String hearingLocation;

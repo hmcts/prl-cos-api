@@ -1,0 +1,1282 @@
+{
+  "case_details": {
+    "state": "AWAITING_SUBMISSION_TO_HMCTS",
+    "id": "1702636092071141",
+    "case_data": {
+      "draftConsentOrderFile": null,
+      "taskListVersion": "v2",
+      "applicationPermissionRequired": "noNotRequired",
+      "newAllegationsOfHarmOtherConcernsDetails": "welfare",
+      "familyMediatorMiam": "No",
+      "childrenNotPartInTheCaseYesNo": "No",
+      "payAgreeStatement": [
+        "agree"
+      ],
+      "isRespondent1SolicitorPresent": "No",
+      "applicantAttendedMiam": "No",
+      "miamChildProtectionConcernList": [
+        "MIAMChildProtectionConcernChecklistEnum_value_1"
+      ],
+      "newOrdersForcedMarriageProtectionDateIssued": null,
+      "isRespondent4SolicitorPresent": "No",
+      "caApplicant5Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR5]"
+      },
+      "allChildrenAreRiskPhysicalAbuse": "Yes",
+      "isRespondent4Present": "No",
+      "isFL401RespondentPresent": "No",
+      "caRespondent2Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR2]"
+      },
+      "respondentConfidentialDetails": [
+
+      ],
+      "isRespondent2Present": "Yes",
+      "reasonsForApplicationWithoutNotice": null,
+      "confidentialDetails": {
+        "isConfidentialDetailsAvailable": "Yes"
+      },
+      "c8WelshDocument": null,
+      "specialArrangement": {
+        "areAnySpecialArrangements": "No"
+      },
+      "newOrdersNonMolestationCaseNumber": null,
+      "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherChildNotInTheCase/otherChildNotInTheCase1'>Other children not in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Relationships\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndRespondents/childrenAndRespondents1'>Children and respondents</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndOtherPeople/childrenAndOtherPeople1'>Children and other people</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submitAndPay/submitAndPay1'>Submit and pay</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+      "caseSolicitorOrgName": "FPRL-test-organisation",
+      "caseSolicitorName": "AAT Solicitor",
+      "newOrdersNonMolestation": "No",
+      "newOrdersForcedMarriageProtection": "No",
+      "newAllegationsOfHarmOtherConcerns": "Yes",
+      "urgencyDetails": {
+        "urgencyStatus": "Not urgent"
+      },
+      "newOrdersOtherInjunctiveEndDate": null,
+      "newOrdersUndertakingInPlaceCurrent": "Yes",
+      "caseUrgencyTimeAndReason": null,
+      "newAllegationsOfHarmSubstanceAbuseDetails": "Drugs, alcohol or substance",
+      "isFL401ApplicantSolicitorPresent": "No",
+      "newOrdersRestrainingEndDate": null,
+      "orderName": "<span class='heading-h3'>Notice of proceedings (C6) (Notice to parties)</span>",
+      "newOrdersOtherInjunctiveCourtName": null,
+      "childAbuses": [
+        "physicalAbuse",
+        "financialAbuse"
+      ],
+      "childPhysicalAbuse": {
+        "typeOfAbuse": "physicalAbuse",
+        "abuseNatureDescription": "Physical abuse nature of behaviour",
+        "behavioursStartDateAndLength": "About 7 months ago",
+        "behavioursApplicantSoughtHelp": "No",
+        "behavioursApplicantHelpSoughtWho": null
+      },
+      "newOrdersUndertakingInPlaceDateIssued": "1967-09-01",
+      "isApplicant2SolicitorPresent": "Yes",
+      "draftOrderCollection": [
+        {
+          "id": "1fc02153-5afd-480d-9271-13fd3e4025e7",
+          "value": {
+            "orderType": "noticeOfProceedingsParties",
+            "childOption": {
+              "value": null,
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "orderTypeId": "Notice of proceedings (C6) (Notice to parties)",
+            "otherDetails": {
+              "status": "Drafted by Solicitor",
+              "dateCreated": "2024-01-12T10:04:54.225064",
+              "orderCreatedBy": "AAT Solicitor",
+              "isJudgeApprovalNeeded": "Yes",
+              "orderCreatedByEmailId": "prl_aat_solicitor@mailinator.com",
+              "nameOfLaForReviewOrder": "null",
+              "nameOfJudgeForReviewOrder": "null"
+            },
+            "orderDocument": {
+              "category_id": null,
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0",
+              "document_filename": "Notice_Of_Proceeding_Order_C6_draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0/binary",
+              "document_creation_date": null
+            },
+            "orderCreatedBy": "SOLICITOR",
+            "orderDocumentWelsh": {
+              "category_id": null,
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41",
+              "document_filename": "Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41/binary",
+              "document_creation_date": null
+            },
+            "orderSelectionType": "draftAnOrder",
+            "isOrderCreatedBySolicitor": "Yes",
+            "manageOrderHearingDetails": [
+              {
+                "id": "3b03b05a-c68c-453a-9d59-bf11f6cde30a",
+                "value": {
+                  "courtList": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "827534:",
+                        "label": "Aberystwyth Justice Centre - Trefechan - SY23 1AS"
+                      },
+                      {
+                        "code": "101959:",
+                        "label": "Carmarthen County Court and Tribunal Hearing Centre - Hill House, Picton Terrace, Carmarthen - SA31 3BT"
+                      },
+                      {
+                        "code": "816875:family.chelmsford.countycourt@justice.gov.uk",
+                        "label": "Chelmsford County and Family Court - Priory Place - CM2 0PP"
+                      },
+                      {
+                        "code": "497679:Coventryprivatelawapplications@justice.gov.uk",
+                        "label": "Coventry Combined Court Centre - Much Park Street, Coventry - CV1 2SN"
+                      },
+                      {
+                        "code": "898213:eastlondonfamilypr@justice.gov.uk",
+                        "label": "East London Family Court - Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE - E14 4HD"
+                      },
+                      {
+                        "code": "735217:family.exeter.countycourt@justice.gov.uk",
+                        "label": "Exeter Combined Court Centre - Southernhay Gardens, Exeter - EX1 1UH"
+                      },
+                      {
+                        "code": "198592:family.gloucester.countycourt@justice.gov.uk",
+                        "label": "Gloucestershire Family and Civil Court - Kimbrose Way, Gloucester Docks - GL1 2DE"
+                      },
+                      {
+                        "code": "700596:",
+                        "label": "Haverfordwest County and Family - Penffynnon, Hawthorn Rise - SA61 2AZ"
+                      },
+                      {
+                        "code": "195520:hull.private.filing@justice.gov.uk",
+                        "label": "Kingston-upon-Hull Combined Court Centre - The Combined Court Centre - HU1 2EZ"
+                      },
+                      {
+                        "code": "195465:PLP.LINCOLN@justice.gov.uk",
+                        "label": "Lincoln County Court and Family Court - High Street - LN5 7PS"
+                      },
+                      {
+                        "code": "390932:",
+                        "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
+                      },
+                      {
+                        "code": "487294:KentPRL@justice.gov.uk",
+                        "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+                      },
+                      {
+                        "code": "366796:newcastle.c100applications@justice.gov.uk",
+                        "label": "Newcastle Civil & Family Courts and Tribunals Centre - Barras Bridge, Newcastle-Upon-Tyne - NE99 1NA"
+                      },
+                      {
+                        "code": "471569:family.peterborough.countycourt@justice.gov.uk",
+                        "label": "Peterborough Combined Court Centre - Crown Buildings, Rivergate - PE1 1EJ"
+                      },
+                      {
+                        "code": "846055:",
+                        "label": "Port Talbot Justice Centre - Harbourside Road - SA13 1SB"
+                      },
+                      {
+                        "code": "43104:family.southampton.countycourt@justice.gov.uk",
+                        "label": "Southampton Combined Court Centre - The Courts of Justice, London Road - SO15 2XQ"
+                      },
+                      {
+                        "code": "234946:",
+                        "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+                      }
+                    ]
+                  },
+                  "hearingTypes": {
+                    "value": {
+                      "code": "ABA5-ALL",
+                      "label": "Allocation"
+                    },
+                    "list_items": [
+                      {
+                        "code": "ABA5-2GA",
+                        "label": "2nd Gatekeeping Appointment"
+                      },
+                      {
+                        "code": "ABA5-ALL",
+                        "label": "Allocation"
+                      },
+                      {
+                        "code": "ABA5-APL",
+                        "label": "Appeal"
+                      },
+                      {
+                        "code": "ABA5-APP",
+                        "label": "Application"
+                      },
+                      {
+                        "code": "ABA5-BRE",
+                        "label": "Breach"
+                      },
+                      {
+                        "code": "ABA5-CMC",
+                        "label": "Case Management Conference"
+                      },
+                      {
+                        "code": "ABA5-CMH",
+                        "label": "Case Management Hearing"
+                      },
+                      {
+                        "code": "ABA5-COM",
+                        "label": "Committal"
+                      },
+                      {
+                        "code": "ABA5-CON",
+                        "label": "Conciliation"
+                      },
+                      {
+                        "code": "ABA5-COS",
+                        "label": "Costs"
+                      },
+                      {
+                        "code": "ABA5-DIR",
+                        "label": "Directions (First/Further)"
+                      },
+                      {
+                        "code": "ABA5-DRA",
+                        "label": "Dispute Resolution Appointment"
+                      },
+                      {
+                        "code": "ABA5-FCM",
+                        "label": "Further Case Management Hearing"
+                      },
+                      {
+                        "code": "ABA5-FFH",
+                        "label": "Full/Final hearing"
+                      },
+                      {
+                        "code": "ABA5-FHD",
+                        "label": "First Hearing Dispute Resolution Appointment (FHDRA)"
+                      },
+                      {
+                        "code": "ABA5-FHR",
+                        "label": "First Hearing"
+                      },
+                      {
+                        "code": "ABA5-FOF",
+                        "label": "Finding of Fact"
+                      },
+                      {
+                        "code": "ABA5-GRH",
+                        "label": "Ground Rules Hearing"
+                      },
+                      {
+                        "code": "ABA5-HRA",
+                        "label": "Human Rights Act Application"
+                      },
+                      {
+                        "code": "ABA5-JMT",
+                        "label": "Judgment"
+                      },
+                      {
+                        "code": "ABA5-NEH",
+                        "label": "Neutral Evaluation Hearing"
+                      },
+                      {
+                        "code": "ABA5-PER",
+                        "label": "Permission Hearing"
+                      },
+                      {
+                        "code": "ABA5-PHR",
+                        "label": "Pre Hearing Review"
+                      },
+                      {
+                        "code": "ABA5-REV",
+                        "label": "Review"
+                      },
+                      {
+                        "code": "ABA5-SCF",
+                        "label": "Settlement Conference"
+                      },
+                      {
+                        "code": "ABA5-SGA",
+                        "label": "Safeguarding Gatekeeping Appointment"
+                      }
+                    ]
+                  },
+                  "applicantName1": "John Doe (Applicant1)",
+                  "applicantName2": "Jeremy Anderson (Applicant2)",
+                  "applicantName3": "Martina Graham (Applicant3)",
+                  "isCafcassCymru": "No",
+                  "hearingChannels": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "respondentName1": "Mary Richards (Respondent1)",
+                  "respondentName2": "Elise Lynn (Respondent2)",
+                  "respondentName3": "David Carman (Respondent3)",
+                  "hearingDateTimes": [
+                    {
+                      "id": "46a35f40-d630-4178-baba-2a0990920c70",
+                      "value": {
+                        "hearingDateTimeOption": "2024-01-13T10:04:00.000"
+                      }
+                    }
+                  ],
+                  "applicantSolicitor1": "Legal Solicitor (Applicant1 solicitor)",
+                  "applicantSolicitor2": "Legal Solicitor Jr (Applicant2 solicitor)",
+                  "applicantSolicitor3": "Sr Legal Solicitor (Applicant3 solicitor)",
+                  "hearingChannelsEnum": "INTER",
+                  "hearingEstimatedDays": "1",
+                  "cafcassHearingChannel": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "confirmedHearingDates": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": null,
+                        "label": null
+                      }
+                    ]
+                  },
+                  "hearingEstimatedHours": "2",
+                  "hearingEstimatedMinutes": "3",
+                  "applicantHearingChannel1": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "applicantHearingChannel2": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "applicantHearingChannel3": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "fillingFormRenderingInfo": "<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhen should I fill this in?\n\n</span>\n\n</summary>\n\n<div class='govuk-details__text'>\n\n<p><strong>Only fill the following if you haven't requested the hearing yet</strong></p></br>\n\n</div>\n\n</details>",
+                  "hearingListedLinkedCases": {
+                    "value": null,
+                    "list_items": [
+
+                    ]
+                  },
+                  "hearingdataFromHearingTab": [
+
+                  ],
+                  "respondentHearingChannel1": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "respondentHearingChannel2": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "respondentHearingChannel3": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "cafcassCymruHearingChannel": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "hearingDateConfirmOptionEnum": "dateReservedWithListAssit",
+                  "localAuthorityHearingChannel": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "applicantSolicitorHearingChannel1": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "applicantSolicitorHearingChannel2": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "applicantSolicitorHearingChannel3": {
+                    "value": null,
+                    "list_items": [
+                      {
+                        "code": "INTER",
+                        "label": "In Person"
+                      },
+                      {
+                        "code": "NA",
+                        "label": "Not in Attendance"
+                      },
+                      {
+                        "code": "ONPPRS",
+                        "label": "On the Papers"
+                      },
+                      {
+                        "code": "TEL",
+                        "label": "Telephone"
+                      },
+                      {
+                        "code": "VID",
+                        "label": "Video"
+                      }
+                    ]
+                  },
+                  "allPartiesAttendHearingSameWayYesOrNo": "Yes"
+                }
+              }
+            ],
+            "isOrderUploadedByJudgeOrAdmin": "No",
+            "hasJudgeProvidedHearingDetails": "Yes"
+          }
+        }
+      ],
+      "childrenSubjectOfChildProtectionPlan": "no",
+      "newAgreeChildSupervisedTime": "No",
+      "paymentServiceRequestReferenceNumber": "2024-1705053696845",
+      "feeAmount": "£232.00",
+      "orderNameForSolicitorCreatedOrder": "Notice of proceedings (C6) (Notice to parties) - 12 Jan 2024, 10:04 AM",
+      "allegationsOfHarmRevisedChildContactTable": {
+        "newAgreeChildOtherContact": "No",
+        "newAgreeChildSupervisedTime": "No",
+        "newAgreeChildUnsupervisedTime": "No"
+      },
+      "newAgreeChildUnsupervisedTime": "No",
+      "newOrdersUndertakingInPlaceCaseNumber": "2132132321",
+      "welshLanguageRequirement": "Yes",
+      "newOrdersOccupationEndDate": null,
+      "newOrdersNonMolestationDateIssued": null,
+      "habitualResidentInOtherStateGiveReason": null,
+      "whichChildrenAreRiskFinancialAbuse": {
+        "value": [
+          {
+            "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+            "label": "Joe Doe"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+            "label": "Joe Doe"
+          },
+          {
+            "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+            "label": "Simon Anderson"
+          },
+          {
+            "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+            "label": "Lilly Anderson"
+          },
+          {
+            "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+            "label": "Charlotte Saxon"
+          },
+          {
+            "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+            "label": "Selena Lees"
+          }
+        ]
+      },
+      "newAllegationsOfHarmChildAbductionYesNo": "Yes",
+      "isCafcassCymru": "No",
+      "c1AWelshDocument": null,
+      "habitualResidentInOtherState": "No",
+      "caseTypeOfApplication": "C100",
+      "newOrdersUndertakingInPlaceCourtName": "SWAE",
+      "caRespondent1Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR1]"
+      },
+      "domesticBehaviours": [
+        {
+          "id": "e4561ef7-ea93-4acb-be70-90091e7d5524",
+          "value": {
+            "typeOfAbuse": "TypeOfAbuseEnum_value_1",
+            "newAbuseNatureDescription": "Suspicious behaviour",
+            "newBehavioursStartDateAndLength": "about 6 months back",
+            "newBehavioursApplicantSoughtHelp": "No",
+            "newBehavioursApplicantHelpSoughtWho": "did to help"
+          }
+        }
+      ],
+      "litigationCapacityTable": {
+        "litigationCapacityFactors": null,
+        "litigationCapacityReferrals": null,
+        "litigationCapacityOtherFactors": null,
+        "litigationCapacityOtherFactorsDetails": null
+      },
+      "whichChildrenAreRiskPhysicalAbuse": null,
+      "newOrdersForcedMarriageProtectionCurrent": null,
+      "c1AWelshDraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a6c70d46-1d3d-40cf-b7b6-64c531dbd4b9",
+        "document_filename": "C1A_Document_Draft_Welsh.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a6c70d46-1d3d-40cf-b7b6-64c531dbd4b9/binary",
+        "document_creation_date": null
+      },
+      "applicantName": "John Doe",
+      "newOrdersOccupationDocument": null,
+      "previewDraftOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0/binary",
+        "document_filename": "Notice_Of_Proceeding_Order_C6_draft.pdf",
+        "category_id": null,
+        "document_creation_date": null
+      },
+      "newChildAbductionReasons": "Details about why children may be abducted",
+      "newOrdersRestrainingCurrent": null,
+      "newOrdersOccupationDateIssued": null,
+      "selectedCaseTypeID": "C100",
+      "respondentTaskListA": "",
+      "respondentTaskListB": "",
+      "otherProceedingEmptyTable": {
+        "otherProceedingEmptyField": " "
+      },
+      "otherChildNotInTheCaseTable": [
+        {
+          "id": "d3ee1d47-c619-4cf7-b101-de015538d453",
+          "value": {
+            "gender": null,
+            "lastName": null,
+            "firstName": null,
+            "dateOfBirth": null,
+            "otherGender": null,
+            "isDateOfBirthKnown": null
+          }
+        }
+      ],
+      "respondentTaskListC": "",
+      "respondentTaskListD": "",
+      "respondentTaskListE": "",
+      "applicationPermissionRequiredReason": null,
+      "dateSubmitted": "2024-01-12",
+      "newOrdersOtherInjunctiveDocument": null,
+      "caseStatus": {
+        "state": "Submitted"
+      },
+      "isRespondent3SolicitorPresent": "No",
+      "isApplicant5Present": "No",
+      "caRespondent1": {
+        "lastName": "Richards",
+        "firstName": "Mary"
+      },
+      "newOrdersRestraining": "No",
+      "caRespondent3": {
+        "lastName": "Carman",
+        "firstName": "David"
+      },
+      "caRespondent2": {
+        "lastName": "Lynn",
+        "firstName": "Elise"
+      },
+      "finalWelshDocument": null,
+      "newOrdersOtherInjunctiveCaseNumber": null,
+      "hearingOptionSelected": null,
+      "allegationsOfHarmRevisedOverviewTable": {
+        "newAllegationsOfHarmYesNo": "Yes",
+        "newAllegationsOfHarmOtherConcerns": "Yes",
+        "newAllegationsOfHarmChildAbuseYesNo": "Yes",
+        "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
+        "newAllegationsOfHarmChildAbductionYesNo": "Yes",
+        "newAllegationsOfHarmSubstanceAbuseYesNo": "Yes",
+        "newAllegationsOfHarmOtherConcernsDetails": "welfare",
+        "newAllegationsOfHarmSubstanceAbuseDetails": "Drugs, alcohol or substance"
+      },
+      "childrenKnownToLocalAuthority": "no",
+      "allegationsOfHarmRevisedOtherConcernsTable": {
+        "newAllegationsOfHarmOtherConcernsCourtActions": "Very very concerning"
+      },
+      "draftOrdersDynamicList": {
+        "value": {
+          "code": "1fc02153-5afd-480d-9271-13fd3e4025e7",
+          "label": "Notice of proceedings (C6) (Notice to parties) - 12 Jan 2024, 10:22 AM"
+        },
+        "list_items": [
+          {
+            "code": "1fc02153-5afd-480d-9271-13fd3e4025e7",
+            "label": "Notice of proceedings (C6) (Notice to parties) - 12 Jan 2024, 10:22 AM"
+          }
+        ]
+      },
+      "natureOfOrder": "Requesting for spending time with the child twice a week",
+      "jurisdictionIssueGiveReason": "Yes,",
+      "caRespondent3Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR3]"
+      },
+      "newPreviousAbductionThreatsDetails": null,
+      "isOrderCreatedBySolicitor": "Yes",
+      "daRespondentPolicy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]"
+      },
+      "typeOfApplicationTable": {
+        "natureOfOrder": "Requesting for spending time with the child twice a week",
+        "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+        "typeOfChildArrangementsOrder": "Spend time with order",
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
+      },
+      "c8Document": null,
+      "caRespondent4Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR4]"
+      },
+      "miamDomesticViolenceChecklist": [
+        "miamDomesticViolenceChecklistEnum_Value_22",
+        "miamDomesticViolenceChecklistEnum_Value_21"
+      ],
+      "helpWithFees": "No",
+      "allegationOfHarmRevised": {
+        "typesOfHarmRevised": "Domestic abuse, child abduction, child abuse, drugs, alcohol or substance abuse, safety or welfare concerns"
+      },
+      "newPreviousAbductionThreats": "No",
+      "buffChildAndApplicantRelations": [
+
+      ],
+      "c21OrderOptions": null,
+      "newOrdersRestrainingDateIssued": null,
+      "finalDocument": null,
+      "newAbductionPreviousPoliceInvolvement": "No",
+      "isApplicant2Present": "Yes",
+      "newOrdersForcedMarriageProtectionDocument": null,
+      "welshLanguageRequirementApplicationNeedEnglish": null,
+      "isRespondent3Present": "Yes",
+      "welshLanguageRequirementsTable": {
+        "welshLanguageRequirement": "Yes",
+        "welshLanguageRequirementApplication": "english",
+        "languageRequirementApplicationNeedWelsh": "Yes",
+        "welshLanguageRequirementApplicationNeedEnglish": null
+      },
+      "orderType": "noticeOfProceedingsParties",
+      "welshLanguageRequirementApplication": "english",
+      "ordersApplyingFor": [
+        "childArrangementsOrder",
+        "prohibitedStepsOrder",
+        "specificIssueOrder"
+      ],
+      "caRespondent5Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
+      },
+      "caseSubmittedTimeStamp": "2024-01-12T10:01:31.893183976Z",
+      "isFL401RespondentSolicitorPresent": "No",
+      "caApplicant3": {
+        "lastName": "Graham",
+        "firstName": "Martina"
+      },
+      "caApplicant2": {
+        "lastName": "Anderson",
+        "firstName": "Jeremy"
+      },
+      "caApplicant1": {
+        "lastName": "Doe",
+        "firstName": "John"
+      },
+      "c100ConfidentialityStatementDisclaimer": [
+        "confidentialityStatementUnderstood"
+      ],
+      "c1ADraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/47f99c9c-4999-456b-b42c-92124cd077df",
+        "document_filename": "C1A_DocumentDraft.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/47f99c9c-4999-456b-b42c-92124cd077df/binary",
+        "document_creation_date": null
+      },
+      "caseworkerEmailAddress": "aloknath.datta@hmcts.net",
+      "isApplicant1SolicitorPresent": "Yes",
+      "miamExemptionsChecklist": [
+        "domesticViolence",
+        "childProtectionConcern"
+      ],
+      "isApplicant4SolicitorPresent": "No",
+      "newAgreeChildOtherContact": "No",
+      "c1ADocument": null,
+      "effortsMadeWithRespondents": null,
+      "isHearingTaskNeeded": null,
+      "id": 1705053615819310,
+      "newAbductionPassportOfficeNotified": "No",
+      "courtId": "115",
+      "areRespondentsAwareOfProceedings": "No",
+      "isMultipleHearingSelected": null,
+      "newAllegationsOfHarmChildAbuseYesNo": "Yes",
+      "previewDraftOrderWelsh": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41/binary",
+        "document_filename": "Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf",
+        "category_id": null,
+        "document_creation_date": null
+      },
+      "newAbductionPreviousPoliceInvolvementDetails": null,
+      "declarationTable": {
+        "agreedBy": "AAT Solicitor",
+        "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. AAT Solicitor is authorised by the applicant to sign this statement."
+      },
+      "newAbductionChildHasPassport": "No",
+      "newOrdersOccupationCaseNumber": null,
+      "consentOrder": "No",
+      "caApplicant2Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+      },
+      "paymentCallbackServiceRequestUpdate": {
+        "payment": {
+          "accountNumber": null,
+          "caseReference": null,
+          "paymentAmount": null,
+          "paymentMethod": null,
+          "paymentReference": null
+        },
+        "ccdCaseNumber": "1705053615819310",
+        "serviceRequestAmount": null,
+        "serviceRequestStatus": "Paid",
+        "callBackUpdateTimestamp": "2024-01-12T10:02:39.763870",
+        "serviceRequestReference": "2024-1705053696845"
+      },
+      "claimingExemptionMiam": "Yes",
+      "applicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
+      },
+      "otherProceedingsDetailsTable": [
+        {
+          "id": "48d17214-af07-4291-bffc-e7e840bb15ba",
+          "value": {
+            "dateEnded": null,
+            "caseNumber": null,
+            "dateStarted": null,
+            "nameOfCourt": null,
+            "nameOfJudge": null,
+            "typeOfOrder": null,
+            "nameAndOffice": null,
+            "nameOfGuardian": null,
+            "otherTypeOfOrder": null,
+            "nameOfChildrenInvolved": null,
+            "previousOrOngoingProceedings": null
+          }
+        }
+      ],
+      "caseManagementLocation": {
+        "region": "2",
+        "regionId": null,
+        "regionName": "Midlands",
+        "baseLocation": "283922",
+        "baseLocationId": null,
+        "baseLocationName": "STOKE ON TRENT TRIBUNAL HEARING CENTRE"
+      },
+      "newAllegationsOfHarmSubstanceAbuseYesNo": "Yes",
+      "isApplicant4Present": "No",
+      "newChildrenLocationNow": "Unknown whereabouts of the children",
+      "newOrdersOccupationCourtName": null,
+      "childDetailsRevisedExtraTable": {
+        "childrenKnownToLocalAuthority": "No",
+        "childrenSubjectOfChildProtectionPlan": "No"
+      },
+      "newOrdersRestrainingCourtName": null,
+      "confidentialityDisclaimer": {
+        "confidentialityChecksChecked": [
+          "confidentialityChecksChecked"
+        ]
+      },
+      "childrenConfidentialDetails": [
+
+      ],
+      "requestToForeignAuthority": "Yes",
+      "newOrdersNonMolestationCourtName": null,
+      "isCaseUrgent": "No",
+      "isRespondent1Present": "Yes",
+      "doYouWantToEditTheOrder": null,
+      "draftOrderDoc": null,
+      "internationalElementTable": {
+        "jurisdictionIssue": "Yes",
+        "requestToForeignAuthority": "Yes",
+        "jurisdictionIssueGiveReason": "Yes,",
+        "habitualResidentInOtherState": "No",
+        "requestToForeignAuthorityGiveReason": "Yes",
+        "habitualResidentInOtherStateGiveReason": null
+      },
+      "newOrdersOccupation": "No",
+      "newOrdersOtherInjunctive": "No",
+      "newOrdersNonMolestationEndDate": null,
+      "miamTable": {
+        "soleTraderName": null,
+        "familyMediatorMiam": "No",
+        "applicantAttendedMiam": "No",
+        "claimingExemptionMiam": "Yes",
+        "familyMediatorServiceName": null,
+        "mediatorRegistrationNumber": null
+      },
+      "isRespondent5Present": "No",
+      "isRespondent2SolicitorPresent": "No",
+      "miamExemptionsTable": {
+        "urgencyEvidence": "",
+        "otherGroundsEvidence": "",
+        "childProtectionEvidence": "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act",
+        "reasonsForMiamExemption": "Domestic violence, Child Protection Concern",
+        "domesticViolenceEvidence": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence by another prospective party in the form of abuse which relates to financial matters.\nA letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom under paragraph 289B of the Rules made by the Home Secretary under section 3(2) of the Immigration Act 1971, which can be found at https://www. gov.uk/guidance/immigration-rules/immigration-rules-index;",
+        "previousAttendenceEvidence": ""
+      },
+      "allChildrenAreRiskFinancialAbuse": "No",
+      "isRespondent5SolicitorPresent": "No",
+      "applicantCaseName": "John Doe Vs Mary Richards v2",
+      "caApplicant4Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR4]"
+      },
+      "summaryTabForOrderAppliedFor": {
+        "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+        "typeOfChildArrangementsOrder": "Spend time with order"
+      },
+      "languageRequirementApplicationNeedWelsh": "Yes",
+      "newOrdersUndertakingInPlace": "Yes",
+      "newOrdersOtherInjunctiveDateIssued": null,
+      "respondentTaskList": "",
+      "isApplicant5SolicitorPresent": "No",
+      "previewUploadedOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0/binary",
+        "document_filename": "Notice_Of_Proceeding_Order_C6_draft.pdf",
+        "category_id": null,
+        "document_creation_date": null
+      },
+      "caseFromCourtNav": null,
+      "draftOrderDocWelsh": null,
+      "jurisdictionIssue": "Yes",
+      "isWelshDocGen": "Yes",
+      "isEngDocGen": "Yes",
+      "childrenKnownToLocalAuthorityTextArea": null,
+      "newAllegationsOfHarmYesNo": "Yes",
+      "caseFlags": {
+        "details": [
+
+        ],
+        "partyName": null,
+        "roleOnCase": null
+      },
+      "isApplicant1Present": "Yes",
+      "isApplicant3Present": "Yes",
+      "requestToForeignAuthorityGiveReason": "Yes",
+      "isApplicant3SolicitorPresent": "Yes",
+      "whatToDoWithOrderSolicitor": "sendToAdminToServe",
+      "typeOfChildArrangementsOrder": "spendTimeWithOrder",
+      "isApprovedByJudge": null,
+      "doYouNeedAWithoutNoticeHearing": "No",
+      "c8WelshDraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8e35d48d-a866-4d08-a1ff-0baba91cc175",
+        "document_filename": "C8Document_Draft_Welsh.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8e35d48d-a866-4d08-a1ff-0baba91cc175/binary",
+        "document_creation_date": null
+      },
+      "c8DraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6ae1de56-44a9-4d6f-b57f-57872a96a3fd",
+        "document_filename": "C8DocumentDraft.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6ae1de56-44a9-4d6f-b57f-57872a96a3fd/binary",
+        "document_creation_date": null
+      },
+      "newOrdersOccupationCurrent": null,
+      "newOrdersForcedMarriageProtectionEndDate": null,
+      "allegationsOfHarmRevisedChildAbductionTable": {
+        "newChildrenLocationNow": "Unknown whereabouts of the children",
+        "newChildAbductionReasons": "Details about why children may be abducted",
+        "newChildPassportPossession": null,
+        "newPreviousAbductionThreats": "No",
+        "newAbductionChildHasPassport": "No",
+        "newChildHasMultiplePassports": null,
+        "newAbductionPassportOfficeNotified": "No",
+        "newPreviousAbductionThreatsDetails": null,
+        "newAbductionPreviousPoliceInvolvement": "No",
+        "newAbductionPreviousPoliceInvolvementDetails": null
+      },
+      "applicantSolicitorEmailAddress": "prl_aat_solicitor@mailinator.com",
+      "courtName": "Central Family Court",
+      "solicitorName": "AAT Solicitor",
+      "newAllegationsOfHarmOtherConcernsCourtActions": "Very very concerning",
+      "hearingUrgencyTable": {
+        "isCaseUrgent": "No",
+        "setOutReasonsBelow": null,
+        "caseUrgencyTimeAndReason": null,
+        "effortsMadeWithRespondents": null,
+        "doYouNeedAWithoutNoticeHearing": "No",
+        "areRespondentsAwareOfProceedings": "No",
+        "reasonsForApplicationWithoutNotice": null,
+        "doYouRequireAHearingWithReducedNotice": "No"
+      },
+      "isFL401ApplicantPresent": "No",
+      "doYouRequireAHearingWithReducedNotice": "No",
+      "newOrdersNonMolestationCurrent": null,
+      "buffChildAndOtherPeopleRelations": [
+
+      ],
+      "caApplicant3Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+      },
+      "childFinancialAbuse": {
+        "typeOfAbuse": "financialAbuse",
+        "abuseNatureDescription": "Financial abuse nature of behaviour",
+        "behavioursStartDateAndLength": "behaviour",
+        "behavioursApplicantSoughtHelp": "Yes",
+        "behavioursApplicantHelpSoughtWho": "Details about who they seek help from"
+      },
+      "newOrdersOtherInjunctiveCurrent": null,
+      "newOrdersUndertakingInPlaceEndDate": "1978-09-01",
+      "otherProceedingsForSummaryTab": [
+        {
+          "id": "f072f461-8a5e-4636-b3f5-0bece7753cb7",
+          "value": {
+            "caseNumber": null,
+            "nameOfCourt": null,
+            "typeOfOrder": null
+          }
+        }
+      ],
+      "caseNameHmctsInternal": "John Doe Vs Mary Richards v2",
+      "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
+      "newOrdersRestrainingCaseNumber": null,
+      "allegationsOfHarmRevisedOrdersTable": {
+        "occupationOrder": {
+
+        },
+        "restrainingOrder": {
+
+        },
+        "newOrdersOccupation": "No",
+        "nonMolestationOrder": {
+
+        },
+        "newOrdersRestraining": "No",
+        "otherInjunctiveOrder": {
+
+        },
+        "newOrdersNonMolestation": "No",
+        "undertakingInPlaceOrder": {
+          "endDate": "1978-09-01",
+          "courtName": "SWAE",
+          "caseNumber": "2132132321",
+          "dateIssued": "1967-09-01",
+          "orderCurrent": "Yes"
+        },
+        "newOrdersOtherInjunctive": "No",
+        "newOrdersUndertakingInPlace": "Yes",
+        "forcedMarriageProtectionOrder": {
+
+        },
+        "newOrdersForcedMarriageProtection": "No"
+      },
+      "newOrdersNonMolestationDocument": null,
+      "applicationDetails": "The reason being it could not be sorted by discussion. We request the court to help us to come to a decision.",
+      "allocatedJudgeDetails": {
+        "lastName": " ",
+        "courtName": "Central Family Court",
+        "emailAddress": " ",
+        "judgePersonalCode": null,
+        "tierOfJudiciaryType": " ",
+        "isJudgeOrLegalAdviser": null,
+        "isSpecificJudgeOrLegalAdviserNeeded": null
+      }
+    }
+  },
+  "event_id": "editAndApproveAnOrder"
+}

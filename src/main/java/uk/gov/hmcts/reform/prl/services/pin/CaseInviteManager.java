@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.pin;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,11 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInviteManager {
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
-    @Autowired
-    private C100CaseInviteService c100CaseInviteService;
-    @Autowired
-    private FL401CaseInviteService fl401CaseInviteService;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final C100CaseInviteService c100CaseInviteService;
+    private final FL401CaseInviteService fl401CaseInviteService;
 
     public CaseData generatePinAndSendNotificationEmail(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {

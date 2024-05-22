@@ -12,6 +12,7 @@
       "additionalProp1": {},
       "additionalProp2": {},
       "additionalProp3": {},
+      "caseTypeOfApplication": "FL401",
       "listWithoutNoticeHearingDetails": [
         {
           "id": "11595009-7cf8-4883-bd03-fd18c8e92de0",
@@ -60,9 +61,9 @@
             "hearingJudgeEmailAddress": "Sample@gmail.com",
             "hearingJudgeNameAndEmail": {
               "idamId": null,
-              "personalCode": "49933940"
+              "personalCode": "4923952"
             },
-            "hearingJudgePersonalCode": "49933940",
+            "hearingJudgePersonalCode": "4923952",
             "hearingListedLinkedCases": {
               "value": {
                 "code": "1677767515750127",

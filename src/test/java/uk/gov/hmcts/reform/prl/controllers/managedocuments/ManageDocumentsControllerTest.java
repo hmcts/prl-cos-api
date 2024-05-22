@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,12 +16,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -28,15 +32,20 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -48,6 +57,8 @@ public class ManageDocumentsControllerTest {
 
     @Mock
     ManageDocumentsService manageDocumentsService;
+    @Mock
+    UserService userService;
 
     @Mock
     AllTabServiceImpl tabService;
@@ -82,7 +93,7 @@ public class ManageDocumentsControllerTest {
     @Before
     public void setup() {
         caseDataMap = new HashMap<>();
-
+        caseDataMap.put("id", 12345678L);
         caseData = CaseData.builder()
             .id(12345678L)
             .build();
@@ -120,7 +131,6 @@ public class ManageDocumentsControllerTest {
             .listItems(dynamicListElementList).build();
     }
 
-
     @Test
     public void testHandleAboutToStart() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -129,18 +139,22 @@ public class ManageDocumentsControllerTest {
 
         Element<ManageDocuments> manageDocumentsElement = element(manageDocuments);
 
-        CaseData caseDataUpdated = CaseData.builder().manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseData caseDataUpdated = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails
+                                           .builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build()).build();
 
-        when(manageDocumentsService.populateDocumentCategories(auth,caseData)).thenReturn(caseDataUpdated);
+        when(manageDocumentsService.populateDocumentCategories(auth, caseData)).thenReturn(caseDataUpdated);
         CallbackResponse response = manageDocumentsController.handleAboutToStart(auth, callbackRequest);
-        Assert.assertNotNull(response.getData().getManageDocuments());
+        Assert.assertNotNull(response.getData().getDocumentManagementDetails().getManageDocuments());
 
         verify(manageDocumentsService).populateDocumentCategories(auth, caseData);
         verifyNoMoreInteractions(manageDocumentsService);
     }
 
     @Test
-    public void testCopyManageDocs() {
+    public void testCopyManageDocs() throws JsonProcessingException {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -157,10 +171,56 @@ public class ManageDocumentsControllerTest {
 
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
-        verify(tabService).updateAllTabsIncludingConfTab(caseData);
         Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
 
     }
 
+    @Test
+    public void testCopyManageDocsMid() {
+
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+    }
+
+    @Test
+    public void testCopyManageDocsMidIfErrorsExist() {
+
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(List.of("errors"));
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+    }
+
+    @Test
+    public void testCopyManageDocsMid_notSolicitor() {
+
+        UserDetails userDetailsCafcassRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(CAFCASS_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService, times(1)).validateRestrictedReason(any(),any());
+    }
 }

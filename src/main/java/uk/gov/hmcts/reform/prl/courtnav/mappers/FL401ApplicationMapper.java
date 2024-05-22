@@ -185,7 +185,7 @@ public class FL401ApplicationMapper {
                                                         .getDeclaration().stream()
                                                         .map(ConsentEnum::getId)
                                                         .map(FL401Consent::getDisplayedValueFromEnumString)
-                                                        .collect(Collectors.toList()))
+                                                        .toList())
                                   .signature(courtNavCaseData.getFl401().getStatementOfTruth().getSignature())
                                   .fullname(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureFullName())
                                   .date(LocalDate.parse(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureDate().mergeDate()))

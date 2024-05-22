@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.bundle;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,18 +19,12 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundlingService {
-    @Autowired
-    private BundleApiClient bundleApiClient;
-
-    @Autowired
-    private BundleCreateRequestMapper bundleCreateRequestMapper;
-
-    @Autowired
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Autowired
-    HearingService hearingService;
+    private final BundleApiClient bundleApiClient;
+    private final BundleCreateRequestMapper bundleCreateRequestMapper;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final HearingService hearingService;
 
     @Value("${bundle.english.config}")
     private String bundleEnglishConfig;
@@ -55,7 +50,7 @@ public class BundlingService {
         try {
             bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in creating bundle service request",e);
         }
         return bundleCreateResponse;
     }

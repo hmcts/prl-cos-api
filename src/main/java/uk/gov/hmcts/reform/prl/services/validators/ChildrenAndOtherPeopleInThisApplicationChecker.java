@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -11,11 +12,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
@@ -27,14 +28,15 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_OTHER_P
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings({"java:S6813"})
 public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Autowired
     @Lazy
-    EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -46,7 +48,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
             List<ChildrenAndOtherPeopleRelation> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             for (ChildrenAndOtherPeopleRelation c : children) {
                 log.debug("ChildrenAndOtherPeopleInThisApplicationChecker - "
                               + "validateMandatoryFieldsCompleted :{} ",validateMandatoryFieldsCompleted(c));

@@ -10,12 +10,12 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -30,7 +30,7 @@ public class OtherPeopleInTheCaseRevisedMapper {
         }
         List<PartyDetails> otherPeopleInTheCaseList = otherPeopleInTheCase.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return otherPeopleInTheCaseList.stream().map(otherPeople -> new NullAwareJsonObjectBuilder()
             .add("firstName", otherPeople.getFirstName())
             .add("lastName", otherPeople.getLastName())
@@ -52,7 +52,7 @@ public class OtherPeopleInTheCaseRevisedMapper {
             .add("isPlaceOfBirthKnown", CommonUtils.getYesOrNoValue(otherPeople.getIsPlaceOfBirthKnown()))
             .add("placeOfBirth", otherPeople.getPlaceOfBirth())
             .add("isCurrentAddressKnown", CommonUtils.getYesOrNoValue(otherPeople.getIsCurrentAddressKnown()))
-            .add("address", addressMapper.mapAddress(otherPeople.getAddress()))
+            .add("address", isNotEmpty(otherPeople.getAddress()) ? addressMapper.mapAddress(otherPeople.getAddress()) : null)
             .add("isAddressConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsAddressConfidential()))
             .add("isAtAddressLessThan5Years", CommonUtils.getYesOrNoValue(otherPeople.getIsAtAddressLessThan5Years()))
             .add("addressLivedLessThan5YearsDetails", otherPeople.getAddressLivedLessThan5YearsDetails())

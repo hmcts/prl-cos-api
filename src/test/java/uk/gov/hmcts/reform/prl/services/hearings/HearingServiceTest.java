@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,11 @@ public class HearingServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(hearings);
+        when(hearingApiClient.getHearingsByListOfCaseIds(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(List.of(hearings));
 
         refDataCategoryValueMap.put("ABA5-FFH", "Full/Final hearing");
         refDataCategoryValueMap.put("ABA5-CHR", "Celebration hearing");
@@ -130,6 +136,18 @@ public class HearingServiceTest {
 
         assertNotNull(hearingsResp.getCaseHearings().get(0).getNextHearingDate());
         assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getHearings no hearings returned.")
+    public void getHearingsTestNoHearingReturned() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertEquals(null, hearingsResp);
+
     }
 
     @Test
@@ -258,6 +276,36 @@ public class HearingServiceTest {
         Assert.assertEquals(null, response);
     }
 
+    @Test
+    @DisplayName("test case for HearingService getHearings for given list of case ids success.")
+    public void getHearingsByListOfCaseIdsTestSuccess() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Map<String, String> caseIds = new HashMap<>();
+        caseIds.put(caseReferenceNumber, null);
+        List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
+
+        assertNotNull(hearingsResp);
+        assertFalse(hearingsResp.isEmpty());
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getHearings for given list of case ids success.")
+    public void getHearingsByListOfCaseIdsTestException() {
+
+        when(hearingApiClient.getHearingsByListOfCaseIds(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(new RuntimeException());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Map<String, String> caseIds = new HashMap<>();
+        caseIds.put(caseReferenceNumber, null);
+        List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
+
+        Assert.assertTrue(hearingsResp.isEmpty());
+    }
 }
 
 

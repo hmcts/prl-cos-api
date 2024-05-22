@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class QuarantineLegalDoc {
     private final Document miamCertificateDocument;
     private final Document previousOrdersSubmittedWithApplicationDocument;
     private final Document respondentApplicationDocument;
+    private final Document ordersFromOtherProceedingsDocument;
     private final Document respondentC1AApplicationDocument;
     private final Document respondentC1AResponseDocument;
     private final Document applicationsFromOtherProceedingsDocument;
@@ -38,7 +40,7 @@ public class QuarantineLegalDoc {
     private final Document safeguardingLetterDocument;
     private final Document section7ReportDocument;
     private final Document section37ReportDocument;
-    private final Document sixteenARiskAssessmentDocument;
+    private final Document sixteenARiskAssessmentDocument; // 16aRiskAssessment
     private final Document guardianReportDocument;
     private final Document specialGuardianshipReportDocument;
     private final Document otherDocsDocument;
@@ -46,17 +48,18 @@ public class QuarantineLegalDoc {
     private final Document emailsToCourtToRequestHearingsAdjournedDocument;
     private final Document publicFundingCertificatesDocument;
     private final Document noticesOfActingDischargeDocument;
-    private final Document requestForFasFormsToBeChangedDocument;
+    private final Document requestForFasFormsToBeChangedDocument; // requestForFASFormsToBeChanged
     private final Document witnessAvailabilityDocument;
     private final Document lettersOfComplaintDocument;
-    private final Document spipReferralRequestsDocument;
-    private final Document homeOfficeDwpResponsesDocument;
+    private final Document spipReferralRequestsDocument; // SPIPReferralRequests
+    private final Document homeOfficeDwpResponsesDocument; // homeOfficeDWPResponses
+    private final Document internalCorrespondenceDocument;
     private final Document medicalReportsDocument;
-    private final Document dnaReportsExpertReportDocument;
+    private final Document dnaReportsExpertReportDocument; // DNAReports_expertReport
     private final Document resultsOfHairStrandBloodTestsDocument;
     private final Document policeDisclosuresDocument;
     private final Document medicalRecordsDocument;
-    private final Document drugAndAlcoholTestDocument;
+    private final Document drugAndAlcoholTestDocument; // drugAndAlcoholTest(toxicology)
     private final Document policeReportDocument;
     private final Document sec37ReportDocument;
     private final Document ordersSubmittedWithApplicationDocument;
@@ -66,7 +69,6 @@ public class QuarantineLegalDoc {
     private final Document magistratesFactsAndReasonsDocument;
     private final Document judgeNotesFromHearingDocument;
     private final Document importantInfoAboutAddressAndContactDocument;
-    private final Document dnaReportsOtherDocsDocument;
     private final Document privacyNoticeDocument;
     private final Document specialMeasuresDocument;
     private final Document anyOtherDocDocument;
@@ -79,6 +81,9 @@ public class QuarantineLegalDoc {
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
     private final Document courtStaffQuarantineDocument;
+    private final Document localAuthorityOtherDocDocument;
+    private final Document pathfinderDocument;
+    private final Document draftOrdersDocument;
 
     // Adding Bulk scan attributes
     public final String fileName;
@@ -90,9 +95,20 @@ public class QuarantineLegalDoc {
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
 
+    //PRL-4320 - manage docs redesign
+    private final YesOrNo isConfidential;
+    private final YesOrNo isRestricted;
+    private final String restrictedDetails;
+    private final String uploadedBy;
+    private final String uploadedByIdamId;
+    private final String uploaderRole;
+    private final YesOrNo hasTheConfidentialDocumentBeenRenamed;
+
+    //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
+            "applicationsWithinProceedings", "applicationsFromOtherProceedings"
         };
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
@@ -31,10 +32,10 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AllegationsOfHarmRevisedMapper {
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    @Autowired
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     public JsonObject map(CaseData caseData) {
 
@@ -122,8 +123,10 @@ public class AllegationsOfHarmRevisedMapper {
             return new NullAwareJsonObjectBuilder()
                     .add("newChildHasMultiplePassports", CommonUtils.getYesOrNoValue(childPassportDetails.getNewChildHasMultiplePassports()))
                     .add("newChildPassportPossessionOtherDetails", childPassportDetails.getNewChildPassportPossessionOtherDetails())
-                    .add("newChildPassportPossession", childPassportDetails.getNewChildPassportPossession().stream()
-                            .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR))).build();
+                    .add("newChildPassportPossession", childPassportDetails.getNewChildPassportPossession() != null ? childPassportDetails
+                            .getNewChildPassportPossession().stream()
+                            .map(NewPassportPossessionEnum::getDisplayedValue)
+                            .collect(Collectors.joining(COMMA_SEPARATOR)) : null).build();
         }
         return JsonValue.EMPTY_JSON_OBJECT;
     }
@@ -136,7 +139,7 @@ public class AllegationsOfHarmRevisedMapper {
         }
         List<DomesticAbuseBehaviours> domesticBehavioursList = domesticBehaviours.stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         return domesticBehavioursList.stream().map(domesticBehaviour -> new NullAwareJsonObjectBuilder()
                 .add("typeOfAbuse", domesticBehaviour.getTypeOfAbuse().getDisplayedValue())
                 .add("newAbuseNatureDescription", domesticBehaviour.getNewAbuseNatureDescription())

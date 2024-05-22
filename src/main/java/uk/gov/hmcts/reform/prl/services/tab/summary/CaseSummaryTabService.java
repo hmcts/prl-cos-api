@@ -29,6 +29,7 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 
 @Service
@@ -36,42 +37,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Qualifier("caseSummaryTab")
 public class CaseSummaryTabService implements TabService {
 
-    @Autowired
-    AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
-
-    @Autowired
-    CaseStatusGenerator caseStatusGenerator;
-
-    @Autowired
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
-
-    @Autowired
-    OrderAppliedForGenerator orderAppliedForGenerator;
-
-    @Autowired
-    OtherProceedingsGenerator otherProceedingsGenerator;
-
-    @Autowired
-    SpecialArrangementsGenerator specialArrangementsGenerator;
-
-    @Autowired
-    UrgencyGenerator urgencyGenerator;
-
-    @Autowired
-    AllegationOfHarmGenerator allegationOfHarmGenerator;
-
-    @Autowired
-    AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
-
-
-    @Autowired
-    DateOfSubmissionGenerator dateOfSubmissionGenerator;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    TypeOfApplicationGenerator typeOfApplicationGenerator;
+    private final AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
+    private final CaseStatusGenerator caseStatusGenerator;
+    private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
+    private final OrderAppliedForGenerator orderAppliedForGenerator;
+    private final OtherProceedingsGenerator otherProceedingsGenerator;
+    private final SpecialArrangementsGenerator specialArrangementsGenerator;
+    private final UrgencyGenerator urgencyGenerator;
+    private final AllegationOfHarmGenerator allegationOfHarmGenerator;
+    private final AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
+    private final DateOfSubmissionGenerator dateOfSubmissionGenerator;
+    private final ObjectMapper objectMapper;
+    private final TypeOfApplicationGenerator typeOfApplicationGenerator;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -116,7 +93,9 @@ public class CaseSummaryTabService implements TabService {
                 orderAppliedForGenerator,
                 specialArrangementsGenerator,
                 urgencyGenerator,
-                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator : allegationOfHarmGenerator,
+                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                        || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
+                        : allegationOfHarmGenerator,
                 dateOfSubmissionGenerator
         );
     }

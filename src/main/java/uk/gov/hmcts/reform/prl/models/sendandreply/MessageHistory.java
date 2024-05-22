@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -33,5 +36,7 @@ public class MessageHistory {
     private String judgeEmail;
     private String otherApplicationLink;
     private String hearingsLink;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    private LocalDateTime updatedTime;
 
 }

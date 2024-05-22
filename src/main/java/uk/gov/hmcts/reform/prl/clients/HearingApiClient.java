@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(
     name = "hearing-api",
@@ -50,4 +51,10 @@ public interface HearingApiClient {
         @RequestHeader("caseReference") String caseReference
     );
 
+    @PostMapping(path = "/hearings-by-list-of-case-ids")
+    List<Hearings> getHearingsByListOfCaseIds(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody Map<String,String> caseIdWithRegionIdMap
+    );
 }
