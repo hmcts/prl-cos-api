@@ -199,6 +199,7 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
@@ -214,6 +215,7 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 2 latest message")
             .messageHistory("Message 2 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
+            .messageHasJudgeAllocated("ALREADY_ALLOCATED")
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
         message3 = Message.builder()
@@ -225,6 +227,7 @@ public class SendAndReplyServiceTest {
             .messageContent("This is message 3 body")
             .updatedTime(dateTime)
             .status(OPEN)
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .latestMessage("Message 3 latest message")
             .messageHistory("Message 3 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
@@ -428,6 +431,7 @@ public class SendAndReplyServiceTest {
             .messageHistory("testReply@email.com - This is message 2 body")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .build();
 
         Element<Message> updatedElement = element(message1Element.getId(), updatedMessage1);
@@ -1006,7 +1010,7 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testCloseMessage() {
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfClosedMessages.get(0).getId());
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(

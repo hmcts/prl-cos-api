@@ -52,8 +52,7 @@ public class RoleAssignmentService {
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
 
-    public uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse
-    createRoleAssignment(String authorization,
+    public String createRoleAssignment(String authorization,
                          CaseDetails caseDetails,
                          RoleAssignmentDto roleAssignmentDto,
                          String eventName,
@@ -108,7 +107,7 @@ public class RoleAssignmentService {
                     authTokenGenerator.generate(),
                     null,
                     assignmentRequest
-                );
+                ).getRoleRequest().getId();
             }
         }
         return null;

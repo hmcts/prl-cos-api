@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 
@@ -77,12 +79,23 @@ public class RoleAssignmentServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+                                                                       .code("test1(test1@test.com)").label(
+                "test1(test1@test.com)").build()).build();
         when(objectMapper.convertValue(legalAdviserList, DynamicList.class)).thenReturn(legalAdviserList);
         when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
-            .forename("first")
-            .id("1234")
-            .surname("test").build()));
+                                                                                          .forename("first")
+                                                                                          .id("1234")
+                                                                                          .surname("test").build()));
+        when(roleAssignmentApi.updateRoleAssignment(
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse.builder()
+                          .roleRequest(RoleRequest.roleRequest()
+                                           .id(null)
+                                           .build())
+                          .build());
         roleAssignmentService.createRoleAssignment(
             auth,
             caseDetails,
@@ -110,6 +123,16 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
+        when(roleAssignmentApi.updateRoleAssignment(
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse.builder()
+                          .roleRequest(RoleRequest.roleRequest()
+                                           .id("123")
+                                           .build())
+                          .build());
         roleAssignmentService.createRoleAssignment(
             auth,
             caseDetails,

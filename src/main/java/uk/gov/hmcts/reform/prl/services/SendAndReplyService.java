@@ -1268,7 +1268,7 @@ public class SendAndReplyService {
                         ALLOCATED_JUDGE.getName(),
                         false,
                         ALLOCATE_JUDGE_ROLE
-                    ).getRoleRequest().getId();
+                    );
 
                     existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
                                                        .judgeId(judicialUsersApiResponse.getSidamId())
@@ -1337,7 +1337,7 @@ public class SendAndReplyService {
                         ALLOCATED_JUDGE.getName(),
                         false,
                         ALLOCATE_JUDGE_ROLE
-                    ).getRoleRequest().getId();
+                    );
 
                     existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
                                                        .judgeId(judicialUsersApiResponse.getSidamId())
