@@ -485,4 +485,9 @@ public class DynamicMultiSelectListServiceTest {
             .getSolicitorRepresentedParties(listOfApplicants);
         assertNotNull(listItems);
     }
+
+    @Test
+    public void testGetDynamicMultiSellectEMptyList() {
+        assertEquals(1, dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size());
+    }
 }

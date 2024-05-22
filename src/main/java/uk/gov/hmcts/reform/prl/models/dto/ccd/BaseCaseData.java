@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.time.LocalDateTime;
 
@@ -24,36 +25,40 @@ import java.time.LocalDateTime;
 @SuperBuilder(toBuilder = true)
 public class BaseCaseData {
 
-    private  long id;
+    private long id;
 
-    private  State state;
+    private State state;
 
-    private  String taskListVersion;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    private  LocalDateTime createdDate;
+    private String taskListVersion;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    private  LocalDateTime lastModifiedDate;
+    private LocalDateTime createdDate;
 
-    private  String dateSubmitted;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    private LocalDateTime lastModifiedDate;
 
-    private  String caseSubmittedTimeStamp;
+    private String dateSubmitted;
+
+    private String caseSubmittedTimeStamp;
 
     private String courtSeal;
 
     /**
      * Case Type Of Application.
      */
-    private  String selectedCaseTypeID;
+    private String selectedCaseTypeID;
     /**
      * Case Type Of Application.
      */
     @JsonProperty("caseTypeOfApplication")
-    private  String caseTypeOfApplication;
+    private String caseTypeOfApplication;
     /**
      * Case name.
      */
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
-    private  String applicantCaseName;
+    private String applicantCaseName;
+
+    //FPET-567 - Added for hiding fields for SDO
+    @JsonProperty("isSdoSelected")
+    private YesOrNo isSdoSelected;
 }

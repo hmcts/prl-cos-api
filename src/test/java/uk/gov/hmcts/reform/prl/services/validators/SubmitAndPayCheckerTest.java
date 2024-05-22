@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -72,6 +75,9 @@ public class SubmitAndPayCheckerTest {
 
     @Mock
     ChildDetailsRevisedChecker childDetailsRevisedChecker;
+
+    @Mock
+    MiamPolicyUpgradeChecker miamPolicyUpgradeChecker;
 
     @Mock
     RespondentsChecker respondentsChecker;
@@ -321,6 +327,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildChecker()).thenReturn(childChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
@@ -410,6 +417,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
@@ -552,6 +560,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
@@ -599,7 +608,7 @@ public class SubmitAndPayCheckerTest {
                              .miamCertificationDocumentUpload(Document.builder().build())
                              .build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(No).build())
+                                         .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -654,6 +663,212 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getAllegationsOfHarmRevisedChecker()).thenReturn(allegationsOfHarmRevisedChecker);
+
+        assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3() {
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("testing")
+            .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
+            .natureOfOrder("Test")
+            .consentOrder(Yes)
+            .applicationPermissionRequired(noNotRequired)
+            .applicationDetails("Test details")
+            .isCaseUrgent(Yes)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .consentOrder(Yes)
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(No)
+            .applicants(applicantList)
+            .newChildDetails(listOfChildDetailsRevised)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+            .respondents(respondentsList)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                .mpuApplicantAttendedMiam(Yes)
+                .mediatorRegistrationNumber("123456")
+                .familyMediatorServiceName("Test Name")
+                .soleTraderName("Trade Sole")
+                .miamCertificationDocumentUpload(Document.builder().build())
+                .build())
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(No).build())
+            .build();
+
+        when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(caseNameChecker.isFinished(caseData)).thenReturn(true);
+        when(applicationTypeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicationTypeChecker.isFinished(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.isFinished(caseData)).thenReturn(true);
+        when(applicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicantsChecker.isFinished(caseData)).thenReturn(true);
+        when(childChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childChecker.isFinished(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndApplicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndApplicantsChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndRespondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndRespondentsChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndOtherPeopleInThisApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndOtherPeopleInThisApplicationChecker.isFinished(caseData)).thenReturn(true);
+        when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(respondentsChecker.isFinished(caseData)).thenReturn(true);
+        when(miamPolicyUpgradeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(miamPolicyUpgradeChecker.isFinished(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
+        when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherChildrenNotPartOfTheApplicationChecker.isFinished(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(litigationCapacityChecker.isFinished(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
+        when(eventsChecker.getChildrenAndApplicantsChecker()).thenReturn(childrenAndApplicantsChecker);
+        when(eventsChecker.getChildrenAndRespondentsChecker()).thenReturn(childrenAndRespondentsChecker);
+        when(eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker()).thenReturn(childrenAndOtherPeopleInThisApplicationChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getAllegationsOfHarmRevisedChecker()).thenReturn(allegationsOfHarmRevisedChecker);
+
+        assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV3ConsentOrderNo() {
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("testing")
+            .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
+            .natureOfOrder("Test")
+            .consentOrder(No)
+            .applicationPermissionRequired(noNotRequired)
+            .applicationDetails("Test details")
+            .isCaseUrgent(Yes)
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(No)
+            .applicants(applicantList)
+            .newChildDetails(listOfChildDetailsRevised)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+            .respondents(respondentsList)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                .mpuApplicantAttendedMiam(Yes)
+                .mediatorRegistrationNumber("123456")
+                .familyMediatorServiceName("Test Name")
+                .soleTraderName("Trade Sole")
+                .miamCertificationDocumentUpload(Document.builder().build())
+                .build())
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                .newAllegationsOfHarmYesNo(No).build())
+            .build();
+
+        when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(caseNameChecker.isFinished(caseData)).thenReturn(true);
+        when(applicationTypeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicationTypeChecker.isFinished(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.isFinished(caseData)).thenReturn(true);
+        when(applicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicantsChecker.isFinished(caseData)).thenReturn(true);
+        when(childChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childChecker.isFinished(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndApplicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndApplicantsChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndRespondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndRespondentsChecker.isFinished(caseData)).thenReturn(true);
+        when(childrenAndOtherPeopleInThisApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childrenAndOtherPeopleInThisApplicationChecker.isFinished(caseData)).thenReturn(true);
+        when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(respondentsChecker.isFinished(caseData)).thenReturn(true);
+        when(miamPolicyUpgradeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(miamPolicyUpgradeChecker.isFinished(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
+        when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherChildrenNotPartOfTheApplicationChecker.isFinished(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(litigationCapacityChecker.isFinished(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
+        when(eventsChecker.getChildrenAndApplicantsChecker()).thenReturn(childrenAndApplicantsChecker);
+        when(eventsChecker.getChildrenAndRespondentsChecker()).thenReturn(childrenAndRespondentsChecker);
+        when(eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker()).thenReturn(childrenAndOtherPeopleInThisApplicationChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamPolicyUpgradeChecker()).thenReturn(miamPolicyUpgradeChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);

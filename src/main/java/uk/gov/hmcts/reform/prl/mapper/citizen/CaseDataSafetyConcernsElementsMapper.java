@@ -55,7 +55,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     private CaseDataSafetyConcernsElementsMapper() {
     }
 
-    public static void updateSafetyConcernsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateSafetyConcernsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder().build();

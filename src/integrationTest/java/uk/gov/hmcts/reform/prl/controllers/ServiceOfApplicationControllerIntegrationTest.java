@@ -26,8 +26,6 @@ public class ServiceOfApplicationControllerIntegrationTest {
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    private final String serviceOfApplicationEndpoint = "/service-of-application/about-to-start";
-
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
     @Autowired
@@ -36,7 +34,7 @@ public class ServiceOfApplicationControllerIntegrationTest {
     @Test
     public void testServiceOfApplicationEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + serviceOfApplicationEndpoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-start");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
@@ -46,4 +44,42 @@ public class ServiceOfApplicationControllerIntegrationTest {
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
 
+    @Test
+    public void testServiceOfApplicationAboutTosubmitEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-submit");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testServiceOfApplicationSubmittedEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/submitted");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testServiceOfApplicationOtherPeopleC6AOrdersEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/soa-validation");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
 }

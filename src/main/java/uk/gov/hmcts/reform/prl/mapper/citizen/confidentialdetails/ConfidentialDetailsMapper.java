@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -28,10 +26,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
     private final AllTabServiceImpl allTabsService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
@@ -42,7 +36,7 @@ public class ConfidentialDetailsMapper {
                 List<PartyDetails> respondents = caseData.getRespondents()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
             }
 
@@ -61,7 +55,7 @@ public class ConfidentialDetailsMapper {
                 .build();
         }
         if (updateTabs) {
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
+            allTabsService.updateAllTabsIncludingConfTab(String.valueOf(caseData.getId()));
         }
         return caseData;
     }
@@ -100,6 +94,24 @@ public class ConfidentialDetailsMapper {
         String email = emailSet ? respondent.getEmail() : null;
 
 
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = getApplicantConfidentialityDetails(
+            addressSet,
+            emailSet,
+            phoneSet,
+            respondent,
+            address,
+            phoneNumber,
+            email
+        );
+
+        return Element
+            .<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+    }
+
+    private ApplicantConfidentialityDetails getApplicantConfidentialityDetails(boolean addressSet, boolean emailSet,
+                                                                               boolean phoneSet, PartyDetails respondent,
+                                                                               Address address, String phoneNumber, String email) {
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()) {
             CitizenDetails citizenDetails = respondent.getResponse().getCitizenDetails();
@@ -110,25 +122,32 @@ public class ConfidentialDetailsMapper {
             }
             if (null != citizenDetails.getContact()
                 && null != citizenDetails.getContact().getPhoneNumber()) {
-                if (!StringUtils.isEmpty(citizenDetails.getContact().getPhoneNumber())
-                    && phoneSet) {
-                    phoneNumber = citizenDetails.getContact().getPhoneNumber();
-                }
-                if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
-                    && emailSet) {
-                    email = citizenDetails.getContact().getEmail();
-                }
+                phoneNumber = getPhoneNumber(phoneSet, phoneNumber, citizenDetails);
+                email = getEmail(emailSet, email, citizenDetails);
             }
         }
+        return ApplicantConfidentialityDetails.builder()
+            .firstName(respondent.getFirstName())
+            .lastName(respondent.getLastName())
+            .address(address)
+            .phoneNumber(phoneNumber)
+            .email(email)
+            .build();
+    }
 
-        return Element
-            .<ApplicantConfidentialityDetails>builder()
-            .value(ApplicantConfidentialityDetails.builder()
-                       .firstName(respondent.getFirstName())
-                       .lastName(respondent.getLastName())
-                       .address(address)
-                       .phoneNumber(phoneNumber)
-                       .email(email)
-                       .build()).build();
+    private String getEmail(boolean emailSet, String email, CitizenDetails citizenDetails) {
+        if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
+            && emailSet) {
+            email = citizenDetails.getContact().getEmail();
+        }
+        return email;
+    }
+
+    private String getPhoneNumber(boolean phoneSet, String phoneNumber, CitizenDetails citizenDetails) {
+        if (!StringUtils.isEmpty(citizenDetails.getContact().getPhoneNumber())
+            && phoneSet) {
+            phoneNumber = citizenDetails.getContact().getPhoneNumber();
+        }
+        return phoneNumber;
     }
 }

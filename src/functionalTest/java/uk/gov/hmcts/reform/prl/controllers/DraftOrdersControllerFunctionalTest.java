@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -117,7 +118,7 @@ public class DraftOrdersControllerFunctionalTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE).id(Long.parseLong("1647373355918192"))
             .build();
-        when(manageOrderService.populateCustomOrderFields(any())).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(any(), any())).thenReturn(caseData);
         mockMvc.perform(post("/populate-draft-order-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -185,4 +186,123 @@ public class DraftOrdersControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+
+    /**
+     * When selected order id for DA case is 'FL402'.
+     * then error should be 'This order is not available to be drafted'.
+     */
+    @Test
+    public void givenRequestBody_whenFl402OrderSelectedForDA_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"createSelectOrderOptions\": \"standardDirectionsOrder\"",
+                     "\"createSelectOrderOptions\": \"noticeOfProceedings\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/selected-order")
+            .then()
+            .body("errors[0]", equalTo("This order is not available to be drafted"))
+            .assertThat().statusCode(200);
+
+    }
+
+    /**
+     * When selected order id for CA case is 'Fl402'.
+     * then error should be 'This order is not available to be drafted'.
+     */
+    @Test
+    public void givenRequestBody_whenFl402OrderSelectedForCA_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace(
+                "\"createSelectOrderOptions\": \"standardDirectionsOrder\"",
+                "\"createSelectOrderOptions\": \"noticeOfProceedings\""
+            )
+            .replace(
+                "\"caseTypeOfApplication\": \"FL401\"",
+                      "\"caseTypeOfApplication\": \"C100\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/selected-order")
+            .then()
+            .body("errors[0]", equalTo("This order is not available to be drafted"))
+            .assertThat().statusCode(200);
+
+    }
+
+    /**
+     * When selected order id for CA case is 'NoticeOfProceeding'.
+     * then error msg should be 'This order is not available to be drafted'.
+     */
+    @Test
+    public void givenRequestBody_whenNoticeOfProceedingSelectedForCA_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace(
+                "\"createSelectOrderOptions\": \"standardDirectionsOrder\"",
+                "\"createSelectOrderOptions\": \"noticeOfProceedingsParties\""
+            )
+            .replace(
+                "\"caseTypeOfApplication\": \"FL401\"",
+                "\"caseTypeOfApplication\": \"C100\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/selected-order")
+            .then()
+            .body("errors[0]", equalTo("This order is not available to be drafted"))
+            .assertThat().statusCode(200);
+
+    }
+
+    /**
+     * When selected order id for CA case is 'noticeOfProceedingsNonParties'.
+     * then error msg should be 'This order is not available to be drafted'.
+     */
+    @Test
+    public void givenRequestBody_whenNoticeOfProceedingNonPartiesSelectedForCA_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace(
+                "\"createSelectOrderOptions\": \"standardDirectionsOrder\"",
+                "\"createSelectOrderOptions\": \"noticeOfProceedingsNonParties\""
+            )
+            .replace(
+                "\"caseTypeOfApplication\": \"FL401\"",
+                "\"caseTypeOfApplication\": \"C100\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/selected-order")
+            .then()
+            .body("errors[0]", equalTo("This order is not available to be drafted"))
+            .assertThat().statusCode(200);
+
+    }
+
+
+
 }

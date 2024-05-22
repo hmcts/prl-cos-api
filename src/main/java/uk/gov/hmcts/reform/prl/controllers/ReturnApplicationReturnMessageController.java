@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -38,25 +36,28 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @Slf4j
-@RequiredArgsConstructor
 public class ReturnApplicationReturnMessageController extends AbstractCallbackController {
+    private final UserService userService;
+    private final ReturnApplicationService returnApplicationService;
+    private final AllTabServiceImpl allTabsService;
+    private final AuthorisationService authorisationService;
+    private final CaseEventHandler caseEventHandler;
 
     @Autowired
-    private UserService userService;
-    @Autowired
-    private ReturnApplicationService returnApplicationService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private final CaseWorkerEmailService caseWorkerEmailService;
-    @Autowired
-    private AllTabServiceImpl allTabsService;
-    @Autowired
-    private AuthorisationService authorisationService;
-    @Autowired
-    CaseEventHandler caseEventHandler;
-    @Autowired
-    EventService eventPublisher;
+    public ReturnApplicationReturnMessageController(ObjectMapper objectMapper,
+                                                    EventService eventPublisher,
+                                                    UserService userService,
+                                                    ReturnApplicationService returnApplicationService,
+                                                    AllTabServiceImpl allTabsService,
+                                                    AuthorisationService authorisationService,
+                                                    CaseEventHandler caseEventHandler) {
+        super(objectMapper, eventPublisher);
+        this.userService = userService;
+        this.returnApplicationService = returnApplicationService;
+        this.allTabsService = allTabsService;
+        this.authorisationService = authorisationService;
+        this.caseEventHandler = caseEventHandler;
+    }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get return message of the return application ")
@@ -102,6 +103,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             // Refreshing the page in the same event. Hence no external event call needed.
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseData = returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(caseData, caseDataUpdated);
             caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
             String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);

@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -58,9 +57,6 @@ public class CafCassControllerIntegrationTest {
     @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
-    @MockBean
-    private PostcodeLookupService postcodeLookupService;
-
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -77,7 +73,6 @@ public class CafCassControllerIntegrationTest {
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(searchResult);
 

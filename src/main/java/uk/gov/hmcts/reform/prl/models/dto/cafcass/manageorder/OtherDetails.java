@@ -47,6 +47,9 @@ public class OtherDetails {
                 }
             }
             this.orderCreatedDate = dateTime.toString();
+            if (this.orderMadeDate == null) {
+                this.orderMadeDate = this.orderCreatedDate;
+            }
         }
     }
 

@@ -16,7 +16,7 @@ public class CaseDataHwnElementsMapper {
     private static final String DETAILS_OF_NOTICE_OTHER_PEOPLE_WILL_DO_SOMETHING = "Details of without notice "
             + "hearing because the other person or people may do something that would obstruct the order";
 
-    public static void updateHearingWithoutNoticeElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateHearingWithoutNoticeElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                C100RebuildHearingWithoutNoticeElements c100RebuildHearingWithoutNoticeElements) {
         caseDataBuilder
                 .doYouNeedAWithoutNoticeHearing(c100RebuildHearingWithoutNoticeElements.getDoYouNeedHearingWithoutNotice())

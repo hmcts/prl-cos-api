@@ -41,7 +41,9 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
@@ -68,7 +70,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -85,7 +86,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -102,7 +102,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -252,6 +252,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final MiamDetails miamDetails;
 
     /**
+     * MIAM.
+     */
+    @JsonUnwrapped
+    private final MiamPolicyUpgradeDetails miamPolicyUpgradeDetails;
+
+    /**
      * Allegations of harm.
      */
 
@@ -339,6 +345,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final Document c1ADocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -615,11 +626,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        this.toBuilder()
+        return this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
-
-        return this;
     }
 
     public CaseData setIssueDate() {
@@ -654,6 +663,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonProperty("citizenResponseC7DocumentList")
     private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
+
+    @JsonProperty("scannedDocuments")
+    private List<Element<ScannedDocument>> scannedDocuments;
 
     /**
      * Courtnav.
@@ -722,7 +734,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private final ListWithoutNoticeDetails listWithoutNoticeDetails;
     @JsonUnwrapped
     private final Fl401ListOnNotice fl401ListOnNotice;
 
@@ -748,44 +760,39 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo hwfRequestedForAdditionalApplications;
 
     private List<Element<RespondentDocs>> respondentDocsList;
-    private ResponseDocuments respondentAc8;
-    private ResponseDocuments respondentBc8;
-    private ResponseDocuments respondentCc8;
-    private ResponseDocuments respondentDc8;
-    private ResponseDocuments respondentEc8;
 
+    @JsonUnwrapped
+    private CitizenResponseDocuments citizenResponseDocuments;
+
+    @JsonUnwrapped
+    private RespondentC8Document respondentC8Document;
+
+    @JsonUnwrapped
+    private RespondentC8 respondentC8;
     //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
 
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
-    private String manageDocumentsTriggeredBy;
-    private String manageDocumentsRestrictedFlag;
-
-    @JsonProperty("legalProfQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
-    @JsonProperty("cafcassQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    @JsonProperty("courtStaffQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
-    @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
-    @JsonProperty("scannedDocuments")
-    private List<Element<ScannedDocument>> scannedDocuments;
+    @JsonUnwrapped
+    private DocumentManagementDetails documentManagementDetails;
 
     /**
      * Review documents.
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
-    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
+    @JsonUnwrapped
+    private StatementOfService statementOfService;
+
+    @JsonUnwrapped
+    private final AllPartyFlags allPartyFlags;
     /**
      * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
      */
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
+    //For case documents tab
+    private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 }

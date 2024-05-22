@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +24,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
+
 
 @Slf4j
 public class CommonUtils {
@@ -44,7 +50,7 @@ public class CommonUtils {
                 return localDateTime.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -57,7 +63,7 @@ public class CommonUtils {
                 return parse.format(formatter);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return " ";
     }
@@ -68,7 +74,7 @@ public class CommonUtils {
             Date date = new Date();
             return dateFormat.format(date);
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
     }
@@ -118,9 +124,7 @@ public class CommonUtils {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(generateUuid());
             }
-            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null
-                && (caseData.getApplicantsFL401().getRepresentativeFirstName() != null
-                || caseData.getApplicantsFL401().getRepresentativeLastName() != null)) {
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(generateUuid());
             }
             if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
@@ -130,6 +134,12 @@ public class CommonUtils {
         if (caseData.getRespondentsFL401() != null) {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
+            }
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null) {
+                caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
+            }
+            if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getRespondentsFL401().setSolicitorOrgUuid(generateUuid());
             }
         }
     }
@@ -144,7 +154,7 @@ public class CommonUtils {
                 return localDate.format(DateTimeFormatter.ofPattern(pattern,  Locale.ENGLISH));
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING, e);
         }
         return "";
     }
@@ -161,15 +171,29 @@ public class CommonUtils {
             .listItems(listItems).build();
     }
 
-    public static String[] getPersonalCode(JudicialUser judgeDetails) {
+    public static String[] getPersonalCode(Object judgeDetails) {
         String[] personalCodes = new String[3];
         try {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
                                                                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return personalCodes;
+    }
+
+    public static String[] getIdamId(Object judgeDetails) {
+        String[] idamIds = new String[3];
+        try {
+            idamIds[0] = new ObjectMapper().readValue(
+                new ObjectMapper()
+                    .writeValueAsString(judgeDetails),
+                JudicialUser.class
+            ).getIdamId();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return idamIds;
     }
 
     public static LocalDate formattedLocalDate(String date, String pattern) {
@@ -180,18 +204,23 @@ public class CommonUtils {
         return null;
     }
 
-
-    public static String getFormattedStringDate(String date, String format) {
+    public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
-            if (date != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                LocalDate parse = LocalDate.parse(date, formatter);
-                return parse.toString();
+            if (null != localDateTime) {
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+                    .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error(ERROR_STRING + "in formatDateTime Method", e);
         }
-        return " ";
+        return "";
     }
 
+    public static boolean isEmpty(@Nullable String string) {
+        return string == null || string.isEmpty();
+    }
+
+    public static boolean isNotEmpty(@Nullable String string) {
+        return !isEmpty(string);
+    }
 }

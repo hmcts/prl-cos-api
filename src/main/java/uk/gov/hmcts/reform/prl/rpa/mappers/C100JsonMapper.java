@@ -19,6 +19,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_ARRANGEME
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_SEQUENCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -30,6 +32,7 @@ public class C100JsonMapper {
     private final TypeOfApplicationMapper typeOfApplicantionMapper;
     private final HearingUrgencyMapper hearingUrgencyMapper;
     private final MiamMapper miamMapper;
+    private final MiamPolicyUpgradeMapper miamPolicyUpgradeMapper;
     private final AllegationsOfHarmMapper allegationOfHarmMapper;
     private final AllegationsOfHarmRevisedMapper allegationsOfHarmRevisedMapper;
     private final OtherPeopleInTheCaseMapper otherPeopleInTheCaseMapper;
@@ -50,24 +53,26 @@ public class C100JsonMapper {
             .add("solicitor", combinedMapper.map(caseData))
             .add("header", getHeader(caseData.getCourtCodeFromFact(), caseData.getCourtName(), caseData.getId()))
             .add("id", caseData.getId())
-            .add("children", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            .add("children", isTaskListV2OrV3(caseData)
                 ? childDetailsRevisedMapper.map(caseData.getNewChildDetails()) : childrenMapper.map(caseData.getChildren()))
-                .add("childAndApplicantRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                .add("childAndApplicantRelations", isTaskListV2OrV3(caseData)
                         ? childrenAndApplicantsMapper.map(caseData.getRelations().getChildAndApplicantRelations()) : JsonValue.EMPTY_JSON_ARRAY)
-                .add("childAndRespondentRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                .add("childAndRespondentRelations", isTaskListV2OrV3(caseData)
                         ? childrenAndRespondentsMapper.map(caseData.getRelations().getChildAndRespondentRelations()) : JsonValue.EMPTY_JSON_ARRAY)
-            .add("childAndOtherPeopleRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            .add("childAndOtherPeopleRelations", isTaskListV2OrV3(caseData)
                 ? childrenAndOtherPeopleMapper.map(caseData.getRelations().getChildAndOtherPeopleRelations()) : JsonValue.EMPTY_JSON_ARRAY)
             .add("applicants", combinedMapper.getApplicantArray())
             .add("respondents", combinedMapper.getRespondentArray())
             .add("typeOfApplication", typeOfApplicantionMapper.map(caseData))
             .add("hearingUrgency", hearingUrgencyMapper.map(caseData))
-            .add("miam", miamMapper.map(caseData))
-            .add("otherPeopleInTheCase", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            .add("miam", TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+                ? miamPolicyUpgradeMapper.map(caseData)
+                : miamMapper.map(caseData))
+            .add("otherPeopleInTheCase", isTaskListV2OrV3(caseData)
                 ? otherPeopleInTheCaseRevisedMapper.map(caseData.getOtherPartyInTheCaseRevised())
                 : otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
             .add("otherChildrenNotPartOfTheApplication", otherChildrenNotInTheCaseMapper.map(caseData.getChildrenNotInTheCase()))
-            .add("allegationsOfHarm", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationsOfHarmRevisedMapper
+            .add("allegationsOfHarm", isTaskListV2OrV3(caseData) ? allegationsOfHarmRevisedMapper
                     .map(caseData) : allegationOfHarmMapper.map(caseData))
             .add("otherProceedings", otherproceedingsMapper.map(caseData))
             .add("attendingTheHearing", attendingTheHearingMapper.map(caseData))
@@ -78,6 +83,11 @@ public class C100JsonMapper {
             .add("others", getOthers(caseData.getDateSubmitted()))
             .add("events", getEvents())
             .build();
+    }
+
+    private boolean isTaskListV2OrV3(CaseData caseData) {
+        return TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) || TASK_LIST_VERSION_V2.equalsIgnoreCase(
+            caseData.getTaskListVersion());
     }
 
     private JsonArray getEvents() {

@@ -51,7 +51,7 @@ public interface HearingApiClient {
         @RequestHeader("caseReference") String caseReference
     );
 
-    @GetMapping(path = "/hearings-by-list-of-case-ids")
+    @PostMapping(path = "/hearings-by-list-of-case-ids")
     List<Hearings> getHearingsByListOfCaseIds(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,

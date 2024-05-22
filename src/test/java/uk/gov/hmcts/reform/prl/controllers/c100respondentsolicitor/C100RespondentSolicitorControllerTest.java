@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -148,7 +149,7 @@ public class C100RespondentSolicitorControllerTest {
                                            .documentFileName("c7DraftFilename.pdf")
                                            .build())
                 .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                               .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                               .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                .confidentiality(Yes)
                                                .confidentialityList(confidentialityListEnums)
                                                .build())

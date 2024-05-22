@@ -67,7 +67,7 @@ public class ServiceAuthConsumerTest {
     @BeforeEach
     public void setUpTest() {
         jsonPayload.put("microservice", "prl_cos_api");
-        jsonPayload.put("oneTimePassword", "784467");
+        // jsonPayload.put("oneTimePassword", "784467");
     }
 
     @Pact(consumer = "prl_cos_api")

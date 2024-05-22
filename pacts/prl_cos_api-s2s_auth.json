@@ -12,8 +12,7 @@
         "method": "POST",
         "path": "/lease",
         "body": {
-          "microservice": "prl_cos_api",
-          "oneTimePassword": "784467"
+          "microservice": "prl_cos_api"
         }
       },
       "response": {

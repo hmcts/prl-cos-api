@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -11,15 +13,20 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ChildrenAndApplicantsCheckerTest {
 
 
@@ -31,6 +38,11 @@ public class ChildrenAndApplicantsCheckerTest {
 
     @InjectMocks
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
@@ -148,7 +160,29 @@ public class ChildrenAndApplicantsCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
+    public void testDefaultTaskStateWhenCannotStart() {
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDone() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        when(eventsChecker.hasMandatoryCompleted(APPLICANT_DETAILS, caseData)).thenReturn(true);
+        assertEquals(TaskState.NOT_STARTED, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
     }
 }

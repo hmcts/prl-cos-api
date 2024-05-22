@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,22 +28,15 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftAnOrderController {
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DraftAnOrderService draftAnOrderService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final ObjectMapper objectMapper;
+    private final DraftAnOrderService draftAnOrderService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -91,8 +83,8 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
             );
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
             if (isNotEmpty(errorList)) {
@@ -123,13 +115,16 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-                draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+                draftAnOrderService.populateStandardDirectionOrderDefaultFields(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated
+                );
             } else {
-                List<String> errorList = new ArrayList<>();
-                errorList.add(
-                    "Please select at least one options from below");
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -184,17 +179,14 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
-            //PRL-4260 - hearing screen validations
-            if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
+                authorisation,
+                callbackRequest
+            );
+            if (caseDataUpdated.containsKey("errorList")) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors((List<String>) caseDataUpdated.get(HEARING_SCREEN_ERRORS))
-                    .build();
-            } else if (ObjectUtils.isNotEmpty(caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
+                    .errors((List<String>) caseDataUpdated.get("errorList"))
                     .build();
             } else {
                 //Draft an order

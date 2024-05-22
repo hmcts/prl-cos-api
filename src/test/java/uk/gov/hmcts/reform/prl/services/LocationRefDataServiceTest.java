@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
+import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.SCOTLAND;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class LocationRefDataServiceTest {
@@ -93,6 +94,20 @@ public class LocationRefDataServiceTest {
         assertFalse(courtLocations.isEmpty());
     }
 
+    @Test
+    public void testgetCourtDetailsWithDataNotMatched() {
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "email");
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
+        assertFalse(courtLocations.isEmpty());
+    }
+
 
     @Test
     public void testDaGetCourtDetailsWithData() {
@@ -101,6 +116,20 @@ public class LocationRefDataServiceTest {
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
                                                      .region("test").siteName("test")
                                                      .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
+        assertFalse(courtLocations.isEmpty());
+    }
+
+    @Test
+    public void testDaGetCourtDetailsWithDataNotMatched() {
+        ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "email");
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("3")
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
@@ -215,5 +244,27 @@ public class LocationRefDataServiceTest {
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
         List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
         assertNotNull(test);
+    }
+
+    @Test
+    public void testGetCourtDetailsFromEpimmsIdEmptyCourtVenue() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
+        assertTrue(courtVenue.isEmpty());
+    }
+
+    @Test
+    public void testGetCourtDetailsFromEpimmsIdForScotland() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region(SCOTLAND).regionId("id").courtName("1")
+                                                     .region("test").siteName("test").postcode("123")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
+        assertTrue(courtVenue.isPresent());
     }
 }

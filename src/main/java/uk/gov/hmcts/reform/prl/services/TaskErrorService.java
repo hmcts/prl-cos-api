@@ -46,4 +46,8 @@ public class TaskErrorService {
         eventErrors.remove(errorType);
     }
 
+    public void clearErrors() {
+        eventErrors.clear();
+    }
+
 }

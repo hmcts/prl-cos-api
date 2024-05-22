@@ -14,7 +14,11 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.Flag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -29,6 +33,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
@@ -48,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RefDataUserServiceTest {
 
+    public static final String FLAG_TYPE = "PARTY";
     @InjectMocks
     RefDataUserService refDataUserService;
 
@@ -74,6 +80,9 @@ public class RefDataUserServiceTest {
 
     @Mock
     CommonDataRefApi commonDataRefApi;
+
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
@@ -150,7 +159,7 @@ public class RefDataUserServiceTest {
     }
 
     @Test
-    public void testGetAllJudicialUsers() {
+    public void testGetAllJudicialUsersForV2() {
         when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
@@ -158,6 +167,28 @@ public class RefDataUserServiceTest {
         List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
         listOfJudges.add(judge1);
         listOfJudges.add(judge2);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(true);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder().personalCode(new String[3]).build();
+        when(judicialUserDetailsApi.getAllJudicialUserDetailsV2(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            judicialUsersApiRequest
+        )).thenReturn(listOfJudges);
+        List<JudicialUsersApiResponse> expectedRespose = refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest);
+        assertNotNull(expectedRespose);
+        assertEquals("lastName1",expectedRespose.get(0).getSurname());
+    }
+
+    @Test
+    public void testGetAllJudicialUsersForV1() {
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
+        JudicialUsersApiResponse judge2 = JudicialUsersApiResponse.builder().surname("lastName2").fullName("judge2@test.com").build();
+        List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
+        listOfJudges.add(judge1);
+        listOfJudges.add(judge2);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(false);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder().personalCode(new String[3]).build();
         when(judicialUserDetailsApi.getAllJudicialUserDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
@@ -191,6 +222,29 @@ public class RefDataUserServiceTest {
         );
         assertNotNull(commonResponse);
         assertEquals("Celebration hearing",commonResponse.getCategoryValues().get(0).getValueEn());
+    }
+
+    @Test
+    public void testRetrieveCaseFlags() {
+        FlagDetail flagDetail1 = FlagDetail.builder().flagCode("ABCD").externallyAvailable(true).flagComment(true).cateGoryId(0).build();
+        FlagDetail flagDetail2 = FlagDetail.builder().flagCode("CDEF")
+            .childFlags(List.of(flagDetail1)).externallyAvailable(false).flagComment(true).cateGoryId(0).build();
+        List<FlagDetail> flagDetails = new ArrayList<>();
+        flagDetails.add(flagDetail1);
+        flagDetails.add(flagDetail2);
+        Flag flag1 = Flag.builder().flagDetails(flagDetails).build();
+        List<Flag> flags = new ArrayList<>();
+        flags.add(flag1);
+        CaseFlag caseFlagResponse = CaseFlag.builder().flags(flags).build();
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(commonDataRefApi.retrieveCaseFlagsByServiceId(authToken, authTokenGenerator.generate(), SERVICE_ID,
+                                                           FLAG_TYPE)).thenReturn(caseFlagResponse);
+        CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(
+            authToken,
+            FLAG_TYPE
+        );
+        assertEquals("ABCD",caseFlag.getFlags().get(0).getFlagDetails().get(0).getFlagCode());
+
     }
 
 

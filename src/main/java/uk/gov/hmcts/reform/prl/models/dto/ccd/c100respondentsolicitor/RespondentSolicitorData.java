@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,18 +10,15 @@ import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -35,9 +33,12 @@ public class RespondentSolicitorData {
     private String respondentNameForResponse;
     private Consent respondentConsentToApplication;
 
-    private final Miam respondentSolicitorHaveYouAttendedMiam;
     private final String whatIsMiamPlaceHolder;
     private final String helpMiamCostsExemptionsPlaceHolder;
+    //PRL-4588 - Miam new case fields
+    private final YesOrNo hasRespondentAttendedMiam;
+    private final YesOrNo respondentWillingToAttendMiam;
+    private final String respondentReasonNotAttendingMiam;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
     @JsonIgnore
@@ -51,17 +52,14 @@ public class RespondentSolicitorData {
      */
     private final CitizenInternationalElements internationalElementChild;
 
-    /**
-     * Respondent solicitor's allegations of harm.
-     */
-    private final YesOrNo respondentAohYesNo;
-    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
-    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
-    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
-    private final RespondentChildAbduction respondentChildAbduction;
-    private final RespondentOtherConcerns respondentOtherConcerns;
 
-    /** Confirm or Edit your contact details. **/
+    @JsonUnwrapped
+    private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+
+    @JsonUnwrapped
+    private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
+
+    /** Confirm or Edit contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
     /**
@@ -73,6 +71,7 @@ public class RespondentSolicitorData {
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
+    private final Document finalC7WelshResponseDoc;
     private final Document draftC8ResponseDoc;
     private final Document finalC8ResponseDoc;
 
@@ -80,7 +79,12 @@ public class RespondentSolicitorData {
 
     private final Document draftC1ADoc;
 
+    private final Document draftC1ADocWelsh;
+
     private final Document finalC1AResponseDoc;
+
+    private final Document finalC1AResponseDocWelsh;
+
     /**
      * Respondent solicitor's Current or Past proceedings.
      */
