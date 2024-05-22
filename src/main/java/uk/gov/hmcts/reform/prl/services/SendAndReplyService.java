@@ -1339,10 +1339,13 @@ public class SendAndReplyService {
                         ALLOCATE_JUDGE_ROLE
                     );
 
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .roleAssignmentId(roleAssignmentId)
-                                                       .build()));
+                    if (existingAllocation != null) {
+                        existingAllocation.add(
+                            element(AllocatedJudgeForSendAndReply.builder()
+                                        .judgeId(judicialUsersApiResponse.getSidamId())
+                                        .roleAssignmentId(roleAssignmentId)
+                                        .build()));
+                    }
                     caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
 
                 }
@@ -1360,7 +1363,7 @@ public class SendAndReplyService {
                 .toList();
             List<String> judgeEmailList = new ArrayList<>();
 
-            if (message.getSenderRole().equals(InternalMessageWhoToSendToEnum.JUDICIARY)) {
+            if (message.getSenderRole().equals(JUDICIARY)) {
                 judgeEmailList.add(message.getSenderEmail());
             }
 
