@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -73,10 +73,10 @@ public class Fm5NotificationService {
     private String citizenUrl;
 
     public List<Element<NotificationDetails>> sendFm5ReminderNotifications(CaseData caseData,
-                                                                           FmPendingParty fmPendingParty) {
+                                                                           Fm5PendingParty fm5PendingParty) {
         long startTime = System.currentTimeMillis();
         List<Element<NotificationDetails>> fm5ReminderNotifications = new ArrayList<>();
-        if ((fmPendingParty.equals(FmPendingParty.BOTH))) {
+        if ((fm5PendingParty.equals(Fm5PendingParty.BOTH))) {
             //send reminders to both applicants & respondents
             caseData.getApplicants()
                 .forEach(party ->
@@ -94,7 +94,7 @@ public class Fm5NotificationService {
                                  false
                              ))
                 );
-        } else if (fmPendingParty.equals(FmPendingParty.APPLICANT)) {
+        } else if (fm5PendingParty.equals(Fm5PendingParty.APPLICANT)) {
             caseData.getApplicants()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
@@ -103,7 +103,7 @@ public class Fm5NotificationService {
                                  true
                              ))
                 );
-        } else if (fmPendingParty.equals(FmPendingParty.RESPONDENT)) {
+        } else if (fm5PendingParty.equals(Fm5PendingParty.RESPONDENT)) {
             caseData.getRespondents()
                 .forEach(party ->
                              fm5ReminderNotifications.add(sendFm5ReminderNotification(
