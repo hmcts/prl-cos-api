@@ -1256,6 +1256,52 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailForCitizenWhenTheyHaveDashboardAccess() throws Exception {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
+        PartyDetails respondent = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().idamId("123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
+            .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Interim").build())))
+            .welshLanguageRequirement(YesOrNo.Yes)
+            .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1275,7 +1321,7 @@ public class ManageOrderEmailServiceTest {
             .representativeLastName("")
             .representativeFirstName("")
             .solicitorEmail("")
-            .user(User.builder().idamId("abc123").build())
+            .user(User.builder().build())
             .contactPreferences(ContactPreferences.email)
             .build();
         caseData = caseData.toBuilder()
@@ -1330,7 +1376,7 @@ public class ManageOrderEmailServiceTest {
             .representativeLastName("")
             .representativeFirstName("")
             .solicitorEmail("")
-            .user(User.builder().idamId("abc123").build())
+            .user(User.builder().build())
             .contactPreferences(ContactPreferences.email)
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
