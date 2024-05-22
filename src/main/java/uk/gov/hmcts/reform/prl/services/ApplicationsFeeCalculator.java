@@ -108,6 +108,7 @@ public class ApplicationsFeeCalculator {
     public List<FeeType> getFeeTypes(CaseData caseData) {
         List<FeeType> feeTypes = new ArrayList<>();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
+
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
@@ -119,7 +120,6 @@ public class ApplicationsFeeCalculator {
         boolean skipC2PaymentForDaApplicant = DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
         boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
             && !c2ApplicationAlreadyPresentForRespondent && applyOrderWithoutGivingNoticeToRespondent;
-
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !skipC2PaymentForDaApplicant && !skipC2PaymentForDaRespondent) {
@@ -161,6 +161,7 @@ public class ApplicationsFeeCalculator {
                 ).atStartOfDay();
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+
             }
         }
         return skipPayments;
