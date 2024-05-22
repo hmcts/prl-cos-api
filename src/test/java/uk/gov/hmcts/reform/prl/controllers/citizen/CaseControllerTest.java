@@ -23,10 +23,12 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -117,8 +119,8 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
-        assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
+        UiCitizenCaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
+        assertEquals(caseData.getApplicantCaseName(), caseData1.getCaseData().getApplicantCaseName());
 
     }
 
@@ -174,6 +176,7 @@ public class CaseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
+            .c100RebuildData(C100RebuildData.builder().c100RebuildApplicantDetails("").build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
@@ -243,7 +246,6 @@ public class CaseControllerTest {
     public void testCitizenRetrieveCases() {
 
         List<CaseData> caseDataList = new ArrayList<>();
-
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
