@@ -15,16 +15,20 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -48,10 +52,16 @@ public class CitizenCaseUpdateServiceTest {
     AllTabServiceImpl allTabService;
 
     @Mock
+    AddCaseNoteService addCaseNoteService;
+
+    @Mock
     ObjectMapper objectMapper;
 
     @Mock
     CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String caseId = "case id";
@@ -216,8 +226,9 @@ public class CitizenCaseUpdateServiceTest {
     @Test
     public void testSubmitApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
+        Long caseIdSubmit = 12345L;
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseData = CaseData.builder().id(caseIdSubmit)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .c100RebuildData(c100RebuildData)
@@ -233,29 +244,35 @@ public class CitizenCaseUpdateServiceTest {
 
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        caseDetails,
-                                                                                                        caseData,
-                                                                                                        UserDetails.builder().build()
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails,
+            caseData,
+            UserDetails.builder().build()
         );
-        when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any())).thenReturn(CaseData.builder().build());
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(
+            any(),
+            any()
+        )).thenReturn(CaseData.builder().id(caseIdSubmit).build());
         when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
-            .thenReturn(CaseDetails.builder().build());
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseIdSubmit)))
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
-            caseId,
+            String.valueOf(caseId),
             "citizenSaveC100DraftInternal",
             caseData
         ));
     }
 
     @Test
-    public void testwithdrawCaseApplication() throws IOException {
+    public void testWithdrawCaseApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
@@ -280,6 +297,29 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(CaseDetails.builder().build());
         when(allTabService.updateAllTabsIncludingConfTab(caseId)).thenReturn(CaseDetails.builder().build());
         Assert.assertNotNull(citizenCaseUpdateService.withdrawCase(caseData, caseId, authToken));
+    }
+
+    @Test
+    public void testaddLanguageSupportCaseNotes() throws IOException {
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        caseDetails, caseData, null);
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(any(),any(),any())).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().build());
+        when(addCaseNoteService.getCurrentCaseNoteDetails(any(),any(),any())).thenReturn(CaseNoteDetails.builder().build());
+        LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest = LanguageSupportCaseNotesRequest.builder().languageSupportNotes("test")
+            .partyIdamId("1234567").build();
+
+        Assert.assertNotNull(citizenCaseUpdateService.addLanguageSupportCaseNotes(caseId, authToken,languageSupportCaseNotesRequest));
     }
 
     private static C100RebuildData getC100RebuildData() throws IOException {

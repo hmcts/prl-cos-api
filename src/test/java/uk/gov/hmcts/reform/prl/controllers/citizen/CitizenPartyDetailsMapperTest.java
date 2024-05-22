@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -43,10 +43,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CitizenPartyDetailsMapperTest {
-
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @InjectMocks
     private CitizenPartyDetailsMapper citizenPartyDetailsMapper;
     public static final String authToken = "Bearer TestAuthToken";
@@ -61,10 +57,14 @@ public class CitizenPartyDetailsMapperTest {
     UpdatePartyDetailsService updatePartyDetailsService;
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
+    @Mock
+    CitizenRespondentAohElementsMapper citizenAllegationOfHarmMapper;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Before
     public void setUpCA() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -118,7 +118,6 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     public void setUpDa() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -309,6 +308,7 @@ public class CitizenPartyDetailsMapperTest {
         assertNotNull(citizenUpdatePartyDataContent);
     }
 
+
     @Test
     public void testMapUpdatedPartyDetailsCaseEventRespSafetyConcern() throws IOException {
         setUpDa();
@@ -373,8 +373,15 @@ public class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    public void testMapUpdatedPartyDetailsEventCurrentProceedings() throws IOException {
+        setUpDa();
+        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = citizenPartyDetailsMapper
+            .mapUpdatedPartyDetails(caseData, updateCaseData, CaseEvent.CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS, authToken);
+        assertNotNull(citizenUpdatePartyDataContent);
+    }
+
+    @Test
     public void testBuildUpdatedCaseData() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))

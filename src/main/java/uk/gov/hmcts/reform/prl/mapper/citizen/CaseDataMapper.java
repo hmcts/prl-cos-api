@@ -50,7 +50,7 @@ public class CaseDataMapper {
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = CaseData.builder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
