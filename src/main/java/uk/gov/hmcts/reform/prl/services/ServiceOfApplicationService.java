@@ -135,8 +135,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -908,13 +908,11 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
             List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
-
             notifyC100ApplicantsPersonalServiceUnRepApplicant(authorization,
                                                               caseData,
                                                               emailNotificationDetails,
                                                               bulkPrintDetails,
                                                               packLdocs);
-
             String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
@@ -969,7 +967,9 @@ public class ServiceOfApplicationService {
                                                         docs,
                                                         SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
                                                         fieldsMap,
-                                                        SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                        doesC1aExists(caseData).equals(Yes)
+                                                            ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                            : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
                     //Post packs to applicants
@@ -1496,7 +1496,9 @@ public class ServiceOfApplicationService {
                                                         packDocs,
                                                         SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                         fieldsMap,
-                                                        CA_APPLICANT_SERVICE_APPLICATION
+                                                        doesC1aExists(caseData).equals(Yes)
+                                                            ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
+                                                            : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
                     Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
