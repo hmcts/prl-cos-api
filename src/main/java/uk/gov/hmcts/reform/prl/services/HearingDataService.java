@@ -49,9 +49,11 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -138,7 +140,7 @@ public class HearingDataService {
             );
             return refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
         } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
+            log.error("Category Values look up failed - ", e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -150,12 +152,11 @@ public class HearingDataService {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing : hearingDetails.getCaseHearings()) {
                     log.info("** Status {}", caseHearing.getHmcStatus());
-                    if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
+                    //Filter Listed & Awaiting hearing details hearings
+                    if (List.of(LISTED, AWAITING_HEARING_DETAILS, COMPLETED).contains(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
-                                                    .label(caseHearing.getHearingTypeValue() + " - "
-                                                               + caseHearing.getNextHearingDate().format(
-                                                        customDateTimeFormatter))
+                                                    .label(caseHearing.getHearingTypeValue() + " - " + getSuffixForHearingDropdown(caseHearing))
                                                     .build());
                     }
                 }
@@ -165,6 +166,16 @@ public class HearingDataService {
             log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
+    }
+
+    private String getSuffixForHearingDropdown(CaseHearing caseHearing) {
+        if (null != caseHearing.getNextHearingDate()) {
+            return caseHearing.getNextHearingDate().format(customDateTimeFormatter);
+        } else if (isNotEmpty(caseHearing.getHearingDaySchedule())) {
+            return caseHearing.getHearingDaySchedule().get(0)
+                .getHearingStartDateTime().format(customDateTimeFormatter);
+        }
+        return "";
     }
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
@@ -564,7 +575,7 @@ public class HearingDataService {
                     .toList();
             }
         } catch (Exception e) {
-            log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
+            log.error("Exception occured in getLinkedCasesDynamicList {}", e);
         }
         return dynamicListElements;
     }
