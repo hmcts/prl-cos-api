@@ -407,11 +407,36 @@ public class CitizenPartyDetailsMapper {
                 }
                 return updateCitizenC7Response(existingPartyDetails, citizenProvidedPartyDetails);
             }
+            case CITIZEN_RESPONSE_TO_AOH -> {
+                return updateCitizenResponseToAohDetails(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             default -> {
                 //return existing party details - no event
                 return existingPartyDetails;
             }
         }
+    }
+
+    private PartyDetails updateCitizenResponseToAohDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        return existingPartyDetails.toBuilder()
+            .response(existingPartyDetails.getResponse()
+                          .toBuilder()
+                          .responseToAllegationsOfHarm(citizenProvidedPartyDetails.getResponse()
+                                                           .getResponseToAllegationsOfHarm().toBuilder()
+                                                           .responseToAllegationsOfHarmYesOrNoResponse(
+                                                               citizenProvidedPartyDetails.getResponse()
+                                                                   .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                           .respondentResponseToAllegationOfHarm(YesOrNo.Yes.equals(
+                                                               citizenProvidedPartyDetails.getResponse()
+                                                                   .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                                                                     ? citizenProvidedPartyDetails.getResponse()
+                                                               .getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm() : null)
+                                                           .build())
+                          .build())
+            .build();
     }
 
     private PartyDetails updateCitizenContactPreferenceDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
@@ -457,6 +482,7 @@ public class CitizenPartyDetailsMapper {
 
     private PartyDetails updateCitizenSafetyConcernDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails,
                                                            List<Element<ChildDetailsRevised>> childDetails) {
+        log.info("inside updateCitizenSafetyConcernDetails");
         return existingPartyDetails.toBuilder()
             .response(existingPartyDetails.getResponse()
                           .toBuilder()

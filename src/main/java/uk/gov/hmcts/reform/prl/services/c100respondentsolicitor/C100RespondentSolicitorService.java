@@ -1135,6 +1135,7 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
+        populateRespondToAohDataMap(response, dataMap);
         dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
@@ -1315,6 +1316,17 @@ public class C100RespondentSolicitorService {
             dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,respondentAllegationOfHarmService
                     .updateChildAbusesForDocmosis(allegationsOfHarmData));
             dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
+
+        }
+    }
+
+    private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
+        if (response.getResponseToAllegationsOfHarm() != null) {
+            ResponseToAllegationsOfHarm responseToAllegationsOfHarm = response.getResponseToAllegationsOfHarm();
+            dataMap.put("responseToAllegationsOfHarmYesOrNoResponse",
+                        getValueForYesOrNoEnum(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse()));
+            dataMap.put("respondentResponseToAllegationOfHarm",
+                        responseToAllegationsOfHarm.getRespondentResponseToAllegationOfHarm());
 
         }
     }
