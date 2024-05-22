@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
-import io.micrometer.core.instrument.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 public class SendReplyJudgeFilter {

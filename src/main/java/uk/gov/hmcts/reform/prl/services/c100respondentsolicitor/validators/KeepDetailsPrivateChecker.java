@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,10 +19,9 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class KeepDetailsPrivateChecker implements RespondentEventChecker {
-
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {

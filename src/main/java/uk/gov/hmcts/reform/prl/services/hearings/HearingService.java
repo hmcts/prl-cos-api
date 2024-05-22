@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -48,7 +46,7 @@ public class HearingService {
     private String hearingTypeCategoryId;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
-        
+
         Hearings hearings = null;
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
@@ -85,7 +83,7 @@ public class HearingService {
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in getCaseLinkedData ", e);
         }
         return caseLinkedData;
     }
@@ -96,7 +94,7 @@ public class HearingService {
         try {
             return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in getNextHearingDate", e);
         }
         return null;
     }
@@ -115,15 +113,13 @@ public class HearingService {
     private LocalDateTime getNextHearingDateWithInHearing(CaseHearing hearing) {
 
         LocalDateTime nextHearingDate = null;
-        LocalDateTime tempNextDateListed = null;
         if (hearing.getHmcStatus().equals(LISTED)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .map(HearingDaySchedule::getHearingStartDateTime)
                 .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
                 .min(LocalDateTime::compareTo);
-            if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
-                tempNextDateListed = minDateOfHearingDaySche.get();
-                nextHearingDate = tempNextDateListed;
+            if (minDateOfHearingDaySche.isPresent()) {
+                nextHearingDate = minDateOfHearingDaySche.get();
             }
         }
         return nextHearingDate;

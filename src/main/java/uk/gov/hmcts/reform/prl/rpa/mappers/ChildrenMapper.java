@@ -33,7 +33,7 @@ public class ChildrenMapper {
         }
         List<Child> childList = children.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return childList.stream().map(child -> new NullAwareJsonObjectBuilder()
             .add("firstName", child.getFirstName())
             .add("lastName", child.getLastName())
@@ -69,7 +69,7 @@ public class ChildrenMapper {
         }
         List<OtherPersonWhoLivesWithChild> otherPersonList = personWhoLivesWithChild.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return otherPersonList.stream().map(otherPerson -> new NullAwareJsonObjectBuilder()
             .add("firstName", otherPerson.getFirstName())
             .add("lastName", otherPerson.getLastName())

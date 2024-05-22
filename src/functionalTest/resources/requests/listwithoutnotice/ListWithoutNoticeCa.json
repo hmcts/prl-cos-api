@@ -1,0 +1,141 @@
+{
+  "case_details": {
+    "id": "1648728532100635",
+    "jurisdiction": "string",
+    "state": "string",
+    "case_type_id": "string",
+    "created_date": "2023-03-16T14:16:14.104Z",
+    "last_modified": "2023-03-16T14:16:14.104Z",
+    "locked_by_user_id": 0,
+    "security_level": 0,
+    "case_data": {
+      "additionalProp1": {},
+      "additionalProp2": {},
+      "additionalProp3": {},
+      "caseTypeOfApplication": "C100",
+      "listWithoutNoticeHearingDetails": [
+        {
+          "id": "11595009-7cf8-4883-bd03-fd18c8e92de0",
+          "value": {
+            "courtList": {
+              "value": {
+                "code": "101959",
+                "label": "Carmarthen County Court and Tribunal Hearing Centre - HILL HOUSE, PICTON TERRACE, CARMARTHEN - SA31 3BT"
+              },
+              "list_items": null
+            },
+            "hearingTypes": {
+              "value": null,
+              "list_items": null
+            },
+            "applicantName": "first last",
+            "respondentName": "FirstName LastName",
+            "hearingChannels": null,
+            "hearingDateTime": null,
+            "hearingAuthority": "magistrates",
+            "applicantSolicitor": null,
+            "hearingChannelsEnum": "TEL",
+            "respondentSolicitor": null,
+            "hearingEstimatedDays": 0,
+            "hearingJudgeLastName": "Prakasscs",
+            "hearingVideoChannels": null,
+            "cafcassHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "confirmedHearingDates": null,
+            "hearingEstimatedHours": 0,
+            "hearingScheduleDetails": [],
+            "applicantHearingChannel": {
+              "value": {
+                "code": "INTER",
+                "label": "In Person"
+              },
+              "list_items": null
+            },
+            "hearingEstimatedMinutes": 0,
+            "additionalHearingDetails": null,
+            "hearingJudgeEmailAddress": "Sample@gmail.com",
+            "hearingJudgeNameAndEmail": {
+              "idamId": null,
+              "personalCode": "4923952"
+            },
+            "hearingJudgePersonalCode": "4923952",
+            "hearingListedLinkedCases": {
+              "value": {
+                "code": "1677767515750127",
+                "label": "CaseName-Test10"
+              },
+              "list_items": null
+            },
+            "hearingTelephoneChannels": {
+              "value": {
+                "code": "TELSKYP",
+                "label": "Telephone - Skype"
+              },
+              "list_items": null
+            },
+            "respondentHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "cafcassCymruHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "hearingDateConfirmOptionEnum": "dateReservedWithListAssit",
+            "instructionsForRemoteHearing": null,
+            "localAuthorityHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "applicantSolicitorHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "respondentSolicitorHearingChannel": {
+              "value": {
+                "code": "NA",
+                "label": "Not in Attendance"
+              },
+              "list_items": null
+            },
+            "allPartiesAttendHearingSameWayYesOrNo": "No"
+          }
+        }
+      ],
+      "listWithoutNoticeHearingInstruction": "test instruction"
+    },
+    "security_classification": "PUBLIC",
+    "callback_response_status": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

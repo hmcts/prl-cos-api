@@ -22,11 +22,8 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -34,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -44,30 +40,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SolicitorEmailService solicitorEmailService;
-
-    @Autowired
-    private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    LocationRefDataService locationRefDataService;
-
-    @Autowired
+    private final FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+    private final ObjectMapper objectMapper;
+    private final LocationRefDataService locationRefDataService;
     private final FL401SubmitApplicationService fl401SubmitApplicationService;
+    private final AuthorisationService authorisationService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    private ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to send FL401 application notification. ")
@@ -91,7 +69,7 @@ public class FL401SubmitApplicationController {
             caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
                 .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
                                .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                               .collect(Collectors.toList()))
+                               .toList())
                 .build());
 
             return AboutToStartOrSubmitCallbackResponse.builder()

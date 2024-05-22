@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,14 +38,10 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentsController {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ReviewDocumentService reviewDocumentService;
+    private final ObjectMapper objectMapper;
+    private final ReviewDocumentService reviewDocumentService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -59,12 +56,13 @@ public class ReviewDocumentsController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
-        List<DynamicListElement> dynamicListElements = reviewDocumentService.getDynamicListElements(caseData);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        List<DynamicListElement> dynamicListElements = reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated);
 
         if (dynamicListElements.isEmpty()) {
             errors = List.of("No documents to review");
         }
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
 
         //clear the previous decision
@@ -81,7 +79,7 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetails(caseData, caseDataUpdated);
+        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -96,6 +94,7 @@ public class ReviewDocumentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        objectMapper.registerModule(new JavaTimeModule());
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

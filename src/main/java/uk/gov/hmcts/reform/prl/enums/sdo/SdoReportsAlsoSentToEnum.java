@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum SdoReportsAlsoSentToEnum {
 
     @JsonProperty("partyOrParties")
-    partyOrParties("partyOrParties", "Party(or parties)"),
+    partyOrParties("partyOrParties", "Other party"),
 
     @JsonProperty("cafcassCymru")
     cafcassCymru("cafcassCymru", "Cafcass or Cafcass Cymru");

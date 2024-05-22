@@ -53,15 +53,9 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMapForCitiz
 public class FeeService {
 
     public static final String ZERO_AMOUNT = "0.00";
-    @Autowired
-    private FeesConfig feesConfig;
-
-    @Autowired
-    private FeesRegisterApi feesRegisterApi;
-
-    @Autowired
+    private final FeesConfig feesConfig;
+    private final FeesRegisterApi feesRegisterApi;
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final ObjectMapper objectMapper;
 
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
@@ -87,7 +81,7 @@ public class FeeService {
 
     public FeeResponse getFeesDataForAdditionalApplications(List<FeeType> applicationsFeeTypes) {
         List<FeeResponse> feeResponses = new ArrayList<>();
-        applicationsFeeTypes.stream().forEach(feeType -> {
+        applicationsFeeTypes.forEach(feeType -> {
             try {
                 FeeResponse feeResponse = fetchFeeDetails(feeType);
                 feeResponses.add(feeResponse);
@@ -107,10 +101,10 @@ public class FeeService {
 
     private FeeResponse getFeeResponseWithHighestCharges(List<FeeResponse> feeResponses) {
         var feeResponse = extractFeeToUse(feeResponses);
-        return feeResponse.isPresent() ? feeResponse.get() : null;
+        return feeResponse.orElse(null);
     }
 
-    private boolean checkIsHearingDate14DaysAway(String hearingDate,String applicationReason) {
+    private boolean checkIsHearingDate14DaysAway(String hearingDate, String applicationReason) {
         boolean isHearingDate14DaysAway = false;
         if (onlyApplyingForAnAdjournment(applicationReason)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -118,7 +112,10 @@ public class FeeService {
                 hearingDate,
                 formatter
             ).atStartOfDay();
-            isHearingDate14DaysAway = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L);
+            isHearingDate14DaysAway = (Duration.between(
+                LocalDateTime.now(),
+                selectedHearingLocalDateTime
+            ).toDays() >= 14L);
 
         }
         return isHearingDate14DaysAway;
@@ -128,7 +125,7 @@ public class FeeService {
         return applicationReason.equals(DELAY_CANCEL_HEARING_DATE.getId());
     }
 
-    private FeeType getFeeType(FeeRequest feeRequest,CaseData caseData) {
+    private FeeType getFeeType(FeeRequest feeRequest, CaseData caseData) {
 
         FeeType feeType = null;
         if (feeRequest != null) {
@@ -145,12 +142,18 @@ public class FeeService {
 
                 // For C2 - Adjourn Hearing
                 if (isNotBlank(feeRequest.getHearingDate())) {
-                    boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate(),feeRequest.getApplicationReason());
-                    return getFeeTypeByPartyConsentAndHearing(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
+                    boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(
+                        feeRequest.getHearingDate(),
+                        feeRequest.getApplicationReason()
+                    );
+                    return getFeeTypeByPartyConsentAndHearing(
+                        feeRequest.getOtherPartyConsent(),
+                        isHearingDate14DaysAway
+                    );
                 }
 
                 // For C2 - All other requests
-                return  getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(),feeRequest.getNotice());
+                return getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(), feeRequest.getNotice());
 
             } else {
 
@@ -160,7 +163,7 @@ public class FeeService {
                 if (feeRequest.getApplicationType().equals(FL403.name())
                     && "respondent".equals(feeRequest.getPartyType())
                     && isFl403ApplicationAlreadyPresent(caseData)) {
-                    feeType =  FL403_EXTEND_AN_ORDER;
+                    feeType = FL403_EXTEND_AN_ORDER;
                 }
 
                 return feeType;
@@ -187,7 +190,7 @@ public class FeeService {
     private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
         Optional<FeeType> feeType;
         feeType = fromOtherPartyConsentAndHearing(partyConsent, isHearingDate14DaysAway);
-        return feeType.isPresent() ? feeType.get() : null;
+        return feeType.orElse(null);
     }
 
     private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
@@ -195,15 +198,10 @@ public class FeeService {
     }
 
     private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
-
-        if (otherPartyConsent.equals(NO) && !isHearingDate14DaysAway) {
+        if (YES.equals(otherPartyConsent)) {
+            return isHearingDate14DaysAway ? Optional.of(NO_FEE) : Optional.of(C2_WITHOUT_NOTICE);
+        } else if (NO.equals(otherPartyConsent)) {
             return Optional.of(C2_WITH_NOTICE);
-        } else if (otherPartyConsent.equals(NO) && isHearingDate14DaysAway) {
-            return Optional.of(C2_WITH_NOTICE);
-        } else if (otherPartyConsent.equals(YES) && !isHearingDate14DaysAway) {
-            return Optional.of(C2_WITHOUT_NOTICE);
-        } else if (otherPartyConsent.equals(YES) && isHearingDate14DaysAway) {
-            return Optional.of(NO_FEE);
         } else {
             return Optional.empty();
         }
@@ -211,18 +209,17 @@ public class FeeService {
 
     private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
 
-        if (otherPartyConsent.equals(YES)) {
+        if (YES.equals(otherPartyConsent)) {
             return C2_WITHOUT_NOTICE;
         } else {
-            if (notice.equals(NO)) {
+            if (NO.equals(notice)) {
                 return C2_WITHOUT_NOTICE;
-            } else if (notice.equals(YES)) {
+            } else if (YES.equals(notice)) {
                 return C2_WITH_NOTICE;
             } else {
                 return null;
             }
         }
-
     }
 
     public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
@@ -231,7 +228,7 @@ public class FeeService {
 
         String caseId = feeRequest.getCaseId();
 
-        FeeResponse feeResponse = null;
+        FeeResponse feeResponse;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
             serviceAuthorization,
@@ -240,14 +237,14 @@ public class FeeService {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        FeeType feeType = getFeeType(feeRequest,caseData);
+        FeeType feeType = getFeeType(feeRequest, caseData);
         if (feeType == null) {
             return FeeResponseForCitizen.builder()
                 .errorRetrievingResponse("Invalid Parameters to fetch fee code").build();
         }
 
-        if (feeType != null && feeType.equals(NO_FEE)) {
-            return  FeeResponseForCitizen.builder()
+        if (NO_FEE.equals(feeType)) {
+            return FeeResponseForCitizen.builder()
                 .amount(ZERO_AMOUNT).build();
         } else {
             feeResponse = fetchFeeDetails(feeType);
@@ -259,7 +256,4 @@ public class FeeService {
 
         }
     }
-
-
-
 }

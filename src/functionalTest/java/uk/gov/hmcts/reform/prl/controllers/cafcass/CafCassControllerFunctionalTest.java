@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
-import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
@@ -62,7 +61,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKE
 @ContextConfiguration
 public class CafCassControllerFunctionalTest {
 
-    private final String userToken = "Bearer testToken";
+    private static final String USER_TOKEN = "Bearer testToken";
 
     private MockMvc mockMvc;
 
@@ -72,8 +71,6 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private CoreCaseDataApi coreCaseDataApi;
 
-    @MockBean
-    private PostcodeLookupService postcodeLookupService;
     @MockBean
     private AuthorisationService authorisationService;
 
@@ -96,7 +93,7 @@ public class CafCassControllerFunctionalTest {
 
     @Ignore
     @Test
-    public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
+    public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
         String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         Map<String, String> refDataMap = new HashMap<>();
@@ -106,8 +103,7 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(systemUserService.getSysUserToken()).thenReturn(userToken);
-        Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
         Mockito.when(hearingService.getHearings(
             anyString(),
             anyString()

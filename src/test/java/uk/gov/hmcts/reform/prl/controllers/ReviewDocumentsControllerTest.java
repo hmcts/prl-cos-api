@@ -92,24 +92,22 @@ public class ReviewDocumentsControllerTest {
     @Test
     public void testHandleAboutToStart() throws Exception {
 
-        when(reviewDocumentService.getDynamicListElements(caseData)).thenReturn(dynamicListElements);
+        when(reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDetails.getData())).thenReturn(dynamicListElements);
         reviewDocumentsController.handleAboutToStart(auth, callbackRequest);
-        verify(reviewDocumentService).getDynamicListElements(caseData);
+        verify(reviewDocumentService).fetchDocumentDynamicListElements(caseData, caseDetails.getData());
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
     @Test
     public void testHandleMidEvent() {
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewedDocumentDetails(caseData,stringObjectMap);
+        verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);

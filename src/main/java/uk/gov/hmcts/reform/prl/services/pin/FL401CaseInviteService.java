@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.pin;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401CaseInviteService implements CaseInviteService {
-
-    @Autowired
-    CaseInviteEmailService caseInviteEmailService;
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
-
+    private final CaseInviteEmailService caseInviteEmailService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     public CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
         //no party id required as fl401 cases have only a single respondent
@@ -70,7 +67,6 @@ public class FL401CaseInviteService implements CaseInviteService {
             CaseInvite caseInvite = generateCaseInvite(partyDetails, No);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails, caseData);
-            log.info("Case invite generated and sent" + caseInvite);
         }
         return caseInvites;
     }
@@ -83,7 +79,6 @@ public class FL401CaseInviteService implements CaseInviteService {
             CaseInvite caseInvite = generateCaseInvite(partyDetails, Yes);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails, caseData);
-            log.info("Case invite generated and sent" + caseInvite);
         }
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {

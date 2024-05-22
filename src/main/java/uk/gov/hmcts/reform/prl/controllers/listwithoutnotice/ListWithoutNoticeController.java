@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -32,13 +33,16 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -47,44 +51,62 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@SuppressWarnings({"java:S107","java:S5665"})
 public class ListWithoutNoticeController extends AbstractCallbackController {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    HearingDataService hearingDataService;
-
-    @Autowired
-    LocationRefDataService locationRefDataService;
-
-    @Autowired
-    RefDataUserService refDataUserService;
-
-    @Autowired
-    AllocatedJudgeService allocatedJudgeService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    private HearingService hearingService;
-
-    @Autowired
+    public static final String LISTING_INSTRUCTIONS_SENT_TO_ADMIN = "Listing instructions sent to admin";
+    public static final String LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION = "listWithoutNoticeHearingInstruction";
+    private final AddCaseNoteService addCaseNoteService;
+    private final UserService userService;
+    private final HearingDataService hearingDataService;
+    private final RefDataUserService refDataUserService;
+    private final AllocatedJudgeService allocatedJudgeService;
+    private final AuthorisationService authorisationService;
+    private final HearingService hearingService;
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-    public static final String CONFIRMATION_HEADER = "# Listing directions sent";
+    private final CaseSummaryTabService caseSummaryTabService;
+    public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
+    public static final String CONFIRMATION_BODY_PREFIX_CA = """
+        ### What happens next
+        Admin will be notified to list the case without notice.\n
+        The hearing instructions will be saved in case notes.
+        """;
 
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
-        + "<ul><li>Listing directions  have been sent as a task to their local court listing.</li> "
-        + "<li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>";
+    public static final String CONFIRMATION_BODY_PREFIX_DA = """
+        ### What happens next
 
+
+        <ul><li>Listing directions  have been sent as a task to their local court listing.</li>
+        <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>""";
+
+    @Autowired
+    public ListWithoutNoticeController(ObjectMapper objectMapper,
+                                       EventService eventPublisher,
+                                       HearingDataService hearingDataService,
+                                       RefDataUserService refDataUserService,
+                                       AllocatedJudgeService allocatedJudgeService,
+                                       AuthorisationService authorisationService,
+                                       HearingService hearingService,
+                                       CaseSummaryTabService caseSummaryTabService,
+                                       AddCaseNoteService addCaseNoteService,
+                                       UserService userService) {
+        super(objectMapper, eventPublisher);
+        this.hearingDataService = hearingDataService;
+        this.refDataUserService = refDataUserService;
+        this.allocatedJudgeService = allocatedJudgeService;
+        this.authorisationService = authorisationService;
+        this.hearingService = hearingService;
+        this.caseSummaryTabService = caseSummaryTabService;
+        this.addCaseNoteService = addCaseNoteService;
+        this.userService = userService;
+    }
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
@@ -96,7 +118,8 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
+            List<Element<HearingData>> existingListWithoutNoticeHearingDetails = null != caseData.getListWithoutNoticeDetails()
+                ? caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingDetails() : null;
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -147,14 +170,16 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                           caseData.getLegalAdviserList(),
-                                                                                           refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-                .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
+                .getHearingDataForOtherOrders(caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingDetails(),
+                                              null, caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -178,7 +203,64 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
-                CONFIRMATION_BODY_PREFIX
+                CONFIRMATION_BODY_PREFIX_DA
+            ).build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/ca-listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List Without Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List Without notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse c100ListWithoutNoticeSubmission(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                REASONS_SELECTED_FOR_LIST_ON_NOTICE,
+                caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction(),
+                userService.getUserDetails(authorisation)
+            );
+            caseDataUpdated.put(
+                CASE_NOTES,
+                addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+            );
+            caseDataUpdated.remove(LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION);
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+
+    @PostMapping(path = "/ca-listWithoutNotice-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to List without notice confirmation . Returns service request reference if "
+        + "successful")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<SubmittedCallbackResponse> c100CcdSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIRMATION_HEADER).confirmationBody(
+                CONFIRMATION_BODY_PREFIX_CA
             ).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

@@ -15,15 +15,17 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM;
+
 
 @Slf4j
-@SuppressWarnings("ALL")
 @Service
+@SuppressWarnings({"java:S6813"})
 public class ResponseSubmitChecker implements RespondentEventChecker {
-
     @Autowired
     @Lazy
     RespondentEventsChecker respondentEventsChecker;
@@ -40,12 +42,17 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
         mandatoryEvents.put(KEEP_DETAILS_PRIVATE, respondentEventsChecker.getKeepDetailsPrivateChecker());
         mandatoryEvents.put(MIAM, respondentEventsChecker.getRespondentMiamChecker());
-        mandatoryEvents.put(ABILITY_TO_PARTICIPATE, respondentEventsChecker.getAbilityToParticipateChecker());
         mandatoryEvents.put(ATTENDING_THE_COURT, respondentEventsChecker.getAttendToCourtChecker());
-        mandatoryEvents.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
         mandatoryEvents.put(ALLEGATION_OF_HARM, respondentEventsChecker.getRespondentAllegationsOfHarmChecker());
         mandatoryEvents.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentEventsChecker.getRespondentContactDetailsChecker());
+        mandatoryEvents.put(RESPOND_ALLEGATION_OF_HARM, respondentEventsChecker.getResponseToAllegationsOfHarmChecker());
         boolean mandatoryFinished;
+        EnumMap<RespondentSolicitorEvents, RespondentEventChecker> optionalEvents = new EnumMap<>(RespondentSolicitorEvents.class);
+        optionalEvents.put(OTHER_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
+        optionalEvents.put(INTERNATIONAL_ELEMENT,respondentEventsChecker.getInternationalElementsChecker());
+        optionalEvents.put(ABILITY_TO_PARTICIPATE, respondentEventsChecker.getAbilityToParticipateChecker());
+
+        boolean optionalFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(respondingParty);
@@ -53,6 +60,13 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
                 return false;
             }
         }
+        for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : optionalEvents.entrySet()) {
+            optionalFinished = e.getValue().isFinished(respondingParty) || !(e.getValue().isStarted(respondingParty));
+            if (!optionalFinished) {
+                return false;
+            }
+        }
+
         return true;
     }
 }

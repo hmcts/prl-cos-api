@@ -27,6 +27,10 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
+    public static final String MPU_CHILD_INVOLVED_IN_MIAM = "mpuChildInvolvedInMiam";
+    public static final String MPU_APPLICANT_ATTENDED_MIAM = "mpuApplicantAttendedMiam";
+    public static final String MPU_CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemptionMiam";
+
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
@@ -51,6 +55,10 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
 
+    public static final String DRAFT_APPLICATION_DOCUMENT_FIELD = "submitAndPayDownloadApplicationLink";
+
+    public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
+
     public static final String C7_FINAL_ENGLISH = "c7FinalEng";
 
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
@@ -72,6 +80,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_LOCAL_AUTHORITY = "Local Authority";
     public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
@@ -100,6 +109,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
     public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
+    public static final String READY_FOR_DELETION_STATE = State.READY_FOR_DELETION.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
@@ -110,6 +120,7 @@ public class PrlAppsConstants {
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
     public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
     public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
+    public static final String C8_RESP_FL401_FINAL_HINT = "C8_RESPONDENT_FL401_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
@@ -270,7 +281,7 @@ public class PrlAppsConstants {
         + "a. The ((applicant / respondent / both)) must notify the court by "
         + "4pm ((date that the deadline has been set)) whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
-        + "b. If the ((applicant / respondent)) does not intend to appoint their own qulaified leagl "
+        + "b. If the ((applicant / respondent)) does not intend to appoint their own qualified legal "
         + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
         + "must complete form EX740 and return it to the court by 4pm on ((date that the deadline has been set))";
     public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
@@ -296,7 +307,7 @@ public class PrlAppsConstants {
         + "c. the court shall send this order to Cafcass or Cafcass Cymru with the parties’ contact details"
         + System.lineSeparator() + System.lineSeparator()
         + "d. the activity provider must notify the Court whether the course was completed at the conclusion of the activity directed";
-    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at (place)."
+    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]."
         + System.lineSeparator() + System.lineSeparator()
         + "The reason for transfer is another court is in the area where the child usually lives / there are on-going "
         + "proceedings in another court / or other reason";
@@ -521,10 +532,8 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "e) if direct contact is not appropriate, whether there should be indirect contact and, if so, in what form";
 
-    public static final String SECTION_7_DA_OCCURED_EDIT_CONTENT = "With regard to the findings of fact made as set out in the schedule to "
-        + "((this order / the order made on)) ((date that the order was made)):"
-        + System.lineSeparator() + System.lineSeparator()
-        + "a) any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are living as a consequence "
+    public static final String SECTION_7_DA_OCCURED_EDIT_CONTENT = "a) any harm suffered by the ((child or children)) and "
+        + "the parent with whom the ((child or children)) are living as a consequence "
         + "of the domestic abuse found"
         + System.lineSeparator()
         + "b) any harm which the ((child or children)) and the parent with whom the ((child or children)) "
@@ -535,6 +544,38 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements with a view "
         + "to a final order if possible";
+
+    public static final String WHO_MADE_ALLEGATIONS_TEXT = "a) The list must be signed and dated. Each incident must be numbered and set "
+        + "out in date order, giving the date each incident happened so far as possible and giving a brief description of what "
+        + "happened and where. If someone else was there at the time of the incident, and/or the incident was reported to the police "
+        + "or medical attention was sought, details should be given."
+        + System.lineSeparator()
+        + "b) If possible, the list of allegations shall be set out in the form of a table with headings. An example table is attached to this order."
+        + System.lineSeparator()
+        + "c) The list must end with a statement that it is true, and be signed and dated."
+        + System.lineSeparator()
+        + "d) A statement must be sent with the list, giving more details of the allegations, referring to each allegation by its number in the list "
+        + "and attaching all evidence relied upon in support."
+        + System.lineSeparator()
+        + "e) If there were other witnesses to the alleged incidents, or there are documents on which a party intends to rely, that should be "
+        + "referred to in the last paragraph of the statement but no additional witnesses or documents should be sent at this stage."
+        + System.lineSeparator()
+        + "f) In addition, the party making the allegations and any witnesses must make written statements of the evidence they will give to "
+        + "the court about the disputed facts, attaching copies of any documents they wish to use to support their evidence. Copies of the "
+        + "statements and any documents must be sent with the lists.";
+
+    public static final String WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT = "a) The written response to each of the allegations should use the same "
+        + "table if possible. It should set out brief details of what the party who made the allegations says happened, or if the incident is "
+        + "denied. The response must end with a statement that it is true, and must be signed and dated."
+        + System.lineSeparator()
+        + "b) A statement giving more details of the responses, referring to each allegation by its number in the list."
+        + System.lineSeparator()
+        + "c) If there were other witnesses to the alleged incidents, or there are documents on which a party intends to rely, that should be "
+        + "referred to in the last paragraph of the statement but no additional witnesses or documents should be sent at this stage."
+        + System.lineSeparator()
+        + "d) In addition, the party who needs to respond to the allegations made and any witnesses must make written statements of the evidence "
+        + "they will give to the court about the disputed facts, attaching any documents they wish to use to support their evidence. Copies of the"
+        + " statements and any documents must be sent with the lists.";
 
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
@@ -557,7 +598,7 @@ public class PrlAppsConstants {
 
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
-    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_ACTUALS";
     public static final String CANCELLED = "CANCELLED";
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
@@ -585,6 +626,9 @@ public class PrlAppsConstants {
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
 
     public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
+
+    public static final String IS_SPECIFIC_JUDGE_OR_LA_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
+
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
 
@@ -615,14 +659,19 @@ public class PrlAppsConstants {
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
+    public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
+    public static final String SOLICITOR_C7_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C7_WELSH_DRAFT";
+    public static final String SOLICITOR_C7_WELSH_FINAL_DOCUMENT = "SOLICITOR_C7_WELSH_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
     public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
+    public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
+    public static final String SOLICITOR_C1A_WELSH_FINAL_DOCUMENT = "SOLICITOR_C1A_WELSH_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
@@ -683,7 +732,7 @@ public class PrlAppsConstants {
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
 
-    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
+    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List without notice";
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
@@ -694,6 +743,8 @@ public class PrlAppsConstants {
     public static final String SDO_FHDRA_HEARING_DETAILS = "sdoFhdraHearingDetails";
     public static final String SDO_DRA_HEARING_DETAILS = "sdoDraHearingDetails";
     public static final String SDO_SETTLEMENT_HEARING_DETAILS = "sdoSettlementHearingDetails";
+
+    public static final String SDO_DIRECTIONS_FOR_FACT_FINDING_HEARING_DETAILS = "sdoDirectionsForFactFindingHearingDetails";
 
     public static final String C100_RESPONDENTS = "respondents";
     public static final String C100_RESPONDENT_TABLE = "respondentTable";
@@ -731,25 +782,34 @@ public class PrlAppsConstants {
 
     public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
 
-    public static final String Q = "Q";
-
-    public static final String S = "S";
-
-    public static final String R = "R";
-
     public static final String A = "A";
 
     public static final String B = "B";
 
-    public static final String G = "G";
+    public static final String C = "C";
 
-    public static final String O = "O";
+    public static final String D = "D";
+
+    public static final String E = "E";
+
+    public static final String F = "F";
+
+    public static final String G = "G";
     public static final String H = "H";
     public static final String I = "I";
+    public static final String J = "J";
+    public static final String K = "K";
+    public static final String L = "L"; //CA other org pack
+    public static final String M = "M";
     public static final String N = "N";
+    public static final String O = "O";
+    public static final String P = "P";
+    public static final String Q = "Q";
+    public static final String R = "R";
+    public static final String S = "S";
+
     public static final String HI = "HI";
     public static final String Z = "Z"; //CA other org pack
-    public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
         + "hence not sending any documents ";
@@ -766,7 +826,7 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
+    public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
@@ -774,13 +834,15 @@ public class PrlAppsConstants {
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
 
-    public static final String SOA_MEDIATION_VOUCHER_FILENAME = "Mediation-voucher.pdf";
+    public static final String SOA_FAMILY_PRESIDENTS_NOTE = "Family President's letter to parties.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
     public static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     public static final String SOA_MULTIPART_FILE = "files";
+    public static final String SOA_CITIZEN = "CITIZEN";
+    public static final String SOA_SOLICITOR = "SOLICITOR";
 
 
     public static final String COURT_ADMIN = "Court admin";
@@ -814,12 +876,18 @@ public class PrlAppsConstants {
     public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
+    public static final String  TASK_LIST_VERSION_V3 = "v3";
 
     public static final String  PHYSICAL_ABUSE = "physicalAbuse";
     public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
+    //Soa letter types
+    public static final String SOA_RES_LET_RE5 = "RE5";
+
+    public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
+    public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";
@@ -839,6 +907,8 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+    public static final String DUMMY = "Dummy";
+
 
     public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
     public static final String AM_LOWER_CASE = "am";
@@ -846,6 +916,7 @@ public class PrlAppsConstants {
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
 
+    public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
@@ -856,11 +927,65 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
-    public static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
-        "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
-        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
+    public static final String WA_PERFORMING_USER = "performingUser";
+    public static final String WA_PERFORMING_ACTION = "performingAction";
+    public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
+    public static final String WA_ORDER_NAME = "orderNameForWA";
+    public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
 
-    public static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
-        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
+    public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
+    public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
+    public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
+    public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
+    public static final String HEARING_JUDGE_ROLE = "hearing-judge";
+    public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
+    public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
+
+    // PRL-5025
+    public static final String WA_IS_ORDER_APPROVED = "isOrderApproved";
+    public static final String WA_WHO_APPROVED_THE_ORDER = "whoApprovedTheOrder";
+    public static final String WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED = "judgeLaManagerReviewRequired";
+    public static final String WA_IS_MULTIPLE_HEARING_SELECTED = "isMultipleHearingSelected";
+    public static final String WA_HEARING_OPTION_SELECTED = "hearingOptionSelected";
+    public static final String WA_IS_HEARING_TASK_NEEDED = "isHearingTaskNeeded";
+    public static final String WA_MULTIPLE_OPTIONS_SELECTED_VALUE = "multipleOptionSelected";
+
+    public static final String WITHOUT_NOTICE_REJECTION = "Without notice rejection";
+    public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
+        + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
+
+    public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
+    public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
+
+    public static final String INTERNAL_CORRESPONDENCE_LABEL = "Internal correspondence";
+    public static final String INTERNAL_CORRESPONDENCE_CATEGORY_ID = "internalCorrespondence";
+    public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
+    public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
+    public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
+
+    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+
+    public static final String STAFF = "STAFF";
+    public static final String TRUE = "True";
+    public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
+    public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
+    public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
+    public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+
+    public static final String HEARINGS_TYPE = "hearingsType";
+
+    public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
+
+    public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+
+    public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
+
+    public static final String FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED = "fl401ReasonsForListWithoutNoticeRequested";
+
+    public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
 }

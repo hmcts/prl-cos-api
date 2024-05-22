@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,17 +43,16 @@ public class DynamicMultiSelectListService {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
-            orders.forEach(order -> {
-                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
-                                  .label(order.getValue().getLabelForDynamicList()).build());
-            });
+            orders.forEach(order -> listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
+                              .label(order.getValue().getLabelForDynamicList()).build()));
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getNewChildDetails() != null) {
+        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             IncrementalInteger i = new IncrementalInteger(1);
             caseData.getNewChildDetails().forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
@@ -158,7 +158,9 @@ public class DynamicMultiSelectListService {
     public List<DynamicMultiselectListElement> getOtherPeopleMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
 
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getOtherPartyInTheCaseRevised() != null) {
+        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion()))
+                && caseData.getOtherPartyInTheCaseRevised() != null) {
             caseData.getOtherPartyInTheCaseRevised().forEach(others ->
                     otherPeopleList.add(DynamicMultiselectListElement.builder()
                             .code(others.getId().toString())
@@ -203,6 +205,7 @@ public class DynamicMultiSelectListService {
                 .add(Element.<ServedParties>builder().value(ServedParties.builder()
                                                                 .partyId(value.getCode())
                                                                 .partyName(value.getLabel())
+                                                                .servedDateTime(LocalDateTime.now())
                                                                 .build()).build())
             );
         }
@@ -261,7 +264,8 @@ public class DynamicMultiSelectListService {
     private Child getChildDetails(CaseData caseData, String id) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
 
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                    || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
 
                 Optional<ChildDetailsRevised> childRevised = caseData.getNewChildDetails().stream()
                         .filter(element -> element.getId().toString().equalsIgnoreCase(id))
@@ -377,5 +381,12 @@ public class DynamicMultiSelectListService {
                           .code(String.valueOf(id))
                           .label(label.toString())
                           .build());
+    }
+
+    public DynamicMultiSelectList getEmptyDynMultiSelectList() {
+        return  DynamicMultiSelectList.builder()
+            .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
+            .build();
     }
 }
