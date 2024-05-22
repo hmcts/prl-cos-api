@@ -659,6 +659,7 @@ public class PrlAppsConstants {
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
+    public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
@@ -931,6 +932,10 @@ public class PrlAppsConstants {
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";

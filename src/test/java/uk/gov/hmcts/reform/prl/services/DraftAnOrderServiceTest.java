@@ -2242,6 +2242,214 @@ public class DraftAnOrderServiceTest {
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
+
+    @Test
+    public void testPopulateStandardDirectionOrderTestScenario2() throws JsonProcessingException {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
+            .sdoUrgentHearingDetails(HearingData.builder().build())
+            .sdoPermissionHearingDetails(HearingData.builder().build())
+            .sdoSecondHearingDetails(HearingData.builder().build())
+            .sdoFhdraHearingDetails(HearingData.builder().build())
+            .sdoDraHearingDetails(HearingData.builder().build())
+            .sdoSettlementHearingDetails(HearingData.builder().build())
+            .editedOrderHasDefaultCaseFields(Yes)
+            .sdoDirectionsForFactFindingHearingDetails(
+                HearingData.builder()
+                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                    .build())
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        SdoDetails sdoDetails = SdoDetails.builder().build();
+        String sdoDetailsJson = null;
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+        when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
+        when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
+        when(objectMapper.convertValue(any(), Mockito.eq(Map.class))).thenReturn(standardDirectionOrderMap);
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(hearingService.getHearings(
+            Mockito.anyString(),
+            Mockito.anyString()
+        )).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            any(),
+            any()
+        ))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+        when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+
+        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder(
+            "test-token",
+            caseData,
+            true
+        );
+        assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
+        //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+
+    @Test
+    public void testPopulateStandardDirectionOrderTestScenario3() throws JsonProcessingException {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
+            .sdoUrgentHearingDetails(HearingData.builder().build())
+            .sdoPermissionHearingDetails(HearingData.builder().build())
+            .sdoSecondHearingDetails(HearingData.builder().build())
+            .sdoFhdraHearingDetails(HearingData.builder().build())
+            .sdoDraHearingDetails(HearingData.builder().build())
+            .sdoSettlementHearingDetails(HearingData.builder().build())
+            .editedOrderHasDefaultCaseFields(Yes)
+            .sdoDirectionsForFactFindingHearingDetails(
+                HearingData.builder()
+                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                    .build())
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        SdoDetails sdoDetails = SdoDetails.builder().build();
+        String sdoDetailsJson = null;
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+        when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
+        when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
+        when(objectMapper.convertValue(any(), Mockito.eq(Map.class))).thenReturn(standardDirectionOrderMap);
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(hearingService.getHearings(
+            Mockito.anyString(),
+            Mockito.anyString()
+        )).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            any(),
+            any()
+        ))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+        when(hearingDataService.getHearingDataForSdo(any(), any(), any())).thenReturn(HearingData.builder().build());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+
+        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder(
+            "test-token",
+            caseData,
+            false
+        );
+        assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
+        //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
     @Test
     public void testPopulateStandardDirectionOrderTestWithExp() throws JsonProcessingException {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
