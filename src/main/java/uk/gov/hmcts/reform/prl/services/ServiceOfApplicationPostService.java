@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -57,7 +58,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
-    public static final String ADDRESS_NOT_PRESENT_ERROR_MESSAGE = "ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER";
     private final BulkPrintService bulkPrintService;
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
@@ -100,7 +100,7 @@ public class ServiceOfApplicationPostService {
                 )
             );
         } else {
-            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
     }
@@ -135,7 +135,7 @@ public class ServiceOfApplicationPostService {
                 coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
         } else {
-            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return coverLetterDocs;
     }
@@ -212,8 +212,8 @@ public class ServiceOfApplicationPostService {
             );
         }
         if (null != uploadResponse) {
-            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream()
-                .map(DocumentUtils::toPrlDocument).toList();
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
+                Collectors.toList());
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
@@ -300,41 +300,4 @@ public class ServiceOfApplicationPostService {
             .timeStamp(currentDate).build();
     }
 
-    public List<Document> getCoverSheets(CaseData caseData, String auth, Address address, String name, String coverSheetTemplate) throws Exception {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        List<Document> coversheets = new ArrayList<>();
-        if (null != address && null != address.getAddressLine1()) {
-            if (documentLanguage.isGenEng()) {
-                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, false,
-                                                                                                       coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                GeneratedDocumentInfo generatedDocumentInfo = fetchCoverSheetBasedOnLanguagePreference(caseData, auth, address, name, true,
-                                                                                                       coverSheetTemplate);
-                coversheets.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
-            }
-        } else {
-            log.error(ADDRESS_NOT_PRESENT_ERROR_MESSAGE);
-        }
-        return coversheets;
-    }
-
-    private GeneratedDocumentInfo fetchCoverSheetBasedOnLanguagePreference(CaseData caseData, String auth,
-                                                                           Address address, String name,
-                                                                           boolean isWelsh, String coverSheetTemplate) throws Exception {
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("coverPagePartyName", null != name ? name : " ");
-        dataMap.put("coverPageAddress", address);
-        dataMap.put("id", String.valueOf(caseData.getId()));
-        GeneratedDocumentInfo generatedDocumentInfo;
-        generatedDocumentInfo = dgsService.generateDocument(
-            auth, String.valueOf(caseData.getId()),
-            documentGenService.getTemplate(
-                caseData,
-                coverSheetTemplate, isWelsh
-            ), dataMap
-        );
-        return generatedDocumentInfo;
-    }
 }

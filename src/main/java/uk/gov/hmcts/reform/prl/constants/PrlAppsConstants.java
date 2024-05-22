@@ -995,6 +995,5 @@ public class PrlAppsConstants {
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
-    public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
 
 }
