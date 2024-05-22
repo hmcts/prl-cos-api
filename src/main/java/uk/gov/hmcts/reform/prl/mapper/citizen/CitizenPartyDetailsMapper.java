@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
@@ -378,6 +380,12 @@ public class CitizenPartyDetailsMapper {
                     citizenProvidedPartyDetails
                 );
             }
+            case CITIZEN_PCQ_UPDATE -> {
+                return updatePcqIdForParty(
+                    existingPartyDetails,
+                    citizenProvidedPartyDetails
+                );
+            }
             case CITIZEN_CURRENT_OR_PREVIOUS_PROCCEDINGS -> {
                 // For citizen-case-update - currentOrPreviousProceedings
                 return updateCitizenResponseForProceedings(
@@ -451,6 +459,15 @@ public class CitizenPartyDetailsMapper {
     private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
         return existingPartyDetails.toBuilder()
             .isRemoveLegalRepresentativeRequested(citizenProvidedPartyDetails.getIsRemoveLegalRepresentativeRequested())
+            .build();
+    }
+
+    private PartyDetails updatePcqIdForParty(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
+        User user = ObjectUtils.isNotEmpty(existingPartyDetails.getUser())
+            ? existingPartyDetails.getUser().toBuilder().pcqId(citizenProvidedPartyDetails.getUser().getPcqId()).build()
+            : User.builder().pcqId(citizenProvidedPartyDetails.getUser().getPcqId()).build();
+        return existingPartyDetails.toBuilder()
+            .user(user)
             .build();
     }
 
@@ -788,7 +805,8 @@ public class CitizenPartyDetailsMapper {
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements);
+            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements,
+                                               c100RebuildData.getApplicantPcqId());
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {

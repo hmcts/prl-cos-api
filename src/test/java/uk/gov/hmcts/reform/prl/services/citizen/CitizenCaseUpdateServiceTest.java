@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +42,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,6 +69,7 @@ public class CitizenCaseUpdateServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String caseId = "case id";
     public static final String eventId = "confirmYourDetails";
+    private static PartyDetails partyDetails;
 
     @Test
     public void testUpdateCitizenPartyDetailsConfirmYourDetails() {
@@ -226,12 +230,14 @@ public class CitizenCaseUpdateServiceTest {
     @Test
     public void testSubmitApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
+        partyDetails = PartyDetails.builder().build();
         Long caseIdSubmit = 12345L;
 
         CaseData caseData = CaseData.builder().id(caseIdSubmit)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -255,7 +261,7 @@ public class CitizenCaseUpdateServiceTest {
         when(citizenPartyDetailsMapper.buildUpdatedCaseData(
             any(),
             any()
-        )).thenReturn(CaseData.builder().id(caseIdSubmit).build());
+        )).thenReturn(caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
@@ -337,6 +343,7 @@ public class CitizenCaseUpdateServiceTest {
             .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .applicantPcqId(PrlAppsConstants.TEST_UUID)
             .build();
         return c100RebuildData;
     }
