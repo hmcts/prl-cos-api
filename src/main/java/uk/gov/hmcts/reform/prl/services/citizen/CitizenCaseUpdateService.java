@@ -73,28 +73,27 @@ public class CitizenCaseUpdateService {
                                                  CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseDetails caseDetails = null;
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(caseId, eventId, authorisation);
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
-
         Optional<CitizenUpdatePartyDataContent> citizenUpdatePartyDataContent = Optional.ofNullable(
             citizenPartyDetailsMapper.mapUpdatedPartyDetails(
                 dbCaseData, citizenUpdatedCaseData,
                 caseEvent,
                 startAllTabsUpdateDataContent.authorisation()
             ));
-
         if (citizenUpdatePartyDataContent.isPresent()) {
+            Map<String, Object> caseDataMapToBeUpdated = citizenUpdatePartyDataContent.get().updatedCaseDataMap();
+
+            Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
             caseDetails = allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
-                citizenUpdatePartyDataContent.get().updatedCaseDataMap(),
+                caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
             );
-
             if (EVENT_IDS_FOR_ALL_TAB_REFRESHED.contains(caseEvent)) {
                 return allTabService.updateAllTabsIncludingConfTab(caseId);
             }
@@ -229,12 +228,6 @@ public class CitizenCaseUpdateService {
         String caseId,
         String authorisation,
         LanguageSupportCaseNotesRequest languageSupportCaseNotesRequest) {
-        log.info("Inside addLanguageSupportCaseNotes for caseId {}", caseId);
-        log.info(
-            "Inside addLanguageSupportCaseNotes languageSupportCaseNotesRequest {}",
-            languageSupportCaseNotesRequest
-        );
-
         if (StringUtils.isEmpty(languageSupportCaseNotesRequest.getPartyIdamId())
             || StringUtils.isEmpty(languageSupportCaseNotesRequest.getLanguageSupportNotes())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
@@ -258,12 +251,6 @@ public class CitizenCaseUpdateService {
             CASE_NOTES,
             addCaseNoteService.getCaseNoteDetails(dbCaseData, currentCaseNoteDetails)
         );
-
-        try {
-            log.info("CaseDataContent ===>" + objectMapper.writeValueAsString(caseNotesMap));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
 
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),

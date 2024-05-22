@@ -78,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCU
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -89,6 +90,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class ManageDocumentsService {
     public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
+    public static final String FM5_ERROR = "The statement of position on non-court dispute resolution "
+        + "(form FM5) cannot contain confidential information or be restricted.";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
@@ -152,19 +155,25 @@ public class ManageDocumentsService {
                                                  UserDetails userDetails) {
         List<String> errorList = new ArrayList<>();
         String userRole = CaseUtils.getUserRole(userDetails);
-        if (SOLICITOR.equals(userRole)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
 
-            List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
-            for (Element<ManageDocuments> element : manageDocuments) {
-                boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
-                boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
-                    || element.getValue().getRestrictedDetails().isEmpty();
-                if (restricted && restrictedReasonEmpty) {
-                    errorList.add(DETAILS_ERROR_MESSAGE);
-                }
+        for (Element<ManageDocuments> element : manageDocuments) {
+            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean confidential = element.getValue().getIsConfidential().equals(YesOrNo.Yes);
+            boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
+                || element.getValue().getRestrictedDetails().isEmpty();
+
+            if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
+                errorList.add(DETAILS_ERROR_MESSAGE);
+            }
+
+            if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
+                && (restricted || confidential)) {
+                errorList.add(FM5_ERROR);
             }
         }
+
         return errorList;
     }
 
@@ -231,7 +240,7 @@ public class ManageDocumentsService {
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
+                Document updatedConfidentialDocument = downloadAndDeleteDocument(document, systemUserService.getSysUserToken());
                 quarantineLegalDoc = setQuarantineDocumentForUploader(
                     ManageDocuments.builder()
                         .document(updatedConfidentialDocument)
@@ -239,28 +248,29 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
-
             }
+            if (quarantineLegalDoc != null) {
+                QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
+                    quarantineLegalDoc,
+                    userDetails
+                );
+                //This will be executed only during manage documents
+                if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(
+                    quarantineLegalDoc.getDocumentParty())) {
+                    finalConfidentialDocument = finalConfidentialDocument.toBuilder()
+                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                        .build();
+                }
 
-            QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
-                quarantineLegalDoc,
-                userDetails
-            );
-            //This will be executed only during manage documents
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
-                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
+                moveToConfidentialOrRestricted(
+                    caseDataUpdated,
+                    CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
+                        ? caseData.getReviewDocuments().getConfidentialDocuments()
+                        : caseData.getReviewDocuments().getRestrictedDocuments(),
+                    finalConfidentialDocument,
+                    restrictedKey
+                );
             }
-
-            moveToConfidentialOrRestricted(
-                caseDataUpdated,
-                CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
-                    ? caseData.getReviewDocuments().getConfidentialDocuments()
-                    : caseData.getReviewDocuments().getRestrictedDocuments(),
-                finalConfidentialDocument,
-                restrictedKey
-            );
         } else {
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
@@ -396,7 +406,7 @@ public class ManageDocumentsService {
     }
 
 
-    private Document downloadAndDeleteDocument(Document document) {
+    public Document downloadAndDeleteDocument(Document document, String systemAuthorisation) {
         try {
             if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                 UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
@@ -405,7 +415,7 @@ public class ManageDocumentsService {
                     documentId
                 );
                 if (null != newUploadedDocument) {
-                    caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                    caseDocumentClient.deleteDocument(systemAuthorisation,
                                                       authTokenGenerator.generate(),
                                                       documentId, true
                     );
@@ -546,27 +556,15 @@ public class ManageDocumentsService {
         }
 
         switch (userRole) {
-            case SOLICITOR -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("legalProfUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
-                }
-            }
-            case CAFCASS -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("cafcassUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("cafcassQuarantineDocsList", quarantineDocs);
-                }
-            }
-            case COURT_STAFF -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
-                }
-            }
+            case SOLICITOR ->
+                caseDataUpdated.put(isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
+                                    quarantineDocs);
+            case CAFCASS ->
+                caseDataUpdated.put(isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
+                                    quarantineDocs);
+            case COURT_STAFF ->
+                caseDataUpdated.put(isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
+                                    quarantineDocs);
             case COURT_ADMIN -> {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
@@ -577,13 +575,9 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
             }
-            case CITIZEN -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("citizenUploadedDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("citizenQuarantineDocsList", quarantineDocs);
-                }
-            }
+            case CITIZEN ->
+                caseDataUpdated.put(isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
+                                    quarantineDocs);
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
@@ -688,7 +682,7 @@ public class ManageDocumentsService {
                     );
                     QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
 
-                    Document renamedDocument = downloadAndDeleteDocument(existingDocument);
+                    Document renamedDocument = downloadAndDeleteDocument(existingDocument, systemUserService.getSysUserToken());
                     Map tempQuarantineObjectMap =
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
                     tempQuarantineObjectMap.put(
@@ -716,7 +710,7 @@ public class ManageDocumentsService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         List<String> loggedInUserType = new ArrayList<>();
-        if (launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
             RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -725,7 +719,6 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            log.info("roleAssignmentServiceResponse {}", roleAssignmentServiceResponse);
             if (roles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);

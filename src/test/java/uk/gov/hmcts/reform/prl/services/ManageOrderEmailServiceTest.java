@@ -12,7 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.*;
@@ -42,8 +41,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -52,7 +49,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +73,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SuppressWarnings({"java:S1607"})
 public class ManageOrderEmailServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
-    private static final String URGENT_CASE = "Urgent ";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -185,8 +180,8 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(englishOrderDoc)
             .orderDocumentWelsh(welshOrderDoc)
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .build())
             .build();
 
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder()
@@ -264,8 +259,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -286,22 +279,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         manageOrderEmailService.sendEmail(caseDetails);
@@ -345,8 +324,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -377,11 +354,11 @@ public class ManageOrderEmailServiceTest {
             .isCaseUrgent(YesOrNo.No)
             .manageOrders(manageOrders)
             .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                .build())
             .familymanCaseNumber("12345678")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
@@ -389,34 +366,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -458,8 +413,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -490,11 +443,11 @@ public class ManageOrderEmailServiceTest {
             .isCaseUrgent(YesOrNo.Yes)
             .manageOrders(manageOrders)
             .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                .build())
             .fl401FamilymanCaseNumber("12345678")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
@@ -502,34 +455,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -573,8 +504,6 @@ public class ManageOrderEmailServiceTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -611,11 +540,11 @@ public class ManageOrderEmailServiceTest {
             .isCaseUrgent(YesOrNo.No)
             .manageOrders(manageOrders)
             .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                .build())
             .fl401FamilymanCaseNumber("12345678")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
@@ -623,34 +552,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", "test@test.com");
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String typeOfHearing = " ";
-
-        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
-            typeOfHearing = URGENT_CASE;
-        }
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
-            .build();
-
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
@@ -660,22 +567,22 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssued() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssued() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .state(State.ALL_FINAL_ORDERS_ISSUED)
             .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build())))
             .build();
 
 
@@ -684,26 +591,26 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+            Mockito.any(),
+            Mockito.any(),Mockito.any());
     }
 
     @Test
-    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() throws  Exception {
+    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build())))
             .build();
 
 
@@ -712,29 +619,29 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(0)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+            Mockito.any(),
+            Mockito.any(),Mockito.any());
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmail() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmail() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .state(State.ALL_FINAL_ORDERS_ISSUED)
             .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .email("test@gmail.com")
-                                            .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .email("test@gmail.com")
+                .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .email("test@gmail.com")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .email("test@gmail.com")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build())))
             .build();
 
 
@@ -743,23 +650,23 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+            Mockito.any(),
+            Mockito.any(),Mockito.any());
     }
 
     @Test
-    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() throws  Exception {
+    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("Fl401")
             .state(State.ALL_FINAL_ORDERS_ISSUED)
             .respondentsFL401(PartyDetails.builder()
-                                  .solicitorEmail("test@gmail.com")
-                                  .representativeLastName("LastName")
-                                  .representativeFirstName("FirstName")
-                                  .email("test@gmail.com")
-                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                  .build())
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .email("test@gmail.com")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build())
             .build();
 
 
@@ -768,8 +675,8 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+            Mockito.any(),
+            Mockito.any(),Mockito.any());
     }
 
     @Test
@@ -818,9 +725,9 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
+                .label("John (Child 1)")
+                .code("00000000-0000-0000-0000-000000000000")
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -852,22 +759,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -879,7 +772,7 @@ public class ManageOrderEmailServiceTest {
     public void testServeOrdersToOtherOrganisation() {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
-                               .addressLine1("Made Up Street").build())
+                .addressLine1("Made Up Street").build())
             .postalName("Test")
             .build();
         Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
@@ -894,10 +787,10 @@ public class ManageOrderEmailServiceTest {
             .orderDocumentWelsh(welshOrderDoc)
             .typeOfOrder("Final")
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .otherPartiesServed(YesOrNo.Yes)
-                                   .postalInformation(listOfAddress)
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
             .build();
         List<Element<PartyDetails>> parties = new ArrayList<>();
         parties.add(element(PartyDetails.builder().build()));
@@ -929,7 +822,7 @@ public class ManageOrderEmailServiceTest {
     public void testServeOrdersToOtherOrganisationThrowsException() throws Exception {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
-                               .addressLine1("Made Up Street").build())
+                .addressLine1("Made Up Street").build())
             .postalName("Test")
             .build();
         Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
@@ -944,10 +837,10 @@ public class ManageOrderEmailServiceTest {
             .orderDocumentWelsh(welshOrderDoc)
             .typeOfOrder("Final")
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .otherPartiesServed(YesOrNo.Yes)
-                                   .postalInformation(listOfAddress)
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
             .build();
 
         caseData = CaseData.builder()
@@ -956,13 +849,13 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(caseData,"testAuth", address.getPostalAddress(),"Test",
-                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenThrow(new RuntimeException());
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -976,15 +869,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testServeOrdersToOtherOrganisationServeOrderDetailsNull() {
-        PostalInformation address = PostalInformation.builder()
-            .postalAddress(Address.builder()
-                               .addressLine1("Made Up Street").build())
-            .postalName("Test")
-            .build();
-        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
-            .id(uuid)
-            .value(address).build();
-
         OrderDetails orderDetails = OrderDetails.builder()
             .orderTypeId("abc")
             .dateCreated(LocalDateTime.now())
@@ -999,8 +883,8 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
@@ -1029,10 +913,10 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(englishOrderDoc)
             .orderDocumentWelsh(welshOrderDoc)
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .otherPartiesServed(YesOrNo.Yes)
-                                   .postalInformation(listOfAddress)
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
             .build();
 
         caseData = CaseData.builder()
@@ -1041,9 +925,9 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.No)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
@@ -1073,10 +957,10 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(englishOrderDoc)
             .orderDocumentWelsh(welshOrderDoc)
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .otherPartiesServed(YesOrNo.Yes)
-                                   .postalInformation(listOfAddress)
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .postalInformation(listOfAddress)
+                .build())
             .build();
 
         caseData = CaseData.builder()
@@ -1085,8 +969,8 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
@@ -1107,9 +991,9 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(englishOrderDoc)
             .orderDocumentWelsh(welshOrderDoc)
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
-                                   .otherPartiesServed(YesOrNo.Yes)
-                                   .build())
+                .additionalDocuments(List.of(element(additionalOrderDoc)))
+                .otherPartiesServed(YesOrNo.Yes)
+                .build())
             .build();
 
         caseData = CaseData.builder()
@@ -1118,10 +1002,10 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveToRespondentOptions(YesOrNo.Yes)
-                              .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
@@ -1148,39 +1032,39 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .issueDate(LocalDate.now())
             .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
-                                        .value(PartyDetails.builder()
-                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
-                                                   .email("test")
-                                                   .build()).build()))
+                .value(PartyDetails.builder()
+                    .canYouProvideEmailAddress(YesOrNo.Yes)
+                    .email("test")
+                    .build()).build()))
             .manageOrders(ManageOrders.builder()
-                              .cafcassCymruServedOptions(YesOrNo.Yes)
-                              .cafcassEmailAddress(List.of(element("test")))
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .deliveryByOptionsCA(DeliveryByEnum.email)
-                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                                              .id(uuid)
-                                                              .value(EmailInformation
-                                                                         .builder()
-                                                                         .emailAddress("test")
-                                                                         .build())
-                                                              .build()))
-                              .otherParties(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .cafcassCymruServedOptions(YesOrNo.Yes)
+                .cafcassEmailAddress(List.of(element("test")))
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                .deliveryByOptionsCA(DeliveryByEnum.email)
+                .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                    .id(uuid)
+                    .value(EmailInformation
+                        .builder()
+                        .emailAddress("test")
+                        .build())
+                    .build()))
+                .otherParties(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .id(uuid)
-                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
-                                                 List.of(element(Document.builder().build()))).build())
-                                                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
-                                         .build()))
+                .id(uuid)
+                .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                        List.of(element(Document.builder().build()))).build())
+                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
+                .build()))
             .build();
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -1213,44 +1097,44 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .issueDate(LocalDate.now())
             .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
-                                        .value(PartyDetails.builder()
-                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
-                                                   .email("test")
-                                                   .build()).build()))
+                .value(PartyDetails.builder()
+                    .canYouProvideEmailAddress(YesOrNo.Yes)
+                    .email("test")
+                    .build()).build()))
             .manageOrders(ManageOrders.builder()
-                              .cafcassCymruServedOptions(YesOrNo.Yes)
-                              .cafcassEmailAddress(List.of(element("test")))
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .deliveryByOptionsCA(DeliveryByEnum.email)
-                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                                              .id(uuid)
-                                                              .value(EmailInformation
-                                                                         .builder()
-                                                                         .emailAddress("test")
-                                                                         .build())
-                                                              .build()))
-                              .otherParties(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .cafcassCymruServedOptions(YesOrNo.Yes)
+                .cafcassEmailAddress(List.of(element("test")))
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                .deliveryByOptionsCA(DeliveryByEnum.email)
+                .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                    .id(uuid)
+                    .value(EmailInformation
+                        .builder()
+                        .emailAddress("test")
+                        .build())
+                    .build()))
+                .otherParties(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .id(uuid)
-                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
-                                                 List.of(element(Document.builder().build()))).build())
-                                                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
-                                         .build(),Element.<OrderDetails>builder()
-                                         .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
-                                                 List.of(element(Document.builder().build()))).build())
-                                                    .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue()).build())
-                                         .build()))
+                .id(uuid)
+                .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                        List.of(element(Document.builder().build()))).build())
+                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
+                .build(),Element.<OrderDetails>builder()
+                .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                        List.of(element(Document.builder().build()))).build())
+                    .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue()).build())
+                .build()))
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1278,39 +1162,39 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("C100")
             .issueDate(LocalDate.now())
             .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
-                                        .value(PartyDetails.builder()
-                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
-                                                   .email("test")
-                                                   .build()).build()))
+                .value(PartyDetails.builder()
+                    .canYouProvideEmailAddress(YesOrNo.Yes)
+                    .email("test")
+                    .build()).build()))
             .manageOrders(ManageOrders.builder()
-                              .cafcassCymruServedOptions(YesOrNo.Yes)
-                              .cafcassEmailAddress(List.of(element("test")))
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .deliveryByOptionsCA(DeliveryByEnum.email)
-                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                                              .id(uuid)
-                                                              .value(EmailInformation
-                                                                         .builder()
-                                                                         .emailAddress("test")
-                                                                         .build())
-                                                              .build()))
-                              .otherParties(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .cafcassCymruServedOptions(YesOrNo.Yes)
+                .cafcassEmailAddress(List.of(element("test")))
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                .deliveryByOptionsCA(DeliveryByEnum.email)
+                .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                    .id(uuid)
+                    .value(EmailInformation
+                        .builder()
+                        .emailAddress("test")
+                        .build())
+                    .build()))
+                .otherParties(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .id(uuid)
-                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
-                                                 List.of(element(Document.builder().build()))).build())
-                                                    .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue()).build())
-                                         .build()))
+                .id(uuid)
+                .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                        List.of(element(Document.builder().build()))).build())
+                    .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue()).build())
+                .build()))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -1349,10 +1233,10 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test")
-                              .serveOrderDynamicList(dynamicMultiSelectList).build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .cafcassEmailId("test")
+                .serveOrderDynamicList(dynamicMultiSelectList).build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -1363,12 +1247,12 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+            Mockito.any(),
+            Mockito.any());
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
+    public void testSendEmailForCitizenWhenTheyHaveDashboardAccess() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1388,7 +1272,7 @@ public class ManageOrderEmailServiceTest {
             .representativeLastName("")
             .representativeFirstName("")
             .solicitorEmail("")
-            .user(User.builder().idamId("abc123").build())
+            .user(User.builder().idamId("123").build())
             .contactPreferences(ContactPreferences.email)
             .build();
         caseData = caseData.toBuilder()
@@ -1397,10 +1281,55 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
+            .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Interim").build())))
+            .welshLanguageRequirement(YesOrNo.Yes)
+            .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
+        PartyDetails respondent = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -1410,8 +1339,8 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+            Mockito.any(),
+            Mockito.any());
     }
 
     @Test
@@ -1443,7 +1372,7 @@ public class ManageOrderEmailServiceTest {
             .representativeLastName("")
             .representativeFirstName("")
             .solicitorEmail("")
-            .user(User.builder().idamId("abc123").build())
+            .user(User.builder().build())
             .contactPreferences(ContactPreferences.email)
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
@@ -1452,8 +1381,8 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(Document.builder().build())))
-                                   .build())
+                .additionalDocuments(List.of(element(Document.builder().build())))
+                .build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
@@ -1461,10 +1390,10 @@ public class ManageOrderEmailServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -1474,18 +1403,17 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+            Mockito.any(),
+            Mockito.any());
     }
 
     @Test
     public void testSendEmailWhenOrderServedFl401() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
             .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListFl401 = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1507,21 +1435,21 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                               .applicantLegalRepresentative)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.post)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .postalInformation(PostalInformation.builder()
-                                                                                              .postalAddress(Address.builder().build())
-                                                                                              .build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.post)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .postalInformation(PostalInformation.builder()
+                        .postalAddress(Address.builder().build())
+                        .build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectListFl401)
+                .cafcassEmailId("test").build())
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1534,7 +1462,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401Welsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1561,21 +1488,21 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                               .applicantLegalRepresentative)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.post)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .postalInformation(PostalInformation.builder()
-                                                                                              .postalAddress(Address.builder().build())
-                                                                                              .build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.post)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .postalInformation(PostalInformation.builder()
+                        .postalAddress(Address.builder().build())
+                        .build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
@@ -1589,12 +1516,11 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
             .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListFl401Null = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1611,24 +1537,24 @@ public class ManageOrderEmailServiceTest {
             .solicitorEmail("test@gmail.com")
             .build();
         caseData = caseData.toBuilder()
-                .caseTypeOfApplication("Fl401")
-                .applicantsFL401(applicant)
-                .respondentsFL401(applicant)
-                .issueDate(LocalDate.now())
-                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                        .serveToRespondentOptions(YesOrNo.No)
-                                  .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                                   .applicantLegalRepresentative)
-                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                        .serveOtherPartiesDA(null)
-                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                .serveByPostOrEmail(DeliveryByEnum.email)
-                                .emailInformation(EmailInformation.builder()
-                                        .emailAddress("test").build())
-                                .build())))
-                        .recipientsOptions(dynamicMultiSelectList)
-                        .cafcassEmailId("test").build())
-                .build();
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesOrNo.No)
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(null)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectListFl401Null)
+                .cafcassEmailId("test").build())
+            .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
@@ -1640,7 +1566,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNullWelsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1667,18 +1592,18 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                               .applicantLegalRepresentative)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .serveOtherPartiesDA(null)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(null)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
@@ -1692,12 +1617,11 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
             .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListFl401Other = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1714,24 +1638,24 @@ public class ManageOrderEmailServiceTest {
             .solicitorEmail("test@gmail.com")
             .build();
         caseData = caseData.toBuilder()
-                .caseTypeOfApplication("Fl401")
-                .applicantsFL401(applicant)
-                .respondentsFL401(applicant)
-                .issueDate(LocalDate.now())
-                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                        .serveToRespondentOptions(YesOrNo.No)
-                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                        .serveOtherPartiesDA(List.of())
-                                  .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                                   .applicantLegalRepresentative)
-                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                .serveByPostOrEmail(DeliveryByEnum.email)
-                                .emailInformation(EmailInformation.builder()
-                                        .emailAddress("test").build())
-                                .build())))
-                        .recipientsOptions(dynamicMultiSelectList)
-                        .cafcassEmailId("test").build())
-                .build();
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of())
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectListFl401Other)
+                .cafcassEmailId("test").build())
+            .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
@@ -1742,7 +1666,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOtherWelsh() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1769,18 +1692,18 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .serveOtherPartiesDA(List.of())
-                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                               .applicantLegalRepresentative)
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of())
+                .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                    .applicantLegalRepresentative)
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
@@ -1794,7 +1717,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testSendEmailWhenOrderServed() {
-        CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -1821,16 +1743,16 @@ public class ManageOrderEmailServiceTest {
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
-                                                                       .emailInformation(EmailInformation.builder()
-                                                                                             .emailAddress("test").build())
-                                                                       .build())))
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                    .serveByPostOrEmail(DeliveryByEnum.email)
+                    .emailInformation(EmailInformation.builder()
+                        .emailAddress("test").build())
+                    .build())))
+                .recipientsOptions(dynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1848,18 +1770,18 @@ public class ManageOrderEmailServiceTest {
         caseData = caseData.toBuilder()
             .othersToNotify(List.of(element(uuid, otherPerson)))
             .manageOrders(ManageOrders.builder()
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .otherParties(dynamicMultiSelectList)
-                              .build())
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .otherParties(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, otherPerson.getAddress(),
-                                                            otherPerson.getLabelForDynamicList(),
-                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            otherPerson.getLabelForDynamicList(),
+            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
-                                   List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
-                                   otherPerson.getLabelForDynamicList())).thenReturn(uuid);
+            List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
+            otherPerson.getLabelForDynamicList())).thenReturn(uuid);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1890,19 +1812,19 @@ public class ManageOrderEmailServiceTest {
         caseData = caseData.toBuilder()
             .respondents(List.of(element(uuid, respondent)))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .recipientsOptions(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, respondent.getAddress(),
-                                                            respondent.getLabelForDynamicList(),
-                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            respondent.getLabelForDynamicList(),
+            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
-                                   List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
-                                   respondent.getLabelForDynamicList())).thenReturn(uuid);
+            List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
+            respondent.getLabelForDynamicList())).thenReturn(uuid);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -1953,14 +1875,14 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .respondents(List.of(element(uuid, respondent1),
-                                 element(UUID.fromString(uuid2), respondent2)))
+                element(UUID.fromString(uuid2), respondent2)))
             .othersToNotify(List.of(element(uuid, otherPerson)))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .otherParties(dynamicMultiSelectList)
-                              .recipientsOptions(receipientDynamicMultiSelectList)
-                              .build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .otherParties(dynamicMultiSelectList)
+                .recipientsOptions(receipientDynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
@@ -2022,24 +1944,19 @@ public class ManageOrderEmailServiceTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
+                .label("John (Child 1)")
+                .code("00000000-0000-0000-0000-000000000000")
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -2066,21 +1983,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2108,9 +2012,6 @@ public class ManageOrderEmailServiceTest {
             .data(dataMap)
             .build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .build();
         manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(caseDetails, DraftOrder.builder().otherDetails(
             OtherDraftOrderDetails.builder().orderCreatedBy("Solicitor name").build()).build());
         verify(emailService, times(1)).getCaseData(caseDetails);
@@ -2154,24 +2055,19 @@ public class ManageOrderEmailServiceTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
+                .label("John (Child 1)")
+                .code("00000000-0000-0000-0000-000000000000")
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of())
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -2198,22 +2094,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink("/dummyURL")
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -2261,21 +2143,21 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-                .serveToRespondentOptions(YesOrNo.No)
-                .recipientsOptions(dynamicMultiSelectList)
-                .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .applicantLegalRepresentative)
-                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                        .emailInformation(EmailInformation.builder().emailName("").build())
-                        .build())))
-                .otherParties(dynamicMultiSelectList)
-                .build();
+                .applicantLegalRepresentative)
+            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectList)
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2284,16 +2166,16 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2306,10 +2188,8 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -2355,41 +2235,41 @@ public class ManageOrderEmailServiceTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListEmailOptionEmpty = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectList)
-            .serveOrderDynamicList(dynamicMultiSelectList)
+            .recipientsOptions(dynamicMultiSelectListEmailOptionEmpty)
+            .serveOrderDynamicList(dynamicMultiSelectListEmailOptionEmpty)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .applicantLegalRepresentative)
+                .applicantLegalRepresentative)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .otherParties(dynamicMultiSelectList)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectListEmailOptionEmpty)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataEmailOption = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2399,17 +2279,15 @@ public class ManageOrderEmailServiceTest {
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
+            .id(caseDataEmailOption.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseDataEmailOption);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataEmailOption, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -2453,19 +2331,19 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .courtBailiff)
+                .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -2476,16 +2354,16 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2498,7 +2376,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -2546,41 +2423,41 @@ public class ManageOrderEmailServiceTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListCourtBaliff = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectList)
-            .serveOrderDynamicList(dynamicMultiSelectList)
+            .recipientsOptions(dynamicMultiSelectListCourtBaliff)
+            .serveOrderDynamicList(dynamicMultiSelectListCourtBaliff)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .courtBailiff)
+                .courtBailiff)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .otherParties(dynamicMultiSelectList)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectListCourtBaliff)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataCourtBaliff = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2590,16 +2467,15 @@ public class ManageOrderEmailServiceTest {
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
+            .id(caseDataCourtBaliff.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseDataCourtBaliff);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCourtBaliff, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -2643,19 +2519,19 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .courtAdmin)
+                .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -2666,16 +2542,16 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2688,7 +2564,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -2736,41 +2611,41 @@ public class ManageOrderEmailServiceTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListCourtAdmin = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectList)
-            .serveOrderDynamicList(dynamicMultiSelectList)
+            .recipientsOptions(dynamicMultiSelectListCourtAdmin)
+            .serveOrderDynamicList(dynamicMultiSelectListCourtAdmin)
             .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                             .courtAdmin)
+                .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .otherParties(dynamicMultiSelectList)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectListCourtAdmin)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataCourtAdmin = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2780,69 +2655,17 @@ public class ManageOrderEmailServiceTest {
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
+            .id(caseDataCourtAdmin.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseDataCourtAdmin);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCourtAdmin, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
-
-
-    /*@Test
-    public void sendEmailWhenOrderIsServedToCafcassCymru() throws IOException {
-
-        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
-            .builder()
-            .code(uuid.toString())
-            .build();
-        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(serveOrderDynamicMultiselectListElement))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
-        ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptions(YesOrNo.Yes)
-            .cafcassCymruServedOptions(YesOrNo.Yes)
-            .otherParties(dynamicMultiSelectList)
-            .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-            .cafcassCymruEmail("test@cafcasscymru.com")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
-            .courtName("testcourt")
-            .manageOrders(manageOrders)
-            .build();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(dataMap)
-            .build();
-        String applicantNames = "TestFirst TestLast";
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
-    }*/
 
     @Test
     public void sendEmailWhenOrderIsServedToCafcassCymruWelsh() throws IOException {
@@ -2857,9 +2680,9 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code("00000000-0000-0000-0000-000000000000")
-                               .build())).build();
+                .label("John (Child 1)")
+                .code("00000000-0000-0000-0000-000000000000")
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.Yes)
             .cafcassCymruServedOptions(YesOrNo.Yes)
@@ -2885,7 +2708,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
@@ -2937,20 +2759,20 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
-                                             .courtBailiff)
+                .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -2961,16 +2783,16 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -2983,7 +2805,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3031,42 +2852,42 @@ public class ManageOrderEmailServiceTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListC100Welsh = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectList)
-            .serveOrderDynamicList(dynamicMultiSelectList)
+            .recipientsOptions(dynamicMultiSelectListC100Welsh)
+            .serveOrderDynamicList(dynamicMultiSelectListC100Welsh)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
-                                             .courtBailiff)
+                .courtBailiff)
             .serveToRespondentOptions(YesOrNo.Yes)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .otherParties(dynamicMultiSelectList)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectListC100Welsh)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataC100Welsh = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -3076,16 +2897,15 @@ public class ManageOrderEmailServiceTest {
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
+            .id(caseDataC100Welsh.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseDataC100Welsh);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataC100Welsh, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -3129,20 +2949,20 @@ public class ManageOrderEmailServiceTest {
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
-                                             .courtAdmin)
+                .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
             .otherParties(dynamicMultiSelectList)
             .build();
 
@@ -3153,16 +2973,16 @@ public class ManageOrderEmailServiceTest {
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -3175,7 +2995,6 @@ public class ManageOrderEmailServiceTest {
             .id(caseData.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3227,42 +3046,42 @@ public class ManageOrderEmailServiceTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListCaWelsh = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .label("John (Child 1)")
-                               .code(TEST_UUID)
-                               .build())).build();
+                .label("John (Child 1)")
+                .code(TEST_UUID)
+                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(dynamicMultiSelectList)
-            .serveOrderDynamicList(dynamicMultiSelectList)
+            .recipientsOptions(dynamicMultiSelectListCaWelsh)
+            .serveOrderDynamicList(dynamicMultiSelectListCaWelsh)
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum
-                                             .courtAdmin)
+                .courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
-                                                     .emailInformation(EmailInformation.builder().emailName("").build())
-                                                     .build())))
-            .otherParties(dynamicMultiSelectList)
+                .emailInformation(EmailInformation.builder().emailName("").build())
+                .build())))
+            .otherParties(dynamicMultiSelectListCaWelsh)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataCaWelsh = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .applicantsFL401(PartyDetails.builder()
-                                 .lastName("test")
-                                 .firstName("test1")
-                                 .solicitorEmail("t")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .email("test@ree.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .solicitorEmail("t")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
-                                  .lastName("test")
-                                  .firstName("test1")
-                                  .email("test@sdsc.com").build())
+                .lastName("test")
+                .firstName("test1")
+                .email("test@sdsc.com").build())
             .children(listOfChildren)
             .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
             .courtName("testcourt")
@@ -3272,16 +3091,15 @@ public class ManageOrderEmailServiceTest {
         dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
+            .id(caseDataCaWelsh.getId())
             .data(dataMap)
             .build();
-        String applicantNames = "TestFirst TestLast";
 
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseDataCaWelsh);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.TRUE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCaWelsh, dataMap);
         verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
             Mockito.any(),
             Mockito.any(),
@@ -3326,18 +3144,18 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(Document.builder().build())))
-                                   .build())
+                .additionalDocuments(List.of(element(Document.builder().build())))
+                .build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -3400,18 +3218,18 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(Document.builder().build())))
-                                   .build())
+                .additionalDocuments(List.of(element(Document.builder().build())))
+                .build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -3462,18 +3280,18 @@ public class ManageOrderEmailServiceTest {
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
-                                   .additionalDocuments(List.of(element(Document.builder().build())))
-                                   .build())
+                .additionalDocuments(List.of(element(Document.builder().build())))
+                .build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                .serveToRespondentOptions(YesOrNo.No)
+                .recipientsOptions(dynamicMultiSelectList)
+                .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                .cafcassEmailId("test").build())
             .orderCollection(List.of(element(uuid, orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
@@ -3495,7 +3313,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantPost = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3505,13 +3323,13 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant)))
+            .applicants(List.of(element(applicantPost)))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
@@ -3532,9 +3350,9 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressC100() {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantNoAddress = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3542,13 +3360,13 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant)))
+            .applicants(List.of(element(applicantNoAddress)))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3565,9 +3383,9 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailC100() {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantEmail = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3578,13 +3396,13 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant)))
+            .applicants(List.of(element(applicantEmail)))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .serveToRespondentOptions(YesOrNo.Yes)
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3601,7 +3419,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testServeOrderDocsToUnrepresentedApplicantViaPostFL401() throws Exception {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantPostFl401 = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3611,12 +3429,12 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
+            .applicantsFL401(applicantPostFl401)
             .manageOrders(ManageOrders.builder()
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
@@ -3637,9 +3455,9 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantWithNoAddressFL401() {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantNoAddressFl401 = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3647,12 +3465,12 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
+            .applicantsFL401(applicantNoAddressFl401)
             .manageOrders(ManageOrders.builder()
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
@@ -3671,7 +3489,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401() throws Exception {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantEmailFl401 = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3681,12 +3499,12 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
+            .applicantsFL401(applicantEmailFl401)
             .manageOrders(ManageOrders.builder()
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
@@ -3707,7 +3525,7 @@ public class ManageOrderEmailServiceTest {
     @Test
     public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantFl401Exception = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3717,12 +3535,12 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
+            .applicantsFL401(applicantFl401Exception)
             .manageOrders(ManageOrders.builder()
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), anyString())).thenReturn(List.of(coverLetterDoc));
@@ -3740,9 +3558,9 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() throws Exception {
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() {
         //Given
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantDa = PartyDetails.builder()
             .partyId(uuid)
             .firstName("AppFN")
             .lastName("AppLN")
@@ -3754,12 +3572,12 @@ public class ManageOrderEmailServiceTest {
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
+            .applicantsFL401(applicantDa)
             .manageOrders(ManageOrders.builder()
-                              .displayLegalRepOption(PrlAppsConstants.NO)
-                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
+                .displayLegalRepOption(PrlAppsConstants.NO)
+                .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .serveOrderDynamicList(dynamicMultiSelectList)
+                .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
