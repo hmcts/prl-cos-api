@@ -226,9 +226,9 @@ public class CitizenCaseUpdateServiceTest {
     @Test
     public void testSubmitApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
-        Long caseId = 12345L;
+        Long caseIdSubmit = 12345L;
 
-        CaseData caseData = CaseData.builder().id(caseId)
+        CaseData caseData = CaseData.builder().id(caseIdSubmit)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .c100RebuildData(c100RebuildData)
@@ -255,13 +255,14 @@ public class CitizenCaseUpdateServiceTest {
         when(citizenPartyDetailsMapper.buildUpdatedCaseData(
             any(),
             any()
-        )).thenReturn(CaseData.builder().id(caseId).build());
+        )).thenReturn(CaseData.builder().id(caseIdSubmit).build());
         when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
-            .thenReturn(CaseDetails.builder().id(caseId).build());
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails);
-        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseId))).thenReturn(CaseDetails.builder().id(caseId).build());
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseIdSubmit)))
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),

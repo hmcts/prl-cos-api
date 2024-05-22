@@ -330,7 +330,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testUploadCitizenStatementDocument() throws Exception {
+    public void testUploadCitizenStatementDocument() {
         HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
@@ -504,7 +504,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test (expected = RuntimeException.class)
-    public void testGenerateDocumentThrowInvalidClientException() throws Exception {
+    public void testGenerateDocumentThrowInvalidClientException() {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
         caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build());
@@ -546,7 +546,6 @@ public class CaseDocumentControllerTest {
 
         //Action
         ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(authToken, s2sToken, documentRequest);
-        DocumentResponse documentResponse = (DocumentResponse) response.getBody();
 
         //Then
         assertEquals(OK, response.getStatusCode());
@@ -562,7 +561,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testUploadAndMoveDocumentsToQuarantine() throws DocumentGenerationException, IOException {
+    public void testUploadAndMoveDocumentsToQuarantine() {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")
