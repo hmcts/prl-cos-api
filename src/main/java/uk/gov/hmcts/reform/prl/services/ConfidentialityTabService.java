@@ -104,7 +104,8 @@ public class ConfidentialityTabService {
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(CaseData caseData) {
         List<Element<ChildConfidentialityDetails>> elementList = new ArrayList<>();
-        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
             Optional<List<Element<ChildDetailsRevised>>> chiildList = ofNullable(caseData.getNewChildDetails());
             if (chiildList.isPresent()) {
                 elementList = getChildrenConfidentialDetailsV2(caseData);
