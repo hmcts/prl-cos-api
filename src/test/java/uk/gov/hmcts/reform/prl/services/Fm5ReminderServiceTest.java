@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
@@ -163,7 +163,7 @@ public class Fm5ReminderServiceTest {
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
-        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH)).thenReturn(fm5ReminderNotifications);
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH)).thenReturn(fm5ReminderNotifications);
 
         document = Document.builder()
             .documentFileName("test.pdf")
@@ -184,7 +184,7 @@ public class Fm5ReminderServiceTest {
 
         //verify
         verify(fm5NotificationService, times(1))
-            .sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH);
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH);
     }
 
     @Test
@@ -204,13 +204,13 @@ public class Fm5ReminderServiceTest {
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
-        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT)).thenReturn(fm5ReminderNotifications);
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.APPLICANT)).thenReturn(fm5ReminderNotifications);
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
         //verify
         verify(fm5NotificationService, times(1))
-            .sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.APPLICANT);
     }
 
     @Test
@@ -231,13 +231,13 @@ public class Fm5ReminderServiceTest {
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
 
         fm5ReminderNotifications = List.of(element(NotificationDetails.builder().build()), element(NotificationDetails.builder().build()));
-        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT)).thenReturn(fm5ReminderNotifications);
+        when(fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT)).thenReturn(fm5ReminderNotifications);
 
         fm5ReminderService.sendFm5ReminderNotifications(null);
 
         //verify
         verify(fm5NotificationService, times(1))
-            .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
     }
 
 
