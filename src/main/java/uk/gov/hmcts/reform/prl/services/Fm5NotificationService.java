@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LTR_ENG_C100_FM5;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
@@ -288,12 +287,11 @@ public class Fm5NotificationService {
                                      PartyDetails party) {
         List<Document> coverSheets = null;
         try {
-            coverSheets = serviceOfApplicationPostService.getCoverSheets(
+            coverSheets = serviceOfApplicationPostService.getCoverLetter(
                 caseData,
                 authorisation,
                 party.getAddress(),
-                party.getLabelForDynamicList(),
-                DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                party.getLabelForDynamicList()
             );
         } catch (Exception e) {
             log.error("Error occurred in generating cover sheets", e);
