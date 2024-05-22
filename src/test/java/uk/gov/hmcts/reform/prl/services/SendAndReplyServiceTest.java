@@ -1378,10 +1378,10 @@ public class SendAndReplyServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .build();
 
-        sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage(auth, caseDetails, message);
+        sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage(auth, caseDetails, message, caseData, new HashMap<>());
 
     }
-  
+
     @Test
     public void testCloseAwPTask() {
 

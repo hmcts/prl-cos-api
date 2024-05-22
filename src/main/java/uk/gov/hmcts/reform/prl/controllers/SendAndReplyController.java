@@ -264,11 +264,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
-            sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage(
+            sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage1(
                 authorisation,
                 caseDetails,
-                caseData.getSendOrReplyMessage().getSendMessageObject()
+                caseData.getSendOrReplyMessage().getSendMessageObject(),
+                caseData,
+                caseDataMap
             );
+
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
@@ -300,11 +303,15 @@ public class SendAndReplyController extends AbstractCallbackController {
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
-                sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage(
+
+                sendAndReplyService.assignCaseToJudgeIfJudgeSelectedForMessage1(
                     authorisation,
                     caseDetails,
-                    caseData.getSendOrReplyMessage().getReplyMessageObject()
+                    caseData.getSendOrReplyMessage().getReplyMessageObject(),
+                    caseData,
+                    caseDataMap
                 );
+
             }
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");

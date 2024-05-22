@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attribute
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
@@ -51,12 +52,13 @@ public class RoleAssignmentService {
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
 
-    public void createRoleAssignment(String authorization,
-                                     CaseDetails caseDetails,
-                                     RoleAssignmentDto roleAssignmentDto,
-                                     String eventName,
-                                     boolean replaceExisting,
-                                     String roleName) {
+    public uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse
+    createRoleAssignment(String authorization,
+                         CaseDetails caseDetails,
+                         RoleAssignmentDto roleAssignmentDto,
+                         String eventName,
+                         boolean replaceExisting,
+                         String roleName) {
         if (!environment.equals("preview")) {
 
             log.info("Role Assignment called from event - {}", eventName);
@@ -101,7 +103,7 @@ public class RoleAssignmentService {
                     .requestedRoles(requestedRoles)
                     .build();
 
-                roleAssignmentApi.updateRoleAssignment(
+                return roleAssignmentApi.updateRoleAssignment(
                     systemUserToken,
                     authTokenGenerator.generate(),
                     null,
@@ -109,6 +111,7 @@ public class RoleAssignmentService {
                 );
             }
         }
+        return null;
     }
 
     private String populateActorIdFromDto(String authorization, RoleAssignmentDto roleAssignmentDto) {
@@ -132,6 +135,17 @@ public class RoleAssignmentService {
 
     private String createRoleRequestReference(final CaseDetails caseDetails, final String userId) {
         return caseDetails.getId() + "-" + userId;
+    }
+
+    public List<RoleAssignmentResponse> getRoleAssignmentForActorId(String authorization, String actorId) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            actorId
+        );
+        return roleAssignmentServiceResponse.getRoleAssignmentResponse();
     }
 
 
@@ -196,5 +210,15 @@ public class RoleAssignmentService {
         );
 
         return finalRoles;
+    }
+
+    public void removeRoleAssignmentFromRoleAssignmentid(String roleAssignmentId) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        roleAssignmentApi.removeRoleAssignments(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentId
+        );
     }
 }

@@ -12,6 +12,7 @@ public class MessageMetaData {
     private  String senderEmail;
     private  String recipientEmail;
     private  String messageSubject;
-    private  String messageUrgency;
+    private String messageUrgency;
+    private String messageHasJudgeAllocated;
 
 }
