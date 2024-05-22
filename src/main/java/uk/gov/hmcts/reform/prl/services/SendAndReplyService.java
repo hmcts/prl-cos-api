@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1339,7 +1340,7 @@ public class SendAndReplyService {
                         ALLOCATE_JUDGE_ROLE
                     );
 
-                    if (existingAllocation != null) {
+                    if (CollectionUtils.isNotEmpty(existingAllocation)) {
                         existingAllocation.add(
                             element(AllocatedJudgeForSendAndReply.builder()
                                         .judgeId(judicialUsersApiResponse.getSidamId())
