@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -56,6 +57,8 @@ public class CitizenCaseUpdateService {
     private final ObjectMapper objectMapper;
     private final AddCaseNoteService addCaseNoteService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     protected static final List<CaseEvent> EVENT_IDS_FOR_ALL_TAB_REFRESHED = Arrays.asList(
         CaseEvent.CONFIRM_YOUR_DETAILS,
@@ -151,6 +154,7 @@ public class CitizenCaseUpdateService {
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
+        miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
