@@ -47,7 +47,6 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -146,10 +145,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
-    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
-    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
-    public static final String C100_DEFAULT_REGION_ID = "2";
     public static final String COURT_LIST = "courtList";
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
     private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
@@ -383,10 +378,7 @@ public class CallbackController {
                 );
             }
             //Assign default court to all c100 cases for work allocation.
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(C100_DEFAULT_REGION_ID)
-                .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
-                .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
+            caseDataUpdated.put("caseManagementLocation", locationRefDataService.getDefaultCourtForCA(authorisation));
             caseDataUpdated.put("caseFlags", Flags.builder().build());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
