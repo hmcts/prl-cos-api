@@ -35,8 +35,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -505,29 +503,21 @@ public class StmtOfServImplService {
                 partiesServed.add(updatedCaseData.getRespondentsFL401().getLabelForDynamicList());
             }
         }
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat targetFormat = new SimpleDateFormat("dd MMM yyyy");
-        try {
-            stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
-                                                      .citizenPartiesServedDate(targetFormat.format(format.parse(sosObject
-                                                                                                                     .getPartiesServedDate())))
-                                                      .citizenPartiesServedList(String.join(",", partiesServed))
-                                                        .stmtOfServiceDocument(Document.builder()
-                                                                                   .documentFileName(sosObject.getCitizenSosDocs()
-                                                                                                         .getDocumentFileName())
-                                                                                   .documentUrl(sosObject.getCitizenSosDocs()
-                                                                                                    .getDocumentUrl())
-                                                                                   .documentHash(sosObject.getCitizenSosDocs()
-                                                                                                     .getDocumentHash())
-                                                                                   .documentBinaryUrl(sosObject.getCitizenSosDocs()
-                                                                                                          .getDocumentBinaryUrl())
-                                                                                   .build())
-                                                        .selectedPartyId(String.join(",", partiesList))
-                                                        .selectedPartyName(String.join(",", partiesServed))
-                                                      .build()));
-        } catch (ParseException e) {
-            log.error("Error while building Sos Object {}", e.getMessage());
-        }
+        stmtOfServiceforApplication.add(element(StmtOfServiceAddRecipient.builder()
+                                                  .citizenPartiesServedDate(sosObject.getPartiesServedDate())
+                                                  .citizenPartiesServedList(String.join(",", partiesServed))
+                                                    .stmtOfServiceDocument(Document.builder()
+                                                                               .documentFileName(sosObject.getCitizenSosDocs()
+                                                                                                     .getDocumentFileName())
+                                                                               .documentUrl(sosObject.getCitizenSosDocs()
+                                                                                                .getDocumentUrl())
+                                                                               .documentHash(sosObject.getCitizenSosDocs()
+                                                                                                 .getDocumentHash())
+                                                                               .documentBinaryUrl(sosObject.getCitizenSosDocs()
+                                                                                                      .getDocumentBinaryUrl())
+                                                                               .build())
+                                                    .selectedPartyId(String.join(",", partiesList))
+                                                  .build()));
 
         log.info("Statement of service list :: {}", stmtOfServiceforApplication);
         if (ObjectUtils.isNotEmpty(updatedCaseData.getStatementOfService())
