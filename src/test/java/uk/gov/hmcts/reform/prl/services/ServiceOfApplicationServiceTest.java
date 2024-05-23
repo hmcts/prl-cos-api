@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +58,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
@@ -83,7 +81,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -138,10 +135,6 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private Time dateTime;
-
-    private String applicantEmail;
-
-    private HearingDetailsEmail applicantEmailVars;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -227,13 +220,6 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testListOfOrdersCreated() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .build();
         List<String> createdOrders = List.of("Blank order (FL404B)",
                                              "Standard directions order",
                                              "Blank order or directions (C21)",
@@ -268,7 +254,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendViaPostNotInvoked() throws Exception {
+    public void testSendViaPostNotInvoked() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -279,19 +265,11 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-
-            .data(casedata)
-            .build();
-        //CaseData caseData1 = serviceOfApplicationService.sendPostToOtherPeopleInCase(caseDetails,"test auth");
         verifyNoInteractions(serviceOfApplicationPostService);
     }
 
     @Test
-    public void testSendViaPostToOtherPeopleInCase() throws Exception {
+    public void testSendViaPostToOtherPeopleInCase() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
@@ -316,10 +294,6 @@ public class ServiceOfApplicationServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        List<Document> packN = new ArrayList<>();
-        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
-        packN.add(Document.builder().documentFileName("Blank_C7.pdf").build());
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -330,19 +304,11 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-
-            .data(casedata)
-            .build();
-        //CaseData caseData1 = serviceOfApplicationService.sendPostToOtherPeopleInCase(caseDetails,"test auth");
         verifyNoInteractions(serviceOfApplicationPostService);
     }
 
     @Test
-    public void testSendNotificationToApplicantSolicitor() throws Exception {
+    public void testSendNotificationToApplicantSolicitor() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -395,7 +361,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationToApplicantSolicitorFl401() throws Exception {
+    public void testSendNotificationToApplicantSolicitorFl401() {
 
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -403,7 +369,6 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.fromString(TEST_UUID))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-        Element<PartyDetails> respondent = element(partyDetails);
         Element<PartyDetails> applicant = element(partyDetails);
 
         DynamicMultiselectListElement dynamicMultiselectListElementApplicant = DynamicMultiselectListElement.builder()
@@ -644,7 +609,7 @@ public class ServiceOfApplicationServiceTest {
     public void testsendNotificationsForUnServedRespondentPacks() {
         parties = parties.stream()
             .peek(party -> party.getValue().setContactPreferences(ContactPreferences.email))
-            .collect(Collectors.toList());
+            .toList();
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(parties)
@@ -851,7 +816,6 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        //when(CaseUtils.isCaseCreatedByCitizen(any())).thenReturn(true);
         assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
                                                                            caseInvite, template));
     }
@@ -887,7 +851,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleAboutToSubmit() throws Exception {
+    public void testHandleAboutToSubmit() {
         final CaseInvite caseInvite = CaseInvite.builder()
             .caseInviteEmail("inviteemail@test.com")
             .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
@@ -937,7 +901,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsNoC100() throws Exception {
+    public void testSendNotificationForSoaServeToRespondentOptionsNoC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1028,7 +992,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsApplicantsDontMatch() throws Exception {
+    public void testSendNotificationForSoaServeToRespondentOptionsApplicantsDontMatch() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1136,7 +1100,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaWithNoRecipientsC100() throws Exception {
+    public void testSendNotificationForSoaWithNoRecipientsC100() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1214,7 +1178,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaServeToRespondentOptionsNoAndLegalRepYesC100() throws Exception {
+    public void testSendNotificationForSoaServeToRespondentOptionsNoAndLegalRepYesC100() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1291,7 +1255,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaFL401() throws Exception {
+    public void testSendNotificationForSoaFL401() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -1352,7 +1316,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForSoaCitizenC100() throws Exception {
+    public void testSendNotificationForSoaCitizenC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1405,7 +1369,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401() throws Exception {
+    public void testSendNotificationForSoaCitizenFL401() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1457,7 +1421,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401Solicitor() throws Exception {
+    public void testSendNotificationForSoaCitizenFL401Solicitor() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -1505,23 +1469,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100Solicitor() throws Exception {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
-            .address(Address.builder().addressLine1("line1").build())
-            .build();
-
-
+    public void testSendNotificationForSoaCitizenC100Solicitor() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(parties)
@@ -1555,7 +1503,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100SolicitorOtherPeopleNull() throws Exception {
+    public void testSendNotificationForSoaCitizenC100SolicitorOtherPeopleNull() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -2351,7 +2299,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmitted() throws Exception {
+    public void testHandleSoaSubmitted() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2394,7 +2342,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedConfidential() throws Exception {
+    public void testHandleSoaSubmittedConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2436,7 +2384,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForNonConfidential() throws Exception {
+    public void testHandleSoaSubmittedForNonConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2479,7 +2427,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForConfidential() throws Exception {
+    public void testHandleSoaSubmittedForConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2893,7 +2841,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedWithC8() throws Exception {
+    public void testHandleSoaSubmittedWithC8() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -2940,7 +2888,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSolicitorC100() throws Exception {
+    public void testSendNotificationForSolicitorC100() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -2991,7 +2939,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testGetNotificationPacks() {
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectListNotifications = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
 
@@ -3002,7 +2950,7 @@ public class ServiceOfApplicationServiceTest {
                 .orderDocument(Document.builder().documentFileName("Test").build())
                 .orderDocumentWelsh(Document.builder().documentFileName("Test").build())
                 .build())))
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
+            .serviceOfApplicationScreen1(dynamicMultiSelectListNotifications)
             .serviceOfApplication(ServiceOfApplication.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -3017,7 +2965,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario1() throws Exception {
+    public void testSendNotificationForSoaCitizenScenario1() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3091,7 +3039,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario2() throws Exception {
+    public void testSendNotificationForSoaCitizenScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3164,7 +3112,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario3() throws Exception {
+    public void testSendNotificationForSoaCitizenScenario3() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3238,7 +3186,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenScenario4() throws Exception {
+    public void testSendNotificationForSoaCitizenScenario4() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3312,7 +3260,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401Senario2() throws Exception {
+    public void testSendNotificationForSoaCitizenFL401Senario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3364,7 +3312,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenC100Scenario1() throws Exception {
+    public void testSendNotificationForSoaCitizenC100Scenario1() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3418,7 +3366,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected() throws JsonProcessingException {
+    public void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected() {
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
             DynamicMultiSelectList.builder().build()).build();
@@ -3441,7 +3389,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenOtherPeopleSelected() throws JsonProcessingException {
+    public void checkC6AOrderExistenceForSoaParties_whenOtherPeopleSelected() {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
@@ -3480,7 +3428,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent() throws JsonProcessingException, JsonProcessingException {
+    public void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent() {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
@@ -3518,7 +3466,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() throws Exception {
+    public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -3594,16 +3542,12 @@ public class ServiceOfApplicationServiceTest {
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(12345L)
-                             .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
     @Test
-    public void testHandleSoaSubmittedForConfidentialPersonalCaCb() throws Exception {
+    public void testHandleSoaSubmittedForConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -3647,7 +3591,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() throws Exception {
+    public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -3715,10 +3659,6 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruEmail("test@hmcts.net")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(12345L)
-                             .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
@@ -3861,7 +3801,6 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        //assertNull(servedApplicationDetails.getModeOfService());
         assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
@@ -4109,13 +4048,13 @@ public class ServiceOfApplicationServiceTest {
         List<Element<String>> partyIds = new ArrayList<>();
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInvite = CaseInvite.builder()
+        CaseInvite caseInviteLocal = CaseInvite.builder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
         CaseInvite caseInvite1 = CaseInvite.builder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite1));
+        caseInviteList.add(element(UUID.randomUUID(), caseInviteLocal));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite1));
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)

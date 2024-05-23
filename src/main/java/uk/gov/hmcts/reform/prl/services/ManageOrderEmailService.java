@@ -153,7 +153,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData) {
+    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData, Element<PartyDetails> party) {
 
         boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
         boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
@@ -173,11 +173,20 @@ public class ManageOrderEmailService {
                 multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .multipleOrdersWelshSentence(languagePreferenceFlag ? multipleOrdersWelshSentence(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
-            .applicantName(String.valueOf(dynamicData.get("name")))
+            .applicantName(party.getValue().getFirstName() + " " + party.getValue().getLastName())
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
+    }
+
+    private String multipleOrdersWelshSentence(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
+        if (multipleOrderFlag || newAndFinalOrderFlag) {
+            return OrderEmailConstants.ORDERS_WELSH_SENTENCE;
+        } else {
+            return OrderEmailConstants.ORDER_WELSH_SENTENCE;
+        }
     }
 
     private String multipleOrdersWelsh(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
@@ -422,6 +431,20 @@ public class ManageOrderEmailService {
                 SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP,
                 EmailTemplateNames.CA_LIP_ORDERS
             ));
+            //Added as part of PRL-5509
+            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
+        }
+    }
+
+    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isPartyProvidedWithEmail(party.getValue()) && CaseUtils.isAccessEnabled(party)) {
+            emailService.send(
+                party.getValue().getEmail(),
+                EmailTemplateNames.CA_LIP_ORDERS,
+                buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
+                dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
+            );
         }
     }
 
@@ -444,7 +467,7 @@ public class ManageOrderEmailService {
                 emailService.send(
                     party.getValue().getEmail(),
                     emailTemplate,
-                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail),
+                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
                     dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
                 );
             } else {

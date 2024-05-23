@@ -30,6 +30,8 @@ public class OrderEmailNotification extends EmailTemplateVars {
 
     private final String multipleOrdersWelsh;
 
+    private final String multipleOrdersWelshSentence;
+
     private final String caseLink;
 
     private final String caseReference;
