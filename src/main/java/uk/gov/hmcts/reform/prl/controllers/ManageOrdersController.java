@@ -87,7 +87,7 @@ public class ManageOrdersController {
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
-    public static final String cafcassOrCymruNeedToProvideReport = "cafcassOrCymruNeedToProvideReport";
+    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -513,12 +513,12 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populateCafcassOrCymruNeedToProvideReportData(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseDataUpdated.put(cafcassOrCymruNeedToProvideReport, Yes);
+                caseDataUpdated.put(CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
             }
 
             //handle preview order
