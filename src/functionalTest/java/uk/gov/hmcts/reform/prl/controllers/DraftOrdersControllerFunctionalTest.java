@@ -33,6 +33,10 @@ public class DraftOrdersControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    private static final String SELECTED_ORDER = "/selected-order";
+    private static final String APPLICATION_JSON = "application/json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -98,18 +102,27 @@ public class DraftOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenPopulate_standard_direction_order_fields() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/populate-standard-direction-order-fields")
             .then()
-            .assertThat().statusCode(200)
-            .body("data.caseTypeOfApplication", equalTo("FL401"),
-                  "data.draftOrderCollection[0].id", notNullValue());
-
+            .body("data.id", equalTo(1705065178030549L),
+                  "data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401"),
+                  "data.manageOrdersOptions", equalTo("createAnOrder"),
+                  "data.createSelectOrderOptions", equalTo("standardDirectionsOrder"),
+                  "data.draftOrderOptions", equalTo("draftAnOrder"),
+                  "data.c21OrderOptions", equalTo("c21ApplicationRefused"),
+                  "data.isCafcassCymru", equalTo("Yes"),
+                  "data.isFL401RespondentPresent", equalTo("Yes"),
+                  "data.isApplicant1Present", equalTo("Yes"),
+                  "data.isFL401ApplicantPresent", equalTo("Yes"))
+            .assertThat().statusCode(200);
     }
 
     @Test
@@ -160,12 +173,12 @@ public class DraftOrdersControllerFunctionalTest {
                      "\"createSelectOrderOptions\": \"noticeOfProceedings\"");
 
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
-            .contentType("application/json")
-            .post("/selected-order")
+            .contentType(APPLICATION_JSON)
+            .post(SELECTED_ORDER)
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
             .assertThat().statusCode(200);
@@ -190,12 +203,12 @@ public class DraftOrdersControllerFunctionalTest {
                       "\"caseTypeOfApplication\": \"C100\"");
 
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
-            .contentType("application/json")
-            .post("/selected-order")
+            .contentType(APPLICATION_JSON)
+            .post(SELECTED_ORDER)
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
             .assertThat().statusCode(200);
@@ -220,12 +233,12 @@ public class DraftOrdersControllerFunctionalTest {
                 "\"caseTypeOfApplication\": \"C100\"");
 
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
-            .contentType("application/json")
-            .post("/selected-order")
+            .contentType(APPLICATION_JSON)
+            .post(SELECTED_ORDER)
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
             .assertThat().statusCode(200);
@@ -250,18 +263,15 @@ public class DraftOrdersControllerFunctionalTest {
                 "\"caseTypeOfApplication\": \"C100\"");
 
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
-            .contentType("application/json")
-            .post("/selected-order")
+            .contentType(APPLICATION_JSON)
+            .post(SELECTED_ORDER)
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
             .assertThat().statusCode(200);
 
     }
-
-
-
 }

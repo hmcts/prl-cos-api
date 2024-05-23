@@ -54,16 +54,17 @@
             },
             "dxNumber": null,
             "solicitorReference": null,
-            "representativeFirstName": null,
-            "representativeLastName": null,
+            "representativeFirstName": "test",
+            "representativeLastName": "data",
             "isAtAddressLessThan5YearsWithDontKnow": null,
             "doTheyHaveLegalRepresentation": null,
             "sendSignUpLink": null,
-            "solicitorEmail": null
+            "solicitorEmail": "test@test.com"
           }
         }
       ],
-      "applicantsFL401": {
+      "applicantsFL401":
+      {
         "firstName": "test",
         "lastName": "data",
         "previousName": null,
@@ -108,508 +109,12 @@
         },
         "dxNumber": null,
         "solicitorReference": null,
-        "representativeFirstName": "string",
-        "representativeLastName": "last string",
+        "representativeFirstName": "test",
+        "representativeLastName": "john",
         "isAtAddressLessThan5YearsWithDontKnow": null,
         "doTheyHaveLegalRepresentation": null,
         "sendSignUpLink": null,
-        "solicitorEmail": "abc@test.com"
-      },
-      "respondentsFL401": {
-        "firstName": "string",
-        "lastName": "string",
-        "previousName": "string",
-        "dateOfBirth": "2023-01-23",
-        "isDateOfBirthUnknown": "dontKnow",
-        "gender": "female",
-        "otherGender": "string",
-        "placeOfBirth": "string",
-        "isAddressUnknown": "dontKnow",
-        "isAddressConfidential": "Yes",
-        "isAtAddressLessThan5Years": "Yes",
-        "addressLivedLessThan5YearsDetails": "string",
-        "canYouProvideEmailAddress": "Yes",
-        "isEmailAddressConfidential": "Yes",
-        "landline": "string",
-        "isPhoneNumberConfidential": "Yes",
-        "relationshipToChildren": "string",
-        "isDateOfBirthKnown": "Yes",
-        "isCurrentAddressKnown": "Yes",
-        "canYouProvidePhoneNumber": "Yes",
-        "isPlaceOfBirthKnown": "Yes",
-        "otherPersonRelationshipToChildren": [
-          {
-            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "value": {
-              "personRelationshipToChild": "string"
-            }
-          }
-        ],
-        "solicitorOrg": {
-          "OrganisationID": "string",
-          "OrganisationName": "string"
-        },
-        "solicitorAddress": {
-          "AddressLine1": "string",
-          "AddressLine2": "string",
-          "AddressLine3": "string",
-          "PostTown": "string",
-          "County": "string",
-          "Country": "string",
-          "PostCode": "string"
-        },
-        "dxNumber": "string",
-        "solicitorReference": "string",
-        "representativeFirstName": "string",
-        "representativeLastName": "string",
-        "isAtAddressLessThan5YearsWithDontKnow": "yes",
-        "doTheyHaveLegalRepresentation": "yes",
-        "sendSignUpLink": "string",
-        "solicitorEmail": "string",
-        "phoneNumber": "string",
-        "email": "string",
-        "address": {
-          "AddressLine1": "string",
-          "AddressLine2": "string",
-          "AddressLine3": "string",
-          "PostTown": "string",
-          "County": "string",
-          "Country": "string",
-          "PostCode": "string"
-        },
-        "organisations": {
-          "companyNumber": "string",
-          "companyUrl": "string",
-          "contactInformation": [
-            {
-              "addressLine1": "string",
-              "addressLine2": "string",
-              "addressLine3": "string",
-              "country": "string",
-              "county": "string",
-              "dxAddress": [
-                {
-                  "dxExchange": "string",
-                  "dxNumber": "string"
-                }
-              ],
-              "postCode": "string",
-              "townCity": "string"
-            }
-          ],
-          "name": "string",
-          "organisationIdentifier": "string",
-          "paymentAccount": [
-            "string"
-          ],
-          "pendingPaymentAccount": [
-            "string"
-          ],
-          "sraId": "string",
-          "sraRegulated": true,
-          "status": "string",
-          "statusMessage": "string",
-          "superUser": {
-            "email": "string",
-            "firstName": "string",
-            "lastName": "string"
-          }
-        },
-        "solicitorTelephone": "string",
-        "respondentLivedWithApplicant": "Yes",
-        "applicantContactInstructions": "string",
-        "user": {
-          "idamId": "string",
-          "email": "string",
-          "solicitorRepresented": "Yes"
-        },
-        "response": {
-          "legalRepresentation": "Yes",
-          "consent": {
-            "consentToTheApplication": "Yes",
-            "noConsentReason": "string",
-            "applicationReceivedDate": "2023-01-23",
-            "permissionFromCourt": "Yes",
-            "courtOrderDetails": "string"
-          },
-          "keepDetailsPrivate": {
-            "otherPeopleKnowYourContactDetails": "yes",
-            "confidentiality": "Yes",
-            "confidentialityList": [
-              "phoneNumber"
-            ]
-          },
-          "citizenDetails": {
-            "firstName": "string",
-            "lastName": "string",
-            "previousName": "string",
-            "dateOfBirth": "2023-01-23",
-            "placeOfBirth": "string",
-            "address": {
-              "AddressLine1": "string",
-              "AddressLine2": "string",
-              "AddressLine3": "string",
-              "PostTown": "string",
-              "County": "string",
-              "Country": "string",
-              "PostCode": "string"
-            },
-            "addressHistory": {
-              "isAtAddressLessThan5Years": "Yes",
-              "previousAddressHistory": [
-                {
-                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                  "value": {
-                    "AddressLine1": "string",
-                    "AddressLine2": "string",
-                    "AddressLine3": "string",
-                    "PostTown": "string",
-                    "County": "string",
-                    "Country": "string",
-                    "PostCode": "string"
-                  }
-                }
-              ]
-            },
-            "contact": {
-              "phoneNumber": "string",
-              "email": "string"
-            }
-          },
-          "miam": {
-            "attendedMiam": "Yes",
-            "willingToAttendMiam": "Yes",
-            "reasonNotAttendingMiam": "string"
-          },
-          "currentOrPreviousProceedings": {
-            "haveChildrenBeenInvolvedInCourtCase": "Yes",
-            "courtOrderMadeForProtection": "Yes",
-            "proceedingsList": [
-              {
-                "orderType": "Emergency Protection Order",
-                "doYouKnowAboutTheOrder": "Yes",
-                "proceedingDetails": {
-                  "previousOrOngoingProceedings": "Ongoing",
-                  "caseNumber": "string",
-                  "dateStarted": "2023-01-23",
-                  "dateEnded": "2023-01-23",
-                  "typeOfOrder": [
-                    "Emergency Protection Order"
-                  ],
-                  "otherTypeOfOrder": "string",
-                  "nameOfJudge": "string",
-                  "nameOfCourt": "string",
-                  "nameOfChildrenInvolved": "string",
-                  "nameOfGuardian": "string",
-                  "nameAndOffice": "string",
-                  "uploadRelevantOrder": {
-                    "document_url": "string",
-                    "document_binary_url": "string",
-                    "document_filename": "string",
-                    "document_hash": "string",
-                    "document_creation_date": "2023-01-23T11:05:27.266Z"
-                  }
-                }
-              }
-            ]
-          },
-          "currentOrPastProceedingsForChildren": "yes",
-          "respondentExistingProceedings": [
-            {
-              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-              "value": {
-                "previousOrOngoingProceedings": "ongoing",
-                "caseNumber": "string",
-                "dateStarted": "2023-01-23",
-                "dateEnded": "2023-01-23",
-                "typeOfOrder": [
-                  "emergencyProtectionOrder"
-                ],
-                "otherTypeOfOrder": "string",
-                "nameOfJudge": "string",
-                "nameOfCourt": "string",
-                "nameOfChildrenInvolved": "string",
-                "nameOfGuardian": "string",
-                "nameAndOffice": "string",
-                "uploadRelevantOrder": {
-                  "document_url": "string",
-                  "document_binary_url": "string",
-                  "document_filename": "string",
-                  "document_hash": "string",
-                  "document_creation_date": "2023-01-23T11:05:27.266Z"
-                }
-              }
-            }
-          ],
-          "citizenInternationalElements": {
-            "childrenLiveOutsideOfEnWl": "Yes",
-            "childrenLiveOutsideOfEnWlDetails": "string",
-            "parentsAnyOneLiveOutsideEnWl": "Yes",
-            "parentsAnyOneLiveOutsideEnWlDetails": "string",
-            "anotherPersonOrderOutsideEnWl": "Yes",
-            "anotherPersonOrderOutsideEnWlDetails": "string",
-            "anotherCountryAskedInformation": "Yes",
-            "anotherCountryAskedInformationDetaails": "string"
-          },
-          "attendToCourt": {
-            "respondentWelshNeeds": "Yes",
-            "respondentWelshNeedsList": [
-              "speakWelsh"
-            ],
-            "isRespondentNeededInterpreter": "Yes",
-            "respondentInterpreterNeeds": [
-              {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "value": {
-                  "party": [
-                    "applicant"
-                  ],
-                  "relationName": "string",
-                  "requiredLanguage": "string",
-                  "respondentOtherAssistance": "string"
-                }
-              }
-            ],
-            "haveAnyDisability": "Yes",
-            "disabilityNeeds": "string",
-            "respondentSpecialArrangements": "Yes",
-            "respondentSpecialArrangementDetails": "string",
-            "respondentIntermediaryNeeds": "Yes",
-            "respondentIntermediaryNeedDetails": "string"
-          },
-          "citizenFlags": {
-            "isApplicationViewed": "Yes",
-            "isAllegationOfHarmViewed": "Yes",
-            "isAllDocumentsViewed": "Yes"
-          },
-          "safeToCallOption": "string",
-          "safetyConcerns": {
-            "child": {
-              "physicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "psychologicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "emotionalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "sexualAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "financialAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "somethingElse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              }
-            },
-            "applicant": {
-              "physicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "psychologicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "emotionalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "sexualAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "financialAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "somethingElse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              }
-            },
-            "respondent": {
-              "physicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "psychologicalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "emotionalAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "sexualAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "financialAbuse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              },
-              "somethingElse": {
-                "behaviourDetails": "string",
-                "behaviourStartDate": "string",
-                "isOngoingBehaviour": "Yes",
-                "seekHelpFromPersonOrAgency": "Yes",
-                "seekHelpDetails": "string",
-                "childrenConcernedAbout": "string"
-              }
-            },
-            "haveSafetyConcerns": "Yes",
-            "safetyConcernAbout": [
-              "children"
-            ],
-            "concernAboutChild": [
-              "physicalAbuse"
-            ],
-            "concernAboutRespondent": [
-              "physicalAbuse"
-            ],
-            "otherconcerns": {
-              "c1AkeepingSafeStatement": "string",
-              "c1AsupervisionAgreementDetails": "string",
-              "c1AagreementOtherWaysDetails": "Yes",
-              "c1AotherConcernsDrugs": "Yes",
-              "c1AotherConcernsDrugsDetails": "string",
-              "c1AchildSafetyConcerns": "Yes",
-              "c1AchildSafetyConcernsDetails": "string"
-            },
-            "abductions": {
-              "c1AabductionReasonOutsideUk": "string",
-              "c1AchildsCurrentLocation": "string",
-              "c1AchildrenMoreThanOnePassport": "Yes",
-              "c1ApossessionChildrenPassport": [
-                "mother"
-              ],
-              "c1AprovideOtherDetails": "string",
-              "c1ApassportOffice": "Yes",
-              "c1AabductionPassportOfficeNotified": "Yes",
-              "c1ApreviousAbductionsShortDesc": "string",
-              "c1ApoliceOrInvestigatorInvolved": "Yes",
-              "c1ApoliceOrInvestigatorOtherDetails": "string",
-              "c1AchildAbductedBefore": "Yes"
-            }
-          },
-          "supportYouNeed": {
-            "helpCommunication": [
-              "hearingloop"
-            ],
-            "describeOtherNeed": "string",
-            "courtComfort": [
-              "appropriatelighting"
-            ],
-            "otherProvideDetails": "string",
-            "courtHearing": [
-              "supportworker"
-            ],
-            "communicationSupportOther": "string",
-            "languageDetails": "string",
-            "reasonableAdjustments": [
-              "docsformat"
-            ],
-            "docsSupport": [
-              "docsprint"
-            ],
-            "otherDetails": "string",
-            "safetyArrangementsDetails": "string",
-            "travellingOtherDetails": "string",
-            "hearingDetails": "string",
-            "signLanguageDetails": "string",
-            "lightingDetails": "string",
-            "supportWorkerDetails": "string",
-            "familyProviderDetails": "string",
-            "therapyDetails": "string",
-            "docsDetails": "string",
-            "largePrintDetails": "string",
-            "parkingDetails": "string",
-            "differentChairDetails": "string"
-          },
-          "c7ResponseSubmitted": "Yes",
-          "c1AResponseSubmitted": "Yes"
-        },
-        "currentRespondent": "Yes",
-        "applicantPreferredContact": [
-          "phone"
-        ]
+        "solicitorEmail": "tst@test.com"
       },
       "children": [
         {
@@ -645,6 +150,66 @@
           }
         }
       ],
+      "respondentsFL401": {
+        "email": "soli@gmail.com",
+        "gender": null,
+        "address": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "dxNumber": null,
+        "landline": null,
+        "lastName": "Doe",
+        "firstName": "John",
+        "dateOfBirth": null,
+        "otherGender": null,
+        "phoneNumber": "01234567891",
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": "tet@test.com",
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "isDateOfBirthKnown": "No",
+        "solicitorReference": null,
+        "solicitorTelephone": null,
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": "Yes",
+        "isCurrentAddressKnown": "No",
+        "relationshipToChildren": null,
+        "representativeLastName": "man",
+        "representativeFirstName": "test",
+        "canYouProvidePhoneNumber": "Yes",
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": null,
+        "isEmailAddressConfidential": null,
+        "respondentLivedWithApplicant": "No",
+        "doTheyHaveLegalRepresentation": null,
+        "addressLivedLessThan5YearsDetails": "*Provide details of all previous addresses for the last 5 years below(if known, including the dates and starting with most recent) (Optional)",
+        "otherPersonRelationshipToChildren": [
+
+        ],
+        "isAtAddressLessThan5YearsWithDontKnow": "yes"
+      },
       "respondents": [
         {
           "id": "29959b30-f49e-483b-a963-d53a88a93209",
@@ -693,12 +258,12 @@
             },
             "dxNumber": null,
             "solicitorReference": null,
-            "representativeFirstName": null,
-            "representativeLastName": null,
+            "representativeFirstName": "test",
+            "representativeLastName": "test",
             "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
             "doTheyHaveLegalRepresentation": "no",
             "sendSignUpLink": null,
-            "solicitorEmail": null
+            "solicitorEmail": "test@test.com"
           }
         }
       ],
@@ -1001,12 +566,13 @@
       "sdoLocalAuthorityList": [],
       "sdoCafcassOrCymruList": [],
       "c21OrderOptions": "c21ApplicationRefused",
-      "draftOrdersDynamicList": "1fc02153-5afd-480d-9271-13fd3e4025e7",
+      "draftOrdersDynamicList": "fa632e84-bc22-4d74-bd36-b37cd27095d3",
       "draftOrderCollection": [
         {
-          "id": "1fc02153-5afd-480d-9271-13fd3e4025e7",
+          "id": "fa632e84-bc22-4d74-bd36-b37cd27095d3",
           "value": {
-            "orderType": "noticeOfProceedingsParties",
+            "orderType": "noticeOfProceedingsNonParties",
+            "judgeNotes": "asdasd",
             "childOption": {
               "value": null,
               "list_items": [
@@ -1032,36 +598,36 @@
                 }
               ]
             },
-            "orderTypeId": "Notice of proceedings (C6) (Notice to parties)",
+            "orderTypeId": "Notice of proceedings (C6a) (Notice to non-parties)",
             "otherDetails": {
-              "status": "Drafted by Solicitor",
-              "dateCreated": "2024-01-12T10:04:54.225064",
-              "orderCreatedBy": "AAT Solicitor",
-              "isJudgeApprovalNeeded": "Yes",
-              "orderCreatedByEmailId": "prl_aat_solicitor@mailinator.com",
+              "status": "Created by Judge",
+              "dateCreated": "2024-01-20T15:08:40.956958",
+              "orderCreatedBy": "Prl Judge",
+              "isJudgeApprovalNeeded": "No",
               "nameOfLaForReviewOrder": "null",
-              "nameOfJudgeForReviewOrder": "null"
+              "nameOfJudgeForReviewOrder": "null",
+              "additionalRequirementsForHearingReq": "dacda"
             },
             "orderDocument": {
               "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0",
-              "document_filename": "Notice_Of_Proceeding_Order_C6_draft.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cdd79b25-145f-4542-91ee-f8e4af63acc0/binary",
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d4e8bb6c-9abd-4404-bdf9-1b8d345d260a",
+              "document_filename": "Notice_Of_Proceeding_Order_C6a_draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d4e8bb6c-9abd-4404-bdf9-1b8d345d260a/binary",
               "document_creation_date": null
             },
-            "orderCreatedBy": "SOLICITOR",
+            "orderCreatedBy": "JUDGE",
             "orderDocumentWelsh": {
               "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41",
-              "document_filename": "Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7eb8b7a1-c8b1-4ba6-8c1c-0ab1159a3c41/binary",
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3ecc2278-cfc1-448b-8d49-be5e41c8a51d",
+              "document_filename": "Welsh_Notice_Of_Proceeding_Order_C6a_draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3ecc2278-cfc1-448b-8d49-be5e41c8a51d/binary",
               "document_creation_date": null
             },
-            "orderSelectionType": "draftAnOrder",
-            "isOrderCreatedBySolicitor": "Yes",
+            "orderSelectionType": "createAnOrder",
+            "isOrderCreatedBySolicitor": "No",
             "manageOrderHearingDetails": [
               {
-                "id": "3b03b05a-c68c-453a-9d59-bf11f6cde30a",
+                "id": "86f73838-2b32-4c2c-903d-a05855ed0d73",
                 "value": {
                   "courtList": {
                     "value": null,
@@ -1138,8 +704,8 @@
                   },
                   "hearingTypes": {
                     "value": {
-                      "code": "ABA5-ALL",
-                      "label": "Allocation"
+                      "code": "ABA5-2GA",
+                      "label": "2nd Gatekeeping Appointment"
                     },
                     "list_items": [
                       {
@@ -1251,7 +817,7 @@
                   "applicantName1": "John Doe (Applicant1)",
                   "applicantName2": "Jeremy Anderson (Applicant2)",
                   "applicantName3": "Martina Graham (Applicant3)",
-                  "isCafcassCymru": "No",
+                  "isCafcassCymru": "Yes",
                   "hearingChannels": {
                     "value": null,
                     "list_items": [
@@ -1280,19 +846,9 @@
                   "respondentName1": "Mary Richards (Respondent1)",
                   "respondentName2": "Elise Lynn (Respondent2)",
                   "respondentName3": "David Carman (Respondent3)",
-                  "hearingDateTimes": [
-                    {
-                      "id": "46a35f40-d630-4178-baba-2a0990920c70",
-                      "value": {
-                        "hearingDateTimeOption": "2024-01-13T10:04:00.000"
-                      }
-                    }
-                  ],
                   "applicantSolicitor1": "Legal Solicitor (Applicant1 solicitor)",
                   "applicantSolicitor2": "Legal Solicitor Jr (Applicant2 solicitor)",
                   "applicantSolicitor3": "Sr Legal Solicitor (Applicant3 solicitor)",
-                  "hearingChannelsEnum": "INTER",
-                  "hearingEstimatedDays": "1",
                   "cafcassHearingChannel": {
                     "value": null,
                     "list_items": [
@@ -1327,8 +883,6 @@
                       }
                     ]
                   },
-                  "hearingEstimatedHours": "2",
-                  "hearingEstimatedMinutes": "3",
                   "applicantHearingChannel1": {
                     "value": null,
                     "list_items": [
@@ -1514,7 +1068,7 @@
                       }
                     ]
                   },
-                  "hearingDateConfirmOptionEnum": "dateReservedWithListAssit",
+                  "hearingDateConfirmOptionEnum": "dateToBeFixed",
                   "localAuthorityHearingChannel": {
                     "value": null,
                     "list_items": [
@@ -1615,12 +1169,75 @@
                       }
                     ]
                   },
-                  "allPartiesAttendHearingSameWayYesOrNo": "Yes"
+                  "additionalDetailsForHearingDateOptions": "dacda"
                 }
               }
             ],
-            "isOrderUploadedByJudgeOrAdmin": "No",
-            "hasJudgeProvidedHearingDetails": "Yes"
+            "isOrderUploadedByJudgeOrAdmin": "No"
+          }
+        },
+        {
+          "id": "7e15be92-3bf1-4fbb-b7a3-6b50d4ab1a5b",
+          "value": {
+            "orderType": "blankOrderOrDirections",
+            "childOption": {
+              "value": null,
+              "list_items": [
+                {
+                  "code": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
+                  "label": "Joe Doe (Child 1)"
+                },
+                {
+                  "code": "cbb66702-223f-42eb-93a0-b2146bc039e0",
+                  "label": "Simon Anderson (Child 2)"
+                },
+                {
+                  "code": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
+                  "label": "Lilly Anderson (Child 3)"
+                },
+                {
+                  "code": "2a147297-0dfc-467a-99d5-68db0e7e9411",
+                  "label": "Charlotte Saxon (Child 4)"
+                },
+                {
+                  "code": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
+                  "label": "Selena Lees (Child 5)"
+                }
+              ]
+            },
+            "orderTypeId": "Blank order or directions (C21)",
+            "childrenList": "Joe Doe (Child 1), Simon Anderson (Child 2), Lilly Anderson (Child 3), Charlotte Saxon (Child 4), Selena Lees (Child 5)",
+            "otherDetails": {
+              "status": "Drafted by Solicitor",
+              "dateCreated": "2024-01-20T14:01:03.844860",
+              "orderCreatedBy": "AAT Solicitor",
+              "isJudgeApprovalNeeded": "Yes",
+              "nameOfLaForReviewOrder": "null",
+              "nameOfJudgeForReviewOrder": "null"
+            },
+            "dateOrderMade": "2024-01-20",
+            "orderDocument": {
+              "category_id": null,
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/788b59a5-de26-4d4f-8fe0-84c3cf83ae8b",
+              "document_filename": "Blank_Order_Directions_C21_Draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/788b59a5-de26-4d4f-8fe0-84c3cf83ae8b/binary",
+              "document_creation_date": null
+            },
+            "orderCreatedBy": "SOLICITOR",
+            "c21OrderOptions": "c21ApplicationRefused",
+            "orderDocumentWelsh": {
+              "category_id": null,
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/68db069a-3b8f-400a-aeea-9cfe82cb73ef",
+              "document_filename": "Welsh_Blank_Order_Directions_C21_Draft.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/68db069a-3b8f-400a-aeea-9cfe82cb73ef/binary",
+              "document_creation_date": null
+            },
+            "orderSelectionType": "draftAnOrder",
+            "isTheOrderByConsent": "Yes",
+            "isOrderCreatedBySolicitor": "Yes",
+            "isTheOrderAboutAllChildren": "Yes",
+            "wasTheOrderApprovedAtHearing": "No",
+            "isOrderUploadedByJudgeOrAdmin": "No"
           }
         }
       ]
