@@ -182,7 +182,7 @@ public class CitizenResponseService {
                     startAllTabsUpdateDataContent.userDetails()
             );
         } else {
-            throw new RuntimeException("Invalid case type or party type for the event request "
+            throw new IllegalArgumentException("Invalid case type or party type for the event request "
                     + CaseEvent.REVIEW_AND_SUBMIT.getValue()
                     + " for the case id "
                     + caseId);
@@ -332,12 +332,13 @@ public class CitizenResponseService {
     private Map<Element<Document>,String> getOrderDocumentsFromProceedings(Map<Element<Document>,String> responseDocs,
                                                                            List<Proceedings> proceedingsList) {
         proceedingsList.stream()
-                .filter(proceedings -> null != proceedings.getProceedingDetails())
-                .flatMap(proceedings -> proceedings.getProceedingDetails().stream())
-                .filter(otherProceedingDetailsElement -> isNotEmpty(otherProceedingDetailsElement.getValue())
-                        && null != otherProceedingDetailsElement.getValue().getOrderDocument())
-                .map(otherProceedingDetailsElement ->
-                    responseDocs.put(element(otherProceedingDetailsElement.getValue().getOrderDocument()),"en"));
+            .filter(proceedings -> null != proceedings.getProceedingDetails())
+            .flatMap(proceedings -> proceedings.getProceedingDetails().stream())
+            .filter(otherProceedingDetailsElement -> isNotEmpty(otherProceedingDetailsElement.getValue())
+                && null != otherProceedingDetailsElement.getValue().getOrderDocument())
+            .map(otherProceedingDetailsElement ->
+                     element(otherProceedingDetailsElement.getValue().getOrderDocument()))
+            .forEach(otherProceedingDetailsElement -> responseDocs.put(otherProceedingDetailsElement, "en"));
 
         return responseDocs;
     }

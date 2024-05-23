@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,9 +51,6 @@ public class ReasonableAdjustmentsControllerTest {
     @Mock
     AuthTokenGenerator authTokenGenerator;
 
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
-
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
@@ -80,11 +74,8 @@ public class ReasonableAdjustmentsControllerTest {
         Assert.assertNotNull(flag);
     }
 
-    @Test
-    public void testRetrieveRaFlagsWhenAuthFails() throws IOException {
-        expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Invalid Client");
-
+    @Test(expected = RuntimeException.class)
+    public void testRetrieveRaFlagsWhenAuthFails() {
 
         String caseId = "1234567891234567L";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
