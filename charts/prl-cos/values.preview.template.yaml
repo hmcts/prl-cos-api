@@ -36,7 +36,7 @@ java:
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: https://prl-cos-pr-1731.preview.platform.hmcts.net/service-request-update
+    PAY_CALLBACK_URL: https://prl-cos-pr-2425.preview.platform.hmcts.net/service-request-update
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
