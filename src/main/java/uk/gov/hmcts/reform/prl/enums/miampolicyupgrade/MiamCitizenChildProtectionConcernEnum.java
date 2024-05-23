@@ -16,7 +16,7 @@ public enum MiamCitizenChildProtectionConcernEnum {
         "childProtectionPlan","mpuChildProtectionConcern_value_1"),
     @JsonProperty("localAuthority")
     localAuthority(
-        "localAuthority", "MIAMChildProtectionConcernChecklistEnum_value_2");
+        "localAuthority", "mpuChildProtectionConcern_value_2");
 
     private final String id;
     private final String displayedValue;
