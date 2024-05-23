@@ -18,4 +18,5 @@ public class AllocatedJudgeForSendAndReply {
     private String judgeEmailId;
     private String roleAssignmentId;
     private String status;
+    private String messageId;
 }

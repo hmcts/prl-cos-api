@@ -136,7 +136,7 @@ public class RoleAssignmentService {
         return caseDetails.getId() + "-" + userId;
     }
 
-    public List<RoleAssignmentResponse> getRoleAssignmentForActorId(String authorization, String actorId) {
+    public List<RoleAssignmentResponse> getRoleAssignmentForActorId(String actorId) {
         String systemUserToken = systemUserService.getSysUserToken();
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
             systemUserToken,

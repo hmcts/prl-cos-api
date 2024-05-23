@@ -329,6 +329,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                  @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("casedata from submitted callback for snr {}", caseData.getSendOrReplyMessage());
+        sendAndReplyService.callfromSubmittedCallback(authorisation, caseData);
+
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(

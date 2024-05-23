@@ -1012,7 +1012,7 @@ public class CallbackController {
         @RequestParam(name = "actorId") String actorId
     ) {
         log.info("processing request after authorization");
-        return ResponseEntity.ok(roleAssignmentService.getRoleAssignmentForActorId(authorisation, actorId));
+        return ResponseEntity.ok(roleAssignmentService.getRoleAssignmentForActorId(actorId));
     }
 
     @PostMapping(path = "/pre-populate-child-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.JudgeAllocationStatusForSendAndReply;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
@@ -489,9 +488,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     Object replyMessageDynamicList;
     Message messageReply;
     SendOrReply chooseSendOrReply;
-
-    @JsonProperty("judgeAllocationStatusForSendAndReply")
-    private final JudgeAllocationStatusForSendAndReply judgeAllocationStatusForSendAndReply;
 
     @JsonProperty("allocatedJudgeForSendAndReply")
     private final List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
