@@ -988,4 +988,6 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String SOA_CAFCASS_CYMRU_SERVED_OPTIONS = "soaCafcassCymruServedOptions";
+
 }
