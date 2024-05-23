@@ -1228,7 +1228,7 @@ public class SendAndReplyService {
         log.info("messageElement -- {}", messageElement);
         log.info("messageObject -- {}", messageObject);
         log.info("closeMessage -- {}", closeMessage);
-
+        String judgeIdamId = userService.getUserByEmailId(authorisation, messageObject.getJudgeEmail()).get(0).getId();
         if (!closeMessage) {
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
             if (messageObject.getJudgeEmail() != null) {
@@ -1240,6 +1240,8 @@ public class SendAndReplyService {
 
                     pr = allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getJudgeEmailId().equals(
                         messageObject.getJudgeEmail())).findAny();
+                } else {
+                    allocatedJudgeForSendAndReply = new ArrayList<Element<AllocatedJudgeForSendAndReply>>();
                 }
 
 
@@ -1254,7 +1256,7 @@ public class SendAndReplyService {
                     }
                 } else {
                     List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-                        messageObject.getSendReplyJudgeName().getIdamId()
+                        judgeIdamId
                     );
                     Optional<RoleAssignmentResponse> filteredRoleAssignmentForThisCase = roleAssignmentResponseList.stream()
                         .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
@@ -1265,8 +1267,8 @@ public class SendAndReplyService {
                     if (!filteredRoleAssignmentForThisCase.isPresent()) {
                         RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                             .judicialUser(JudicialUser.builder()
-                                              .idamId(messageObject.getSendReplyJudgeName().getIdamId())
-                                              .personalCode(messageObject.getSendReplyJudgeName().getPersonalCode())
+                                              .idamId(judgeIdamId)
+                                              //.personalCode(messageObject.getSendReplyJudgeName().getPersonalCode())
                                               .build())
                             .build();
 
