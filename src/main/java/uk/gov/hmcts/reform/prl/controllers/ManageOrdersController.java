@@ -87,6 +87,8 @@ public class ManageOrdersController {
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
+    public static final String cafcassOrCymruNeedToProvideReport = "cafcassOrCymruNeedToProvideReport";
+
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -499,6 +501,29 @@ public class ManageOrdersController {
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/cafcass-cymru-need-to-provide-report-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to show preview order in next screen for upload order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse populateCafcassOrCymruNeedToProvideReportData(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseDataUpdated.put(cafcassOrCymruNeedToProvideReport, Yes);
+            }
+
+            //handle preview order
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
