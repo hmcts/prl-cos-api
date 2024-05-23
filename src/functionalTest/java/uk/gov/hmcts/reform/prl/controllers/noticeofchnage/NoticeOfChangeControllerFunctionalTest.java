@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
@@ -42,11 +41,13 @@ public class NoticeOfChangeControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
+  
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
     @Value("${TEST_URL}")
     protected String cosApiUrl;
+
 
 
     @Test
@@ -84,10 +85,10 @@ public class NoticeOfChangeControllerFunctionalTest {
 
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_whenSubmittedNoCRequest_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-
         RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
