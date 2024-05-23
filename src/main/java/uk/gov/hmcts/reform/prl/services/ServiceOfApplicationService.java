@@ -1863,7 +1863,6 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        log.info("updated case data: {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
