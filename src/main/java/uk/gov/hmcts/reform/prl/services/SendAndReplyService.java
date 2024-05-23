@@ -1232,11 +1232,16 @@ public class SendAndReplyService {
         if (!closeMessage) {
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
             if (messageObject.getJudgeEmail() != null) {
-                List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList = allocatedJudgeForSendAndReply.stream()
-                    .map(Element::getValue).toList();
+                List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList = null;
+                Optional<AllocatedJudgeForSendAndReply> pr = Optional.empty();
+                if (allocatedJudgeForSendAndReply != null) {
+                    allocatedJudgeForSendAndReplyList = allocatedJudgeForSendAndReply.stream()
+                        .map(Element::getValue).toList();
 
-                Optional<AllocatedJudgeForSendAndReply> pr = allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getJudgeEmailId().equals(
-                    messageObject.getJudgeEmail())).findAny();
+                    pr = allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getJudgeEmailId().equals(
+                        messageObject.getJudgeEmail())).findAny();
+                }
+
 
                 if (pr.isPresent()) {
                     Optional<AllocatedJudgeForSendAndReply> mn = allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getJudgeEmailId().equals(
