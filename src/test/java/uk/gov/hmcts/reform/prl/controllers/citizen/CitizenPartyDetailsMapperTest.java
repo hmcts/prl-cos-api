@@ -414,7 +414,6 @@ public class CitizenPartyDetailsMapperTest {
 
     @Test
     public void testBuildUpdatedCaseDataForMiam() throws IOException {
-        mapper.registerModule(new JSR310Module());
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
