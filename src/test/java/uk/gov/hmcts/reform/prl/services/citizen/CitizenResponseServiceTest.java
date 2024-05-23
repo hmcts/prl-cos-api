@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
@@ -89,7 +91,7 @@ public class CitizenResponseServiceTest {
             .partyId(UUID.fromString(uuid))
             .user(User.builder().idamId(uuid).build())
             .response(Response.builder()
-                .c7ResponseSubmitted(YesOrNo.Yes)
+                .c7ResponseSubmitted(YesOrNo.No)
                 .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder().respAohYesOrNo(YesOrNo.Yes).build())
                 .currentOrPreviousProceedings(CurrentOrPreviousProceedings
                     .builder()
@@ -187,6 +189,18 @@ public class CitizenResponseServiceTest {
         Map<String, Object> returnedMap = new HashMap<>();
         returnedMap.put("isConfidentialDataPresent", "yes");
         when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(returnedMap);
+        when(citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(any(), any(), any(), any())).thenReturn(PartyDetails
+            .builder()
+            .response(Response
+                .builder()
+                .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm
+                    .builder().responseToAllegationsOfHarmYesOrNoResponse(YesOrNo.Yes)
+                    .build())
+                .build()).build());
+        when(documentGenService.generateSingleDocument(any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(Document.builder().documentFileName("c7_response.pdf").build());
+        when(documentGenService.generateSingleDocument(any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(Document.builder().documentFileName("c7_response.pdf").build());
 
         when(allTabService.submitUpdateForSpecificUserEvent(any(), anyString(), any(), any(), any(), any())).thenReturn(caseDetails);
         when(documentGenService.generateSingleDocument(authToken, caseData, SOLICITOR_C1A_FINAL_DOCUMENT, false, returnedMap))

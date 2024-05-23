@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -30,11 +31,13 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,11 +49,13 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -60,6 +65,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseService {
 
+    public static final String ENGLISH = "en";
+    public static final String WELSH = "cy";
     private final ObjectMapper objectMapper;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final AllTabServiceImpl allTabService;
@@ -67,6 +74,11 @@ public class CitizenResponseService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
+    public static final String C_1_ARESPONSE = "C1Aresponse";
+    public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
+
 
     public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
@@ -98,6 +110,7 @@ public class CitizenResponseService {
                 && PartyEnum.respondent.equals(citizenUpdatedCaseData.getPartyType())) {
             Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
             Map<Element<Document>, String> responseDocs = new HashMap<>();
+            Map<Document, String> respondentC1aResponseDocuments = new HashMap<>();
 
             // initiate the event
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
@@ -147,6 +160,14 @@ public class CitizenResponseService {
                                     citizenUpdatedCaseData.getPartyDetails(),
                                     party.getValue(),
                                     CaseEvent.REVIEW_AND_SUBMIT,dbCaseData.getNewChildDetails());
+                                updatedPartyDetails = generateRespondentC1aResponseDocument(
+                                    updatedPartyDetails,
+                                    documentLanguage,
+                                    dataMap,
+                                    dbCaseData,
+                                    authorisation,
+                                    respondentC1aResponseDocuments
+                                );
                                 Element<PartyDetails> updatedPartyElement = element(party.getId(), updatedPartyDetails);
                                 int updatedRespondentPartyIndex = respondents.indexOf(party);
                                 respondents.set(updatedRespondentPartyIndex, updatedPartyElement);
@@ -154,13 +175,15 @@ public class CitizenResponseService {
                         caseDataMapToBeUpdated.put(C100_RESPONDENTS, respondents);
                     }
 
+
                     checkPreviousProceedings(responseDocs, response);
                     generateC1A(authorisation, response, documentLanguage, responseDocs, dbCaseData, dataMap);
 
                     caseDataMapToBeUpdated.putAll(addCitizenDocumentsToTheQuarantineList(
                             dbCaseData,
                             responseDocs,
-                            startAllTabsUpdateDataContent.userDetails()
+                            startAllTabsUpdateDataContent.userDetails(),
+                            respondentC1aResponseDocuments
                     ));
                     caseDataMapToBeUpdated.putAll(generateC8Document(
                             authorisation,
@@ -189,6 +212,76 @@ public class CitizenResponseService {
         }
     }
 
+    private PartyDetails generateRespondentC1aResponseDocument(PartyDetails updatedPartyDetails,
+                                                               DocumentLanguage documentLanguage,
+                                                               Map<String, Object> dataMap,
+                                                               CaseData caseData, String authorisation,
+                                                               Map<Document, String> respondentC1aResponseDocuments) {
+
+        Document c1aFinalResponseEngDocument = null;
+        Document c1aFinalResponseWelDocument = null;
+        log.info("inside generateRespondentC1aResponseDocuments()");
+        log.info("responseToAllegationsOfHarm options {}",
+                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+        log.info("responseToAllegationsOfHarm text {}",
+                 updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm().getRespondentResponseToAllegationOfHarm());
+        respondentC1aResponseDocuments = null != respondentC1aResponseDocuments ? respondentC1aResponseDocuments : new HashMap<>();
+        if (isNotEmpty(updatedPartyDetails.getResponse())
+            && isNotEmpty(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm())
+            && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                              .getResponseToAllegationsOfHarmYesOrNoResponse())) {
+            String fileName = updatedPartyDetails.getLabelForDynamicList()
+                + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
+                LONDON_TIME_ZONE)).format(dateTimeFormatter);
+            log.info("generating respondent C1A response documents");
+            try {
+                if (documentLanguage.isGenEng()) {
+                    dataMap.put(DYNAMIC_FILE_NAME, fileName + ".pdf");
+                    c1aFinalResponseEngDocument = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        C1A_FINAL_RESPONSE_DOCUMENT,
+                        false,
+                        dataMap
+                    );
+                    respondentC1aResponseDocuments.put(c1aFinalResponseEngDocument, ENGLISH);
+                }
+                if (documentLanguage.isGenWelsh) {
+                    dataMap.put(DYNAMIC_FILE_NAME, fileName + "_Welsh.pdf");
+                    c1aFinalResponseWelDocument = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        C1A_FINAL_RESPONSE_DOCUMENT,
+                        true,
+                        dataMap
+                    );
+                    respondentC1aResponseDocuments.put(c1aFinalResponseWelDocument, WELSH);
+                }
+                log.info("generated respondent C1A response documents");
+                updatedPartyDetails = updatedPartyDetails.toBuilder()
+                    .response(updatedPartyDetails.getResponse().toBuilder()
+                                  .responseToAllegationsOfHarm(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
+                                                                   .toBuilder()
+                                                                   .responseToAllegationsOfHarmDocument(isNotEmpty(
+                                                                       c1aFinalResponseEngDocument) ? c1aFinalResponseEngDocument : null)
+                                                                   .responseToAllegationsOfHarmWelshDocument(isNotEmpty(
+                                                                       c1aFinalResponseWelDocument) ? c1aFinalResponseWelDocument : null)
+                                                                   .build())
+                                  .build())
+                    .build();
+
+            } catch (Exception e) {
+                log.info(
+                    "Failed to generate Respondent C1A response document for party {}",
+                    updatedPartyDetails.getLabelForDynamicList()
+                );
+            } finally {
+                dataMap.remove(DYNAMIC_FILE_NAME);
+            }
+        }
+        return updatedPartyDetails;
+    }
+
     private void generateC7Response(String authorisation,
                                     DocumentLanguage documentLanguage,
                                     Map<Element<Document>, String> responseDocs,
@@ -213,7 +306,9 @@ public class CitizenResponseService {
                 responseDocs.put(element(generateFinalC1A(dbCaseData, authorisation, dataMap)), "en");
             }
             if (documentLanguage.isGenWelsh()) {
-                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, dataMap)), "cy");
+                Map<String, Object> welshDataMap = new HashMap<>();
+                welshDataMap.putAll(dataMap);
+                responseDocs.put(element(generateFinalC1AWelsh(dbCaseData, authorisation, welshDataMap)), "cy");
             }
         }
     }
@@ -343,8 +438,11 @@ public class CitizenResponseService {
         return responseDocs;
     }
 
-    public Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData, Map<Element<Document>,String> responseDocs,
-                                                            UserDetails userDetails) {
+    public Map<String, Object> addCitizenDocumentsToTheQuarantineList(CaseData caseData,
+                                                                      Map<Element<Document>,
+                                                                          String> responseDocs,
+                                                                      UserDetails userDetails,
+                                                                      Map<Document, String> respondentC1aResponseDocuments) {
 
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
         if (null != caseData.getDocumentManagementDetails() && null != caseData
@@ -373,6 +471,31 @@ public class CitizenResponseService {
                 .id(element.getId()).build();
             finalQuarantineDocs.add(quarantineLegalDoc);
         });
+
+        if (MapUtils.isNotEmpty(respondentC1aResponseDocuments)) {
+            respondentC1aResponseDocuments.forEach((document, language) -> {
+                Element<QuarantineLegalDoc> quarantineLegalDoc = Element.<QuarantineLegalDoc>builder()
+                    .value(QuarantineLegalDoc
+                               .builder()
+                               .citizenQuarantineDocument(document
+                                                              .toBuilder()
+                                                              .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(
+                                                                      LONDON_TIME_ZONE))
+                                                                                               .toInstant()))
+                                                              .build())
+                               .categoryId("respondentC1AResponse")
+                               .categoryName("Respondent C1A response")
+                               .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                               .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+                               .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
+                               .uploaderRole(PrlAppsConstants.CITIZEN)
+                               .documentLanguage(language)
+                               .build())
+                    .id(CommonUtils.generateUuid()).build();
+                finalQuarantineDocs.add(quarantineLegalDoc);
+                log.info("Added respondent C1A response document to quarantine docs list");
+            });
+        }
 
         Map<String, Object> caseDataMapToBeUpdated = new HashMap<>();
         caseDataMapToBeUpdated.put("citizenQuarantineDocsList", finalQuarantineDocs);
