@@ -1013,4 +1013,9 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+
+    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
+    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
+    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
+    public static final String C100_DEFAULT_REGION_ID = "2";
 }

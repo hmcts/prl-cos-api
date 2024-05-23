@@ -182,7 +182,7 @@ public class CaseUtils {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
