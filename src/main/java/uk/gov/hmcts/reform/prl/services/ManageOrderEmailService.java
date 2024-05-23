@@ -335,11 +335,20 @@ public class ManageOrderEmailService {
                 multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .multipleOrdersWelshSentence(languagePreferenceFlag ? multipleOrdersWelshSentence(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .caseName(String.valueOf(dynamicData.get("caseName")))
             .applicantName(party.getValue().getFirstName() + " " + party.getValue().getLastName())
             .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
             .caseReference(String.valueOf(dynamicData.get("caseReference")))
             .build();
+    }
+
+    private String multipleOrdersWelshSentence(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
+        if (multipleOrderFlag || newAndFinalOrderFlag) {
+            return OrderEmailConstants.ORDERS_WELSH_SENTENCE;
+        } else {
+            return OrderEmailConstants.ORDER_WELSH_SENTENCE;
+        }
     }
 
     private String multipleOrdersWelsh(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
