@@ -78,7 +78,7 @@ public class StmtOfServImplService {
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final AllTabServiceImpl allTabService;
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
