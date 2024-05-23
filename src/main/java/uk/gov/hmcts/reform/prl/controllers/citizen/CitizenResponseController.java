@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -47,12 +48,14 @@ public class CitizenResponseController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public Document generateC7DraftDocument(
-            @PathVariable("caseId") String caseId,
-            @PathVariable("partyId") String partyId,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody DocumentRequest documentRequest,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation);
+            return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation,
+                                                                   documentRequest.isWelsh());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
