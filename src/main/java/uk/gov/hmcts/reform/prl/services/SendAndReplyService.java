@@ -1204,7 +1204,9 @@ public class SendAndReplyService {
         boolean closeMessage = false;
         if (SEND.equals(caseData.getChooseSendOrReply())) {
             messageElement = caseData.getSendOrReplyMessage().getMessages().get(0).getId();
-            messageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
+            messageObject = caseData.getSendOrReplyMessage()
+                .getMessages().stream().filter(messageElement1 -> messageElement1.getId().equals(messageElement))
+                .toList().get(0).getValue();
 
         } else if (REPLY.equals(caseData.getChooseSendOrReply())) {
             messageElement = elementUtils.getDynamicListSelectedValue(
@@ -1223,6 +1225,9 @@ public class SendAndReplyService {
             messageObject = null;
             messageElement = null;
         }
+        log.info("messageElement -- {}", messageElement);
+        log.info("messageObject -- {}", messageObject);
+        log.info("closeMessage -- {}", closeMessage);
 
         if (!closeMessage) {
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
