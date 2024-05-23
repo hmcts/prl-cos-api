@@ -119,6 +119,7 @@ public enum Event {
             return List.of(
                 CASE_NAME,
                 TYPE_OF_APPLICATION,
+                CHILD_DETAILS_REVISED,
                 HEARING_URGENCY,
                 APPLICANT_DETAILS,
                 RESPONDENT_DETAILS,
@@ -141,8 +142,8 @@ public enum Event {
             TYPE_OF_APPLICATION,
             HEARING_URGENCY,
             APPLICANT_DETAILS,
-            RESPONDENT_DETAILS,
             CHILD_DETAILS,
+            RESPONDENT_DETAILS,
             MIAM,
             ALLEGATIONS_OF_HARM,
             OTHER_PEOPLE_IN_THE_CASE,
