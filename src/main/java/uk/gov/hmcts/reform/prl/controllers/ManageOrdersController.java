@@ -165,7 +165,11 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-
+            log.debug(" ---> patel {}", CaseUtils.getCaseTypeOfApplication(caseData));
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                log.debug(" ---> patel CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT Yes");
+                caseDataUpdated.put(CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
