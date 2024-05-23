@@ -1606,6 +1606,18 @@ public class SendAndReplyService {
                     .getValue().getJudgeEmailId().equals(messageObject.getJudgeEmail())
                     && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement));
         }
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()));
+        Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataUpdated.put("allocatedJudgeForSendAndReply", allocatedJudgeForSendAndReplyList);
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            String.valueOf(caseData.getId()),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated
+        );
     }
 
     private void removeRoleAssignmentBasedonJudgeEmail(List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList, String judgeEmail) {
