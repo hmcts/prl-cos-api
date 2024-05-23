@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 public class OrderEmailConstants {
 
     public static final String ORDERS_WELSH = "gorchmynion";
+    public static final String ORDERS_WELSH_SENTENCE = "gorchmynion gael eu cyflwyno";
     public static final String ORDER_WELSH = "gorchymyn";
+    public static final String ORDER_WELSH_SENTENCE = "gorchymyn gael ei gyflwyno";
     public static final String ORDER_SUBJECT_ENG_NEW_AND_FINAL = "New and final court orders issued";
     public static final String ORDERS_SUBJECT_ENG_FINAL = "Final court orders issued";
     public static final String ORDERS_SUBJECT_ENG_NEW = "New court orders issued";
