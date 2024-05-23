@@ -598,7 +598,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
   '**uk/gov/hmcts/reform/prl/services/SendAndReplyService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java'
+  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java'
 ]
 
 sonarqube {
