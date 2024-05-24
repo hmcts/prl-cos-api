@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,7 @@ public class Fm5ReminderController {
     @PostMapping("/reminder-notifications/{hearingAwayDays}")
     public void sendFm5ReminderNotifications(
         @PathVariable("hearingAwayDays") Long hearingAwayDays,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("*** Trigger FM5 reminder notifications via API ***");
@@ -51,12 +50,13 @@ public class Fm5ReminderController {
         }
     }
 
-    @GetMapping("/fetch-Fm5-reminder-eligible-cases/{hearingAwayDays}")
+    @GetMapping("/fetch-reminder-eligible-cases/{hearingAwayDays}")
     public ResponseEntity<Object> fetchFm5ReminderEligibleCases(
         @PathVariable("hearingAwayDays") Long hearingAwayDays,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation) {
-        if (authorisationService.authoriseUser(authorisation)) {
-            log.info("*** Retrieve FM5 eligible cases notifications via API ***");
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("*** Retrieve FM5 reminder eligible cases via API ***");
             List<CaseDetails> caseDetailsList = fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders();
 
             if (isNotEmpty(caseDetailsList)) {
@@ -66,7 +66,6 @@ public class Fm5ReminderController {
                 ));
             }
         } else {
-            log.error("Authorization failed, throwing invalid client error");
             throw (new RuntimeException(INVALID_CLIENT));
         }
         return ResponseEntity.ok("No Cases Eligible for FM5 notification");
