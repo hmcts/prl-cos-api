@@ -176,7 +176,7 @@ public class CaseUtils {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
@@ -689,4 +689,9 @@ public class CaseUtils {
         return roles;
     }
 
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+        return null != party.getValue()
+            && null != party.getValue().getUser()
+            && null != party.getValue().getUser().getIdamId();
+    }
 }
