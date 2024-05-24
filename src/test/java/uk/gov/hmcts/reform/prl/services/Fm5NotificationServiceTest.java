@@ -148,7 +148,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForApplicantSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.APPLICANT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -202,7 +202,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
