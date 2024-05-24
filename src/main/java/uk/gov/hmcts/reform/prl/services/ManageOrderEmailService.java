@@ -81,6 +81,7 @@ public class ManageOrderEmailService {
     public static final String NAME = "name";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String MULTIPLE_ORDERS = "multipleOrders";
+    public static final String AUTHORISATION = "authorisation";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -421,10 +422,10 @@ public class ManageOrderEmailService {
             });
         } else {
             log.info("*** Send email/post notifications to applicants ***");
+            dynamicDataForEmail.put(AUTHORISATION, authorisation);
             caseData.getApplicants().forEach(party -> sendNotificationsToParty(
                 caseData,
                 party,
-                authorisation,
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
@@ -450,7 +451,6 @@ public class ManageOrderEmailService {
 
     private void sendNotificationsToParty(CaseData caseData,
                                           Element<PartyDetails> party,
-                                          String authorisation,
                                           Map<String, Object> dynamicDataForEmail,
                                           List<Document> orderDocuments,
                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
@@ -473,7 +473,7 @@ public class ManageOrderEmailService {
             } else {
                 //Send notification to party without access to dashboard using sendgrid
                 sendEmailViaSendGrid(
-                    authorisation,
+                    String.valueOf(dynamicDataForEmail.get(AUTHORISATION)),
                     orderDocuments,
                     dynamicDataForEmail,
                     party.getValue().getEmail(),
@@ -484,7 +484,7 @@ public class ManageOrderEmailService {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
             sendOrdersToPartyAddressViaPost(
                 caseData,
-                authorisation,
+                String.valueOf(dynamicDataForEmail.get(AUTHORISATION)),
                 orderDocuments,
                 bulkPrintOrderDetails,
                 party
@@ -516,11 +516,11 @@ public class ManageOrderEmailService {
         } else {
             //PRL-5206 unrepresented applicant option - unrepresentedApplicant
             log.info("===== DA Serving unrepresented applicant ====");
+            dynamicDataForEmail.put(AUTHORISATION, authorisation);
             sendNotificationsToParty(
                 caseData,
                 element(caseData.getApplicantsFL401().getPartyId(),
                         caseData.getApplicantsFL401()),
-                authorisation,
                 dynamicDataForEmail,
                 orderDocuments,
                 bulkPrintOrderDetails,
@@ -551,16 +551,16 @@ public class ManageOrderEmailService {
             if (CaseUtils.isCaseCreatedByCitizen(caseData)
                 && C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 log.info("*** courtAdmin/courtBailiff: Send email/post notifications to all C100 applicants");
-                caseData.getApplicants().forEach(applicant -> sendNotificationsToParty(
+                dynamicDataForEmail.put(AUTHORISATION, authorisation);
+                sendNotificationsToParty(
                     caseData,
-                    applicant,
-                    authorisation,
+                    partyElement,
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
                     SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
                     EmailTemplateNames.SERVE_ORDER_NON_PER_LIP_NEW_FINAL_ORDERS
-                ));
+                );
             } else if (isNotEmpty(party.getSolicitorEmail())) {
                 log.info("*** courtAdmin/courtBailiff: Sending email to applicant LR");
                 sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, party.getSolicitorEmail(),
@@ -568,10 +568,10 @@ public class ManageOrderEmailService {
                 );
             } else {
                 log.info("*** courtAdmin/courtBailiff: Sending email/post to FL401 applicant LiP");
+                dynamicDataForEmail.put(AUTHORISATION, authorisation);
                 sendNotificationsToParty(
                     caseData,
                     partyElement,
-                    authorisation,
                     dynamicDataForEmail,
                     orderDocuments,
                     bulkPrintOrderDetails,
@@ -876,10 +876,10 @@ public class ManageOrderEmailService {
                     );
                 } else {
                     log.info("*** Send email/post notifications to parties ***");
+                    dynamicDataForEmail.put(AUTHORISATION, authorisation);
                     sendNotificationsToParty(
                         caseData,
                         partyDataOptional.get(),
-                        authorisation,
                         dynamicDataForEmail,
                         orderDocuments,
                         bulkPrintOrderDetails,
