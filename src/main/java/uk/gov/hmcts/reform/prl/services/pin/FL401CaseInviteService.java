@@ -29,7 +29,7 @@ public class FL401CaseInviteService implements CaseInviteService {
 
     public CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
         //no party id required as fl401 cases have only a single respondent
-        return new CaseInvite().generateAccessCode(partyDetails.getEmail(), partyDetails.getPartyId(), isApplicant);
+        return new CaseInvite().generateAccessCode(partyDetails.getEmail(), null, isApplicant);
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
