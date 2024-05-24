@@ -215,7 +215,6 @@ public class DraftAnOrderService {
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
-    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
 
     private final WelshCourtEmail welshCourtEmail;
 
@@ -281,7 +280,7 @@ public class DraftAnOrderService {
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseDataMap.put(CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
+            caseDataMap.put(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
         }
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);

@@ -87,8 +87,6 @@ public class ManageOrdersController {
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
-    public static final String CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT = "cafcassOrCymruNeedToProvideReport";
-
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -166,7 +164,7 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseDataUpdated.put(CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
+                caseDataUpdated.put(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT, Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
