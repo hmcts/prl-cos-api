@@ -210,14 +210,14 @@ public class ManageDocumentsService {
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            updatedUserDetails
+            updatedUserDetails,authorization
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                          UserDetails userDetails) {
+                                          UserDetails userDetails,String authorization) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
@@ -235,7 +235,7 @@ public class ManageDocumentsService {
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole
+                    userRole,authorization
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -248,7 +248,8 @@ public class ManageDocumentsService {
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
+                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole,
+                                                       String authorization) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrictedKey != null) {
@@ -321,15 +322,17 @@ public class ManageDocumentsService {
                         break;
                     }
                 }
+                List<Document> docs = new ArrayList<>();
 
 
                 for (PartyDetails applicant : applicants) {
                     if (ContactPreferences.email.equals(applicant.getContactPreferences())
                         && (document.getDocumentFileName().equals("C7_Document.pdf")
                         || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
+                        docs.add(document);
                         dynamicData.put("applicantName",  applicant.getLabelForDynamicList());
-                        sendEmailViaSendGrid(dynamicData, applicant.getEmail(),
-                                             SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION
+                        sendEmailViaSendGrid(dynamicData, docs,applicant.getEmail(),
+                                             SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION, authorization
                         );
                     }
                 }
@@ -340,15 +343,16 @@ public class ManageDocumentsService {
 
 
     private void sendEmailViaSendGrid(
-                                      Map<String, Object> dynamicDataForEmail,
+                                      Map<String, Object> dynamicDataForEmail,List<Document> docs,
                                       String emailAddress,
-                                      SendgridEmailTemplateNames sendgridEmailTemplateName) {
+                                      SendgridEmailTemplateNames sendgridEmailTemplateName, String authorization) {
         try {
             log.info("inside sendEmailViaSendGrid");
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 sendgridEmailTemplateName,
-                null,
+                authorization,
                 SendgridEmailConfig.builder()
+                    .listOfAttachments(docs)
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
                     .languagePreference(LanguagePreference.english)

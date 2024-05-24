@@ -1508,7 +1508,7 @@ public class DocumentGenService {
                         userDetails,
                         updatedCaseData,
                         updatedCaseDataMap,
-                        userRole
+                        userRole,authorisation
                     );
                 }
             } else {

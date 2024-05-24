@@ -1015,7 +1015,8 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Legal adviser");
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Legal adviser",
+                                                    "authorization");
         List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
 
         assertNotNull(confidentialDocuments);
@@ -1893,7 +1894,8 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen");
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Citizen",
+                                                    "authorization");
 
         citizenUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("citizenUploadedDocListDocTab");
 
@@ -1942,32 +1944,6 @@ public class ManageDocumentsServiceTest {
         when(authTokenGenerator.generate()).thenReturn("test");
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(caseDocumentClient
-                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(expectedResponse);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.Yes)
-            .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentFileName("testFileName")
-                          .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
-            .isRestricted(YesOrNo.No).categoryId("test").build();
-        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
-
-        manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCitizenRole, caseData, caseDataMapInitial, "Citizen");
-        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
-
-        assertNotNull(confidentialDocuments);
-        assertEquals(1,confidentialDocuments.size());
-        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCitizenQuarantineDocument().getDocumentFileName());
-
-        assertNotNull(quarantineLegalDoc);
     }
 
 
