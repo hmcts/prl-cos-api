@@ -1011,6 +1011,11 @@ public class PrlAppsConstants {
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
 
+    //SOA - mode of service
+    public static final String SOA_BY_EMAIL = "By email";
+    public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
+    public static final String SOA_BY_POST = "By post";
+
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
 

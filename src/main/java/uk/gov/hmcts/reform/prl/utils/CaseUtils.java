@@ -71,6 +71,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -91,10 +94,6 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
-
-    private static final String BY_EMAIL = "By email";
-    private static final String BY_EMAIL_AND_POST = "By email and post";
-    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -676,13 +675,13 @@ public class CaseUtils {
                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
         if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
-            temp = BY_EMAIL;
+            temp = SOA_BY_EMAIL;
         }
         if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
             if (null != temp) {
-                temp = BY_EMAIL_AND_POST;
+                temp = SOA_BY_EMAIL_AND_POST;
             } else {
-                temp = BY_POST;
+                temp = SOA_BY_POST;
             }
         }
         return temp;
