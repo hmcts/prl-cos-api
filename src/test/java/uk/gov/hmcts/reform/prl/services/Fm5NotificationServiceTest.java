@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -160,7 +160,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForRespondentSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -172,7 +172,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForBothApplicantRespondentSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -186,7 +186,7 @@ public class Fm5NotificationServiceTest {
     public void sendFm5ReminderForNoApplicantRespondentSolicitorsNotification() {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService
-            .sendFm5ReminderNotifications(caseData, FmPendingParty.NOTIFICATION_NOT_REQUIRED);
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
 
         //verify
         Assert.assertTrue(notifications.isEmpty());
@@ -221,7 +221,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.RESPONDENT
+            Fm5PendingParty.RESPONDENT
         );
 
         //verify
@@ -240,7 +240,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
@@ -259,7 +259,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.RESPONDENT
+            Fm5PendingParty.RESPONDENT
         );
 
         //verify
@@ -292,7 +292,7 @@ public class Fm5NotificationServiceTest {
                                                 List.of(file)))
             .thenReturn(uploadResponse);
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -314,7 +314,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
@@ -339,7 +339,7 @@ public class Fm5NotificationServiceTest {
 
         assertExpectedException(() -> {
             fm5NotificationService
-                .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+                .sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
         }, NullPointerException.class,"Cannot invoke \"java.util.Collection.toArray()\" because \"c\" is null");
 
     }
@@ -356,7 +356,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.RESPONDENT
+            Fm5PendingParty.RESPONDENT
         );
 
         //verify
