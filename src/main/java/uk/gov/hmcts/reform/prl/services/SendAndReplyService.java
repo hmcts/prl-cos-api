@@ -270,7 +270,7 @@ public class SendAndReplyService {
                 if (messageElement.getId().equals(messageId)) {
                     messageElement.getValue().setStatus(MessageStatus.CLOSED);
                     messageElement.getValue().setUpdatedTime(dateTime.now());
-                    removeJudgeAllocation(messageElement.getValue(), caseData);
+                    //removeJudgeAllocation(messageElement.getValue(), caseData);
                 }
                 return messageElement;
             })
