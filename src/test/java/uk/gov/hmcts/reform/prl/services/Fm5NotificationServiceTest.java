@@ -215,7 +215,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForNoRespondentEmail() {
 
-        respondent = respondent.toBuilder().user(User.builder().idamId("123").build()).solicitorEmail("").build();
+        respondent = respondent.toBuilder().contactPreferences(ContactPreferences.email).solicitorEmail("").build();
         caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
 
         //invoke
