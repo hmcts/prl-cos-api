@@ -138,7 +138,7 @@ public class Fm5ReminderService {
     }
 
 
-    private HashMap<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
+    public HashMap<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
                                                                                           Long hearingAwayDays) {
         log.info("Running system rules on the cases");
         List<String> caseIdsForHearing = new ArrayList<>();
@@ -241,7 +241,7 @@ public class Fm5ReminderService {
         return caseIdPendingPartyMapping;
     }
 
-    private List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
+    public List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
 
         SearchResultResponse response = SearchResultResponse.builder()
             .cases(new ArrayList<>()).build();
