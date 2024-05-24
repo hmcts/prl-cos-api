@@ -107,7 +107,7 @@ public class RoleAssignmentService {
                     authTokenGenerator.generate(),
                     null,
                     assignmentRequest
-                ).getRoleRequest().getId();
+                ).getRequestedRoles().get(0).getId();
             }
         }
         return null;
