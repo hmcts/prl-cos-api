@@ -85,6 +85,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -439,16 +442,30 @@ public class CaseService {
             .forEach(servedApplicationDetails -> {
                 if (citizenDocuments[0].isEmpty()
                     && servedApplicationDetails.getModeOfService() != null) {
-                    if (servedApplicationDetails.getModeOfService().equals("By email")) {
-                        citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
-                            servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
+                    switch (servedApplicationDetails.getModeOfService()) {
+                        case SOA_BY_EMAIL_AND_POST -> {
+                            citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
+                                servedApplicationDetails.getEmailNotificationDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            ));
+
+                            citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
+                                servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            ));
+                        }
+                        case SOA_BY_EMAIL -> citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
+                            servedApplicationDetails.getEmailNotificationDetails(),
+                            caseData.getServiceOfApplication(),
                             partyIdAndType
                         ));
-                    } else {
-                        citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
+                        case SOA_BY_POST -> citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
                             servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
                             partyIdAndType
                         ));
+
+                        default -> citizenDocuments[0] = null;
                     }
                 }
             });
