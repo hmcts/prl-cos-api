@@ -655,6 +655,7 @@ bundle:
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
+  caDefaultCourtEpimmsID: ${CA_DEFAULT_COURT_EPIMMS_ID:}
 
 fis_hearing:
   api:
