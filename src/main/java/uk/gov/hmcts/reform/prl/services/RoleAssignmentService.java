@@ -52,7 +52,7 @@ public class RoleAssignmentService {
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
 
-    public String createRoleAssignment(String authorization,
+    public void createRoleAssignment(String authorization,
                          CaseDetails caseDetails,
                          RoleAssignmentDto roleAssignmentDto,
                          String eventName,
@@ -102,15 +102,14 @@ public class RoleAssignmentService {
                     .requestedRoles(requestedRoles)
                     .build();
 
-                return roleAssignmentApi.updateRoleAssignment(
+                roleAssignmentApi.updateRoleAssignment(
                     systemUserToken,
                     authTokenGenerator.generate(),
                     null,
                     assignmentRequest
-                ).getRequestedRoles().get(0).getId();
+                );
             }
         }
-        return null;
     }
 
     private String populateActorIdFromDto(String authorization, RoleAssignmentDto roleAssignmentDto) {

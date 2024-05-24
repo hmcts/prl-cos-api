@@ -1272,7 +1272,7 @@ public class SendAndReplyService {
                                               .build())
                             .build();
 
-                        String roleAssignmentId = roleAssignmentService.createRoleAssignment(
+                        roleAssignmentService.createRoleAssignment(
                             authorisation,
                             CaseDetails.builder()
                                 .jurisdiction(JURISDICTION)
@@ -1284,6 +1284,14 @@ public class SendAndReplyService {
                             false,
                             ALLOCATE_JUDGE_ROLE
                         );
+                        roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
+                            judgeIdamId
+                        );
+                        String roleAssignmentId = roleAssignmentResponseList.stream()
+                            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
+                                ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
+                                String.valueOf(caseData.getId()))).toList().get(0).getId();
+
                         allocatedJudgeForSendAndReply.add(element(AllocatedJudgeForSendAndReply.builder()
                                                                       .judgeEmailId(messageObject.getJudgeEmail())
                                                                       .roleAssignmentId(roleAssignmentId)
@@ -1307,184 +1315,6 @@ public class SendAndReplyService {
 
 
     }
-
-    public List<Element<AllocatedJudgeForSendAndReply>> assignCaseToJudgeIfJudgeSelectedForMessage2(
-        String authorisation,
-        Message message,
-        CaseData caseData) {
-
-        final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
-            getJudicialUserDetails(message.getSendReplyJudgeName());
-        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
-        List<Element<AllocatedJudgeForSendAndReply>> existingAllocation = caseData.getAllocatedJudgeForSendAndReply();
-        if (null != judicialUsersApiResponse) {
-
-
-            if (message.getMessageHasJudgeAllocated() != null) {
-                if (message.getMessageHasJudgeAllocated().equals("SNR_ALLOCATED")) {
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("SNR_REALLOCATED")
-                                                       .build()));
-                }
-            } else {
-                if (existingAllocation == null) {
-                    existingAllocation = new ArrayList<>();
-                }
-
-                List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-                    judicialUsersApiResponse.getSidamId()
-                );
-                Optional<RoleAssignmentResponse> filteredRoleAssignmentForThisCase = roleAssignmentResponseList.stream()
-                    .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                        ALLOCATE_JUDGE_ROLE))
-                    .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
-                        String.valueOf(caseData.getId())))
-                    .findFirst();
-
-                // check if already allocated before SnR
-                if (filteredRoleAssignmentForThisCase.isPresent()) {
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("ALREADY_ALLOCATED")
-                                                       .roleAssignmentId(filteredRoleAssignmentForThisCase.get().getId())
-                                                       .build()));
-                    // caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
-                    message = message.toBuilder()
-                        .messageHasJudgeAllocated("ALREADY_ALLOCATED")
-                        .build();
-
-                } else {
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judicialUser(JudicialUser.builder()
-                                          .idamId(judicialUsersApiResponse.getSidamId())
-                                          .personalCode(judicialUsersApiResponse.getPersonalCode())
-                                          .build())
-                        .build();
-
-                    String roleAssignmentId = roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        CaseDetails.builder()
-                            .jurisdiction(JURISDICTION)
-                            .caseTypeId(CASE_TYPE)
-                            .id(caseData.getId())
-                            .build(),
-                        roleAssignmentDto,
-                        ALLOCATED_JUDGE.getName(),
-                        false,
-                        ALLOCATE_JUDGE_ROLE
-                    );
-
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("SNR_ALLOCATED")
-                                                       .roleAssignmentId(roleAssignmentId)
-                                                       .build()));
-                    //caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
-                    message = message.toBuilder()
-                        .messageHasJudgeAllocated("SNR_ALLOCATED")
-                        .build();
-                }
-            }
-
-            return existingAllocation;
-
-        }
-        return existingAllocation;
-
-    }
-
-    public void assignCaseToJudgeIfJudgeSelectedForMessage1(
-        String authorisation,
-        CaseDetails caseDetails,
-        Message message,
-        CaseData caseData,
-        Map<String, Object> caseDataMap) {
-
-        final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
-            getJudicialUserDetails(message.getSendReplyJudgeName());
-        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
-
-        if (null != judicialUsersApiResponse) {
-            List<Element<AllocatedJudgeForSendAndReply>> existingAllocation = caseData.getAllocatedJudgeForSendAndReply();
-
-            if (message.getMessageHasJudgeAllocated() != null) {
-                if (message.getMessageHasJudgeAllocated().equals("SNR_ALLOCATED")) {
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("SNR_REALLOCATED")
-                                                       .build()));
-                }
-            } else {
-                if (existingAllocation == null) {
-                    existingAllocation = new ArrayList<>();
-                }
-
-                /* else {
-                    filteredJudgeDetails = existingAllocation.stream()
-                        .map(Element::getValue)
-                        .toList()
-                        .stream()
-                        .filter(allocatedJudgeForSendAndReply ->
-                                    allocatedJudgeForSendAndReply.getJudgeId().equals(judicialUsersApiResponse.getSidamId())
-                        )
-                        .collect(Collectors.toList());
-                }*/
-
-                List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-                    judicialUsersApiResponse.getSidamId()
-                );
-                Optional<RoleAssignmentResponse> filteredRoleAssignmentForThisCase = roleAssignmentResponseList.stream()
-                    .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                        ALLOCATE_JUDGE_ROLE))
-                    .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
-                        caseDetails.getId().toString()))
-                    .findFirst();
-
-                // check if already allocated before SnR
-                if (filteredRoleAssignmentForThisCase.isPresent()) {
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("ALREADY_ALLOCATED")
-                                                       .roleAssignmentId(filteredRoleAssignmentForThisCase.get().getId())
-                                                       .build()));
-                    caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
-                    message = message.toBuilder()
-                        .messageHasJudgeAllocated("ALREADY_ALLOCATED")
-                        .build();
-                } else {
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judicialUser(JudicialUser.builder()
-                                          .idamId(judicialUsersApiResponse.getSidamId())
-                                          .personalCode(judicialUsersApiResponse.getPersonalCode())
-                                          .build())
-                        .build();
-
-                    String roleAssignmentId = roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        caseDetails,
-                        roleAssignmentDto,
-                        ALLOCATED_JUDGE.getName(),
-                        false,
-                        ALLOCATE_JUDGE_ROLE
-                    );
-
-                    existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
-                                                       .status("SNR_ALLOCATED")
-                                                       .roleAssignmentId(roleAssignmentId)
-                                                       .build()));
-                    caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
-                    message = message.toBuilder()
-                        .messageHasJudgeAllocated("SNR_ALLOCATED")
-                        .build();
-                }
-            }
-
-
-        }
-    }
-
 
     public void assignCaseToJudgeIfJudgeSelectedForMessage(
         String authorisation,
@@ -1528,7 +1358,7 @@ public class SendAndReplyService {
                                           .build())
                         .build();
 
-                    String roleAssignmentId = roleAssignmentService.createRoleAssignment(
+                    roleAssignmentService.createRoleAssignment(
                         authorisation,
                         caseDetails,
                         roleAssignmentDto,
@@ -1541,7 +1371,7 @@ public class SendAndReplyService {
                         existingAllocation.add(
                             element(AllocatedJudgeForSendAndReply.builder()
                                         .judgeId(judicialUsersApiResponse.getSidamId())
-                                        .roleAssignmentId(roleAssignmentId)
+                                        .roleAssignmentId("roleAssignmentId")
                                         .build()));
                     }
                     caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
