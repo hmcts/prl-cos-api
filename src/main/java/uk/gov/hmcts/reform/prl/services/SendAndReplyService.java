@@ -1322,7 +1322,9 @@ public class SendAndReplyService {
 
     }
 
-    private void removeUnecessaryFieldsBeforeMessageSubmission(SendOrReply chooseSendOrReply, YesOrNo respondToMessage, Map<String, Object> caseDataUpdated) {
+    private void removeUnecessaryFieldsBeforeMessageSubmission(SendOrReply chooseSendOrReply,
+                                                               YesOrNo respondToMessage,
+                                                               Map<String, Object> caseDataUpdated) {
         if (chooseSendOrReply.equals(SEND)) {
             removeTemporaryFields(caseDataUpdated, "replyMessageObject");
         } else {
