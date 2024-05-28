@@ -57,4 +57,11 @@ public interface HearingApiClient {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody Map<String,String> caseIdWithRegionIdMap
     );
+
+    @PostMapping(path = "/hearings-by-list-of-caseids-without-venue")
+    List<Hearings> getHearingsForAllCaseIdsWithCourtVenue(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody List<String> caseIds
+    );
 }

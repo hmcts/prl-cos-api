@@ -988,10 +988,16 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
-
     public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
     public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
     public static final String C100_DEFAULT_REGION_NAME = "Midlands";
     public static final String C100_DEFAULT_REGION_ID = "2";
+  
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
 
 }
