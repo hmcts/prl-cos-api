@@ -527,8 +527,7 @@ public class UpdatePartyDetailsService {
             List<Element<Child>> children = caseData.getChildren();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 children = new ArrayList<>();
-                Element<Child> childDetails = element(Child.builder()
-                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()).build());
+                Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
             } else {
