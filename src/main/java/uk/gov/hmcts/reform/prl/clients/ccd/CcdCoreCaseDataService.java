@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -164,5 +165,16 @@ public class CcdCoreCaseDataService {
     public CaseDetails findCaseById(String authorisation, String caseId) {
         String cosApis2sToken = authTokenGenerator.generate();
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
+    }
+
+    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification(StartEventResponse startEventResponse) {
+        return CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(startEventResponse.getCaseDetails().getData())
+            .securityClassification(Classification.RESTRICTED)
+            .build();
     }
 }
