@@ -566,12 +566,14 @@ public class UpdatePartyDetailsService {
                 String address = populateAddressInDynamicList(parties);
                 String name = null;
 
-                if (StringUtils.isBlank(parties.getValue().getFirstName())
-                    && StringUtils.isBlank(parties.getValue().getLastName())) {
+                if (!StringUtils.isBlank(parties.getValue().getFirstName())
+                    && !StringUtils.isBlank(parties.getValue().getLastName())) {
+                    log.info("assigning name");
                     name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
                 }
 
                 if (null != name && null != address) {
+                    log.info("adding element to dynamiclist");
                     whoDoesTheChildLiveWith.add(DynamicListElement
                         .builder()
                         .code(parties.getId())
@@ -590,8 +592,10 @@ public class UpdatePartyDetailsService {
     private String populateAddressInDynamicList(Element<PartyDetails> parties) {
         String address = null;
         if (null != parties.getValue().getAddress()
-            && StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())
-            && StringUtils.isBlank(parties.getValue().getAddress().getPostCode())) {
+            && !StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())
+            && !StringUtils.isBlank(parties.getValue().getAddress().getPostCode())) {
+
+            log.info("assigning address");
 
             //Address line 2 can be empty/null
             String addressLine2 = StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())
