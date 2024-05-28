@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -514,14 +515,14 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        log.info("tasklist version {}", caseData.getTaskListVersion());
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
             log.info("Inside v3 if statement");
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 children = new ArrayList<>();
-                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()).build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
@@ -543,6 +544,6 @@ public class UpdatePartyDetailsService {
     }
 
     private DynamicList populateWhoDoesTheChildLiveWith() {
-        return DynamicList.builder().build();
+        return DynamicList.builder().value(DynamicListElement.defaultListItem("test item")).build();
     }
 }

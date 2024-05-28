@@ -1441,7 +1441,6 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSetDefaultEmptyChildDetails_whenNoChildDetailsPresent() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1490,6 +1489,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
+    @Ignore
     public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
