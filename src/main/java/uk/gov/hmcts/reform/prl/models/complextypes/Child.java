@@ -34,13 +34,13 @@ public class Child {
     private final String otherApplicantsRelationshipToChild;
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
-    private final DynamicList whoDoesTheChildLiveWith;
     @JsonIgnore
     private final Address address;
     @JsonIgnore
     private final YesOrNo isChildAddressConfidential;
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
+    private final DynamicList whoDoesTheChildLiveWith;
     private final String parentalResponsibilityDetails;
     private final YesOrNo isFinalOrderIssued;
 
