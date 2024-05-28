@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2343,8 +2344,9 @@ public class ServiceOfApplicationServiceTest {
 
     /*
     Copy of test case testHandleSoaSubmittedForConfidential
-    Sonar Issue Fix: Methods should not have identical implementations
+    Sonar Issue Fix: Methods should not have identical implementations*/
     @Test
+    @Ignore
     public void testHandleSoaSubmittedConfidential() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2384,7 +2386,7 @@ public class ServiceOfApplicationServiceTest {
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
-    }*/
+    }
 
     @Test
     public void testHandleSoaSubmittedForNonConfidential() {
