@@ -17,7 +17,8 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.FmPendingParty;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -105,6 +106,7 @@ public class Fm5NotificationServiceTest {
             .lastName("app LN")
             .email("app@test.com")
             .solicitorEmail("app.sol@test.com")
+            .contactPreferences(ContactPreferences.post)
             .representativeFirstName("app LR FN")
             .representativeLastName("app LR LN")
             .address(Address.builder().addressLine1("test").build())
@@ -115,6 +117,7 @@ public class Fm5NotificationServiceTest {
             .lastName("resp LN")
             .email("resp@test.com")
             .solicitorEmail("resp.sol@test.com")
+            .contactPreferences(ContactPreferences.post)
             .representativeFirstName("resp LR FN")
             .representativeLastName("resp LR LN")
             .address(Address.builder().addressLine1("test").build())
@@ -145,7 +148,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForApplicantSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.APPLICANT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.APPLICANT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -157,7 +160,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForRespondentSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -169,7 +172,7 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForBothApplicantRespondentSolicitors() {
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.BOTH);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -183,7 +186,7 @@ public class Fm5NotificationServiceTest {
     public void sendFm5ReminderForNoApplicantRespondentSolicitorsNotification() {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService
-            .sendFm5ReminderNotifications(caseData, FmPendingParty.NOTIFICATION_NOT_REQUIRED);
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
 
         //verify
         Assert.assertTrue(notifications.isEmpty());
@@ -199,7 +202,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
@@ -212,13 +215,13 @@ public class Fm5NotificationServiceTest {
     @Test
     public void sendFm5ReminderForNoRespondentEmail() {
 
-        respondent = respondent.toBuilder().user(User.builder().idamId("123").build()).solicitorEmail("").build();
+        respondent = respondent.toBuilder().contactPreferences(ContactPreferences.email).solicitorEmail("").build();
         caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
 
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.RESPONDENT
+            Fm5PendingParty.RESPONDENT
         );
 
         //verify
@@ -237,7 +240,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
@@ -256,7 +259,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.RESPONDENT
+            Fm5PendingParty.RESPONDENT
         );
 
         //verify
@@ -289,7 +292,7 @@ public class Fm5NotificationServiceTest {
                                                 List.of(file)))
             .thenReturn(uploadResponse);
         //invoke
-        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
 
         //verify
         Assert.assertFalse(notifications.isEmpty());
@@ -311,7 +314,7 @@ public class Fm5NotificationServiceTest {
         //invoke
         List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
             caseData,
-            FmPendingParty.APPLICANT
+            Fm5PendingParty.APPLICANT
         );
 
         //verify
@@ -336,9 +339,31 @@ public class Fm5NotificationServiceTest {
 
         assertExpectedException(() -> {
             fm5NotificationService
-                .sendFm5ReminderNotifications(caseData, FmPendingParty.RESPONDENT);
+                .sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
         }, NullPointerException.class,"Cannot invoke \"java.util.Collection.toArray()\" because \"c\" is null");
 
+    }
+
+    @Test
+    public void sendFm5ReminderForNoRespondentEmailNotification() {
+
+        respondent = respondent.toBuilder().solicitorEmail("")
+            .user(User.builder().idamId("123").build())
+            .contactPreferences(ContactPreferences.email)
+            .address(Address.builder().addressLine1(null).build()).build();
+        caseData = caseData.toBuilder().respondents(List.of(element(respondent))).build();
+
+        //invoke
+        List<Element<NotificationDetails>> notifications = fm5NotificationService.sendFm5ReminderNotifications(
+            caseData,
+            Fm5PendingParty.RESPONDENT
+        );
+
+        //verify
+        Assert.assertFalse(notifications.isEmpty());
+        Assert.assertNotNull(notifications.get(0).getValue().getPartyId());
+        assertEquals(PartyType.RESPONDENT, notifications.get(0).getValue().getPartyType());
+        assertEquals(1, notifications.size());
     }
 
 
