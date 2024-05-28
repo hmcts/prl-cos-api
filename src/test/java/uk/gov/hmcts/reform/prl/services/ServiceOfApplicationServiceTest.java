@@ -2341,6 +2341,9 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
     }
 
+    /*
+    Copy of test case testHandleSoaSubmittedForConfidential
+    Sonar Issue Fix: Methods should not have identical implementations
     @Test
     public void testHandleSoaSubmittedConfidential() {
         CaseData caseData = CaseData.builder()
@@ -2381,7 +2384,7 @@ public class ServiceOfApplicationServiceTest {
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
-    }
+    }*/
 
     @Test
     public void testHandleSoaSubmittedForNonConfidential() {
