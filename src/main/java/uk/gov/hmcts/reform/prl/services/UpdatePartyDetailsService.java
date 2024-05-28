@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -542,7 +541,6 @@ public class UpdatePartyDetailsService {
     }
 
     private DynamicList populateWhoDoesTheChildLiveWith() {
-        return DynamicList.builder().listItems(List.of(DynamicListElement
-            .builder().code(UUID.randomUUID()).label("testLabel").build())).build();
+        return DynamicList.builder().value(DynamicListElement.defaultListItem("test")).build();
     }
 }
