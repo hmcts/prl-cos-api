@@ -529,7 +529,10 @@ public class UpdatePartyDetailsService {
                 log.info("children are {}", children);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
-                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
+                List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
+                listOfChildren.forEach(child -> child.getValue().toBuilder()
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()));
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildren);
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
