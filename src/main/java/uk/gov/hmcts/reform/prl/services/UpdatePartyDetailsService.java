@@ -36,7 +36,15 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -544,7 +552,7 @@ public class UpdatePartyDetailsService {
             .listItems(List.of(DynamicListElement.builder().code(UUID.randomUUID()).label("test label").build()))
             .value(DynamicListElement.builder()
                 .code(UUID.randomUUID())
-                .label("All respondents").build())
+                .label("test label").build())
             .build();
     }
 }
