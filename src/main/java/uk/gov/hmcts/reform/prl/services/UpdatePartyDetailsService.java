@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -42,10 +44,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
@@ -53,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -528,16 +529,20 @@ public class UpdatePartyDetailsService {
             List<Element<Child>> children = caseData.getChildren();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 children = new ArrayList<>();
-                Element<Child> childDetails = element(Child.builder().build());
+                Element<Child> childDetails = element(Child.builder()
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()).build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
-                log.info("there isn't a child");
             } else {
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
-                log.info("there is a child");
             }
         }
         return caseDataUpdated;
 
+    }
+
+    private DynamicList populateWhoDoesTheChildLiveWith() {
+        return DynamicList.builder().listItems(List.of(DynamicListElement
+            .builder().code(UUID.randomUUID()).label("testLabel").build())).build();
     }
 }
