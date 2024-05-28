@@ -1453,9 +1453,9 @@ public class SendAndReplyService {
                     && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement));
         } else {
             roleAssignmentService.removeRoleAssignmentFromRoleAssignmentid(
-                allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getValue().getJudgeEmailId().equals(
-                        messageObject.getJudgeEmail()) && e.getValue().getMessageId().equals(messageElement))
-                    .toList().get(0).getValue().getRoleAssignmentId()
+                allocatedJudgeForSendAndReplyList.stream().map(Element::getValue).filter(e -> e.getJudgeEmailId().equals(
+                        messageObject.getJudgeEmail()) && e.getMessageId().equals(messageElement))
+                    .toList().get(0).getRoleAssignmentId()
             );
             allocatedJudgeForSendAndReplyList
                 .removeIf(allocatedJudgeForSendAndReplyElement -> allocatedJudgeForSendAndReplyElement
