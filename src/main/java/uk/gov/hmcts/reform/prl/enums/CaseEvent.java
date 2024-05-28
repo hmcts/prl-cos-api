@@ -47,6 +47,8 @@ public enum CaseEvent {
     ALL_AWP_IN_REVIEW("allAwPInReview"),
     CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
     MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
+    MARK_CASE_AS_PRIVATE("privateCaseAccess"),
+    MARK_CASE_AS_PUBLIC("publicCaseAccess"),
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
 
