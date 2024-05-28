@@ -88,6 +88,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class ManageDocumentsService {
     public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
+    public static final String FM5_ERROR = "The statement of position on non-court dispute resolution "
+        + "(form FM5) cannot contain confidential information or be restricted.";
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
@@ -151,19 +153,25 @@ public class ManageDocumentsService {
                                                  UserDetails userDetails) {
         List<String> errorList = new ArrayList<>();
         String userRole = CaseUtils.getUserRole(userDetails);
-        if (SOLICITOR.equals(userRole)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
 
-            List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
-            for (Element<ManageDocuments> element : manageDocuments) {
-                boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
-                boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
-                    || element.getValue().getRestrictedDetails().isEmpty();
-                if (restricted && restrictedReasonEmpty) {
-                    errorList.add(DETAILS_ERROR_MESSAGE);
-                }
+        for (Element<ManageDocuments> element : manageDocuments) {
+            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean confidential = element.getValue().getIsConfidential().equals(YesOrNo.Yes);
+            boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
+                || element.getValue().getRestrictedDetails().isEmpty();
+
+            if (SOLICITOR.equals(userRole) && restricted && restrictedReasonEmpty) {
+                errorList.add(DETAILS_ERROR_MESSAGE);
+            }
+
+            if ("fm5Statements".equalsIgnoreCase(element.getValue().getDocumentCategories().getValue().getCode())
+                && (restricted || confidential)) {
+                errorList.add(FM5_ERROR);
             }
         }
+
         return errorList;
     }
 
@@ -714,7 +722,6 @@ public class ManageDocumentsService {
                 null,
                 userDetails.getId()
             );
-            log.info("roleAssignmentServiceResponse {}", roleAssignmentServiceResponse);
             if (roles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
