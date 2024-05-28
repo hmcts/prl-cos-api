@@ -1002,6 +1002,12 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
+    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
+    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
+    public static final String C100_DEFAULT_REGION_ID = "2";
+
+    public static final String C1A_FINAL_RESPONSE_DOCUMENT = "C1A_FINAL_RESPONSE_DOCUMENT";
     public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
 
     public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
@@ -1009,6 +1015,11 @@ public class PrlAppsConstants {
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
+
+    //SOA - mode of service
+    public static final String SOA_BY_EMAIL = "By email";
+    public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
+    public static final String SOA_BY_POST = "By post";
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
