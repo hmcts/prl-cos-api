@@ -4397,19 +4397,6 @@
     "newOrdersRestrainingEndDate": null,
     "newOrdersUndertakingInPlace": "Yes",
     "newPreviousAbductionThreats": "No",
-    "otherChildNotInTheCaseTable": [
-      {
-        "id": "de055797-a043-42bb-8491-f9bbc97c02e9",
-        "value": {
-          "gender": null,
-          "lastName": null,
-          "firstName": null,
-          "dateOfBirth": null,
-          "otherGender": null,
-          "isDateOfBirthKnown": null
-        }
-      }
-    ],
     "childAndOtherPeopleRelations": [
       {
         "id": "02b12160-7229-44c4-9a4f-46fab8d089f6",
@@ -4481,24 +4468,6 @@
     "newAbductionChildHasPassport": "No",
     "newOrdersOccupationCourtName": null,
     "newOrdersRestrainingDocument": null,
-    "otherProceedingsDetailsTable": [
-      {
-        "id": "9256fa48-ac8f-4351-8909-14e7de1946cc",
-        "value": {
-          "dateEnded": null,
-          "caseNumber": null,
-          "dateStarted": null,
-          "nameOfCourt": null,
-          "nameOfJudge": null,
-          "typeOfOrder": null,
-          "nameAndOffice": null,
-          "nameOfGuardian": null,
-          "otherTypeOfOrder": null,
-          "nameOfChildrenInvolved": null,
-          "previousOrOngoingProceedings": null
-        }
-      }
-    ],
     "summaryTabForOrderAppliedFor": {
       "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
       "typeOfChildArrangementsOrder": "Spend time with order"
@@ -4563,16 +4532,6 @@
     "newOrdersOccupationCaseNumber": null,
     "newOrdersOccupationDateIssued": null,
     "newOrdersRestrainingCourtName": null,
-    "otherProceedingsForSummaryTab": [
-      {
-        "id": "966bef15-bffa-4c46-aab9-befe7d58be7d",
-        "value": {
-          "caseNumber": null,
-          "nameOfCourt": null,
-          "typeOfOrder": null
-        }
-      }
-    ],
     "respondentConfidentialDetails": [],
     "applicantSolicitorEmailAddress": "prl_aat_solicitor@mailinator.com",
     "buffChildAndApplicantRelations": [],
