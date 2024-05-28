@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -524,14 +523,14 @@ public class UpdatePartyDetailsService {
                 log.info("No children");
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
-                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()).build());
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)).build());
                 children.add(childDetails);
                 log.info("children are {}", children);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 listOfChildren.forEach(child -> child.getValue().toBuilder()
-                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()));
+                    .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)));
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildren);
             }
         } else {
@@ -549,13 +548,32 @@ public class UpdatePartyDetailsService {
 
     }
 
-    private DynamicList populateWhoDoesTheChildLiveWith() {
+    private DynamicList populateWhoDoesTheChildLiveWith(CaseData caseData) {
+        List<DynamicListElement> whoDoesTheChildLiveWith = new ArrayList<>();
+        List<Element<PartyDetails>> listOfParties = new ArrayList<>();
+        if (null != caseData.getApplicants()) {
+            listOfParties.addAll(caseData.getApplicants());
+        }
+        if (null != caseData.getRespondents()) {
+            listOfParties.addAll(caseData.getRespondents());
+        }
+        if (null != caseData.getOtherPartyInTheCaseRevised()) {
+            listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
+        }
+        if (!listOfParties.isEmpty()) {
+            for (Element<PartyDetails> parties : listOfParties) {
+                whoDoesTheChildLiveWith.add(DynamicListElement
+                    .builder()
+                    .code(parties.getId())
+                    .label(parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
+                        + parties.getValue().getAddress())
+                    .build());
+            }
+        }
+
         return DynamicList
             .builder()
-            .listItems(List.of(DynamicListElement.builder().code(UUID.randomUUID()).label("test label").build()))
-            .value(DynamicListElement.builder()
-                .code(UUID.randomUUID())
-                .label("test label").build())
+            .listItems(whoDoesTheChildLiveWith)
             .build();
     }
 }
