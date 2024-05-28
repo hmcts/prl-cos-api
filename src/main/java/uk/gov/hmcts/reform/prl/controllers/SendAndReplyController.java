@@ -48,7 +48,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
-import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessages;
 
 
@@ -268,7 +267,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+            //      sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
@@ -292,16 +291,16 @@ public class SendAndReplyController extends AbstractCallbackController {
                 }
 
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+                //  sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
+            //  sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        //sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }

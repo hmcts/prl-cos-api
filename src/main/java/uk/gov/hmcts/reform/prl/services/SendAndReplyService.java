@@ -97,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
+import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
@@ -1215,7 +1216,7 @@ public class SendAndReplyService {
                 .getMessages().stream().filter(messageElement1 -> messageElement1.getId().equals(messageElement))
                 .toList().get(0).getValue();
 
-            if (YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 removeRoleAssignmentBasedonJudgeEmail1(caseData, messageElement, messageObject);
                 closeMessage = true;
             }
@@ -1302,6 +1303,11 @@ public class SendAndReplyService {
                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
                     caseData.getId()));
                 Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+                removeUnecessaryFieldsBeforeMessageSubmission(
+                    caseData.getChooseSendOrReply(),
+                    caseData.getSendOrReplyMessage().getRespondToMessage(),
+                    caseDataUpdated
+                );
                 caseDataUpdated.put("allocatedJudgeForSendAndReply", allocatedJudgeForSendAndReply);
                 allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
@@ -1313,6 +1319,22 @@ public class SendAndReplyService {
             }
         }
 
+
+    }
+
+    private void removeUnecessaryFieldsBeforeMessageSubmission(SendOrReply chooseSendOrReply, YesOrNo respondToMessage, Map<String, Object> caseDataUpdated) {
+        if (chooseSendOrReply.equals(SEND)) {
+            removeTemporaryFields(caseDataUpdated, "replyMessageObject");
+        } else {
+            if (respondToMessage.equals(YesOrNo.No)) {
+                removeTemporaryFields(caseDataUpdated, "replyMessageObject");
+            }
+            removeTemporaryFields(caseDataUpdated, "sendMessageObject");
+        }
+        removeTemporaryFields(caseDataUpdated, temporaryFieldsAboutToSubmit());
+    }
+
+    private void removeUnecessaryFieldsBeforeMessageSubmission() {
 
     }
 
