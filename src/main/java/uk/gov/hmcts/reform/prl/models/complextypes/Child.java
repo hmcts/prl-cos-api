@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -40,6 +41,7 @@ public class Child {
     private final YesOrNo isChildAddressConfidential;
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
+    @JsonProperty("whoDoesTheChildLiveWith")
     private final DynamicList whoDoesTheChildLiveWith;
     private final String parentalResponsibilityDetails;
     private final YesOrNo isFinalOrderIssued;
