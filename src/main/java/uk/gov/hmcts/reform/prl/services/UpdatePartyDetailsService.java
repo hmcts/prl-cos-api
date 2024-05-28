@@ -531,8 +531,10 @@ public class UpdatePartyDetailsService {
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
+                log.info("there isn't a child");
             } else {
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
+                log.info("there is a child");
             }
         }
         return caseDataUpdated;
