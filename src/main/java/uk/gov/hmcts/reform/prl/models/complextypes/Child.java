@@ -41,8 +41,6 @@ public class Child {
     private final YesOrNo isChildAddressConfidential;
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
-    @JsonProperty("whoDoesTheChildLiveWith")
-    private final DynamicList whoDoesTheChildLiveWith;
     private final String parentalResponsibilityDetails;
     private final YesOrNo isFinalOrderIssued;
 
