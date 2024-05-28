@@ -167,14 +167,15 @@ public class CcdCoreCaseDataService {
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 
-    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification(StartEventResponse startEventResponse) {
+    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification
+        (StartEventResponse startEventResponse, Classification classification) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
             .data(startEventResponse.getCaseDetails().getData())
-            .securityClassification(Classification.RESTRICTED)
+            .securityClassification(classification)
             .build();
     }
 }
