@@ -36,14 +36,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -520,10 +513,12 @@ public class UpdatePartyDetailsService {
             log.info("Inside v3 if statement");
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                log.info("No children");
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
                     .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith()).build());
                 children.add(childDetails);
+                log.info("children are {}", children);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
@@ -544,6 +539,12 @@ public class UpdatePartyDetailsService {
     }
 
     private DynamicList populateWhoDoesTheChildLiveWith() {
-        return DynamicList.builder().value(DynamicListElement.defaultListItem("test item")).build();
+        return DynamicList
+            .builder()
+            .listItems(List.of(DynamicListElement.builder().code(UUID.randomUUID()).label("test label").build()))
+            .value(DynamicListElement.builder()
+                .code(UUID.randomUUID())
+                .label("All respondents").build())
+            .build();
     }
 }
