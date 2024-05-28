@@ -562,12 +562,22 @@ public class UpdatePartyDetailsService {
         }
         if (!listOfParties.isEmpty()) {
             for (Element<PartyDetails> parties : listOfParties) {
-                whoDoesTheChildLiveWith.add(DynamicListElement
-                    .builder()
-                    .code(parties.getId())
-                    .label(parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
-                        + parties.getValue().getAddress())
-                    .build());
+
+                String address = populateAddressInDynamicList(parties);
+                String name = null;
+
+                if (StringUtils.isBlank(parties.getValue().getFirstName())
+                    && StringUtils.isBlank(parties.getValue().getLastName())) {
+                    name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
+                }
+
+                if (null != name && null != address) {
+                    whoDoesTheChildLiveWith.add(DynamicListElement
+                        .builder()
+                        .code(parties.getId())
+                        .label(name + address)
+                        .build());
+                }
             }
         }
 
@@ -575,5 +585,23 @@ public class UpdatePartyDetailsService {
             .builder()
             .listItems(whoDoesTheChildLiveWith)
             .build();
+    }
+
+    private String populateAddressInDynamicList(Element<PartyDetails> parties) {
+        String address = null;
+        if (null != parties.getValue().getAddress()
+            && StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())
+            && StringUtils.isBlank(parties.getValue().getAddress().getPostCode())) {
+
+            //Address line 2 can be empty/null
+            String addressLine2 = StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())
+                ? parties.getValue().getAddress().getAddressLine2() + ", " : "";
+
+            address = parties.getValue().getAddress().getAddressLine1() + ", "
+                + addressLine2
+                + parties.getValue().getAddress().getPostCode();
+        }
+
+        return address;
     }
 }
