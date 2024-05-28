@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -541,6 +540,6 @@ public class UpdatePartyDetailsService {
     }
 
     private DynamicList populateWhoDoesTheChildLiveWith() {
-        return DynamicList.builder().value(DynamicListElement.defaultListItem("test")).build();
+        return DynamicList.builder().build();
     }
 }
