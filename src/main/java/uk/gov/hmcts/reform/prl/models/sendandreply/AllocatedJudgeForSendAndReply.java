@@ -14,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class AllocatedJudgeForSendAndReply {
 
-    private String judgeId;
     private String judgeEmailId;
     private String roleAssignmentId;
     private String status;

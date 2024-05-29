@@ -1336,10 +1336,6 @@ public class SendAndReplyService {
         removeTemporaryFields(caseDataUpdated, temporaryFieldsAboutToSubmit());
     }
 
-    private void removeUnecessaryFieldsBeforeMessageSubmission() {
-
-    }
-
     public void assignCaseToJudgeIfJudgeSelectedForMessage(
         String authorisation,
         CaseDetails caseDetails,
@@ -1371,7 +1367,6 @@ public class SendAndReplyService {
                     existingAllocation = new ArrayList<>();
 
                     existingAllocation.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                       .judgeId(judicialUsersApiResponse.getSidamId())
                                                        .build()));
                     caseDataMap.put("allocatedJudgeForSendAndReply", existingAllocation);
                 } else {
@@ -1394,7 +1389,6 @@ public class SendAndReplyService {
                     if (CollectionUtils.isNotEmpty(existingAllocation)) {
                         existingAllocation.add(
                             element(AllocatedJudgeForSendAndReply.builder()
-                                        .judgeId(judicialUsersApiResponse.getSidamId())
                                         .roleAssignmentId("roleAssignmentId")
                                         .build()));
                     }
@@ -1404,38 +1398,6 @@ public class SendAndReplyService {
 
             }
         }
-    }
-
-
-    public void removeJudgeAllocation(Message message,
-                                      CaseData caseData) {
-        if (!message.getMessageHasJudgeAllocated().equals("ALREADY_ALLOCATED")) {
-            List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList = caseData.getAllocatedJudgeForSendAndReply().stream()
-                .map(Element::getValue)
-                .toList();
-            List<String> judgeEmailList = new ArrayList<>();
-
-            if (message.getSenderRole().equals(JUDICIARY)) {
-                judgeEmailList.add(message.getSenderEmail());
-            }
-
-            judgeEmailList.addAll(message.getReplyHistory().stream()
-                                      .map(Element::getValue)
-                                      .toList()
-                                      .stream()
-                                      .filter(messageHistory -> messageHistory.getJudgeEmail() != null)
-                                      .map(MessageHistory::getJudgeEmail)
-                                      .distinct()
-                                      .toList());
-
-            judgeEmailList.stream().distinct().forEach(
-                judgeEmail -> {
-                    removeRoleAssignmentBasedonJudgeEmail(allocatedJudgeForSendAndReplyList, judgeEmail);
-
-                }
-            );
-        }
-
     }
 
 
