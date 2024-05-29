@@ -46,6 +46,7 @@ spring:
     name: Prl cos api
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
 
 azure:
   application-insights:
