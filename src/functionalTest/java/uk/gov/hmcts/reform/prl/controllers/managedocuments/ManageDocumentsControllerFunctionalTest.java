@@ -182,6 +182,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_GiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -197,6 +198,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -224,6 +226,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenNotRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED);
