@@ -585,7 +585,7 @@ public class UpdatePartyDetailsService {
                 }
             }
         }
-        log.info("who does the child live with");
+        log.info("who does the child live with {}", whoDoesTheChildLiveWith);
 
         return DynamicList
             .builder()
