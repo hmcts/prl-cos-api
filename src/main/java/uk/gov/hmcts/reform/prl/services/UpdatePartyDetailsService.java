@@ -531,6 +531,7 @@ public class UpdatePartyDetailsService {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 listOfChildren.forEach(child -> child.getValue().toBuilder()
                     .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)));
+                log.info("list of children {}", listOfChildren);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildren);
             }
         } else {
@@ -556,10 +557,12 @@ public class UpdatePartyDetailsService {
         }
         if (null != caseData.getRespondents()) {
             listOfParties.addAll(caseData.getRespondents());
+            log.info("Adding respondents to list of parties");
         }
         if (null != caseData.getOtherPartyInTheCaseRevised()) {
             listOfParties.addAll(caseData.getOtherPartyInTheCaseRevised());
         }
+        log.info("list of parties {}", listOfParties);
         if (!listOfParties.isEmpty()) {
             for (Element<PartyDetails> parties : listOfParties) {
 
@@ -571,7 +574,9 @@ public class UpdatePartyDetailsService {
                     name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - ";
                 }
 
+                log.info("name is {} and address is {}", name, address);
                 if (null != name && null != address) {
+                    log.info("adding new person to who does the child live with list");
                     whoDoesTheChildLiveWith.add(DynamicListElement
                         .builder()
                         .code(parties.getId())
@@ -580,6 +585,7 @@ public class UpdatePartyDetailsService {
                 }
             }
         }
+        log.info("who does the child live with");
 
         return DynamicList
             .builder()
