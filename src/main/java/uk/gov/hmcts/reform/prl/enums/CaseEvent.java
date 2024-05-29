@@ -49,6 +49,7 @@ public enum CaseEvent {
     MARK_CASE_AS_RESTRICTED("restrictedCaseAccess"),
     MARK_CASE_AS_PRIVATE("privateCaseAccess"),
     MARK_CASE_AS_PUBLIC("publicCaseAccess"),
+    CHANGE_CASE_ACCESS_AS_SYSUSER("changeCaseAccess"),
     FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
     FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
 
