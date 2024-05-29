@@ -167,8 +167,9 @@ public class CcdCoreCaseDataService {
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 
-    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification
-        (StartEventResponse startEventResponse, Classification classification) {
+    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification(
+        StartEventResponse startEventResponse,
+        Classification classification) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
