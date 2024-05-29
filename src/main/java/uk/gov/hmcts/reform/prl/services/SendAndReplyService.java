@@ -1229,10 +1229,14 @@ public class SendAndReplyService {
         log.info("messageElement -- {}", messageElement);
         log.info("messageObject -- {}", messageObject);
         log.info("closeMessage -- {}", closeMessage);
-        String judgeIdamId = userService.getUserByEmailId(authorisation, messageObject.getJudgeEmail()).get(0).getId();
-        if (!closeMessage) {
-            List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
-            if (messageObject.getJudgeEmail() != null) {
+        if (messageObject.getJudgeEmail() != null) {
+            String judgeIdamId = userService.getUserByEmailId(
+                authorisation,
+                messageObject.getJudgeEmail()
+            ).get(0).getId();
+            if (!closeMessage) {
+                List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
+
                 List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList = null;
                 Optional<AllocatedJudgeForSendAndReply> pr = Optional.empty();
                 if (allocatedJudgeForSendAndReply != null) {
