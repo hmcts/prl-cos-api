@@ -130,8 +130,7 @@ public class RestrictedCaseAccessController {
 
         log.info("** markCaseAsPublic event started");
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-            startAllTabsUpdateDataContent.startEventResponse()
-            ,
+            startAllTabsUpdateDataContent.startEventResponse(),
             Classification.PUBLIC
         );
         log.info("** markCaseAsPublic caseDataContent got Data {} SC {} Reference {}",
