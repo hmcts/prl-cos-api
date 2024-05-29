@@ -587,10 +587,14 @@ public class UpdatePartyDetailsService {
         }
         log.info("who does the child live with {}", whoDoesTheChildLiveWith);
 
-        return DynamicList
+        DynamicList dynamicList = DynamicList
             .builder()
             .listItems(whoDoesTheChildLiveWith)
             .build();
+
+        log.info ("dynamiclist is {}", dynamicList);
+
+        return dynamicList;
     }
 
     private String populateAddressInDynamicList(Element<PartyDetails> parties) {
