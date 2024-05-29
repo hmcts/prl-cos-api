@@ -569,18 +569,19 @@ public class UpdatePartyDetailsService {
             for (Element<PartyDetails> parties : listOfParties) {
 
                 String address = populateAddressInDynamicList(parties);
-                String name = null;
-
-                if (!StringUtils.isBlank(parties.getValue().getFirstName())
-                    && !StringUtils.isBlank(parties.getValue().getLastName())) {
-                    name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - ";
-                }
+                String name = populateNameInDynamicList(parties, address);
 
                 if (null != name && null != address) {
                     whoDoesTheChildLiveWith.add(DynamicListElement
                         .builder()
                         .code(parties.getId())
                         .label(name + address)
+                        .build());
+                } else if (null != name) {
+                    whoDoesTheChildLiveWith.add(DynamicListElement
+                        .builder()
+                        .code(parties.getId())
+                        .label(name)
                         .build());
                 }
             }
@@ -590,6 +591,19 @@ public class UpdatePartyDetailsService {
             .builder()
             .listItems(whoDoesTheChildLiveWith)
             .build();
+    }
+
+    private  String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
+        String name = null;
+        if (!StringUtils.isBlank(parties.getValue().getFirstName())
+            && !StringUtils.isBlank(parties.getValue().getLastName())
+            && !StringUtils.isBlank(address)) {
+            name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - ";
+        } else if (!StringUtils.isBlank(parties.getValue().getFirstName())
+            && !StringUtils.isBlank(parties.getValue().getLastName())) {
+            name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
+        }
+        return name;
     }
 
     private String populateAddressInDynamicList(Element<PartyDetails> parties) {
