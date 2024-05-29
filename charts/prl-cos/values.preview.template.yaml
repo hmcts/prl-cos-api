@@ -33,22 +33,18 @@ java:
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: https://prl-cos-pr-2401.preview.platform.hmcts.net/service-request-update
+    PAY_CALLBACK_URL: https://prl-cos-pr-2430.preview.platform.hmcts.net/service-request-update
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
     IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2204-ccd-data-store-api
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2204-cdam
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2204-aac-manage-case-assignment
-    BUNDLE_URL: http://prl-ccd-definitions-pr-2204-em-ccdorc
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2225-ccd-data-store-api
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2225-cdam
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2225-aac-manage-case-assignment
+    BUNDLE_URL: http://prl-ccd-definitions-pr-2225-em-ccdorc
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
-    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2209-ccd-data-store-api
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2209-cdam
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2209-aac-manage-case-assignment
-    BUNDLE_URL: http://prl-ccd-definitions-pr-2209-em-ccdorc
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
@@ -57,7 +53,7 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PRL_DGS_API_URL: http://prl-dgs-pr-325-java/
+    PRL_DGS_API_URL: http://prl-dgs-pr-334-java/
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
