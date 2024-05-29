@@ -1450,17 +1450,17 @@ public class SendAndReplyService {
             allocatedJudgeForSendAndReplyList
                 .removeIf(allocatedJudgeForSendAndReplyElement -> allocatedJudgeForSendAndReplyElement
                     .getValue().getJudgeEmailId().equals(messageObject.getJudgeEmail())
-                    && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement));
+                    && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement.toString()));
         } else {
             roleAssignmentService.removeRoleAssignmentFromRoleAssignmentid(
-                allocatedJudgeForSendAndReplyList.stream().map(Element::getValue).filter(e -> e.getJudgeEmailId().equals(
-                        messageObject.getJudgeEmail()) && e.getMessageId().equals(messageElement))
-                    .toList().get(0).getRoleAssignmentId()
+                allocatedJudgeForSendAndReplyList.stream().filter(e -> e.getValue().getJudgeEmailId().equals(
+                        messageObject.getJudgeEmail()) && e.getValue().getMessageId().equals(messageElement.toString()))
+                    .toList().get(0).getValue().getRoleAssignmentId()
             );
             allocatedJudgeForSendAndReplyList
                 .removeIf(allocatedJudgeForSendAndReplyElement -> allocatedJudgeForSendAndReplyElement
                     .getValue().getJudgeEmailId().equals(messageObject.getJudgeEmail())
-                    && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement));
+                    && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement.toString()));
         }
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(String.valueOf(
