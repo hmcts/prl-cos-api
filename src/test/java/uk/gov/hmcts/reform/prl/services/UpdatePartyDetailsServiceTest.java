@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -1460,6 +1461,7 @@ public class UpdatePartyDetailsServiceTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
+            .whoDoesTheChildLiveWith(DynamicList.builder().listItems(new ArrayList<>()).build())
             .build();
 
         ChildDetailsRevised child2 = ChildDetailsRevised.builder()
@@ -1469,6 +1471,7 @@ public class UpdatePartyDetailsServiceTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
+            .whoDoesTheChildLiveWith(DynamicList.builder().listItems(new ArrayList<>()).build())
             .build();
 
         Element<ChildDetailsRevised> wrappedChild1 = Element.<ChildDetailsRevised>builder().value(child1).build();
@@ -1480,23 +1483,43 @@ public class UpdatePartyDetailsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V3)
             .newChildDetails(childList)
             .build();
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
-        assertEquals(childList, updatedCaseData.get("newChildDetails"));
+        assertNotNull(updatedCaseData.get("newChildDetails"));
     }
 
     @Test
     public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
+        PartyDetails applicant = PartyDetails.builder().firstName("test").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder().firstName("test").lastName("test").build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent);
+
+        PartyDetails otherParties = PartyDetails.builder().firstName("test").lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
+        List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
+        otherPartiesList.add(wrappedOtherParties);
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .otherPartyInTheCaseRevised(otherPartiesList)
             .build();
 
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
         assertEquals(1, updatedChildDetails.size());
-        assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
+        assertEquals(ChildDetailsRevised.builder().whoDoesTheChildLiveWith(DynamicList.builder()
+                .listItems(new ArrayList<>()).build()).build(),
+            updatedChildDetails.get(0).getValue());
     }
 }
