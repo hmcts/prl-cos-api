@@ -1516,7 +1516,7 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
         PartyDetails otherParties4 = PartyDetails.builder().firstName("test")
             .address(Address.builder().addressLine1("test").postCode("test").addressLine2("test").build()).lastName("test").build();
-        Element<PartyDetails> wrappedOtherParties4 = Element.<PartyDetails>builder().value(otherParties3).build();
+        Element<PartyDetails> wrappedOtherParties4 = Element.<PartyDetails>builder().value(otherParties4).build();
         otherPartiesList.add(wrappedOtherParties);
         otherPartiesList.add(wrappedOtherParties2);
         otherPartiesList.add(wrappedOtherParties3);
