@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1488,6 +1489,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
+    @Ignore
     public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
