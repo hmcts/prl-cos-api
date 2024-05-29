@@ -166,12 +166,12 @@ public class RestrictedCaseAccessController {
     public AboutToStartOrSubmitCallbackResponse changeCaseAccess(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
-        log.info("Case details before:: " + objectMapper.writeValueAsString(callbackRequest));
+        log.info("Case details before for changeCaseAccess:: " + objectMapper.writeValueAsString(callbackRequest));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
-        log.info("dataClassification::" + dataClassification);
+        log.info("dataClassification for changeCaseAccess::" + dataClassification);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .dataClassification(dataClassification)
