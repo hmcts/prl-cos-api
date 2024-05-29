@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -161,12 +160,6 @@ public class ServiceOfApplicationPostService {
                         SOA_FAMILY_PRESIDENTS_NOTE,
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FAMILY_PRESIDENTS_NOTE)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        SOA_NOTICE_SAFETY,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
