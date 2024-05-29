@@ -1492,9 +1492,27 @@ public class UpdatePartyDetailsServiceTest {
 
     @Test
     public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
+        PartyDetails applicant = PartyDetails.builder().firstName("test").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder().firstName("test").lastName("test").build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent);
+
+        PartyDetails otherParties = PartyDetails.builder().firstName("test").lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
+        List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
+        otherPartiesList.add(wrappedOtherParties);
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .otherPartyInTheCaseRevised(otherPartiesList)
             .build();
 
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);

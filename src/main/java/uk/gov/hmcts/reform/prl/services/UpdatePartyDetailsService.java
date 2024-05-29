@@ -517,15 +517,12 @@ public class UpdatePartyDetailsService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("Inside v3 if statement");
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
-                log.info("No children");
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
                     .whoDoesTheChildLiveWith(populateWhoDoesTheChildLiveWith(caseData)).build());
                 children.add(childDetails);
-                log.info("children are {}", children);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
             } else {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
@@ -535,10 +532,10 @@ public class UpdatePartyDetailsService {
                         .whoDoesTheChildLiveWith(
                             populateWhoDoesTheChildLiveWith(caseData)
                                 .toBuilder()
-                                .value(child.getValue().getWhoDoesTheChildLiveWith().getValue())
+                                .value(null != child.getValue().getWhoDoesTheChildLiveWith()
+                                    ? child.getValue().getWhoDoesTheChildLiveWith().getValue() : DynamicListElement.EMPTY)
                                 .build())
                         .build())));
-                log.info("list of children {}", listOfChildrenRevised);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, listOfChildrenRevised);
             }
         } else {
