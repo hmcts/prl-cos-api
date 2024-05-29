@@ -1449,7 +1449,7 @@ public class SendAndReplyService {
             .count() > 1) {
             allocatedJudgeForSendAndReplyList
                 .removeIf(allocatedJudgeForSendAndReplyElement -> allocatedJudgeForSendAndReplyElement
-                    .getValue().getJudgeId().equals(messageObject.getJudgeEmail())
+                    .getValue().getJudgeEmailId().equals(messageObject.getJudgeEmail())
                     && allocatedJudgeForSendAndReplyElement.getValue().getMessageId().equals(messageElement));
         } else {
             roleAssignmentService.removeRoleAssignmentFromRoleAssignmentid(
