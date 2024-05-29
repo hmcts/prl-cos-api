@@ -592,7 +592,7 @@ public class UpdatePartyDetailsService {
             .listItems(whoDoesTheChildLiveWith)
             .build();
 
-        log.info ("dynamiclist is {}", dynamicList);
+        log.info("dynamiclist is {}", dynamicList);
 
         return dynamicList;
     }
