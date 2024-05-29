@@ -593,12 +593,19 @@ public class UpdatePartyDetailsService {
             && !StringUtils.isBlank(parties.getValue().getAddress().getAddressLine1())) {
 
             //Address line 2 is an optional field
-            String addressLine2 = !StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())
-                ? parties.getValue().getAddress().getAddressLine2().concat(", ") : "";
+            String addressLine2 = "";
 
             //Postcode is an optional field
             String postcode = !StringUtils.isBlank(parties.getValue().getAddress().getPostCode())
                 ? parties.getValue().getAddress().getPostCode() : "";
+
+            //Adding comma to address line 2 if the postcode is there
+            if (!StringUtils.isBlank(postcode) && !StringUtils.isBlank(parties.getValue()
+                .getAddress().getAddressLine2())) {
+                addressLine2 = parties.getValue().getAddress().getAddressLine2().concat(", ");
+            } else if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
+                addressLine2 = parties.getValue().getAddress().getAddressLine2();
+            }
 
             //Comma is required if postcode or address line 2 is not blank
             String addressLine1 = !StringUtils.isBlank(postcode) || !StringUtils.isBlank(addressLine2)
