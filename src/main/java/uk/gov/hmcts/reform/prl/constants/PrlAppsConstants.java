@@ -27,6 +27,10 @@ public class PrlAppsConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
+    public static final String MPU_CHILD_INVOLVED_IN_MIAM = "mpuChildInvolvedInMiam";
+    public static final String MPU_APPLICANT_ATTENDED_MIAM = "mpuApplicantAttendedMiam";
+    public static final String MPU_CLAIMING_EXEMPTION_MIAM = "mpuClaimingExemptionMiam";
+
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
@@ -105,6 +109,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
     public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
+    public static final String READY_FOR_DELETION_STATE = State.READY_FOR_DELETION.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
@@ -655,14 +660,19 @@ public class PrlAppsConstants {
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
+    public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
+    public static final String SOLICITOR_C7_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C7_WELSH_DRAFT";
+    public static final String SOLICITOR_C7_WELSH_FINAL_DOCUMENT = "SOLICITOR_C7_WELSH_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
     public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
+    public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
+    public static final String SOLICITOR_C1A_WELSH_FINAL_DOCUMENT = "SOLICITOR_C1A_WELSH_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
@@ -825,7 +835,7 @@ public class PrlAppsConstants {
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
 
-    public static final String SOA_MEDIATION_VOUCHER_FILENAME = "Mediation-voucher.pdf";
+    public static final String SOA_FAMILY_PRESIDENTS_NOTE = "Family President's letter to parties.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
@@ -867,6 +877,7 @@ public class PrlAppsConstants {
     public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
+    public static final String  TASK_LIST_VERSION_V3 = "v3";
 
     public static final String  PHYSICAL_ABUSE = "physicalAbuse";
     public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
@@ -925,6 +936,10 @@ public class PrlAppsConstants {
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+
+    public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
+    public static final String AWP_WA_TASK_TO_BE_CREATED = "awpWaTaskToBeCreated";
+
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
@@ -966,4 +981,27 @@ public class PrlAppsConstants {
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
 
     public static final String HEARINGS_TYPE = "hearingsType";
+
+    public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
+
+    public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+
+    public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
+
+    public static final String FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED = "fl401ReasonsForListWithoutNoticeRequested";
+
+    public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
+
+    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
+    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
+    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
+    public static final String C100_DEFAULT_REGION_ID = "2";
+  
+    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+
+    public static final String NAME = "name";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+
 }

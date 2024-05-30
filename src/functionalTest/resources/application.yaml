@@ -124,11 +124,13 @@ uk:
             CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED: d1602761-dc82-4d17-99a8-675514049bfc
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
             LIST_ON_NOTICE_EMAIL_NOTIFICATION: 21ede4dc-cce4-4198-b63e-cd0f775299d5
+            FM5_REMINDER_APPLICANT_RESPONDENT: d5151148-6228-47a2-9fd4-0ec3ad1aae9c
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
             APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
             RETURN_APPLICATION_CONSENT_ORDER: a491189a-737c-4fbc-ae13-15d9a4e42ce7
+            FM5_REMINDER_APPLICANT_RESPONDENT: 2aeed2b8-c145-4c26-9931-b3cbcb280941
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -151,6 +153,8 @@ send-grid:
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
           SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-0dec5ed3abd84dbeb935dc2319a66fee}
+          FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
+          FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
@@ -288,9 +292,11 @@ document:
     c100:
       c100_final_template: FL-PRL-APP-ENG-C100-Final.docx
       c100_final_template_v2: FL-PRL-APP-ENG-C100-Final-V2.docx
+      c100_final_template_v3: FL-PRL-APP-ENG-C100-Final-V3.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_template_v2: FL-PRL-APP-ENG-C100-DRAFT-V2.docx
+      c100_draft_template_v3: FL-PRL-APP-ENG-C100-DRAFT-V3.docx
       c100_draft_filename: Draft_C100_application.pdf
       c100_c8_template: FL-PRL-APP-ENG-C100-C8-Final.docx
       c100_c8_template_v2: FL-PRL-CON-ENG-C8-Final-V2.docx
@@ -316,9 +322,11 @@ document:
       c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_template_v2: FL-PRL-APP-WEL-C100-Final-V2.docx
+      c100_final_welsh_template_v3: FL-PRL-APP-WEL-C100-Final-V3.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_template_v2: FL-PRL-APP-WEL-C100-Draft-V2.docx
+      c100_draft_welsh_template_v3: FL-PRL-APP-WEL-C100-Draft-V3.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
       c100_c8_welsh_template: PRL-C8-WelshLang.docx
       c100_c8_welsh_template_v2: FL-PRL-CON-WEL-C8-Final-V2.docx
@@ -424,10 +432,18 @@ document:
       prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
       prl_solicitor_c7_final_filename: C7_Response.pdf
+      prl_solicitor_c7_welsh_draft_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_welsh_draft_filename: Draft_C7_response_Welsh.pdf
+      prl_solicitor_c7_welsh_final_template: FL-PRL-GOR-WEL-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_welsh_final_filename: Final_C7_response_Welsh.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
       prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
       prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_welsh_draft_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_welsh_draft_filename: Draft_C1A_allegation_of_harm_Welsh.pdf
+      prl_solicitor_c1a_welsh_final_template: FL-PRL-GOR-WEL-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_welsh_final_filename: Final_C1A_allegation_of_harm_Welsh.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
@@ -516,10 +532,11 @@ bundle:
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
+  caDefaultCourtEpimmsID: ${CA_DEFAULT_COURT_EPIMMS_ID:}
 
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 staffDetails:
   api:
     url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}

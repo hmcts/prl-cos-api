@@ -123,6 +123,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -307,6 +308,7 @@ public class ServiceOfApplicationService {
                                                                        List<Document> packN, String servedParty) {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                                                        || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                                                             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
         selectedOthers.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
@@ -898,6 +900,8 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
+        //PRL-5566 - Set FM5 notification flag to No during SOA
+        caseDataMap.put("fm5RemindersSent", "NO");
         return caseDataMap;
     }
 
@@ -1044,7 +1048,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 caseId,
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -1069,7 +1073,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.systemAuthorisation(),
+                updatedCaseDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
                 updatedCaseDataContent.startEventResponse(),
                 updatedCaseDataContent.eventRequestData(),
@@ -2614,7 +2618,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
         allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.systemAuthorisation(),
+            startAllTabsUpdateDataContent.authorisation(),
             String.valueOf(callbackRequest.getCaseDetails().getId()),
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
