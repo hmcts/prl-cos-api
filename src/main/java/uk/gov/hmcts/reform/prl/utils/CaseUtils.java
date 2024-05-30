@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,6 +40,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +67,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -170,7 +176,7 @@ public class CaseUtils {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
@@ -260,6 +266,7 @@ public class CaseUtils {
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
         return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                                       ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
             .map(Element::getValue)
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
@@ -585,6 +592,7 @@ public class CaseUtils {
 
     public static List<Element<PartyDetails>> getOthersToNotifyInCase(CaseData caseData) {
         return TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
     }
 
@@ -595,9 +603,12 @@ public class CaseUtils {
     }
 
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        log.info("inside checkIfAddressIsChanged old {} , new {}",
+                 updatedParty.getAddress(), currentParty.getAddress());
         Address currentAddress = currentParty.getAddress();
-        Address previousAddress = updatedParty.getAddress();
-        return currentAddress != null
+        Address previousAddress = ObjectUtils.isNotEmpty(updatedParty.getAddress())
+            ? updatedParty.getAddress() : Address.builder().build();
+        boolean flag = currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
             || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
@@ -605,19 +616,82 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
             || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
-            || (currentParty.getIsAddressConfidential() != null
-            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+            || !isConfidentialityRemainsSame(currentParty.getIsAddressConfidential(),
+                                             updatedParty.getIsAddressConfidential()))
+            && (StringUtils.isNotEmpty(currentAddress.getAddressLine1())
+                || StringUtils.isNotEmpty(previousAddress.getAddressLine1()));
+        log.info("checkIfAddressIsChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        log.info("inside isEmailAddressChanged old {} , new {}", updatedParty.getEmail(), currentParty.getEmail());
+        boolean flag = (!StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || !isConfidentialityRemainsSame(currentParty.getIsEmailAddressConfidential(),
+                                             updatedParty.getIsEmailAddressConfidential()))
+            && (StringUtils.isNotEmpty(currentParty.getEmail())
+                || StringUtils.isNotEmpty(updatedParty.getEmail()));
+        log.info("isEmailAddressChanged ===>" + flag);
+        return flag;
     }
 
     public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
-        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
-            || (currentParty.getIsEmailAddressConfidential() != null
-            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+        log.info("inside isPhoneNumberChanged old {} , new {}", updatedParty.getPhoneNumber(), currentParty.getPhoneNumber());
+        boolean flag = (!StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || !isConfidentialityRemainsSame(currentParty.getIsPhoneNumberConfidential(),
+                                             updatedParty.getIsPhoneNumberConfidential()))
+            && (StringUtils.isNotEmpty(currentParty.getPhoneNumber())
+                || StringUtils.isNotEmpty(updatedParty.getPhoneNumber()));
+        log.info("isPhoneNumberChanged ===>" + flag);
+        return flag;
+    }
+
+    private static boolean isConfidentialityRemainsSame(YesOrNo newConfidentiality, YesOrNo oldConfidentiality) {
+        log.info("inside isConfidentialityRemainsSame");
+        log.info("newConfidentiality ==> " + newConfidentiality);
+        log.info("oldConfidentiality ==> " + oldConfidentiality);
+        if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isEmpty(newConfidentiality)) {
+            return true;
+        } else if (ObjectUtils.isEmpty(oldConfidentiality)
+            && ObjectUtils.isNotEmpty(newConfidentiality)) {
+            return No.equals(newConfidentiality);
+        } else {
+            return newConfidentiality.equals(oldConfidentiality);
+        }
+    }
+
+    public static List<String> mapAmUserRolesToIdamRoles(RoleAssignmentServiceResponse roleAssignmentServiceResponse,
+                                                   String authorisation,
+                                                   UserDetails userDetails) {
+        //This would check for user roles from AM for Judge/Legal advisor/Court admin
+        //and then return the corresponding idam role base on that
+        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
+
+        String idamRole;
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+            idamRole = Roles.JUDGE.getValue();
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+            idamRole = Roles.LEGAL_ADVISER.getValue();
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+            idamRole = Roles.COURT_ADMIN.getValue();
+        } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            idamRole = Roles.SOLICITOR.getValue();
+        } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+            idamRole = Roles.CITIZEN.getValue();
+        } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+            idamRole = Roles.SYSTEM_UPDATE.getValue();
+        } else {
+            idamRole = "";
+        }
+
+        roles = new ArrayList<>(Collections.singleton(idamRole));
+        return roles;
+    }
+
+    public static boolean hasDashboardAccess(Element<PartyDetails> party) {
+        return null != party.getValue()
+            && null != party.getValue().getUser()
+            && null != party.getValue().getUser().getIdamId();
     }
 }
