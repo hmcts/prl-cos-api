@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,23 +77,24 @@ public class CitizenResponseService {
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
-    public static final String C_1_ARESPONSE = "C1Aresponse";
+    public static final String C1A_RESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
 
-
-    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation, boolean isWelsh) throws Exception {
+    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("Inside generateAndReturnDraftC7");
         return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 DOCUMENT_C7_DRAFT_HINT,
-                isWelsh,
+                false,
                 updateCurrentRespondent(caseData, partyId)
         );
     }
 
     private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
+        log.info("data map creating");
         Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
@@ -103,6 +105,12 @@ public class CitizenResponseService {
                 CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
                 dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
                                                                partyElement);
+                try {
+                    log.info("data map generated is ===>" + objectMapper.writeValueAsString(dataMap));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                log.info("data map processed");
             }
         }
         return dataMap;
@@ -235,7 +243,7 @@ public class CitizenResponseService {
             && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
                               .getResponseToAllegationsOfHarmYesOrNoResponse())) {
             String fileName = updatedPartyDetails.getLabelForDynamicList()
-                + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
+                + UNDERSCORE + C1A_RESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
                 LONDON_TIME_ZONE)).format(dateTimeFormatter);
             log.info("generating respondent C1A response documents");
             try {
