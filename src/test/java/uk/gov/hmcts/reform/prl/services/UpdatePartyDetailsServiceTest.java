@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -29,11 +30,13 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,6 +71,9 @@ public class UpdatePartyDetailsServiceTest {
 
     @Mock
     C100RespondentSolicitorService c100RespondentSolicitorService;
+
+    @Mock
+    DocumentLanguageService documentLanguageService;
 
     @Mock
     DocumentGenService documentGenService;
@@ -606,6 +612,8 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
     }
@@ -892,6 +900,8 @@ public class UpdatePartyDetailsServiceTest {
                                    .data(stringObjectMap1)
                                    .build())
             .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
     }
@@ -1255,5 +1265,238 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService
                 .updateApplicantRespondentAndChildData(callbackRequest, "test");
         assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testSetApplicantDefaultApplicant() {
+
+
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+        respondentList.add(wrappedRespondent2);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondentList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData);
+        assertNotNull(updatedCaseData.get("applicants"));
+    }
+
+
+    @Test
+    public void testSetApplicantDefaultApplicant_scenario2() {
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> applicantsList = new ArrayList<>();
+        applicantsList.add(wrappedRespondent1);
+        applicantsList.add(wrappedRespondent2);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantsList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData);
+        assertNotNull(updatedCaseData.get("applicants"));
+    }
+
+    @Test
+    public void testSetRespondentsDefaultApplicant() {
+
+
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+        respondentList.add(wrappedRespondent2);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondentList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
+        assertNotNull(updatedCaseData.get("respondents"));
+    }
+
+    @Test
+    public void testSetRespondentsDefaultApplicant_scenario2() {
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> applicantsList = new ArrayList<>();
+        applicantsList.add(wrappedRespondent1);
+        applicantsList.add(wrappedRespondent2);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantsList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
+        assertNotNull(updatedCaseData.get("respondents"));
+    }
+    
+    @Test
+    public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
+        Child child1 = Child.builder()
+            .firstName("Test")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChild1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChild2 = Element.<Child>builder().value(child2).build();
+
+        List<Element<Child>> childList = new ArrayList<>();
+        childList.add(wrappedChild1);
+        childList.add(wrappedChild2);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .children(childList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        assertEquals(childList, updatedCaseData.get("children"));
+    }
+
+    @Test
+    public void testSetDefaultEmptyChildDetails_whenNoChildDetailsPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        List<Element<Child>> updatedChildDetails = (List<Element<Child>>) updatedCaseData.get("children");
+        assertEquals(1, updatedChildDetails.size());
+        assertEquals(Child.builder().build(), updatedChildDetails.get(0).getValue());
+    }
+
+    @Test
+    public void testSetDefaultEmptyForChildDetails_whenRevisedChildDetailsPresent() {
+        ChildDetailsRevised child1 = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name1")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        ChildDetailsRevised child2 = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name2")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChild1 = Element.<ChildDetailsRevised>builder().value(child1).build();
+        Element<ChildDetailsRevised> wrappedChild2 = Element.<ChildDetailsRevised>builder().value(child2).build();
+
+        List<Element<ChildDetailsRevised>> childList = new ArrayList<>();
+        childList.add(wrappedChild1);
+        childList.add(wrappedChild2);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .newChildDetails(childList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        assertEquals(childList, updatedCaseData.get("newChildDetails"));
+    }
+
+    @Test
+    public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .build();
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
+        assertEquals(1, updatedChildDetails.size());
+        assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
     }
 }
