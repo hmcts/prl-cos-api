@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
@@ -124,8 +125,6 @@ public class CafCassCaseData {
                 && !ObjectUtils.isEmpty(otherDocumentsElement.getValue().getDocumentOther())
                 && StringUtils.hasText(otherDocumentsElement.getValue().getDocumentOther().getDocumentUrl())) {
                 Document documentOther = otherDocumentsElement.getValue().getDocumentOther();
-                URL url = new URL(documentOther.getDocumentUrl());
-                documentOther.setDocumentUrl(getDocumentId(url));
                 otherDocumentsElement.getValue().setDocumentOther(documentOther);
             }
         } catch (Exception e) {
@@ -428,5 +427,7 @@ public class CafCassCaseData {
     private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
 
     private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
+
+    private List<uk.gov.hmcts.reform.prl.models.Element<UploadedDocuments>> cafcassUploadedDocs;
 
 }
