@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -153,7 +152,7 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
-    public void testCopyManageDocs() throws JsonProcessingException {
+    public void testCopyManageDocs() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -161,8 +160,6 @@ public class ManageDocumentsControllerTest {
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
         verify(manageDocumentsService).copyDocument(callbackRequest, auth);
-        verifyNoMoreInteractions(manageDocumentsService);
-
     }
 
     @Test

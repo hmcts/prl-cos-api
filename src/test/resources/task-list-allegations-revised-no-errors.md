@@ -156,7 +156,7 @@ Add the details about other people in the case to <a href='/cases/case-details/$
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a>Submit and pay</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHcannot-start-yet.png' title='Cannot start yet'/>
+Submit and pay<img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHcannot-start-yet.png' title='Cannot start yet'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
