@@ -14,11 +14,11 @@ public enum ServingRespondentsEnum {
     @JsonProperty("applicantLegalRepresentative")
     applicantLegalRepresentative("applicantLegalRepresentative", "Applicant's legal representative"),
     @JsonProperty("courtBailiff")
-    courtBailiff("courtBailiff", "Court bailiff"),
+    courtBailiff("courtBailiff", "Court bailiff (you must arrange for them to serve the order)"),
     @JsonProperty("unrepresentedApplicant")
     unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
-    courtAdmin("courtAdmin", "Court admin");
+    courtAdmin("courtAdmin", "Court admin (you must serve the order)");
 
     private final String id;
     private final String displayedValue;

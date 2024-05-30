@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.FcOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrdersServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -47,7 +48,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -1809,7 +1809,7 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -1863,7 +1863,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -1923,7 +1923,7 @@ public class ManageOrderServiceTest {
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -1991,7 +1991,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsDA(OrdersServingRespondentsEnum.courtAdmin)
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
@@ -2502,7 +2502,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .recipientsOptions(dynamicMultiSelectList)
@@ -2570,7 +2570,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
@@ -2635,7 +2635,7 @@ public class ManageOrderServiceTest {
             .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -2693,7 +2693,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -2791,7 +2791,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -3054,7 +3054,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -3194,7 +3194,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -3258,7 +3258,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -3306,7 +3306,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.Yes)
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -3333,7 +3333,7 @@ public class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(YesOrNo.No)
             .serveToRespondentOptions(YesOrNo.No)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -3397,7 +3397,7 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
@@ -3603,7 +3603,7 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.applicantLegalRepresentative)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
@@ -3871,7 +3871,7 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsDA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
@@ -5073,7 +5073,7 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsCA(OrdersServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
