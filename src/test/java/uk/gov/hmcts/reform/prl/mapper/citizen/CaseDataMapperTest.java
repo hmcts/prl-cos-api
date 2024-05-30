@@ -11,11 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
@@ -34,7 +30,6 @@ import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.spendT
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
  class CaseDataMapperTest {
@@ -213,24 +208,11 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
     void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("app FN")
-            .lastName("app LN")
-            .email("app@test.com")
-            .solicitorEmail("app.sol@test.com")
-            .user(User.builder().idamId("123").pcqId("123").build())
-            .contactPreferences(ContactPreferences.post)
-            .representativeFirstName("app LR FN")
-            .representativeLastName("app LR LN")
-            .address(Address.builder().addressLine1("test").build())
-            .build();
         CaseData caseData1 = caseData
             .toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
-                                 .applicantPcqId("test")
                                  .build())
-            .applicants(List.of(element(applicant)))
             .build();
 
         //When

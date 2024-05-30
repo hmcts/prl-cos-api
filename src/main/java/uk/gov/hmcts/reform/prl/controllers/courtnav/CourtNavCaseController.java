@@ -65,7 +65,7 @@ public class CourtNavCaseController {
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
-            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData, authorisation);
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 authorisation,
                 caseData

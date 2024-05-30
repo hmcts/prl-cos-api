@@ -93,7 +93,7 @@ public class CourtNavCaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(201, response.getStatusCodeValue());
@@ -159,7 +159,7 @@ public class CourtNavCaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
         assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
     }
 
@@ -176,7 +176,7 @@ public class CourtNavCaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData,"Bearer:test")).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
         assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
 
     }
