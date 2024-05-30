@@ -2263,6 +2263,51 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testGetSelectedOrderIdForUploadDomesticAbuseOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.blankOrder)
+            .build();
+        assertEquals("blankOrder", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadFcOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .fcOrders(FcOrdersEnum.summonToAppearToCourt)
+            .build();
+        assertEquals("summonToAppearToCourt", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadOtherOrdersOption() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .otherOrdersOption(OtherOrdersOptionEnum.other)
+            .nameOfOrder("test")
+            .build();
+        assertEquals("other : test", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUpload() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertEquals("", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderIdForUploadforChildArrOrder() {
+        CaseData caseData = CaseData.builder()
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertEquals("blankOrderOrDirections", manageOrderService.getSelectedOrderIdForUpload(caseData));
+    }
+
+    @Test
     public void testPopulateDraftOrderForJudge() throws Exception {
         when(userService.getUserDetails(Mockito.anyString()))
             .thenReturn(UserDetails.builder().roles(List.of(Roles.JUDGE.getValue())).build());
