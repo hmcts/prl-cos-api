@@ -86,6 +86,90 @@ public class SendgridServiceTest {
         verify(sendGrid,times(1)).api(any(Request.class));
     }
 
+    @Test
+    public void testSendEmailWithAttachments() throws Exception {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant)))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("subject", "Case documents for : ");
+        combinedMap.put("content", "Case details");
+        combinedMap.put("attachmentType", "pdf");
+        combinedMap.put("disposition", "attachment");
+        combinedMap.put("specialNote", "Yes");
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
+            .emailAddress("test@email.com")
+            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
+            .docs(documentList.stream().map(s -> element(s)).toList())
+            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                Collectors.toList())))
+            .timeStamp(currentDate).build();
+        when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
+
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody("test body");
+
+        byte[] biteData = "test bytes".getBytes();
+        for (Document d : documentList) {
+            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
+                                                      TEST_AUTH,
+                                                      s2sToken)).thenReturn(biteData);
+        }
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "test auth");
+        headers.put("Content-Type", "mail/send");
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(sendGrid.api(any(Request.class))).thenThrow(new IOException("expected exception"));
+        assertThrows(
+            IOException.class,
+            () -> sendgridService
+            .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                                      documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
+    }
+
 
     @Test
     public void testSendEmailUsingTemplatesWithAttachments() throws Exception {
@@ -142,7 +226,7 @@ public class SendgridServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
@@ -242,7 +326,7 @@ public class SendgridServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
@@ -293,6 +377,189 @@ public class SendgridServiceTest {
     }
 
     @Test
+    public void testSendEmailWithAttachmentsRespondentSolicitor() throws Exception {
+
+        PartyDetails applicant = PartyDetails.builder()
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .canYouProvideEmailAddress(YesOrNo.Yes)
+                .email("test@applicant.com")
+                .build();
+
+        Document finalDoc = Document.builder()
+                .documentUrl("finalDoc")
+                .documentBinaryUrl("finalDoc")
+                .documentHash("finalDoc")
+                .build();
+
+        Document coverSheet = Document.builder()
+                .documentUrl("coverSheet")
+                .documentBinaryUrl("coverSheet")
+                .documentHash("coverSheet")
+                .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("test")
+                .caseTypeOfApplication("C100")
+                .applicants(List.of(element(applicant)))
+                .respondents(List.of(element(PartyDetails.builder()
+                        .solicitorEmail("test@gmail.com")
+                        .representativeLastName("LastName")
+                        .representativeFirstName("FirstName")
+                        .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                        .build())))
+                .build();
+
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderURLLinkNeeded", YES);
+        combinedMap.put("subject", "Case documents for : ");
+        combinedMap.put("content", "Case details");
+        combinedMap.put("attachmentType", "pdf");
+        combinedMap.put("disposition", "attachment");
+        combinedMap.put("specialNote", "Yes");
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
+                .emailAddress("test@email.com")
+                .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
+                .docs(documentList.stream().map(s -> element(s)).toList())
+                .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                        Collectors.toList())))
+                .timeStamp(currentDate).build();
+        when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
+
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody("test body");
+
+        byte[] biteData = "test bytes".getBytes();
+        for (Document d : documentList) {
+            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
+                    TEST_AUTH,
+                    s2sToken)).thenReturn(biteData);
+        }
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "test auth");
+        headers.put("Content-Type", "mail/send");
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Response response = new Response();
+        response.setBody("test response");
+        response.setHeaders(headers);
+        response.setStatusCode(SUCCESSFUL);
+        when(sendGrid.api(any(Request.class))).thenThrow(new IOException("expected exception"));
+        assertThrows(
+                IOException.class,
+                () -> sendgridService
+                        .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                                documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
+
+
+    }
+
+    @Test
+    public void testSendEmailWithAttachmentsRespondentSolicitorFinal() throws Exception {
+
+        PartyDetails applicant = PartyDetails.builder()
+                .solicitorEmail("test@gmail.com")
+                .representativeLastName("LastName")
+                .representativeFirstName("FirstName")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .canYouProvideEmailAddress(YesOrNo.Yes)
+                .email("test@applicant.com")
+                .build();
+
+        Document finalDoc = Document.builder()
+                .documentUrl("finalDoc")
+                .documentBinaryUrl("finalDoc")
+                .documentHash("finalDoc")
+                .build();
+
+        Document coverSheet = Document.builder()
+                .documentUrl("coverSheet")
+                .documentBinaryUrl("coverSheet")
+                .documentHash("coverSheet")
+                .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("test")
+                .caseTypeOfApplication("C100")
+                .applicants(List.of(element(applicant)))
+                .respondents(List.of(element(PartyDetails.builder()
+                        .solicitorEmail("test@gmail.com")
+                        .representativeLastName("LastName")
+                        .representativeFirstName("FirstName")
+                        .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                        .build())))
+                .build();
+
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderURLLinkNeeded", YES);
+        combinedMap.put("subject", "Case documents for : ");
+        combinedMap.put("content", "Case details");
+        combinedMap.put("attachmentType", "pdf");
+        combinedMap.put("finalOrder", "Yes");
+        combinedMap.put("disposition", "attachment");
+        combinedMap.put("specialNote", "Yes");
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
+                .emailAddress("test@email.com")
+                .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
+                .docs(documentList.stream().map(s -> element(s)).toList())
+                .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
+                        Collectors.toList())))
+                .timeStamp(currentDate).build();
+        when(launchDarklyClient.isFeatureEnabled("soa-sendgrid")).thenReturn(true);
+
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody("test body");
+
+        byte[] biteData = "test bytes".getBytes();
+        for (Document d : documentList) {
+            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
+                    TEST_AUTH,
+                    s2sToken)).thenReturn(biteData);
+        }
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "test auth");
+        headers.put("Content-Type", "mail/send");
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Response response = new Response();
+        response.setBody("test response");
+        response.setHeaders(headers);
+        response.setStatusCode(SUCCESSFUL);
+        when(sendGrid.api(any(Request.class))).thenThrow(new IOException("expected exception"));
+        assertThrows(
+                IOException.class,
+                () -> sendgridService
+                        .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                                documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
+
+
+    }
+
+  
     public void testSendEmailUsingTemplatesWithAttachments_scenario2() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -347,7 +614,7 @@ public class SendgridServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
@@ -452,7 +719,7 @@ public class SendgridServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
