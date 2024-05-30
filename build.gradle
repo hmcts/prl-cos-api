@@ -352,7 +352,6 @@ dependencies {
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
-
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
@@ -595,8 +594,16 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
   "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
+  "**uk/gov/hmcts/reform/prl/services/SendgridService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
+  '**uk/gov/hmcts/reform/prl/controllers/SystemUserRoleAssingmentController.java',
+  '**uk/gov/hmcts/reform/prl/mapper/bundle/BundleCreateRequestMapper.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
+  '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenResponseController.java',
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenAllegationOfHarmElementsMapper.java'
 ]
 
 sonarqube {

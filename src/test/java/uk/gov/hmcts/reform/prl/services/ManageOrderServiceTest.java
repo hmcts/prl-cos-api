@@ -3923,6 +3923,7 @@ public class ManageOrderServiceTest {
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other)).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .applicantsFL401(PartyDetails.builder().build())
             .build();
 
         List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);
