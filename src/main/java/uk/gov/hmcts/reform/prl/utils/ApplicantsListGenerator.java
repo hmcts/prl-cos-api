@@ -95,7 +95,8 @@ public class ApplicantsListGenerator {
         List<Element<ApplicantOfAdditionalApplication>> parties = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+                    || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
                 List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
                 children.forEach(child -> parties.add(
                     element(ApplicantOfAdditionalApplication.builder().code(child.getId().toString())

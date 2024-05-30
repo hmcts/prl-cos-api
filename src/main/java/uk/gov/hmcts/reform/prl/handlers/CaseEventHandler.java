@@ -88,7 +88,7 @@ public class CaseEventHandler {
                 ID,
                 caseId
         );
-        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.systemAuthorisation(),
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 caseId,
                 startAllTabsUpdateDataContent.startEventResponse(),
                 startAllTabsUpdateDataContent.eventRequestData(),
