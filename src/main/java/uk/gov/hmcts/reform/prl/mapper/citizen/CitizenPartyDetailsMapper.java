@@ -659,6 +659,10 @@ public class CitizenPartyDetailsMapper {
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
+            //Save service request & payment request references
+            caseDataMapToBeUpdated.put("paymentServiceRequestReferenceNumber",
+                                       citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber());
+            caseDataMapToBeUpdated.put("paymentReferenceNumber", citizenUpdatedCaseData.getPaymentReferenceNumber());
         }
         return caseDataMapToBeUpdated;
     }
