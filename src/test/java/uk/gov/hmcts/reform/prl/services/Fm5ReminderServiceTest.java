@@ -590,7 +590,7 @@ public class Fm5ReminderServiceTest {
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .document(document)
             .categoryId(RESPONDENT_C1A_APPLICATION)
-            .restrictedDetails("test details")
+            .restrictedDetails("restricted test details")
             .build();
         quarantineList.add(element(quarantineLegalDoc));
 
