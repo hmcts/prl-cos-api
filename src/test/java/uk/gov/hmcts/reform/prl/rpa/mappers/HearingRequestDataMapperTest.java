@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicList
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -206,6 +209,92 @@ public class HearingRequestDataMapperTest {
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertNotNull(hearingData);
     }
+
+    @Test
+    public void testHearingUrgencyMapperWithMultipleApplicants() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList3 = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElements)
+            .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists = null;
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicList dynamicList1 = DynamicList.builder()
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("TestName")
+            .representativeFirstName("Ram")
+            .representativeLastName("Mer")
+            .build();
+        PartyDetails respondent1 = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent1).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(applicantList)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .respondents(respondentList)
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
+        assertNotNull(hearingData);
+    }
+
 
 
 
