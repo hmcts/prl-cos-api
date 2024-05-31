@@ -460,13 +460,13 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application.pdf
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
-      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_draft_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_draft_filename: Power_of_arrest_draft.pdf
       fl401_fl406_english_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_engllish_filename: Power_of_arrest.pdf
-      fl401_fl406_welsh_draft_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_welsh_draft_template: FL-PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
-      fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_welsh_template: FL-PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
@@ -519,11 +519,11 @@ document:
       prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
       prl_fl404b_final_template: FL-PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_welsh_final_template: PRL-GOR-WEL-FL404B-Common-Final.docx
+      prl_fl404b_welsh_final_template: FL-PRL-GOR-WEL-FL404B-Common-Final.docx
       prl_fl404b_welsh_final_filename: welsh_amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
+      prl_fl404b_draft_template: FL-PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_welsh_draft_template: FL-PRL-GOR-WEL-FL404B-Common-Draft.docx
       prl_fl404b_welsh_draft_filename: welsh_amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
