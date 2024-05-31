@@ -537,11 +537,11 @@ document:
       prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
       prl_fl404b_final_template: FL-PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_welsh_final_template: PRL-GOR-WEL-FL404B-Common-Final.docx
+      prl_fl404b_welsh_final_template: FL-PRL-GOR-WEL-FL404B-Common-Final.docx
       prl_fl404b_welsh_final_filename: welsh_amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
+      prl_fl404b_draft_template: FL-PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_welsh_draft_template: FL-PRL-GOR-WEL-FL404B-Common-Draft.docx
       prl_fl404b_welsh_draft_filename: welsh_amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
@@ -583,11 +583,11 @@ document:
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl404a_final_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
-      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_draft_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      prl_fl404a_welsh_final_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_welsh_final_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
-      prl_fl404a_welsh_draft_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_welsh_draft_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
       prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
