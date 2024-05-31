@@ -1229,7 +1229,7 @@ public class SendAndReplyService {
         log.info("messageElement -- {}", messageElement);
         log.info("messageObject -- {}", messageObject);
         log.info("closeMessage -- {}", closeMessage);
-        if (messageObject.getJudgeEmail() != null) {
+        if (messageObject != null && messageObject.getJudgeEmail() != null) {
             String judgeIdamId = userService.getUserByEmailId(
                 authorisation,
                 messageObject.getJudgeEmail()

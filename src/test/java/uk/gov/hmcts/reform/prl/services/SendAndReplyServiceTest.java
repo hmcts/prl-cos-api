@@ -50,6 +50,8 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
@@ -1619,6 +1621,117 @@ public class SendAndReplyServiceTest {
 
         caseData = caseData.toBuilder().id(12345L)
             .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+
+        assertNotNull(caseDetails);
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForEmptySend() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(YesOrNo.Yes)
+            .build();
+        allocatedJudgeForSendAndReply = null;
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
+
+        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+
+        assertNotNull(caseDetails);
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForEmptyRoleSend() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder().respondToMessage(YesOrNo.Yes).build();
+        allocatedJudgeForSendAndReply = null;
+        caseData = caseData.toBuilder().id(12345L).chooseSendOrReply(SEND).sendOrReplyMessage(sendOrReplyMessage).allocatedJudgeForSendAndReply(
+            allocatedJudgeForSendAndReply).messageReply(message1).replyMessageDynamicList(DynamicList.builder().build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(),
+            objectMapper
+        )).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject,
+                                                                                                        caseData,
+                                                                                                        null
+        );
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()))).thenReturn(
+            startAllTabsUpdateDataContent);
+        //modify the mocking
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setId("12345");
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses = new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
+
+
+        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+
+
+        assertNotNull(caseDetails);
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForNoSendOrReply() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(null)
+            .build();
+
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(null)
             .sendOrReplyMessage(sendOrReplyMessage)
             .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
             .messageReply(message1)
