@@ -2032,6 +2032,11 @@ public class ManageOrderService {
     }
 
     public CaseData getN117FormData(CaseData caseData) {
+
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -2042,28 +2047,28 @@ public class ManageOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
-            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
-                                                 caseData.getApplicantsFL401().getLastName()
+            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
+                                                 applicant1.getLastName()
             ))
             .manageOrdersRespondent(String.format(
                 PrlAppsConstants.FORMAT,
-                caseData.getRespondentsFL401().getFirstName(),
-                caseData.getRespondentsFL401().getLastName()
+                respondent1.getFirstName(),
+                respondent1.getLastName()
             ))
-            .manageOrdersApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
-                                                ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+            .manageOrdersApplicantReference(applicant1.getSolicitorReference() != null
+                                                ? applicant1.getSolicitorReference() : "")
             //PRL-5137
-            .manageOrdersRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
-                                                 ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+            .manageOrdersRespondentReference(respondent1.getSolicitorReference() != null
+                                                 ? respondent1.getSolicitorReference() : "")
             .build();
 
-        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+        if (ofNullable(respondent1.getAddress()).isPresent()) {
             orderData = orderData.toBuilder()
-                .manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                .manageOrdersRespondentAddress(respondent1.getAddress()).build();
         }
-        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+        if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
             orderData = orderData.toBuilder()
-                .manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                .manageOrdersRespondentDob(respondent1.getDateOfBirth()).build();
         }
 
         return caseData.toBuilder().manageOrders(orderData)
