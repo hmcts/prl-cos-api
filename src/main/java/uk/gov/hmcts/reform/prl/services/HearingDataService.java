@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +8,6 @@ import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
-import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -817,11 +814,8 @@ public class HearingDataService {
         } else {
             log.info("Populating party names for C100");
             List<String> applicantNames = getPartyNameList(caseData.getApplicants());
-            log.info("applicantNames: {}", applicantNames);
             List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-            log.info("respondentNames: {}", respondentNames);
             List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-            log.info("applicantSolicitorNames: {}", applicantSolicitorNames);
             List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
             int numberOfApplicant = applicantNames.size();
             int numberOfRespondents = respondentNames.size();
@@ -838,11 +832,6 @@ public class HearingDataService {
         }
 
         //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
-        try {
-            log.info("tempPartyNamesForDocGen: {}", AppObjectMapper.getObjectMapper().writeValueAsString(tempPartyNamesMap));
-        } catch (JsonProcessingException e) {
-            throw new ManageOrderRuntimeException(e.getMessage(), e);
-        }
         tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
     }
 
