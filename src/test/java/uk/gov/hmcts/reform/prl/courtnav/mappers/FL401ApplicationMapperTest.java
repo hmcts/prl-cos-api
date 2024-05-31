@@ -50,8 +50,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReason
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -347,7 +345,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavMetaDataIsNull() throws NotFoundException {
+    public void testCourtnavMetaDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .metaData(CourtNavMetaData.builder()
@@ -364,7 +362,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataIsNull() throws NotFoundException {
+    public void testCourtnavCaseDataIsNull() {
 
         courtNavFl401 = CourtNavFl401.builder()
             .fl401(null)
@@ -375,7 +373,7 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
-    public void testCourtnavCaseDataWithBeforeStart() throws NotFoundException {
+    public void testCourtnavCaseDataWithBeforeStart() {
 
 
         CaseData caseData = CaseData.builder()
@@ -414,8 +412,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String email = "dacourt@test.com";
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -453,8 +449,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String email = "dacourt@test.com";
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -500,11 +494,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -546,11 +535,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -597,11 +581,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -646,11 +625,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -704,11 +678,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -755,11 +724,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -830,11 +794,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -880,11 +839,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -924,11 +878,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -971,11 +920,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1022,11 +966,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1069,11 +1008,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1128,11 +1062,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1179,11 +1108,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1246,11 +1170,6 @@ public class FL401ApplicationMapperTest {
             .metaData(courtNavMetaData)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
-            .build();
-
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("test court address")
             .description("court desc")
@@ -1309,11 +1228,6 @@ public class FL401ApplicationMapperTest {
                        .goingToCourt(goingToCourt)
                        .build())
             .metaData(courtNavMetaData)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
