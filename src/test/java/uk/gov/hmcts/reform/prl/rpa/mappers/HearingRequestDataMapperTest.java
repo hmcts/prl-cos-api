@@ -224,12 +224,6 @@ public class HearingRequestDataMapperTest {
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
-        DynamicList dynamicList3 = DynamicList.builder()
-            .listItems(dynamicListElementsList)
-            .build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(dynamicListElements)
-            .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists = null;
         LocalDateTime localDateTime = LocalDateTime.now();
         List<LocalDateTime> localDateTimes = new ArrayList<>();
@@ -313,9 +307,6 @@ public class HearingRequestDataMapperTest {
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
-        DynamicList dynamicList3 = DynamicList.builder()
-            .listItems(dynamicListElementsList)
-            .build();
         DynamicList dynamicList = DynamicList.builder()
             .listItems(dynamicListElements)
             .value(dynamicListElement)
