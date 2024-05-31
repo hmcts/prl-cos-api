@@ -1831,7 +1831,6 @@ public class ManageOrderService {
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
-            log.info("caseData.getManageOrders().getOrdersHearingDetails() {}", caseData.getManageOrders().getOrdersHearingDetails());
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
