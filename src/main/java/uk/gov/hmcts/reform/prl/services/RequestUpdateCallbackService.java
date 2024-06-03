@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,6 +35,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_TO_BE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 @Component
@@ -48,13 +54,26 @@ public class RequestUpdateCallbackService {
     private final CourtFinderService courtFinderService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        CaseDetails caseDetails
+            = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
 
-        CaseEvent caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
-            ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
+        boolean isCasePayment = verifyCaseCreationPaymentReference(
+            caseDetails,
+            serviceRequestUpdateDto.getServiceRequestReference()
+        );
+        CaseEvent caseEvent;
+        if (isCasePayment) {
+            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
+                ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
+        } else {
+            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
+                ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
+        }
 
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
@@ -67,11 +86,7 @@ public class RequestUpdateCallbackService {
                 true
             );
 
-        CaseDataContent caseDataContent = null;
-        boolean isCasePayment = verifyCaseCreationPaymentReference(
-            startEventResponse,
-            serviceRequestUpdateDto.getServiceRequestReference()
-        );
+        CaseDataContent caseDataContent;
         if (isCasePayment) {
             caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
@@ -117,7 +132,7 @@ public class RequestUpdateCallbackService {
                 objectMapper
             );
             log.info(
-                "Refreshing tab based on the payment response for caseid {} ",
+                "Refreshing tab based on the payment response for caseId {} ",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
 
@@ -127,7 +142,7 @@ public class RequestUpdateCallbackService {
             );
             log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
-            allTabService.updateAllTabsIncludingConfTabRefactored(
+            allTabService.mapAndSubmitAllTabsUpdate(
                 systemAuthorisation,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 allTabsUpdateStartEventResponse,
@@ -147,14 +162,10 @@ public class RequestUpdateCallbackService {
         }
     }
 
-    private boolean verifyCaseCreationPaymentReference(StartEventResponse startEventResponse, String serviceRequestReference) {
-        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        boolean isCasePayment = false;
-        if (!StringUtils.isEmpty(serviceRequestReference)
-            && serviceRequestReference.equalsIgnoreCase(startEventResponseData.getPaymentServiceRequestReferenceNumber())) {
-            isCasePayment = true;
-        }
-        return isCasePayment;
+    private boolean verifyCaseCreationPaymentReference(CaseDetails caseDetails, String serviceRequestReference) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        return !StringUtils.isEmpty(serviceRequestReference)
+                && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
     private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
@@ -186,7 +197,7 @@ public class RequestUpdateCallbackService {
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         return CaseData.builder()
-            .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+            .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
                                                      .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
@@ -243,6 +254,10 @@ public class RequestUpdateCallbackService {
                         );
                 }
                 caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    AWP_WA_TASK_NAME,
+                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(updatedAdditionalApplicationsBundleElement));
+                caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
             }
         }
         return caseDataUpdated;

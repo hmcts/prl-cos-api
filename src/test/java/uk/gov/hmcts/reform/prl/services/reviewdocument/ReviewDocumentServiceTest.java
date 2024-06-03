@@ -18,10 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -35,9 +38,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,8 +88,6 @@ public class ReviewDocumentServiceTest {
     ReviewDocumentService reviewDocumentService;
 
     @Mock
-    CoreCaseDataService coreCaseDataService;
-    @Mock
     AuthTokenGenerator authTokenGenerator;
     @Mock
     SystemUserService systemUserService;
@@ -93,11 +95,18 @@ public class ReviewDocumentServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @Mock
+    AllTabsService allTabsService;
+
+    @Mock
+    AllTabServiceImpl allTabServiceImpl;
+
+    @Mock
     ManageDocumentsService manageDocumentsService;
 
     @Mock
     ObjectMapper objectMapper;
 
+    private final String authorization = "authToken";
     Element element;
     Document document;
     QuarantineLegalDoc quarantineLegalDoc;
@@ -588,7 +597,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
@@ -616,7 +625,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NO, response.getBody().getConfirmationBody());
@@ -632,7 +641,15 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
@@ -649,7 +666,13 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+                      EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());
@@ -664,7 +687,13 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(authToken, caseData);
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
