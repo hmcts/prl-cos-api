@@ -117,7 +117,6 @@ public class HearingRequestDataMapperTest {
             .applicantSolicitorHearingChannel2(null)
             .respondentHearingChannel1(dynamicList1)
             .respondentSolicitorHearingChannel1(dynamicList3)
-            .applicantName1("Test")
             .build();
         PartyDetails applicant = PartyDetails.builder()
             .firstName("appF")
@@ -202,7 +201,6 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
-            .respondentName1("Test")
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -284,7 +282,6 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
-            .applicantSolicitor1("Test")
             .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
 
