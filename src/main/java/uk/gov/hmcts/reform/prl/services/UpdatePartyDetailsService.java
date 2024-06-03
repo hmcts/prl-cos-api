@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -528,9 +529,19 @@ public class UpdatePartyDetailsService {
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             applicants.add(partyDetails);
             caseDataUpdated.put(APPLICANTS, applicants);
-            return caseDataUpdated;
+        } else {
+            List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+            caseData.getApplicants().forEach(eachApplicant ->
+                                                 updatedApplicants.add(element(
+                                                     eachApplicant.getId(),
+                                                     YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
+                                                         ? resetConfidentialDetailsForRefugeParties(
+                                                         eachApplicant.getValue())
+                                                         : eachApplicant.getValue()
+                                                 ))
+            );
+            caseDataUpdated.put(APPLICANTS, updatedApplicants);
         }
-        caseDataUpdated.put(APPLICANTS, caseData.getApplicants());
         return caseDataUpdated;
 
     }
@@ -576,5 +587,44 @@ public class UpdatePartyDetailsService {
         }
         return caseDataUpdated;
 
+    }
+
+    public Map<String, Object> updateRefugeConfidentialDetails(CallbackRequest callbackRequest) {
+
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && Event.AMEND_APPLICANTS_DETAILS.getId().equalsIgnoreCase(callbackRequest.getEventId())
+            && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+            caseData.getApplicants().forEach(eachApplicant ->
+                                                 updatedApplicants.add(element(
+                                                     eachApplicant.getId(),
+                                                     YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
+                                                         ? resetConfidentialDetailsForRefugeParties(
+                                                         eachApplicant.getValue())
+                                                         : eachApplicant.getValue()
+                                                 ))
+            );
+            updatedCaseData.put(APPLICANTS, updatedApplicants);
+        }
+        return updatedCaseData;
+    }
+
+    private PartyDetails resetConfidentialDetailsForRefugeParties(PartyDetails partyDetails) {
+        log.info("*** Inside resetConfidentialDetailsForRefugeParties ***");
+        PartyDetails updatedPartyDetails = partyDetails.toBuilder()
+            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                       ? null : partyDetails.getIsAddressConfidential())
+            .isAtAddressLessThan5Years(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                           ? null : partyDetails.getIsAtAddressLessThan5Years())
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                            && YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? null : partyDetails.getIsEmailAddressConfidential())
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                           ? null : partyDetails.getIsPhoneNumberConfidential())
+            .build();
+        log.info("Exit resetConfidentialDetailsForRefugeParties with party {}", updatedPartyDetails);
+        return updatedPartyDetails;
     }
 }
