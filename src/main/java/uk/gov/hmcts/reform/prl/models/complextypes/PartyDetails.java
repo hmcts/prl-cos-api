@@ -161,4 +161,6 @@ public class PartyDetails {
 
     @JsonIgnore
     private CitizenSos citizenSosObject;
+
+    private YesOrNo isLiveInRefuge;
 }

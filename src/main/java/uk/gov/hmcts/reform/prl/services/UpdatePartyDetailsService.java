@@ -88,6 +88,7 @@ public class UpdatePartyDetailsService {
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get(APPLICANTS));
+        setConfidentialFlagForPartiesLiveInRefuge(updatedCaseData);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -139,6 +140,44 @@ public class UpdatePartyDetailsService {
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    private void setConfidentialFlagForPartiesLiveInRefuge(Map<String, Object> updatedCaseData) {
+        log.info("*** Inside setConfidentialFlagForPartiesLiveInRefuge ***");
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+            caseData.getApplicants().forEach(eachApplicant ->
+                                                 updatedApplicants.add(element(
+                                                     eachApplicant.getId(),
+                                                     YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
+                                                         ? markContactDetailsAsConfidentialForRefugeApplicants(
+                                                             eachApplicant.getValue())
+                                                         : eachApplicant.getValue()
+                                                 ))
+            );
+            updatedCaseData.put(APPLICANTS, updatedApplicants);
+        }
+
+    }
+
+    private PartyDetails markContactDetailsAsConfidentialForRefugeApplicants(PartyDetails partyDetails) {
+        log.info("*** Inside markContactDetailsAsConfidentialForRefugeApplicants ***");
+        PartyDetails updatedPartyDetails = partyDetails.toBuilder()
+            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                       ? YesOrNo.Yes : partyDetails.getIsAddressConfidential())
+            .isAtAddressLessThan5Years(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                                   ? YesOrNo.Yes : partyDetails.getIsAtAddressLessThan5Years())
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                                               && YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? YesOrNo.Yes : partyDetails.getIsEmailAddressConfidential())
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
+                                            ? YesOrNo.Yes : partyDetails.getIsPhoneNumberConfidential())
+            .build();
+        log.info("Exit markContactDetailsAsConfidentialForRefugeApplicants with party {}", updatedPartyDetails);
+        return updatedPartyDetails;
+
     }
 
     private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
