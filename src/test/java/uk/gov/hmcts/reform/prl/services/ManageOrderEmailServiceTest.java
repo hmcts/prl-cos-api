@@ -3595,4 +3595,74 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(caseDataMap.get("orderCollection"));
         //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
     }
+
+    @Test
+    public void testSendEmailForCitizenWhenTheyHaveDashboardAccessAndMultipleOrdersWelshSentence() {
+        UUID uuidOne = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID uuidTwo = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        DynamicMultiselectListElement dynamicMultiselectListElementOne = DynamicMultiselectListElement
+            .builder()
+            .code(uuidOne.toString())
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElementTwo = DynamicMultiselectListElement
+            .builder()
+            .code(uuidTwo.toString())
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElementOne,dynamicMultiselectListElementTwo))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().idamId("123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        respondent = respondent.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().idamId("123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        OrderDetails newOrderDetails = OrderDetails.builder()
+            .typeOfOrder("Interim")
+            .build();
+        OrderDetails finalOrderDetails = OrderDetails.builder()
+            .typeOfOrder("Final")
+            .build();
+        Element<OrderDetails> newOrders = Element.<OrderDetails>builder().id(uuidOne).value(newOrderDetails).build();
+        Element<OrderDetails> finalOrders = Element.<OrderDetails>builder().id(uuidTwo).value(finalOrderDetails).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(newOrders);
+        orderList.add(finalOrders);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .displayLegalRepOption("No")
+                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .cafcassEmailId("test")
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .build())
+            .orderCollection(orderList)
+            .welshLanguageRequirement(YesOrNo.Yes)
+            .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.FALSE).isGenWelsh(Boolean.TRUE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
 }
