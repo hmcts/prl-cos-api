@@ -186,6 +186,7 @@ public class TaskListRenderer {
                 .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships")
+                .withInfo("Ensure relatioship of children with all people on the case is captured, before submitting the application")
                 .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
                 .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
                 .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
@@ -265,6 +266,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
         final TaskSection relationships = newSection("Relationships")
+            .withInfo("Ensure relatioship of children with all people on the case is captured, before submitting the application")
             .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
             .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
             .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
