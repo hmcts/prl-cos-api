@@ -526,19 +526,35 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
             caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
         }
-        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+        if ((FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(draftOrder.getOrderType()),
+                                                            caseData))
             && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
+            boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(draftOrder.getOrderType()), caseData);
             caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
-                                                             .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
-                                                             .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
-                                                                 caseData))
-                                                             .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
+                                                             .manageOrdersApplicant(isDaOrderSelectedForCaCase
+                                                                                        ? CaseUtils
+                                                                 .getApplicantNameForDaOrderSelectedForCaCase(caseData)
+                                                                                        : CaseUtils.getApplicant(caseData))
+                                                             .manageOrdersApplicantReference(isDaOrderSelectedForCaCase
+                                                                                                 ? CaseUtils
+                                                                 .getApplicantReferenceForDaOrderSelectedForCaCase(caseData)
+                                                                                                 : CaseUtils.getApplicantReference(caseData))
+                                                             .manageOrdersRespondent(isDaOrderSelectedForCaCase
+                                                                                         ? CaseUtils
+                                                                 .getRespondentForDaOrderSelectedForCaCase(caseData)
+                                                                                         : CaseUtils.getRespondent(caseData))
                                                              .manageOrdersRespondentReference(
-                                                                 caseData.getRespondentsFL401().getSolicitorReference() != null
-                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() : "")
-                                                             .manageOrdersRespondentDob(
-                                                                 null != caseData.getRespondentsFL401().getDateOfBirth()
-                                                                     ? caseData.getRespondentsFL401().getDateOfBirth() : null)
+                                                                 caseData.getRespondentsFL401() != null
+                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() : "" : null)
+                                                             .manageOrdersRespondentDob(isDaOrderSelectedForCaCase
+                                                                                            ? CaseUtils
+                                                                 .getRespondentDobForDaOrderSelectedForCaCase(caseData)
+                                                                                            : null != caseData.getRespondentsFL401().getDateOfBirth()
+                                                                                            ? caseData.getRespondentsFL401().getDateOfBirth() : null)
                                                              .build())
                 .build();
         }
@@ -1135,6 +1151,9 @@ public class DraftAnOrderService {
                 .build();
 
         } else {
+            boolean isDaOrderSelectedForCaCase = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && ManageOrdersUtils.isDaOrderSelectedForCaCase(
+                String.valueOf(draftOrder.getOrderType()), caseData);
             return draftOrder.toBuilder()
                 .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
                 .orderDocument(orderDocumentEng)
@@ -1177,11 +1196,16 @@ public class DraftAnOrderService {
                 .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
                 .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
                 .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-                .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
-                .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
-                .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+                .manageOrdersApplicant(isDaOrderSelectedForCaCase ? CaseUtils.getApplicantNameForDaOrderSelectedForCaCase(caseData)
+                                           : CaseUtils.getApplicant(caseData))
+                .manageOrdersApplicantReference(isDaOrderSelectedForCaCase ? CaseUtils.getApplicantReferenceForDaOrderSelectedForCaCase(caseData)
+                                                    : CaseUtils.getApplicantReference(caseData))
+                .manageOrdersRespondent(isDaOrderSelectedForCaCase
+                                            ? CaseUtils.getRespondentForDaOrderSelectedForCaCase(caseData)
+                                            : caseData.getManageOrders().getManageOrdersRespondent())
                 .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
-                .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+                .manageOrdersRespondentDob(isDaOrderSelectedForCaCase ? CaseUtils.getRespondentDobForDaOrderSelectedForCaCase(caseData)
+                                               : caseData.getManageOrders().getManageOrdersRespondentDob())
                 .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
                 .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
                 .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
@@ -1230,7 +1254,9 @@ public class DraftAnOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
+                                                            caseData)) {
             caseData = caseData.toBuilder()
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
