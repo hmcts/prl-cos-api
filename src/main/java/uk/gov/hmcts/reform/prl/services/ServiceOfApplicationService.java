@@ -2110,6 +2110,8 @@ public class ServiceOfApplicationService {
             && StringUtils.isNotEmpty(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())) {
             caseDataUpdated.put(UNSERVED_CAFCASS_CYMRU_PACK, SoaPack.builder()
                     .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())))
+                    .servedBy(userService.getUserDetails(authorization).getFullName())
+                    .servedPartyEmail(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())
                 .build());
         }
 
