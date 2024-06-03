@@ -1399,7 +1399,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
         assertNotNull(updatedCaseData.get("respondents"));
     }
-    
+
     @Test
     public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
         Child child1 = Child.builder()
@@ -1498,5 +1498,48 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
         assertEquals(1, updatedChildDetails.size());
         assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
+    }
+
+
+    @Test
+    public void testSetConfidentialFlagForPartiesLiveInRefuge() {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isLiveInRefuge(YesOrNo.Yes)
+            .build();
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("applicant2")
+            .lastName("lastname")
+            .isLiveInRefuge(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant1).build();
+
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant1);
+        applicantList.add(wrappedApplicant2);
+
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        updatePartyDetailsService.setConfidentialFlagForPartiesLiveInRefuge(stringObjectMap);
+        List<Element<PartyDetails>> updatedApplicantList = (List<Element<PartyDetails>>) stringObjectMap.get("applicants");
+        assertEquals(YesOrNo.Yes, updatedApplicantList.get(0).getValue().getIsAddressConfidential());
+        assertEquals(YesOrNo.No,updatedApplicantList.get(1).getValue().getIsAddressConfidential());
     }
 }

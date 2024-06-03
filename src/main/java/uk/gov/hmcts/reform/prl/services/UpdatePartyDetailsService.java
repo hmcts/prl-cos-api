@@ -46,7 +46,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
@@ -54,7 +53,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -143,7 +141,7 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-    private void setConfidentialFlagForPartiesLiveInRefuge(Map<String, Object> updatedCaseData) {
+    public void setConfidentialFlagForPartiesLiveInRefuge(Map<String, Object> updatedCaseData) {
         log.info("*** Inside setConfidentialFlagForPartiesLiveInRefuge ***");
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -153,7 +151,7 @@ public class UpdatePartyDetailsService {
                                                  updatedApplicants.add(element(
                                                      eachApplicant.getId(),
                                                      YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
-                                                         ? markContactDetailsAsConfidentialForRefugeApplicants(
+                                                         ? markPersonalDetailsAsConfidentialForRefugeApplicants(
                                                              eachApplicant.getValue())
                                                          : eachApplicant.getValue()
                                                  ))
@@ -163,8 +161,8 @@ public class UpdatePartyDetailsService {
 
     }
 
-    private PartyDetails markContactDetailsAsConfidentialForRefugeApplicants(PartyDetails partyDetails) {
-        log.info("*** Inside markContactDetailsAsConfidentialForRefugeApplicants ***");
+    private PartyDetails markPersonalDetailsAsConfidentialForRefugeApplicants(PartyDetails partyDetails) {
+        log.info("*** Inside markPersonalDetailsAsConfidentialForRefugeApplicants ***");
         PartyDetails updatedPartyDetails = partyDetails.toBuilder()
             .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
                                        ? YesOrNo.Yes : partyDetails.getIsAddressConfidential())
@@ -176,7 +174,7 @@ public class UpdatePartyDetailsService {
             .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
                                             ? YesOrNo.Yes : partyDetails.getIsPhoneNumberConfidential())
             .build();
-        log.info("Exit markContactDetailsAsConfidentialForRefugeApplicants with party {}", updatedPartyDetails);
+        log.info("Exit markPersonalDetailsAsConfidentialForRefugeApplicants with party {}", updatedPartyDetails);
         return updatedPartyDetails;
 
     }
@@ -589,7 +587,7 @@ public class UpdatePartyDetailsService {
 
     }
 
-    public Map<String, Object> updateRefugeConfidentialDetails(CallbackRequest callbackRequest) {
+    public Map<String, Object> updateConfidentialDetailsForRefuge(CallbackRequest callbackRequest) {
 
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);

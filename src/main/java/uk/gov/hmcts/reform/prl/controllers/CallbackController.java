@@ -1012,13 +1012,13 @@ public class CallbackController {
     }
 
     @PostMapping(path = "/update-refuge-confidential-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Update Applicants, Children and Respondents details for future processing")
+    @Operation(description = "Reset confidential details for refuge Applicants")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse updateRefugeConfidentialDetails(
+    public AboutToStartOrSubmitCallbackResponse updateConfidentialDetailsForRefuge(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -1026,7 +1026,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateRefugeConfidentialDetails(callbackRequest))
+                .data(updatePartyDetailsService.updateConfidentialDetailsForRefuge(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
