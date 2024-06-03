@@ -34,6 +34,7 @@ public class CitizenDocuments {
     private List<Document> respondentSoaPack;
     private String servedParty;
     private boolean wasCafcassServed;
+    private boolean isPersonalService;
 
     private String orderType;
     private LocalDate createdDate;

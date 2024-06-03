@@ -29,6 +29,9 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
@@ -60,10 +63,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,10 +77,18 @@ import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_10_FM5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN10_FM5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN4_SOA_PERS_NONPERS_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN5_SOA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN7_SOA_PERSONAL_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN8_SOS_PERSONAL_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN9_SOA_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF3_PERS_SERV_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -398,16 +412,17 @@ public class CaseService {
     public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
+        Map<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
         CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()
             .citizenDocuments(getCitizenDocuments(userDetails, caseData))
-            .citizenOrders(getCitizenOrders(userDetails, caseData))
-            .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
+            .citizenOrders(getCitizenOrders(userDetails, caseData, partyIdAndType))
+            .citizenApplicationPacks(getCitizenApplicationPacks(caseData, partyIdAndType))
             .build();
 
         //Citizen dashboard notification enable/disable flags
         List<CitizenNotification> citizenNotifications =
-            getAllCitizenDashboardNotifications(caseData, citizenDocumentsManagement, userDetails);
+            getAllCitizenDashboardNotifications(authToken, caseData, citizenDocumentsManagement, userDetails, partyIdAndType);
         if (CollectionUtils.isNotEmpty(citizenNotifications)) {
             citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
                 .citizenNotifications(citizenNotifications)
@@ -417,13 +432,12 @@ public class CaseService {
         return citizenDocumentsManagement;
     }
 
-    private List<CitizenDocuments> getCitizenApplicationPacks(UserDetails userDetails,
-                                                              CaseData caseData) {
+    private List<CitizenDocuments> getCitizenApplicationPacks(CaseData caseData,
+                                                              Map<String, String> partyIdAndType) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         if (caseData.getState().equals(PREPARE_FOR_HEARING_CONDUCT_HEARING)
             || caseData.getState().equals(DECISION_OUTCOME)) {
-            HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
             if (!partyIdAndType.isEmpty()) {
                 citizenDocuments.addAll(fetchSoaPacksForParty(caseData, partyIdAndType));
@@ -434,7 +448,7 @@ public class CaseService {
     }
 
     private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData,
-                                                         HashMap<String, String> partyIdAndType) {
+                                                         Map<String, String> partyIdAndType) {
         final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
 
         caseData.getFinalServedApplicationDetailsList().stream()
@@ -492,7 +506,8 @@ public class CaseService {
 
     private CitizenDocuments retrieveApplicationPackFromEmailNotifications(
         List<Element<EmailNotificationDetails>> emailNotificationDetailsList,
-        ServiceOfApplication serviceOfApplication, HashMap<String, String> partyIdAndType) {
+        ServiceOfApplication serviceOfApplication,
+        Map<String, String> partyIdAndType) {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
@@ -504,7 +519,7 @@ public class CaseService {
             .findFirst()
             .ifPresent(
                 emailNotificationDetails -> citizenDocuments[0] = CitizenDocuments.builder()
-                    .partyId(emailNotificationDetails.getPartyIds())
+                    .partyId(partyIdAndType.get(PARTY_ID))
                     .servedParty(emailNotificationDetails.getServedParty())
                     .uploadedDate(LocalDateTime.parse(
                         emailNotificationDetails.getTimeStamp(),
@@ -518,11 +533,10 @@ public class CaseService {
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? (
-                            emailNotificationDetails.getDocs().stream()
+                            ? emailNotificationDetails.getDocs().stream()
                                 .map(Element::getValue)
                                 .toList()
-                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                            : getUnservedRespondentDocumentList(serviceOfApplication)
                     )
                     .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList))
                     .build()
@@ -547,7 +561,8 @@ public class CaseService {
 
     private CitizenDocuments retreiveApplicationPackFromBulkPrintDetails(
         List<Element<BulkPrintDetails>> bulkPrintDetailsList,
-        ServiceOfApplication serviceOfApplication, HashMap<String, String> partyIdAndType) {
+        ServiceOfApplication serviceOfApplication,
+        Map<String, String> partyIdAndType) {
 
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
@@ -560,7 +575,7 @@ public class CaseService {
             .findFirst()
             .ifPresent(
                 bulkPrintDetails -> citizenDocuments[0] = CitizenDocuments.builder()
-                    .partyId(bulkPrintDetails.getPartyIds())
+                    .partyId(partyIdAndType.get(PARTY_ID))
                     .servedParty(bulkPrintDetails.getServedParty())
                     .uploadedDate(LocalDateTime.parse(
                         bulkPrintDetails.getTimeStamp(),
@@ -574,11 +589,10 @@ public class CaseService {
                     )
                     .respondentSoaPack(
                         SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
-                            ? (
-                            bulkPrintDetails.getPrintDocs().stream()
+                            ? bulkPrintDetails.getPrintDocs().stream()
                                 .map(Element::getValue)
                                 .toList()
-                        ) : getUnservedRespondentDocumentList(serviceOfApplication)
+                            : getUnservedRespondentDocumentList(serviceOfApplication)
                     )
                     .build()
         );
@@ -673,19 +687,20 @@ public class CaseService {
             .build();
     }
 
-    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails, CaseData caseData) {
-        List<CitizenDocuments> citizenDocuments = new ArrayList<>();
-        HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
+    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails,
+                                                    CaseData caseData,
+                                                    Map<String, String> partyIdAndType) {
+        List<CitizenDocuments> citizenOrders = new ArrayList<>();
 
         if (!partyIdAndType.isEmpty()) {
-            citizenDocuments.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
+            citizenOrders.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
-        return citizenDocuments;
+        return citizenOrders;
     }
 
     private List<CitizenDocuments> getCitizenOrdersForParty(CaseData caseData,
-                                                            HashMap<String, String> partyIdAndType,
+                                                            Map<String, String> partyIdAndType,
                                                             String idamId) {
         String partyId = partyIdAndType.get(PARTY_ID);
 
@@ -698,7 +713,7 @@ public class CaseService {
 
     private CitizenDocuments createCitizenOrder(OrderDetails order,
                                                 String idamId,
-                                                HashMap<String, String> partyIdAndType) {
+                                                Map<String, String> partyIdAndType) {
         return CitizenDocuments.builder()
             .partyId(idamId)
             .partyType(partyIdAndType.get(PARTY_TYPE))
@@ -712,7 +727,13 @@ public class CaseService {
             .isNew(!isFinalOrder(order))
             .isFinal(isFinalOrder(order))
             .wasCafcassServed(isCafcassOrCafcassCymruServed(order))
+            .isPersonalService(isPersonalService(order))
             .build();
+    }
+
+    private boolean isPersonalService(OrderDetails order) {
+        return null != order.getServeOrderDetails()
+            && YesOrNo.Yes.equals(order.getServeOrderDetails().getServeOnRespondent());
     }
 
     private LocalDate getOrderMadeDate(OrderDetails order) {
@@ -767,9 +788,9 @@ public class CaseService {
             .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
     }
 
-    private HashMap<String, String> findPartyIdAndType(CaseData caseData,
+    private Map<String, String> findPartyIdAndType(CaseData caseData,
                                        UserDetails userDetails) {
-        HashMap<String, String> partyIdAndTypeMap = new HashMap<>();
+        Map<String, String> partyIdAndTypeMap = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
             if (applicantOptional.isPresent()) {
@@ -815,27 +836,145 @@ public class CaseService {
             .findFirst();
     }
 
-    private List<CitizenNotification> getAllCitizenDashboardNotifications(CaseData caseData,
+    private List<CitizenNotification> getAllCitizenDashboardNotifications(String authorization,
+                                                                          CaseData caseData,
                                                                           CitizenDocumentsManagement citizenDocumentsManagement,
-                                                                          UserDetails userDetails) {
+                                                                          UserDetails userDetails,
+                                                                          Map<String, String> partyIdAndType) {
         List<CitizenNotification> citizenNotifications = new ArrayList<>();
 
-        //PRL-5565 - FM5 dashboard notification
-        if (null != caseData.getFm5ReminderNotificationDetails()
-            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
-            && !isFm5UploadedByParty(citizenDocumentsManagement.getCitizenDocuments(), userDetails)) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(true).build());
+        //PRL-5565 - FM5 notification
+        addFm5ReminderNotification(authorization,
+                                   caseData,
+                                   citizenDocumentsManagement.getCitizenDocuments(),
+                                   userDetails,
+                                   citizenNotifications);
+
+        //PRL-5688 - Orders notifications
+        if (CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenOrders())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(false).build());
         } else {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(false).build());
+            addOrderNotifications(citizenDocumentsManagement.getCitizenOrders(),
+                                  citizenNotifications);
+        }
+
+        //PRL-5431 - SOA notifications
+        if (CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())
+            || isAnyOrderServedPostSoa(citizenDocumentsManagement.getCitizenApplicationPacks().get(0),
+                                    citizenDocumentsManagement.getCitizenOrders())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
+        } else {
+            addSoaNotifications(citizenDocumentsManagement.getCitizenApplicationPacks().get(0),
+                                citizenNotifications);
+        }
+        //SOS
+        if (isSosCompletedPostSoa(caseData, partyIdAndType.get(PARTY_ID))
+            && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders(), partyIdAndType.get(PARTY_ID))) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
         }
 
         return citizenNotifications;
     }
 
+    private void addOrderNotifications(List<CitizenDocuments> citizenOrders,
+                                       List<CitizenNotification> citizenNotifications) {
+        if (citizenOrders.get(0).isPersonalService()) {
+            //CRNF3 - personal service
+            citizenNotifications.add(CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(true).build());
+        } else {
+            //CRNF2 - non personal service
+            citizenNotifications.add(CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(true).build());
+        }
+    }
+
+    private void addFm5ReminderNotification(String authorization,
+                                            CaseData caseData,
+                                            List<CitizenDocuments> citizenDocuments,
+                                            UserDetails userDetails,
+                                            List<CitizenNotification> citizenNotifications) {
+        if (null != caseData.getFm5ReminderNotificationDetails()
+            && "YES".equalsIgnoreCase(caseData.getFm5ReminderNotificationDetails().getFm5RemindersSent())
+            && !isFm5UploadedByParty(citizenDocuments, userDetails)
+            && !isFirstHearingCompleted(authorization, String.valueOf(caseData.getId()))) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN10_FM5).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN10_FM5).show(false).build());
+        }
+    }
+
+    private void addSoaNotifications(CitizenDocuments citizenAppPack,
+                                     List<CitizenNotification> citizenNotifications) {
+        //CAN-4 - SOA Applicant
+        if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
+        }
+
+        //CAN-5 - SOA Respondent
+        if (CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
+        }
+    }
+
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
                                          UserDetails userDetails) {
-        return nullSafeCollection(citizenDocuments).stream()
+        return CollectionUtils.isNotEmpty(citizenDocuments)
+            && citizenDocuments.stream()
             .anyMatch(citizenDocument -> FM5_STATEMENTS.equals(citizenDocument.getCategoryId())
                 && citizenDocument.getPartyId().equals(userDetails.getId()));
+    }
+
+    private boolean isFirstHearingCompleted(String authorization, String caseId) {
+        Hearings hearings = hearingService.getHearings(authorization, caseId);
+        return null != hearings
+            && nullSafeCollection(hearings.getCaseHearings())
+            .stream()
+            .filter(caseHearing -> COMPLETED.equals(caseHearing.getHmcStatus()))
+            .map(CaseHearing::getHearingDaySchedule)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .min(Comparator.comparing(
+                HearingDaySchedule::getHearingStartDateTime,
+                Comparator.nullsLast(Comparator.naturalOrder())
+            )).isPresent();
+    }
+
+    private boolean isAnyOrderServedPostSoa(CitizenDocuments citizenAppPack,
+                                            List<CitizenDocuments> citizenOrders) {
+        return isAnyOrderServedPostDate(citizenOrders, citizenAppPack.getUploadedDate().toLocalDate());
+    }
+
+    private boolean isAnyOrderServedPostSos(CaseData caseData,
+                                            List<CitizenDocuments> citizenOrders,
+                                            String partyId) {
+        return (null != caseData.getStatementOfService()
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication()))
+            && caseData.getStatementOfService().getStmtOfServiceForApplication().stream()
+            .anyMatch(stmtOfSerParty -> getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId()).contains(partyId)
+                && isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption().toLocalDate()));
+    }
+
+    private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
+                                            LocalDate postDate) {
+        return CollectionUtils.isNotEmpty(citizenOrders)
+            && citizenOrders.stream()
+            .anyMatch(citizenOrder -> null != citizenOrder.getServedDate()
+                && citizenOrder.getServedDate().isAfter(postDate));
+    }
+
+    private boolean isSosCompletedPostSoa(CaseData caseData, String partyId) {
+        return (null != caseData.getStatementOfService())
+            && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
+            .anyMatch(stmtOfSerParty -> getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId())
+                .contains(partyId));
     }
 }

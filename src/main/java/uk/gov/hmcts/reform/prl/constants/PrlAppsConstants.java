@@ -1026,5 +1026,13 @@ public class PrlAppsConstants {
     public static final String SOA_BY_POST = "By post";
 
     //Citizen dashboard notifications
-    public static final String CAN_10_FM5 = "CAN_10";
+    public static final String CAN10_FM5 = "CAN10_FM5";
+    public static final String CAN4_SOA_PERS_NONPERS_APPLICANT = "CAN4_SOA_PERS_NONPERS_APPLICANT";
+    public static final String CAN5_SOA_RESPONDENT = "CAN5_SOA_RESPONDENT";
+    public static final String CAN8_SOS_PERSONAL_APPLICANT = "CAN8_SOS_PERSONAL_APPLICANT";
+    public static final String CAN7_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT";
+    public static final String CAN9_SOA_PERSONAL_APPLICANT = "CAN9_SOA_PERSONAL_APPLICANT";
+    public static final String CAN6_VIEW_RESPONSE_APPLICANT = "CAN6_VIEW_RESPONSE_APPLICANT";
+    public static final String CRNF2_APPLICANT_RESPONDENT = "CRNF2_APPLICANT_RESPONDENT";
+    public static final String CRNF3_PERS_SERV_APPLICANT = "CRNF3_PERS_SERV_APPLICANT";
 }
