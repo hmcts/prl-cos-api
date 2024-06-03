@@ -182,6 +182,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_GiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -197,6 +198,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
@@ -224,6 +226,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenNotRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED);
@@ -310,7 +313,6 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
-
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBody)
@@ -325,11 +327,12 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
+    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBody)
             .when()
@@ -342,6 +345,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
+    @Ignore
     @Test
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);

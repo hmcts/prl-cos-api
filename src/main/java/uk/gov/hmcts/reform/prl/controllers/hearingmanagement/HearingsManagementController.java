@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,15 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -44,10 +42,7 @@ public class HearingsManagementController {
     private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
     private final HearingManagementService hearingManagementService;
-    private final AllTabServiceImpl allTabsService;
-
-    @Value("${citizen.url}")
-    private String hearingDetailsUrl;
+    private final AllTabServiceImpl allTabService;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
@@ -94,11 +89,10 @@ public class HearingsManagementController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put("nextHearingDetails",
-                            hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
+                            hearingManagementService.getNextHearingDate(String.valueOf(callbackRequest.getCaseDetails().getId())));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -108,9 +102,13 @@ public class HearingsManagementController {
     public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
+                                          String.valueOf(callbackRequest.getCaseDetails().getId()),
+                                          startAllTabsUpdateDataContent.startEventResponse(),
+                                          startAllTabsUpdateDataContent.eventRequestData(),
+                                          startAllTabsUpdateDataContent.caseDataMap());
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }
