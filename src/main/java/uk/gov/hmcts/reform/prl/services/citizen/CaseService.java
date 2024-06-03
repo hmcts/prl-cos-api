@@ -76,10 +76,12 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN4_SOA_PERS_NONPERS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN5_SOA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN6_VIEW_RESPONSE_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN7_SOA_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN8_SOS_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN9_SOA_PERSONAL_APPLICANT;
@@ -855,23 +857,23 @@ public class CaseService {
             citizenNotifications.add(CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(false).build());
         } else {
-            addOrderNotifications(citizenDocumentsManagement.getCitizenOrders(),
-                                  citizenNotifications);
+            addOrderNotifications(citizenDocumentsManagement.getCitizenOrders(), citizenNotifications);
         }
 
-        //PRL-5431 - SOA notifications
+        //PRL-5431 - SOA & response notifications
         if (CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())
             || isAnyOrderServedPostSoa(citizenDocumentsManagement.getCitizenApplicationPacks().get(0),
                                     citizenDocumentsManagement.getCitizenOrders())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
         } else {
-            addSoaNotifications(citizenDocumentsManagement.getCitizenApplicationPacks().get(0),
-                                citizenNotifications);
+            addSoaNotifications(citizenDocumentsManagement, citizenNotifications);
         }
-        //SOS
+
+        //PRL-5431 - Statement of service notifications
         if (isSosCompletedPostSoa(caseData, partyIdAndType.get(PARTY_ID))
             && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders(), partyIdAndType.get(PARTY_ID))) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
@@ -908,8 +910,9 @@ public class CaseService {
         }
     }
 
-    private void addSoaNotifications(CitizenDocuments citizenAppPack,
+    private void addSoaNotifications(CitizenDocumentsManagement citizenDocumentsManagement,
                                      List<CitizenNotification> citizenNotifications) {
+        CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
         //CAN-4 - SOA Applicant
         if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true).build());
@@ -922,6 +925,11 @@ public class CaseService {
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(true).build());
         } else {
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
+        }
+
+        //Respondent response
+        if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
         }
     }
 
@@ -976,5 +984,11 @@ public class CaseService {
             && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
             .anyMatch(stmtOfSerParty -> getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId())
                 .contains(partyId));
+    }
+
+    private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments) {
+        return CollectionUtils.isNotEmpty(citizenDocuments)
+            && citizenDocuments.stream()
+            .anyMatch(citizenDocument -> RESPONDENT_APPLICATION.equals(citizenDocument.getCategoryId()));
     }
 }
