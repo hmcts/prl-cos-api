@@ -50,6 +50,8 @@
 
 ## Relationships
 
+<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relatioship of children with all people on the case is captured, before submitting the application</div>
+
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
 <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
