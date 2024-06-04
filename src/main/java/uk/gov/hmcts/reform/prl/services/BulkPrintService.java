@@ -62,6 +62,7 @@ public class BulkPrintService {
         } catch (Exception e) {
             log.info("The bulk print service has failed during convertToPdf", e);
         }
+        log.info("*** Documents for bulk print {}", pdfDocuments);
         long stringifiedDocStartTime = System.currentTimeMillis();
         final List<String> stringifiedDocuments = pdfDocuments.parallelStream()
             .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
