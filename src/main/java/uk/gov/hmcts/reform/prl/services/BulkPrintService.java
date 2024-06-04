@@ -68,6 +68,8 @@ public class BulkPrintService {
             .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .toList();
+        log.info("*** Document string {}", stringifiedDocuments);
+
         log.info("*** Time taken to convert docs to stringified array - {}s",
                  TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - stringifiedDocStartTime));
 
