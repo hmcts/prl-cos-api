@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -77,6 +79,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
 
+    private final EventService eventPublisher;
+
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
@@ -96,6 +100,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             if (!mandatoryEventStatus) {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+                eventPublisher.publishEvent(new CaseDataChanged(caseData));
             } else {
                 FeeResponse feeResponse = null;
                 try {
