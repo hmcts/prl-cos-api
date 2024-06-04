@@ -3443,4 +3443,39 @@ public class CallbackControllerTest {
             .populateChildInformation(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("children"));
     }
+
+    @Test
+    public void testUpdateConfidentialDetailsForRefugeWithAuth() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder().build();
+        when(updatePartyDetailsService.updateConfidentialDetailsForRefuge(callbackRequest)).thenReturn(stringObjectMap);
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .updateConfidentialDetailsForRefuge(authToken, s2sToken, callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testUpdateConfidentialDetailsForRefugeWithoutAuth() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        assertExpectedException(() -> {
+            callbackController
+                .updateConfidentialDetailsForRefuge(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
 }
