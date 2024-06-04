@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -81,6 +82,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     private final EventService eventPublisher;
 
+    private final ObjectMapper objectMapper;
+
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
@@ -100,6 +103,8 @@ public class PrePopulateFeeAndSolicitorNameController {
             if (!mandatoryEventStatus) {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+                caseData = objectMapper.convertValue(callbackRequest
+                    .getCaseDetails().getCaseData(), CaseData.class);
                 eventPublisher.publishEvent(new CaseDataChanged(caseData));
             } else {
                 FeeResponse feeResponse = null;
