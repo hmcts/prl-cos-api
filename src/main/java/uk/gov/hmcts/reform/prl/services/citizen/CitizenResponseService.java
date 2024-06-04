@@ -80,7 +80,7 @@ public class CitizenResponseService {
     public static final String C1A_RESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
 
-    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation) throws Exception {
+    public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Inside generateAndReturnDraftC7");
@@ -88,7 +88,7 @@ public class CitizenResponseService {
                 authorisation,
                 caseData,
                 DOCUMENT_C7_DRAFT_HINT,
-                false,
+                isWelsh,
                 updateCurrentRespondent(caseData, partyId)
         );
     }

@@ -141,7 +141,7 @@ public class CitizenResponseServiceTest {
         when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false, new HashMap<>()))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
-        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken);
+        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken, false);
         Assert.assertNotNull(document);
         Assert.assertEquals("testDoc", document.getDocumentFileName());
     }
