@@ -87,11 +87,12 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside prePopulateSolicitorAndFees");
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
                                                                                          .getCaseDetails().getCaseData());
-
+            log.info("mandatoryEventStatus ==>" + mandatoryEventStatus);
             if (!mandatoryEventStatus) {
                 errorList.add(
                     "Submit and pay is not allowed for this case unless you finish all the mandatory events");
