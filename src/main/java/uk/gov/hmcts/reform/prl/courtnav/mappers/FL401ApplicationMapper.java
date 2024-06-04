@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants;
@@ -59,6 +60,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtnavAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
@@ -83,6 +85,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -118,6 +121,7 @@ public class FL401ApplicationMapper {
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getFl401().getSituation().getOrdersAppliedFor())
                                          .build())
+            .applicantChildDetails(getApplicantChildDetails(courtNavCaseData.getFl401().getFamily()))
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
                                                       .orderWithoutGivingNotice(courtNavCaseData
                                                                                     .getFl401()
@@ -235,6 +239,23 @@ public class FL401ApplicationMapper {
 
         return caseData;
 
+    }
+
+    private List<Element<ApplicantChild>> getApplicantChildDetails(Family family) {
+        if (!ObjectUtils.isEmpty(family) && !ObjectUtils.isEmpty(family.getProtectedChildren())) {
+            List<Element<ApplicantChild>> childList = new ArrayList<>();
+            family.getProtectedChildren().forEach(child ->
+                childList.add(element(ApplicantChild.builder()
+                    .fullName(child.getFullName())
+                    .dateOfBirth(LocalDate.parse(child.getDateOfBirth().mergeDate()))
+                    .respondentChildRelationship(child.getRespondentRelationship())
+                    .applicantChildRelationship(child.getRelationship())
+                    .applicantRespondentShareParental(child.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
+                    .build()))
+            );
+            return childList;
+        }
+        return Collections.emptyList();
     }
 
     private CaseData populateCourtDetailsForCourtNavCase(String authorization, CaseData caseData,
