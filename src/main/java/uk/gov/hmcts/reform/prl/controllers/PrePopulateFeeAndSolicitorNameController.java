@@ -106,6 +106,9 @@ public class PrePopulateFeeAndSolicitorNameController {
                 caseData = objectMapper.convertValue(callbackRequest
                     .getCaseDetails().getCaseData(), CaseData.class);
                 eventPublisher.publishEvent(new CaseDataChanged(caseData));
+                return CallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
             } else {
                 FeeResponse feeResponse = null;
                 try {
