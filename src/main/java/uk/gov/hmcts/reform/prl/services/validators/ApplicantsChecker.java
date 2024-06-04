@@ -145,7 +145,6 @@ public class ApplicantsChecker implements EventChecker {
         }
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
-            fields.add(ofNullable(applicant.getIsLiveInRefuge()));
         }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
