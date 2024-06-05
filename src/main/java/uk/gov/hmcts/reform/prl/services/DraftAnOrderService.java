@@ -2439,15 +2439,17 @@ public class DraftAnOrderService {
                 caseData.getCreateSelectOrderOptions()
             );
         } else {
-            DraftOrder draftOrder = getSelectedDraftOrderDetails(
-                caseData.getDraftOrderCollection(),
-                caseData.getDraftOrdersDynamicList()
-            );
+            DraftOrder draftOrder = null;
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 draftOrder = getSelectedDraftOrderDetails(
                     caseData.getDraftOrderCollection(),
                     caseData.getManageOrders()
                         .getRejectedOrdersDynamicList()
+                );
+            } else {
+                draftOrder = getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    caseData.getDraftOrdersDynamicList()
                 );
             }
 
