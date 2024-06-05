@@ -125,7 +125,7 @@ public class SendgridService {
             }
             return false;
         } catch (IOException ex) {
-            log.info("error is {}", ex.getMessage());
+            log.info("Sendgrid exception is {}", ex.getMessage());
             throw new IOException(ex.getMessage());
         } finally {
             log.info("*** Response time taken by sendgrid - {}s",

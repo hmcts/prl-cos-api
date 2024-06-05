@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -205,7 +204,7 @@ public class ManageDocumentsServiceTest {
         parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
             .stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .collect(Collectors.toList());
+            .toList();
 
         dynamicListElementList = new ArrayList<>();
         CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
@@ -1775,12 +1774,12 @@ public class ManageDocumentsServiceTest {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
                                            .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build()).build();
-        uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
+        uk.gov.hmcts.reform.prl.models.documents.Document quarantineDocument = manageDocumentsService
             .getQuarantineDocumentForUploader("Citizen", quarantineLegalDoc
             );
 
-        assertNotNull(document1);
-        assertEquals(quarantineLegalDoc.getCitizenQuarantineDocument().getDocumentUrl(),document1.getDocumentUrl());
+        assertNotNull(quarantineDocument);
+        assertEquals(quarantineLegalDoc.getCitizenQuarantineDocument().getDocumentUrl(),quarantineDocument.getDocumentUrl());
     }
 
 

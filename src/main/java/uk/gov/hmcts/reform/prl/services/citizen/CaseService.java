@@ -85,6 +85,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -430,29 +433,61 @@ public class CaseService {
         return Collections.emptyList();
     }
 
-    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, HashMap<String, String> partyIdAndType) {
+    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData,
+                                                         HashMap<String, String> partyIdAndType) {
         final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
 
         caseData.getFinalServedApplicationDetailsList().stream()
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].isEmpty()
+                if (CollectionUtils.isEmpty(citizenDocuments[0])
                     && servedApplicationDetails.getModeOfService() != null) {
-                    if (servedApplicationDetails.getModeOfService().equals("By email")) {
-                        citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
-                            servedApplicationDetails.getEmailNotificationDetails(), caseData.getServiceOfApplication(),
-                            partyIdAndType
-                        ));
-                    } else {
-                        citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
-                            servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
-                            partyIdAndType
-                        ));
+                    switch (servedApplicationDetails.getModeOfService()) {
+                        case SOA_BY_EMAIL_AND_POST -> {
+                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
+                                servedApplicationDetails.getEmailNotificationDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], emailSoaPack);
+
+                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                servedApplicationDetails.getBulkPrintDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], postSoaPack);
+                        }
+                        case SOA_BY_EMAIL -> {
+                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
+                                servedApplicationDetails.getEmailNotificationDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], emailSoaPack);
+                        }
+                        case SOA_BY_POST -> {
+                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                servedApplicationDetails.getBulkPrintDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], postSoaPack);
+                        }
+
+                        default -> citizenDocuments[0] = null;
                     }
                 }
             });
         return citizenDocuments[0];
+    }
+
+    private void addSoaPacksToCitizenDocuments(List<CitizenDocuments> citizenDocuments,
+                                               CitizenDocuments citizenSoaPack) {
+        if (null != citizenSoaPack) {
+            citizenDocuments.add(citizenSoaPack);
+        }
     }
 
     private CitizenDocuments retrieveApplicationPackFromEmailNotifications(

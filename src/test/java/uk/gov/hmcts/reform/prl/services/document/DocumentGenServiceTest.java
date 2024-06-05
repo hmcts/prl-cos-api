@@ -3726,7 +3726,8 @@ public class DocumentGenServiceTest {
         assertEquals(SUCCESS, documentResponse.getStatus());
     }
 
-    //@Test
+    @Test
+    @Ignore
     public void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
         //Given
         documentRequest = documentRequest.toBuilder()
@@ -3758,10 +3759,10 @@ public class DocumentGenServiceTest {
         //Then
         assertNotNull(caseDetails);
         //CORRECT ASSERTIONS LATER
-        /*assertNotNull(caseDetailsUpdated);
+        assertNotNull(caseDetailsUpdated);
         assertNotNull(caseDetailsUpdated.getData());
         CaseData caseUpdated = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-        assertNotNull(caseUpdated.getDocumentManagementDetails().getCitizenQuarantineDocsList());*/
+        assertNotNull(caseUpdated.getDocumentManagementDetails().getCitizenQuarantineDocsList());
     }
 
     @Test

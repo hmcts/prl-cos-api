@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.OrderEmailConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.OrderEmailNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
@@ -67,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -78,6 +81,7 @@ public class ManageOrderEmailService {
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
+    public static final String MULTIPLE_ORDERS = "multipleOrders";
     public static final String ORDERS = "#Orders";
     public static final String NAME = "name";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
@@ -230,7 +234,7 @@ public class ManageOrderEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
@@ -248,7 +252,7 @@ public class ManageOrderEmailService {
                 ));
                 return temp;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
@@ -257,7 +261,7 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
             .map(PartyDetails::getEmail)
-            .collect(Collectors.toList());
+            .toList();
     }
 
 
@@ -309,6 +313,149 @@ public class ManageOrderEmailService {
             .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
             .orderLink(manageCaseUrl + URL_STRING + caseData.getId() + ORDERS)
             .build();
+    }
+
+    private EmailTemplateVars buildEmailTemplateVarsForCitizenWithDashBoardAccess(Map<String, Object> dynamicData, Element<PartyDetails> party) {
+
+        boolean isFinalOrderFlag = dynamicData.get(FINAL).equals(true);
+        boolean multipleOrderFlag = dynamicData.get(MULTIPLE_ORDERS).equals(true);
+        boolean newAndFinalOrderFlag = dynamicData.get(NEW_AND_FINAL).equals(true);
+        boolean languagePreferenceFlag = dynamicData.get(WELSH_EMAIL).equals(true);
+
+        return OrderEmailNotification
+            .builder()
+            .emailSubject(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
+                newAndFinalOrderFlag, languagePreferenceFlag, false))
+            .emailTitle(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
+                newAndFinalOrderFlag, languagePreferenceFlag, true))
+            .emailTitleWelsh(languagePreferenceFlag ? buildEmailTitleWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
+            .emailTextWelsh(languagePreferenceFlag ? buildEmailTextWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
+            .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .multipleOrdersWelshSentence(languagePreferenceFlag ? multipleOrdersWelshSentence(multipleOrderFlag, newAndFinalOrderFlag) : "")
+            .caseName(String.valueOf(dynamicData.get("caseName")))
+            .applicantName(party.getValue().getFirstName() + " " + party.getValue().getLastName())
+            .caseLink(String.valueOf(dynamicData.get(DASH_BOARD_LINK)))
+            .caseReference(String.valueOf(dynamicData.get("caseReference")))
+            .build();
+    }
+
+    private String multipleOrdersWelshSentence(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
+        if (multipleOrderFlag || newAndFinalOrderFlag) {
+            return OrderEmailConstants.ORDERS_WELSH_SENTENCE;
+        } else {
+            return OrderEmailConstants.ORDER_WELSH_SENTENCE;
+        }
+    }
+
+    private String multipleOrdersWelsh(boolean multipleOrderFlag, boolean newAndFinalOrderFlag) {
+
+        if (multipleOrderFlag || newAndFinalOrderFlag) {
+            return OrderEmailConstants.ORDERS_WELSH;
+        } else {
+            return OrderEmailConstants.ORDER_WELSH;
+        }
+    }
+
+    private String buildEmailSubjectForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                                  boolean newAndFinalOrderFLag, boolean languagePreferenceFlag,
+                                                                  boolean isTitle) {
+
+        if (!languagePreferenceFlag || isTitle) {
+            if (newAndFinalOrderFLag) {
+                return OrderEmailConstants.ORDER_SUBJECT_ENG_NEW_AND_FINAL;
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return OrderEmailConstants.ORDERS_SUBJECT_ENG_FINAL;
+                } else {
+                    return OrderEmailConstants.ORDERS_SUBJECT_ENG_NEW;
+                }
+            } else {
+                if (isFinalOrderFlag) {
+                    return OrderEmailConstants.ORDER_SUBJECT_ENG_FINAL;
+                } else {
+                    return OrderEmailConstants.ORDER_SUBJECT_ENG_NEW;
+                }
+            }
+        } else {
+            if (newAndFinalOrderFLag) {
+                return OrderEmailConstants.ORDER_SUBJECT_WEL_NEW_AND_FINAL;
+            } else if (multipleOrderFlag) {
+                if (isFinalOrderFlag) {
+                    return OrderEmailConstants.ORDERS_SUBJECT_WEL_FINAL;
+                } else {
+                    return OrderEmailConstants.ORDERS_SUBJECT_WEL_NEW;
+                }
+            } else {
+                if (isFinalOrderFlag) {
+                    return OrderEmailConstants.ORDER_SUBJECT_WEL_FINAL;
+                } else {
+                    return OrderEmailConstants.ORDER_SUBJECT_WEL_NEW;
+                }
+            }
+        }
+    }
+
+    private String buildEmailTitleWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                                     boolean newAndFinalOrderFLag) {
+
+        if (newAndFinalOrderFLag) {
+            return OrderEmailConstants.ORDER_TITLE_WEL_NEW_AND_FINAL;
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDERS_TITLE_WEL_FINAL;
+            } else {
+                return OrderEmailConstants.ORDERS_TITLE_WEL_NEW;
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDER_TITLE_WEL_FINAL;
+            } else {
+                return OrderEmailConstants.ORDER_TITLE_WEL_NEW;
+            }
+        }
+    }
+
+    private String buildEmailTextForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                               boolean newAndFinalOrderFLag) {
+
+        if (newAndFinalOrderFLag) {
+            return OrderEmailConstants.ORDER_ENG_NEW_AND_FINAL;
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDERS_ENG_FINAL;
+            } else {
+                return OrderEmailConstants.ORDERS_ENG_NEW;
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDER_ENG_FINAL;
+            } else {
+                return OrderEmailConstants.ORDER_ENG_NEW;
+            }
+        }
+    }
+
+    private String buildEmailTextWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
+                                                               boolean newAndFinalOrderFLag) {
+        if (newAndFinalOrderFLag) {
+            return OrderEmailConstants.ORDER_WEL_NEW_AND_FINAL;
+        } else if (multipleOrderFlag) {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDERS_WEL_FINAL;
+            } else {
+                return OrderEmailConstants.ORDERS_WEL_NEW;
+            }
+        } else {
+            if (isFinalOrderFlag) {
+                return OrderEmailConstants.ORDER_WEL_FINAL;
+            } else {
+                return OrderEmailConstants.ORDER_WEL_NEW;
+            }
+        }
     }
 
     public void sendEmailWhenOrderIsServed(String authorisation,
@@ -445,6 +592,20 @@ public class ManageOrderEmailService {
                 bulkPrintOrderDetails,
                 SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
             ));
+            //Added as part of PRL-5509
+            caseData.getRespondents().forEach(party -> sendSendGridLipOrderEmailToRespondent(party, dynamicDataForEmail));
+        }
+    }
+
+    private void sendSendGridLipOrderEmailToRespondent(Element<PartyDetails> party, Map<String, Object> dynamicDataForEmail) {
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isPartyProvidedWithEmail(party.getValue()) && hasDashboardAccess(party)) {
+            emailService.send(
+                party.getValue().getEmail(),
+                EmailTemplateNames.CA_LIP_ORDERS,
+                buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
+                dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
+            );
         }
     }
 
@@ -458,17 +619,27 @@ public class ManageOrderEmailService {
         log.debug("=== Party contact preference ==== {}", party.getValue().getContactPreferences());
         if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
             && isPartyProvidedWithEmail(party.getValue())) {
-            log.info("*** Send orders to party via email using send grid {}", party.getId());
             dynamicDataForEmail.put("name", party.getValue().getLabelForDynamicList());
             dynamicDataForEmail.put(DASH_BOARD_LINK, citizenDashboardUrl);
 
-            sendEmailViaSendGrid(
-                authorisation,
-                orderDocuments,
-                dynamicDataForEmail,
-                party.getValue().getEmail(),
-                sengGridTemplate
-            );
+            if (hasDashboardAccess(party)) {
+                //Send notification to party with access to dashboard using notify.gov
+                emailService.send(
+                    party.getValue().getEmail(),
+                    EmailTemplateNames.CA_LIP_ORDERS,
+                    buildEmailTemplateVarsForCitizenWithDashBoardAccess(dynamicDataForEmail, party),
+                    dynamicDataForEmail.get(WELSH_EMAIL).equals(true) ? LanguagePreference.welsh : LanguagePreference.english
+                );
+            } else {
+                //Send notification to party without access to dashboard using sendgrid
+                sendEmailViaSendGrid(
+                    authorisation,
+                    orderDocuments,
+                    dynamicDataForEmail,
+                    party.getValue().getEmail(),
+                    sengGridTemplate
+                );
+            }
         } else {
             log.info("*** Send orders to party via post using bulk print {}", party.getId());
             sendOrdersToPartyAddressViaPost(
@@ -694,7 +865,7 @@ public class ManageOrderEmailService {
     }
 
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
-        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
+        dynamicData.put(MULTIPLE_ORDERS, CollectionUtils.size(selectedOrderIds) > 1);
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {

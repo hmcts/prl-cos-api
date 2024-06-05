@@ -238,7 +238,6 @@ public class ReviewDocumentService {
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid,String authorization) {
         boolean isDocumentFound = false;
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             //solicitor uploaded docs
@@ -274,22 +273,9 @@ public class ReviewDocumentService {
 
             }
             //Bulk scan
-            if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
-                quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
-                if (quarantineLegalDocElementOptional.isPresent()) {
-                    processDocumentsAfterReviewNew(
-                        caseData,
-                        caseDataUpdated,
-                        quarantineLegalDocElementOptional.get(),
-                        UserDetails.builder().roles(List.of(Roles.BULK_SCAN.getValue())).build(),
-                        BULK_SCAN,authorization
-                    );
-                    removeFromScannedDocumentListAfterReview(caseDataUpdated, caseData, uuid);
-                }
-            }
+            processBulkScanDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
         }
     }
-
 
     private boolean processReviewDocument(CaseData caseData,
                                           Map<String, Object> caseDataUpdated,
@@ -340,6 +326,23 @@ public class ReviewDocumentService {
             caseDataUpdated,
             userRole,authorization
         );
+    }
+
+    private void processBulkScanDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
+        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
+        if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
+            quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
+            if (quarantineLegalDocElementOptional.isPresent()) {
+                processDocumentsAfterReviewNew(
+                    caseData,
+                    caseDataUpdated,
+                    quarantineLegalDocElementOptional.get(),
+                    UserDetails.builder().roles(List.of(Roles.BULK_SCAN.getValue())).build(),
+                    BULK_SCAN
+                );
+                removeFromScannedDocumentListAfterReview(caseDataUpdated, caseData, uuid);
+            }
+        }
     }
 
     private void removeFromScannedDocumentListAfterReview(Map<String, Object> caseDataUpdated,
