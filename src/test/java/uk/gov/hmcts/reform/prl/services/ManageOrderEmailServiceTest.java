@@ -1079,7 +1079,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForCitizenWhenTheyHaveDashboardAccess() throws Exception {
+    public void testSendEmailForCitizenWhenTheyHaveDashboardAccess() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1130,7 +1130,7 @@ public class ManageOrderEmailServiceTest {
             .builder()
             .code("00000000-0000-0000-0000-000000000000")
             .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+        DynamicMultiSelectList dynamicMultiSelectLists = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
         applicant = applicant.toBuilder()
@@ -1139,7 +1139,7 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("")
             .build();
-        PartyDetails respondent = applicant.toBuilder()
+        PartyDetails respondents = applicant.toBuilder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
@@ -1150,12 +1150,12 @@ public class ManageOrderEmailServiceTest {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondents).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                 .serveToRespondentOptions(YesOrNo.No)
-                .recipientsOptions(dynamicMultiSelectList)
-                .serveOrderDynamicList(dynamicMultiSelectList)
+                .recipientsOptions(dynamicMultiSelectLists)
+                .serveOrderDynamicList(dynamicMultiSelectLists)
                 .cafcassEmailId("test").build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();

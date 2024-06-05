@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -54,6 +55,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
@@ -71,6 +73,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -91,10 +96,6 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
-
-    private static final String BY_EMAIL = "By email";
-    private static final String BY_EMAIL_AND_POST = "By email and post";
-    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -182,7 +183,7 @@ public class CaseUtils {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String baseLocationName = courtVenue.get().getVenueName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
@@ -676,13 +677,13 @@ public class CaseUtils {
                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
         if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
-            temp = BY_EMAIL;
+            temp = SOA_BY_EMAIL;
         }
         if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
             if (null != temp) {
-                temp = BY_EMAIL_AND_POST;
+                temp = SOA_BY_EMAIL_AND_POST;
             } else {
-                temp = BY_POST;
+                temp = SOA_BY_POST;
             }
         }
         return temp;
@@ -808,5 +809,38 @@ public class CaseUtils {
         return null != party.getValue()
             && null != party.getValue().getUser()
             && null != party.getValue().getUser().getIdamId();
+    }
+
+    public static String getApplicantNameForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return String.format(PrlAppsConstants.FORMAT, applicant1.getFirstName(),
+                             applicant1.getLastName()
+        );
+
+    }
+
+    public static String getApplicantReferenceForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails applicant1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicants().get(0).getValue() : caseData.getApplicantsFL401();
+        return applicant1.getSolicitorReference();
+    }
+
+    public static String getRespondentForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        return String.format(
+            PrlAppsConstants.FORMAT, respondent1.getFirstName(),
+            respondent1.getLastName()
+        );
+    }
+
+    public static LocalDate getRespondentDobForDaOrderSelectedForCaCase(CaseData caseData) {
+        PartyDetails respondent1 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getRespondents().get(0).getValue() : caseData.getRespondentsFL401();
+        if (ofNullable(respondent1.getDateOfBirth()).isPresent()) {
+            return respondent1.getDateOfBirth();
+        }
+        return null;
     }
 }
