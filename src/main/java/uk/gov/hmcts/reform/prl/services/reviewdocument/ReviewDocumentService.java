@@ -11,20 +11,28 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +66,7 @@ public class ReviewDocumentService {
     private final AllTabServiceImpl allTabService;
     private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
+    private final SendgridService sendgridService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
@@ -326,6 +335,58 @@ public class ReviewDocumentService {
             caseDataUpdated,
             userRole
         );
+        // PRL-5247 Send notifications to Applicants if Respondent's response is reviewed and marked as Non Confidential
+        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            if (tempQuarantineDoe.getRespondentApplicationDocument() != null) {
+                QuarantineLegalDoc finalTempQuarantineDoe = tempQuarantineDoe;
+                caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .toList()
+                    .stream()
+                    .forEach(partyDetails ->
+                                 sendEmailToApplicantOrApplicantSolicitor(
+                                     partyDetails,
+                                     finalTempQuarantineDoe,
+                                     caseData
+                                 )
+                    );
+            }
+        }
+    }
+
+    private void sendEmailToApplicantOrApplicantSolicitor(PartyDetails partyDetails, QuarantineLegalDoc quarantineLegalDoc, CaseData caseData) {
+        String applicantName = partyDetails.getLabelForDynamicList();
+        String applicantEmail = partyDetails.getEmail();
+        boolean isRepresented = YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        if (isRepresented) {
+            applicantName = partyDetails.getSolicitorReference();
+            applicantEmail = partyDetails.getSolicitorEmail();
+        }
+
+        List<Document> documentsToBeAttached = new ArrayList<>();
+        documentsToBeAttached.add(quarantineLegalDoc.getRespondentApplicationDocument());
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put("respondentName", quarantineLegalDoc.getUploadedBy());
+        dynamicData.put("applicantName", applicantName);
+
+        try {
+            log.info("inside sendEmailViaSendGrid");
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.NOTIFY_APPLICANT_ABOUT_RESPONDENT_RESPONSE,
+                systemUserService.getSysUserToken(),
+                SendgridEmailConfig.builder()
+                    .listOfAttachments(documentsToBeAttached)
+                    .toEmailAddress(applicantEmail)
+                    .dynamicTemplateData(dynamicData)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
+            );
+        } catch (IOException e) {
+            log.error("THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION",
+                      partyDetails.getEmail(), e.getMessage(), e
+            );
+        }
+
     }
 
     private void processBulkScanDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
