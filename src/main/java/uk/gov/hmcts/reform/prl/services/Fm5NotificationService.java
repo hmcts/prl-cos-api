@@ -287,7 +287,7 @@ public class Fm5NotificationService {
                                      PartyDetails party) {
         List<Document> coverSheets = null;
         try {
-            coverSheets = serviceOfApplicationPostService.getCoverLetter(
+            coverSheets = serviceOfApplicationPostService.getCoverLetterServeOrder(
                 caseData,
                 authorisation,
                 party.getAddress(),
