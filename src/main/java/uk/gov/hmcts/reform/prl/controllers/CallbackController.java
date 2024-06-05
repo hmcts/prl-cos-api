@@ -15,11 +15,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -989,22 +987,8 @@ public class CallbackController {
         }
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         if (isCourtStaff) {
-            caseDataUpdated.put(CASE_CREATED_BY, CaseCreatedBy.COURT_ADMIN);
+            caseDataUpdated.put(CASE_CREATED_BY,CaseCreatedBy.COURT_ADMIN);
         }
-    }
-
-    @GetMapping(path = "/fetchRoleAssignment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "search case data")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity<Object> fetchRoleAssignment(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestParam(name = "actorId") String actorId
-    ) {
-        log.info("processing request after authorization");
-        return ResponseEntity.ok(roleAssignmentService.getRoleAssignmentForActorId(actorId));
     }
 
     @PostMapping(path = "/pre-populate-child-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

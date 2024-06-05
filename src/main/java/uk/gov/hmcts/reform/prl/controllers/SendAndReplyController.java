@@ -267,7 +267,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            //      sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
@@ -290,17 +290,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                     );
                 }
 
-                // in case of reply and close message, removing replymessageobject for wa
-                //  sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
-            //WA - clear send field in case of REPLY
-            //  sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
-        //clear temp fields
-        //sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
@@ -319,7 +313,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        sendAndReplyService.callfromSubmittedCallback(authorisation, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(authorisation, caseData);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
