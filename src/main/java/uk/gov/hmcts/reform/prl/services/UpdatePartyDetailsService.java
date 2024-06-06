@@ -596,12 +596,10 @@ public class UpdatePartyDetailsService {
     private  String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
         String name = null;
         if (!StringUtils.isBlank(parties.getValue().getFirstName())
-            && !StringUtils.isBlank(parties.getValue().getLastName())
-            && !StringUtils.isBlank(address)) {
-            name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - ";
-        } else if (!StringUtils.isBlank(parties.getValue().getFirstName())
             && !StringUtils.isBlank(parties.getValue().getLastName())) {
-            name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
+            name = !StringUtils.isBlank(address)
+                ? parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
+                : parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
         }
         return name;
     }
@@ -619,11 +617,10 @@ public class UpdatePartyDetailsService {
                 ? parties.getValue().getAddress().getPostCode() : "";
 
             //Adding comma to address line 2 if the postcode is there
-            if (!StringUtils.isBlank(postcode) && !StringUtils.isBlank(parties.getValue()
-                .getAddress().getAddressLine2())) {
-                addressLine2 = parties.getValue().getAddress().getAddressLine2().concat(", ");
-            } else if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
-                addressLine2 = parties.getValue().getAddress().getAddressLine2();
+            if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
+                addressLine2 = !StringUtils.isBlank(postcode)
+                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
+                    : parties.getValue().getAddress().getAddressLine2();
             }
 
             //Comma is required if postcode or address line 2 is not blank
