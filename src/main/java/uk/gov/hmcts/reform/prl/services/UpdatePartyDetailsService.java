@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
@@ -157,8 +158,14 @@ public class UpdatePartyDetailsService {
                                                  ))
             );
             updatedCaseData.put(APPLICANTS, updatedApplicants);
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && isNotEmpty(caseData.getApplicantsFL401())) {
+            PartyDetails updatedApplicant = YesOrNo.Yes.equals(caseData.getApplicantsFL401().getIsLiveInRefuge())
+                ? markPersonalDetailsAsConfidentialForRefugeApplicants(
+                caseData.getApplicantsFL401())
+                : caseData.getApplicantsFL401();
+            updatedCaseData.put(FL401_APPLICANTS, updatedApplicant);
         }
-
     }
 
     private PartyDetails markPersonalDetailsAsConfidentialForRefugeApplicants(PartyDetails partyDetails) {
@@ -289,10 +296,10 @@ public class UpdatePartyDetailsService {
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
         boolean roleNotExists = false;
-        if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
+        if (isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (isEmpty(
             applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
             applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
@@ -532,12 +539,7 @@ public class UpdatePartyDetailsService {
             caseData.getApplicants().forEach(eachApplicant ->
                                                  updatedApplicants.add(element(
                                                      eachApplicant.getId(),
-                                                     YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
-                                                         ? resetConfidentialDetailsForRefugeParties(
-                                                         eachApplicant.getValue())
-                                                         : eachApplicant.getValue()
-                                                 ))
-            );
+                                                     resetPartyConfidentialDetailsForRefuge(eachApplicant.getValue()))));
             caseDataUpdated.put(APPLICANTS, updatedApplicants);
         }
         return caseDataUpdated;
@@ -591,27 +593,29 @@ public class UpdatePartyDetailsService {
 
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && Event.AMEND_APPLICANTS_DETAILS.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
-            List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
-            caseData.getApplicants().forEach(eachApplicant ->
-                                                 updatedApplicants.add(element(
-                                                     eachApplicant.getId(),
-                                                     YesOrNo.Yes.equals(eachApplicant.getValue().getIsLiveInRefuge())
-                                                         ? resetConfidentialDetailsForRefugeParties(
-                                                         eachApplicant.getValue())
-                                                         : eachApplicant.getValue()
-                                                 ))
-            );
-            updatedCaseData.put(APPLICANTS, updatedApplicants);
+        if (Event.AMEND_APPLICANTS_DETAILS.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+                caseData.getApplicants().forEach(eachApplicant ->
+                                                     updatedApplicants.add(element(
+                                                         eachApplicant.getId(),
+                                                         resetPartyConfidentialDetailsForRefuge(eachApplicant.getValue())
+                                                     )));
+                updatedCaseData.put(APPLICANTS, updatedApplicants);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && isNotEmpty(caseData.getApplicantsFL401())) {
+                PartyDetails updatedApplicant = resetPartyConfidentialDetailsForRefuge(caseData.getApplicantsFL401());
+                updatedCaseData.put(FL401_APPLICANTS, updatedApplicant);
+            }
         }
         return updatedCaseData;
     }
 
-    private PartyDetails resetConfidentialDetailsForRefugeParties(PartyDetails partyDetails) {
-        log.info("*** Inside resetConfidentialDetailsForRefugeParties ***");
+    public PartyDetails resetPartyConfidentialDetailsForRefuge(PartyDetails partyDetails) {
+        log.info("*** Inside resetPartyConfidentialDetailsForRefuge ***");
         PartyDetails updatedPartyDetails = partyDetails.toBuilder()
+            .isLiveInRefuge(isEmpty(partyDetails.getIsLiveInRefuge()) ? YesOrNo.No : partyDetails.getIsLiveInRefuge())
             .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
                                        ? null : partyDetails.getIsAddressConfidential())
             .isAtAddressLessThan5Years(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
@@ -622,7 +626,7 @@ public class UpdatePartyDetailsService {
             .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getIsLiveInRefuge())
                                            ? null : partyDetails.getIsPhoneNumberConfidential())
             .build();
-        log.info("Exit resetConfidentialDetailsForRefugeParties with party {}", updatedPartyDetails);
+        log.info("Exit resetPartyConfidentialDetailsForRefuge with party {}", updatedPartyDetails);
         return updatedPartyDetails;
     }
 }

@@ -49,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -113,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -625,6 +627,11 @@ public class CallbackController {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData));
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData));
+        } else {
+            if (isNotEmpty(caseData.getApplicantsFL401()) && isNotEmpty(caseData.getApplicantsFL401().getFirstName())) {
+                PartyDetails updatedApplicant = updatePartyDetailsService.resetPartyConfidentialDetailsForRefuge(caseData.getApplicantsFL401());
+                caseDataUpdated.put(FL401_APPLICANTS, updatedApplicant);
+            }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -1011,7 +1018,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/update-refuge-confidential-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/update-party-confidential-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Reset confidential details for refuge Applicants")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
