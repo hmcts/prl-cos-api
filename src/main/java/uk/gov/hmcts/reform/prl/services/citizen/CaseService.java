@@ -758,7 +758,7 @@ public class CaseService {
             && null != order.getOtherDetails().getOrderServedDate()) {
             return LocalDate.parse(
                 order.getOtherDetails().getOrderServedDate(),
-                DateTimeFormatter.ofPattern("dd MMM yyyy")
+                DateTimeFormatter.ofPattern(D_MMM_YYYY)
             );
         }
         return null;
