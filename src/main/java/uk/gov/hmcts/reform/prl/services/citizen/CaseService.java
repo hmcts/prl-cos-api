@@ -92,6 +92,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF3_PERS_SERV_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
@@ -743,7 +744,7 @@ public class CaseService {
             && null != order.getOtherDetails().getOrderMadeDate()) {
             return LocalDate.parse(
                 order.getOtherDetails().getOrderMadeDate(),
-                DateTimeFormatter.ofPattern("dd MMM yyyy")
+                DateTimeFormatter.ofPattern(D_MMM_YYYY)
             );
         } else if (null != order.getDateCreated()) {
             //If order made date is not available then fallback to order created date.
