@@ -1192,8 +1192,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put(
                 "solicitorRepresented",
-                solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
-        );
+                null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (null != response.getResponseToAllegationsOfHarm()
