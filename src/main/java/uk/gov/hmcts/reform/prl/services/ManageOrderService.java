@@ -3211,12 +3211,11 @@ public class ManageOrderService {
         Map<String, Object> waFieldsMap = new HashMap<>();
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions() != null
-                                                                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
-            } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(getSelectedOrderInfoForUpload(caseData));
-            }
+            // Its expected that draft order collection is already sorted
+            // by this time and first element is the latest draft order
+            orderNameForWA = !caseData.getDraftOrderCollection().isEmpty()
+                ? caseData.getDraftOrderCollection().get(0).getValue().getLabelForOrdersDynamicList()
+                : " ";
             performingUser = getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
