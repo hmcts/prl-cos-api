@@ -107,17 +107,6 @@
           "caseType": "Unknown",
           "caseDetails": ""
         }
-      ],
-      "protectedChildren": [
-        {
-          "fullName": "John Jr",
-          "dateOfBirth": {
-            "day": 1,
-            "month": 1,
-            "year": 1958
-          },
-          "relationship": "Father"
-        }
       ]
     },
     "respondentBehaviour": {
