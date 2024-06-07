@@ -69,12 +69,19 @@ public class CaseDataApplicantElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(ApplicantDto applicantDto) {
-        List<String> contactDetailsPrivateList1 = Arrays.stream(applicantDto.getContactDetailsPrivate())
+        List<String> contactDetailsPrivateList;
+        if (YesOrNo.Yes.equals(applicantDto.getStayingInRefuge())) {
+            contactDetailsPrivateList = Arrays.asList(ADDRESS_FIELD, EMAIL_FIELD, TELEPHONE_FIELD);
+        } else {
+            List<String> contactDetailsPrivateList1 = Arrays.stream(applicantDto.getContactDetailsPrivate())
                 .toList();
-        List<String> contactDetailsPrivateList2 = Arrays.stream(applicantDto.getContactDetailsPrivateAlternative())
+            List<String> contactDetailsPrivateList2 = Arrays.stream(applicantDto.getContactDetailsPrivateAlternative())
                 .toList();
-        List<String> contactDetailsPrivateList = Stream.concat(contactDetailsPrivateList1.stream(),
-                contactDetailsPrivateList2.stream()).toList();
+            contactDetailsPrivateList = Stream.concat(
+                contactDetailsPrivateList1.stream(),
+                contactDetailsPrivateList2.stream()
+            ).toList();
+        }
         return PartyDetails
             .builder()
             .firstName(applicantDto.getApplicantFirstName())
@@ -95,12 +102,9 @@ public class CaseDataApplicantElementsMapper {
             .address(buildAddress(applicantDto))
             .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
             .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
-            .isAddressConfidential(YesOrNo.Yes.equals(applicantDto.getStayingInRefuge())
-                                   ? YesOrNo.Yes : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
-            .isEmailAddressConfidential(YesOrNo.Yes.equals(applicantDto.getStayingInRefuge())
-                                            ? YesOrNo.Yes : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-            .isPhoneNumberConfidential(YesOrNo.Yes.equals(applicantDto.getStayingInRefuge())
-                                           ? YesOrNo.Yes : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+            .isAddressConfidential(buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
+            .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
+            .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
             .liveInRefuge(applicantDto.getStayingInRefuge())
