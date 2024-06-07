@@ -76,6 +76,7 @@ import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RefugeConfidentialityService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -182,6 +183,8 @@ public class CallbackController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
+
+    private final RefugeConfidentialityService refugeConfidentialityService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -629,7 +632,7 @@ public class CallbackController {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData));
         } else {
             if (isNotEmpty(caseData.getApplicantsFL401()) && isNotEmpty(caseData.getApplicantsFL401().getFirstName())) {
-                PartyDetails updatedApplicant = updatePartyDetailsService.resetPartyConfidentialDetailsForRefuge(caseData.getApplicantsFL401());
+                PartyDetails updatedApplicant = refugeConfidentialityService.resetPartyConfidentialDetailsForRefuge(caseData.getApplicantsFL401());
                 caseDataUpdated.put(FL401_APPLICANTS, updatedApplicant);
             }
         }
@@ -1016,28 +1019,6 @@ public class CallbackController {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyChildDetails(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/update-party-confidential-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Reset confidential details for refuge Applicants")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse updateConfidentialDetailsForRefuge(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse
-                .builder()
-                .data(updatePartyDetailsService.updateConfidentialDetailsForRefuge(callbackRequest))
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
     }
 }
 
