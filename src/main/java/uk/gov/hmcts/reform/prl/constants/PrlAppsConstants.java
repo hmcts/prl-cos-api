@@ -654,6 +654,7 @@ public class PrlAppsConstants {
     public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
     public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String DA_ORDER_FOR_CA_CASE = "daOrderForCaCase";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
@@ -924,6 +925,9 @@ public class PrlAppsConstants {
 
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
+
+    public static final String ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT = "You need to go back to the previous screen and "
+        + "upload an order, as this case has multiple applicants or respondents.";
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
