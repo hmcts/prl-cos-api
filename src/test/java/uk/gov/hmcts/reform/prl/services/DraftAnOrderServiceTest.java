@@ -5067,7 +5067,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
             TEST_UUID));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, true);
+        String name = draftAnOrderService.getApprovedDraftOrderNameForWA(caseData);
         assertNotNull(name);
         assertTrue(name.contains(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
@@ -5086,7 +5086,7 @@ public class DraftAnOrderServiceTest {
             .build();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        String name = draftAnOrderService.getApprovedDraftOrderNameForWA(caseData);
         assertNotNull(name);
         assertTrue(name.contains(CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
@@ -5109,7 +5109,7 @@ public class DraftAnOrderServiceTest {
             caseData)).thenReturn(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue());
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
-        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        String name = draftAnOrderService.getApprovedDraftOrderNameForWA(caseData);
         assertNotNull(name);
         assertTrue(name.contains(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue()));
         assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(

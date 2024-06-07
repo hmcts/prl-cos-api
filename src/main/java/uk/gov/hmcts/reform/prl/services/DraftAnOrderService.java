@@ -2130,7 +2130,6 @@ public class DraftAnOrderService {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, false));
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)
             && isHearingPageNeeded(
@@ -2171,25 +2170,28 @@ public class DraftAnOrderService {
 
         }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
+        caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, callbackRequest.getEventId()));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
-    public String getDraftOrderNameForWA(CaseData caseData, boolean isApprovalJourney) {
-        if (isApprovalJourney) {
+    private String getDraftOrderNameForWA(CaseData caseData, String eventId) {
+        if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
+            return caseData.getDraftOrderCollection().get(0).getValue().getLabelForOrdersDynamicList();
+        } else {
+            log.error("Error while fetching the order name for WA");
+            return "";
+        }
+    }
+
+    public String getApprovedDraftOrderNameForWA(CaseData caseData) {
+        if (!Objects.isNull(caseData.getDraftOrdersDynamicList())) {
             return getSelectedDraftOrderDetails(
                 caseData.getDraftOrderCollection(),
                 caseData.getDraftOrdersDynamicList()
             )
                 .getLabelForOrdersDynamicList();
-        } else {
-            if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
-                return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue());
-            } else if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-                return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(
-                    caseData));
-            }
         }
         return null;
     }
