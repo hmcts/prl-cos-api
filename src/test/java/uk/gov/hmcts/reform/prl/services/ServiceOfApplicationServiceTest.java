@@ -3667,7 +3667,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
 
-    @Ignore
+    @Ignore("Temporary, this will be fixed before releasing")
     @Test
     public void testSendNotificationForLa() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
