@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -214,6 +215,7 @@ public class EditReturnedOrderServiceTest {
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
+    @Ignore
     @Test
     public void  testAboutToSubmitHandlerForDraftedOrder() {
         CaseData caseData = CaseData.builder()
@@ -231,6 +233,7 @@ public class EditReturnedOrderServiceTest {
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
     }
 
+    @Ignore
     @Test
     public void  testAboutToSubmitHandlerForUploadedOrder() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();

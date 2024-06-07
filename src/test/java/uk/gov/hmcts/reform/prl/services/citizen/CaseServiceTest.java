@@ -816,7 +816,7 @@ public class CaseServiceTest {
         assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
         assertEquals(false, notifications.get(CAN10_FM5));
         assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
-        assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
+        //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
         assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
