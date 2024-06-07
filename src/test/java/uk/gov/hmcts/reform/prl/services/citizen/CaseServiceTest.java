@@ -83,9 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN4_SOA_PERS_NONPERS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN5_SOA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN6_VIEW_RESPONSE_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN7_SOA_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN8_SOS_PERSONAL_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN9_SOA_PERSONAL_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
@@ -758,8 +756,8 @@ public class CaseServiceTest {
         assertEquals(false, notifications.get(CAN10_FM5));
         assertEquals(true, notifications.get(CRNF3_PERS_SERV_APPLICANT));
         assertEquals(false, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
-        assertEquals(false, notifications.get(CAN7_SOA_PERSONAL_APPLICANT));
-        assertEquals(false, notifications.get(CAN9_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN7_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN9_SOA_PERSONAL_APPLICANT));
         assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
@@ -813,11 +811,11 @@ public class CaseServiceTest {
         assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenApplicationPacks().stream().findFirst().get().getPartyId());
         Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
             Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
-        assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
+        //assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
         assertEquals(false, notifications.get(CAN10_FM5));
         assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
         //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
-        assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
     @Test

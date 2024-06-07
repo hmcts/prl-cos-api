@@ -67,6 +67,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -427,7 +428,7 @@ public class CaseService {
 
         //Citizen dashboard notification enable/disable flags
         List<CitizenNotification> citizenNotifications =
-            getAllCitizenDashboardNotifications(authToken, caseData, citizenDocumentsManagement, userDetails, partyIdAndType);
+            getAllCitizenDashboardNotifications(authToken, caseData, citizenDocumentsManagement, userDetails);
         if (CollectionUtils.isNotEmpty(citizenNotifications)) {
             citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
                 .citizenNotifications(citizenNotifications)
@@ -465,14 +466,14 @@ public class CaseService {
                     switch (servedApplicationDetails.getModeOfService()) {
                         case SOA_BY_EMAIL_AND_POST -> {
                             CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
-                                servedApplicationDetails.getEmailNotificationDetails(),
+                                servedApplicationDetails,
                                 caseData.getServiceOfApplication(),
                                 partyIdAndType
                             );
                             addSoaPacksToCitizenDocuments(citizenDocuments[0], servedApplicationDetails, emailSoaPack);
 
                             CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
-                                servedApplicationDetails.getBulkPrintDetails(),
+                                servedApplicationDetails,
                                 caseData.getServiceOfApplication(),
                                 partyIdAndType
                             );
@@ -480,7 +481,7 @@ public class CaseService {
                         }
                         case SOA_BY_EMAIL -> {
                             CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
-                                servedApplicationDetails.getEmailNotificationDetails(),
+                                servedApplicationDetails,
                                 caseData.getServiceOfApplication(),
                                 partyIdAndType
                             );
@@ -488,7 +489,7 @@ public class CaseService {
                         }
                         case SOA_BY_POST -> {
                             CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
-                                servedApplicationDetails.getBulkPrintDetails(),
+                                servedApplicationDetails,
                                 caseData.getServiceOfApplication(),
                                 partyIdAndType
                             );
@@ -516,13 +517,13 @@ public class CaseService {
     }
 
     private CitizenDocuments retrieveApplicationPackFromEmailNotifications(
-        List<Element<EmailNotificationDetails>> emailNotificationDetailsList,
+        ServedApplicationDetails servedApplicationDetails,
         ServiceOfApplication serviceOfApplication,
         Map<String, String> partyIdAndType) {
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        nullSafeCollection(emailNotificationDetailsList).stream()
+        nullSafeCollection(servedApplicationDetails.getEmailNotificationDetails()).stream()
             .map(Element::getValue)
             .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
             .filter(emailNotificationDetails -> getPartyIds(emailNotificationDetails.getPartyIds())
@@ -547,10 +548,12 @@ public class CaseService {
                             ? emailNotificationDetails.getDocs().stream()
                                 .map(Element::getValue)
                                 .toList()
-                            : getUnservedRespondentDocumentList(serviceOfApplication)
+                            : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
-                    .wasCafcassServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList, SERVED_PARTY_CAFCASS))
-                    .wasCafcassCymruServed(isCafcassOrCafcassCymruServed(emailNotificationDetailsList, SERVED_PARTY_CAFCASS_CYMRU))
+                    .wasCafcassServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
+                                                                    SERVED_PARTY_CAFCASS))
+                    .wasCafcassCymruServed(isCafcassOrCafcassCymruServed(servedApplicationDetails.getEmailNotificationDetails(),
+                                                                         SERVED_PARTY_CAFCASS_CYMRU))
                     .build()
         );
         return citizenDocuments[0];
@@ -562,8 +565,17 @@ public class CaseService {
             : Collections.emptyList();
     }
 
-    private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
-        return null != serviceOfApplication.getUnServedRespondentPack()
+    private List<String> getPartyIds(List<Element<PartyDetails>> parties) {
+        return CollectionUtils.isNotEmpty(parties)
+            ? parties.stream().map(Element::getId).map(Objects::toString).toList()
+            : Collections.emptyList();
+    }
+
+    private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication,
+                                                                    ServedApplicationDetails servedApplicationDetails) {
+        //populate respondent unserved packs only in case of personal service by unrepresented lip
+        return UNREPRESENTED_APPLICANT.equals(servedApplicationDetails.getWhoIsResponsible())
+            && null != serviceOfApplication.getUnServedRespondentPack()
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)
@@ -572,14 +584,14 @@ public class CaseService {
 
 
     private CitizenDocuments retreiveApplicationPackFromBulkPrintDetails(
-        List<Element<BulkPrintDetails>> bulkPrintDetailsList,
+        ServedApplicationDetails servedApplicationDetails,
         ServiceOfApplication serviceOfApplication,
         Map<String, String> partyIdAndType) {
 
         final CitizenDocuments[] citizenDocuments = {null};
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
 
-        nullSafeCollection(bulkPrintDetailsList).stream()
+        nullSafeCollection(servedApplicationDetails.getBulkPrintDetails()).stream()
             .map(Element::getValue)
             .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
             .filter(bulkPrintDetails -> getPartyIds(bulkPrintDetails.getPartyIds())
@@ -604,7 +616,7 @@ public class CaseService {
                             ? bulkPrintDetails.getPrintDocs().stream()
                                 .map(Element::getValue)
                                 .toList()
-                            : getUnservedRespondentDocumentList(serviceOfApplication)
+                            : getUnservedRespondentDocumentList(serviceOfApplication, servedApplicationDetails)
                     )
                     .build()
         );
@@ -688,9 +700,9 @@ public class CaseService {
             );
         }
         return CitizenDocuments.builder()
-            .partyId(quarantineDoc.getUploadedByIdamId())
+            .partyId(quarantineDoc.getUploadedByIdamId())//BETTER TO HAVE SEPARATE FIELD FOR IDAMID
             .partyType(quarantineDoc.getDocumentParty())
-            .partyName(quarantineDoc.getUploadedBy())
+            .partyName(quarantineDoc.getUploadedBy())//CAN NOT BE UPLOADEDBY, SHOULD BE PARTY NAME
             .categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
@@ -860,8 +872,7 @@ public class CaseService {
     private List<CitizenNotification> getAllCitizenDashboardNotifications(String authorization,
                                                                           CaseData caseData,
                                                                           CitizenDocumentsManagement citizenDocumentsManagement,
-                                                                          UserDetails userDetails,
-                                                                          Map<String, String> partyIdAndType) {
+                                                                          UserDetails userDetails) {
         List<CitizenNotification> citizenNotifications = new ArrayList<>();
 
         //PRL-5565 - FM5 notification
@@ -882,23 +893,29 @@ public class CaseService {
         //PRL-5431 - SOA & response notifications
         if (CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())
             || isAnyOrderServedPostSoa(citizenDocumentsManagement.getCitizenApplicationPacks().get(0),
-                                    citizenDocumentsManagement.getCitizenOrders())) {
+                                       citizenDocumentsManagement.getCitizenOrders())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
+            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
         } else {
-            addSoaNotifications(citizenDocumentsManagement, citizenNotifications);
+            addSoaNotifications(citizenDocumentsManagement, citizenNotifications, userDetails);
         }
 
         //PRL-5431 - Statement of service notifications
-        //PASS RESPONDENT PARTY IDS HERE
-        if (isSosCompletedPostSoa(caseData, partyIdAndType.get(PARTY_ID))
-            && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
-        } else {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
+        if (isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
+            CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
+            //SOS by unrepresented applicant
+            if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
+                citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
+            }
+
+            //SOS by Court admin/Court bailiff
+            if (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
+                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible())) {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
+            }
         }
 
         return citizenNotifications;
@@ -907,7 +924,7 @@ public class CaseService {
     private void addOrderNotifications(List<CitizenDocuments> citizenOrders,
                                        List<CitizenNotification> citizenNotifications) {
         CitizenNotification citizenNotification;
-        List<CitizenDocuments> ordersServed = getOrdersServed(citizenOrders);
+        List<CitizenDocuments> ordersServed = getMultipleOrdersServed(citizenOrders);
         if (citizenOrders.get(0).isPersonalService()) {
             //CRNF3 - personal service
             citizenNotification = CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(true).build();
@@ -924,7 +941,7 @@ public class CaseService {
         citizenNotifications.add(citizenNotification);
     }
 
-    private List<CitizenDocuments> getOrdersServed(List<CitizenDocuments> citizenOrders) {
+    private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {
         List<CitizenDocuments> multipleOrdersServed = new ArrayList<>();
         multipleOrdersServed.add(citizenOrders.get(0));
         for (int i = 0; i < citizenOrders.size() - 1; i++) {
@@ -951,23 +968,26 @@ public class CaseService {
     }
 
     private void addSoaNotifications(CitizenDocumentsManagement citizenDocumentsManagement,
-                                     List<CitizenNotification> citizenNotifications) {
+                                     List<CitizenNotification> citizenNotifications,
+                                     UserDetails userDetails) {
         CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
-        //personal service - unrepresented applicant
+        //SOA Applicant - personal service(unrepresented applicant)
         if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(true).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(true).build());
         }
 
-        //CAN-4 - SOA Applicant
+        //SOA Applicant - personal(court admin/court bailiff)/non-personal
         if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true).build());
         } else {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
         }
 
-        //CAN-5 - SOA Respondent
-        if (CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())) {
+        //SOA Respondent - non-personal
+        if (CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())
+            && !UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible()) //to exclude resp unserved packs
+            && !isResponseSubmittedByRespondent(citizenDocumentsManagement.getCitizenDocuments(), userDetails.getId())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(true).build());
         } else {
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
@@ -1007,14 +1027,15 @@ public class CaseService {
         return isAnyOrderServedPostDate(citizenOrders, citizenAppPack.getUploadedDate().toLocalDate());
     }
 
-    private boolean isAnyOrderServedPostSos(CaseData caseData,
+    //CHECK & REMOVE IF NOT NEEDED
+    /*private boolean isAnyOrderServedPostSos(CaseData caseData,
                                             List<CitizenDocuments> citizenOrders) {
         return (null != caseData.getStatementOfService()
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication()))
             && caseData.getStatementOfService().getStmtOfServiceForApplication().stream()
             .anyMatch(stmtOfSerParty ->
                           isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption().toLocalDate()));
-    }
+    }*/
 
     private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
                                             LocalDate postDate) {
@@ -1024,16 +1045,24 @@ public class CaseService {
                 && citizenOrder.getServedDate().isAfter(postDate));
     }
 
-    private boolean isSosCompletedPostSoa(CaseData caseData, String partyId) {
+    private boolean isSosCompletedPostSoa(CaseData caseData, List<String> partyIds) {
         return (null != caseData.getStatementOfService())
             && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
-            .anyMatch(stmtOfSerParty -> getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId())
-                .contains(partyId));
+            .anyMatch(stmtOfSerParty -> new HashSet<>(getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId()))
+                .containsAll(partyIds));
     }
 
     private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments) {
         return CollectionUtils.isNotEmpty(citizenDocuments)
             && citizenDocuments.stream()
             .anyMatch(citizenDocument -> RESPONDENT_APPLICATION.equals(citizenDocument.getCategoryId()));
+    }
+
+    private boolean isResponseSubmittedByRespondent(List<CitizenDocuments> citizenDocuments,
+                                                    String idamId) {
+        return CollectionUtils.isNotEmpty(citizenDocuments)
+            && citizenDocuments.stream()
+            .anyMatch(citizenDocument -> RESPONDENT_APPLICATION.equals(citizenDocument.getCategoryId())
+                && idamId.equals(citizenDocument.getPartyId()));
     }
 }
