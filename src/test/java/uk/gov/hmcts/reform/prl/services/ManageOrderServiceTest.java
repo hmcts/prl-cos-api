@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -3593,7 +3592,6 @@ public class ManageOrderServiceTest {
         Assert.assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
     }
 
-    @Ignore
     @Test
     public void testSetFieldsForWaTaskForJudgeCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -3618,7 +3616,6 @@ public class ManageOrderServiceTest {
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
     }
 
-    @Ignore
     @Test
     public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -3643,7 +3640,6 @@ public class ManageOrderServiceTest {
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
     }
 
-    @Ignore
     @Test
     public void testSetFieldsForWaTaskForUploadOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
