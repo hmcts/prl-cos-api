@@ -50,7 +50,7 @@
 
 ## Relationships
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relatioship of children with all people on the case is captured, before submitting the application</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>Ensure relationship of children with all people on the case is captured, before submitting the application</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
