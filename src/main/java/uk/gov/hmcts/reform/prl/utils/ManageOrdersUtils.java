@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApproveAndServeClearFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -23,9 +24,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -343,6 +347,21 @@ public class ManageOrdersUtils {
         return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
                 VALID_ORDER_IDS_FOR_FL401)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
+    }
+
+    public static String getOrderNameAlongWithTime(String name, LocalDateTime now) {
+        if (!isBlank(name)) {
+            return String.format(
+                "%s - %s",
+                name,
+                now.format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMM_YYYY_HH_MM,
+                    Locale.ENGLISH
+                                           )
+                )
+            );
+        }
+        return " ";
     }
 
     public static String getOrderName(DraftOrder selectedOrder) {
