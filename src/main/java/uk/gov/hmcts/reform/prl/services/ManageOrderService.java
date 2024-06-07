@@ -3213,7 +3213,7 @@ public class ManageOrderService {
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             // Its expected that draft order collection is already sorted
             // by this time and first element is the latest draft order
-            orderNameForWA = !caseData.getDraftOrderCollection().isEmpty()
+            orderNameForWA = CollectionUtils.isNotEmpty(caseData.getDraftOrderCollection())
                 ? caseData.getDraftOrderCollection().get(0).getValue().getLabelForOrdersDynamicList()
                 : " ";
             performingUser = getLoggedInUserType(authorisation);
