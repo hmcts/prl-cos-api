@@ -34,8 +34,8 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -124,7 +124,7 @@ public class SendAndReplyServiceTest {
 
     @Mock
     SendgridService sendgridService;
-  
+
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
     @Value("${xui.url}")
@@ -1694,6 +1694,7 @@ public class SendAndReplyServiceTest {
 
         assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
         assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
 
     @Test
     public void testCloseAwPTask() {
@@ -1718,7 +1719,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         openMessagesList.add(element(message1));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.SEND)
             .sendOrReplyMessage(
@@ -1739,14 +1740,14 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData, null);
+                                                                                                        stringObjectMap, caseData1, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        sendAndReplyService.closeAwPTask(caseData);
+        sendAndReplyService.closeAwPTask(caseData1);
         Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
     }
 
@@ -1842,7 +1843,7 @@ public class SendAndReplyServiceTest {
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
     }
 
-    private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
+    public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         binaryLink.href = randomAlphaNumeric;
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
