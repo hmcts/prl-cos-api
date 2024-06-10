@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -745,7 +746,7 @@ public class CaseService {
             .orderType(order.getOrderTypeId())
             .uploadedBy(order.getOtherDetails().getCreatedBy())
             .createdDate(getOrderMadeDate(order))
-            .servedDate(getServedDate(order))
+            .servedDateTime(getServedDate(order, partyIdAndType.get(PARTY_TYPE)))
             .document(order.getOrderDocument())
             .documentWelsh(order.getOrderDocumentWelsh())
             .isNew(!isFinalOrder(order))
@@ -782,15 +783,18 @@ public class CaseService {
         return null;
     }
 
-    private LocalDate getServedDate(OrderDetails order) {
-        if (null != order.getOtherDetails()
-            && null != order.getOtherDetails().getOrderServedDate()) {
-            return LocalDate.parse(
-                order.getOtherDetails().getOrderServedDate(),
-                DateTimeFormatter.ofPattern(D_MMM_YYYY)
-            );
-        }
-        return null;
+    private LocalDateTime getServedDate(OrderDetails order,
+                                        String partyId) {
+
+        return nullSafeCollection(order.getServeOrderDetails().getServedParties())
+            .stream()
+            .map(Element::getValue)
+            .filter(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId))
+            .min(comparing(
+                ServedParties::getServedDateTime,
+                Comparator.nullsLast(Comparator.reverseOrder())
+            )).map(ServedParties::getServedDateTime)
+            .orElse(null);
     }
 
     private boolean isCafcassServed(OrderDetails order) {
@@ -949,7 +953,10 @@ public class CaseService {
         List<CitizenDocuments> multipleOrdersServed = new ArrayList<>();
         multipleOrdersServed.add(citizenOrders.get(0));
         for (int i = 0; i < citizenOrders.size() - 1; i++) {
-            if (citizenOrders.get(0).getServedDate().equals(citizenOrders.get(i + 1).getServedDate())) {
+            if (null != citizenOrders.get(0).getServedDateTime()
+                && null != citizenOrders.get(i + 1).getServedDateTime()
+                && citizenOrders.get(0).getServedDateTime().toLocalDate()
+                .equals(citizenOrders.get(i + 1).getServedDateTime().toLocalDate())) {
                 multipleOrdersServed.add(citizenOrders.get(i + 1));
             }
         }
@@ -1033,7 +1040,7 @@ public class CaseService {
 
     private boolean isAnyOrderServedPostSoa(CitizenDocuments citizenAppPack,
                                             List<CitizenDocuments> citizenOrders) {
-        return isAnyOrderServedPostDate(citizenOrders, citizenAppPack.getUploadedDate().toLocalDate());
+        return isAnyOrderServedPostDate(citizenOrders, citizenAppPack.getUploadedDate());
     }
 
     //CHECK & REMOVE IF NOT NEEDED
@@ -1047,11 +1054,11 @@ public class CaseService {
     }*/
 
     private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
-                                            LocalDate postDate) {
+                                            LocalDateTime postDateTime) {
         return CollectionUtils.isNotEmpty(citizenOrders)
             && citizenOrders.stream()
-            .anyMatch(citizenOrder -> null != citizenOrder.getServedDate()
-                && citizenOrder.getServedDate().isAfter(postDate));
+            .anyMatch(citizenOrder -> null != citizenOrder.getServedDateTime()
+                && citizenOrder.getServedDateTime().isAfter(postDateTime));
     }
 
     private boolean isSosCompletedPostSoa(CaseData caseData, List<String> partyIds) {

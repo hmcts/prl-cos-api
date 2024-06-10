@@ -39,7 +39,7 @@ public class CitizenDocuments {
 
     private String orderType;
     private LocalDate createdDate;
-    private LocalDate servedDate;
+    private LocalDateTime servedDateTime;
     private boolean isNew;
     private boolean isFinal;
     private String documentLanguage;
