@@ -33,8 +33,8 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -97,10 +97,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -1551,6 +1551,20 @@ public class SendAndReplyServiceTest {
             .build();
 
         return Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .messageAbout(MessageAboutEnum.OTHER)
+            .submittedDocumentsList(dynamicList)
+            .build();
     }
 
     private PartyDetails getApplicant() {
@@ -1640,9 +1654,9 @@ public class SendAndReplyServiceTest {
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
     }
-      
+
     public void testCloseAwPTask() {
-        
+
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
         Message message1 = Message.builder()

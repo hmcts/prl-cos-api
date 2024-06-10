@@ -3704,7 +3704,6 @@ public class DocumentGenServiceTest {
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
     }
-}
 
     @Test
     public void testSendReplyMessageTemplateEnglish() {

@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
@@ -1557,7 +1557,7 @@ public class SendAndReplyService {
     private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
         return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
-  
+
     public void closeAwPTask(CaseData caseData) {
         if (SEND.equals(caseData.getChooseSendOrReply())
             && caseData.getSendOrReplyMessage() != null
