@@ -190,6 +190,8 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
+    private static final String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -419,6 +421,7 @@ public class ServiceOfApplicationService {
 
         } else {
             if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                log.info("Case created by citizen");
                 whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
                                                                                       authorization,
                                                                                       emailNotificationDetails,
@@ -473,21 +476,57 @@ public class ServiceOfApplicationService {
                 sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
             }
         } else {
+            log.info("Sending service of application notifications to FL401 citizens");
             if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                 .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-                getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
-                getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs);
-                Element<PartyDetails> applicant = Element.<PartyDetails>builder()
-                    .id(caseData.getApplicantsFL401().getPartyId())
-                    .value(caseData.getApplicantsFL401())
-                    .build();
+                log.info("Sending service of application notifications to FL401 citizens - applicant Lip Personal service");
+                Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
                 CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
+                List<Document> docs = new ArrayList<>();
                 if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                    generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE2);
+                    docs.add(generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE2));
                 } else {
-                    generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE3);
+                    docs.add(generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE3));
                 }
+                List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
+                List<Document> packFdocs = getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs);
+                removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
                 whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
+                if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                    if (isAccessEnabled(applicant)) {
+                        sendEmailToUnrepresentedApplicant(authorization, caseData, packEdocs,
+                                                          applicant,
+                                                          Templates.PRL_LET_ENG_AP1,
+                                                          EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
+                                                          );
+                    } else {
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("name", caseData.getApplicantsFL401().getLabelForDynamicList());
+                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                            authorization,
+                            caseData.getApplicantsFL401().getEmail(),
+                            docs,
+                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                            dynamicData,
+                            whoIsResponsibleForServing
+                        );
+                    }
+
+                } else {
+                    sendSoaPacksToPartyViaPost(authorization, caseData, docs,
+                                               bulkPrintDetails,
+                                               element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                                               Templates.PRL_LET_ENG_AP1);
+                }
+
+                caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
+                    .packDocument(wrapElements(packFdocs))
+                    .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
+                    .servedBy(UNREPRESENTED_APPLICANT)
+                    .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                    .packCreatedDate(dateCreated)
+                    .build());
             } else {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication()
@@ -913,8 +952,6 @@ public class ServiceOfApplicationService {
                                                               emailNotificationDetails,
                                                               bulkPrintDetails,
                                                               packLdocs);
-            String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -2399,8 +2436,6 @@ public class ServiceOfApplicationService {
         log.info("Inside generatePacks for confidential check C100 method");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                       CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                       caseData);
@@ -2631,8 +2666,6 @@ public class ServiceOfApplicationService {
         log.info("Inside generatePacksForConfidentialCheck FL401 Method");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                        CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                        caseData);
