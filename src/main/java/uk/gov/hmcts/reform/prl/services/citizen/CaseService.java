@@ -433,43 +433,61 @@ public class CaseService {
         return Collections.emptyList();
     }
 
-    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData, HashMap<String, String> partyIdAndType) {
+    private List<CitizenDocuments> fetchSoaPacksForParty(CaseData caseData,
+                                                         HashMap<String, String> partyIdAndType) {
         final List<CitizenDocuments>[] citizenDocuments = new List[]{new ArrayList<>()};
 
         caseData.getFinalServedApplicationDetailsList().stream()
             .map(Element::getValue)
             .sorted(comparing(ServedApplicationDetails::getServedAt).reversed())
             .forEach(servedApplicationDetails -> {
-                if (citizenDocuments[0].isEmpty()
+                if (CollectionUtils.isEmpty(citizenDocuments[0])
                     && servedApplicationDetails.getModeOfService() != null) {
                     switch (servedApplicationDetails.getModeOfService()) {
                         case SOA_BY_EMAIL_AND_POST -> {
-                            citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
+                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
                                 servedApplicationDetails.getEmailNotificationDetails(),
                                 caseData.getServiceOfApplication(),
                                 partyIdAndType
-                            ));
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], emailSoaPack);
 
-                            citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
-                                servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
+                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                servedApplicationDetails.getBulkPrintDetails(),
+                                caseData.getServiceOfApplication(),
                                 partyIdAndType
-                            ));
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], postSoaPack);
                         }
-                        case SOA_BY_EMAIL -> citizenDocuments[0].add(retrieveApplicationPackFromEmailNotifications(
-                            servedApplicationDetails.getEmailNotificationDetails(),
-                            caseData.getServiceOfApplication(),
-                            partyIdAndType
-                        ));
-                        case SOA_BY_POST -> citizenDocuments[0].add(retreiveApplicationPackFromBulkPrintDetails(
-                            servedApplicationDetails.getBulkPrintDetails(), caseData.getServiceOfApplication(),
-                            partyIdAndType
-                        ));
+                        case SOA_BY_EMAIL -> {
+                            CitizenDocuments emailSoaPack = retrieveApplicationPackFromEmailNotifications(
+                                servedApplicationDetails.getEmailNotificationDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], emailSoaPack);
+                        }
+                        case SOA_BY_POST -> {
+                            CitizenDocuments postSoaPack = retreiveApplicationPackFromBulkPrintDetails(
+                                servedApplicationDetails.getBulkPrintDetails(),
+                                caseData.getServiceOfApplication(),
+                                partyIdAndType
+                            );
+                            addSoaPacksToCitizenDocuments(citizenDocuments[0], postSoaPack);
+                        }
 
                         default -> citizenDocuments[0] = null;
                     }
                 }
             });
         return citizenDocuments[0];
+    }
+
+    private void addSoaPacksToCitizenDocuments(List<CitizenDocuments> citizenDocuments,
+                                               CitizenDocuments citizenSoaPack) {
+        if (null != citizenSoaPack) {
+            citizenDocuments.add(citizenSoaPack);
+        }
     }
 
     private CitizenDocuments retrieveApplicationPackFromEmailNotifications(

@@ -70,6 +70,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
@@ -125,18 +126,17 @@ public class TestingSupportServiceTest {
     private CaseInitiationService caseInitiationService;
 
     @Mock
-    private TaskListService taskListService;
+    private SystemUserService systemUserService;
 
     @Mock
     private FL401ApplicationMapper fl401ApplicationMapper;
-
-    private CourtNavFl401 courtNavFl401;
-
-    @Mock
-    SystemUserService systemUserService;
-
     @Mock
     private CourtNavCaseService courtNavCaseService;
+
+    @Mock
+    private TaskListService taskListService;
+
+    private CourtNavFl401 courtNavFl401;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -291,6 +291,12 @@ public class TestingSupportServiceTest {
                 .address(Address.builder().addressLine1("").build())
                 .organisations(Organisations.builder().contactInformation(contactInformation).build())
                 .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                           ApplicantAge.eighteenOrOlder).build()).build())
+            .build();
 
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.TRUE);
@@ -680,6 +686,42 @@ public class TestingSupportServiceTest {
     }
 
     @Test
+    public void testCourtNavCreatedCase() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.SUBMITTED_PAID)
+            .fl401StmtOfTruth(StatementOfTruth.builder().build())
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .caseTypeId("FL401")
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
+            .build();
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
+        when(systemUserService.getSysUserToken()).thenReturn(s2sAuth);
+        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+            .thenReturn(caseData);
+        when(courtNavCaseService.createCourtNavCase(any(),any()))
+            .thenReturn(caseDetails);
+        Map<String,Object> caseDataMapResponse =
+            testingSupportService.initiateCaseCreationForCourtNav(auth,callbackRequest);
+        assertEquals(12345678L,caseDataMapResponse.get(CASE_DATA_ID));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+        testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
+    }
+
+    @Test
     public void testInitiateCaseCreationForCourtNav() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
@@ -701,17 +743,12 @@ public class TestingSupportServiceTest {
             .eventId(TS_CA_URGENT_CASE.getId())
             .build();
 
-        courtNavFl401 = CourtNavFl401.builder()
-            .fl401(CourtNavCaseData.builder()
-                       .beforeStart(BeforeStart.builder().applicantHowOld(
-                           ApplicantAge.eighteenOrOlder).build()).build())
-            .build();
-
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(COURT_ADMIN_ROLE))
                                                                      .build());
-        when(fl401ApplicationMapper.mapCourtNavData(courtNavFl401)).thenReturn(caseData);
+        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+            .thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn(auth);
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(caseDetails);
 

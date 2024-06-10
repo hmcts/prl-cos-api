@@ -13,9 +13,6 @@
         "email"
       ],
       "contactDetailsPrivateAlternative": [
-        "address",
-        "telephone",
-        "email"
       ],
       "relationshipDetails": {
         "relationshipToChildren": [
