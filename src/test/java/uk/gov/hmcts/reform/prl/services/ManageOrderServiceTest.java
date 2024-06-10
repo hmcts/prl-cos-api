@@ -3596,6 +3596,7 @@ public class ManageOrderServiceTest {
     @Ignore
     @Test
     public void testSetFieldsForWaTaskForJudgeCreateOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3620,6 +3621,7 @@ public class ManageOrderServiceTest {
     @Ignore
     @Test
     public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3644,6 +3646,7 @@ public class ManageOrderServiceTest {
     @Ignore
     @Test
     public void testSetFieldsForWaTaskForUploadOrder() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
