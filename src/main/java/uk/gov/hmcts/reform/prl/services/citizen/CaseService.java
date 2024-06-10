@@ -577,6 +577,7 @@ public class CaseService {
         //populate respondent unserved packs only in case of personal service by unrepresented lip
         return UNREPRESENTED_APPLICANT.equals(servedApplicationDetails.getWhoIsResponsible())
             && null != serviceOfApplication.getUnServedRespondentPack()
+            && CollectionUtils.isNotEmpty(serviceOfApplication.getUnServedRespondentPack().getPackDocument())
             ? serviceOfApplication.getUnServedRespondentPack()
             .getPackDocument().stream()
             .map(Element::getValue)

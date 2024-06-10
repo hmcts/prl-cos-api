@@ -220,7 +220,7 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-    public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
+    public List<Element<DraftOrder>> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
@@ -239,8 +239,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
-        );
+        return draftOrderList;
     }
 
     private static void defaultHearingOptionToDateReservedWithListAssist(DraftOrder draftOrder) {
@@ -2169,16 +2168,23 @@ public class DraftAnOrderService {
             );
 
         }
-        caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
-        caseDataUpdated.put(WA_ORDER_NAME_SOLICITOR_CREATED, getDraftOrderNameForWA(caseData, callbackRequest.getEventId()));
+        List<Element<DraftOrder>> draftOrderCollection = generateDraftOrderCollection(caseData, authorisation);
+        caseDataUpdated.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+        caseDataUpdated.put(
+            WA_ORDER_NAME_SOLICITOR_CREATED,
+            getDraftOrderNameForWA(
+                null != draftOrderCollection && draftOrderCollection.size() > 0 ? draftOrderCollection.get(0).getValue() : null,
+                callbackRequest.getEventId()
+            )
+        );
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
-    private String getDraftOrderNameForWA(CaseData caseData, String eventId) {
-        if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId)) {
-            return caseData.getDraftOrderCollection().get(0).getValue().getLabelForOrdersDynamicList();
+    private String getDraftOrderNameForWA(DraftOrder draftOrder, String eventId) {
+        if (DRAFT_AN_ORDER.getId().equalsIgnoreCase(eventId) && null != draftOrder) {
+            return draftOrder.getLabelForOrdersDynamicList();
         } else {
             log.error("Error while fetching the order name for WA");
             return "";
