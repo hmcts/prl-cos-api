@@ -1617,6 +1617,47 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testCallFromSubmittedCallbackForReplyMultipleList() {
+
+        AllocatedJudgeForSendAndReply allocatedJudge2 =
+            AllocatedJudgeForSendAndReply
+                .builder()
+                .judgeEmailId("judge@email.com")
+                .messageId(String.valueOf(UUID.fromString(TEST_UUID)))
+                .status("Action required")
+                .build();
+
+        allocatedJudgeForSendAndReply = new ArrayList<>();
+        allocatedJudgeForSendAndReply.add(element(allocatedJudge));
+        allocatedJudgeForSendAndReply.add(element(allocatedJudge2));
+        caseData = caseData.toBuilder()
+            .id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+    }
+
+    @Test
     public void testCallFromSubmittedCallbackForSend() {
         sendOrReplyMessage = sendOrReplyMessage.toBuilder()
             .respondToMessage(YesOrNo.Yes)
