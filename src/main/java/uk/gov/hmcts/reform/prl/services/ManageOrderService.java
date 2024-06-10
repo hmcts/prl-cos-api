@@ -3212,10 +3212,16 @@ public class ManageOrderService {
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions() != null
-                                                                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(
+                    caseData.getCreateSelectOrderOptions() != null
+                        ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ",
+                    dateTime.now()
+                );
             } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(getSelectedOrderInfoForUpload(caseData));
+                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(
+                    getSelectedOrderInfoForUpload(caseData),
+                    dateTime.now()
+                );
             }
             performingUser = getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
