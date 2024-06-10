@@ -1418,7 +1418,7 @@ public class SendAndReplyServiceTest {
         );
     }
 
-    @Ignore
+    @Ignore("value")
     @Test
     public void testAssignCaseToJudgeIfJudgeSelectedForMessage() {
         when(refDataUserService.getAllJudicialUserDetails(any()))
@@ -1611,7 +1611,7 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartAllTabsUpdate(String.valueOf(
             caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
 
-        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
     }
@@ -1643,7 +1643,7 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartAllTabsUpdate(String.valueOf(
             caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
 
-        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
     }
@@ -1682,7 +1682,7 @@ public class SendAndReplyServiceTest {
         roleAssignmentResponses.add(roleAssignmentResponse);
         when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
 
-        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
     }
@@ -1721,7 +1721,7 @@ public class SendAndReplyServiceTest {
         when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
 
 
-        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
 
         assertNotNull(caseDetails);
@@ -1754,7 +1754,7 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartAllTabsUpdate(String.valueOf(
             caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
 
-        sendAndReplyService.callfromSubmittedCallback(auth, caseData);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
     }
