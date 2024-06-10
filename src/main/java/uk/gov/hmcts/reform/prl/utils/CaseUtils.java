@@ -169,7 +169,7 @@ public class CaseUtils {
     public static boolean isCaseCreatedByCitizen(CaseData caseData) {
         log.info("case created by {}", caseData.getCaseCreatedBy());
         log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             return true;
         }
 
