@@ -569,18 +569,19 @@ public class UpdatePartyDetailsService {
             for (Element<PartyDetails> parties : listOfParties) {
 
                 String address = populateAddressInDynamicList(parties);
-                String name = null;
-
-                if (!StringUtils.isBlank(parties.getValue().getFirstName())
-                    && !StringUtils.isBlank(parties.getValue().getLastName())) {
-                    name = parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - ";
-                }
+                String name = populateNameInDynamicList(parties, address);
 
                 if (null != name && null != address) {
                     whoDoesTheChildLiveWith.add(DynamicListElement
                         .builder()
                         .code(parties.getId())
                         .label(name + address)
+                        .build());
+                } else if (null != name) {
+                    whoDoesTheChildLiveWith.add(DynamicListElement
+                        .builder()
+                        .code(parties.getId())
+                        .label(name)
                         .build());
                 }
             }
@@ -590,6 +591,17 @@ public class UpdatePartyDetailsService {
             .builder()
             .listItems(whoDoesTheChildLiveWith)
             .build();
+    }
+
+    private  String populateNameInDynamicList(Element<PartyDetails> parties, String address) {
+        String name = null;
+        if (!StringUtils.isBlank(parties.getValue().getFirstName())
+            && !StringUtils.isBlank(parties.getValue().getLastName())) {
+            name = !StringUtils.isBlank(address)
+                ? parties.getValue().getFirstName() + " " + parties.getValue().getLastName() + " - "
+                : parties.getValue().getFirstName() + " " + parties.getValue().getLastName();
+        }
+        return name;
     }
 
     private String populateAddressInDynamicList(Element<PartyDetails> parties) {
@@ -605,11 +617,10 @@ public class UpdatePartyDetailsService {
                 ? parties.getValue().getAddress().getPostCode() : "";
 
             //Adding comma to address line 2 if the postcode is there
-            if (!StringUtils.isBlank(postcode) && !StringUtils.isBlank(parties.getValue()
-                .getAddress().getAddressLine2())) {
-                addressLine2 = parties.getValue().getAddress().getAddressLine2().concat(", ");
-            } else if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
-                addressLine2 = parties.getValue().getAddress().getAddressLine2();
+            if (!StringUtils.isBlank(parties.getValue().getAddress().getAddressLine2())) {
+                addressLine2 = !StringUtils.isBlank(postcode)
+                    ?  parties.getValue().getAddress().getAddressLine2().concat(", ")
+                    : parties.getValue().getAddress().getAddressLine2();
             }
 
             //Comma is required if postcode or address line 2 is not blank

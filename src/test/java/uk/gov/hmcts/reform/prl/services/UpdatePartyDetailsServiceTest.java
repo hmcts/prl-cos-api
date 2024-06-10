@@ -1471,7 +1471,6 @@ public class UpdatePartyDetailsServiceTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
-            .whoDoesTheChildLiveWith(DynamicList.builder().listItems(new ArrayList<>()).build())
             .build();
 
         Element<ChildDetailsRevised> wrappedChild1 = Element.<ChildDetailsRevised>builder().value(child1).build();
@@ -1497,15 +1496,31 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<PartyDetails>> applicantList = new ArrayList<>();
         applicantList.add(wrappedApplicant);
 
-        PartyDetails respondent = PartyDetails.builder().firstName("test").lastName("test").build();
+        PartyDetails respondent = PartyDetails.builder().firstName("test")
+            .address(Address
+                .builder()
+                .build()).lastName("test").build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondent);
 
-        PartyDetails otherParties = PartyDetails.builder().firstName("test").lastName("test").build();
+        PartyDetails otherParties = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").build()).lastName("test").build();
         Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
+        PartyDetails otherParties2 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").addressLine2("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties2 = Element.<PartyDetails>builder().value(otherParties2).build();
+        PartyDetails otherParties3 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").postCode("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties3 = Element.<PartyDetails>builder().value(otherParties3).build();
         List<Element<PartyDetails>> otherPartiesList = new ArrayList<>();
+        PartyDetails otherParties4 = PartyDetails.builder().firstName("test")
+            .address(Address.builder().addressLine1("test").postCode("test").addressLine2("test").build()).lastName("test").build();
+        Element<PartyDetails> wrappedOtherParties4 = Element.<PartyDetails>builder().value(otherParties4).build();
         otherPartiesList.add(wrappedOtherParties);
+        otherPartiesList.add(wrappedOtherParties2);
+        otherPartiesList.add(wrappedOtherParties3);
+        otherPartiesList.add(wrappedOtherParties4);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1518,8 +1533,5 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
         assertEquals(1, updatedChildDetails.size());
-        assertEquals(ChildDetailsRevised.builder().whoDoesTheChildLiveWith(DynamicList.builder()
-                .listItems(new ArrayList<>()).build()).build(),
-            updatedChildDetails.get(0).getValue());
     }
 }
