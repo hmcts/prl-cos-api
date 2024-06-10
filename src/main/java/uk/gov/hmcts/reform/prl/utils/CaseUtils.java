@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -728,5 +729,14 @@ public class CaseUtils {
             return respondent1.getDateOfBirth();
         }
         return null;
+    }
+
+    public static Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
+        Optional<Element<PartyDetails>> party = Optional.empty();
+        if (CollectionUtils.isNotEmpty(parties)) {
+            party = parties.stream()
+                .filter(element -> code.equalsIgnoreCase(String.valueOf(element.getId()))).findFirst();
+        }
+        return party;
     }
 }

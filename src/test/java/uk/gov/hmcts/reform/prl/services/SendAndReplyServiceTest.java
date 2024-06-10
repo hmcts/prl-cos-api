@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,10 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -31,11 +35,15 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -48,6 +56,8 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -59,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -111,15 +122,23 @@ public class SendAndReplyServiceTest {
     @Mock
     EmailService emailService;
 
+    @Mock
+    SendgridService sendgridService;
+
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
+
     String auth = "auth-token";
     UserDetails userDetails;
-    LocalDateTime dateTime = LocalDateTime.of(LocalDate.of(2000, 1, 10),
-                                              LocalTime.of(10, 22));
+    LocalDateTime dateTime = LocalDateTime.of(
+        LocalDate.of(2000, 1, 10),
+        LocalTime.of(10, 22)
+    );
     String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK));
     Message message1;
     Message message2;
@@ -148,7 +167,7 @@ public class SendAndReplyServiceTest {
     private HearingDataService hearingDataService;
 
     @Mock
-    private  RefDataService refDataService;
+    private RefDataService refDataService;
 
     @Mock
     private CaseDocumentClient caseDocumentClient;
@@ -182,7 +201,11 @@ public class SendAndReplyServiceTest {
         when(time.now()).thenReturn(LocalDateTime.now());
         userDetails = UserDetails.builder()
             .email("sender@email.com")
-            .roles(Arrays.asList("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge ","caseworker-privatelaw-la "))
+            .roles(Arrays.asList(
+                "caseworker-privatelaw-courtadmin",
+                "caseworker-privatelaw-judge ",
+                "caseworker-privatelaw-la "
+            ))
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
@@ -257,7 +280,7 @@ public class SendAndReplyServiceTest {
             .messageSubject("Message test subject")
             .build();
 
-        dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
+        dynamicList = ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
 
         message1Element = element(message1);
@@ -297,7 +320,7 @@ public class SendAndReplyServiceTest {
     public void testThatDynamicListOfOpenMessagesIsGenerated() {
         List<Element<Message>> openMessages = new ArrayList<>();
         openMessages.addAll(messages);
-        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessages, null, Message::getLabelForDynamicList);
+        DynamicList dynamicList = ElementUtils.asDynamicList(openMessages, null, Message::getLabelForDynamicList);
         assertEquals(sendAndReplyService.getOpenMessagesDynamicList(caseData), dynamicList);
     }
 
@@ -310,7 +333,10 @@ public class SendAndReplyServiceTest {
             .messageMetaData(preFillMetaData)
             .build();
         assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
-        assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill, auth).get("messageObject"), preFillMetaData);
+        assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(
+            caseDataWithPreFill,
+            auth
+        ).get("messageObject"), preFillMetaData);
     }
 
     @Test
@@ -431,9 +457,11 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = new ArrayList<>();
         updatedMessageList.add(updatedElement);
         when(time.now()).thenReturn(dateTime);
-        assertEquals(updatedMessageList, sendAndReplyService.buildNewReplyMessage(selectedMessage,
-                                                                                  replyMessage,
-                                                                                  testMessages));
+        assertEquals(updatedMessageList, sendAndReplyService.buildNewReplyMessage(
+            selectedMessage,
+            replyMessage,
+            testMessages
+        ));
 
     }
 
@@ -443,9 +471,11 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> testMessages = List.of(message1Element);
         Message replyMessage = Message.builder()
             .build();
-        assertEquals(testMessages, sendAndReplyService.buildNewReplyMessage(selectedMessage,
-                                                                                  replyMessage,
-                                                                                  testMessages));
+        assertEquals(testMessages, sendAndReplyService.buildNewReplyMessage(
+            selectedMessage,
+            replyMessage,
+            testMessages
+        ));
     }
 
     @Test
@@ -468,9 +498,11 @@ public class SendAndReplyServiceTest {
     @Test
     public void testBuildHistoryString() {
         String expected = "test@gmail.com - Test 1\n \ntest2@gmail.com - Test 2";
-        assertEquals(expected, sendAndReplyService.buildMessageHistory("test2@gmail.com",
-                                                                       "test@gmail.com - Test 1",
-                                                                       "Test 2"));
+        assertEquals(expected, sendAndReplyService.buildMessageHistory(
+            "test2@gmail.com",
+            "test@gmail.com - Test 1",
+            "Test 2"
+        ));
     }
 
     @Test
@@ -536,18 +568,30 @@ public class SendAndReplyServiceTest {
 
         when(hearingDataService.getLinkedCasesDynamicList(anyString(), anyString())).thenReturn(dynamicListElementList);
         DynamicList linkedCasesDynamicList = sendAndReplyService.getLinkedCasesDynamicList(anyString(), anyString());
-        assertEquals("testCaseRefNo",linkedCasesDynamicList.getListItems().get(0).getLabel());
+        assertEquals("testCaseRefNo", linkedCasesDynamicList.getListItems().get(0).getLabel());
     }
 
     @Test
     public void testGetJudiciaryTierDynmicList() {
-        Map<String, String> refDataCategoryValueMap = Map.of("51", "High Court Judge", "46", "District Judge Magistrates Court");
+        Map<String, String> refDataCategoryValueMap = Map.of(
+            "51",
+            "High Court Judge",
+            "46",
+            "District Judge Magistrates Court"
+        );
 
-        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(
+            refDataCategoryValueMap);
 
-        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(anyString(),anyString(), anyString(), anyString());
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()
+        );
 
-        assertTrue(judiciaryTierDynmicList.getListItems().stream().anyMatch(ti -> ti.getLabel().equals("High Court Judge")));
+        assertTrue(judiciaryTierDynmicList.getListItems().stream().anyMatch(ti -> ti.getLabel().equals(
+            "High Court Judge")));
     }
 
     @Test
@@ -599,19 +643,23 @@ public class SendAndReplyServiceTest {
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(
+            1,
+            List.of(category),
+            List.of(document)
+        );
         when(coreCaseDataApi.getCategoriesAndDocuments(
             Mockito.any(),
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        when(hearingService.getFutureHearings(anyString(),anyString())).thenReturn(futureHearings);
+        when(hearingService.getFutureHearings(anyString(), anyString())).thenReturn(futureHearings);
 
         Map<String, String> refDataCategoryValueMap = new HashMap<>();
 
-        refDataCategoryValueMap.put("hearingType1","val1");
-        refDataCategoryValueMap.put("hearingType2","val2");
-        refDataCategoryValueMap.put("hearingType3","val3");
+        refDataCategoryValueMap.put("hearingType1", "val1");
+        refDataCategoryValueMap.put("hearingType2", "val2");
+        refDataCategoryValueMap.put("hearingType3", "val3");
 
         ReflectionTestUtils.setField(
             sendAndReplyService, "serviceCode", "serviceCode");
@@ -631,12 +679,13 @@ public class SendAndReplyServiceTest {
                                                      .build()));
 
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
-        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataCategoryValueMap);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(
+            refDataCategoryValueMap);
 
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
-        assertEquals("123 - hearingType1",updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
+        assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
             .getFutureHearingsList().getListItems().get(0).getCode());
     }
 
@@ -646,11 +695,21 @@ public class SendAndReplyServiceTest {
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
         Category subCategory1 = new Category("subCategory1Id", "subCategory1Name", 1, List.of(document), null);
-        Category subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
+        Category subCategory2 = new Category(
+            "subCategory2Id",
+            "subCategory2Name",
+            1,
+            List.of(document),
+            List.of(subCategory1)
+        );
 
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(
+            1,
+            List.of(category),
+            List.of(document)
+        );
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
@@ -668,7 +727,7 @@ public class SendAndReplyServiceTest {
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
-        assertEquals("categoryId->documentURL",updatedCaseData.getSendOrReplyMessage()
+        assertEquals("categoryId->documentURL", updatedCaseData.getSendOrReplyMessage()
             .getSendMessageObject().getSubmittedDocumentsList().getListItems().get(0).getCode());
     }
 
@@ -686,9 +745,15 @@ public class SendAndReplyServiceTest {
     @Test
     public void testGetJudiciaryTierDynmicListException() {
 
-        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenThrow(new RuntimeException());
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenThrow(
+            new RuntimeException());
 
-        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(anyString(),anyString(), anyString(), anyString());
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyString()
+        );
         assertNull(judiciaryTierDynmicList.getListItems());
     }
 
@@ -702,10 +767,13 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder().build())
             .build();
 
-        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            caseData,
+            caseData.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
 
-        assertEquals(null,message.getMessageContent());
+        assertEquals(null, message.getMessageContent());
     }
 
     @Test
@@ -853,10 +921,13 @@ public class SendAndReplyServiceTest {
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
         when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
             .thenReturn(document1);
-        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            caseData,
+            caseData.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
 
-        assertEquals("some message while sending",message.getMessageContent());
+        assertEquals("some message while sending", message.getMessageContent());
     }
 
     @Test
@@ -886,12 +957,15 @@ public class SendAndReplyServiceTest {
 
         UserDetails userDetails = UserDetails.builder()
             .email("sender@email.com")
-            .roles(Arrays.asList("caseworker-privatelaw-judge ","caseworker-privatelaw-la "))
+            .roles(Arrays.asList("caseworker-privatelaw-judge ", "caseworker-privatelaw-la "))
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            caseData,
+            caseData.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
 
         assertNull(message.getJudgeName());
     }
@@ -925,7 +999,7 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
 
-        assertEquals(2,updatedMessageList.size());
+        assertEquals(2, updatedMessageList.size());
     }
 
     @Test
@@ -938,11 +1012,11 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        Map<String,Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData,auth);
+        Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, auth);
         MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
 
         assertNotNull(updatedResponse.get("messageReplyDynamicList"));
-        assertEquals("sender@email.com",messageMetaData.getSenderEmail());
+        assertEquals("sender@email.com", messageMetaData.getSenderEmail());
 
     }
 
@@ -955,7 +1029,10 @@ public class SendAndReplyServiceTest {
                     .messageReplyDynamicList(dynamicList)
                     .build())
             .build();
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(
+            dynamicList,
+            objectMapper
+        )).thenReturn(messagesWithOneAdded.get(0).getId());
         CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         assertNotNull(data);
     }
@@ -971,8 +1048,11 @@ public class SendAndReplyServiceTest {
                     .messages(listOfOpenMessages)
                     .build())
             .build();
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
-        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData,auth);
+        when(elementUtils.getDynamicListSelectedValue(
+            dynamicList,
+            objectMapper
+        )).thenReturn(listOfOpenMessages.get(0).getId());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         assertNotNull(data.getSendOrReplyMessage().getMessageReplyTable());
 
     }
@@ -993,17 +1073,21 @@ public class SendAndReplyServiceTest {
                     .messages(openMessagesListWithReplyHistory)
                     .build())
             .build();
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
-        CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData,auth);
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(
+            openMessagesListWithReplyHistory.get(0).getId());
+        CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         String messageTo = updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
 
-        assertEquals("testRecipient1@email.com",messageTo);
+        assertEquals("testRecipient1@email.com", messageTo);
     }
 
     @Test
     public void testCloseMessage() {
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(
+            dynamicList,
+            objectMapper
+        )).thenReturn(listOfOpenMessages.get(0).getId());
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1015,7 +1099,7 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
 
-        assertEquals(3,closeMessages.size());
+        assertEquals(3, closeMessages.size());
     }
 
     @Test
@@ -1046,10 +1130,13 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(
+            dynamicList,
+            objectMapper
+        )).thenReturn(openMessagesList.get(0).getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
 
-        assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
+        assertEquals(1, msgList.get(0).getValue().getReplyHistory().size());
     }
 
     @Test
@@ -1095,10 +1182,13 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(
+            dynamicList,
+            objectMapper
+        )).thenReturn(openMessagesList.get(0).getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
 
-        assertEquals(2,msgList.get(0).getValue().getReplyHistory().size());
+        assertEquals(2, msgList.get(0).getValue().getReplyHistory().size());
     }
 
     @Test
@@ -1122,7 +1212,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         openMessagesList.add(element(message1));
-        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+        DynamicList dynamicList = ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1171,7 +1261,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         openMessagesList.add(element(message1));
-        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+        DynamicList dynamicList = ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1220,7 +1310,7 @@ public class SendAndReplyServiceTest {
 
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
         openMessagesList.add(element(message1));
-        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+        DynamicList dynamicList = ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1271,7 +1361,7 @@ public class SendAndReplyServiceTest {
 
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
         openMessagesList.add(element(message1));
-        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+        DynamicList dynamicList = ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1348,6 +1438,265 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationToExternalPartiesC100Case() throws IOException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Respondent firstname")
+            .lastName("Respondent lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .contactPreferences(ContactPreferences.email)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(
+            respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(respondent.getFirstName() + " " + respondent.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .messageSubject("message subject")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );
+    }
+
+    @Test
+    public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .contactPreferences(ContactPreferences.post)
+            .address(Address.builder().addressLine1("1 ADD Road").postCode("1XY 2AB").country("ABC").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(applicant.getPartyId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(respondent.getPartyId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .applicantCaseName("case name a")
+            .caseTypeOfApplication("FL401")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .messageSubject("message subject")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );
+    }
+
+    @NotNull
+    private Map<String, Object> getEmailDynamicData(CaseData caseData) {
+        Map<String, Object> dynamicData = new HashMap<>();
+        dynamicData.put("caseReference", "12345");
+        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId());
+        dynamicData.put("subject", "message subject");
+        dynamicData.put("content", "some msg content");
+        dynamicData.put("attachmentType", "pdf");
+        dynamicData.put("disposition", "attachment");
+        dynamicData.put("name", "Abc Xyz");
+        dynamicData.put("documentSize", 0);
+        dynamicData.put("messageAbout", "an application");
+        dynamicData.put("caseName", caseData.getApplicantCaseName());
+        return dynamicData;
+    }
+
+    @Test
+    public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() throws IOException {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(null)
+            .respondents(null)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .externalMessageWhoToSendTo(null)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+            .dynamicTemplateData(dynamicData)
+            .listOfAttachments(new ArrayList<>())
+            .languagePreference(LanguagePreference.english)
+            .build();
+        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            "authorisation",
+            sendgridEmailConfig
+        );;
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExist() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(null)
+            .respondents(null)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                                           .externalMessageWhoToSendTo(null)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build())
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+    @Test
     public void testCloseAwPTask() {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
@@ -1370,7 +1719,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         openMessagesList.add(element(message1));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.SEND)
             .sendOrReplyMessage(
@@ -1391,14 +1740,14 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData, null);
+                                                                                                        stringObjectMap, caseData1, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        sendAndReplyService.closeAwPTask(caseData);
+        sendAndReplyService.closeAwPTask(caseData1);
         Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
     }
 
