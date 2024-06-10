@@ -1,0 +1,283 @@
+{
+  "partyDetails": {
+      "firstName": "test",
+      "lastName": "data",
+      "email": "citizen@email.com",
+      "phoneNumber": "07442772347",
+      "placeOfBirth": "Harrow",
+      "dateOfBirth": "1997-12-12",
+      "isRemoveLegalRepresentativeRequested": "Yes",
+      "contactPreferences": "digital",
+      "user": {
+        "email": null,
+        "idamId": "12345",
+        "solicitorRepresented": null
+      },
+    "response": {
+      "keepDetailsPrivate": {
+        "otherPeopleKnowYourContactDetails": "yes",
+        "confidentiality": "Yes",
+        "confidentialityList": [
+          "phoneNumber"
+        ]
+      },
+      "consent": {
+        "consentToTheApplication": "Yes",
+        "noConsentReason": "string",
+        "applicationReceivedDate": "2023-01-23",
+        "permissionFromCourt": "Yes",
+        "courtOrderDetails": "Court Order details test"
+      },
+      "miam": {
+        "attendedMiam": "Yes",
+        "willingToAttendMiam": "Yes",
+        "reasonNotAttendingMiam": "No reason"
+      },
+      "legalRepresentation": "Yes",
+      "safetyConcerns": {
+        "child": {
+          "physicalAbuse": {
+            "behaviourDetails": "behaviour was not acceptable",
+            "behaviourStartDate": "2023-07-07",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "applicant": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "respondent": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "haveSafetyConcerns": "Yes",
+        "safetyConcernAbout": [
+          "children"
+        ],
+        "concernAboutChild": [
+          "physicalAbuse"
+        ],
+        "concernAboutRespondent": [
+          "physicalAbuse"
+        ],
+        "otherconcerns": {
+          "c1AkeepingSafeStatement": "string",
+          "c1AsupervisionAgreementDetails": "string",
+          "c1AagreementOtherWaysDetails": "Yes",
+          "c1AotherConcernsDrugs": "Yes",
+          "c1AotherConcernsDrugsDetails": "string",
+          "c1AchildSafetyConcerns": "Yes",
+          "c1AchildSafetyConcernsDetails": "string"
+        },
+        "abductions": {
+          "c1AabductionReasonOutsideUk": "string",
+          "c1AchildsCurrentLocation": "string",
+          "c1AchildrenMoreThanOnePassport": "Yes",
+          "c1ApossessionChildrenPassport": [
+            "mother"
+          ],
+          "c1AprovideOtherDetails": "string",
+          "c1ApassportOffice": "Yes",
+          "c1AabductionPassportOfficeNotified": "Yes",
+          "c1ApreviousAbductionsShortDesc": "string",
+          "c1ApoliceOrInvestigatorInvolved": "Yes",
+          "c1ApoliceOrInvestigatorOtherDetails": "string",
+          "c1AchildAbductedBefore": "Yes"
+        }
+      },
+      "supportYouNeed": {
+        "helpCommunication": [
+          "hearingloop"
+        ],
+        "describeOtherNeed": "string",
+        "courtComfort": [
+          "appropriatelighting"
+        ],
+        "otherProvideDetails": "string",
+        "courtHearing": [
+          "supportworker"
+        ],
+        "communicationSupportOther": "string",
+        "languageDetails": "string",
+        "reasonableAdjustments": [
+          "docsformat"
+        ],
+        "docsSupport": [
+          "docsprint"
+        ],
+        "otherDetails": "string",
+        "safetyArrangementsDetails": "string",
+        "travellingOtherDetails": "string",
+        "hearingDetails": "string",
+        "signLanguageDetails": "string",
+        "lightingDetails": "string",
+        "supportWorkerDetails": "string",
+        "familyProviderDetails": "string",
+        "therapyDetails": "string",
+        "docsDetails": "string",
+        "largePrintDetails": "string",
+        "parkingDetails": "Need space for parking",
+        "differentChairDetails": "string"
+      },
+      "citizenInternationalElements": {
+        "childrenLiveOutsideOfEnWl": "Yes",
+        "childrenLiveOutsideOfEnWlDetails": "some children live outside",
+        "parentsAnyOneLiveOutsideEnWl": "Yes",
+        "parentsAnyOneLiveOutsideEnWlDetails": "Living outside EnWl",
+        "anotherPersonOrderOutsideEnWl": "Yes",
+        "anotherPersonOrderOutsideEnWlDetails": "string",
+        "anotherCountryAskedInformation": "Yes",
+        "anotherCountryAskedInformationDetaails": "string"
+      },
+      "citizenFlags": {
+        "isApplicationViewed": "Yes",
+        "isAllegationOfHarmViewed": "No",
+        "isAllDocumentsViewed": "Yes"
+      },
+      "currentOrPreviousProceedings": {
+        "haveChildrenBeenInvolvedInCourtCase": "Yes",
+        "courtOrderMadeForProtection": "Yes",
+        "proceedingsList": [
+
+        ]
+      }
+    }
+  },
+  "partyType": "applicant",
+  "caseTypeOfApplication": "C100"
+}

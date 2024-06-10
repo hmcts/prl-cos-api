@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +17,11 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -30,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -61,6 +66,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -92,6 +98,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -129,6 +138,8 @@ public class SendAndReplyServiceTest {
 
     @Mock
     EmailService emailService;
+
+    private static final String randomAlphaNumeric = "Abc123EFGH";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -186,6 +197,13 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    AllTabServiceImpl allTabService;
+
+    public static final String caseId = "case id";
+
+
 
     @Before
     public void init() {
@@ -631,8 +649,13 @@ public class SendAndReplyServiceTest {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
-                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder().uploadedDateTime(dateSent).build())
-                                                     .c2DocumentBundle(C2DocumentBundle.builder().uploadedDateTime(dateSent).build())
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                                  .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
+                                                                                  .uploadedDateTime(dateSent).build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                           .uploadedDateTime(dateSent).build())
                                                      .build()));
 
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
@@ -711,6 +734,112 @@ public class SendAndReplyServiceTest {
                                                                     caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals(null,message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForJudge() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .roles(List.of(JUDGE_ROLE))
+                                                              .build());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForLegalAdvisor() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList.toBuilder()
+                                                        .value(DynamicListElement.builder()
+                                                                   .code(UUID.randomUUID())
+                                                                   .label("test-document")
+                                                                   .build())
+                                                        .build())
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .roles(List.of(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        when(caseDocumentClient
+                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+            .thenReturn(testDocument());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageWithMessageForNoRolesinUserDetails() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .build());
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
     }
 
     @Test
@@ -1422,20 +1551,6 @@ public class SendAndReplyServiceTest {
             .build();
 
         return Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-            .messageAbout(MessageAboutEnum.OTHER)
-            .submittedDocumentsList(dynamicList)
-            .build();
     }
 
     private PartyDetails getApplicant() {
@@ -1524,5 +1639,168 @@ public class SendAndReplyServiceTest {
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
+    }
+      
+    public void testCloseAwPTask() {
+        
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
+            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        sendAndReplyService.closeAwPTask(caseData);
+        Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistWhileSendingMessage() {
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .sendMessageObject(Message.builder()
+                                                           .applicationsList(DynamicList.builder()
+                                                                                 .value(DynamicListElement.builder()
+                                                                                            .code(UUID.randomUUID())
+                                                                                            .label("test")
+                                                                                            .build())
+                                                                                 .build())
+                                                           .build())
+                                    .build())
+            .build();
+        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileSendingMessage() {
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .sendMessageObject(null)
+                                    .build())
+            .build();
+        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistWhileReplyingMessage() {
+        DynamicList messageReplyDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
+            .listItems(List.of(DynamicListElement.builder()
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
+            .build();
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .messageReplyDynamicList(messageReplyDynamicList)
+                                    .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                                                           Message
+                                        .builder()
+                                            .selectedApplicationCode("test-code")
+                                        .build())))
+                                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(messageReplyDynamicList, objectMapper))
+            .thenReturn(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+    @Test
+    public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileReplyingMessage() {
+        DynamicList messageReplyDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
+            .listItems(List.of(DynamicListElement.builder()
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
+            .build();
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                                    .messageReplyDynamicList(messageReplyDynamicList)
+                                    .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),Message
+                                        .builder().build())))
+                                    .build())
+            .build();
+        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+    @Test
+    public void testGetFutureHearingDynamicList() {
+        Hearings futureHearings =
+            Hearings.hearingsWith()
+                .caseRef("1234")
+                .hmctsServiceCode("ABA5")
+                .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                          .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                          .hearingDayScheduleWith()
+                                                                          .build()))
+                                          .build()))
+                .build();
+        when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
+        Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
+    }
+
+    private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = randomAlphaNumeric;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = randomAlphaNumeric;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        links.binary = binaryLink;
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        document.links = links;
+        document.originalDocumentName = randomAlphaNumeric;
+
+        return document;
     }
 }

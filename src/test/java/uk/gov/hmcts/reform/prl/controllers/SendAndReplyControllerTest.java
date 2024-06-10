@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
@@ -88,6 +91,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Mock
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     CaseData replyCaseData;
     Map<String, Object> caseDataMap;
@@ -253,6 +259,27 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.buildNewSendMessage(caseData)).thenReturn(message);
         when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
 
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        verify(sendAndReplyService).buildNewSendMessage(caseData);
+        verify(sendAndReplyService).addNewMessage(caseData, message);
+    }
+
+    @Test
+    public void testHandleAboutToSubmitSendPathWhenCaseTypeIsNull() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L)
+            .build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(null)
+            .selectedCaseTypeID(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SEND).build();
+        Message message = Message.builder().build();
+        Map<String, Object> map = new HashMap<>();
+        map.put("caseTypeOfApplication", null);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.buildNewSendMessage(caseData)).thenReturn(message);
+        when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
+        when(allTabService.getAllTabsFields(caseData)).thenReturn(map);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewSendMessage(caseData);
@@ -612,6 +639,8 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,SEND))
+            .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
@@ -682,9 +711,6 @@ public class SendAndReplyControllerTest {
 
         List<Element<Message>> closedMessage = new ArrayList<>();
 
-        LocalDateTime dateTimeNow = LocalDateTime.now();
-        String dateSubmitted = dateTimeNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH));
-
         closedMessage = messages.stream()
             .filter(m -> m.getId().equals(selectedValue))
             .findFirst()
@@ -697,26 +723,6 @@ public class SendAndReplyControllerTest {
         closedMessage.add(listOfClosedMessages.get(0));
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
-
-
-        CaseData caseDataAfterClosed = CaseData.builder().id(12345L)
-            .state(State.SUBMITTED_PAID)
-            .dateSubmitted(dateSubmitted)
-            .chooseSendOrReply(REPLY)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .messages(openMessagesBefore)
-                    .build())
-            .build();
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
@@ -737,7 +743,28 @@ public class SendAndReplyControllerTest {
 
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
+        when(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData,REPLY))
+            .thenReturn("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355");
+        LocalDateTime dateTimeNow = LocalDateTime.now();
+        String dateSubmitted = dateTimeNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH));
+        CaseData caseDataAfterClosed = CaseData.builder().id(12345L)
+            .state(State.SUBMITTED_PAID)
+            .dateSubmitted(dateSubmitted)
+            .chooseSendOrReply(REPLY)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(openMessagesBefore)
+                    .build())
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
         verify(sendAndReplyService).closeMessage(caseDataAfterClosed);
@@ -916,4 +943,29 @@ public class SendAndReplyControllerTest {
         verify(sendAndReplyService).resetSendAndReplyDynamicLists(caseData);
     }
 
+    @Test
+    public void testSendOrReplyToMessagesMidEventForReplyWithNoOpenMessages() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(listOfClosedMessages)
+                    .build())
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .closedMessages(Collections.singletonList(element(message)))
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        Assert.assertNotNull(response.getErrors());
+        Assert.assertTrue(!response.getErrors().isEmpty());
+        Assert.assertEquals("There are no messages to respond to.",
+                            response.getErrors().get(0));
+    }
 }
