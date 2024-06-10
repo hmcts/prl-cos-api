@@ -115,8 +115,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
@@ -133,12 +133,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -313,7 +316,7 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(No).build())
                 .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
@@ -349,12 +352,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -551,7 +554,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
 
     }
 
@@ -562,7 +565,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
-        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
     }
 
@@ -585,8 +588,8 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(authToken, c100CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_FIELD));
-        assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
 
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
@@ -770,12 +773,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -888,12 +891,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -1084,9 +1087,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -1094,7 +1097,7 @@ public class DocumentGenServiceTest {
             .build();
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
+            .keepChildrenInfoConfidential(No)
             .childFullName("child")
             .childsAge("12")
             .isRespondentResponsibleForChild(YesOrNo.Yes)
@@ -1178,9 +1181,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -1188,7 +1191,7 @@ public class DocumentGenServiceTest {
             .build();
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
+            .keepChildrenInfoConfidential(No)
             .childFullName("child")
             .childsAge("12")
             .isRespondentResponsibleForChild(YesOrNo.Yes)
@@ -1267,9 +1270,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -1277,7 +1280,7 @@ public class DocumentGenServiceTest {
             .build();
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
+            .keepChildrenInfoConfidential(No)
             .childFullName("child")
             .childsAge("12")
             .isRespondentResponsibleForChild(YesOrNo.Yes)
@@ -2427,9 +2430,11 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_DRAFT_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_FINAL_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_FINAL_HINT, false);
-        verify(dgsService, times(6)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService, times(8)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -2717,12 +2722,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -2834,12 +2839,12 @@ public class DocumentGenServiceTest {
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doesApplicantHaveHomeRights(No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
             .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRented(YesOrNo.No)
-            .isThereMortgageOnProperty(YesOrNo.No)
-            .isPropertyAdapted(YesOrNo.No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -3030,9 +3035,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3104,9 +3109,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3175,9 +3180,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3241,9 +3246,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3313,9 +3318,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3376,9 +3381,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3437,9 +3442,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3499,9 +3504,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3547,9 +3552,9 @@ public class DocumentGenServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("1234567890")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
@@ -3634,6 +3639,68 @@ public class DocumentGenServiceTest {
 
         assertNotNull(template);
         assertEquals("citizen_cover_letter_wel", template);
+    }
+
+    @Test
+    public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
+                                                                            .builder()
+                                                                            .newAllegationsOfHarmYesNo(Yes).build())
+            .allegationOfHarm(null).build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(authToken, c100CaseData);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+    }
+
+    @Test
+    public void testGenerateDraftDocumentsForCaseResubmissionTest2() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+
+        c100CaseData = c100CaseData.toBuilder()
+            .applicantsConfidentialDetails(new ArrayList<>())
+            .childrenConfidentialDetails(new ArrayList<>())
+            .allegationOfHarmRevised(AllegationOfHarmRevised
+                                         .builder().newAllegationsOfHarmYesNo(No).build()).allegationOfHarm(null).build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.generateDraftDocumentsForC100CaseResubmission(authToken, c100CaseData);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
     }
 }
 

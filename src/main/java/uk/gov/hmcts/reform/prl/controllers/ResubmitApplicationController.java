@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,10 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
+import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -48,6 +52,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
@@ -56,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
 @Slf4j
 @RestController
@@ -73,6 +80,12 @@ public class ResubmitApplicationController {
     private final AuthorisationService authorisationService;
     private final EventService eventPublisher;
 
+    private final MiamPolicyUpgradeService miamPolicyUpgradeService;
+
+    private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+
+    private final SystemUserService systemUserService;
+
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
     @ApiResponses(value = {
@@ -88,80 +101,30 @@ public class ResubmitApplicationController {
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-
-            Court closestChildArrangementsCourt = courtFinderService
-                .getNearestFamilyCourt(caseData);
-            if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
-                caseData = caseData.toBuilder()
-                    .courtName(closestChildArrangementsCourt.getCourtName())
-                    .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
-                    .build();
-                caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(
-                    COURT_ID_FIELD,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            //Populate MIAM Policy Upgrade data
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))
+                && TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+                && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+                caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, caseDataUpdated);
+                caseData = miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(
+                    caseData,
+                    systemUserService.getSysUserToken()
                 );
-                caseDataUpdated.put(
-                    COURT_CODE_FROM_FACT,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
+                allTabService.getNewMiamPolicyUpgradeDocumentMap(caseData, caseDataUpdated);
             }
 
+            //SNI-5695 fix-- if court name is already present then do not update
+            if (StringUtils.isBlank(caseData.getCourtName())) {
+                Court closestChildArrangementsCourt = courtFinderService
+                    .getNearestFamilyCourt(caseData);
+                caseData = assignCourtDetailsBasedOnClosestChildArrangementCourt(closestChildArrangementsCourt, caseData, caseDataUpdated);
+            }
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
 
-            if (previousStates.isPresent()) {
-                if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
-                    caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
-                    caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
-                    ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-                    caseData = caseData.setDateSubmittedDate();
-                    caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
-                    caseDataUpdated.put(
-                        CASE_DATE_AND_TIME_SUBMITTED_FIELD,
-                        DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
-                    );
-                    CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent = prepareCaseworkerEvent(
-                        CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification,
-                        callbackRequest
-                    );
-                    SolicitorNotificationEmailEvent solicitorNotificationEmailEvent = prepareSolicitorNotificationEvent(
-                        CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification.getDisplayedValue(),
-                        callbackRequest
-                    );
-
-                    eventPublisher.publishEvent(caseWorkerNotificationEmailEvent);
-                    eventPublisher.publishEvent(solicitorNotificationEmailEvent);
-                }
-                if (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
-                    || State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())) {
-                    caseData = organisationService.getApplicantOrganisationDetails(caseData);
-                    caseData = organisationService.getRespondentOrganisationDetails(caseData);
-                    caseData = caseData.setIssueDate();
-                    caseData = caseData.toBuilder().state(State.fromValue((previousStates.get()))).build();
-
-                    caseDataUpdated.put(STATE_FIELD, State.fromValue((previousStates.get())));
-                    caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
-
-                    CaseWorkerNotificationEmailEvent courtAdminNotificationEmailEvent = prepareCaseworkerEvent(
-                        CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin,
-                        callbackRequest
-                    );
-                    eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
-                }
-                // All docs will be regenerated in both issue and submitted state jira FPET-21
-                caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-                caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
-                caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
-                // remove the tick from submit screens so not present if resubmitted again
-                caseDataUpdated.put(
-                    "confidentialityDisclaimerSubmit",
-                    Collections.singletonMap("confidentialityChecksChecked", null)
-                );
-                caseDataUpdated.put("submitAgreeStatement", null);
-            }
+            updateCaseDataBasedOnState(authorisation, callbackRequest, caseData, caseDataUpdated, previousStates);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -169,6 +132,89 @@ public class ResubmitApplicationController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void updateCaseDataBasedOnState(String authorisation,
+                                            CallbackRequest callbackRequest,
+                                            CaseData caseData,
+                                            Map<String, Object> caseDataUpdated,
+                                            Optional<String> previousStates) throws Exception {
+        if (previousStates.isPresent()) {
+            if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
+                caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
+                caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                caseData = caseData.setDateSubmittedDate();
+                caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                caseDataUpdated.put(
+                    CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+                    DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+                );
+                CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent = prepareCaseworkerEvent(
+                    CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification,
+                    callbackRequest
+                );
+                SolicitorNotificationEmailEvent solicitorNotificationEmailEvent = prepareSolicitorNotificationEvent(
+                    CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification.getDisplayedValue(),
+                    callbackRequest
+                );
+
+                eventPublisher.publishEvent(caseWorkerNotificationEmailEvent);
+                eventPublisher.publishEvent(solicitorNotificationEmailEvent);
+            }
+            if (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
+                || State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())) {
+                caseData = organisationService.getApplicantOrganisationDetails(caseData);
+                caseData = organisationService.getRespondentOrganisationDetails(caseData);
+                caseData = caseData.setIssueDate();
+                caseData = caseData.toBuilder().state(State.fromValue((previousStates.get()))).build();
+
+                caseDataUpdated.put(STATE_FIELD, State.fromValue((previousStates.get())));
+                caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
+
+                CaseWorkerNotificationEmailEvent courtAdminNotificationEmailEvent = prepareCaseworkerEvent(
+                    CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin,
+                    callbackRequest
+                );
+                eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
+            }
+            // All docs will be regenerated in both issue and submitted state jira FPET-21
+            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForC100CaseResubmission(
+                    authorisation,
+                    caseData
+                ));
+            }
+            caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+            caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+            // remove the tick from submit screens so not present if resubmitted again
+            caseDataUpdated.put(
+                "confidentialityDisclaimerSubmit",
+                Collections.singletonMap("confidentialityChecksChecked", null)
+            );
+            caseDataUpdated.put("submitAgreeStatement", null);
+        }
+    }
+
+    private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(Court closestChildArrangementsCourt,
+                                                                                  CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+            caseData = caseData.toBuilder()
+                .courtName(closestChildArrangementsCourt.getCourtName())
+                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                .build();
+            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+            caseDataUpdated.put(
+                COURT_ID_FIELD,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+            caseDataUpdated.put(
+                COURT_CODE_FROM_FACT,
+                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+            );
+        }
+        return caseData;
     }
 
     private SolicitorNotificationEmailEvent prepareSolicitorNotificationEvent(String reSubmitEmailNotification, CallbackRequest callbackRequest) {
