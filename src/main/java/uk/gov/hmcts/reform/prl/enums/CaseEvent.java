@@ -43,7 +43,11 @@ public enum CaseEvent {
     CITIZEN_CONTACT_PREFERENCE("citizenContactPreference"),
     C100_ALL_DOCS_REVIEWED("c100-all-docs-reviewed"),
     FL401_ALL_DOCS_REVIEWED("fl401-all-docs-reviewed"),
-    CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload");
+    CAFCASS_ENGLAND_DOCUMENT_UPLOAD("cafcass-document-upload"),
+    ALL_AWP_IN_REVIEW("allAwPInReview"),
+    CREATE_WA_TASK_FOR_CTSC_CASE_FLAGS("createWaTaskForCtscCaseFlags"),
+    FM5_NOTIFICATION_CASE_UPDATE("fm5NotificationCaseUpdate"),
+    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE("fm5NotificationNotRequiredCaseUpdate");
 
     private final String value;
 
