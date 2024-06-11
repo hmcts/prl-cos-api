@@ -51,7 +51,7 @@ public class RefugeConfidentialityControllerFT {
 
 
     @Test
-    public void givenCAEnglishCaseWhenUpdatePartyConfidentialDetailsCalled() throws Exception {
+    public void givenCaEnglishCaseWhenUpdatePartyConfidentialDetailsCalled() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_REFUGE_CASE_DATA);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/confidentiality/update-party-confidential-details")
