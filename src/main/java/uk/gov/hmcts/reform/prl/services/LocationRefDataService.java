@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
@@ -18,6 +19,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_BASE_LOCATION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_BASE_LOCATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_REGION_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_REGION_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 
@@ -30,12 +35,16 @@ public class LocationRefDataService {
     private final LocationRefDataApi locationRefDataApi;
 
     public static final String SCOTLAND = "Scotland";
+    public static final String MIDLANDS = "Midlands";
 
     @Value("${courts.filter}")
     protected String courtsToFilter;
 
     @Value("${courts.daFilter}")
     protected String daCourtsToFilter;
+
+    @Value("${courts.caDefaultCourtEpimmsID}")
+    protected String caDefaultCourtEpimmsID;
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
@@ -198,5 +207,36 @@ public class LocationRefDataService {
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
+    }
+
+
+    public CaseManagementLocation getDefaultCourtForCA(String authorisation) {
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+        CaseManagementLocation defaultCaseManagementLocation = CaseManagementLocation.builder()
+            .region(C100_DEFAULT_REGION_ID)
+            .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+            .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build();
+
+        if (null == courtDetails || null == courtDetails.getCourtVenues()) {
+            log.error("******Default court Id is failing, as fallback defaulted to Ctsc stoke****");
+            return defaultCaseManagementLocation;
+        }
+
+        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream()
+            .filter(location -> caDefaultCourtEpimmsID.equalsIgnoreCase(location.getCourtEpimmsId()))
+            .findFirst();
+        if (courtVenue.isPresent()) {
+            return CaseManagementLocation.builder()
+                .baseLocation(courtVenue.get().getCourtEpimmsId())
+                .baseLocationName(courtVenue.get().getVenueName())
+                .region(courtVenue.get().getRegionId())
+                .regionName(courtVenue.get().getRegion()).build();
+        }
+        log.error("******Default court Id is failing, as fallback defaulted to Ctsc stoke****");
+        return defaultCaseManagementLocation;
     }
 }
