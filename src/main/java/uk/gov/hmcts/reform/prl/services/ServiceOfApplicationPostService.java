@@ -158,12 +158,6 @@ public class ServiceOfApplicationPostService {
                 List.of(
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
-                        PRIVACY_DOCUMENT_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
                         C7_BLANK_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)

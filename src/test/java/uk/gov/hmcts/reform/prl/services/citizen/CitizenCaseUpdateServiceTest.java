@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -74,6 +75,9 @@ public class CitizenCaseUpdateServiceTest {
 
     @Mock
     MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+
+    @Mock
+    NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @Mock
     SystemUserService systemUserService;

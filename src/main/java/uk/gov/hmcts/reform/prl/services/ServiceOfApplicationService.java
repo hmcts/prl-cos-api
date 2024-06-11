@@ -63,7 +63,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -1243,9 +1242,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
-        caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
         }
@@ -1385,36 +1382,61 @@ public class ServiceOfApplicationService {
                 if (null != caseData.getRespondentC8Document()) {
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentAc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentBc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentCc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentDc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                     if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
                         caseData.getRespondentC8Document().getRespondentEc8Documents().forEach(document -> {
-                            docs.add(document.getValue().getRespondentC8Document());
-                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            if (null != document.getValue().getRespondentC8Document()) {
+                                docs.add(document.getValue().getRespondentC8Document());
+                            }
+                            if (null != document.getValue().getRespondentC8DocumentWelsh()) {
+                                docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                            }
                         });
                     }
                 }
-                docs.add(caseData.getC8Document());
+                if (null != caseData.getC8Document()) {
+                    docs.add(caseData.getC8Document());
+                }
+                if (null != caseData.getC8WelshDocument()) {
+                    docs.add(caseData.getC8WelshDocument());
+                }
             }
             return docs;
         }
@@ -2440,8 +2462,9 @@ public class ServiceOfApplicationService {
             if (CollectionUtils.isNotEmpty(docsForLa)) {
                 caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
-                    .packCreatedDate(LocalDateTime.now().toString())
-                        .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
+                    .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                    .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
                     .build());
             }
         } else {
