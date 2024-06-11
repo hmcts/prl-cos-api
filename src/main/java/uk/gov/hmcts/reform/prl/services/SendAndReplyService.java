@@ -67,10 +67,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1301,6 +1302,47 @@ public class SendAndReplyService {
         }
     }
 
+    /*
+     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
+        //get the latest message
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        // Return if not external message
+        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            return;
+        }
+        //Get Selected Applicant Respondent
+        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
+
+        //Get list of Applicant & Respondent in Case
+        List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
+
+        //Hardcoded for testing
+        *//*
+        String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
+        selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
+        *//*
+        selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
+            Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                applicantOrRespondent.getCode(),
+                applicantAndRespondentInCase
+            );
+
+            if (party.isPresent()) {
+                PartyDetails partyDetails = party.get().getValue();
+                if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                    .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                    try {
+                        sendEmailNotification(caseData, partyDetails, authorisation);
+                    } catch (Exception e) {
+                        log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
+                    }
+                } else {
+                    log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
+                }
+            }
+        });
+    }*/
+
     public void sendNotificationToExternalParties(CaseData caseData, String auth) {
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
@@ -1327,8 +1369,13 @@ public class SendAndReplyService {
 
                     PartyDetails partyDetails = party.get().getValue();
 
-                    if (YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
-                        log.info("----> Else if partyDetails.getContactPreferences() {}", partyDetails.getDoTheyHaveLegalRepresentation());
+                    if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                        .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                        try {
+                            sendEmailNotification(caseData, partyDetails, auth);
+                        } catch (Exception e) {
+                            log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
+                        }
                     } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
 
                         try {
@@ -1348,8 +1395,8 @@ public class SendAndReplyService {
                         }
 
                     } else {
-                        log.info("----> Else partyDetails.getContactPreferences() {}",
-                                 partyDetails.getAddress());
+                        log.info("Error while sending post notification as not contact preferences set for party id {}",
+                                 partyDetails.getPartyId());
                     }
                 }
             }
@@ -1388,64 +1435,11 @@ public class SendAndReplyService {
 
         return bulkPrintDetails;
     }
-  
-    public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
-        //get the latest message
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        // Return if not external message
-        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-            return;
-        }
-        //Get Selected Applicant Respondent
-        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
-
-        //Get list of Applicant & Respondent in Case
-        List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-
-        //Hardcoded for testing
-        /*
-        String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
-        selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-        */
-        selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
-            Optional<Element<PartyDetails>> party = CaseUtils.getParty(
-                applicantOrRespondent.getCode(),
-                applicantAndRespondentInCase
-            );
-
-            if (party.isPresent()) {
-                PartyDetails partyDetails = party.get().getValue();
-                if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
-                    .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
-                    try {
-                        sendEmailNotification(caseData, partyDetails, authorisation);
-                    } catch (Exception e) {
-                        log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
-                    }
-                } else {
-                    log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
-                }
-            }
-        });
-    }
 
     private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
         return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 
-    private List<Element<PartyDetails>> getApplicantAndRespondentList(CaseData caseData) {
-        List<Element<PartyDetails>> applicantRespondentList = new ArrayList<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            applicantRespondentList.addAll(caseData.getApplicants());
-            applicantRespondentList.addAll(caseData.getRespondents());
-        } else {
-            applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getApplicantsFL401().getPartyId()).value(
-                caseData.getApplicantsFL401()).build()));
-            applicantRespondentList.addAll(List.of(Element.<PartyDetails>builder().id(caseData.getRespondentsFL401().getPartyId()).value(
-                caseData.getRespondentsFL401()).build()));
-        }
-        return applicantRespondentList;
-    }
 
     private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
@@ -1614,10 +1608,6 @@ public class SendAndReplyService {
         }
 
         return applicantsRespondentInCase;
-    }
-
-    private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
-        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
