@@ -906,8 +906,19 @@ public class CaseService {
             addSoaNotifications(citizenDocumentsManagement, citizenNotifications, userDetails, partyIdAndType);
         }
 
+        //Respondent response
+        if (SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
+            && isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
+            && !isAnyOrderServedPostLatestC7Resp(citizenDocumentsManagement.getCitizenDocuments(),
+                                                citizenDocumentsManagement.getCitizenOrders())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
+        }
+
         //PRL-5431 - Statement of service notifications
-        if (isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
+        if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())
+            && isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
             CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
             //SOS by unrepresented applicant
             if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
@@ -916,9 +927,12 @@ public class CaseService {
             }
 
             //SOS by Court admin/Court bailiff
-            if (PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
-                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible())) {
+            if ((PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
+                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))
+                && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
+            } else {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
             }
         }
 
@@ -987,8 +1001,6 @@ public class CaseService {
         if (isAnyOrderServedPostSoa(citizenAppPack, citizenDocumentsManagement.getCitizenOrders())) {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
-            citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
         } else {
             //SOA Applicant - personal service(unrepresented applicant)
             if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
@@ -1000,7 +1012,7 @@ public class CaseService {
 
             //SOA Applicant - personal(court admin/court bailiff)/non-personal
             if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
-                && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) {
+                && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) { //logged in party is applicant
                 citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true)
                                              .isPersonalService(citizenAppPack.isPersonalService()).build());
             } else {
@@ -1009,17 +1021,11 @@ public class CaseService {
 
             //SOA Respondent - non-personal
             if (CollectionUtils.isNotEmpty(citizenAppPack.getRespondentSoaPack())
-                && SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE))
+                && SERVED_PARTY_RESPONDENT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is respondent
                 && !isResponseSubmittedByRespondent(citizenDocumentsManagement.getCitizenDocuments(), userDetails.getId())) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(true).build());
             } else {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
-            }
-
-            //Respondent response
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
-                && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
             }
         }
     }
@@ -1052,15 +1058,33 @@ public class CaseService {
         return isAnyOrderServedPostDate(citizenOrders, citizenAppPack.getUploadedDate());
     }
 
-    //CHECK & REMOVE IF NOT NEEDED
-    /*private boolean isAnyOrderServedPostSos(CaseData caseData,
+    private boolean isAnyOrderServedPostSos(CaseData caseData,
                                             List<CitizenDocuments> citizenOrders) {
         return (null != caseData.getStatementOfService()
             && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication()))
             && caseData.getStatementOfService().getStmtOfServiceForApplication().stream()
             .anyMatch(stmtOfSerParty ->
-                          isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption().toLocalDate()));
-    }*/
+                          isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption()));
+    }
+
+    private boolean isAnyOrderServedPostLatestC7Resp(List<CitizenDocuments> citizenDocuments,
+                                                     List<CitizenDocuments> citizenOrders) {
+        return CollectionUtils.isNotEmpty(citizenDocuments)
+            && isAnyOrderServedPostDate(citizenOrders,
+                                        getLatestReviewedDocumentDate(citizenDocuments, RESPONDENT_APPLICATION));
+    }
+
+    private LocalDateTime getLatestReviewedDocumentDate(List<CitizenDocuments> citizenDocuments,
+                                                        String category) {
+        return citizenDocuments.stream()
+            .filter(citizenDocument -> category.equals(citizenDocument.getCategoryId()))
+            .min(comparing(
+                CitizenDocuments::getUploadedDate,
+                Comparator.nullsLast(Comparator.reverseOrder())
+            ))
+            .map(CitizenDocuments::getUploadedDate)
+            .orElse(null);
+    }
 
     private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
                                             LocalDateTime postDateTime) {
