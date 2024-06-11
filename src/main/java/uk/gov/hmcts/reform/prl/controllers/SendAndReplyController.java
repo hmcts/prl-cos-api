@@ -271,6 +271,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
+            sendAndReplyService.sendNotificationToExternalParties(caseData, authorisation);
             //WA - clear reply field in case of SEND
             sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {

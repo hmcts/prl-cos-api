@@ -871,6 +871,32 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
+    public void testHandleSubmittedSendAndReplyWhenRespToMesgSendAndNo() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .messages(messages)
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .build())
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+    }
+
+    @Test
     public void testHandSubmittedSendAndReplyWhenRespondToMessageYes() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
@@ -893,6 +919,7 @@ public class SendAndReplyControllerTest {
 
     }
 
+    @Test
     public void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
