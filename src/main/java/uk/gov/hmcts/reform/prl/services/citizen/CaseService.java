@@ -754,7 +754,10 @@ public class CaseService {
             .wasCafcassServed(isCafcassServed(order))
             .wasCafcassCymruServed(isCafcassCymruServed(order))
             .isPersonalService(isPersonalService(order))
-            .whoIsResponsible(null) //POPULATE ONCE DETAILS ARE AVAILABLE IN ORDER COLLECTION
+            .whoIsResponsible(null != order.getServeOrderDetails()
+                                  ? order.getServeOrderDetails().getWhoIsResponsibleToServe() : null)
+            .isMultiple(null != order.getServeOrderDetails()
+                            && YesOrNo.Yes.equals(order.getServeOrderDetails().getMultipleOrdersServed()))
             .build();
     }
 
@@ -925,7 +928,9 @@ public class CaseService {
     private void addOrderNotifications(List<CitizenDocuments> citizenOrders,
                                        List<CitizenNotification> citizenNotifications) {
         CitizenNotification citizenNotification;
-        List<CitizenDocuments> ordersServed = getMultipleOrdersServed(citizenOrders);
+        List<CitizenDocuments> multipleOrdersServed = citizenOrders.stream()
+            .filter(CitizenDocuments::isMultiple).toList();
+
         if (citizenOrders.get(0).isPersonalService()) {
             //CRNF3 - personal service
             citizenNotification = CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(true).isPersonalService(true).build();
@@ -935,25 +940,11 @@ public class CaseService {
         }
 
         citizenNotification = citizenNotification.toBuilder()
-            .isNew(ordersServed.stream().anyMatch(CitizenDocuments::isNew))
-            .isFinal(ordersServed.stream().anyMatch(CitizenDocuments::isFinal))
-            .isMultiple(ordersServed.size() > 1)
+            .isNew(multipleOrdersServed.stream().anyMatch(CitizenDocuments::isNew))
+            .isFinal(multipleOrdersServed.stream().anyMatch(CitizenDocuments::isFinal))
+            .isMultiple(multipleOrdersServed.size() > 1)
             .build();
         citizenNotifications.add(citizenNotification);
-    }
-
-    private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {
-        List<CitizenDocuments> multipleOrdersServed = new ArrayList<>();
-        multipleOrdersServed.add(citizenOrders.get(0));
-        for (int i = 0; i < citizenOrders.size() - 1; i++) {
-            if (null != citizenOrders.get(0).getServedDateTime()
-                && null != citizenOrders.get(i + 1).getServedDateTime()
-                && citizenOrders.get(0).getServedDateTime().toLocalDate()
-                .equals(citizenOrders.get(i + 1).getServedDateTime().toLocalDate())) {
-                multipleOrdersServed.add(citizenOrders.get(i + 1));
-            }
-        }
-        return multipleOrdersServed;
     }
 
     private void addFm5ReminderNotification(String authorization,

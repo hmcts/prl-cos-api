@@ -42,5 +42,6 @@ public class CitizenDocuments {
     private LocalDateTime servedDateTime;
     private boolean isNew;
     private boolean isFinal;
+    private boolean isMultiple;
     private String documentLanguage;
 }

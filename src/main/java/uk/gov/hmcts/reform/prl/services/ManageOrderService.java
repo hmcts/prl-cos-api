@@ -193,9 +193,9 @@ public class ManageOrderService {
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
-
+    public static final String WHO_IS_RESPONSIBLE_TO_SERVE = "whoIsResponsibleToServe";
+    public static final String IS_MULTIPLE_ORDERS_SERVED = "multipleOrdersServed";
     public static final String RECIPIENTS_OPTIONS = "recipientsOptions";
-
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
@@ -1457,16 +1457,17 @@ public class ManageOrderService {
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        servedC100Order(caseData, orders, order);
+                        servedC100Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     } else {
-                        servedFL401Order(caseData, orders, order);
+                        servedFL401Order(caseData, orders, order, selectedOrderIds.size() > 1);
                     }
                 });
         }
         return orders;
     }
 
-    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order,
+                                  boolean isMultipleOrdersServed) {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
@@ -1489,6 +1490,8 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderDA(caseData));
+        servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions) {
@@ -1516,7 +1519,7 @@ public class ManageOrderService {
         return servedParties;
     }
 
-    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order, boolean isMultipleOrdersServed) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
         String serveRecipientName = null;
@@ -1567,6 +1570,8 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderCA(caseData));
+        servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions) {
@@ -1581,6 +1586,18 @@ public class ManageOrderService {
             postalInformation,
             emailInformation
         );
+    }
+
+    private String getWhoIsResponsibleToServeOrderCA(CaseData caseData) {
+        return NO.equals(caseData.getManageOrders().getDisplayLegalRepOption())
+            ? caseData.getManageOrders().getServingOptionsForNonLegalRep().getId()
+            : caseData.getManageOrders().getServingRespondentsOptionsCA().getId();
+    }
+
+    private String getWhoIsResponsibleToServeOrderDA(CaseData caseData) {
+        return NO.equals(caseData.getManageOrders().getDisplayLegalRepOption())
+            ? caseData.getManageOrders().getServingOptionsForNonLegalRep().getId()
+            : caseData.getManageOrders().getServingRespondentsOptionsDA().getId();
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
@@ -1729,6 +1746,8 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
         String serveRecipientName = null;
+        String whoIsResponsibleToServe = null;
+        YesOrNo multipleOrdersServed = null;
 
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
@@ -1761,6 +1780,13 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
             serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
         }
+        if (servedOrderDetails.containsKey(WHO_IS_RESPONSIBLE_TO_SERVE)) {
+            whoIsResponsibleToServe = (String) servedOrderDetails.get(WHO_IS_RESPONSIBLE_TO_SERVE);
+        }
+        if (servedOrderDetails.containsKey(IS_MULTIPLE_ORDERS_SERVED)) {
+            multipleOrdersServed = (boolean) servedOrderDetails.get(IS_MULTIPLE_ORDERS_SERVED) ? Yes : No;
+        }
+
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
@@ -1800,6 +1826,8 @@ public class ManageOrderService {
             .servedParties(servedParties)
             .servingRecipientName(serveRecipientName)
             .courtPersonalService(courtPersonalService)
+            .whoIsResponsibleToServe(whoIsResponsibleToServe)
+            .multipleOrdersServed(multipleOrdersServed)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
