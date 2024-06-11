@@ -928,8 +928,7 @@ public class CaseService {
     private void addOrderNotifications(List<CitizenDocuments> citizenOrders,
                                        List<CitizenNotification> citizenNotifications) {
         CitizenNotification citizenNotification;
-        List<CitizenDocuments> multipleOrdersServed = citizenOrders.stream()
-            .filter(CitizenDocuments::isMultiple).toList();
+        List<CitizenDocuments> multipleOrdersServed = getMultipleOrdersServed(citizenOrders);
 
         if (citizenOrders.get(0).isPersonalService()) {
             //CRNF3 - personal service
@@ -945,6 +944,24 @@ public class CaseService {
             .isMultiple(multipleOrdersServed.size() > 1)
             .build();
         citizenNotifications.add(citizenNotification);
+    }
+
+    private List<CitizenDocuments> getMultipleOrdersServed(List<CitizenDocuments> citizenOrders) {
+        List<CitizenDocuments> multipleOrdersServed = new ArrayList<>();
+        multipleOrdersServed.add(citizenOrders.get(0));
+
+        if (citizenOrders.get(0).isMultiple()) {
+            for (int i = 1; i < citizenOrders.size(); i++) {
+                if (null != citizenOrders.get(0).getServedDateTime()
+                    && null != citizenOrders.get(i).getServedDateTime()
+                    && citizenOrders.get(0).getServedDateTime().toLocalDate()
+                    .equals(citizenOrders.get(i).getServedDateTime().toLocalDate())) {
+                    multipleOrdersServed.add(citizenOrders.get(i));
+                }
+            }
+        }
+
+        return multipleOrdersServed;
     }
 
     private void addFm5ReminderNotification(String authorization,
@@ -1000,7 +1017,8 @@ public class CaseService {
             }
 
             //Respondent response
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())) {
+            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
+                && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
             }
         }
