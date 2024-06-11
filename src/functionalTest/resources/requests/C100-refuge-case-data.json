@@ -1,0 +1,101 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "caseTypeOfApplication": "C100",
+      "applicantOrRespondentCaseName": "c100 test name",
+      "applicants": [
+        {
+          "id": "5080a550-b13e-4786-8329-fe7813bff7e5",
+          "value": {
+            "email": null,
+            "gender": "female",
+            "address": {
+              "County": "",
+              "Country": "",
+              "PostCode": "le2 1yh",
+              "PostTown": "test",
+              "AddressLine1": "17 Lorne Road",
+              "AddressLine2": "",
+              "AddressLine3": ""
+            },
+            "dxNumber": "12123",
+            "landline": null,
+            "lastName": "Manchella",
+            "firstName": "Sairam",
+            "dateOfBirth": "1111-11-11",
+            "otherGender": null,
+            "phoneNumber": "01234567891",
+            "placeOfBirth": "test",
+            "previousName": null,
+            "solicitorOrg": {
+              "OrganisationID": "79ZRSOU",
+              "OrganisationName": "Civil - Organisation 2"
+            },
+            "sendSignUpLink": null,
+            "solicitorEmail": "soli@gmail.com",
+            "isAddressUnknown": null,
+            "solicitorAddress": {
+              "County": null,
+              "Country": null,
+              "PostCode": null,
+              "PostTown": null,
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null
+            },
+            "isDateOfBirthKnown": null,
+            "solicitorReference": "007",
+            "solicitorTelephone": null,
+            "isPlaceOfBirthKnown": null,
+            "isDateOfBirthUnknown": null,
+            "isAddressConfidential": "No",
+            "isCurrentAddressKnown": null,
+            "relationshipToChildren": null,
+            "representativeLastName": "Manchella",
+            "representativeFirstName": "Sairam",
+            "canYouProvidePhoneNumber": null,
+            "canYouProvideEmailAddress": "No",
+            "isAtAddressLessThan5Years": "No",
+            "isPhoneNumberConfidential": "No",
+            "isEmailAddressConfidential": null,
+            "respondentLivedWithApplicant": null,
+            "doTheyHaveLegalRepresentation": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "otherPersonRelationshipToChildren": [
+
+            ],
+            "isAtAddressLessThan5YearsWithDontKnow": null
+          }
+        }
+      ],
+      "withDrawApplicationData": {
+        "withDrawApplication": "Yes",
+        "withDrawApplicationReason": "Test"
+      }
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "amendApplicantsDetails"
+}
