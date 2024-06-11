@@ -502,12 +502,13 @@ public class ServiceOfApplicationService {
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", caseData.getApplicantsFL401().getLabelForDynamicList());
-                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        dynamicData.put(DASH_BOARD_LINK, citizenUrl);
+                        populateLanguageMap(caseData, dynamicData);
                         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
                             caseData.getApplicantsFL401().getEmail(),
                             docs,
-                            SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                            SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
                             dynamicData,
                             whoIsResponsibleForServing
                         );
