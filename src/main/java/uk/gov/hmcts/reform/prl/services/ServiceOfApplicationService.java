@@ -190,7 +190,7 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
-    private static final String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+    private static final String DATE_CREATED = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
 
     @Value("${xui.url}")
@@ -494,24 +494,24 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
                     if (isAccessEnabled(applicant)) {
-                        sendEmailToUnrepresentedApplicant(authorization, caseData, packEdocs,
+                        emailNotificationDetails.add(element(sendEmailToUnrepresentedApplicant(authorization, caseData, packEdocs,
                                                           applicant,
                                                           Templates.PRL_LET_ENG_AP1,
                                                           EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
-                                                          );
+                                                          )));
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", caseData.getApplicantsFL401().getLabelForDynamicList());
                         dynamicData.put(DASH_BOARD_LINK, citizenUrl);
                         populateLanguageMap(caseData, dynamicData);
-                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
                             caseData.getApplicantsFL401().getEmail(),
                             docs,
                             SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
                             dynamicData,
                             whoIsResponsibleForServing
-                        );
+                        )));
                     }
 
                 } else {
@@ -526,7 +526,7 @@ public class ServiceOfApplicationService {
                     .partyIds(List.of(element(String.valueOf(caseData.getRespondentsFL401().getPartyId()))))
                     .servedBy(UNREPRESENTED_APPLICANT)
                     .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                    .packCreatedDate(dateCreated)
+                    .packCreatedDate(DATE_CREATED)
                     .build());
             } else {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
@@ -958,7 +958,7 @@ public class ServiceOfApplicationService {
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(dateCreated)
+                .packCreatedDate(DATE_CREATED)
                 .build());
         } else {
             log.info("personal service - court bailiff/court admin");
@@ -2468,14 +2468,16 @@ public class ServiceOfApplicationService {
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
-            c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData,
+                                                                        DATE_CREATED, c100StaticDocs);
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData,
+                                                    DATE_CREATED, c100StaticDocs);
         }
         //serving other people in the case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, DATE_CREATED, c100StaticDocs);
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
@@ -2697,13 +2699,14 @@ public class ServiceOfApplicationService {
                                                                                        caseData);
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
-            caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData, dateCreated,
+            caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData,
+                                                                                    DATE_CREATED,
                                                                                     fl401StaticDocs));
         } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
             || SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
-            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, dateCreated, fl401StaticDocs,
+            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, DATE_CREATED, fl401StaticDocs,
                                                                authorization);
         } else if (SoaCitizenServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
