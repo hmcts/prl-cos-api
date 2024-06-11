@@ -351,8 +351,8 @@ public class ServiceOfApplicationServiceTest {
             .servedParty("ApplicantSolicitor")
             .build();
         when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
+                                                                                        Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                        Mockito.anyString()))
             .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
@@ -597,9 +597,9 @@ public class ServiceOfApplicationServiceTest {
             .finalServedApplicationDetailsList(servedApplDetailsList)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(List.of(element("test12345")))
-                                                                  .packDocument(List.of(element(Document.builder().build())))
-                                                                  .build())
+                                                          .partyIds(List.of(element("test12345")))
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -1386,15 +1386,19 @@ public class ServiceOfApplicationServiceTest {
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicantsFL401(partyDetails)
-            .respondentsFL401(partyDetails)
+            .applicants(applicants)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
@@ -2603,7 +2607,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        //assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2680,7 +2684,7 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        //assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2731,12 +2735,17 @@ public class ServiceOfApplicationServiceTest {
                                                 .noticeOfSafetySupportLetter(Document.builder().build())
                                                 .build())
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds).build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
                                                                   .build())
+                                      .applicationServedYesNo(No)
+                                      .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -2749,8 +2758,9 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2811,10 +2821,10 @@ public class ServiceOfApplicationServiceTest {
                                                                                         .applicantLegalRepresentative.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                         .applicantLegalRepresentative.toString())
-                                                                  .build())
+                                                                 .partyIds(partyIds)
+                                                                 .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                        .applicantLegalRepresentative.toString())
+                                                                 .build())
                                       .applicationServedYesNo(No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
@@ -2951,7 +2961,9 @@ public class ServiceOfApplicationServiceTest {
             .build();
         for (String i : new ArrayList<>(Arrays.asList("E", "F", "H", "I", "L", "M", "O", "P", "Z"))) {
             List<Document> documentPack = serviceOfApplicationService.getNotificationPack(caseData,i,List.of(Document.builder()
-                .documentFileName(SOA_FL415_FILENAME).build(),Document.builder().documentFileName(SOA_FL416_FILENAME).build()));
+                                                                                   .documentFileName(SOA_FL415_FILENAME).build(),
+                                                                               Document.builder()
+                                                                                   .documentFileName(SOA_FL416_FILENAME).build()));
             assertFalse(documentPack.isEmpty());
         }
     }
@@ -3577,6 +3589,7 @@ public class ServiceOfApplicationServiceTest {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }
@@ -3677,7 +3690,7 @@ public class ServiceOfApplicationServiceTest {
         applicants.add(element(partyDetails));
         List<Element<ResponseDocuments>> c8Docs = List.of(Element.<ResponseDocuments>builder()
                                                               .value(ResponseDocuments.builder().build())
-                                                              .build());
+            .build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
@@ -3697,8 +3710,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
-                                                                                       .documentsListForLa(DynamicList.builder().build())
-                                                                                       .build())))
+                                                                               .documentsListForLa(DynamicList.builder().build())
+                                                                               .build())))
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .build())
@@ -3761,7 +3774,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
+                                      .soaServeToRespondentOptions(No)
                                       .soaServeLocalAuthorityYesOrNo(No)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
@@ -3793,7 +3806,7 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
