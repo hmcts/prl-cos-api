@@ -76,6 +76,7 @@ public class CaseDataChildDetailsElementsMapper {
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
+                   .citizenWhoDoesTheChildLiveWith(childDetail.getMainlyLiveWith())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                                                   .build()
             ).build();
