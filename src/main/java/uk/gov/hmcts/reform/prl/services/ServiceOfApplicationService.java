@@ -1941,8 +1941,17 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getWitnessStatement(CaseData caseData) {
-        return !CollectionUtils.isEmpty(caseData.getFl401UploadWitnessDocuments()) ? ElementUtils.unwrapElements(
-            caseData.getFl401UploadWitnessDocuments()) : new ArrayList<>();
+        List<Document> witnessStatements = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(caseData.getFl401UploadWitnessDocuments())) {
+            witnessStatements.addAll(ElementUtils.unwrapElements(
+                caseData.getFl401UploadWitnessDocuments()));
+        }
+        if (!CollectionUtils.isEmpty(caseData.getCourtNavUploadedDocs())) {
+            caseData.getCourtNavUploadedDocs().stream()
+                .filter(e -> Optional.ofNullable(e.getValue().getCitizenDocument()).isPresent())
+                .forEach(e -> witnessStatements.add(e.getValue().getCitizenDocument()));
+        }
+        return witnessStatements;
     }
 
     private List<Document> generatePackB(CaseData caseData, List<Document> staticDocs) {
