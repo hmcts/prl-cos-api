@@ -1594,10 +1594,12 @@ public class ManageOrderService {
     }
 
     private String getWhoIsResponsibleToServeOrderCA(ManageOrders manageOrders) {
-        return Yes.equals(manageOrders.getServeToRespondentOptions())
-            && NO.equals(manageOrders.getDisplayLegalRepOption())
-            ? manageOrders.getServingOptionsForNonLegalRep().getId()
-            : manageOrders.getServingRespondentsOptionsCA().getId();
+        if (Yes.equals(manageOrders.getServeToRespondentOptions())) {
+            return NO.equals(manageOrders.getDisplayLegalRepOption())
+                ? manageOrders.getServingOptionsForNonLegalRep().getId()
+                : manageOrders.getServingRespondentsOptionsCA().getId();
+        }
+        return null;
     }
 
     private String getWhoIsResponsibleToServeOrderDA(ManageOrders manageOrders) {
