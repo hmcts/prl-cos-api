@@ -523,7 +523,7 @@ public class ServiceOfApplicationService {
 
                 caseDataMap.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
                     .packDocument(wrapElements(packFdocs))
-                    .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
+                    .partyIds(List.of(element(String.valueOf(caseData.getRespondentsFL401().getPartyId()))))
                     .servedBy(UNREPRESENTED_APPLICANT)
                     .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
                     .packCreatedDate(dateCreated)
