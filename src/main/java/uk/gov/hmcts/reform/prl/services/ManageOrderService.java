@@ -89,6 +89,8 @@ import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
@@ -604,6 +607,8 @@ public class ManageOrderService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
+
+    private final ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1490,7 +1495,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderDA(caseData));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderDA(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
@@ -1570,7 +1575,7 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderCA(caseData));
+        servedOrderDetails.put(WHO_IS_RESPONSIBLE_TO_SERVE, getWhoIsResponsibleToServeOrderCA(caseData.getManageOrders()));
         servedOrderDetails.put(IS_MULTIPLE_ORDERS_SERVED, isMultipleOrdersServed);
 
         if (null != serveRecipientName
@@ -1588,16 +1593,17 @@ public class ManageOrderService {
         );
     }
 
-    private String getWhoIsResponsibleToServeOrderCA(CaseData caseData) {
-        return NO.equals(caseData.getManageOrders().getDisplayLegalRepOption())
-            ? caseData.getManageOrders().getServingOptionsForNonLegalRep().getId()
-            : caseData.getManageOrders().getServingRespondentsOptionsCA().getId();
+    private String getWhoIsResponsibleToServeOrderCA(ManageOrders manageOrders) {
+        return Yes.equals(manageOrders.getServeToRespondentOptions())
+            && NO.equals(manageOrders.getDisplayLegalRepOption())
+            ? manageOrders.getServingOptionsForNonLegalRep().getId()
+            : manageOrders.getServingRespondentsOptionsCA().getId();
     }
 
-    private String getWhoIsResponsibleToServeOrderDA(CaseData caseData) {
-        return NO.equals(caseData.getManageOrders().getDisplayLegalRepOption())
-            ? caseData.getManageOrders().getServingOptionsForNonLegalRep().getId()
-            : caseData.getManageOrders().getServingRespondentsOptionsDA().getId();
+    private String getWhoIsResponsibleToServeOrderDA(ManageOrders manageOrders) {
+        return NO.equals(manageOrders.getDisplayLegalRepOption())
+            ? manageOrders.getServingOptionsForNonLegalRep().getId()
+            : manageOrders.getServingRespondentsOptionsDA().getId();
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData, String representativeName) {
@@ -1643,7 +1649,7 @@ public class ManageOrderService {
             .map(applicant -> element(ServedParties.builder()
                                           .partyId(String.valueOf(applicant.getId()))
                                           .partyName(applicant.getValue().getLabelForDynamicList())
-                                          .servedDateTime(LocalDateTime.now())
+                                          .servedDateTime(zonedDateTime.toLocalDateTime())
                                           .build()))
             .toList();
     }
@@ -1652,7 +1658,7 @@ public class ManageOrderService {
         return element(ServedParties.builder()
                            .partyId(String.valueOf(party.getPartyId()))
                            .partyName(party.getLabelForDynamicList())
-                           .servedDateTime(LocalDateTime.now())
+                           .servedDateTime(zonedDateTime.toLocalDateTime())
                            .build());
     }
 
@@ -1665,14 +1671,14 @@ public class ManageOrderService {
                                               .partyId("11111111-1111-1111-1111-111111111111")//adding some default value
                                               .partyName(representativeName + " (" + servingRespondentsOptions
                                                   .getDisplayedValue() + ")")
-                                              .servedDateTime(LocalDateTime.now())
+                                              .servedDateTime(zonedDateTime.toLocalDateTime())
                                               .build()));
 
             } else {
                 servedParties.add(element(ServedParties.builder()
                                               .partyId("00000000-0000-0000-0000-000000000000")//adding some default value
                                               .partyName(servingRespondentsOptions.getDisplayedValue())
-                                              .servedDateTime(LocalDateTime.now())
+                                              .servedDateTime(zonedDateTime.toLocalDateTime())
                                               .build()));
             }
         }

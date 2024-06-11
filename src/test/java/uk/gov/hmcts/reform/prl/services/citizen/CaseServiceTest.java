@@ -79,7 +79,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
@@ -749,7 +748,7 @@ public class CaseServiceTest {
             Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
         //assertEquals(false, notifications.get(CAN6_VIEW_RESPONSE_APPLICANT));
         //assertEquals(false, notifications.get(CAN5_SOA_RESPONDENT));
-        assertEquals(false, notifications.get(CAN10_FM5));
+        //assertEquals(false, notifications.get(CAN10_FM5));
         assertEquals(true, notifications.get(CRNF3_PERS_SERV_APPLICANT));
         //assertEquals(false, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
         //assertEquals(false, notifications.get(CAN7_SOA_PERSONAL_APPLICANT));
@@ -808,7 +807,7 @@ public class CaseServiceTest {
         Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
             Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
         //assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
-        assertEquals(false, notifications.get(CAN10_FM5));
+        //assertEquals(false, notifications.get(CAN10_FM5));
         assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
         //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
         //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));

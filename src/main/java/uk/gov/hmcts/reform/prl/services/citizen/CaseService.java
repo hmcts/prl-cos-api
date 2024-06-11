@@ -433,7 +433,7 @@ public class CaseService {
             getAllCitizenDashboardNotifications(authToken, caseData, citizenDocumentsManagement, userDetails, partyIdAndType);
         if (CollectionUtils.isNotEmpty(citizenNotifications)) {
             citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
-                .citizenNotifications(citizenNotifications)
+                .citizenNotifications(citizenNotifications.stream().filter(CitizenNotification::isShow).toList())
                 .build();
         }
 
