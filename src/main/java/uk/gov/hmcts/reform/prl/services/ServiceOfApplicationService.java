@@ -99,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL402_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
@@ -694,7 +695,6 @@ public class ServiceOfApplicationService {
                         break;
                     }
                 }
-                log.info("is present in Pack A {}", isPresentInPackA);
                 if (!isPresentInPackA) {
                     docs.add(packBDocument);
                 }
@@ -1481,14 +1481,18 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> generatePackAcN(CaseData caseData, List<Document> staticDocs) {
-        List<Document> docs = new ArrayList<>();
 
+        List<Document> selectedOrders = new ArrayList<>();
+        caseData.getOrderCollection().stream()
+            .findAny()
+            .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
+
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
-        docs.addAll(staticDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).toList());
-        docs.addAll(staticDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(staticDocs);
+        docs.addAll(getFL402Orders(selectedOrders));
+        docs.addAll(getNonFl402Orders((getSoaSelectedOrders(caseData))));
         Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
         noticeOfSafetyFl401.ifPresent(docs::add);
 
@@ -1590,6 +1594,16 @@ public class ServiceOfApplicationService {
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+    }
+
+    private List<Document> getNonFl402Orders(List<Document> soaSelectedOrders) {
+        return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
+            FL402_ORDER)).collect(Collectors.toList());
+    }
+
+    private List<Document> getFL402Orders(List<Document> soaOrders) {
+        return soaOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
+            FL402_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
