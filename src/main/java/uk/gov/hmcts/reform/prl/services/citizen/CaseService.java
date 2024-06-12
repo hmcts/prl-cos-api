@@ -569,7 +569,7 @@ public class CaseService {
 
     private List<String> getPartyIds(List<Element<PartyDetails>> parties) {
         return CollectionUtils.isNotEmpty(parties)
-            ? parties.stream().map(Element::getId).map(Objects::toString).toList()
+            ? parties.stream().map(Element::getId).map(Objects::toString).map(String::trim).toList()
             : Collections.emptyList();
     }
 
@@ -1011,11 +1011,12 @@ public class CaseService {
                                      CitizenDocumentsManagement citizenDocumentsManagement,
                                      List<CitizenNotification> citizenNotifications,
                                      String partyType) {
-        if (isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
+        if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
+            && isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
+            log.info("*** SOS is completed for respondents ***");
             CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
             //SOS by unrepresented applicant
-            if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
-                && UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
+            if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
                 citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
             }
@@ -1110,6 +1111,7 @@ public class CaseService {
     }
 
     private boolean isSosCompletedPostSoa(CaseData caseData, List<String> partyIds) {
+        log.info("Respondent partyIds for SOS check {}", partyIds);
         return (null != caseData.getStatementOfService())
             && nullSafeCollection(caseData.getStatementOfService().getStmtOfServiceForApplication()).stream()
             .anyMatch(stmtOfSerParty -> new HashSet<>(getPartyIds(stmtOfSerParty.getValue().getSelectedPartyId()))
