@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.services.Fm5ReminderService;
+import uk.gov.hmcts.reform.prl.services.UpdateHearingActualsService;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class UpdateHearingActualTask implements Runnable {
 
-    private final Fm5ReminderService fm5ReminderService;
+    private final UpdateHearingActualsService updateHearingActualsService;
 
     /**
      * When an object implementing interface {@code Runnable} is used
@@ -27,7 +28,7 @@ public class UpdateHearingActualTask implements Runnable {
     public void run() {
         log.info("*** FM5 reminder scheduled task is started ***");
         //Invoke fm5 reminder service to evaluate & notify if needed
-        fm5ReminderService.updateHearingActuals();
+        updateHearingActualsService.updateHearingActuals();
 
         log.info("*** FM5 reminder scheduled task is completed ***");
     }

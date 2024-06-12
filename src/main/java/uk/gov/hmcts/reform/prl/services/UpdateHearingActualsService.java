@@ -14,27 +14,35 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 
 @Slf4j
 @Service
@@ -57,8 +65,75 @@ public class UpdateHearingActualsService {
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
         if (isNotEmpty(caseDetailsList)) {
-
+            createUpdateHearingActualWaTask(
+                caseDetailsList,
+                fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
+                    caseDetailsList))
+            );
         }
+    }
+
+    private List<String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
+        return filterHearingsForTodaysDate(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            listOfCaseidsForHearings
+        ));
+    }
+
+    private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList, List<String> caseIds) {
+        caseIds.stream()
+            .map(caseId ->
+                 {
+                     caseDetailsList.stream()
+                         .filter(caseDetails -> caseDetails.getId().equals(caseId))
+                         .map(
+                             caseDetails -> {
+                                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                                 caseData.getDraftOrderCollection().stream()
+                                     .map(Element::getValue)
+                                     .filter(draftOrderElement ->
+                                         draftOrderElement.getWasTheOrderApprovedAtHearing().equals(YesOrNo.Yes)
+                                             && draftOrderElement.getHearingsType().getValue().getCode()
+                                     )
+                             }
+                         );
+
+                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                     startAllTabsUpdateDataContent
+                         = allTabService.getStartAllTabsUpdate(caseId);
+                     Map<String, Object> caseDataUpdated = new HashMap<>();
+                     caseDataUpdated.put("enableUpdateHearingActualTask", "true");
+                     allTabService.submitAllTabsUpdate(
+                         startAllTabsUpdateDataContent.authorisation(),
+                         caseId,
+                         startAllTabsUpdateDataContent.startEventResponse(),
+                         startAllTabsUpdateDataContent.eventRequestData(),
+                         caseDataUpdated
+                     );
+                 }
+            );
+
+    }
+
+    private List<String> filterHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
+
+        return hearingsForAllCaseIds.stream().filter(hearings -> checkIfHearingIsToday(hearings.getCaseHearings()))
+            .map(Hearings::getCaseRef).toList();
+    }
+
+    private boolean checkIfHearingIsToday(List<CaseHearing> caseHearings) {
+        return caseHearings.stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
+            .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().filter(hearingDaySchedule -> Duration.between(
+                hearingDaySchedule.getHearingStartDateTime(),
+                LocalDateTime.now()
+            ).isZero()).findAny().isPresent();
+
+    }
+
+    private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
+        return caseDetailsList.stream().map(CaseDetails::getId).map(String::valueOf).toList();
+
     }
 
 
