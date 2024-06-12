@@ -119,7 +119,7 @@ public class TaskListService {
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
-        boolean isC1aApplicable = caseData.getC1ADocument() != null ? true : false;
+        boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
                 .map(event -> RespondentTask.builder()
                         .event(event)
