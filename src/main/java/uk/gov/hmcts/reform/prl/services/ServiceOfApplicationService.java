@@ -526,7 +526,6 @@ public class ServiceOfApplicationService {
                 caseData,
                 authorization,
                 emailNotificationDetails,
-                UNREPRESENTED_APPLICANT,
                 applicant,
                 docs,
                 packEdocs
@@ -551,7 +550,7 @@ public class ServiceOfApplicationService {
 
     private void checkAndSendEmailToDaApplicantLip(CaseData caseData, String authorization,
                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                   String whoIsResponsibleForServing, Element<PartyDetails> applicant,
+                                                   Element<PartyDetails> applicant,
                                                    List<Document> docs, List<Document> packEdocs) {
         if (isAccessEnabled(applicant)) {
             serviceOfApplicationEmailService.sendGovNotifyEmail(
@@ -587,7 +586,7 @@ public class ServiceOfApplicationService {
                 docsToApplicant,
                 SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
                 dynamicData,
-                whoIsResponsibleForServing
+                UNREPRESENTED_APPLICANT
             )));
         }
     }
@@ -2032,7 +2031,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> getWitnessStatement(CaseData caseData) {
         return !CollectionUtils.isEmpty(caseData.getFl401UploadWitnessDocuments()) ? ElementUtils.unwrapElements(
-            caseData.getFl401UploadWitnessDocuments()) : new ArrayList<>();
+            caseData.getFl401UploadWitnessDocuments()) : Collections.emptyList();
     }
 
     private List<Document> generatePackB(CaseData caseData, List<Document> staticDocs) {
@@ -2071,9 +2070,13 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
+        log.info("witness docs {}", docs);
         docs.addAll(staticDocs);
+        log.info("static docs {}", staticDocs);
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        log.info("after non c6 docs {}", staticDocs);
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        log.info("after uploaded docs {}", docs);
         return docs;
     }
 
@@ -2115,6 +2118,7 @@ public class ServiceOfApplicationService {
         } else {
             docs.add(caseData.getFinalDocument());
         }
+        log.info("case docs {}", docs);
         return docs;
     }
 
@@ -2134,6 +2138,7 @@ public class ServiceOfApplicationService {
         if (CollectionUtils.isNotEmpty(additionalDocuments)) {
             docs.addAll(additionalDocuments);
         }
+        log.info("uploaded docs {}", docs);
         return docs;
     }
 
