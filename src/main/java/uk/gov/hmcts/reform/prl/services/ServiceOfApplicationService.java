@@ -518,17 +518,15 @@ public class ServiceOfApplicationService {
         }
         packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs));
         removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
-        String whoIsResponsibleForServing;
         log.info("pack E docs {}", packEdocs);
         log.info("pack F docs {}", packFdocs);
         log.info("pack docs {}", docs);
-        whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
             checkAndSendEmailToDaApplicantLip(
                 caseData,
                 authorization,
                 emailNotificationDetails,
-                whoIsResponsibleForServing,
+                UNREPRESENTED_APPLICANT,
                 applicant,
                 docs,
                 packEdocs
@@ -548,7 +546,7 @@ public class ServiceOfApplicationService {
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
             .packCreatedDate(DATE_CREATED)
             .build());
-        return whoIsResponsibleForServing;
+        return UNREPRESENTED_APPLICANT;
     }
 
     private void checkAndSendEmailToDaApplicantLip(CaseData caseData, String authorization,
