@@ -129,7 +129,7 @@ public class ServiceOfApplicationEmailService {
                 SendgridEmailConfig.builder()
                     .toEmailAddress(email)
                     .dynamicTemplateData(dynamicData)
-                    .listOfAttachments(docs).languagePreference(LanguagePreference.english).build()
+                    .listOfAttachments(docs).languagePreference(LanguagePreference.welsh).build()
             );
             return EmailNotificationDetails.builder()
                 .emailAddress(email)
