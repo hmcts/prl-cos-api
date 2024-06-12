@@ -1,20 +1,28 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.contains;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
 @SpringBootTest
@@ -28,29 +36,35 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    @MockBean
+    private EventService eventPublisher;
+
     private static final String VALID_INPUT_JSON = "controller/valid-request-casedata-body.json";
 
-    private final String targetInstance =
-        StringUtils.defaultIfBlank(
-            System.getenv("TEST_URL"),
-            "http://localhost:4044"
-        );
 
-    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+    private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
 
     @Test
     public void givenValidAuthDetailsAndC100Case_whenEndPointCalledWithoutCompleteCase_ResponseContainsError() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/getSolicitorAndFeeDetails")
-            .then()
-            .body("errors", contains("Submit and pay is not allowed for this case unless you finish all the mandatory events"))
-            .assertThat().statusCode(200);
+        doNothing().when(eventPublisher).publishEvent(any());
+        mockMvc.perform(post("/getSolicitorAndFeeDetails")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").value("Submit and pay is not allowed for this case unless you finish all the mandatory events"))
+            .andReturn();
     }
 
 }
