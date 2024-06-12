@@ -101,11 +101,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                                                          .getCaseDetails().getCaseData());
             log.info("mandatoryEventStatus ==>" + mandatoryEventStatus);
             if (!mandatoryEventStatus) {
-                errorList.add(
-                    "Submit and pay is not allowed for this case unless you finish all the mandatory events");
-                caseData = objectMapper.convertValue(callbackRequest
-                    .getCaseDetails().getCaseData(), CaseData.class);
-                eventPublisher.publishEvent(new CaseDataChanged(caseData));
+                populateErrorAndUpdateTaskList(callbackRequest, errorList);
                 return CallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -158,6 +154,19 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void populateErrorAndUpdateTaskList(CallbackRequest callbackRequest, List<String> errorList) {
+        CaseData caseData;
+        errorList.add(
+            "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+        caseData = objectMapper.convertValue(callbackRequest
+            .getCaseDetails().getCaseData(), CaseData.class);
+        try {
+            eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        } catch (Exception exp) {
+            log.error("Error while updating taskLst for case id {}", caseData.getId());
         }
     }
 
