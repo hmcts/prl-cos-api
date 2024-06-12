@@ -810,8 +810,6 @@ public class PrlAppsConstants {
     public static final String S = "S";
 
     public static final String HI = "HI";
-    public static final String ACN = "ACN"; //courtnav pack A
-    public static final String BCN = "BCN"; //courtnav pack B
     public static final String Z = "Z"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
@@ -836,7 +834,6 @@ public class PrlAppsConstants {
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
-    public static final String FL402_ORDER = "NoticeOfProceedings(FL402).pdf";
 
     public static final String SOA_FAMILY_PRESIDENTS_NOTE = "Family President's letter to parties.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";

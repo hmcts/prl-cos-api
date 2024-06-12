@@ -99,7 +99,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL402_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
@@ -739,18 +738,10 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                              Map<String, Object> caseDataMap) {
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-        log.info("static docs {}", staticDocs);
         String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
-            .getSoaServingRespondentsOptionsDA()) && Yes.equals(caseData.getIsCourtNavCase())) {
-            List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.ACN, staticDocs);
-            List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.BCN, staticDocs);
-            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
-            whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
-        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
-            log.info("sending email to solicitor");
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
             emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
@@ -1470,8 +1461,6 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.R -> docs.addAll(generatePackR(caseData, staticDocs));
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
-            case PrlAppsConstants.ACN -> docs.addAll(generatePackAcN(caseData, staticDocs));
-            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
@@ -1479,41 +1468,6 @@ public class ServiceOfApplicationService {
         return docs;
 
     }
-
-    private List<Document> generatePackAcN(CaseData caseData, List<Document> staticDocs) {
-
-        List<Document> selectedOrders = new ArrayList<>();
-        if (null != caseData.getOrderCollection()) {
-            caseData.getOrderCollection().stream()
-                .findAny()
-                .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
-        }
-
-        List<Document> docs = new ArrayList<>();
-        docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getWitnessStatement(caseData));
-        docs.addAll(staticDocs);
-        docs.addAll(getFL402Orders(selectedOrders));
-        docs.addAll(getNonFl402Orders((getSoaSelectedOrders(caseData))));
-        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
-        noticeOfSafetyFl401.ifPresent(docs::add);
-
-        List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
-            .getAdditionalDocumentsList());
-        if (CollectionUtils.isNotEmpty(additionalDocuments)) {
-            docs.addAll(additionalDocuments);
-        }
-
-        return docs;
-    }
-
-    private List<Document> generatePackBcN(CaseData caseData) {
-        List<Document> docs = new ArrayList<>();
-        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
-        noticeOfSafetyFl401.ifPresent(docs::add);
-        return  docs;
-    }
-
 
     private List<Document> generatePackJ(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
@@ -1596,16 +1550,6 @@ public class ServiceOfApplicationService {
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
-    }
-
-    private List<Document> getNonFl402Orders(List<Document> soaSelectedOrders) {
-        return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            FL402_ORDER)).collect(Collectors.toList());
-    }
-
-    private List<Document> getFL402Orders(List<Document> soaOrders) {
-        return soaOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
-            FL402_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
