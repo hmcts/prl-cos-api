@@ -31,12 +31,12 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
     RespondentEventsChecker respondentEventsChecker;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         return false;
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         EnumMap<RespondentSolicitorEvents, RespondentEventChecker> mandatoryEvents = new EnumMap<>(RespondentSolicitorEvents.class);
 
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
@@ -55,13 +55,14 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         boolean optionalFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
-            mandatoryFinished = e.getValue().isFinished(respondingParty);
+            mandatoryFinished = e.getValue().isFinished(respondingParty, isC1aApplicable);
             if (!mandatoryFinished) {
                 return false;
             }
         }
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : optionalEvents.entrySet()) {
-            optionalFinished = e.getValue().isFinished(respondingParty) || !(e.getValue().isStarted(respondingParty));
+            optionalFinished = e.getValue().isFinished(respondingParty, isC1aApplicable)
+                || !(e.getValue().isStarted(respondingParty, isC1aApplicable));
             if (!optionalFinished) {
                 return false;
             }
