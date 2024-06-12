@@ -59,7 +59,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        assertFalse(respondentAllegationsOfHarmChecker.isStarted(partyDetails));
+        assertFalse(respondentAllegationsOfHarmChecker.isStarted(partyDetails, true));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        assertTrue(respondentAllegationsOfHarmChecker.isStarted(partyDetails));
+        assertTrue(respondentAllegationsOfHarmChecker.isStarted(partyDetails, true));
     }
 
 
@@ -83,7 +83,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails);
+        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails, true);
 
         assertFalse(isFinished);
     }
@@ -97,7 +97,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails);
+        boolean isFinished = respondentAllegationsOfHarmChecker.isFinished(partyDetails, true);
 
         assertTrue(isFinished);
     }
@@ -110,7 +110,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
                                 .build()).build())
                 .build();
 
-        boolean isAbusePresent = respondentAllegationsOfHarmChecker.isStarted(partyDetails);
+        boolean isAbusePresent = respondentAllegationsOfHarmChecker.isStarted(partyDetails, true);
 
         assertFalse(isAbusePresent);
     }
