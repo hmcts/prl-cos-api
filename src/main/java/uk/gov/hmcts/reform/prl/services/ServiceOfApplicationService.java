@@ -707,14 +707,16 @@ public class ServiceOfApplicationService {
                                                        List<Document> reLetters, Element<PartyDetails> respondent) {
         boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(
             caseData);
-        if (applyOrderWithoutGivingNoticeToRespondent) {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                PRL_LET_ENG_FL401_RE2
-            ));
-        } else {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                PRL_LET_ENG_FL401_RE3
-            ));
+        if (!Yes.equals(caseData.getIsCourtNavCase())) {
+            if (applyOrderWithoutGivingNoticeToRespondent) {
+                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE2
+                ));
+            } else {
+                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE3
+                ));
+            }
         }
     }
 
