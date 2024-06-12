@@ -499,7 +499,7 @@ public class ServiceOfApplicationService {
                 removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
 
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-
+                 return null;
                 } else {
                     sendSoaPacksToPartyViaPost(authorization, caseData, packEdocs,
                                                bulkPrintDetails,
