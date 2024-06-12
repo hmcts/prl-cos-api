@@ -1244,6 +1244,67 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
+    @Test
+    public void testSendNotificationForSoaFL401CourtNav() throws Exception {
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .solicitorEmail("solicitor@email.com")
+            .build();
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
+                .label("recipient1")
+                .build()))
+            .build();
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .isCourtNavCase(Yes)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .soaRecipientsOptions(soaRecipientsOptions)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","FL401");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+            .forename("first")
+            .surname("test").build());
+        List<Document> staticDocs = new ArrayList<>();
+        staticDocs.add(Document.builder().documentBinaryUrl("testUrl").documentFileName("Blank.pdf").build());
+        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString()))
+            .thenReturn(staticDocs);
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            casedata
+        );
+
+        assertNotNull(servedApplicationDetails);
+        assertEquals(SERVED_PARTY_APPLICANT_SOLICITOR, servedApplicationDetails.getWhoIsResponsible());
+
+    }
+
 
     @Test
     public void testSendNotificationForSoaCitizenC100() throws Exception {
