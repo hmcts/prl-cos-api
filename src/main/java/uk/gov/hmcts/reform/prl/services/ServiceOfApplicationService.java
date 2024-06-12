@@ -133,7 +133,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
@@ -507,7 +506,6 @@ public class ServiceOfApplicationService {
                                                              List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                              Map<String, Object> caseDataMap,
                                                              List<Document> c100StaticDocs) {
-        String whoIsResponsibleForServing;
         Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
         CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
         List<Document> docs = new ArrayList<>();
@@ -520,6 +518,7 @@ public class ServiceOfApplicationService {
         }
         packFdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs));
         removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
+        String whoIsResponsibleForServing;
         whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
             checkAndSendEmailToDaApplicantLip(
