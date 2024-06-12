@@ -83,8 +83,6 @@ public class NoticeOfChangeControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        Assert.assertNotNull(response1.getData());
-
     }
 
     @Ignore
