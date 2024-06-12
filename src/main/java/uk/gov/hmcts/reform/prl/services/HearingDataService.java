@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -41,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -622,7 +625,8 @@ public class HearingDataService {
         }).toList();
     }
 
-    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData,
+                                                                       CreateSelectOrderOptionsEnum orderType) {
         boolean[] hearingFetchedOnce = {false};
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -655,6 +659,21 @@ public class HearingDataService {
                             caseHearing.get().getHearingTypeValue()
                         ))
                         .build();
+                }
+            }
+            String order = Objects.nonNull(orderType) ? String.valueOf(orderType) : String.valueOf(caseData.getCreateSelectOrderOptions());
+            boolean isDaOrderForCaCase = ManageOrdersUtils.isDaOrderSelectedForCaCase(order, caseData);
+
+            if (getPartyNameList(caseData.getApplicants()).size() > 0 && isDaOrderForCaCase) {
+                if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                }
+                if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                }
+                if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                                                              " (Applicant solicitor)"));
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
