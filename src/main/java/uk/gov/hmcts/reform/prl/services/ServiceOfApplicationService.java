@@ -2070,7 +2070,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
-        log.info("witness docs {}", docs);
+        log.info("after witness docs {}", docs);
         docs.addAll(staticDocs);
         log.info("static docs {}", staticDocs);
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
@@ -2116,7 +2116,9 @@ public class ServiceOfApplicationService {
                 docs.add(caseData.getC1AWelshDocument());
             }
         } else {
-            docs.add(caseData.getFinalDocument());
+            if (null != caseData.getFinalDocument()) {
+                docs.add(caseData.getFinalDocument());
+            }
         }
         log.info("case docs {}", docs);
         return docs;
