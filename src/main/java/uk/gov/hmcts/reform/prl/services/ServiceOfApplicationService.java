@@ -737,11 +737,11 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                              Map<String, Object> caseDataMap) {
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
+        log.info("static docs {}", staticDocs);
         String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
             .getSoaServingRespondentsOptionsDA()) && Yes.equals(caseData.getIsCourtNavCase())) {
-            log.info("sending courtnav email to solicitor");
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.ACN, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.BCN, staticDocs);
             emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
@@ -1469,7 +1469,7 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
             case PrlAppsConstants.ACN -> docs.addAll(generatePackAcN(caseData, staticDocs));
-            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData, staticDocs));
+            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
@@ -1497,11 +1497,9 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackBcN(CaseData caseData, List<Document> staticDocs) {
+    private List<Document> generatePackBcN(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getWitnessStatement(caseData));
-        docs.addAll(staticDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
         return  docs;
     }
