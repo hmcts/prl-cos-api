@@ -52,7 +52,7 @@ public class C100IssueCaseControllerFunctionalTest {
             .post("/issue-and-send-to-local-court")
             .then()
             .assertThat().statusCode(200)
-            .body("data.caseStatus.state", equalTo("Gatekeeping"),
+            .body("data.caseStatus.state", equalTo("Case Issued"),
                   "data.caseTypeOfApplication", equalTo("C100"),
                   "data.issueDate", notNullValue(),
                   "data.localCourtAdmin[0].value", notNullValue(),
