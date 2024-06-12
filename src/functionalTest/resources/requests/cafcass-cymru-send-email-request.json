@@ -399,6 +399,13 @@
           }
         ]
       },
+      "courtList": {
+        "value": {
+          "code": "234946:",
+          "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+        },
+        "list_items": null
+      },
       "otherParties": {
         "value": [
         ],
@@ -412,7 +419,46 @@
       "cafcassCymruServedOptions": "Yes",
       "cafcassCymruEmail": "test@hmcts.net",
       "serveOtherPartiesCA": [
-      ]
+      ],
+      "caApplicant2Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+      },
+      "caApplicant3Policy": {
+        "Organisation": {
+          "OrganisationID": "QO4A1Q8",
+          "OrganisationName": "FPRL-test-organisation"
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+      },
+      "changeOrganisationRequestField": {
+        "CreatedBy": null,
+        "CaseRoleId": {
+          "value": {
+              "code": "[C100APPLICANTSOLICITOR2]",
+              "label": "Respondent solicitor A"
+            },
+          "list_items": [
+            {
+              "code": "[C100APPLICANTSOLICITOR2]",
+              "label": "Respondent solicitor A"
+            }
+          ]
+        },
+        "ApprovalStatus": 1,
+        "RequestTimestamp": null,
+        "OrganisationToAdd": {
+          "OrganisationID": "QO4A1Q8"
+        },
+        "OrganisationToRemove": {
+          "OrganisationID": "QO4A1Q8"
+        }
+      }
     },
     "event": {
       "id": "manageOrders",
