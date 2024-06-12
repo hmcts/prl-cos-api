@@ -99,63 +99,62 @@ public class PrePopulateFeeAndSolicitorNameController {
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
                                                                                          .getCaseDetails().getCaseData());
-            log.info("mandatoryEventStatus ==>" + mandatoryEventStatus);
-            if (!mandatoryEventStatus) {
-                errorList.add(
-                    "Submit and pay is not allowed for this case unless you finish all the mandatory events");
-                caseData = objectMapper.convertValue(callbackRequest
-                    .getCaseDetails().getCaseData(), CaseData.class);
-                eventPublisher.publishEvent(new CaseDataChanged(caseData));
-                return CallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-            } else {
-                FeeResponse feeResponse = null;
-                try {
-                    feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-                } catch (Exception e) {
-                    errorList.add(e.getMessage());
-                    return CallbackResponse.builder()
-                        .errors(errorList)
-                        .build();
-                }
-                CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
-                caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
-                caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
+            try {
+                if (!mandatoryEventStatus) {
+                    errorList.add(
+                        "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+                    caseData = objectMapper.convertValue(callbackRequest
+                                                             .getCaseDetails().getCaseData(), CaseData.class);
+                    eventPublisher.publishEvent(new CaseDataChanged(caseData));
+                } else {
+                    FeeResponse feeResponse = null;
+                    try {
+                        feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+                    } catch (Exception e) {
+                        errorList.add(e.getMessage());
+                        return CallbackResponse.builder()
+                            .errors(errorList)
+                            .build();
+                    }
+                    CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
+                    caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
+                    caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
-                Court closestChildArrangementsCourt = courtLocatorService
-                    .getNearestFamilyCourt(callbackRequest.getCaseDetails()
-                                               .getCaseData());
-                UserDetails userDetails = userService.getUserDetails(authorisation);
-                caseData = CaseData.builder()
-                    .solicitorName(userDetails.getFullName())
-                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                    .applicantSolicitorEmailAddress(userDetails.getEmail())
-                    .caseworkerEmailAddress(southamptonCourtEmailAddress)
-                    .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                    .build();
-                // setting fee amount to populate in draft document
-                caseDataForOrgDetails = caseDataForOrgDetails.toBuilder().feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString()).build();
-                if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
-                    && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
-                    caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
-                        caseDataForOrgDetails,
-                        new HashMap<>()
+                    Court closestChildArrangementsCourt = courtLocatorService
+                        .getNearestFamilyCourt(callbackRequest.getCaseDetails()
+                                                   .getCaseData());
+                    UserDetails userDetails = userService.getUserDetails(authorisation);
+                    caseData = CaseData.builder()
+                        .solicitorName(userDetails.getFullName())
+                        .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                        .applicantSolicitorEmailAddress(userDetails.getEmail())
+                        .caseworkerEmailAddress(southamptonCourtEmailAddress)
+                        .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
+                        .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                        .build();
+                    // setting fee amount to populate in draft document
+                    caseDataForOrgDetails = caseDataForOrgDetails.toBuilder().feeAmount(CURRENCY_SIGN_POUND
+                                                                                            + feeResponse.getAmount().toString()).build();
+                    if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseDataForOrgDetails.getTaskListVersion())
+                        && isNotEmpty(caseDataForOrgDetails.getMiamPolicyUpgradeDetails())) {
+                        caseDataForOrgDetails = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(
+                            caseDataForOrgDetails,
+                            new HashMap<>()
+                        );
+                    }
+                    caseData = buildGeneratedDocumentCaseData(
+                        authorisation,
+                        callbackRequest,
+                        caseData,
+                        caseDataForOrgDetails
                     );
                 }
-                caseData = buildGeneratedDocumentCaseData(
-                    authorisation,
-                    callbackRequest,
-                    caseData,
-                    caseDataForOrgDetails
-                );
+            } finally {
+                return CallbackResponse.builder()
+                    .data(caseData)
+                    .errors(errorList)
+                    .build();
             }
-
-            return CallbackResponse.builder()
-                .data(caseData)
-                .errors(errorList)
-                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
