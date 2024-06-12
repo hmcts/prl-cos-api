@@ -116,6 +116,37 @@ public class ServiceOfApplicationEmailService {
                                                         partyDetails.getEmail(), docs, servedParty);
     }
 
+    public EmailNotificationDetails sendLanguageEmailUsingTemplateWithAttachments(String authorization,
+                                                                          String email,
+                                                                          List<Document> docs,
+                                                                          SendgridEmailTemplateNames template,
+                                                                          Map<String, Object> dynamicData,
+                                                                          String servedParty,
+                                                                                        LanguagePreference
+                                                                                            languagePreference) {
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                template,
+                authorization,
+                SendgridEmailConfig.builder()
+                    .toEmailAddress(email)
+                    .dynamicTemplateData(dynamicData)
+                    .listOfAttachments(docs).languagePreference(languagePreference).build()
+            );
+            return EmailNotificationDetails.builder()
+                .emailAddress(email)
+                .servedParty(servedParty)
+                .docs(wrapElements(docs))
+                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+                .timeStamp(DateTimeFormatter
+                    .ofPattern("dd MMM yyyy HH:mm:ss")
+                    .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
+        }
+        return null;
+    }
+
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
                                                       String email,
                                                       List<Document> docs,
@@ -129,7 +160,7 @@ public class ServiceOfApplicationEmailService {
                 SendgridEmailConfig.builder()
                     .toEmailAddress(email)
                     .dynamicTemplateData(dynamicData)
-                    .listOfAttachments(docs).languagePreference(LanguagePreference.welsh).build()
+                    .listOfAttachments(docs).languagePreference(LanguagePreference.english).build()
             );
             return EmailNotificationDetails.builder()
                 .emailAddress(email)
