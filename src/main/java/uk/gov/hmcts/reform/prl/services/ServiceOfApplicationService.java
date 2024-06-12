@@ -1483,6 +1483,8 @@ public class ServiceOfApplicationService {
 
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
+            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).toList());
+        docs.addAll(staticDocs.stream()
             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
         Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
@@ -1499,8 +1501,8 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackBcN(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getWitnessStatement(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
+        noticeOfSafetyFl401.ifPresent(docs::add);
         return  docs;
     }
 
