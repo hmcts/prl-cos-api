@@ -707,6 +707,8 @@ public class CitizenPartyDetailsMapper {
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
             c100RebuildChildDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+            log.info("c100RebuildChildDetailsElements " + c100RebuildChildDetailsElements);
+
             updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
 
