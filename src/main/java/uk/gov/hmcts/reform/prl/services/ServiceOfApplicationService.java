@@ -707,14 +707,26 @@ public class ServiceOfApplicationService {
         boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(
             caseData);
 
-        if (applyOrderWithoutGivingNoticeToRespondent) {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                                                   PRL_LET_ENG_FL401_RE2
-            ));
+        if (Yes.equals(caseData.getIsCourtNavCase())) {
+            if (applyOrderWithoutGivingNoticeToRespondent) {
+                reLetters.add(0, generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE2
+                ));
+            } else {
+                reLetters.add(0, generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE3
+                ));
+            }
         } else {
-            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                                                   PRL_LET_ENG_FL401_RE3
-            ));
+            if (applyOrderWithoutGivingNoticeToRespondent) {
+                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE2
+                ));
+            } else {
+                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                    PRL_LET_ENG_FL401_RE3
+                ));
+            }
         }
     }
 
@@ -740,6 +752,11 @@ public class ServiceOfApplicationService {
         String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
+            .getSoaServingRespondentsOptionsDA()) && Yes.equals(caseData.getIsCourtNavCase())) {
+            List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.ACN, staticDocs);
+            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, null, true));
+            whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
+        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
@@ -1459,12 +1476,31 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.R -> docs.addAll(generatePackR(caseData, staticDocs));
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
+            case PrlAppsConstants.ACN -> docs.addAll(generatePackAcN(caseData, staticDocs));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
         }
         return docs;
 
+    }
+
+    private List<Document> generatePackAcN(CaseData caseData, List<Document> staticDocs) {
+        List<Document> docs = new ArrayList<>();
+        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
+
+        docs.addAll(getWitnessStatement(caseData));
+        docs.addAll(staticDocs.stream()
+            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+        noticeOfSafetyFl401.ifPresent(docs::add);
+
+        List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
+            .getAdditionalDocumentsList());
+        if (CollectionUtils.isNotEmpty(additionalDocuments)) {
+            docs.addAll(additionalDocuments);
+        }
+
+        return docs;
     }
 
     private List<Document> generatePackJ(CaseData caseData, List<Document> staticDocs) {
