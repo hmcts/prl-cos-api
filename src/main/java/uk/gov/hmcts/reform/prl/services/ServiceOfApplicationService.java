@@ -753,11 +753,14 @@ public class ServiceOfApplicationService {
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
             .getSoaServingRespondentsOptionsDA()) && Yes.equals(caseData.getIsCourtNavCase())) {
+            log.info("sending courtnav email to solicitor");
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.ACN, staticDocs);
-            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, null, true));
+            List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.BCN, staticDocs);
+            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
             whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
         } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
+            log.info("sending email to solicitor");
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
             emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
@@ -1339,6 +1342,7 @@ public class ServiceOfApplicationService {
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
                     ));
+                log.info("finalDocumentList {}", finalDocumentList);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
@@ -1477,6 +1481,7 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
             case PrlAppsConstants.ACN -> docs.addAll(generatePackAcN(caseData, staticDocs));
+            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
@@ -1487,11 +1492,12 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackAcN(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
-        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
 
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+        docs.addAll(getSoaSelectedOrders(caseData));
+        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
         noticeOfSafetyFl401.ifPresent(docs::add);
 
         List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
@@ -1502,6 +1508,13 @@ public class ServiceOfApplicationService {
 
         return docs;
     }
+
+    private List<Document> generatePackBcN(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return  docs;
+    }
+
 
     private List<Document> generatePackJ(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();

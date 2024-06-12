@@ -810,7 +810,8 @@ public class PrlAppsConstants {
     public static final String S = "S";
 
     public static final String HI = "HI";
-    public static final String ACN = "ACN"; //courtnav pack
+    public static final String ACN = "ACN"; //courtnav pack A
+    public static final String BCN = "BCN"; //courtnav pack B
     public static final String Z = "Z"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
