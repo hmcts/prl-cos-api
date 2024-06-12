@@ -3,40 +3,21 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
 public class FeesAndPaymentControllerFunctionalTest {
-
-    private MockMvc mockMvc;
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-    @Mock
-    protected AuthorisationService authorisationService;
-    @MockBean
-    private FeeService feeService;
-    @MockBean
-    private PaymentRequestService paymentRequestService;
 
     private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";
 
@@ -48,12 +29,6 @@ public class FeesAndPaymentControllerFunctionalTest {
 
     @Value("${TEST_URL}")
     protected String cosApiUrl;
-
-
-    @BeforeAll
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
 
 
     /*
