@@ -492,11 +492,11 @@ document:
       prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
       prl_fl404_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
-      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
+      prl_fl404_draft_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
+      prl_fl404_welsh_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
       prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
-      prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
+      prl_fl404_welsh_draft_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
       prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
       prl_c49_draft_template: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
