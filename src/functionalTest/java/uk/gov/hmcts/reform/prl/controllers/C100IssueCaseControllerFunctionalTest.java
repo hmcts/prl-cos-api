@@ -76,7 +76,7 @@ public class C100IssueCaseControllerFunctionalTest {
             .post("/issue-and-send-to-local-court-notification")
             .then()
             .assertThat().statusCode(200)
-            .body("data.caseStatus.state", equalTo("Gatekeeping"),
+            .body("data.caseStatus.state", equalTo("Case Issued"),
                   "data.caseTypeOfApplication", equalTo("C100")
             );
     }
