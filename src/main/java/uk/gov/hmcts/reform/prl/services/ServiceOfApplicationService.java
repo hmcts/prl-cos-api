@@ -579,6 +579,7 @@ public class ServiceOfApplicationService {
             List<Document> docsToApplicant = new ArrayList<>();
             docsToApplicant.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
             docsToApplicant.addAll(docs);
+            log.info("*** Docs to applicant {}", docsToApplicant);
             emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
                 caseData.getApplicantsFL401().getEmail(),
@@ -1799,6 +1800,7 @@ public class ServiceOfApplicationService {
                                                       ));
             docs.add(coverLetter);
             docs.addAll(packDocs);
+            log.info("*** Docs to applicant Lip post {}", docs);
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                 caseData,
                 authorization,
