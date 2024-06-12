@@ -901,40 +901,17 @@ public class CaseService {
             addOrderNotifications(citizenDocumentsManagement.getCitizenOrders(), citizenNotifications);
         }
 
-        //PRL-5431 - SOA & response notifications
+        //PRL-5431 - SOA & SOS notifications
         if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())) {
+            //SOA applicant/respondent notifications
             addSoaNotifications(citizenDocumentsManagement, citizenNotifications, userDetails, partyIdAndType);
+
+            //SOS notifications
+            addSosNotifications(caseData, citizenDocumentsManagement, citizenNotifications, partyIdAndType.get(PARTY_TYPE));
         }
 
-        //Respondent response
-        if (SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE)) //logged in party is applicant
-            && isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
-            && !isAnyOrderServedPostLatestC7Resp(citizenDocumentsManagement.getCitizenDocuments(),
-                                                citizenDocumentsManagement.getCitizenOrders())) {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
-        } else {
-            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
-        }
-
-        //PRL-5431 - Statement of service notifications
-        if (CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks())
-            && isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
-            CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
-            //SOS by unrepresented applicant
-            if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
-                citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
-            }
-
-            //SOS by Court admin/Court bailiff
-            if ((PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
-                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))
-                && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
-            }
-        }
+        //Respondent response notification to applicant
+        addRespondentResponseNotification(citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
         return citizenNotifications;
     }
@@ -1002,19 +979,19 @@ public class CaseService {
             citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
             citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
         } else {
-            //SOA Applicant - personal service(unrepresented applicant)
-            if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(true)
-                                             .isPersonalService(citizenAppPack.isPersonalService()).build());
-                citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(true)
-                                             .isPersonalService(citizenAppPack.isPersonalService()).build());
-            }
-
-            //SOA Applicant - personal(court admin/court bailiff)/non-personal
             if (CollectionUtils.isNotEmpty(citizenAppPack.getApplicantSoaPack())
                 && SERVED_PARTY_APPLICANT.equals(partyIdAndType.get(PARTY_TYPE))) { //logged in party is applicant
-                citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true)
-                                             .isPersonalService(citizenAppPack.isPersonalService()).build());
+                //SOA Applicant - personal service(unrepresented applicant)
+                if (UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
+                    citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(true)
+                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
+                    citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(true)
+                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
+                } else {
+                    //SOA Applicant - personal(court admin/court bailiff) OR non-personal service
+                    citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(true)
+                                                 .isPersonalService(citizenAppPack.isPersonalService()).build());
+                }
             } else {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN4_SOA_PERS_NONPERS_APPLICANT).show(false).build());
             }
@@ -1027,6 +1004,44 @@ public class CaseService {
             } else {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN5_SOA_RESPONDENT).show(false).build());
             }
+        }
+    }
+
+    private void addSosNotifications(CaseData caseData,
+                                     CitizenDocumentsManagement citizenDocumentsManagement,
+                                     List<CitizenNotification> citizenNotifications,
+                                     String partyType) {
+        if (isSosCompletedPostSoa(caseData, getPartyIds(caseData.getRespondents()))) {
+            CitizenDocuments citizenAppPack = citizenDocumentsManagement.getCitizenApplicationPacks().get(0);
+            //SOS by unrepresented applicant
+            if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
+                && UNREPRESENTED_APPLICANT.equals(citizenAppPack.getWhoIsResponsible())) {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN7_SOA_PERSONAL_APPLICANT).show(false).build());
+                citizenNotifications.add(CitizenNotification.builder().id(CAN9_SOA_PERSONAL_APPLICANT).show(false).build());
+            }
+
+            //SOS by Court admin/Court bailiff
+            if ((PERSONAL_SERVICE_SERVED_BY_CA.equals(citizenAppPack.getWhoIsResponsible())
+                || PERSONAL_SERVICE_SERVED_BY_BAILIFF.equals(citizenAppPack.getWhoIsResponsible()))
+                && !isAnyOrderServedPostSos(caseData, citizenDocumentsManagement.getCitizenOrders())) {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(true).build());
+            } else {
+                citizenNotifications.add(CitizenNotification.builder().id(CAN8_SOS_PERSONAL_APPLICANT).show(false).build());
+            }
+        }
+    }
+
+
+    private void addRespondentResponseNotification(CitizenDocumentsManagement citizenDocumentsManagement,
+                                                   List<CitizenNotification> citizenNotifications,
+                                                   String partyType) {
+        if (SERVED_PARTY_APPLICANT.equals(partyType) //logged in party is applicant
+            && isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
+            && !isAnyOrderServedPostLatestC7Resp(citizenDocumentsManagement.getCitizenDocuments(),
+                                                 citizenDocumentsManagement.getCitizenOrders())) {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
         }
     }
 
