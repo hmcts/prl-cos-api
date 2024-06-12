@@ -813,7 +813,7 @@ public class C100RespondentSolicitorService {
                 if (respondingParty.getValue() != null
                         && respondingParty.getValue().getUser() != null
                         && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
-                    boolean isC1aApplicable = caseData.getC1ADocument() != null ? true : false;
+                    boolean isC1aApplicable = caseData.getC1ADocument() != null;
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue(), isC1aApplicable);
                 }
             }
