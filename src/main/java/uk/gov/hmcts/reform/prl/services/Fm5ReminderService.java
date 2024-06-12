@@ -89,7 +89,7 @@ public class Fm5ReminderService {
 
         if (isNotEmpty(caseDetailsList)) {
             //Iterate all cases to evaluate rules to trigger FM5 reminder
-            HashMap<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
+            Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing =
                 getQualifiedCasesAndHearingsForNotifications(caseDetailsList, hearingAwayDays);
             log.info("Qualified cases meeting all system rules {}", qualifiedCasesAndPartiesBeforeHearing);
 
@@ -138,12 +138,12 @@ public class Fm5ReminderService {
     }
 
 
-    private HashMap<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
+    public Map<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
                                                                                           Long hearingAwayDays) {
         log.info("Running system rules on the cases");
         List<String> caseIdsForHearing = new ArrayList<>();
-        HashMap<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
-        HashMap<String, Fm5PendingParty> filteredCaseAndParties = new HashMap<>();
+        Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
+        Map<String, Fm5PendingParty> filteredCaseAndParties = new HashMap<>();
 
         for (CaseDetails caseDetails : caseDetailsList) {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -241,7 +241,7 @@ public class Fm5ReminderService {
         return caseIdPendingPartyMapping;
     }
 
-    private List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
+    public List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
 
         SearchResultResponse response = SearchResultResponse.builder()
             .cases(new ArrayList<>()).build();
