@@ -694,6 +694,7 @@ public class ServiceOfApplicationService {
                         break;
                     }
                 }
+                log.info("is present in Pack A {}", isPresentInPackA);
                 if (!isPresentInPackA) {
                     docs.add(packBDocument);
                 }
@@ -706,27 +707,14 @@ public class ServiceOfApplicationService {
                                                        List<Document> reLetters, Element<PartyDetails> respondent) {
         boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(
             caseData);
-
-        if (Yes.equals(caseData.getIsCourtNavCase())) {
-            if (applyOrderWithoutGivingNoticeToRespondent) {
-                reLetters.add(0, generateAccessCodeLetter(authorization, caseData, respondent, null,
-                    PRL_LET_ENG_FL401_RE2
-                ));
-            } else {
-                reLetters.add(0, generateAccessCodeLetter(authorization, caseData, respondent, null,
-                    PRL_LET_ENG_FL401_RE3
-                ));
-            }
+        if (applyOrderWithoutGivingNoticeToRespondent) {
+            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                PRL_LET_ENG_FL401_RE2
+            ));
         } else {
-            if (applyOrderWithoutGivingNoticeToRespondent) {
-                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                    PRL_LET_ENG_FL401_RE2
-                ));
-            } else {
-                reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
-                    PRL_LET_ENG_FL401_RE3
-                ));
-            }
+            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                PRL_LET_ENG_FL401_RE3
+            ));
         }
     }
 
@@ -1481,7 +1469,7 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
             case PrlAppsConstants.ACN -> docs.addAll(generatePackAcN(caseData, staticDocs));
-            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData));
+            case PrlAppsConstants.BCN -> docs.addAll(generatePackBcN(caseData, staticDocs));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
@@ -1509,8 +1497,11 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackBcN(CaseData caseData) {
+    private List<Document> generatePackBcN(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
+        docs.addAll(getWitnessStatement(caseData));
+        docs.addAll(staticDocs.stream()
+            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
         return  docs;
     }
