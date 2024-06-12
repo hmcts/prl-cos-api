@@ -492,8 +492,22 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication()
                                 .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-                getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
-                getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
+                List<Document> docs = new ArrayList<>();
+                Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
+                CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
+                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                    docs.add(generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE2));
+                } else {
+                    docs.add(generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE3));
+                }
+                List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
+                List<Document> packFdocs = getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
+
+                removeDuplicatesAndGetConsolidatedDocs(packEdocs, packFdocs, docs);
+                sendSoaPacksToPartyViaPost(authorization, caseData, docs,
+                                           bulkPrintDetails,
+                                           element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                                           Templates.PRL_LET_ENG_AP1);
             }
         }
         return whoIsResponsibleForServing;
