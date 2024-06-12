@@ -1483,9 +1483,11 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackAcN(CaseData caseData, List<Document> staticDocs) {
 
         List<Document> selectedOrders = new ArrayList<>();
-        caseData.getOrderCollection().stream()
-            .findAny()
-            .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
+        if (null != caseData.getOrderCollection()) {
+            caseData.getOrderCollection().stream()
+                .findAny()
+                .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
+        }
 
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
