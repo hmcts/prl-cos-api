@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
     "uk.gov.hmcts.reform.prl.schedule",
     "uk.gov.hmcts.reform.prl.tasks"})
 @Slf4j
-@EnableScheduling
 public class Application implements CommandLineRunner {
 
     @Value("${runs-locally}")
