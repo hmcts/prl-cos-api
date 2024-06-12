@@ -739,4 +739,17 @@ public class CaseUtils {
         }
         return party;
     }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForC100(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                                List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
+    public static List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondentsForFL401(PartyDetails applicantsOrRespondent,
+                                                                                                 List<DynamicMultiselectListElement> value) {
+        return value.stream().filter(element -> applicantsOrRespondent.getPartyId().toString().equals(
+            element.getCode())).collect(Collectors.toList());
+    }
 }

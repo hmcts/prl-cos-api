@@ -77,6 +77,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
     public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
     public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_EXTERNAL = "External";
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
@@ -129,6 +130,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
+    public static final String DOCUMENT_SEND_REPLY_MESSAGE = "SEND_REPLY_MESSAGE";
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
