@@ -1614,6 +1614,42 @@ public class SendAndReplyServiceTest {
         sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testRemoveJudgeRoleAssignmentIfRequiredForReply() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(YesOrNo.No)
+            .build();
+
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -1655,6 +1691,8 @@ public class SendAndReplyServiceTest {
         sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -1687,6 +1725,8 @@ public class SendAndReplyServiceTest {
         sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -1722,10 +1762,11 @@ public class SendAndReplyServiceTest {
         roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
         roleAssignmentResponses.add(roleAssignmentResponse);
         when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
-
         sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -1766,6 +1807,8 @@ public class SendAndReplyServiceTest {
 
 
         assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
