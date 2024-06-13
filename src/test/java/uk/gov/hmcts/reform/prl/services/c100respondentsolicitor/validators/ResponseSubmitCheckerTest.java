@@ -110,7 +110,7 @@ public class ResponseSubmitCheckerTest {
     @Test
     public void isStarted() {
 
-        Boolean bool = responseSubmitChecker.isStarted(emptyRespondent);
+        Boolean bool = responseSubmitChecker.isStarted(emptyRespondent, true);
         assertFalse(bool);
     }
 
@@ -127,7 +127,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
 
 
-        Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
+        Boolean bool = responseSubmitChecker.isFinished(emptyRespondent, true);
 
         assertFalse(bool);
     }
@@ -136,36 +136,36 @@ public class ResponseSubmitCheckerTest {
     public void hasMandatoryCompletedTrue() {
 
         when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
-        when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);
+        when(consentToApplicationChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
-        when(keepDetailsPrivateChecker.isFinished(respondent)).thenReturn(true);
+        when(keepDetailsPrivateChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getRespondentMiamChecker()).thenReturn(respondentMiamChecker);
-        when(respondentMiamChecker.isFinished(respondent)).thenReturn(true);
+        when(respondentMiamChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
-        when(abilityToParticipateChecker.isFinished(respondent)).thenReturn(true);
+        when(abilityToParticipateChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
-        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
+        when(attendToCourtChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
-        when(currentOrPastProceedingsChecker.isFinished(respondent)).thenReturn(true);
+        when(currentOrPastProceedingsChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
-        when(respondentAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
-        when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+        when(respondentContactDetailsChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getInternationalElementsChecker()).thenReturn(internationalElementsChecker);
-        when(internationalElementsChecker.isFinished(respondent)).thenReturn(true);
+        when(internationalElementsChecker.isFinished(respondent, true)).thenReturn(true);
 
         when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
-        when(responseToAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
+        when(responseToAllegationsOfHarmChecker.isFinished(respondent, true)).thenReturn(true);
 
-        Boolean bool = responseSubmitChecker.isFinished(respondent);
+        Boolean bool = responseSubmitChecker.isFinished(respondent, true);
 
         assertTrue(bool);
     }
