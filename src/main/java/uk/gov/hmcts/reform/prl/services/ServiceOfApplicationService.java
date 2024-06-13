@@ -1631,8 +1631,6 @@ public class ServiceOfApplicationService {
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
                     ));
-                dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
-                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicantsFL401().getSolicitorEmail(),

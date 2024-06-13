@@ -119,6 +119,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
+    @Test
     public void testCitizenEmailVars() {
         EmailTemplateVars emailTemplateVars = serviceOfApplicationEmailService.buildCitizenEmailVars(CaseData.builder()
                                                                                                          .id(123L)
