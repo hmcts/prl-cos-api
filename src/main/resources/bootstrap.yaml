@@ -42,6 +42,7 @@ spring:
         prl-citizen-frontend-idam-client-secret: CITIZEN_IDAM_CLIENT_SECRET
         prl.filtered-court-ids: COURT_IDS_TO_FILTER
         prl.da-filtered-court-ids: DA_COURT_IDS_TO_FILTER
+        prl.ca-default-court-epimms-id: CA_DEFAULT_COURT_EPIMMS_ID
         prl.prl-rd-api-system-username: PRL_IDAM_REFDATA_USERNAME
         prl.prl-rd-api-system-user-password: PRL_IDAM_REFDATA_PASSWORD
         prl.welsh-court-mapping: WELSH_COURT_MAPPING

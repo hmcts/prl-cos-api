@@ -80,6 +80,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_FL401_SUBMISSION_TO_HMCTS;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
@@ -117,10 +119,11 @@ public class TaskListService {
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
+        boolean isC1aApplicable = caseData.getC1ADocument() != null;
         return getRespondentsEvents(caseData).stream()
                 .map(event -> RespondentTask.builder()
                         .event(event)
-                        .state(getRespondentTaskState(event, respondingParty))
+                        .state(getRespondentTaskState(event, respondingParty, isC1aApplicable))
                         .build())
                 .toList();
     }
@@ -138,11 +141,11 @@ public class TaskListService {
         return eventsChecker.getDefaultState(event, caseData);
     }
 
-    private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty) {
-        if (respondentEventsChecker.isFinished(event, respondingParty)) {
+    private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty, boolean isC1aApplicable) {
+        if (respondentEventsChecker.isFinished(event, respondingParty, isC1aApplicable)) {
             return TaskState.FINISHED;
         }
-        if (respondentEventsChecker.isStarted(event, respondingParty)) {
+        if (respondentEventsChecker.isStarted(event, respondingParty, isC1aApplicable)) {
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;
@@ -299,15 +302,7 @@ public class TaskListService {
         Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                authorisation,
-                authTokenGenerator.generate(),
-                null,
-                userDetails.getId()
-            );
-            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
-        }
+        roles = mapAmToIdamUserRoles(authorisation, userDetails, roles);
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
@@ -344,9 +339,24 @@ public class TaskListService {
             caseData
         );
 
-        if (!isCourtStaff) {
+        if (!isCourtStaff
+            || (isCourtStaff && (AWAITING_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)
+            || AWAITING_FL401_SUBMISSION_TO_HMCTS.getValue().equalsIgnoreCase(state)))) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private List<String> mapAmToIdamUserRoles(String authorisation, UserDetails userDetails, List<String> roles) {
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                authorisation,
+                authTokenGenerator.generate(),
+                null,
+                userDetails.getId()
+            );
+            roles = CaseUtils.mapAmUserRolesToIdamRoles(roleAssignmentServiceResponse, authorisation, userDetails);
+        }
+        return roles;
     }
 }

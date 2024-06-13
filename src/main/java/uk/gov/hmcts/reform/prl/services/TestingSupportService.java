@@ -68,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -76,20 +77,11 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestingSupportService {
 
-    @Autowired
     private final ObjectMapper objectMapper;
-    @Autowired
     private final EventService eventPublisher;
-    @Autowired
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
-    @Autowired
-    private final UserService userService;
-    @Autowired
     private final DocumentGenService dgsService;
-    @Autowired
-    private final CaseWorkerEmailService caseWorkerEmailService;
-    @Autowired
     private final AllTabServiceImpl allTabsService;
     private final CaseService citizenCaseService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
@@ -105,16 +97,13 @@ public class TestingSupportService {
     private final CaseInitiationService caseInitiationService;
     private final TaskListService taskListService;
 
-    private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
-
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
 
     private static final String VALID_FL401_COURTNAV_DRAFT_INPUT_JSON = "FL401_CourtNav_Draft_CaseDetails.json";
 
-    private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
-
+    private static final String VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON = "FL401_Dummy_Draft_admin_CaseDetails.json";
 
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
 
@@ -124,6 +113,8 @@ public class TestingSupportService {
 
     private static final String VALID_C100_GATEKEEPING_V3_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails_v3.json";
 
+    private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
+
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
             String requestBody;
@@ -132,6 +123,8 @@ public class TestingSupportService {
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData);
+            } else if (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                requestBody = loadUrgentCaseDetailsInDraftStage(initialCaseData);
             } else {
                 requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);
                 adminCreateApplication = true;
@@ -220,7 +213,8 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetails(String authorisation, CaseDetails initialCaseDetails,
-                                                  CaseData initialCaseData, boolean adminCreateApplication, CaseDetails dummyCaseDetails) {
+                                                  CaseData initialCaseData, boolean adminCreateApplication,
+                                                  CaseDetails dummyCaseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
@@ -256,8 +250,8 @@ public class TestingSupportService {
                                                              CourtNavFl401 dummyCaseDetails) throws NotFoundException {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
-            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
             String systemAuthorisation = systemUserService.getSysUserToken();
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails, systemAuthorisation);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 systemAuthorisation,
                 fl401CourtNav
@@ -280,12 +274,26 @@ public class TestingSupportService {
         return requestBody;
     }
 
-    private static String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
+    private String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+        }
+        return requestBody;
+    }
+
+    private String loadUrgentCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
+        return loadCaseDetailsInDraftStageForUrgentCases(initialCaseData);
+    }
+
+    private static String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData) throws Exception {
+        String requestBody;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON);
+        } else {
+            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
         }
         return requestBody;
     }
@@ -441,4 +449,5 @@ public class TestingSupportService {
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
+
 }
