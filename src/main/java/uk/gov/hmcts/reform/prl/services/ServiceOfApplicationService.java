@@ -2960,12 +2960,37 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                notifyC100ApplicantsPersonalServiceUnRepApplicant(authorization,
-                                                                  caseData,
-                                                                  emailNotificationDetails,
-                                                                  bulkPrintDetails,
-                                                                  removeCoverLettersFromThePacks(
-                                                                      unwrapElements(unServedApplicantPack.getPackDocument())));
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    notifyC100ApplicantsPersonalServiceUnRepApplicant(authorization,
+                                                                      caseData,
+                                                                      emailNotificationDetails,
+                                                                      bulkPrintDetails,
+                                                                      removeCoverLettersFromThePacks(
+                                                                          unwrapElements(unServedApplicantPack.getPackDocument())));
+                } else {
+                    List<Document> packEDocuments = removeCoverLettersFromThePacks(
+                        unwrapElements(unServedApplicantPack.getPackDocument()));
+                    assert unServedRespondentPack != null;
+                    List<Document> packFDocuments = unwrapElements(unServedRespondentPack.getPackDocument());
+                    List<Document> docs = new ArrayList<>();
+                    removeDuplicatesAndGetConsolidatedDocs(packEDocuments, packFDocuments, docs);
+                    if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                        checkAndSendEmailToDaApplicantLip(
+                            caseData,
+                            authorization,
+                            emailNotificationDetails,
+                            element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                            docs,
+                            packEDocuments
+                        );
+                    } else {
+                        sendSoaPacksToPartyViaPost(authorization, caseData, docs,
+                                                   bulkPrintDetails,
+                                                   element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                                                   Templates.PRL_LET_ENG_AP1);
+                    }
+                }
+
                 whoIsResponsible = UNREPRESENTED_APPLICANT;
             } else {
                 if (unServedApplicantPack != null) {
