@@ -629,10 +629,10 @@ public class ServiceOfApplicationService {
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(ENG, documentLanguage.isGenEng());
-        dynamicData.put(WEL, documentLanguage.isGenWelsh());
-        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
-        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
+        dynamicData.put(ENG, false);
+        dynamicData.put(WEL, true);
+        dynamicData.put(IS_ENGLISH, false);
+        dynamicData.put(IS_WELSH, true);
     }
 
     private void sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(CaseData caseData, String authorization,
