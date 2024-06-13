@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -134,6 +135,7 @@ public class HearingRequestDataMapperTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(applicant), element(applicant), element(applicant), element(applicant), element(applicant)))
             .respondents(List.of(element(respondent), element(respondent), element(respondent), element(respondent), element(respondent)))
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
