@@ -629,9 +629,9 @@ public class ServiceOfApplicationService {
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(ENG, false);
+        dynamicData.put(ENG, true);
         dynamicData.put(WEL, true);
-        dynamicData.put(IS_ENGLISH, false);
+        dynamicData.put(IS_ENGLISH, true);
         dynamicData.put(IS_WELSH, true);
     }
 
