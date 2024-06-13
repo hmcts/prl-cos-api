@@ -494,8 +494,18 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication()
                                 .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-                getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
-                getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
+                List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
+
+                if (!ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                    sendSoaPacksToPartyViaPost(authorization, caseData, packEdocs,
+                                               bulkPrintDetails,
+                                               element(
+                                                   caseData.getApplicantsFL401().getPartyId(),
+                                                   caseData.getApplicantsFL401()
+                                               ),
+                                               Templates.PRL_LET_ENG_AP1
+                    );
+                }
             }
         }
         return whoIsResponsibleForServing;
