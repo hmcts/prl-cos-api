@@ -543,4 +543,44 @@ public class Fm5ReminderServiceTest {
         verifyNoInteractions(fm5NotificationService);
     }
 
+    @Test
+    public void testSendFm5ReminderNotificationsToNonePartiesWhenCitizenQuarantineDocsListAvailable() {
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .categoryId(RESPONDENT_C1A_APPLICATION)
+            .restrictedDetails("test details")
+            .build();
+        legalProfQuarantineDocsList.add(element(quarantineLegalDoc));
+
+        caseData = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(legalProfQuarantineDocsList)
+                                           .build())
+            .build();
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseData.toMap(objectMapper))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(coreCaseDataApi.searchCases(authToken, s2sAuthToken, CASE_TYPE, null)).thenReturn(searchResult);
+
+        SearchResultResponse response = SearchResultResponse.builder()
+            .total(1)
+            .cases(List.of(caseDetails))
+            .build();
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class)).thenReturn(response);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
+
 }

@@ -11,6 +11,58 @@
     "case_data" : {
       "dateSubmitted" : "2023-01-20",
       "caseTypeOfApplication" : "C100",
+      "cafcassUploadedDocs": [
+        {
+          "id": "a5dbc39d-6322-4abc-821a-45206b88253f",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 19:11:46 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0b5a9e4c-4244-4cd4-a9d5-b4f270c38b7d/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        },
+        {
+          "id": "c05a93db-7494-41a5-bfe4-767dbc42e7d4",
+          "value": {
+            "parentDocumentType": "Safe_guarding_Letter",
+            "documentType": "16_4_Report",
+            "partyName": "John Doe Vs Mary Richards v2",
+            "isApplicant": "CAFCASS",
+            "uploadedBy": "CAFCASS",
+            "dateCreated": "2024-04-02",
+            "documentDetails": {
+              "documentName": "Prev orders selected.docx",
+              "documentUploadedDate": "Tue Apr 02 23:46:00 BST 2024"
+            },
+            "citizenDocument": null,
+            "cafcassDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/56b876c5-6a72-4244-be81-8722aaac6f1a/binary",
+              "document_filename": "Prev orders selected.docx",
+              "document_hash": null,
+              "category_id": null,
+              "document_creation_date": null
+            },
+            "documentRequestedByCourt": null
+          }
+        }
+      ],
       "draftConsentOrderFile" : {
         "document_filename" : "dummy.pdf",
         "document_id" : "053ecf20-3337-4b31-a3e4-00b5672c73a4"
