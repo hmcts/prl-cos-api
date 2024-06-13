@@ -629,10 +629,10 @@ public class ServiceOfApplicationService {
 
     private void populateLanguageMap(CaseData caseData, Map<String, Object> dynamicData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicData.put(ENG, true);
-        dynamicData.put(WEL, true);
-        dynamicData.put(IS_ENGLISH, true);
-        dynamicData.put(IS_WELSH, true);
+        dynamicData.put(ENG, documentLanguage.isGenEng());
+        dynamicData.put(WEL, documentLanguage.isGenWelsh());
+        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
     }
 
     private void sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(CaseData caseData, String authorization,
@@ -1627,7 +1627,6 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 populateLanguageMap(caseData, dynamicData);
-                log.info("dynamic data is {}", dynamicData);
                 List<Document> finalDocumentList = new ArrayList<>(
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
