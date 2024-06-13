@@ -1756,12 +1756,19 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartAllTabsUpdate(String.valueOf(
             caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
 
-        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("allocated-judge");
-        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234").build());
+        RoleAssignmentResponse roleAssignmentResponse2 =  new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleName("allocated-judge");
+        roleAssignmentResponse2.setAttributes(Attributes.builder().caseId("12345").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        List<RoleAssignmentResponse> roleAssignmentResponses2 =  new ArrayList<>();
         roleAssignmentResponses.add(roleAssignmentResponse);
-        when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
+        roleAssignmentResponses2.add(roleAssignmentResponse2);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses).thenReturn(roleAssignmentResponses2);
         sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
 
         assertNotNull(caseDetails);
