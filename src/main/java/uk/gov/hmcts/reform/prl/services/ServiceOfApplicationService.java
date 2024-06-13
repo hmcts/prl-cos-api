@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
@@ -1632,29 +1631,16 @@ public class ServiceOfApplicationService {
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
                     ));
-                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-                if (Yes.equals(caseData.getIsCourtNavCase())) {
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendLanguageEmailUsingTemplateWithAttachments(
-                        authorization,
-                        caseData.getApplicantsFL401().getSolicitorEmail(),
-                        finalDocumentList,
-                        SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
-                        dynamicData,
-                        SERVED_PARTY_APPLICANT_SOLICITOR,
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    )));
-                } else {
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
-                        authorization,
-                        caseData.getApplicantsFL401().getSolicitorEmail(),
-                        finalDocumentList,
-                        SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
-                        dynamicData,
-                        SERVED_PARTY_APPLICANT_SOLICITOR
-                    )));
-                }
+                emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    caseData.getApplicantsFL401().getSolicitorEmail(),
+                    finalDocumentList,
+                    SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
+                    dynamicData,
+                    SERVED_PARTY_APPLICANT_SOLICITOR
+                );
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

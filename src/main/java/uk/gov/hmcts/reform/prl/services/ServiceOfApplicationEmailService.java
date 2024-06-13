@@ -72,49 +72,6 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
-                                                                      PartyDetails partyDetails,
-                                                                      List<Document> docs,String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        EmailUtils.getEmailProps(null, false,
-                                                                                 partyDetails.getFirstName() + " "
-                                                                          + partyDetails.getLastName(),null,
-                                                                      caseData.getApplicantCaseName(),
-                                                                      String.valueOf(caseData.getId())),
-                                                        partyDetails.getEmail(), docs, servedParty);
-    }
-
-    public EmailNotificationDetails sendLanguageEmailUsingTemplateWithAttachments(String authorization,
-                                                                          String email,
-                                                                          List<Document> docs,
-                                                                          SendgridEmailTemplateNames template,
-                                                                          Map<String, Object> dynamicData,
-                                                                          String servedParty,
-                                                                                        LanguagePreference
-                                                                                            languagePreference) {
-        try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                template,
-                authorization,
-                SendgridEmailConfig.builder()
-                    .toEmailAddress(email)
-                    .dynamicTemplateData(dynamicData)
-                    .listOfAttachments(docs).languagePreference(languagePreference).build()
-            );
-            return EmailNotificationDetails.builder()
-                .emailAddress(email)
-                .servedParty(servedParty)
-                .docs(wrapElements(docs))
-                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-                .timeStamp(DateTimeFormatter
-                    .ofPattern("dd MMM yyyy HH:mm:ss")
-                    .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
-        } catch (IOException e) {
-            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
-        }
-        return null;
-    }
-
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
                                                       String email,
                                                       List<Document> docs,

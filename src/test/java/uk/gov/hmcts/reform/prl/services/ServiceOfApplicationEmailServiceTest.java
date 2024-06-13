@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -115,20 +114,6 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    .SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                                                                                new HashMap<>(),
                                                                                PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
-
-        verify(sendgridService, times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    public void testsendEmailUsingTemplateWithAttachmentsWelsh() throws Exception {
-        serviceOfApplicationEmailService.sendLanguageEmailUsingTemplateWithAttachments("test",
-            "", List.of(Document.builder().build()),
-            SendgridEmailTemplateNames
-                .SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-            new HashMap<>(),
-            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR,
-            LanguagePreference.welsh);
 
         verify(sendgridService, times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());

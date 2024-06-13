@@ -1363,7 +1363,7 @@ public class ServiceOfApplicationServiceTest {
             .surname("test").build());
         List<Document> staticDocs = new ArrayList<>();
         staticDocs.add(Document.builder().documentBinaryUrl("testUrl").documentFileName("Blank.pdf").build());
-        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString()))
+        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString(),  Mockito.any(CaseData.class)))
             .thenReturn(staticDocs);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
@@ -2668,7 +2668,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2745,7 +2744,6 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -3867,7 +3865,7 @@ public class ServiceOfApplicationServiceTest {
             TEST_AUTH,
             new HashMap<>()
         );
-        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
