@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,7 +48,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
-import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessages;
 
 
@@ -267,7 +267,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
@@ -290,17 +290,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                     );
                 }
 
-                // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
-            //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
@@ -311,6 +305,15 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        try {
+            log.info(
+                "casedata from submitted callback for snr callbackRequest {}",
+                objectMapper.writeValueAsString(callbackRequest)
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(authorisation, caseData);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {

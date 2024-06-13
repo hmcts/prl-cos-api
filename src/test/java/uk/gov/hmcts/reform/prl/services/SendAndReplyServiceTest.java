@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -48,6 +51,9 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -87,8 +93,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -98,6 +107,8 @@ public class SendAndReplyServiceTest {
 
     @Mock
     UserService userService;
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -139,10 +150,20 @@ public class SendAndReplyServiceTest {
 
     List<Element<MessageHistory>> messageHistoryList;
 
+    List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
+
     MessageMetaData metaData;
     DynamicList dynamicList;
     CaseData caseData;
     CaseData caseDataWithAddedMessage;
+
+    CaseDetails caseDetails;
+
+    DynamicListElement dynamicListElement;
+
+    AllocatedJudgeForSendAndReply allocatedJudge;
+
+    SendOrReplyMessage sendOrReplyMessage;
 
     @Mock
     private HearingDataService hearingDataService;
@@ -171,11 +192,14 @@ public class SendAndReplyServiceTest {
     private HearingService hearingService;
 
     @Mock
+    CcdCoreCaseDataService ccdCoreCaseDataService;
+
+    @Mock
     AllTabServiceImpl allTabService;
 
     public static final String caseId = "case id";
 
-
+    Map<String, Object> stringMapObject;
 
     @Before
     public void init() {
@@ -196,6 +220,7 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
@@ -211,6 +236,7 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 2 latest message")
             .messageHistory("Message 2 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
+            .messageHasJudgeAllocated("ALREADY_ALLOCATED")
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
         message3 = Message.builder()
@@ -222,6 +248,7 @@ public class SendAndReplyServiceTest {
             .messageContent("This is message 3 body")
             .updatedTime(dateTime)
             .status(OPEN)
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .latestMessage("Message 3 latest message")
             .messageHistory("Message 3 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
@@ -286,6 +313,49 @@ public class SendAndReplyServiceTest {
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
             .build();
+
+        //setup code for Send and Reply
+        stringMapObject = new HashMap<>();
+        caseDetails = CaseDetails.builder().data(stringMapObject).id(12345L).build();
+        dynamicListElement =  DynamicListElement.builder()
+            .code(UUID.fromString(TEST_UUID))
+            .label("test")
+            .build();
+
+        allocatedJudge =
+            AllocatedJudgeForSendAndReply
+                .builder()
+                .judgeEmailId("judge@email.com")
+                .messageId(String.valueOf(UUID.fromString(TEST_UUID)))
+                .status("Action required")
+                .build();
+
+        allocatedJudgeForSendAndReply = new ArrayList<>();
+        allocatedJudgeForSendAndReply.add(element(allocatedJudge));
+
+        message1 = message1.toBuilder()
+            .judgeEmail("judge@email.com")
+            .applicationsList(DynamicList.builder().value(dynamicListElement).build())
+            .build();
+
+        sendOrReplyMessage = SendOrReplyMessage.builder()
+            .respondToMessage(YesOrNo.No)
+            .messages(List.of(element(UUID.fromString(TEST_UUID), message1)))
+            .messageReplyDynamicList(DynamicList.builder().build())
+            .sendMessageObject(message1)
+            .build();
+
+        when(ccdCoreCaseDataService.submitUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
+        when(userService.getUserByEmailId(any(), any())).thenReturn(List.of(UserDetails.builder()
+                                                                                .id("1234")
+                                                                                .forename("first")
+                                                                                .surname("test").build()));
     }
 
     @Test
@@ -425,6 +495,7 @@ public class SendAndReplyServiceTest {
             .messageHistory("testReply@email.com - This is message 2 body")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
+            .messageHasJudgeAllocated("SNR_ALLOCATED")
             .build();
 
         Element<Message> updatedElement = element(message1Element.getId(), updatedMessage1);
@@ -696,7 +767,7 @@ public class SendAndReplyServiceTest {
     public void testBuildSendMessageWithNullMessage() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().build())
@@ -712,7 +783,7 @@ public class SendAndReplyServiceTest {
     public void testBuildSendMessageWithMessageForJudge() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -744,7 +815,7 @@ public class SendAndReplyServiceTest {
     public void testBuildSendMessageWithMessageForLegalAdvisor() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -787,7 +858,7 @@ public class SendAndReplyServiceTest {
     public void testBuildSendMessageWithMessageForNoRolesinUserDetails() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -829,7 +900,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -1003,7 +1074,7 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testCloseMessage() {
-        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfClosedMessages.get(0).getId());
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1224,7 +1295,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
@@ -1275,7 +1346,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
@@ -1347,6 +1418,41 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Ignore("value")
+    @Test
+    public void testAssignCaseToJudgeIfJudgeSelectedForMessage() {
+        when(refDataUserService.getAllJudicialUserDetails(any()))
+            .thenReturn(List.of(JudicialUsersApiResponse.builder()
+                                    .emailId("test@test.com")
+                                    .personalCode("test")
+                                    .fullName("test")
+                                    .build()));
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .sendReplyJudgeName(JudicialUser.builder()
+                                    .personalCode("test")
+                                    .idamId("test")
+                                    .build())
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .build();
+        caseData.setChooseSendOrReply(SendOrReply.SEND);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(message);
+
+    }
+
     @Test
     public void testCloseAwPTask() {
 
@@ -1367,12 +1473,13 @@ public class SendAndReplyServiceTest {
             .replyHistory(messageHistoryList)
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
+            .judgeEmail("test@test.com")
             .build();
 
         openMessagesList.add(element(message1));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .chooseSendOrReply(SendOrReply.SEND)
+            .chooseSendOrReply(SEND)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
@@ -1399,6 +1506,7 @@ public class SendAndReplyServiceTest {
                                                                                                         stringObjectMap, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         sendAndReplyService.closeAwPTask(caseData);
+        when(allTabService.getStartAllTabsUpdate(any())).thenReturn(startAllTabsUpdateDataContent);
         Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
     }
 
@@ -1416,7 +1524,7 @@ public class SendAndReplyServiceTest {
                                                            .build())
                                     .build())
             .build();
-        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+        Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND));
     }
 
     @Test
@@ -1426,7 +1534,7 @@ public class SendAndReplyServiceTest {
                                     .sendMessageObject(null)
                                     .build())
             .build();
-        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
+        Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND));
     }
 
     @Test
@@ -1476,6 +1584,270 @@ public class SendAndReplyServiceTest {
                                     .build())
             .build();
         Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+    }
+
+
+    @Test
+    public void testCallFromSubmittedCallbackForReply() {
+        caseData = caseData.toBuilder()
+            .id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testRemoveJudgeRoleAssignmentIfRequiredForReply() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(YesOrNo.No)
+            .build();
+
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForReplyMultipleList() {
+
+        AllocatedJudgeForSendAndReply allocatedJudge2 =
+            AllocatedJudgeForSendAndReply
+                .builder()
+                .judgeEmailId("judge@email.com")
+                .messageId(String.valueOf(UUID.fromString(TEST_UUID)))
+                .status("Action required")
+                .build();
+
+        allocatedJudgeForSendAndReply = new ArrayList<>();
+        allocatedJudgeForSendAndReply.add(element(allocatedJudge));
+        allocatedJudgeForSendAndReply.add(element(allocatedJudge2));
+        caseData = caseData.toBuilder()
+            .id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForSend() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(YesOrNo.Yes)
+            .build();
+
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForEmptySend() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(YesOrNo.Yes)
+            .build();
+        allocatedJudgeForSendAndReply = null;
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234").build());
+        RoleAssignmentResponse roleAssignmentResponse2 =  new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleName("allocated-judge");
+        roleAssignmentResponse2.setAttributes(Attributes.builder().caseId("12345").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        List<RoleAssignmentResponse> roleAssignmentResponses2 =  new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        roleAssignmentResponses2.add(roleAssignmentResponse2);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses).thenReturn(roleAssignmentResponses2);
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForEmptyRoleSend() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder().respondToMessage(YesOrNo.Yes).build();
+        allocatedJudgeForSendAndReply = null;
+        caseData = caseData.toBuilder().id(12345L).chooseSendOrReply(SEND).sendOrReplyMessage(sendOrReplyMessage).allocatedJudgeForSendAndReply(
+            allocatedJudgeForSendAndReply).messageReply(message1).replyMessageDynamicList(DynamicList.builder().build()).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(),
+            objectMapper
+        )).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject,
+                                                                                                        caseData,
+                                                                                                        null
+        );
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(caseData.getId()))).thenReturn(
+            startAllTabsUpdateDataContent);
+        //modify the mocking
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setId("12345");
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses = new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString())).thenReturn(roleAssignmentResponses);
+
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+
+        assertNotNull(caseDetails);
+        verify(userService, Mockito.times(1))
+            .getUserByEmailId(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testCallFromSubmittedCallbackForNoSendOrReply() {
+        sendOrReplyMessage = sendOrReplyMessage.toBuilder()
+            .respondToMessage(null)
+            .build();
+
+        caseData = caseData.toBuilder().id(12345L)
+            .chooseSendOrReply(null)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .allocatedJudgeForSendAndReply(allocatedJudgeForSendAndReply)
+            .messageReply(message1)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(any(),
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringMapObject, caseData, null);
+
+        when(allTabService.getStartAllTabsUpdate(String.valueOf(
+            caseData.getId()))).thenReturn(startAllTabsUpdateDataContent);
+
+        sendAndReplyService.removeJudgeRoleAssignmentIfRequired(auth, caseData);
+
+        assertNotNull(caseDetails);
     }
 
     @Test

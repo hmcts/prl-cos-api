@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attribute
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
@@ -52,11 +53,11 @@ public class RoleAssignmentService {
     private final SystemUserService systemUserService;
 
     public void createRoleAssignment(String authorization,
-                                     CaseDetails caseDetails,
-                                     RoleAssignmentDto roleAssignmentDto,
-                                     String eventName,
-                                     boolean replaceExisting,
-                                     String roleName) {
+                         CaseDetails caseDetails,
+                         RoleAssignmentDto roleAssignmentDto,
+                         String eventName,
+                         boolean replaceExisting,
+                         String roleName) {
         if (!environment.equals("preview")) {
 
             log.info("Role Assignment called from event - {}", eventName);
@@ -134,6 +135,17 @@ public class RoleAssignmentService {
         return caseDetails.getId() + "-" + userId;
     }
 
+    public List<RoleAssignmentResponse> getRoleAssignmentForActorId(String actorId) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            actorId
+        );
+        return roleAssignmentServiceResponse.getRoleAssignmentResponse();
+    }
+
 
     public boolean validateIfUserHasRightRoles(
         String authorization,
@@ -196,5 +208,15 @@ public class RoleAssignmentService {
         );
 
         return finalRoles;
+    }
+
+    public void removeRoleAssignmentFromRoleAssignmentid(String roleAssignmentId) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        roleAssignmentApi.removeRoleAssignments(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentId
+        );
     }
 }
