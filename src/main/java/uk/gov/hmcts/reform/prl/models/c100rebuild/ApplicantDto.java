@@ -34,4 +34,5 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
+    private YesOrNo stayingInRefuge;
 }

@@ -44,8 +44,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
@@ -53,7 +53,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -84,10 +83,13 @@ public class UpdatePartyDetailsService {
     @Qualifier("caseSummaryTab")
     private final  CaseSummaryTabService caseSummaryTabService;
 
+    private final RefugeConfidentialityService refugeConfidentialityService;
+
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get(APPLICANTS));
+        refugeConfidentialityService.setConfidentialFlagForPartiesLiveInRefuge(updatedCaseData);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -251,10 +253,10 @@ public class UpdatePartyDetailsService {
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
         boolean roleNotExists = false;
-        if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
+        if (isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (isEmpty(
             applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
             applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
@@ -489,9 +491,15 @@ public class UpdatePartyDetailsService {
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             applicants.add(partyDetails);
             caseDataUpdated.put(APPLICANTS, applicants);
-            return caseDataUpdated;
+        } else {
+            List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+            caseData.getApplicants().forEach(eachApplicant ->
+                                                 updatedApplicants.add(element(
+                                                     eachApplicant.getId(),
+                                                     refugeConfidentialityService
+                                                         .resetPartyConfidentialDetailsForRefuge(eachApplicant.getValue()))));
+            caseDataUpdated.put(APPLICANTS, updatedApplicants);
         }
-        caseDataUpdated.put(APPLICANTS, caseData.getApplicants());
         return caseDataUpdated;
 
     }

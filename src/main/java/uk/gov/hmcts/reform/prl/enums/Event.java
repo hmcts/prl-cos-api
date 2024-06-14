@@ -68,7 +68,8 @@ public enum Event {
     SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper"),
     TS_CA_URGENT_CASE("testingSupportCAUrgentCases", "TS-Urgent case"),
     AMEND_MIAM_POLICY_UPGRADE("amendMiamPolicyUpgrade", "Amend MIAM"),
-    SOLICITOR_CREATE("solicitorCreate", "Solicitor application");
+    SOLICITOR_CREATE("solicitorCreate", "Solicitor application"),
+    AMEND_APPLICANTS_DETAILS("amendApplicantsDetails", "Amend applicant details");
 
     private final String id;
     private final String name;
