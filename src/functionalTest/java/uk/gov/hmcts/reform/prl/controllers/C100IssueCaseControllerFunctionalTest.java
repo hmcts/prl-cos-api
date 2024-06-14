@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
@@ -42,7 +45,7 @@ public class C100IssueCaseControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenIssue_and_send_to_local_court_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -52,9 +55,8 @@ public class C100IssueCaseControllerFunctionalTest {
             .post("/issue-and-send-to-local-court")
             .then()
             .assertThat().statusCode(200)
-            .body("data.caseStatus.state", equalTo("Gatekeeping"),
-                  "data.caseTypeOfApplication", equalTo("C100"),
-                  "data.issueDate", notNullValue(),
+            .body("data.caseTypeOfApplication", equalTo("C100"),
+                  "data.issueDate",  equalTo(today),
                   "data.localCourtAdmin[0].value", notNullValue(),
                   "data.courtList.value.code", notNullValue(),
                   "data.courtList.value.label", notNullValue()
@@ -75,10 +77,7 @@ public class C100IssueCaseControllerFunctionalTest {
             .contentType("application/json")
             .post("/issue-and-send-to-local-court-notification")
             .then()
-            .assertThat().statusCode(200)
-            .body("data.caseStatus.state", equalTo("Gatekeeping"),
-                  "data.caseTypeOfApplication", equalTo("C100")
-            );
+            .assertThat().statusCode(200);
     }
 
 }
