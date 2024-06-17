@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -257,6 +258,14 @@ public class PaymentRequestService {
                             .volume(1).build()
                     })
                     .build()
+            );
+    }
+
+    public PaymentGroupReferenceStatusResponse fetchPaymentGroupReferenceStatus(String authorization,
+                                                                                String paymentGroupReference) {
+        return paymentApi
+            .fetchPaymentGroupReferenceStatus(authorization, authTokenGenerator.generate(),
+                                              paymentGroupReference
             );
     }
 }
