@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -36,6 +36,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 
 @Slf4j
 @Component
@@ -44,7 +45,6 @@ public class NoticeOfChangeEventHandler {
     public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "PRL-LEG-REP-REMOVED.docx";
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
-    private final LaunchDarklyClient launchDarklyClient;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
@@ -225,12 +225,11 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
         //Access code will not generate if the case has not reached to Hearing state yet
-        if (StringUtils.isNotEmpty(event.getAccessCode())
-            && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
+        if (StringUtils.isNotEmpty(event.getAccessCode())) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
             //PRL-5300 - send email/post to LiP based on contact pref
-            sendNotificationToLitigant(caseData, event, partyElement);
+            sendNotificationToLitigant(caseData, event, partyElement, event.getRepresenting());
 
             //PRL-3215 - notify applicants/respondents other parties except litigant
             sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true, partyElement);
@@ -246,11 +245,13 @@ public class NoticeOfChangeEventHandler {
 
     private void sendNotificationToLitigant(CaseData caseData,
                                             NoticeOfChangeEvent event,
-                                            Element<PartyDetails> party) {
+                                            Element<PartyDetails> party,
+                                            SolicitorRole.Representing representedParty) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
             log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
-            if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
+            if (CARESPONDENT != representedParty
+                && ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
                 sendEmailToLitigant(caseData,

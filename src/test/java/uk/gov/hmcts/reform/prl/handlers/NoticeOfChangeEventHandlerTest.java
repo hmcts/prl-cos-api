@@ -163,7 +163,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(6)).send(Mockito.anyString(),
+        verify(emailService,times(5)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
