@@ -19,8 +19,7 @@ public class FeeAndPayServiceRequestService {
 
     public List<String> validateSuppressedHelpWithFeesCheck(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
-        boolean hwfSelectedForSubmitAndPay = Event.SUBMIT_AND_PAY.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees());
+        boolean hwfSelectedForSubmitAndPay = Event.SUBMIT_AND_PAY.getId().equalsIgnoreCase(callbackRequest.getEventId());
         boolean hwfSelectedForAwP = Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId().equalsIgnoreCase(callbackRequest.getEventId())
             && null != callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
             && YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
