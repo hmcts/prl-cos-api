@@ -359,7 +359,8 @@ public class DynamicMultiSelectListService {
         });
         caseData.getRespondents().stream().forEach(respondent -> {
             PartyDetails partyDetails = respondent.getValue();
-            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
+                || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
                 addSolicitorRepresentedParties(listItems, respondent.getId(), partyDetails
                 );
             }
