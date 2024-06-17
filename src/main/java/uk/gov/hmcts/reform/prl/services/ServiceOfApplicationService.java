@@ -185,7 +185,6 @@ public class ServiceOfApplicationService {
     public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
     public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
 
-    public static final String COURTADMIN_COURTBAILIFF = "Court admin court bailiff";
 
     public static final String ENG = "eng";
     public static final String WEL = "wel";
