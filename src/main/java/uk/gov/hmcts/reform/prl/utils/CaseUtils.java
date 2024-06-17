@@ -477,7 +477,7 @@ public class CaseUtils {
         return givenZonedTime.withZoneSameInstant(ZoneId.of(EUROPE_LONDON)).toLocalDateTime();
     }
 
-    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+    public static boolean isCitizenAccessEnabled(PartyDetails party) {
         return party != null && party.getUser() != null
             && party.getUser().getIdamId() != null;
     }
