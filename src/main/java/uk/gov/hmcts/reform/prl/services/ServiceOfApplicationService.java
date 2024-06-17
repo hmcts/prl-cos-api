@@ -501,7 +501,7 @@ public class ServiceOfApplicationService {
                 Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
                 docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())) {
+                    if (Boolean.TRUE.equals(CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401()))) {
                         log.info("#Gov notify to Lip from courtadmin bailiff DA");
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -2155,6 +2155,9 @@ public class ServiceOfApplicationService {
         } else {
             if (null != caseData.getFinalDocument()) {
                 docs.add(caseData.getFinalDocument());
+            }
+            if (null != caseData.getFinalWelshDocument()) {
+                docs.add(caseData.getFinalWelshDocument());
             }
         }
         log.info("case docs {}", docs);
