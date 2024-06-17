@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -41,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -49,9 +52,11 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -138,7 +143,7 @@ public class HearingDataService {
             );
             return refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
         } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
+            log.error("Category Values look up failed - ", e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -150,12 +155,11 @@ public class HearingDataService {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing : hearingDetails.getCaseHearings()) {
                     log.info("** Status {}", caseHearing.getHmcStatus());
-                    if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
+                    //Filter Listed & Awaiting hearing details hearings
+                    if (List.of(LISTED, AWAITING_HEARING_DETAILS, COMPLETED).contains(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
-                                                    .label(caseHearing.getHearingTypeValue() + " - "
-                                                               + caseHearing.getNextHearingDate().format(
-                                                        customDateTimeFormatter))
+                                                    .label(caseHearing.getHearingTypeValue() + " - " + getSuffixForHearingDropdown(caseHearing))
                                                     .build());
                     }
                 }
@@ -165,6 +169,16 @@ public class HearingDataService {
             log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
+    }
+
+    private String getSuffixForHearingDropdown(CaseHearing caseHearing) {
+        if (null != caseHearing.getNextHearingDate()) {
+            return caseHearing.getNextHearingDate().format(customDateTimeFormatter);
+        } else if (isNotEmpty(caseHearing.getHearingDaySchedule())) {
+            return caseHearing.getHearingDaySchedule().get(0)
+                .getHearingStartDateTime().format(customDateTimeFormatter);
+        }
+        return "";
     }
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
@@ -564,7 +578,7 @@ public class HearingDataService {
                     .toList();
             }
         } catch (Exception e) {
-            log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
+            log.error("Exception occured in getLinkedCasesDynamicList {}", e);
         }
         return dynamicListElements;
     }
@@ -611,7 +625,8 @@ public class HearingDataService {
         }).toList();
     }
 
-    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData,
+                                                                       CreateSelectOrderOptionsEnum orderType) {
         boolean[] hearingFetchedOnce = {false};
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -644,6 +659,21 @@ public class HearingDataService {
                             caseHearing.get().getHearingTypeValue()
                         ))
                         .build();
+                }
+            }
+            String order = Objects.nonNull(orderType) ? String.valueOf(orderType) : String.valueOf(caseData.getCreateSelectOrderOptions());
+            boolean isDaOrderForCaCase = ManageOrdersUtils.isDaOrderSelectedForCaCase(order, caseData);
+
+            if (getPartyNameList(caseData.getApplicants()).size() > 0 && isDaOrderForCaCase) {
+                if (Optional.ofNullable(hearingData.getApplicantName1()).isEmpty()) {
+                    hearingData.setApplicantName1(concat(getPartyNameList(caseData.getApplicants()).get(0), " (Applicant1)"));
+                }
+                if (Optional.ofNullable(hearingData.getRespondentName1()).isEmpty()) {
+                    hearingData.setRespondentName1(concat(getPartyNameList(caseData.getRespondents()).get(0), " (Respondent1)"));
+                }
+                if (Optional.ofNullable(hearingData.getApplicantSolicitor1()).isEmpty()) {
+                    hearingData.setApplicantSolicitor1(concat(getApplicantSolicitorNameList(caseData.getApplicants()).get(0),
+                                                              " (Applicant solicitor)"));
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())

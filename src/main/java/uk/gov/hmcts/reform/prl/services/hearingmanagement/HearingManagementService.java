@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
-import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -33,14 +31,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingManagementService {
-    private static final String DATE_FORMAT = "dd-MM-yyyy";
     public static final String USER_TOKEN = "userToken";
     public static final String SYSTEM_UPDATE_USER_ID = "systemUpdateUserId";
     public static final String CASE_REF_ID = "id";
@@ -49,16 +45,12 @@ public class HearingManagementService {
 
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
-    private final EmailService emailService;
     private final AllTabServiceImpl allTabService;
     private final CcdCoreCaseDataService coreCaseDataService;
 
     private final HearingService hearingService;
 
-    @Value("${citizen.url}")
-    private String dashboardUrl;
-
-    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest, State caseState) throws Exception {
+    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest, State caseState) {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                  hearingRequest.getHearingUpdate().getHmcStatus());
@@ -80,33 +72,29 @@ public class HearingManagementService {
             fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
 
-        log.info("fields object -- > {}",fields);
-
-        switch (caseState) {
-            case PREPARE_FOR_HEARING_CONDUCT_HEARING:
-                customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
-                submitUpdate(fields, customFields);
-                break;
-
-            case DECISION_OUTCOME:
-                customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
-                submitUpdate(fields, customFields);
-                break;
-            default:
-                break;
-        }
-
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
+
         List<String> allowedHmcStatus = List.of(
             LISTED,
-            WAITING_TO_BE_LISTED,
             COMPLETED,
             POSTPONED,
             ADJOURNED,
             CANCELLED
         );
         if (allowedHmcStatus.contains(hmcStatus)) {
-            updateTabsWithLatestData(customFields);
+            switch (caseState) {
+                case PREPARE_FOR_HEARING_CONDUCT_HEARING -> {
+                    customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
+                    submitUpdate(fields, customFields);
+                }
+                case DECISION_OUTCOME -> {
+                    customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
+                    submitUpdate(fields, customFields);
+                }
+                default -> {
+                    break;
+                }
+            }
         }
     }
 
@@ -129,7 +117,7 @@ public class HearingManagementService {
         );
         log.info("Refreshing tab based on the payment response for caseid {} ", fields.get("id"));
 
-        allTabService.updateAllTabsIncludingConfTabRefactored(
+        allTabService.mapAndSubmitAllTabsUpdate(
             (String) fields.get(USER_TOKEN),
             (String) fields.get(CASE_REF_ID),
             allTabsUpdateStartEventResponse,
@@ -171,7 +159,7 @@ public class HearingManagementService {
         );
     }
 
-    public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
+    public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) {
 
         log.info("Processing the callback for the caseId {} with next hearing date {}", nextHearingDateRequest.getCaseRef(),
                  nextHearingDateRequest.getNextHearingDetails().getHearingDateTime());

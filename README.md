@@ -4,11 +4,12 @@
 
 ### Notes
 
-This is manage order changes base branch
+This is manage order changes base branch test.
 
 Update with master - Respondent dynamic task list with stop representation.
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
+
 
 JUnit 5 is now enabled by default in the project. Please refrain from using JUnit4 and use the next generation
 
@@ -99,4 +100,3 @@ Make sure you have added the label 'enable_keep_helm' while creating the PR. Oth
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-

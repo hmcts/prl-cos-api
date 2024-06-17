@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -45,10 +47,10 @@ public class ServiceOfApplicationEmailService {
 
     private final SendgridService sendgridService;
 
-    public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
+    public void sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails,
                                                                               List<Document> docs, String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
+        sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
                                                                                  null, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
@@ -77,8 +79,8 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String currentDate = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         emailService.sendSoa(
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
@@ -138,7 +140,7 @@ public class ServiceOfApplicationEmailService {
                                .ofPattern("dd MMM yyyy HH:mm:ss")
                                .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
         } catch (IOException e) {
-            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
+            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage(), e);
         }
         return null;
     }
@@ -173,7 +175,7 @@ public class ServiceOfApplicationEmailService {
 
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
-                      email, e.getMessage()
+                      email, e.getMessage(), e
             );
         }
         return null;

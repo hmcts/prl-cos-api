@@ -40,8 +40,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -323,18 +323,30 @@ public class ManageOrdersUtils {
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_C100);
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder)) {
+                    errorList.add("This order is not available to be created");
+                }
+                if (isDaOrderSelectedForCaCase(selectedOrder.toString(),caseData) && isNotDaOrderSupportedCase(caseData)) {
+                    errorList.add(ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT);
+                }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                    && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                    .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
-
         return !errorList.isEmpty();
+    }
+
+    private static boolean isNotDaOrderSupportedCase(CaseData caseData) {
+        return CollectionUtils.size(caseData.getApplicants()) > 1 || CollectionUtils.size(caseData.getRespondents()) > 1;
+    }
+
+    public static boolean isDaOrderSelectedForCaCase(String selectedOrder, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && Arrays.stream(
+                VALID_ORDER_IDS_FOR_FL401)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 
 

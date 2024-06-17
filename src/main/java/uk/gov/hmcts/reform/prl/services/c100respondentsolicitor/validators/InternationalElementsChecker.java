@@ -26,18 +26,28 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
-        return response.filter(value -> ofNullable(value.getCitizenInternationalElements())
+        boolean isStarted = false;
+        isStarted = response.filter(value -> ofNullable(value.getCitizenInternationalElements())
             .filter(citizenInternationalElements -> anyNonEmpty(
                 citizenInternationalElements.getChildrenLiveOutsideOfEnWlDetails(),
                 citizenInternationalElements.getAnotherCountryAskedInformation(),
                 citizenInternationalElements.getParentsAnyOneLiveOutsideEnWl()
             )).isPresent()).isPresent();
+        if (isStarted) {
+            respondentTaskErrorService.addEventError(
+                INTERNATIONAL_ELEMENT,
+                INTERNATIONAL_ELEMENT_ERROR,
+                INTERNATIONAL_ELEMENT_ERROR.getError()
+            );
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -49,11 +59,6 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 return true;
             }
         }
-        respondentTaskErrorService.addEventError(
-            INTERNATIONAL_ELEMENT,
-            INTERNATIONAL_ELEMENT_ERROR,
-            INTERNATIONAL_ELEMENT_ERROR.getError()
-        );
         return false;
     }
 
@@ -63,8 +68,13 @@ public class InternationalElementsChecker implements RespondentEventChecker {
         fields.add(reasonForChild);
         if (reasonForChild.isPresent() && YesOrNo.Yes.equals(reasonForChild.get())) {
             fields.add(ofNullable(internationalElements.getChildrenLiveOutsideOfEnWlDetails()));
-            fields.add(ofNullable(internationalElements.getParentsAnyOneLiveOutsideEnWlDetails()));
+        }
+        Optional<YesOrNo> reasonForAnotherPerson = ofNullable(internationalElements.getAnotherPersonOrderOutsideEnWl());
+        if (reasonForAnotherPerson.isPresent() && YesOrNo.Yes.equals(reasonForAnotherPerson.get())) {
             fields.add(ofNullable(internationalElements.getAnotherPersonOrderOutsideEnWlDetails()));
+        }
+        Optional<YesOrNo> reasonForAnotherCountry = ofNullable(internationalElements.getAnotherCountryAskedInformation());
+        if (reasonForAnotherCountry.isPresent() && YesOrNo.Yes.equals(reasonForAnotherCountry.get())) {
             fields.add(ofNullable(internationalElements.getAnotherCountryAskedInformationDetaails()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)

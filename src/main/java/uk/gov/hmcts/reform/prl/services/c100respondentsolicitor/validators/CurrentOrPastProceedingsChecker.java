@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.OTHER_PROCEEDINGS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -23,20 +23,28 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
-
+        boolean isStarted = false;
         if (response.isPresent()) {
-            return ofNullable(response.get().getCurrentOrPastProceedingsForChildren())
+            isStarted = ofNullable(response.get().getCurrentOrPastProceedingsForChildren())
                 .filter(proceedings -> anyNonEmpty(
                     proceedings.getDisplayedValue()
                 )).isPresent();
+        }
+        if (isStarted) {
+            respondentTaskErrorService.addEventError(
+                OTHER_PROCEEDINGS,
+                OTHER_PROCEEDINGS_ERROR,
+                OTHER_PROCEEDINGS_ERROR.getError()
+            );
+            return true;
         }
         return false;
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
         List<Optional<?>> fields = new ArrayList<>();
 
@@ -55,14 +63,9 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .noneMatch(field -> field.equals(""))) {
-            respondentTaskErrorService.removeError(CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR);
+            respondentTaskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
             return true;
         } else {
-            respondentTaskErrorService.addEventError(
-                CURRENT_OR_PREVIOUS_PROCEEDINGS,
-                CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR,
-                CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR.getError()
-            );
             return false;
         }
     }

@@ -11,9 +11,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -89,6 +92,8 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -173,6 +178,15 @@ public class ManageOrderServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private RoleAssignmentApi roleAssignmentApi;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
     private LocalDateTime now;
     @Mock
     private HearingService hearingService;
@@ -182,6 +196,7 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -1384,6 +1399,53 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testPopulatePreviewOrderFromCaseDataNonMolestationOrderFl404aForC100() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .firstName("Test")
+            .lastName("Test")
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .manageOrders(ManageOrders.builder().fl404CustomFields(FL404.builder().build()).build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        CaseData caseData2 = manageOrderService.populateCustomOrderFields(
+            caseData,
+            CreateSelectOrderOptionsEnum.nonMolestation
+        );
+
+        assertNotNull(caseData2.getManageOrders().getFl404CustomFields().getFl404bApplicantName());
+
+    }
+
+    @Test
     public void testPopulatePreviewOrderFromCaseDataGeneralN117() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -2377,6 +2439,90 @@ public class ManageOrderServiceTest {
                                                                      .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
     }
+
+
+    @Test
+    public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "hearing-centre-admin");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.COURT_ADMIN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeSolicitorFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-solicitor");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        assertEquals(UserRoles.JUDGE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-systemupdate");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForCitizenFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
+    }
+
 
     @Test
     public void testServeOrderCaWithRecipients() throws Exception {
@@ -4845,6 +4991,51 @@ public class ManageOrderServiceTest {
                          + "If you need to include directions for a fact-finding hearing, you need to upload the"
                          + " order in manage orders instead.</div>", caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
 
+    }
+
+    @Test
+    public void testHandlePreviewOrderScenario3() throws Exception {
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        PartyDetails details1 = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement1 = element(details1);
+        partyDetails.add(partyDetailsElement1);
+        manageOrders.toBuilder().fl404CustomFields(FL404.builder().build()).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .respondents(partyDetails)
+            .applicants(partyDetails)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId("createOrders")
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
     }
 
     @Test
