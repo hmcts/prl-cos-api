@@ -496,7 +496,7 @@ public class ServiceOfApplicationService {
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
                 List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())){
+                    if (Boolean.TRUE.equals(CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401()))) {
                         log.info("#Gov notify to Lip from courtadmin bailiff DA");
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -781,7 +781,8 @@ public class ServiceOfApplicationService {
         generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
     }
 
-    private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs, Map<String, Object> caseDataMap) {
+    private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
+                                                      Map<String, Object> caseDataMap) {
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
@@ -2140,6 +2141,9 @@ public class ServiceOfApplicationService {
         } else {
             if (null != caseData.getFinalDocument()) {
                 docs.add(caseData.getFinalDocument());
+            }
+            if (null != caseData.getFinalWelshDocument()) {
+                docs.add(caseData.getFinalWelshDocument());
             }
         }
         log.info("case docs {}", docs);
