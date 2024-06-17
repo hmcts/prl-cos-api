@@ -184,6 +184,9 @@ public class ServiceOfApplicationService {
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
     public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
     public static final String UNREPRESENTED_APPLICANT = "Unrepresented applicant";
+
+    public static final String COURTADMIN_COURTBAILIFF = "Court admin court bailiff";
+
     public static final String ENG = "eng";
     public static final String WEL = "wel";
     public static final String IS_WELSH = "isWelsh";
@@ -494,9 +497,14 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+                List<Document> docs = new ArrayList<>();
                 List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
+                List<Document> packDdocs = getNotificationPack(caseData, PrlAppsConstants.D, staticDocs);
+                removeDuplicatesAndGetConsolidatedDocs(packCdocs, packDdocs, docs);
+                Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())){
+                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())) {
                         log.info("#Gov notify to Lip from courtadmin bailiff DA");
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -506,10 +514,10 @@ public class ServiceOfApplicationService {
                         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
                             caseData.getApplicantsFL401().getEmail(),
-                            packCdocs,
+                            docs,
                             SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                             dynamicData,
-                            SERVED_PARTY_APPLICANT_SOLICITOR
+                            whoIsResponsibleForServing
                         );
                         if (null != emailNotification) {
                             emailNotificationDetails.add(element(emailNotification));
@@ -781,7 +789,8 @@ public class ServiceOfApplicationService {
         generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
     }
 
-    private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs, Map<String, Object> caseDataMap) {
+    private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
+                                                      Map<String, Object> caseDataMap) {
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
