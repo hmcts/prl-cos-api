@@ -497,8 +497,7 @@ public class ServiceOfApplicationService {
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
                 List<Document> docs = new ArrayList<>();
                 List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
-                List<Document> packDdocs = getNotificationPack(caseData, PrlAppsConstants.D, staticDocs);
-                removeDuplicatesAndGetConsolidatedDocs(packCdocs, packDdocs, docs);
+                docs.addAll(packCdocs);
                 Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
                 docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
@@ -513,7 +512,7 @@ public class ServiceOfApplicationService {
                             authorization,
                             caseData.getApplicantsFL401().getEmail(),
                             docs,
-                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_PER_CA_CB,
                             dynamicData,
                             whoIsResponsibleForServing
                         );
