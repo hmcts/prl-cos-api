@@ -442,8 +442,7 @@ public class ServiceOfApplicationService {
 
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                          .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .servedAt(DATE_CREATED)
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
@@ -455,7 +454,7 @@ public class ServiceOfApplicationService {
                                                             Map<String, Object> caseDataMap) {
         //CITIZEN SCENARIO
         String whoIsResponsibleForServing = COURT;
-        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
+        List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                       CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                       caseData);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -464,18 +463,18 @@ public class ServiceOfApplicationService {
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                 && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
-                                                   bulkPrintDetails, c100StaticDocs);
+                                                   bulkPrintDetails, staticDocs);
             } else {
                 whoIsResponsibleForServing = handlePersonalServiceForCitizenC100(caseData, authorization,
                                                     emailNotificationDetails,
-                                                    bulkPrintDetails, c100StaticDocs,
+                                                    bulkPrintDetails, staticDocs,
                                                     caseDataMap);
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                 && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
                 log.info("sending notification to Other in case of Citizen");
-                sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
+                sendNotificationToOthers(caseData, authorization, bulkPrintDetails, staticDocs);
             }
         } else {
             log.info("Sending service of application notifications to FL401 citizens");
@@ -488,16 +487,37 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails,
                     bulkPrintDetails,
                     caseDataMap,
-                    c100StaticDocs
+                    staticDocs
                 );
             } else {
-                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication()
-                                .getSoaCitizenServingRespondentsOptionsDA()) ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-                List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
 
-                if (!ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    sendSoaPacksToPartyViaPost(authorization, caseData, packEdocs,
+                whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
+                    ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+                List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
+                if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())){
+                        log.info("#Gov notify to Lip from courtadmin bailiff DA");
+                    } else {
+                        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                        dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
+                        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                        populateLanguageMap(caseData, dynamicData);
+                        EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                            authorization,
+                            caseData.getApplicantsFL401().getEmail(),
+                            packCdocs,
+                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                            dynamicData,
+                            SERVED_PARTY_APPLICANT_SOLICITOR
+                        );
+                        if (null != emailNotification) {
+                            emailNotificationDetails.add(element(emailNotification));
+                        }
+                        generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+                    }
+                } else {
+                    sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
                                                bulkPrintDetails,
                                                element(
                                                    caseData.getApplicantsFL401().getPartyId(),
@@ -506,6 +526,7 @@ public class ServiceOfApplicationService {
                                                Templates.PRL_LET_ENG_AP1
                     );
                 }
+                generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
             }
         }
         return whoIsResponsibleForServing;
@@ -562,7 +583,7 @@ public class ServiceOfApplicationService {
                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                    Element<PartyDetails> applicant,
                                                    List<Document> docs, List<Document> packEdocs) {
-        if (isAccessEnabled(applicant)) {
+        if (CaseUtils.isCitizenAccessEnabled(applicant.getValue())) {
             serviceOfApplicationEmailService.sendGovNotifyEmail(
                 LanguagePreference.getPreferenceLanguage(caseData),
                 applicant.getValue().getEmail(),
@@ -578,8 +599,7 @@ public class ServiceOfApplicationService {
                 .servedParty(SERVED_PARTY_APPLICANT)
                 .docs(wrapElements(packEdocs))
                 .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-                .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                               .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                .timeStamp(DATE_CREATED)
                 .build()));
         } else {
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -724,7 +744,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -758,6 +778,10 @@ public class ServiceOfApplicationService {
         if (null != emailNotification) {
             emailNotificationDetails.add(element(emailNotification));
         }
+        generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+    }
+
+    private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs, Map<String, Object> caseDataMap) {
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
@@ -767,8 +791,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(
-                EUROPE_LONDON_TIME_ZONE))))
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -888,10 +911,6 @@ public class ServiceOfApplicationService {
             whoIsResponsibleForServing = SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
                 ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-
-        } else {
-            log.error("#SOA TO DO...Generate packs to be served by unrepresented applicant.."
-                          + "solicitor created case");
         }
         return whoIsResponsibleForServing;
     }
@@ -1155,8 +1174,7 @@ public class ServiceOfApplicationService {
             .servedParty(SERVED_PARTY_APPLICANT)
             .docs(wrapElements(packsWithCoverLetter))
             .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-            .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                           .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .timeStamp(DATE_CREATED)
             .build();
     }
 
@@ -1221,8 +1239,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().toString())
             .build();
     }
@@ -1235,7 +1252,7 @@ public class ServiceOfApplicationService {
                                                      Map<String, String> fieldMap,
                                                      EmailTemplateNames notifyTemplate) {
         EmailNotificationDetails emailNotification;
-        if (isAccessEnabled(selectedApplicant)) {
+        if (CaseUtils.isCitizenAccessEnabled(selectedApplicant.getValue())) {
             log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
             emailNotification = sendEmailToUnrepresentedApplicant(fieldMap.get(AUTHORIZATION),
                                                                   caseData,
@@ -1670,11 +1687,6 @@ public class ServiceOfApplicationService {
             }
         });
         return emailNotificationDetails;
-    }
-
-    private boolean isAccessEnabled(Element<PartyDetails> party) {
-        return party.getValue() != null && party.getValue().getUser() != null
-            && party.getValue().getUser().getIdamId() != null;
     }
 
     private EmailNotificationDetails sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
@@ -2567,8 +2579,7 @@ public class ServiceOfApplicationService {
             if (CollectionUtils.isNotEmpty(docsForLa)) {
                 caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
-                    .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                         .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                    .packCreatedDate(DATE_CREATED)
                     .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
                     .build());
             }
@@ -2659,8 +2670,7 @@ public class ServiceOfApplicationService {
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .packCreatedDate(DATE_CREATED)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2670,8 +2680,7 @@ public class ServiceOfApplicationService {
                           : wrapElements(caseData.getApplicants().get(0).getId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .personalServiceBy(serviceBy)
-            .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+            .packCreatedDate(DATE_CREATED)
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
@@ -2713,7 +2722,7 @@ public class ServiceOfApplicationService {
                                                          String template) {
         Map<String, Object> dataMap;
         CaseInvite caseInvite = null;
-        if (!isAccessEnabled(party) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
+        if (!CaseUtils.isCitizenAccessEnabled(party.getValue()) && !CaseUtils.hasLegalRepresentation(party.getValue())) {
             caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
         }
         dataMap = populateAccessCodeMap(caseData, party, caseInvite);
@@ -2783,7 +2792,8 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
             || SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-            log.error("#SOA TO DO... Personal courtadmin / court bailiff - case created by - citizen");
+            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, DATE_CREATED, fl401StaticDocs,
+                                                               authorization);
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
             List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
@@ -3063,8 +3073,6 @@ public class ServiceOfApplicationService {
         if (emailNotification != null) {
             emailNotificationDetails.add(element(emailNotification));
         }
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
@@ -3074,7 +3082,7 @@ public class ServiceOfApplicationService {
         finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
             emailNotificationDetails)
                                                           .servedBy(userService.getUserDetails(authorization).getFullName())
-                                                          .servedAt(formatter)
+                                                          .servedAt(DATE_CREATED)
                                                           .modeOfService(CaseUtils.getModeOfService(
                                                               emailNotificationDetails,
                                                               bulkPrintDetails
@@ -3250,12 +3258,9 @@ public class ServiceOfApplicationService {
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
         }
         log.info("Reject reason list empty, adding first reject reason");
-
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication().getRejectionReason())
-            .dateRejected(formatter)
+            .dateRejected(DATE_CREATED)
             .build();
 
         confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
