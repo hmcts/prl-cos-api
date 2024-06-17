@@ -505,7 +505,7 @@ public class ServiceOfApplicationService {
                         log.info("#Gov notify to Lip from courtadmin bailiff DA");
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                        dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
+                        dynamicData.put("name", caseData.getApplicantsFL401().getLabelForDynamicList());
                         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                         populateLanguageMap(caseData, dynamicData);
                         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
