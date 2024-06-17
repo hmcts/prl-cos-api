@@ -519,7 +519,7 @@ public class ServiceOfApplicationService {
                         if (null != emailNotification) {
                             emailNotificationDetails.add(element(emailNotification));
                         }
-                       // generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+                        // generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
                     }
                 } else {
                     sendSoaPacksToPartyViaPost(authorization, caseData, packCdocs,
@@ -531,7 +531,7 @@ public class ServiceOfApplicationService {
                                                Templates.PRL_LET_ENG_AP1
                     );
                 }
-               // generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+                // generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
             }
         }
         return whoIsResponsibleForServing;
