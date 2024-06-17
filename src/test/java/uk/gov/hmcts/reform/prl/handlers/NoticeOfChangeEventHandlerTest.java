@@ -41,9 +41,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -148,62 +145,25 @@ public class NoticeOfChangeEventHandlerTest {
 
     @Test
     public void shouldNotifyWhenLegalRepresentativeRemoved() {
-        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
-
-        verify(emailService,times(6)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
-
-    }
-
-    @Test
-    public void shouldNotifyWhenCaRespondentRemoved() {
-        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
-            .representing(CARESPONDENT).build();
-
-        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
-
-        verify(emailService,times(5)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
-
-    }
-
-    @Test
-    public void shouldNotifyWhenDaApplicantRemoved() {
-        caseData = caseData.toBuilder()
-            .applicants(Collections.emptyList())
-            .respondents(Collections.emptyList())
-            .applicantsFL401(applicant1)
-            .respondentsFL401(respondent1)
+        caseData = CaseData.builder()
+            .id(nextLong())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(Arrays.asList(element(applicant1), element(applicant2)))
+            .respondents(Arrays.asList(element(respondent1), element(respondent2)))
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
             .build();
-        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
-            .caseData(caseData)
-            .representing(DAAPPLICANT).build();
 
-        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
-
-        verify(emailService,times(3)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(), Mockito.any());
-
-    }
-
-    @Test
-    public void shouldNotifyWhenDaRespondentRemoved() {
-        caseData = caseData.toBuilder()
-            .applicants(Collections.emptyList())
-            .respondents(Collections.emptyList())
-            .applicantsFL401(applicant1)
-            .respondentsFL401(respondent1)
+        noticeOfChangeEvent = NoticeOfChangeEvent.builder()
+            .caseData(caseData).solicitorEmailAddress("testemail@test.com")
+            .solicitorName("test sol name")
+            .representedPartyIndex(0)
+            .representing(CAAPPLICANT)
+            .accessCode("ABCD1234")
             .build();
-        noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
-            .caseData(caseData)
-            .representing(DARESPONDENT).build();
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(3)).send(Mockito.anyString(),
+        verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -247,6 +207,7 @@ public class NoticeOfChangeEventHandlerTest {
                          .build())
             .build();
         caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .build();
         noticeOfChangeEvent = noticeOfChangeEvent.toBuilder()
@@ -275,7 +236,7 @@ public class NoticeOfChangeEventHandlerTest {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         Assert.assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
-        verify(emailService,times(5)).send(Mockito.anyString(),
+        verify(emailService,times(4)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
     }

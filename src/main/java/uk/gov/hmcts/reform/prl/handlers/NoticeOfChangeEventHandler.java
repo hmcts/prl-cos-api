@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -225,7 +226,8 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
         //Access code will not generate if the case has not reached to Hearing state yet
-        if (StringUtils.isNotEmpty(event.getAccessCode())) {
+        if (StringUtils.isNotEmpty(event.getAccessCode())
+            && !PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
             //PRL-5300 - send email/post to LiP based on contact pref
