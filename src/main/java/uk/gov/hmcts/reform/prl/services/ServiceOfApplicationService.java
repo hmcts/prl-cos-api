@@ -2790,14 +2790,12 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
             || SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
-            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, DATE_CREATED, fl401StaticDocs,
-                                                               authorization);
+            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization);
         } else if (SoaCitizenServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
             || SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, DATE_CREATED, fl401StaticDocs,
-                                                               authorization);
+            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization);
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
             List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
@@ -2831,7 +2829,7 @@ public class ServiceOfApplicationService {
     }
 
     private void getPacksForConfidentialCheckDaCourtAdminAndBailiff(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                                                    String dateCreated, List<Document> fl401StaticDocs,
+                                                                    List<Document> fl401StaticDocs,
                                                                     String authorization) {
         log.info("serving Fl401 court admin or court bailiff with confidential check");
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
@@ -2842,7 +2840,7 @@ public class ServiceOfApplicationService {
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
@@ -2851,7 +2849,7 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(packcDocs))
             .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
