@@ -10,9 +10,10 @@ public class CaseDataHelpWithFeesElementsMapper {
     }
 
     public static void updateHelpWithFeesDetailsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
-                                                            C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements) {
+                                                            C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements,
+                                                            String helpWithFeesReferenceNumber) {
         caseDataBuilder
                 .helpWithFees(c100RebuildHelpWithFeesElements.getNeedHelpWithFees())
-                .helpWithFeesNumber(c100RebuildHelpWithFeesElements.getHelpWithFeesReferenceNumber());
+                .helpWithFeesNumber(helpWithFeesReferenceNumber);
     }
 }
