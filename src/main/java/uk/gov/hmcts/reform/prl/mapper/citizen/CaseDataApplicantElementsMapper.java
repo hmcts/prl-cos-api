@@ -108,6 +108,7 @@ public class CaseDataApplicantElementsMapper {
                 .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
+                .isAccessCodeNeeded(Yes)
                 .build();
     }
 

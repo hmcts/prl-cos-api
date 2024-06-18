@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.LanguageSupportCaseNotesRequest;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,7 +34,9 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -50,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
@@ -151,6 +157,7 @@ public class CitizenCaseUpdateService {
                 .firstName(userDetails.getForename())
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
+                .role(CITIZEN_ROLE)
                 .build();
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
@@ -160,6 +167,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+        //PRL-3466
+        caseDataToSubmit = updateAccessCodeGenerationFlag(caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
 
@@ -184,6 +194,26 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    private CaseData updateAccessCodeGenerationFlag(CaseData caseData) {
+        List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+        String idamEmail = caseData.getUserInfo().get(0).getValue().getEmailAddress();
+        log.info("Email used for IDAM reg -> {}", idamEmail);
+
+        applicants.stream()
+            .filter(party -> CommonUtils.isNotEmpty(party.getValue().getEmail())
+                && party.getValue().getEmail().equals(idamEmail))
+            .findFirst()
+            .ifPresent(party -> {
+                log.info("Email in Party & IDAM are same for applicant at index {}", applicants.indexOf(party));
+                PartyDetails updatedPartyDetails = party.getValue().toBuilder()
+                    .isAccessCodeNeeded(YesOrNo.No)
+                    .build();
+                applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+            });
+
+        return caseData.toBuilder().applicants(applicants).build();
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)

@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.Confiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
@@ -264,7 +265,9 @@ public class CitizenCaseUpdateServiceTest {
                                       .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
                                       .applicationServedYesNo(YesOrNo.Yes)
 
-                                      .build()).build();
+                                      .build())
+            .userInfo(List.of(element(UserInfo.builder().emailAddress("abc@test.com").build())))
+            .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
