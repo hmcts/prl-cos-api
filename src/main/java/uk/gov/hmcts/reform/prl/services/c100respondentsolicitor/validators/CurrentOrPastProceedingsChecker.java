@@ -23,7 +23,7 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
         boolean isStarted = false;
         if (response.isPresent()) {
@@ -44,7 +44,7 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
         List<Optional<?>> fields = new ArrayList<>();
 
