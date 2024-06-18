@@ -173,8 +173,8 @@ public class HwfProcessingCheckPaymentStatusService {
 
         Bool finalFilter = Bool.builder()
             .should(shoulds)
-            .minimumShouldMatch(2)
             .filter(filter)
+            .minimumShouldMatch(1)
             .must(mustFilter)
             .build();
 
