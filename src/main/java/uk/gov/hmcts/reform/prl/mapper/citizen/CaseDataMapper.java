@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
@@ -158,7 +157,7 @@ public class CaseDataMapper {
             && isNotEmpty(c100RebuildData.getHelpWithFeesReferenceNumber())) {
             C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements = mapper
                 .readValue(c100RebuildData.getC100RebuildHelpWithFeesDetails(), C100RebuildHelpWithFeesElements.class);
-                updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildHelpWithFeesElements);
+            updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildHelpWithFeesElements);
         }
     }
 }
