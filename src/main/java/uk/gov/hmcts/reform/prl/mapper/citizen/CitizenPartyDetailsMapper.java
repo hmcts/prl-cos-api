@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHelpWithFeesElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
@@ -73,7 +72,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHelpWithFeesElementsMapper.updateHelpWithFeesDetailsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
@@ -762,7 +760,7 @@ public class CitizenPartyDetailsMapper {
                                                     c100RebuildChildDetailsElements);
         }
 
-        checkForHelpWithFeesDetails(mapper, caseDataBuilder, c100RebuildData);
+        CaseDataMapper.checkForHelpWithFeesDetails(mapper, caseDataBuilder, c100RebuildData);
 
         caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
 
@@ -798,16 +796,5 @@ public class CitizenPartyDetailsMapper {
         }
 
         return caseName;
-    }
-
-    public static void checkForHelpWithFeesDetails(ObjectMapper mapper,
-                                                   CaseData.CaseDataBuilder<?, ?> caseDataBuilder,
-                                                   C100RebuildData c100RebuildData) throws JsonProcessingException {
-        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildHelpWithFeesDetails())
-            && StringUtils.isNotEmpty(c100RebuildData.getHelpWithFeesReferenceNumber())) {
-            C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements = mapper
-                .readValue(c100RebuildData.getC100RebuildHelpWithFeesDetails(), C100RebuildHelpWithFeesElements.class);
-            updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildHelpWithFeesElements, c100RebuildData.getHelpWithFeesReferenceNumber());
-        }
     }
 }

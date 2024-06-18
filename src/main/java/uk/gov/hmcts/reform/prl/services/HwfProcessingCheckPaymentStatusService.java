@@ -63,6 +63,7 @@ public class HwfProcessingCheckPaymentStatusService {
     private final ObjectMapper objectMapper;
 
 
+
     public void checkPaymentStatus() {
         long startTime = System.currentTimeMillis();
         //Fetch all C100 pending cases with Help with fees
@@ -70,30 +71,29 @@ public class HwfProcessingCheckPaymentStatusService {
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
                 CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                Map<String, Object> caseDataUpdated = new HashMap<>();
+                startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(
+                    caseDetails.getId().toString(),
+                    HWF_PROCESS_CASE_UPDATE.getValue()
+                );
                 PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = paymentRequestService.fetchPaymentGroupReferenceStatus(
-                    systemUserService.getSysUserToken(),
+                    startAllTabsUpdateDataContent.authorisation(),
                     caseData.getPaymentServiceRequestReferenceNumber()
                 );
+
                 if (PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
-                    Map<String, Object> caseDataUpdated = new HashMap<>();
-                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                        = allTabService.getStartUpdateForSpecificEvent(
-                        caseDetails.getId().toString(),
-                        HWF_PROCESS_CASE_UPDATE.getValue()
-                    );
-
-
                     caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
-
-                    //Save case data
-                    allTabService.submitAllTabsUpdate(
-                        startAllTabsUpdateDataContent.authorisation(),
-                        caseDetails.getId().toString(),
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        startAllTabsUpdateDataContent.eventRequestData(),
-                        caseDataUpdated
-                    );
                 }
+                //Save case data
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseDetails.getId().toString(),
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataUpdated
+                );
 
             });
         }
