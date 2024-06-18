@@ -81,15 +81,25 @@ public class ApplicationsFeeCalculator {
         boolean fl403ApplicationAlreadyPresentForRespondent = false;
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
             for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
+                log.info("other application bundle {}",additionalApplicationsBundle.getValue().getOtherApplicationsBundle());
                 if (isNotEmpty(additionalApplicationsBundle.getValue().getC2DocumentBundle())
                     && PartyEnum.respondent.equals(additionalApplicationsBundle.getValue().getPartyType())) {
                     c2ApplicationAlreadyPresentForRespondent = true;
+                }
+                if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()) {
+                    log.info(
+                        "additional application type {} and a" + "application party {} ",
+                        additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType(),
+                        additionalApplicationsBundle.getValue().getPartyType()
+
+                    );
                 }
                 if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
                     && OtherApplicationType.FL403_EXTEND_AN_ORDER.equals(
                     additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())
                     && PartyEnum.respondent.equals(additionalApplicationsBundle.getValue().getPartyType())) {
                     fl403ApplicationAlreadyPresentForRespondent = true;
+                    log.info("fl403 should already exist : {}",fl403ApplicationAlreadyPresentForRespondent);
                 }
             }
         }
@@ -110,8 +120,13 @@ public class ApplicationsFeeCalculator {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
 
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
+        log.info("existing application types {}", existingApplicationTypes);
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
+        log.info(
+            "value of fl403ApplicationAlreadyPresentForRespondent {}",
+            fl403ApplicationAlreadyPresentForRespondent
+        );
         boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             C2_ALREADY_PRESENT_FOR_RESPONDENT);
         boolean applyOrderWithoutGivingNoticeToRespondent = isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
@@ -134,6 +149,7 @@ public class ApplicationsFeeCalculator {
                 fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData),
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
+                log.info("represented type of newly created application {}",uploadAdditionalApplicationData.getRepresentedPartyType());
                 if (fl403ApplicationAlreadyPresentForRespondent
                     && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue().equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
