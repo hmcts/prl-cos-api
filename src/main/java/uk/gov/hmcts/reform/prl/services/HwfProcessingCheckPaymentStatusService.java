@@ -152,6 +152,11 @@ public class HwfProcessingCheckPaymentStatusService {
                                            .match(Match.builder()
                                                       .caseTypeOfApplication("C100")
                                                       .build())
+                                           .build(),
+                                       Should.builder()
+                                           .match(Match.builder()
+                                                      .caseCreatedBy("CITIZEN")
+                                                      .build())
                                            .build());
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
