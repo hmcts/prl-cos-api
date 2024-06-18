@@ -227,7 +227,7 @@ public class NoticeOfChangeEventHandler {
 
         //Access code will not generate if the case has not reached to Hearing state yet
         if (StringUtils.isNotEmpty(event.getAccessCode())
-            && !PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
             //PRL-5300 - send email/post to LiP based on contact pref

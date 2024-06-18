@@ -163,7 +163,7 @@ public class NoticeOfChangeEventHandlerTest {
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
-        verify(emailService,times(4)).send(Mockito.anyString(),
+        verify(emailService,times(6)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
@@ -236,7 +236,7 @@ public class NoticeOfChangeEventHandlerTest {
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         Assert.assertNotNull(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()));
-        verify(emailService,times(4)).send(Mockito.anyString(),
+        verify(emailService,times(5)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
     }
