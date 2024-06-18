@@ -13,14 +13,22 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum.witnessStatementNotProvided;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
@@ -32,6 +40,12 @@ public class ReturnApplicationServiceTest {
 
     @Mock
     private UserDetails userDetails;
+
+    @Mock
+    private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadServices;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
 
     CaseData casedata;
 
@@ -367,5 +381,19 @@ public class ReturnApplicationServiceTest {
 
     }
 
+    @Test
+    public void testUpdateMiamPolicyUpgradeDataForConfidentialDocument() {
+        casedata = casedata.toBuilder()
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .build();
+        when(miamPolicyUpgradeFileUploadServices.renameMiamPolicyUpgradeDocumentWithoutConfidential(
+            any(CaseData.class))).thenReturn(casedata);
+        when(allTabsService.getNewMiamPolicyUpgradeDocumentMap(any(CaseData.class), anyMap())).thenReturn(anyMap());
+        assertNotNull(returnApplicationService.updateMiamPolicyUpgradeDataForConfidentialDocument(
+            casedata,
+            new HashMap<>()
+        ));
+    }
 
 }

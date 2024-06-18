@@ -76,14 +76,14 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent);
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void isStartedTest_scenario2() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent2);
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent2, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -92,14 +92,14 @@ public class AbilityToParticipateCheckerTest {
     @Test
     public void isStartedNotTest() {
         respondent = null;
-        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent);
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent, true);
 
         assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent, true);
 
         assertTrue(anyNonEmpty);
     }
@@ -107,7 +107,7 @@ public class AbilityToParticipateCheckerTest {
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
         respondent = null;
-        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent, true);
         assertFalse(anyNonEmpty);
     }
 

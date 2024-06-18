@@ -111,6 +111,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
@@ -123,6 +124,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -307,6 +309,7 @@ public class ServiceOfApplicationService {
                                                                        List<Document> packN, String servedParty) {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                                                        || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                                                             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
         selectedOthers.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
@@ -898,6 +901,8 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
+        //PRL-5566 - Set FM5 notification flag to No during SOA
+        caseDataMap.put("fm5RemindersSent", "NO");
         return caseDataMap;
     }
 
@@ -1853,6 +1858,7 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION)))) {
             caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                                String.valueOf(caseData.getId())));
+            caseDataUpdated.put(SOA_CAFCASS_CYMRU_SERVED_OPTIONS, Yes);
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         caseDataUpdated.put(
