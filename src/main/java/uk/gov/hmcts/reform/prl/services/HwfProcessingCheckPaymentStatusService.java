@@ -42,12 +42,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
-import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
@@ -154,12 +151,12 @@ public class HwfProcessingCheckPaymentStatusService {
         List<Should> shoulds = List.of(
             Should.builder()
                 .match(Match.builder()
-                           .caseTypeOfApplication(C100_CASE_TYPE)
+                           .caseTypeOfApplication("C100")
                            .build())
                 .build(),
             Should.builder()
                 .match(Match.builder()
-                           .helpWithFees(Yes.getDisplayedValue())
+                           .helpWithFees("Yes")
                            .build())
                 .build()
         );
