@@ -28,7 +28,7 @@ public class HwfProcessingCheckPaymentStatusTask implements Runnable {
     public void run() {
         log.info("*** FM5 reminder scheduled task is started ***");
         //Invoke fm5 reminder service to evaluate & notify if needed
-        hwfProcessingCheckPaymentStatusService.checkPaymentStatus();
+        hwfProcessingCheckPaymentStatusService.checkHwfPaymentStatus();
 
         log.info("*** FM5 reminder scheduled task is completed ***");
     }

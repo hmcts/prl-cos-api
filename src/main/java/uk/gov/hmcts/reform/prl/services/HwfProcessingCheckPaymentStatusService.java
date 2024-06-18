@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -63,39 +64,47 @@ public class HwfProcessingCheckPaymentStatusService {
     private final ObjectMapper objectMapper;
 
 
-    public void checkPaymentStatus() {
+    public void checkHwfPaymentStatus() {
         long startTime = System.currentTimeMillis();
+        log.info("inside checkHwfPaymentStatus");
         //Fetch all C100 pending cases with Help with fees
         List<CaseDetails> caseDetailsList = retrieveCasesWithHelpWithFeesInPendingState();
         if (isNotEmpty(caseDetailsList)) {
             caseDetailsList.forEach(caseDetails -> {
+                log.info("caseDetails caseId - " + caseDetails.getId());
                 CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-                PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = paymentRequestService.fetchPaymentGroupReferenceStatus(
-                    systemUserService.getSysUserToken(),
-                    caseData.getPaymentServiceRequestReferenceNumber()
-                );
-                if (PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
-                    Map<String, Object> caseDataUpdated = new HashMap<>();
-                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-                        = allTabService.getStartUpdateForSpecificEvent(
-                        caseDetails.getId().toString(),
-                        HWF_PROCESS_CASE_UPDATE.getValue()
+                if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
+                    && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
+                    log.info("Going to check service request payment status");
+                    PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = paymentRequestService.fetchPaymentGroupReferenceStatus(
+                        systemUserService.getSysUserToken(),
+                        caseData.getPaymentServiceRequestReferenceNumber()
                     );
+                    log.info("PaymentGroupReferenceStatusResponse - " + paymentGroupReferenceStatusResponse.getServiceRequestStatus());
+                    if (PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
+                        Map<String, Object> caseDataUpdated = new HashMap<>();
+                        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+                            = allTabService.getStartUpdateForSpecificEvent(
+                            caseDetails.getId().toString(),
+                            HWF_PROCESS_CASE_UPDATE.getValue()
+                        );
 
+                        caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
 
-                    caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
-
-                    //Save case data
-                    allTabService.submitAllTabsUpdate(
-                        startAllTabsUpdateDataContent.authorisation(),
-                        caseDetails.getId().toString(),
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        startAllTabsUpdateDataContent.eventRequestData(),
-                        caseDataUpdated
-                    );
+                        //Save case data
+                        allTabService.submitAllTabsUpdate(
+                            startAllTabsUpdateDataContent.authorisation(),
+                            caseDetails.getId().toString(),
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            startAllTabsUpdateDataContent.eventRequestData(),
+                            caseDataUpdated
+                        );
+                    }
                 }
             });
 
+        } else {
+            log.info("Retrieve Cases With HelpWithFees In Pending State is empty");
         }
         log.info(
             "*** Total time taken to run HWF processing check payment status task - {}s ***",

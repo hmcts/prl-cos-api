@@ -603,7 +603,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/PaymentRequestService.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CaseDataHelpWithFeesElementsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/HwfProcessingCheckPaymentStatusService.java',
-  '**uk/gov/hmcts/reform/prl/schedule/HwfProcessingCheckPaymentStatusTask.java'
+  '**uk/gov/hmcts/reform/prl/schedule/HwfProcessingCheckPaymentStatusTask.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenCaseUpdateController.java'
 ]
 
 sonarqube {

@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.HwfProcessingCheckPaymentStatusService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,6 +42,8 @@ public class CitizenCaseUpdateController {
     private final CitizenCaseUpdateService citizenCaseUpdateService;
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
+
+    private final HwfProcessingCheckPaymentStatusService hwfProcessingCheckPaymentStatusService;
 
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
@@ -172,5 +176,13 @@ public class CitizenCaseUpdateController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping("/citizen-process-hwf-payment")
+    public void processHwfPayment(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                  @RequestBody CallbackRequest callbackRequest) {
+        log.info("start processHwfPayment");
+        hwfProcessingCheckPaymentStatusService.checkHwfPaymentStatus();
+        log.info("exit processHwfPayment");
     }
 }
