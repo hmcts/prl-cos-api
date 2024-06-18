@@ -42,7 +42,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.ReplyDocument;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -733,11 +733,12 @@ public class SendAndReplyService {
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
 
-        List<Element<Document>> replyDocs = getReplyDocuments(authorization, caseData.getSendOrReplyMessage().getReplyDocuments());
+        List<Element<Document>> sendAndReplyDocs = getSendAndReplyDocuments(authorization,
+                                                                            caseData.getSendOrReplyMessage().getSendAndReplyDynamicDocs());
         uk.gov.hmcts.reform.prl.models.documents.Document sendAttachedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
-        if (isNotEmpty(replyDocs) || null != sendAttachedDoc) {
+        if (isNotEmpty(sendAndReplyDocs) || null != sendAttachedDoc) {
             newMessage = newMessage.toBuilder()
-                .documents(REPLY.equals(caseData.getChooseSendOrReply()) ? replyDocs : List.of(element(sendAttachedDoc)))
+                .internalMessageAttachDocs(REPLY.equals(caseData.getChooseSendOrReply()) ? sendAndReplyDocs : List.of(element(sendAttachedDoc)))
                 .build();
         }
 
@@ -884,9 +885,9 @@ public class SendAndReplyService {
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
                             .legalAdvisersList(getLegalAdvisersList())
                             .build())
-                    .sendReplyTempDocs4(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
-                    .sendReplyTempDocs5(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
-                    .replyDocuments(Arrays.asList(element(ReplyDocument.builder()
+                    .internalMessageAttachDocsList(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
+                    .internalMessageAttachDocsList2(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
+                    .sendAndReplyDynamicDocs(Arrays.asList(element(SendAndReplyDynamicDoc.builder()
                                     .submittedDocsRefList(getCategoriesAndDocuments(authorization, String.valueOf(caseData.getId())))
                                     .build())))
                     .build())
@@ -1089,7 +1090,7 @@ public class SendAndReplyService {
             .senderName(message.getSenderName())
             .senderRole(message.getSenderRole())
             .updatedTime(message.getUpdatedTime())
-            .documents(message.getDocuments())
+            .internalMessageAttachDocs(message.getInternalMessageAttachDocs())
             .build();
     }
 
@@ -1237,8 +1238,8 @@ public class SendAndReplyService {
         List<Element<SendReplyTempDoc>> sendReplyTempDocs = new ArrayList<>();
 
         //document from latest message
-        if (isNotEmpty(message.getDocuments())) {
-            message.getDocuments().stream()
+        if (isNotEmpty(message.getInternalMessageAttachDocs())) {
+            message.getInternalMessageAttachDocs().stream()
                 .map(Element::getValue)
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
@@ -1252,8 +1253,8 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     LocalDateTime attachedTime = history.getUpdatedTime();
-                    if (isNotEmpty(history.getDocuments())) {
-                        history.getDocuments().stream()
+                    if (isNotEmpty(history.getInternalMessageAttachDocs())) {
+                        history.getInternalMessageAttachDocs().stream()
                             .map(Element::getValue)
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
@@ -1266,13 +1267,13 @@ public class SendAndReplyService {
         return sendReplyTempDocs;
     }
 
-    private List<Element<Document>> getReplyDocuments(String authorization,
-                                                      List<Element<ReplyDocument>> replyDocuments) {
-        if (isNotEmpty(replyDocuments)) {
-            return replyDocuments.stream()
+    private List<Element<Document>> getSendAndReplyDocuments(String authorization,
+                                                      List<Element<SendAndReplyDynamicDoc>> sendAndReplyDocuments) {
+        if (isNotEmpty(sendAndReplyDocuments)) {
+            return sendAndReplyDocuments.stream()
                 .map(Element::getValue)
-                .map(replyDocument -> element(getSelectedDocument(authorization,
-                                                                  replyDocument.getSubmittedDocsRefList())))
+                .map(sendAndReplyDocument -> element(getSelectedDocument(authorization,
+                                                                         sendAndReplyDocument.getSubmittedDocsRefList())))
                 .toList();
         }
 

@@ -25,29 +25,29 @@ public class SendOrReplyMessage {
     private Message sendMessageObject;
     private Message replyMessageObject;
 
-    @JsonProperty("sendReplyTempDocs4")
-    private final List<Element<SendReplyTempDoc>> sendReplyTempDocs4;
+    @JsonProperty("internalMessageAttachDocsList")
+    private final List<Element<SendReplyTempDoc>> internalMessageAttachDocsList;
 
-    @JsonProperty("sendReplyTempDocs5")
-    private final List<Element<SendReplyTempDoc>> sendReplyTempDocs5;
+    @JsonProperty("internalMessageAttachDocsList2")
+    private final List<Element<SendReplyTempDoc>> internalMessageAttachDocsList2;
 
-    @JsonProperty("replyDocuments")
-    private List<Element<ReplyDocument>> replyDocuments;
+    @JsonProperty("sendAndReplyDynamicDocs")
+    private List<Element<SendAndReplyDynamicDoc>> sendAndReplyDynamicDocs;
 
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
-            "messageContent", "respondToMessage", "replyDocuments",
+            "messageContent", "respondToMessage", "sendAndReplyDynamicDocs",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
             "replyMessageObject", "messageReplyTable", "chooseSendOrReply",
-            "sendReplyTempDocs4", "sendReplyTempDocs5"
+            "internalMessageAttachDocsList", "internalMessageAttachDocsList2"
         };
     }
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
-            "messageContent", "replyDocuments",
+            "messageContent", "sendAndReplyDynamicDocs",
             "messageMetaData", "messageReplyDynamicList", "messageReplyTable",
-            "sendReplyTempDocs4", "sendReplyTempDocs5"
+            "internalMessageAttachDocsList", "internalMessageAttachDocsList2"
         };
     }
 }

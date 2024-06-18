@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReplyDocument {
+public class SendAndReplyDynamicDoc {
 
     private DynamicList submittedDocsRefList;
 }

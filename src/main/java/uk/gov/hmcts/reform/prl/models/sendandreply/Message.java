@@ -85,7 +85,7 @@ public class Message extends MessageMetaData {
     private String hearingsLink;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Element<Document>> documents;
+    private List<Element<Document>> internalMessageAttachDocs;
 
     @JsonIgnore
     public String getLabelForDynamicList() {

@@ -43,5 +43,5 @@ public class MessageHistory {
     private LocalDateTime updatedTime;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Element<Document>> documents;
+    private List<Element<Document>> internalMessageAttachDocs;
 }
