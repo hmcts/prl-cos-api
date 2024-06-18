@@ -175,9 +175,6 @@ public class HwfProcessingCheckPaymentStatusService {
         Filter filter = Filter.builder().range(range).build();
 
         Bool finalFilter = Bool.builder()
-            .filter(filter)
-            .should(shoulds)
-            .minimumShouldMatch(2)
             .must(mustFilter)
             .build();
 
