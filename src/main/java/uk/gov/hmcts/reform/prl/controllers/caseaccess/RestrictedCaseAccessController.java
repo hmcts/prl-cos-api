@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccessmanagement.CaseSecurityClassificationEnum;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
@@ -34,49 +35,107 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PRIVATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PUBLIC;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_RESTRICTED;
 
 @Slf4j
 @RestController
-@RequestMapping("/case-access")
+@RequestMapping("/restricted-case-access")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RestrictedCaseAccessController {
+    public static final String CASE_SECURITY_CLASSIFICATION = "caseSecurityClassification";
     private final AuthorisationService authorisationService;
     private final ExtendedCaseDataService caseDataService;
     private final AllTabServiceImpl allTabService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final ObjectMapper objectMapper;
 
-    @PostMapping(path = "/mark-as-restricted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mark case as restricted")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed", content = @Content),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public void markCaseAsRestricted(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
+    public uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse restrictedCaseAccessAboutToSubmit(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("** markCaseAsRestricted event started");
+            log.info("** restrictedCaseAccessAboutToSubmit event started");
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
+            if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.RESTRICTED);
+            } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PRIVATE);
+            } else if (MARK_CASE_AS_PUBLIC.equals(caseEvent)) {
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC);
+            }
+            log.info("** restrictedCaseAccessAboutToSubmit abs done");
+            return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
+                    .builder()
+                    .data(caseDataUpdated)
+                    .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark case as restricted")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed", content = @Content),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void restrictedCaseAccessSubmitted(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("** restrictedCaseAccess event started");
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            log.info("** caseDataUpdated:: " + caseDataUpdated);
+            CaseSecurityClassificationEnum caseSecurityClassification
+                    = (CaseSecurityClassificationEnum) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION);
+            log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificEvent(
-                    String.valueOf(callbackRequest.getCaseDetails().getId()),
-                    CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
+                    allTabService.getStartUpdateForSpecificEvent(
+                            String.valueOf(callbackRequest.getCaseDetails().getId()),
+                            CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
+                    );
+            CaseDataContent caseDataContent = null;
+            switch (caseSecurityClassification) {
+                case RESTRICTED ->
+                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                                startAllTabsUpdateDataContent.startEventResponse(),
+                                Classification.RESTRICTED
+                        );
+                case PRIVATE ->
+                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                                startAllTabsUpdateDataContent.startEventResponse(),
+                                Classification.PRIVATE
+                        );
+                case PUBLIC ->
+                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                                startAllTabsUpdateDataContent.startEventResponse(),
+                                Classification.PUBLIC
+                        );
+                default -> coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                        startAllTabsUpdateDataContent.startEventResponse(),
+                        Classification.PUBLIC
                 );
-
-            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                startAllTabsUpdateDataContent.startEventResponse(),
-                Classification.RESTRICTED
-            );
+            }
             coreCaseDataService.submitUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataContent,
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                true
+                    startAllTabsUpdateDataContent.authorisation(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataContent,
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    true
             );
-            log.info("** markCaseAsRestricted submitUpdate done");
+            log.info("** restrictedCaseAccess submitUpdate done");
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -89,28 +148,28 @@ public class RestrictedCaseAccessController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public void markCaseAsPrivate(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificEvent(
-                    String.valueOf(callbackRequest.getCaseDetails().getId()),
-                    CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
-                );
+                    allTabService.getStartUpdateForSpecificEvent(
+                            String.valueOf(callbackRequest.getCaseDetails().getId()),
+                            CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
+                    );
 
             log.info("** markCaseAsPrivate event started");
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                startAllTabsUpdateDataContent.startEventResponse(),
-                Classification.PRIVATE
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    Classification.PRIVATE
             );
 
             coreCaseDataService.submitUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataContent,
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                true
+                    startAllTabsUpdateDataContent.authorisation(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataContent,
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    true
             );
             log.info("** markCaseAsPrivate submitUpdate done");
         } else {
@@ -125,28 +184,28 @@ public class RestrictedCaseAccessController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public void markCaseAsPublic(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                allTabService.getStartUpdateForSpecificEvent(
-                    String.valueOf(callbackRequest.getCaseDetails().getId()),
-                    CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
-                );
+                    allTabService.getStartUpdateForSpecificEvent(
+                            String.valueOf(callbackRequest.getCaseDetails().getId()),
+                            CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER.getValue()
+                    );
 
             log.info("** markCaseAsPublic event started");
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                startAllTabsUpdateDataContent.startEventResponse(),
-                Classification.PUBLIC
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    Classification.PUBLIC
             );
 
             coreCaseDataService.submitUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                caseDataContent,
-                String.valueOf(callbackRequest.getCaseDetails().getId()),
-                true
+                    startAllTabsUpdateDataContent.authorisation(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    caseDataContent,
+                    String.valueOf(callbackRequest.getCaseDetails().getId()),
+                    true
             );
             log.info("** markCaseAsPublic submitUpdate done");
         } else {
@@ -162,21 +221,24 @@ public class RestrictedCaseAccessController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse changeCaseAccess(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("Case details before for changeCaseAccess:: " + objectMapper.writeValueAsString(callbackRequest));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("caseDataUpdated::" + caseDataUpdated);
+            CaseSecurityClassificationEnum caseSecurityClassification
+                    = (CaseSecurityClassificationEnum) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION);
+            log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
             Map<String, Object> dataClassification
-                = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
+                    = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
             log.info("dataClassification for changeCaseAccess::" + dataClassification);
             AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .dataClassification(dataClassification)
-                .securityClassification("RESTRICTED")
-                .build();
+                    .data(caseDataUpdated)
+                    .dataClassification(dataClassification)
+                    .securityClassification(String.valueOf(caseSecurityClassification))
+                    .build();
             log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
             return aboutToStartOrSubmitCallbackResponse;
         } else {
