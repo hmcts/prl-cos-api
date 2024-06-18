@@ -796,6 +796,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     //For case documents tab
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
+    @JsonUnwrapped
+    private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
+
     //Amend Draft order
     private String removeDraftOrderText;
 
