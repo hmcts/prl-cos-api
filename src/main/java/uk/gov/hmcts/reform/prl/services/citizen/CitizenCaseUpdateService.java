@@ -99,8 +99,9 @@ public class CitizenCaseUpdateService {
                         CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
                         authToken
                 );
+        log.info("HelpWithFeesReferenceNumber from citizen ui" + citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber());
         Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
-
+        log.info("HelpWithFeesReferenceNumber trying to set in backend" + caseDataMapToBeUpdated.get("helpWithFeesReferenceNumber"));
         return allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,

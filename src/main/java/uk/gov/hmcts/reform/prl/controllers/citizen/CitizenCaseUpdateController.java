@@ -77,6 +77,8 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside save-c100-draft-application");
+            log.info("C100RebuildData from citizen ui" + caseData.getC100RebuildData());
             CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
                 caseId,
                 caseData,
