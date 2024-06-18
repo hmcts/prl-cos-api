@@ -154,12 +154,11 @@ public class CaseDataMapper {
     public static void checkForHelpWithFeesDetails(ObjectMapper mapper,
                                                    CaseData.CaseDataBuilder<?, ?> caseDataBuilder,
                                                    C100RebuildData c100RebuildData) throws JsonProcessingException {
-        if (isNotEmpty(c100RebuildData.getC100RebuildHelpWithFeesDetails())) {
+        if (isNotEmpty(c100RebuildData.getC100RebuildHelpWithFeesDetails())
+            && isNotEmpty(c100RebuildData.getHelpWithFeesReferenceNumber())) {
             C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements = mapper
                 .readValue(c100RebuildData.getC100RebuildHelpWithFeesDetails(), C100RebuildHelpWithFeesElements.class);
-            if (YesOrNo.Yes.equals(c100RebuildHelpWithFeesElements.getNeedHelpWithFees())) {
                 updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildHelpWithFeesElements);
-            }
         }
     }
 }

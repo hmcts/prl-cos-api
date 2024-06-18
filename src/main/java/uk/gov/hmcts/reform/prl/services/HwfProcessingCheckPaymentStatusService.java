@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
@@ -141,16 +142,23 @@ public class HwfProcessingCheckPaymentStatusService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 citizen cases with help with fess
-        List<Should> shoulds = List.of(Should.builder()
-                                             .match(Match.builder()
-                                                        .caseCreatedBy(CITIZEN.toString())
-                                                        .build())
-                                             .build(),
-                                       Should.builder()
-                                           .match(Match.builder()
-                                                      .helpWithFees(Yes.getDisplayedValue())
-                                                      .build())
-                                           .build());
+        List<Should> shoulds = List.of(
+            Should.builder()
+                .match(Match.builder()
+                           .caseTypeOfApplication(C100_CASE_TYPE)
+                           .build())
+                .build(),
+            Should.builder()
+                .match(Match.builder()
+                           .caseCreatedBy(CITIZEN.toString())
+                           .build())
+                .build(),
+            Should.builder()
+                .match(Match.builder()
+                           .helpWithFees(Yes.getDisplayedValue())
+                           .build())
+                .build()
+        );
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()

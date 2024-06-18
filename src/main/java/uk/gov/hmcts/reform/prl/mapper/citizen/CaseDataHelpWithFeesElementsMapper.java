@@ -16,10 +16,7 @@ public class CaseDataHelpWithFeesElementsMapper {
     public static void updateHelpWithFeesDetailsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                             C100RebuildHelpWithFeesElements c100RebuildHelpWithFeesElements) {
         caseDataBuilder
-                .helpWithFees(nonNull(c100RebuildHelpWithFeesElements.getNeedHelpWithFees())
-                        ? c100RebuildHelpWithFeesElements.getNeedHelpWithFees() : No)
-                .helpWithFeesNumber(nonNull(c100RebuildHelpWithFeesElements.getFeesAppliedDetails())
-                        && YesOrNo.Yes.equals(c100RebuildHelpWithFeesElements.getFeesAppliedDetails())
-                ? c100RebuildHelpWithFeesElements.getHelpWithFeesReferenceNumber() : null);
+                .helpWithFees(c100RebuildHelpWithFeesElements.getNeedHelpWithFees())
+                .helpWithFeesNumber(c100RebuildHelpWithFeesElements.getHelpWithFeesReferenceNumber());
     }
 }
