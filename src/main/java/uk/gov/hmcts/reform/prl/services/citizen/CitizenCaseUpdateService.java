@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
@@ -146,6 +147,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+
+        caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
@@ -158,6 +162,19 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
+    }
+
+    private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
+        caseDataToSubmit = caseDataToSubmit.toBuilder()
+            .helpWithFeesNumber(isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
+                                    && YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+                                    ? citizenUpdatedCaseData.getHelpWithFeesNumber() : null)
+            .paymentServiceRequestReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber())
+                                                      ? citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber() : null)
+            .paymentReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentReferenceNumber())
+                                        ? citizenUpdatedCaseData.getPaymentReferenceNumber() : null)
+            .build();
+        return caseDataToSubmit;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)

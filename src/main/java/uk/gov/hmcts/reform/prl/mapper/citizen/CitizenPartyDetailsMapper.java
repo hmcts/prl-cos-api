@@ -803,16 +803,14 @@ public class CitizenPartyDetailsMapper {
     public static void checkForHelpWithFeesDetails(ObjectMapper mapper,
                                                    CaseData.CaseDataBuilder<?, ?> caseDataBuilder,
                                                    C100RebuildData c100RebuildData) throws JsonProcessingException {
-        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildHelpWithFeesDetails())
-            && StringUtils.isNotEmpty(c100RebuildData.getHelpWithFeesReferenceNumber())) {
+        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildHelpWithFeesDetails())) {
             updateHelpWithFeesDetailsForCaseData(
                 caseDataBuilder,
                 mapper
                     .readValue(
                         c100RebuildData.getC100RebuildHelpWithFeesDetails(),
                         C100RebuildHelpWithFeesElements.class
-                    ),
-                c100RebuildData.getHelpWithFeesReferenceNumber()
+                    )
             );
         }
     }
