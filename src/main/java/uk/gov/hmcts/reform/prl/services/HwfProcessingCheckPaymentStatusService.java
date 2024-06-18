@@ -148,7 +148,11 @@ public class HwfProcessingCheckPaymentStatusService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 citizen cases with help with fess
-
+        List<Should> shoulds = List.of(Should.builder()
+                                           .match(Match.builder()
+                                                      .caseTypeOfApplication("C100")
+                                                      .build())
+                                           .build());
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
             .should(List.of(Should.builder().match(Match.builder()
@@ -163,6 +167,7 @@ public class HwfProcessingCheckPaymentStatusService {
         Filter filter = Filter.builder().range(range).build();
 
         Bool finalFilter = Bool.builder()
+            .should(shoulds)
             .filter(filter)
             .must(mustFilter)
             .build();
