@@ -307,7 +307,7 @@ public class Fm5ReminderService {
         Bool finalFilter = Bool.builder()
             .filter(filter)
             .should(shoulds)
-            .minimumShouldMatch(1)
+            .minimumShouldMatch(2)
             .must(mustFilter)
             .build();
 
