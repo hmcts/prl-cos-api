@@ -124,7 +124,7 @@ public class HwfProcessingCheckPaymentStatusService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
-
+            log.info("searchString " + searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(
@@ -155,11 +155,6 @@ public class HwfProcessingCheckPaymentStatusService {
             Should.builder()
                 .match(Match.builder()
                            .caseTypeOfApplication(C100_CASE_TYPE)
-                           .build())
-                .build(),
-            Should.builder()
-                .match(Match.builder()
-                           .caseCreatedBy(CITIZEN.toString())
                            .build())
                 .build(),
             Should.builder()
