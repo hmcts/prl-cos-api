@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -24,6 +25,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -31,26 +34,34 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,11 +113,17 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
 
+    private final SendgridService sendgridService;
+
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
+    private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
+
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -193,14 +210,14 @@ public class ManageDocumentsService {
         transformAndMoveDocument(
             caseData,
             caseDataUpdated,
-            updatedUserDetails
+            updatedUserDetails,authorization
         );
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                          UserDetails userDetails) {
+                                          UserDetails userDetails,String authorization) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
@@ -218,7 +235,7 @@ public class ManageDocumentsService {
                     userDetails,
                     updatedCaseData,
                     caseDataUpdated,
-                    userRole
+                    userRole,authorization
                 );
             } else {
                 if (!isWaTaskSetForFirstDocumentIteration) {
@@ -231,7 +248,8 @@ public class ManageDocumentsService {
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
-                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
+                                                       CaseData caseData, Map<String, Object> caseDataUpdated, String userRole,
+                                                       String authorization) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrictedKey != null) {
@@ -285,7 +303,64 @@ public class ManageDocumentsService {
             );
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(finalConfidentialDocument));
+
+            if (finalConfidentialDocument.getRespondentApplicationDocument() != null) {
+                String uploadedByIdamID = finalConfidentialDocument.getUploadedByIdamId();
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                Document document = finalConfidentialDocument.getRespondentApplicationDocument();
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .toList();
+
+                List<PartyDetails> respondents = caseData.getRespondents().stream()
+                    .map(Element::getValue)
+                    .toList();
+                for (PartyDetails respondent : respondents) {
+                    log.info(respondent.getUser().getIdamId() + "***********" + uploadedByIdamID);
+                    if (respondent.getUser().getIdamId().equals(uploadedByIdamID)) {
+                        dynamicData.put("respondentName", respondent.getLabelForDynamicList());
+                        break;
+                    }
+                }
+                List<Document> docs = new ArrayList<>();
+
+
+                for (PartyDetails applicant : applicants) {
+                    if (ContactPreferences.email.equals(applicant.getContactPreferences())
+                        && (document.getDocumentFileName().equals("C7_Document.pdf")
+                        || document.getDocumentFileName().equals("Final_C7_response_Welsh.pdf"))) {
+                        docs.add(document);
+                        dynamicData.put("applicantName",  applicant.getLabelForDynamicList());
+                        sendEmailViaSendGrid(dynamicData, docs,applicant.getEmail(),
+                                             SendgridEmailTemplateNames.RESPONDENT_RESPONSE_TO_APPLICATION, authorization
+                        );
+                    }
+                }
+            }
             updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
+        }
+    }
+
+
+    private void sendEmailViaSendGrid(
+                                      Map<String, Object> dynamicDataForEmail,List<Document> docs,
+                                      String emailAddress,
+                                      SendgridEmailTemplateNames sendgridEmailTemplateName, String authorization) {
+        try {
+            log.info("inside sendEmailViaSendGrid");
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                sendgridEmailTemplateName,
+                authorization,
+                SendgridEmailConfig.builder()
+                    .listOfAttachments(docs)
+                    .toEmailAddress(emailAddress)
+                    .dynamicTemplateData(dynamicDataForEmail)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
+            );
+        } catch (IOException e) {
+            log.error("THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION",
+                      emailAddress, e.getMessage(), e);
         }
     }
 

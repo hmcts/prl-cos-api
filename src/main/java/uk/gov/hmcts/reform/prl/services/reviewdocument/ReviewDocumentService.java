@@ -236,7 +236,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
     }
 
-    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
+    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid,String authorization) {
         boolean isDocumentFound = false;
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
@@ -245,7 +245,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
-                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST);
+                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST,authorization);
 
             }
             //cafcass uploaded docs
@@ -253,7 +253,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(CAFCASS)).build(),
-                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST);
+                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST,authorization);
 
             }
             //court staff uploaded docs
@@ -261,7 +261,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
-                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST);
+                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST,authorization);
 
             }
             //citizen uploaded docs
@@ -269,7 +269,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
-                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST);
+                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST,authorization);
 
             }
             //Bulk scan
@@ -283,7 +283,7 @@ public class ReviewDocumentService {
                                           UUID uuid,
                                           UserDetails userDetails,
                                           String userRole,
-                                          String quarantineDocsListToBeModified) {
+                                          String quarantineDocsListToBeModified,String authorization) {
         boolean isDocumentFound = false;
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = getQuarantineDocumentById(
             quarantineDocsList,
@@ -296,7 +296,7 @@ public class ReviewDocumentService {
                 caseDataUpdated,
                 quarantineLegalDocElementOptional.get(),
                 userDetails,
-                userRole
+                userRole,authorization
             );
 
             //remove document from quarantine
@@ -310,7 +310,7 @@ public class ReviewDocumentService {
                                                 Map<String, Object> caseDataUpdated,
                                                 Element<QuarantineLegalDoc> quarantineLegalDocElement,
                                                 UserDetails userDetails,
-                                                String userRole) {
+                                                String userRole,String authorization) {
         QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElement.getValue();
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             tempQuarantineDoe = tempQuarantineDoe.toBuilder()
@@ -324,7 +324,7 @@ public class ReviewDocumentService {
             userDetails,
             caseData,
             caseDataUpdated,
-            userRole
+            userRole,authorization
         );
     }
 
