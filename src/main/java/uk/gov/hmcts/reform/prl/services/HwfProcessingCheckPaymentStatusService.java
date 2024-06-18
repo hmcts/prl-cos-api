@@ -158,11 +158,6 @@ public class HwfProcessingCheckPaymentStatusService {
                                            .match(Match.builder()
                                                       .caseCreatedBy("CITIZEN")
                                                       .build())
-                                           .build(),
-                                       Should.builder()
-                                           .match(Match.builder()
-                                                      .helpWithFees(YesOrNo.Yes)
-                                                      .build())
                                            .build());
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
@@ -179,6 +174,7 @@ public class HwfProcessingCheckPaymentStatusService {
 
         Bool finalFilter = Bool.builder()
             .should(shoulds)
+            .minimumShouldMatch(2)
             .filter(filter)
             .must(mustFilter)
             .build();
