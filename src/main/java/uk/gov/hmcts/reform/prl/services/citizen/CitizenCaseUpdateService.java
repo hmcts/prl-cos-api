@@ -93,6 +93,7 @@ public class CitizenCaseUpdateService {
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
             throws JsonProcessingException {
+        log.info("C100RebuildData from citizen ui" + citizenUpdatedCaseData.getC100RebuildData());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
