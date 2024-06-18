@@ -179,8 +179,7 @@ public class CitizenCaseUpdateController {
     }
 
     @PostMapping("/citizen-process-hwf-payment")
-    public void processHwfPayment(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestBody CallbackRequest callbackRequest) {
+    public void processHwfPayment() {
         log.info("start processHwfPayment");
         hwfProcessingCheckPaymentStatusService.checkHwfPaymentStatus();
         log.info("exit processHwfPayment");
