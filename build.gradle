@@ -388,8 +388,8 @@ dependencies {
 
 
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'
