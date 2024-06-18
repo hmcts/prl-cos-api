@@ -801,6 +801,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
     @JsonUnwrapped
-    private final CaseAccessStatusAndReason caseAccessStatusAndReason;
+    private CaseAccessStatusAndReason caseAccessStatusAndReason;
 
 }
