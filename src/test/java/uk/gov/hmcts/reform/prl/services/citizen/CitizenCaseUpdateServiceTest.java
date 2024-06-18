@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,17 +19,24 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +44,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,9 +63,34 @@ public class CitizenCaseUpdateServiceTest {
     @Mock
     CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
+    @Mock
+    private CitizenAwpMapper citizenAwpMapper;
+
+    private CaseData caseData;
+    private Map<String, Object> caseDetails;
+    private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String caseId = "case id";
     public static final String eventId = "confirmYourDetails";
+
+    @Before
+    public void setup() {
+        caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        caseDetails = caseData.toMap(new ObjectMapper());
+
+        startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails,
+            caseData,
+            null
+        );
+    }
 
     @Test
     public void testUpdateCitizenPartyDetailsConfirmYourDetails() {
@@ -138,8 +173,6 @@ public class CitizenCaseUpdateServiceTest {
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
                                                                                                         caseDetails, caseData, null);
-
-        CitizenUpdatePartyDataContent citizenUpdatePartyDataContent = new CitizenUpdatePartyDataContent(caseDetails, caseData);
         when(allTabService.getStartUpdateForSpecificUserEvent(caseId, "citizenCreate", authToken))
             .thenReturn(startAllTabsUpdateDataContent);
         Assert.assertNull(citizenCaseUpdateService.updateCitizenPartyDetails(authToken, caseId, "citizenCreate",
@@ -283,7 +316,7 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     private static C100RebuildData getC100RebuildData() throws IOException {
-        C100RebuildData c100RebuildData = C100RebuildData.builder()
+        return C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
             .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
@@ -298,7 +331,34 @@ public class CitizenCaseUpdateServiceTest {
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .build();
-        return c100RebuildData;
+    }
+
+    @Test
+    public void testSaveCitizenAwpApplication() {
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder().build())))
+            .citizenAwpPayments(Collections.emptyList())
+            .build();
+        when(allTabService.getStartUpdateForSpecificUserEvent(caseId, CITIZEN_CASE_UPDATE.getValue(), authToken))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(citizenAwpMapper.map(caseData, CitizenAwpRequest.builder().build())).thenReturn(updatedCaseData);
+        when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder()
+                            .data(updatedCaseData.toMap(new ObjectMapper())).build());
+
+        CaseDetails updatedCaseDetails = citizenCaseUpdateService.saveCitizenAwpApplication(authToken, caseId, CitizenAwpRequest.builder().build());
+
+        Assert.assertNotNull(updatedCaseDetails);
+        Assert.assertNotNull(updatedCaseDetails.getData());
+        //noinspection unchecked
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle =
+            (List<Element<AdditionalApplicationsBundle>>) updatedCaseDetails.getData().get("additionalApplicationsBundle");
+        Assert.assertFalse(additionalApplicationsBundle.isEmpty());
+        //noinspection unchecked
+        List<Element<CitizenAwpPayment>> citizenAwpPayments =
+            (List<Element<CitizenAwpPayment>>) updatedCaseDetails.getData().get("citizenAwpPayments");
+        Assert.assertTrue(citizenAwpPayments.isEmpty());
     }
 }
 

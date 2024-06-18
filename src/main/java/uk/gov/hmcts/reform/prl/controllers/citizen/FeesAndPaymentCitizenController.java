@@ -95,7 +95,7 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
 
-        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
+        return paymentRequestService.createPayment(authorization, createPaymentRequest);
 
     }
 

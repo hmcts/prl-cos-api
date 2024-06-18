@@ -245,7 +245,9 @@ public class FeeService {
 
         if (NO_FEE.equals(feeType)) {
             return FeeResponseForCitizen.builder()
-                .amount(ZERO_AMOUNT).build();
+                .amount(ZERO_AMOUNT)
+                .feeType(feeType.toString())
+                .build();
         } else {
             feeResponse = fetchFeeDetails(feeType);
 

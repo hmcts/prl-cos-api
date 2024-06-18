@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CitizenAwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
@@ -661,6 +663,26 @@ public class CaseUtils {
         } else {
             return newConfidentiality.equals(oldConfidentiality);
         }
+    }
+
+    public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
+                                                                                     CreatePaymentRequest createPaymentRequest) {
+        log.info("Existing citizen awp payments {}", citizenAwpPayments);
+        if (isNotEmpty(citizenAwpPayments)) {
+            return citizenAwpPayments.stream()
+                .filter(awpPaymentElement ->
+                            isCitizenAwpPaymentPresent(awpPaymentElement.getValue(), createPaymentRequest))
+                .findFirst();
+        }
+        return Optional.empty();
+    }
+
+    public static boolean isCitizenAwpPaymentPresent(CitizenAwpPayment citizenAwpPayment,
+                                                     CreatePaymentRequest createPaymentRequest) {
+        return citizenAwpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
+            && citizenAwpPayment.getPartType().equals(createPaymentRequest.getPartyType())
+            && null != createPaymentRequest.getFeeType()
+            && citizenAwpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
 
     public static List<String> mapAmUserRolesToIdamRoles(RoleAssignmentServiceResponse roleAssignmentServiceResponse,
