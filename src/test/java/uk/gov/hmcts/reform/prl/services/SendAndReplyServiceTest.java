@@ -51,7 +51,9 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -59,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -143,6 +146,9 @@ public class SendAndReplyServiceTest {
     DynamicList dynamicList;
     CaseData caseData;
     CaseData caseDataWithAddedMessage;
+
+    uk.gov.hmcts.reform.prl.models.documents.Document internalMessageDoc;
+    Message messageWithReplyHistoryAndDocuments;
 
     @Mock
     private HearingDataService hearingDataService;
@@ -285,6 +291,30 @@ public class SendAndReplyServiceTest {
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
+            .build();
+
+        internalMessageDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl("documentURL")
+            .documentBinaryUrl("binaryUrl")
+            .documentFileName("fileName")
+            .documentHash("documentHash")
+            .categoryId("categoryId")
+            .documentCreatedOn(Date.valueOf("2024-1-1")).build();
+
+        messageWithReplyHistoryAndDocuments = Message.builder()
+            .senderEmail("sender2@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject4")
+            .messageUrgency("testUrgency4")
+            .dateSent(dateSent)
+            .messageContent("This is message 4 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 4 latest message")
+            .messageHistory("")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
             .build();
     }
 
@@ -1200,6 +1230,54 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testResetSendAndReplyDynamicListsForReplyAndResetLegalAdviserWhileJudiciarySelected() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .replyMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .messageContent("Reply Message Content").legalAdvisersList(dynamicList)
+                            .ctscEmailList(dynamicList)
+                            .recipientEmailAddresses("recep")
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertEquals(DynamicListElement.EMPTY, caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getLegalAdvisersList().getValue());
+    }
+
+    @Test
     public void testResetSendAndReplyDynamicListsForSendWhenOtherSelected() {
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
@@ -1299,6 +1377,55 @@ public class SendAndReplyServiceTest {
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
         assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getRecipientEmailAddresses());
+    }
+
+    @Test
+    public void testResetSendAndReplyDynamicListsForSendWhenLegalAdvisorSelected() {
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(dynamicList)
+                            .legalAdvisersList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertEquals(DynamicListElement.EMPTY, caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getLegalAdvisersList().getValue());
     }
 
     @Test
@@ -1492,6 +1619,134 @@ public class SendAndReplyServiceTest {
                 .build();
         when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldsWithPrevMsgWithReplyHistoryAndDocuments() {
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> internalMessageDocs = new ArrayList<>();
+        internalMessageDocs.add(element(internalMessageDoc));
+        messageWithReplyHistoryAndDocuments.setInternalMessageAttachDocs(internalMessageDocs);
+
+        List<Element<Message>> openMessagesListWithReplyHistory = new ArrayList<>();
+        openMessagesListWithReplyHistory.add(element(messageWithReplyHistoryAndDocuments));
+        openMessagesListWithReplyHistory.add(element(message1));
+        openMessagesListWithReplyHistory.add(element(message3));
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesListWithReplyHistory)
+                    .build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData,auth);
+
+        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
+
+        assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
+            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList2().get(0).getValue());
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldsWithPrevMsgWithReplyHistoryWithDocuments() {
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> internalMessageDocs = new ArrayList<>();
+        internalMessageDocs.add(element(internalMessageDoc));
+
+        MessageHistory messageHistory = MessageHistory.builder().messageFrom("sender1@email.com")
+            .messageTo("testRecipient1@email.com")
+            .messageDate(dateSent)
+            .isUrgent(YesOrNo.Yes)
+            .internalMessageAttachDocs(internalMessageDocs)
+            .updatedTime(dateTime)
+            .build();
+
+        List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
+        messageHistoryList.add(element(messageHistory));
+        messageWithReplyHistoryAndDocuments.setReplyHistory(messageHistoryList);
+
+        List<Element<Message>> openMessagesListWithReplyHistory = new ArrayList<>();
+        openMessagesListWithReplyHistory.add(element(messageWithReplyHistoryAndDocuments));
+        openMessagesListWithReplyHistory.add(element(message1));
+        openMessagesListWithReplyHistory.add(element(message3));
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesListWithReplyHistory)
+                    .build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
+        CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData,auth);
+
+        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
+
+        assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
+            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList2().get(0).getValue());
+    }
+
+    @Test
+    public void testBuildSendMessageWithSendAndReplyDocuemnts() {
+        uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument = testDocument();
+        Document document = new Document(testDocument.links.self.href, testDocument.originalDocumentName, testDocument.links.binary.href, null, null);
+        List<Element<Document>> messageDocuments = new ArrayList<>();
+        messageDocuments.add(element(document));
+
+        DynamicList dynamicDocuments = ElementUtils.asDynamicList(messageDocuments, messageDocuments.get(0).getId(), Document::getDocumentFilename);
+        List<Element<SendAndReplyDynamicDoc>> sendAndReplyDynamicDocList = new ArrayList<>();
+        sendAndReplyDynamicDocList.add(element(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicDocuments).build()));
+
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while replying")
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).sendAndReplyDynamicDocs(sendAndReplyDynamicDocList).build())
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .roles(List.of(JUDGE_ROLE))
+                                                              .build());
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(caseDocumentClient
+                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+            .thenReturn(testDocument);
+
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals(messageDocuments.get(0).getValue().getDocumentURL(), message.getInternalMessageAttachDocs().get(0).getValue().getDocumentUrl());
+        assertEquals(messageDocuments.get(0).getValue().getDocumentFilename(),
+                    message.getInternalMessageAttachDocs().get(0).getValue().getDocumentFileName());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
