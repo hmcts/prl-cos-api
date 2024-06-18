@@ -148,18 +148,6 @@ public class HwfProcessingCheckPaymentStatusService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 citizen cases with help with fess
-        List<Should> shoulds = List.of(
-            Should.builder()
-                .match(Match.builder()
-                           .caseTypeOfApplication("C100")
-                           .build())
-                .build(),
-            Should.builder()
-                .match(Match.builder()
-                           .helpWithFees("Yes")
-                           .build())
-                .build()
-        );
 
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
@@ -169,10 +157,6 @@ public class HwfProcessingCheckPaymentStatusService {
                                 .build()))
             .build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
-
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().minusDays(3).toString()).build();
-        Range range = Range.builder().lastModified(lastModified).build();
-        Filter filter = Filter.builder().range(range).build();
 
         Bool finalFilter = Bool.builder()
             .must(mustFilter)
