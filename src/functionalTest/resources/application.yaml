@@ -46,6 +46,10 @@ spring:
     name: Prl cos api
   main:
     allow-circular-references: true
+  test:
+    context:
+      cache:
+        maxSize:5
 
 azure:
   application-insights:
