@@ -2703,7 +2703,9 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(dateCreated)
-            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
+            .personalServiceBy(null != caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA()
+                ? caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString()
+                : caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA().toString())
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         List<Document> packcDocs = getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs);
