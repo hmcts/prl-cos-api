@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @AllArgsConstructor
@@ -27,7 +26,7 @@ public class Match {
     private String caseCreatedBy;
 
     @JsonProperty("data.helpWithFees")
-    private YesOrNo helpWithFees;
+    private String helpWithFees;
 
 
 }
