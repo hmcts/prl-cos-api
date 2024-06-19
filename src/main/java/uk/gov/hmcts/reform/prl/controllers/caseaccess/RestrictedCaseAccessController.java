@@ -67,11 +67,11 @@ public class RestrictedCaseAccessController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
             if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.RESTRICTED);
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.RESTRICTED.getValue());
             } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
-                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PRIVATE);
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PRIVATE.getValue());
             } else if (MARK_CASE_AS_PUBLIC.equals(caseEvent)) {
-                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC);
+                caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
             }
             log.info("** restrictedCaseAccessAboutToSubmit abs done");
             return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
@@ -99,7 +99,7 @@ public class RestrictedCaseAccessController {
 
             log.info("** caseDataUpdated:: " + caseDataUpdated);
             CaseSecurityClassificationEnum caseSecurityClassification
-                    = (CaseSecurityClassificationEnum) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION);
+                    = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
             log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                     allTabService.getStartUpdateForSpecificEvent(
@@ -229,7 +229,7 @@ public class RestrictedCaseAccessController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("caseDataUpdated::" + caseDataUpdated);
             CaseSecurityClassificationEnum caseSecurityClassification
-                    = (CaseSecurityClassificationEnum) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION);
+                    = CaseSecurityClassificationEnum.fromValue((String) caseDataUpdated.get(CASE_SECURITY_CLASSIFICATION));
             log.info("CaseSecurityClassificationEnum::" + caseSecurityClassification);
             Map<String, Object> dataClassification
                     = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
