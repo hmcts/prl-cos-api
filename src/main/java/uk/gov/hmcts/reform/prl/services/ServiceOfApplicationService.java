@@ -496,8 +496,17 @@ public class ServiceOfApplicationService {
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
                 List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                    if (Boolean.TRUE.equals(CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401()))) {
+                    if (CaseUtils.isCitizenAccessEnabled(caseData.getApplicantsFL401())) {
                         log.info("#Gov notify to Lip from courtadmin bailiff DA");
+                        serviceOfApplicationEmailService.sendGovNotifyEmail(
+                            LanguagePreference.getPreferenceLanguage(caseData),
+                            caseData.getApplicantsFL401().getEmail(),
+                            EmailTemplateNames.SOA_DA_PERSONAL_CB_CA_UNREPRESENTED_APPLICANT_COURTNAV,
+                            serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
+                                                                                   caseData.getApplicantsFL401(),
+                                                                                   YesOrNo.Yes.equals(doesC1aExists(caseData)) ? "Yes" : null
+                            )
+                        );
                     } else {
                         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                         dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
