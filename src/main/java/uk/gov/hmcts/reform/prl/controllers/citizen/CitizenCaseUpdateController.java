@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.HwfProcessingCheckPaymentStatusService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,6 +41,8 @@ public class CitizenCaseUpdateController {
     private final CitizenCaseUpdateService citizenCaseUpdateService;
     private final AuthorisationService authorisationService;
     private static final String INVALID_CLIENT = "Invalid Client";
+
+    private final HwfProcessingCheckPaymentStatusService hwfProcessingCheckPaymentStatusService;
 
     @PostMapping(value = "/{caseId}/{eventId}/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
@@ -77,6 +80,7 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside save-c100-draft-application");
             CaseDetails caseDetails = citizenCaseUpdateService.saveDraftCitizenApplication(
                 caseId,
                 caseData,
@@ -103,6 +107,7 @@ public class CitizenCaseUpdateController {
         @Valid @NotNull @RequestBody CaseData caseData
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("inside submit-c100-application");
             CaseDetails caseDetails = citizenCaseUpdateService.submitCitizenC100Application(
                 authorisation,
                 caseId,
@@ -170,5 +175,12 @@ public class CitizenCaseUpdateController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping("/citizen-process-hwf-payment")
+    public void processHwfPayment() {
+        log.info("start processHwfPayment");
+        hwfProcessingCheckPaymentStatusService.checkHwfPaymentStatus();
+        log.info("exit processHwfPayment");
     }
 }

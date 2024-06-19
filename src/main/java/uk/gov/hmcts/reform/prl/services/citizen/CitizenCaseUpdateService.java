@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
@@ -93,14 +94,17 @@ public class CitizenCaseUpdateService {
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
             throws JsonProcessingException {
+        log.info("citizenUpdatedCaseData from citizen ui " + citizenUpdatedCaseData);
+        log.info("C100RebuildData from citizen ui " + citizenUpdatedCaseData.getC100RebuildData());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
                         CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
                         authToken
                 );
+        log.info("HelpWithFeesReferenceNumber from citizen ui " + citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber());
         Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
-
+        log.info("HelpWithFeesReferenceNumber trying to set in backend " + caseDataMapToBeUpdated.get("helpWithFeesReferenceNumber"));
         return allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -116,6 +120,10 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
             throws JsonProcessingException {
+        log.info("citizenUpdatedCaseData from citizen ui " + citizenUpdatedCaseData);
+        log.info("C100RebuildData from citizen ui " + citizenUpdatedCaseData.getC100RebuildData());
+        log.info("PaymentServiceRequestReferenceNumber from citizen ui " + citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber());
+        log.info("HelpWithFeesReferenceNumber from citizen ui " + citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
@@ -139,6 +147,9 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
+
+        caseDataToSubmit = setPaymentDetails(citizenUpdatedCaseData, caseDataToSubmit);
+
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
@@ -151,6 +162,19 @@ public class CitizenCaseUpdateService {
                 caseDataMapToBeUpdated,
                 startAllTabsUpdateDataContent.userDetails()
         );
+    }
+
+    private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
+        caseDataToSubmit = caseDataToSubmit.toBuilder()
+            .helpWithFeesNumber(isNotEmpty(citizenUpdatedCaseData.getHelpWithFeesNumber())
+                                    && YesOrNo.Yes.equals(caseDataToSubmit.getHelpWithFees())
+                                    ? citizenUpdatedCaseData.getHelpWithFeesNumber() : null)
+            .paymentServiceRequestReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber())
+                                                      ? citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber() : null)
+            .paymentReferenceNumber(isNotEmpty(citizenUpdatedCaseData.getPaymentReferenceNumber())
+                                        ? citizenUpdatedCaseData.getPaymentReferenceNumber() : null)
+            .build();
+        return caseDataToSubmit;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)

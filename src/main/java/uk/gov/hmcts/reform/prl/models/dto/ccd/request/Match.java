@@ -22,4 +22,11 @@ public class Match {
     @JsonProperty("data.fm5RemindersSent")
     private String fm5RemindersSent;
 
+    @JsonProperty("data.caseCreatedBy")
+    private String caseCreatedBy;
+
+    @JsonProperty("data.helpWithFees")
+    private String helpWithFees;
+
+
 }

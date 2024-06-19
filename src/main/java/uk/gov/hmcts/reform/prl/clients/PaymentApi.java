@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -38,5 +39,12 @@ public interface PaymentApi {
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @PathVariable("reference") String paymentReference
+    );
+
+    @GetMapping(value = "/payment-groups/{payment-group-reference}", consumes = "application/json")
+    PaymentGroupReferenceStatusResponse fetchPaymentGroupReferenceStatus(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @PathVariable("payment-group-reference") String paymentGroupReference
     );
 }
