@@ -4,7 +4,7 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 env: ${test_environment:local}
-TEST_URL: https://localhost:4044
+TEST_URL: http://localhost:4044
 
 case:
   orchestration:
@@ -46,6 +46,10 @@ spring:
     name: Prl cos api
   main:
     allow-circular-references: true
+  test:
+    context:
+      cache:
+        maxSize:5
 
 azure:
   application-insights:
