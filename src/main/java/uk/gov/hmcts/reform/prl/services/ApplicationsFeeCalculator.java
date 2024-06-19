@@ -149,9 +149,11 @@ public class ApplicationsFeeCalculator {
                 fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData),
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
+                log.info("Other application type {}",otherApplicationType);
                 log.info("represented type of newly created application {}",uploadAdditionalApplicationData.getRepresentedPartyType());
+                log.info("display value {}",DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue());
                 if (fl403ApplicationAlreadyPresentForRespondent
-                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue().equalsIgnoreCase(otherApplicationType)
+                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getId().equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
                     feeTypes.add(FL403_EXTEND_AN_ORDER);
                 }
