@@ -55,7 +55,7 @@ java:
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
     PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
+    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api,ds_ui
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
