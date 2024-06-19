@@ -78,7 +78,7 @@ public class HwfProcessingCheckPaymentStatusService {
                         caseData.getPaymentServiceRequestReferenceNumber()
                     );
                     log.info("PaymentGroupReferenceStatusResponse - " + paymentGroupReferenceStatusResponse.getServiceRequestStatus());
-                    if (PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
+                    if (!PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
                         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                             = allTabService.getStartUpdateForSpecificEvent(
