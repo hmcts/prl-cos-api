@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
@@ -86,7 +87,7 @@ public class HwfProcessingCheckPaymentStatusService {
                             HWF_PROCESS_CASE_UPDATE.getValue()
                         );
 
-                        caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
+                        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
 
                         //Save case data
                         allTabService.submitAllTabsUpdate(
