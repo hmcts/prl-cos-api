@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -221,8 +222,11 @@ public class CaseService {
                 dateTimeFormatter
             )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement)).dssUploadedDocuments(
-            uploadDssDocs).dssUploadedAdditionalDocuments(uploadAdditionalDssDocs).build();
+        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement)).dssCaseDetails(
+            DssCaseDetails.builder()
+                .dssUploadedDocuments(uploadDssDocs)
+                .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
+                .build()).build();
         System.out.println("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 

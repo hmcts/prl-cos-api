@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AmendDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RemoveDraftOrderService;
@@ -107,7 +108,9 @@ public class RemoveDraftOrderControllerTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .removeDraftOrderText("Draft removed")
+            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
+                                        .removeDraftOrderText("Draft removed")
+                                        .build())
             .build();
 
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
