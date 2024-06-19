@@ -2980,16 +2980,16 @@ public class DocumentGenServiceTest {
                                                                                                          caseData,
                                                                                                          null
         );
+
         when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
             startAllTabsUpdateDataContents);
-
-
         when(caseService.getCase(any(), any())).thenReturn(caseDetails);
-
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
+            quarantineCaseDoc);
         when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
                                                                  .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
@@ -2997,15 +2997,9 @@ public class DocumentGenServiceTest {
             documentRequest
         );
 
-        //Then
         assertNotNull(caseDetails);
-        //CORRECT ASSERTIONS LATER
-
-        //assertNotNull(caseDetailsUpdated);
-        //assertNotNull(caseDetailsUpdated.getData());
-
-        //CaseData caseUpdated = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-        // assertNotNull(caseUpdated.getDocumentManagementDetails().getCitizenQuarantineDocsList());
+        assertNotNull(caseDetailsUpdated);
+        assertNotNull(caseDetailsUpdated.getData());
     }
 
     @Test
@@ -3063,6 +3057,7 @@ public class DocumentGenServiceTest {
         when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
             startAllTabsUpdateDataContents);
 
+        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = documentGenService.citizenSubmitDocuments(
@@ -3073,8 +3068,8 @@ public class DocumentGenServiceTest {
         //Then
         assertNotNull(caseDetails);
         //CORRECT ASSERTIONS LATER
-        //assertNotNull(caseDetailsUpdated);
-        //assertNotNull(caseDetailsUpdated.getData());
+        assertNotNull(caseDetailsUpdated);
+        assertNotNull(caseDetailsUpdated.getData());
 
     }
 
