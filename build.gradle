@@ -105,6 +105,10 @@ allprojects {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   }
 
+  tasks.withType(Test) {
+    systemProperties['spring.test.context.cache.maxSize'] = 5
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
@@ -605,7 +609,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenResponseController.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenAllegationOfHarmElementsMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java'
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/services/SystemUserService.java'
 ]
 
 sonarqube {
