@@ -62,5 +62,6 @@ public class BaseCaseData {
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
 
-
+    //Amend Draft order
+    private String removeDraftOrderText;
 }
