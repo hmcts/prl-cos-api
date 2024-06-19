@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -148,7 +149,21 @@ public class HwfProcessingCheckPaymentStatusService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 citizen cases with help with fess
-
+        List<Should> shoulds = List.of(Should.builder()
+                                           .match(Match.builder()
+                                                      .caseTypeOfApplication("C100")
+                                                      .build())
+                                           .build(),
+                                       Should.builder()
+                                           .match(Match.builder()
+                                                      .caseCreatedBy("CITIZEN")
+                                                      .build())
+                                           .build(),
+                                       Should.builder()
+                                           .match(Match.builder()
+                                                      .helpWithFees(YesOrNo.Yes)
+                                                      .build())
+                                           .build());
         //Hearing state
         StateFilter stateFilter = StateFilter.builder()
             .should(List.of(Should.builder().match(Match.builder()
@@ -163,6 +178,8 @@ public class HwfProcessingCheckPaymentStatusService {
         Filter filter = Filter.builder().range(range).build();
 
         Bool finalFilter = Bool.builder()
+            .should(shoulds)
+            .minimumShouldMatch(3)
             .filter(filter)
             .must(mustFilter)
             .build();
