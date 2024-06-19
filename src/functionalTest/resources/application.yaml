@@ -50,6 +50,8 @@ spring:
     context:
       cache:
         maxSize:5
+  cache:
+    type: simple
 
 azure:
   application-insights:
