@@ -2674,7 +2674,8 @@ public class ServiceOfApplicationService {
             || SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
             && Yes.equals(caseData.getIsCourtNavCase())) {
-            log.error("#SOA TO DO... Personal courtadmin / court bailiff - case created by - courtnav");
+            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, dateCreated, fl401StaticDocs,
+                authorization);;
         } else if (SoaCitizenServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
             || SoaCitizenServingRespondentsEnum.courtAdmin
