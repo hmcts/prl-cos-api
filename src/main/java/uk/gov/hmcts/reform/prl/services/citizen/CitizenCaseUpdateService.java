@@ -94,17 +94,14 @@ public class CitizenCaseUpdateService {
 
     public CaseDetails saveDraftCitizenApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)
             throws JsonProcessingException {
-        log.info("citizenUpdatedCaseData from citizen ui " + citizenUpdatedCaseData);
-        log.info("C100RebuildData from citizen ui " + citizenUpdatedCaseData.getC100RebuildData());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,
                         CaseEvent.CITIZEN_SAVE_C100_DRAFT_INTERNAL.getValue(),
                         authToken
                 );
-        log.info("HelpWithFeesReferenceNumber from citizen ui " + citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber());
         Map<String, Object> caseDataMapToBeUpdated = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
-        log.info("HelpWithFeesReferenceNumber trying to set in backend " + caseDataMapToBeUpdated.get("helpWithFeesReferenceNumber"));
+
         return allTabService.submitUpdateForSpecificUserEvent(
                 startAllTabsUpdateDataContent.authorisation(),
                 caseId,
@@ -120,10 +117,6 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
             throws JsonProcessingException {
-        log.info("citizenUpdatedCaseData from citizen ui " + citizenUpdatedCaseData);
-        log.info("C100RebuildData from citizen ui " + citizenUpdatedCaseData.getC100RebuildData());
-        log.info("PaymentServiceRequestReferenceNumber from citizen ui " + citizenUpdatedCaseData.getPaymentServiceRequestReferenceNumber());
-        log.info("HelpWithFeesReferenceNumber from citizen ui " + citizenUpdatedCaseData.getC100RebuildData().getHelpWithFeesReferenceNumber());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
                 allTabService.getStartUpdateForSpecificUserEvent(
                         caseId,

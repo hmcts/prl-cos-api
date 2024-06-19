@@ -26,10 +26,10 @@ public class HwfProcessUpdateCaseStateTask implements Runnable {
      */
     @Override
     public void run() {
-        log.info("*** FM5 reminder scheduled task is started ***");
-        //Invoke fm5 reminder service to evaluate & notify if needed
+        log.info("*** Hwf process update case state scheduled task is started ***");
+        //Invoke hwfProcessUpdateCaseStateService to get service request status and update case state for successful payment
         hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
 
-        log.info("*** FM5 reminder scheduled task is completed ***");
+        log.info("*** Hwf process update case state scheduled task is completed ***");
     }
 }
