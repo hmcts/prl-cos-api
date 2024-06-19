@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
@@ -200,6 +201,7 @@ public class CitizenCaseUpdateService {
         List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
         String idamEmail = caseData.getUserInfo().get(0).getValue().getEmailAddress();
         log.info("Email used for IDAM reg -> {}", idamEmail);
+        AtomicBoolean isApplicantDataAltered = new AtomicBoolean(false);
 
         applicants.stream()
             .filter(party -> CommonUtils.isNotEmpty(party.getValue().getEmail())
@@ -211,9 +213,13 @@ public class CitizenCaseUpdateService {
                     .isAccessCodeNeeded(YesOrNo.No)
                     .build();
                 applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+                isApplicantDataAltered.set(true);
             });
 
-        return caseData.toBuilder().applicants(applicants).build();
+        if (isApplicantDataAltered.get()) {
+            return caseData.toBuilder().applicants(applicants).build();
+        }
+        return caseData;
     }
 
     public CaseDetails deleteApplication(String caseId, CaseData citizenUpdatedCaseData, String authToken)

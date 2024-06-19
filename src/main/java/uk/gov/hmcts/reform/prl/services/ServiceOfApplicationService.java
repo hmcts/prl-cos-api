@@ -1343,6 +1343,11 @@ public class ServiceOfApplicationService {
                     && !hasDashboardAccess(party))
                 .findFirst()
                 .ifPresent(party -> {
+                    log.info(
+                        "*** Auto linking citizen case for primary applicant, partyId: {} and partyIndex: {}",
+                        party.getId(),
+                        applicants.indexOf(party)
+                    );
                     User user = null != party.getValue().getUser()
                         ? party.getValue().getUser().toBuilder().build()
                         : User.builder().build();
