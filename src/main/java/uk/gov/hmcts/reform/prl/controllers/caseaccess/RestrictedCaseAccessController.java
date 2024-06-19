@@ -108,25 +108,34 @@ public class RestrictedCaseAccessController {
                     );
             CaseDataContent caseDataContent = null;
             switch (caseSecurityClassification) {
-                case RESTRICTED ->
-                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                                startAllTabsUpdateDataContent.startEventResponse(),
-                                Classification.RESTRICTED
-                        );
-                case PRIVATE ->
-                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                                startAllTabsUpdateDataContent.startEventResponse(),
-                                Classification.PRIVATE
-                        );
-                case PUBLIC ->
-                        caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                                startAllTabsUpdateDataContent.startEventResponse(),
-                                Classification.PUBLIC
-                        );
-                default -> coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        Classification.PUBLIC
-                );
+                case RESTRICTED -> {
+                    log.info("** inside restriced:: ");
+                    caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            Classification.RESTRICTED
+                    );
+                }
+                case PRIVATE -> {
+                    log.info("** inside private:: ");
+                    caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            Classification.PRIVATE
+                    );
+                }
+                case PUBLIC -> {
+                    log.info("** inside public:: ");
+                    caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            Classification.PUBLIC
+                    );
+                }
+                default -> {
+                    log.info("** inside default:: ");
+                    coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
+                            startAllTabsUpdateDataContent.startEventResponse(),
+                            Classification.PUBLIC
+                    );
+                }
             }
             coreCaseDataService.submitUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
