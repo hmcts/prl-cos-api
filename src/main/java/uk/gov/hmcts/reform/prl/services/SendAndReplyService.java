@@ -1098,61 +1098,7 @@ public class SendAndReplyService {
         Message sendMessageObject = null;
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
-            sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-            if (canClearInternalWhoToSendFields(
-                sendMessageObject.getInternalMessageWhoToSendTo(),
-                InternalMessageWhoToSendToEnum.LEGAL_ADVISER,
-                sendMessageObject.getLegalAdvisersList()
-            )) {
-                sendMessageObject.setLegalAdvisersList(sendMessageObject.getLegalAdvisersList().toBuilder()
-                                                          .value(DynamicListElement.EMPTY).build());
-            }
-            if (canClearInternalWhoToSendFields(
-                sendMessageObject.getInternalMessageWhoToSendTo(),
-                InternalMessageWhoToSendToEnum.JUDICIARY,
-                sendMessageObject.getJudicialOrMagistrateTierList()
-            )) {
-                sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
-                                                                      .value(DynamicListElement.EMPTY).build());
-                sendMessageObject.setSendReplyJudgeName(null);
-            }
-
-            if (canClearInternalWhoToSendFields(
-                sendMessageObject.getInternalMessageWhoToSendTo(),
-                InternalMessageWhoToSendToEnum.OTHER,
-                sendMessageObject.getCtscEmailList()
-            )) {
-                sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
-                                                       .value(DynamicListElement.EMPTY).build());
-                sendMessageObject.setRecipientEmailAddresses(null);
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.APPLICATION,
-                sendMessageObject.getApplicationsList()
-            )) {
-                sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
-                                                          .value(DynamicListElement.EMPTY).build());
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.HEARING,
-                sendMessageObject.getFutureHearingsList()
-            )) {
-                sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
-                                                            .value(DynamicListElement.EMPTY).build());
-            }
-
-            if (canClearMessageAboutFields(
-                sendMessageObject.getMessageAbout(),
-                MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
-                sendMessageObject.getSubmittedDocumentsList()
-            )) {
-                sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
-                                                                .value(DynamicListElement.EMPTY).build());
-            }
+            sendMessageObject = resetSendMessageDynamicLists(caseData);
         }
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
@@ -1176,6 +1122,68 @@ public class SendAndReplyService {
                 .replyMessageObject(replyMessageObject)
                 .build()
         ).build();
+    }
+
+    private Message resetSendMessageDynamicLists(CaseData caseData) {
+        Message sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
+
+        if (canClearInternalWhoToSendFields(
+            sendMessageObject.getInternalMessageWhoToSendTo(),
+            InternalMessageWhoToSendToEnum.LEGAL_ADVISER,
+            sendMessageObject.getLegalAdvisersList()
+        )) {
+            sendMessageObject.setLegalAdvisersList(sendMessageObject.getLegalAdvisersList().toBuilder()
+                                                       .value(DynamicListElement.EMPTY).build());
+        }
+
+        if (canClearInternalWhoToSendFields(
+            sendMessageObject.getInternalMessageWhoToSendTo(),
+            InternalMessageWhoToSendToEnum.JUDICIARY,
+            sendMessageObject.getJudicialOrMagistrateTierList()
+        )) {
+            sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
+                                                                  .value(DynamicListElement.EMPTY).build());
+            sendMessageObject.setSendReplyJudgeName(null);
+        }
+
+        if (canClearInternalWhoToSendFields(
+            sendMessageObject.getInternalMessageWhoToSendTo(),
+            InternalMessageWhoToSendToEnum.OTHER,
+            sendMessageObject.getCtscEmailList()
+        )) {
+            sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
+                                                   .value(DynamicListElement.EMPTY).build());
+            sendMessageObject.setRecipientEmailAddresses(null);
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.APPLICATION,
+            sendMessageObject.getApplicationsList()
+        )) {
+            sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
+                                                      .value(DynamicListElement.EMPTY).build());
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.HEARING,
+            sendMessageObject.getFutureHearingsList()
+        )) {
+            sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
+                                                        .value(DynamicListElement.EMPTY).build());
+        }
+
+        if (canClearMessageAboutFields(
+            sendMessageObject.getMessageAbout(),
+            MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
+            sendMessageObject.getSubmittedDocumentsList()
+        )) {
+            sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
+                                                            .value(DynamicListElement.EMPTY).build());
+        }
+
+        return sendMessageObject;
     }
 
     private boolean canClearInternalWhoToSendFields(InternalMessageWhoToSendToEnum sendObjectInternalMsgWhoToSendToEnum,
