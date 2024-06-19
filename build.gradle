@@ -387,8 +387,8 @@ dependencies {
 
 
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'
@@ -405,6 +405,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
+  testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
 
 
 
