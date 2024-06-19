@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -891,6 +892,27 @@ public class PaymentRequestServiceTest {
         PaymentServiceResponse paymentResponse = paymentRequestService
             .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
         assertEquals("response", paymentServiceResponse.getServiceRequestReference());
+    }
+
+    @Test
+    public void shouldReturnPaymentGroupReferenceStatus() throws Exception {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = PaymentGroupReferenceStatusResponse.builder()
+            .paymentGroupReference("2024-1750000072989")
+            .serviceRequestStatus("Paid")
+            .build();
+        when(paymentApi.fetchPaymentGroupReferenceStatus(serviceAuthToken, serviceAuthToken, "2024-1750000072989"))
+            .thenReturn(paymentGroupReferenceStatusResponse);
+
+        //When
+        PaymentGroupReferenceStatusResponse actualPaymentGroupReferenceStatusResponse = paymentRequestService
+            .fetchPaymentGroupReferenceStatus(serviceAuthToken, "2024-1750000072989");
+
+        //Then
+        assertEquals(paymentGroupReferenceStatusResponse, actualPaymentGroupReferenceStatusResponse);
+
     }
 }
 
