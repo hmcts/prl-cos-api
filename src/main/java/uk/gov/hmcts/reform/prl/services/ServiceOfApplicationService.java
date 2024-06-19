@@ -2672,6 +2672,12 @@ public class ServiceOfApplicationService {
         } else if (SoaCitizenServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
             || SoaCitizenServingRespondentsEnum.courtAdmin
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
+            && Yes.equals(caseData.getIsCourtNavCase())) {
+            log.error("#SOA TO DO... Personal courtadmin / court bailiff - case created by - courtnav");
+        } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
+            || SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
             log.error("#SOA TO DO... Personal courtadmin / court bailiff - case created by - citizen");
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
