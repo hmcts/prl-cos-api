@@ -4,14 +4,14 @@ package uk.gov.hmcts.reform.prl.schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.services.HwfProcessingCheckPaymentStatusService;
+import uk.gov.hmcts.reform.prl.services.HwfProcessUpdateCaseStateService;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class HwfProcessingCheckPaymentStatusTask implements Runnable {
+public class HwfProcessUpdateCaseStateTask implements Runnable {
 
-    private final HwfProcessingCheckPaymentStatusService hwfProcessingCheckPaymentStatusService;
+    private final HwfProcessUpdateCaseStateService hwfProcessUpdateCaseStateService;
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -28,7 +28,7 @@ public class HwfProcessingCheckPaymentStatusTask implements Runnable {
     public void run() {
         log.info("*** FM5 reminder scheduled task is started ***");
         //Invoke fm5 reminder service to evaluate & notify if needed
-        hwfProcessingCheckPaymentStatusService.checkHwfPaymentStatus();
+        hwfProcessUpdateCaseStateService.checkHwfPaymentStatusAndUpdateCaseState();
 
         log.info("*** FM5 reminder scheduled task is completed ***");
     }

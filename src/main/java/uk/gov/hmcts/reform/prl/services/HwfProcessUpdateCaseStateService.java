@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.HWF_PROCESS_CASE_UPDATE;
 @Service
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class HwfProcessingCheckPaymentStatusService {
+public class HwfProcessUpdateCaseStateService {
 
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator authTokenGenerator;
@@ -61,7 +61,7 @@ public class HwfProcessingCheckPaymentStatusService {
     private final ObjectMapper objectMapper;
 
 
-    public void checkHwfPaymentStatus() {
+    public void checkHwfPaymentStatusAndUpdateCaseState() {
         long startTime = System.currentTimeMillis();
         log.info("inside checkHwfPaymentStatus");
         //Fetch all C100 pending cases with Help with fees
