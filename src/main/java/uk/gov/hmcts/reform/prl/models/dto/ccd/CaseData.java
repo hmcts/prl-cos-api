@@ -803,8 +803,5 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private CaseAccessStatusAndReason caseAccessStatusAndReason;
 
-    //Amend Draft order
-    private String removeDraftOrderText;
-
     private Object removeDraftOrdersDynamicList;
 }
