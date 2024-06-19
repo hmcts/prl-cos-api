@@ -138,8 +138,9 @@ public class FeeAndPayServiceRequestControllerTest {
             .eventId(Event.SUBMIT_AND_PAY.getId())
             .build();
         when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest)).thenCallRealMethod();
-        Assert.assertEquals(0,
-            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().size()
+        Assert.assertEquals(
+            HWF_SUPPRESSION_ERROR_MESSAGE,
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
