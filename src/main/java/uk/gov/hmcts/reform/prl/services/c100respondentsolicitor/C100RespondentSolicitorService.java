@@ -813,7 +813,8 @@ public class C100RespondentSolicitorService {
                 if (respondingParty.getValue() != null
                         && respondingParty.getValue().getUser() != null
                         && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
-                    mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
+                    boolean isC1aApplicable = caseData.getC1ADocument() != null;
+                    mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue(), isC1aApplicable);
                 }
             }
         }
@@ -856,7 +857,9 @@ public class C100RespondentSolicitorService {
                 quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(
                     updatedUserDetails,
                     representedRespondent.getValue().getResponse()
-                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument(),
+                    representedRespondent.getValue().getLabelForDynamicList(),
+                    String.valueOf(representedRespondent.getId())
                 ));
             }
 
@@ -929,7 +932,10 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7FinalDocument,
+                                                               representedRespondent.getValue().getLabelForDynamicList(),
+                                                               String.valueOf(representedRespondent.getId())
+            ));
         }
 
         if (representedRespondent.getValue().getResponse() != null
@@ -943,11 +949,14 @@ public class C100RespondentSolicitorService {
                     false,
                     dataMap
                 );
-                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument));
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument,
+                                                                    representedRespondent.getValue().getLabelForDynamicList(),
+                                                                    String.valueOf(representedRespondent.getId())
+                ));
             }
 
             if (documentLanguage.isGenWelsh()) {
-                dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,getChildAbuses(representedRespondent));
+                dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS, getChildAbuses(representedRespondent));
                 Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -955,7 +964,10 @@ public class C100RespondentSolicitorService {
                     true,
                     dataMap
                 );
-                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh));
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh,
+                                                                    representedRespondent.getValue().getLabelForDynamicList(),
+                                                                    String.valueOf(representedRespondent.getId())
+                ));
             }
         }
 
@@ -967,7 +979,10 @@ public class C100RespondentSolicitorService {
                 true,
                 dataMap
             );
-            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument,
+                                                               representedRespondent.getValue().getLabelForDynamicList(),
+                                                               String.valueOf(representedRespondent.getId())
+            ));
         }
         return dataMap;
     }
@@ -1121,6 +1136,7 @@ public class C100RespondentSolicitorService {
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
+        populateRespondToAohDataMap(response, dataMap);
         dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
@@ -1246,8 +1262,9 @@ public class C100RespondentSolicitorService {
                 .contains(ConfidentialityListEnum.email))) {
             dataMap.put(EMAIL, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getContact()
-                && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
+        } else if (null != response.getCitizenDetails()
+            && null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
             dataMap.put(EMAIL, response.getCitizenDetails().getContact().getEmail());
         } else {
             dataMap.put(EMAIL, solicitorRepresentedRespondent.getValue().getEmail());
@@ -1300,6 +1317,17 @@ public class C100RespondentSolicitorService {
             dataMap.put(RESP_CHILD_ABUSES_DOCMOSIS,respondentAllegationOfHarmService
                     .updateChildAbusesForDocmosis(allegationsOfHarmData));
             dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
+
+        }
+    }
+
+    private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
+        if (response.getResponseToAllegationsOfHarm() != null) {
+            ResponseToAllegationsOfHarm responseToAllegationsOfHarm = response.getResponseToAllegationsOfHarm();
+            dataMap.put("responseToAllegationsOfHarmYesOrNoResponse",
+                        getValueForYesOrNoEnum(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse()));
+            dataMap.put("respondentResponseToAllegationOfHarm",
+                        responseToAllegationsOfHarm.getRespondentResponseToAllegationOfHarm());
 
         }
     }
@@ -1455,46 +1483,52 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private QuarantineLegalDoc getC7QuarantineLegalDoc(UserDetails userDetails, Document c7doc) {
+    private QuarantineLegalDoc getC7QuarantineLegalDoc(UserDetails userDetails, Document c7doc, String partyName, String partyId) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         return QuarantineLegalDoc.builder()
-                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentApplication")
-                .categoryName("Respondent Application")
-                .fileName(c7doc.getDocumentFileName())
-                .isConfidential(Yes)
-                .uploadedBy(userDetails.getFullName())
-                .uploaderRole(loggedInUserType)
-                .document(c7doc)
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId("respondentApplication")
+            .categoryName("Respondent Application")
+            .fileName(c7doc.getDocumentFileName())
+            .isConfidential(Yes)
+            .uploadedBy(userDetails.getFullName())
+            .uploaderRole(loggedInUserType)
+            .solicitorRepresentedPartyName(partyName)
+            .solicitorRepresentedPartyId(partyId)
+            .document(c7doc)
                 .build();
 
     }
 
-    private QuarantineLegalDoc getC1AQuarantineLegalDoc(UserDetails userDetails, Document c1aDoc) {
+    private QuarantineLegalDoc getC1AQuarantineLegalDoc(UserDetails userDetails, Document c1aDoc, String partyName, String partyId) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         return QuarantineLegalDoc.builder()
-                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentC1AApplication")
-                .categoryName("Respondent C1A Application")
-                .isConfidential(Yes)
-                .fileName(c1aDoc.getDocumentFileName())
-                .uploadedBy(userDetails.getFullName())
-                .uploaderRole(loggedInUserType)
-                .document(c1aDoc)
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId("respondentC1AApplication")
+            .categoryName("Respondent C1A Application")
+            .isConfidential(Yes)
+            .fileName(c1aDoc.getDocumentFileName())
+            .uploadedBy(userDetails.getFullName())
+            .uploaderRole(loggedInUserType)
+            .document(c1aDoc)
+            .solicitorRepresentedPartyName(partyName)
+            .solicitorRepresentedPartyId(partyId)
                 .build();
     }
 
-    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document) {
+    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document, String partyName, String partyId) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         return QuarantineLegalDoc.builder()
-                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                .categoryId("respondentC1AResponse")
-                .categoryName("Respondent C1A response")
-                .isConfidential(Yes)
-                .fileName(document.getDocumentFileName())
-                .uploadedBy(userDetails.getFullName())
-                .uploaderRole(loggedInUserType)
-                .document(document)
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId("respondentC1AResponse")
+            .categoryName("Respondent C1A response")
+            .isConfidential(Yes)
+            .fileName(document.getDocumentFileName())
+            .uploadedBy(userDetails.getFullName())
+            .uploaderRole(loggedInUserType)
+            .document(document)
+            .solicitorRepresentedPartyName(partyName)
+            .solicitorRepresentedPartyId(partyId)
                 .build();
     }
 
