@@ -88,7 +88,6 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get(APPLICANTS));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -348,7 +347,6 @@ public class UpdatePartyDetailsService {
             }
         }
         if (respondentList != null && !respondentList.isEmpty()) {
-            log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
             return true;
         }
         log.info("respondent data not changed");
