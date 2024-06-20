@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
@@ -287,18 +286,20 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
 
-    private List<Element<BundlingRequestDocument>> mapBundlingDocsFromCitizenUploadedDocs(List<Element<UploadedDocuments>>
-                                                                                              citizenUploadedDocumentList) {
+    private List<Element<BundlingRequestDocument>> mapBundlingDocsFromCitizenUploadedDocs(List<Element<QuarantineLegalDoc>>
+                                                                                              citizenQuarantineDocumentList) {
         List<BundlingRequestDocument> bundlingCitizenDocuments = new ArrayList<>();
-        Optional<List<Element<UploadedDocuments>>> citizenUploadedDocuments = ofNullable(citizenUploadedDocumentList);
-        if (citizenUploadedDocuments.isEmpty()) {
+        Optional<List<Element<QuarantineLegalDoc>>> citizenQuarantineDocuments = ofNullable(citizenQuarantineDocumentList);
+        if (citizenQuarantineDocuments.isEmpty()) {
             return new ArrayList<>();
         }
-        citizenUploadedDocumentList.forEach(citizenUploadedDocumentElement -> {
-            UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
-            Document uploadedDocument = uploadedDocuments.getCitizenDocument();
+        citizenQuarantineDocumentList.forEach(citizenQuarantineDocumentElement -> {
+            QuarantineLegalDoc quarantineLegalDoc = citizenQuarantineDocumentElement.getValue();
+            //FIX TO FETCH DOCUMENT LATER
+            Document uploadedDocument = quarantineLegalDoc.getCitizenQuarantineDocument();
             bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
-                .documentGroup(getDocumentGroupForCitizen(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
+                //FIX TO FETCH CATEGORY FROM DocumentCategory
+                //.documentGroup(getDocumentGroupForCitizen(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
                 .documentFileName(uploadedDocument.getDocumentFileName())
                 .documentLink(uploadedDocument).build());
 

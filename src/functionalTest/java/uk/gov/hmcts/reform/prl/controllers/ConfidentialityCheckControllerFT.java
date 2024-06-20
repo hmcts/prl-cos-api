@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETUR
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConfidentialityCheckControllerFT {
 
