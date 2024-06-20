@@ -784,8 +784,8 @@ public class ServiceOfApplicationService {
         );
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packdDocs))
-            .partyIds(wrapElements(isNull(caseData.getRespondentsFL401().getPartyId())?null
-                                       :caseData.getRespondentsFL401().getPartyId().toString()))
+            .partyIds(wrapElements(isNull(caseData.getRespondentsFL401().getPartyId()) ? null
+                                       : caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
