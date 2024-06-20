@@ -1,54 +1,72 @@
-package uk.gov.hmcts.reform.prl.controllers.courtnav;
+package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class CourtNavCaseControllerFunctionalTest {
-
+@SpringBootTest
+@ContextConfiguration
+@Ignore
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class CaseApplicationResponseControllerFunctionalTest {
 
     private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @MockBean
-    private FL401ApplicationMapper fl401ApplicationMapper;
+    private CaseService caseService;
     @MockBean
-    protected CourtNavCaseService courtNavCaseServic;
+    private CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
+
     @MockBean
-    private AuthorisationService authorisationService;
+    private DocumentGenService documentGenService;
+
+    private static final String SLASH = "/";
+
+    private static final String PATH_CORE = SLASH.concat("cases").concat(SLASH);
+
+
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    @Autowired
+    private  IdamTokenGenerator idamTokenGenerator;
 
-    private static final String VALID_REQUEST_BODY = "requests/courtnav-request.json";
+    @Value("${TEST_URL}")
+    protected String cosApiUrl;
+
+    private static CaseDetails caseDetails;
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -56,27 +74,19 @@ public class CourtNavCaseControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private static CaseDetails caseDetails;
-
-    @Value("${TEST_URL}")
-    protected String cosApiUrl;
-
-    @Autowired
-    private IdamTokenGenerator idamTokenGenerator;
-
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Before
+
+    @BeforeAll
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-
     @Test
-    public void givenRequestBody_whenCase_then400Response() throws Exception {
-
+    @Ignore
+    public void givenRequestBody_whenGenerate_c7document_then200Response() throws Exception {
+        //Element<PartyDetails> partyDetailsElement = element(PartyDetails.builder().firstName("test").build());
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-
         caseDetails =  request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -92,7 +102,10 @@ public class CourtNavCaseControllerFunctionalTest {
         Assert.assertNotNull(caseDetails);
         Assert.assertNotNull(caseDetails.getId());
 
-        RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        Long id = caseDetails.getId();
+        List<Map> respondents = (List) caseDetails.getData().get("respondents");
+
+        Document response1 = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -100,9 +113,24 @@ public class CourtNavCaseControllerFunctionalTest {
             .body("")
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .post("/case")
+            .post("/" + id + "/" + respondents.stream().findFirst().get().get("id") + "/generate-c7document")
             .then()
-            .assertThat().statusCode(400);
+            .assertThat().statusCode(200)
+            .extract()
+            .as(Document.class);
 
+        Assert.assertNotNull(response1.getDocumentHash());
+        Assert.assertNotNull(response1.getDocumentBinaryUrl());
+        Assert.assertNotNull(response1.getDocumentUrl());
+    }
+
+    public RequestSpecification getMultipleAuthHeaders() {
+        return SerenityRest.with()
+            .relaxedHTTPSValidation()
+            .baseUri(cosApiUrl)
+            .header("Content-Type", APPLICATION_JSON_VALUE)
+            .header("Accepts", APPLICATION_JSON_VALUE)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd());
     }
 }

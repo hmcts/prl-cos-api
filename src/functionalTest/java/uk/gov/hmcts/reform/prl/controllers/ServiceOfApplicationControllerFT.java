@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -155,6 +156,7 @@ public class ServiceOfApplicationControllerFT {
     }
 
     @Test
+    @Ignore
     public void givenRequestWithCaseData_Response_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);

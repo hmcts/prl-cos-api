@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -201,12 +200,6 @@ public class CaseDataApplicantElementsMapper {
     }
 
     private static void checkAndupdatePcqIdForParty(PartyDetails party, String applicantPcqId) {
-        if (ObjectUtils.isNotEmpty(party.getUser())) {
-            if (StringUtils.isEmpty(party.getUser().getPcqId())) {
-                party.getUser().setPcqId(applicantPcqId);
-            }
-        } else {
-            party.setUser(User.builder().pcqId(applicantPcqId).build());
-        }
+        party.setUser(User.builder().pcqId(applicantPcqId).build());
     }
 }
