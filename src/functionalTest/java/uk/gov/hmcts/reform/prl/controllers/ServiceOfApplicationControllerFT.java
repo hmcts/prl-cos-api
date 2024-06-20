@@ -256,6 +256,8 @@ public class ServiceOfApplicationControllerFT {
             .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
             .assertThat().statusCode(200);
     }
+
+
     @Test
     public void givenRequestWithFl401CaseData_Perosnal_Service_lr_Submitted() throws Exception {
 
