@@ -34,4 +34,11 @@ public class BulkPrintDetails {
     private String servedParty;
     @JsonProperty("printDocs")
     private List<Element<Document>> printDocs;
+    /**
+     * This will contain either
+     * 1. Served party id(applicant) after SOA or after confidential check.
+     * 2. List of comma separated served party ids(respondents) after statement of service.
+     */
+    @JsonProperty("partyIds")
+    private String partyIds;
 }

@@ -25,14 +25,14 @@ public class ViewDraftResponseCheckerTest {
     @Test
     public void isStartedTest() {
 
-        boolean bool = viewDraftResponseChecker.isStarted(respondent);
+        boolean bool = viewDraftResponseChecker.isStarted(respondent, true);
 
         assertFalse(bool);
     }
 
     @Test
     public void mandatoryCompletedTest() {
-        boolean bool = viewDraftResponseChecker.isFinished(respondent);
+        boolean bool = viewDraftResponseChecker.isFinished(respondent, true);
 
         assertFalse(bool);
     }
