@@ -50,6 +50,9 @@ public class DssCaseData {
     private String applicantStatementOfTruth;
 
     @JsonUnwrapped
+    private String selectedCourt;
+
+    @JsonUnwrapped
     private List<Element<EdgeCaseDocument>> applicantApplicationFormDocuments;
 
     @JsonUnwrapped

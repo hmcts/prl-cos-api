@@ -19,4 +19,6 @@ public class DssCaseDetails {
     private final List<Element<Document>> dssUploadedAdditionalDocuments;
     @JsonProperty("edgeCaseTypeOfApplication")
     private final String edgeCaseTypeOfApplication;
+    @JsonProperty("selectCourt")
+    private final String selectCourt;
 }

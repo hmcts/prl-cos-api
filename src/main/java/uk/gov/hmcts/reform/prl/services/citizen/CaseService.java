@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -20,7 +22,10 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
@@ -37,11 +42,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -62,6 +69,8 @@ public class CaseService {
     private final RoleAssignmentService roleAssignmentService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
+    private final LocationRefDataApi locationRefDataApi;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -222,13 +231,37 @@ public class CaseService {
                 dateTimeFormatter
             )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement)).dssCaseDetails(
+        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
+            .caseManagementLocation(getCourtLocationByEpmsId(dssCaseData.getSelectedCourt(), authToken))
+            .courtName(getCourtLocationByEpmsId(dssCaseData.getSelectedCourt(), authToken).getBaseLocationName())
+            .dssCaseDetails(
             DssCaseDetails.builder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
+                .selectCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         System.out.println("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
+    }
+
+    private CaseManagementLocation getCourtLocationByEpmsId(String epmsId, String authorisation) {
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+
+        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream()
+            .filter(location -> epmsId.equalsIgnoreCase(location.getCourtEpimmsId()))
+            .findFirst();
+        if (courtVenue.isPresent()) {
+            return CaseManagementLocation.builder()
+                .baseLocation(courtVenue.get().getCourtEpimmsId())
+                .baseLocationName(courtVenue.get().getVenueName())
+                .region(courtVenue.get().getRegionId())
+                .regionName(courtVenue.get().getRegion()).build();
+        }
+        return CaseManagementLocation.builder().build();
     }
 }
