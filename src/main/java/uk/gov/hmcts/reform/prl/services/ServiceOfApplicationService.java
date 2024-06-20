@@ -2791,7 +2791,8 @@ public class ServiceOfApplicationService {
             || SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
             getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization,
-                                                               caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA().toString());
+                                                               caseData.getServiceOfApplication()
+                                                                   .getSoaCitizenServingRespondentsOptionsDA().toString());
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
             List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
