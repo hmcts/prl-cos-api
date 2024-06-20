@@ -1163,10 +1163,16 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
-            caseDataMap.put(APPLICANTS, caseData.getApplicants());
+        if (caseData.getServiceOfApplication() != null) {
+            if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                caseDataMap.put(APPLICANTS, caseData.getApplicants());
+            } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                caseData.getApplicantsFL401().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
+                caseDataMap.put(PrlAppsConstants.FL401_APPLICANTS, caseData.getApplicantsFL401());
+            }
         }
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
@@ -1696,7 +1702,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
+    public void sendPostWithAccessCodeLetterToParty(CaseData caseData, String authorization, List<Document> packDocs,
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, Document coverLetter,
                                                      String servedParty) {
@@ -2331,7 +2337,7 @@ public class ServiceOfApplicationService {
         return fetchCoverLetter(authorisation, template, dataMap);
     }
 
-    private Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
+    public Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
@@ -2389,7 +2395,7 @@ public class ServiceOfApplicationService {
         return No;
     }
 
-    private CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
+    public CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
         if (CollectionUtils.isNotEmpty(caseInvites)) {
             Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
                 .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)

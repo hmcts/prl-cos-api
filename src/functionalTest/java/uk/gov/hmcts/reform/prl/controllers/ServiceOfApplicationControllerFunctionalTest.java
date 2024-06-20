@@ -143,5 +143,4 @@ public class ServiceOfApplicationControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();
     }
-
 }
