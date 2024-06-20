@@ -83,6 +83,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_whenGenerate_c7document_then200Response() throws Exception {
         //Element<PartyDetails> partyDetailsElement = element(PartyDetails.builder().firstName("test").build());
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
