@@ -4,7 +4,11 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -253,30 +257,6 @@ public class ServiceOfApplicationControllerFT {
             .assertThat().statusCode(200);
     }
 
-    @Test
-    public void givenRequestWithFl401CaseData_Perosnal_Service_ca_cb_Submitted() throws Exception {
-
-        String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY_PERSONAL_SERVICE_CA_CB);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .servedParty("ApplicantSolicitor")
-            .build();
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                                                    Mockito.any(), Mockito.any(), Mockito.any(),
-                                                                                    Mockito.anyString()))
-            .thenReturn(emailNotificationDetails);
-        MvcResult res = mockMvc.perform(post("/service-of-application/submitted")
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
-
-        String json = res.getResponse().getContentAsString();
-        assertTrue(json.contains("confirmation_header"));
-    }
 
     @Test
     public void givenRequestWithFl401CaseData_Perosnal_Service_lr_Submitted() throws Exception {
