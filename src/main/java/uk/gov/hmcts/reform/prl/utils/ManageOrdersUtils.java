@@ -349,13 +349,12 @@ public class ManageOrdersUtils {
             .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder));
     }
 
-
-    public static String getOrderNameAlongWithTime(String name) {
+    public static String getOrderNameAlongWithTime(String name, LocalDateTime now) {
         if (!isBlank(name)) {
             return String.format(
                 "%s - %s",
                 name,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                now.format(DateTimeFormatter.ofPattern(
                     PrlAppsConstants.D_MMM_YYYY_HH_MM,
                     Locale.ENGLISH
                                            )
