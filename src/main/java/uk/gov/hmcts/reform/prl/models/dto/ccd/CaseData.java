@@ -787,7 +787,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private StatementOfService statementOfService;
 
     @JsonUnwrapped
-    private final AllPartyFlags allPartyFlags;
+    private AllPartyFlags allPartyFlags;
     /**
      * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
      */

@@ -10,11 +10,13 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 @Slf4j
 @SpringBootTest
@@ -33,6 +35,9 @@ public class UploadAdditionalApplicationControllerFunctionalTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @MockBean
+    protected IdamTokenGenerator idamTokenGenerator;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 

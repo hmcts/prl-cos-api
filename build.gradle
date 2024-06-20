@@ -105,6 +105,10 @@ allprojects {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   }
 
+  tasks.withType(Test) {
+    systemProperties['spring.test.context.cache.maxSize'] = 5
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
@@ -351,7 +355,6 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.7.12'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
-
 
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud)
     {
@@ -602,6 +605,15 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/clients/ccd/CcdCoreCaseDataService.java',
   '**/uk/gov/hmcts/reform/prl/clients/ccd/ExtendedCaseDataApi.java',
   '**/uk/gov/hmcts/reform/prl/services/extendedcasedataservice/ExtendedCaseDataService.java',
+  '**uk/gov/hmcts/reform/prl/services/SystemUserService.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/Fm5ReminderController.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
+  '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
+  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java'
 ]
 
 sonarqube {

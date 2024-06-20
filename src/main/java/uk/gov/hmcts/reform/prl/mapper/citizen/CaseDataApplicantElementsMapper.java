@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -45,12 +47,17 @@ public class CaseDataApplicantElementsMapper {
     private static final String TELEPHONE_FIELD = "telephone";
     private static final String I_DONT_KNOW = "I dont know";
 
-    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
+    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder<?, ?> caseDataBuilder,
                                                           C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
-                                                          C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+                                                          C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                          String applicantPcqId) {
 
+        List<Element<PartyDetails>> applicants = buildApplicants(c100RebuildApplicantDetailsElements);
+        if (StringUtils.isNotEmpty(applicantPcqId)) {
+            checkAndupdatePcqIdForParty(applicants.get(0).getValue(), applicantPcqId);
+        }
         caseDataBuilder
-            .applicants(buildApplicants(c100RebuildApplicantDetailsElements))
+            .applicants(applicants)
             .relations(Relations.builder()
                            .childAndApplicantRelations(
                                buildChildAndApplicantRelation(c100RebuildApplicantDetailsElements,
@@ -189,5 +196,9 @@ public class CaseDataApplicantElementsMapper {
             )
             .flatMap(Collection::stream)
             .toList();
+    }
+
+    private static void checkAndupdatePcqIdForParty(PartyDetails party, String applicantPcqId) {
+        party.setUser(User.builder().pcqId(applicantPcqId).build());
     }
 }
