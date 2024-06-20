@@ -20,8 +20,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -37,6 +39,7 @@ public class LinkCitizenCaseController {
     private final LinkCitizenCaseService linkCitizenCaseService;
     private final AuthorisationService authorisationService;
     private final HearingService hearingService;
+    private final CaseService caseService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
@@ -75,9 +78,15 @@ public class LinkCitizenCaseController {
                 accessCodeRequest.getAccessCode()
             );
             if (caseDetails.isPresent()) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails.get(), objectMapper);
                 caseDataWithHearingResponse = caseDataWithHearingResponse
                     .toBuilder()
-                    .caseData(CaseUtils.getCaseData(caseDetails.get(), objectMapper))
+                    .caseData(UiCitizenCaseData.builder()
+                                  .caseData(caseData)
+                                  //This is a non-persistent view, list of citizen documents, orders & packs
+                                  .citizenDocumentsManagement(
+                                      caseService.getAllCitizenDocumentsOrders(authorisation, caseData))
+                                  .build())
                     .build();
 
                 if ("Yes".equalsIgnoreCase(accessCodeRequest.getHearingNeeded())) {

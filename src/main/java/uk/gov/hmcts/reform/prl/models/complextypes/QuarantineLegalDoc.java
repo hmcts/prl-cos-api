@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class QuarantineLegalDoc {
     private final String documentName;
     private final String notes;
@@ -104,6 +106,11 @@ public class QuarantineLegalDoc {
     private final String uploadedByIdamId;
     private final String uploaderRole;
     private final YesOrNo hasTheConfidentialDocumentBeenRenamed;
+
+    // These fields are neeeded when Respondent solicitor uploads response on behalf of party
+    private final String solicitorRepresentedPartyName;
+    private final String solicitorRepresentedPartyId;
+    private final String documentLanguage;
 
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
