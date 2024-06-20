@@ -238,7 +238,7 @@ public class CaseService {
             DssCaseDetails.builder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
-                .selectCourt(dssCaseData.getSelectedCourt())
+                .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         System.out.println("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
