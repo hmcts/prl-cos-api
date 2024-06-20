@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -39,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -73,62 +73,87 @@ public class UpdateHearingActualsService {
         }
     }
 
-    private List<String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
-        return filterHearingsForTodaysDate(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+    private Map<String, String> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
+        List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
             listOfCaseidsForHearings
+        );
+
+        return filterCaseIdAndHearingsForTodaysDate(hearingsList);
+    }
+
+    private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
+                                                 Map<String,
+                                                     String> caseIds) {
+        caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> caseDetails.getId().equals(
+            caseId)).map(caseDetails -> {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                    startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+                    Map<String, Object> caseDataUpdated = new HashMap<>();
+                    caseDataUpdated.put("enableUpdateHearingActualTask", "true");
+                    allTabService.submitAllTabsUpdate(
+                        startAllTabsUpdateDataContent.authorisation(),
+                        caseId,
+                        startAllTabsUpdateDataContent.startEventResponse(),
+                        startAllTabsUpdateDataContent.eventRequestData(),
+                        caseDataUpdated
+                    );
+                }
+                return null;
+            }
         ));
     }
 
-    private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList, List<String> caseIds) {
-        caseIds.stream()
-            .map(caseId ->
-                 {
-                     caseDetailsList.stream()
-                         .filter(caseDetails -> caseDetails.getId().equals(caseId))
-                         .map(
-                             caseDetails -> {
-                                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-                                 caseData.getDraftOrderCollection().stream()
-                                     .map(Element::getValue)
-                                     .filter(draftOrderElement ->
-                                         draftOrderElement.getWasTheOrderApprovedAtHearing().equals(YesOrNo.Yes)
-                                             && draftOrderElement.getHearingsType().getValue().getCode()
-                                     )
-                             }
-                         );
-
-                     StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-                     startAllTabsUpdateDataContent
-                         = allTabService.getStartAllTabsUpdate(caseId);
-                     Map<String, Object> caseDataUpdated = new HashMap<>();
-                     caseDataUpdated.put("enableUpdateHearingActualTask", "true");
-                     allTabService.submitAllTabsUpdate(
-                         startAllTabsUpdateDataContent.authorisation(),
-                         caseId,
-                         startAllTabsUpdateDataContent.startEventResponse(),
-                         startAllTabsUpdateDataContent.eventRequestData(),
-                         caseDataUpdated
-                     );
-                 }
-            );
-
+    private boolean checkIfHearingIdIsMappedInOrders(CaseData caseData, String hearingId) {
+        if (!checkIfHearingIdIsMappedinDraftOrder(caseData, hearingId)) {
+            return !checkIfHearingIdIsMappedinSavedServedOrder(caseData, hearingId);
+        }
+        return true;
     }
 
-    private List<String> filterHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
-
-        return hearingsForAllCaseIds.stream().filter(hearings -> checkIfHearingIsToday(hearings.getCaseHearings()))
-            .map(Hearings::getCaseRef).toList();
+    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, String hearingId) {
+        return caseData.getDraftOrderCollection()
+            .stream()
+            .map(Element::getValue)
+            .filter(draftOrderElement -> draftOrderElement.getManageOrderHearingDetails()
+                .stream()
+                .map(Element::getValue)
+                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)))
+            .findAny().isPresent();
     }
 
-    private boolean checkIfHearingIsToday(List<CaseHearing> caseHearings) {
-        return caseHearings.stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
-            .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().filter(hearingDaySchedule -> Duration.between(
-                hearingDaySchedule.getHearingStartDateTime(),
-                LocalDateTime.now()
-            ).isZero()).findAny().isPresent();
+    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, String hearingId) {
+        return caseData.getOrderCollection()
+            .stream()
+            .map(Element::getValue)
+            .filter(orderElement -> orderElement.getManageOrderHearingDetails()
+                .stream().map(Element::getValue)
+                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)))
+            .findAny().isPresent();
+    }
 
+    private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
+
+        Map<String, String> caseIdHearingIdMapping = new HashMap<>();
+        hearingsForAllCaseIds.stream().forEach(hearings -> {
+            List<Long> filteredHearingIds = hearings.getCaseHearings()
+                .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
+                .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().filter(
+                    hearingDaySchedule -> Duration.between(
+                        hearingDaySchedule.getHearingStartDateTime(),
+                        LocalDateTime.now()
+                    ).isZero()).findAny().isPresent()).map(CaseHearing::getHearingID).collect(Collectors.toList());
+
+            caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
+
+        });
+        return caseIdHearingIdMapping;
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
@@ -139,8 +164,7 @@ public class UpdateHearingActualsService {
 
     public List<CaseDetails> retrieveCasesInHearingState() {
 
-        SearchResultResponse response = SearchResultResponse.builder()
-            .cases(new ArrayList<>()).build();
+        SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
 
@@ -152,17 +176,9 @@ public class UpdateHearingActualsService {
 
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
-            SearchResult searchResult = coreCaseDataApi.searchCases(
-                userToken,
-                s2sToken,
-                CASE_TYPE,
-                searchString
-            );
+            SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
 
-            response = objectMapper.convertValue(
-                searchResult,
-                SearchResultResponse.class
-            );
+            response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
         }
@@ -177,39 +193,21 @@ public class UpdateHearingActualsService {
 
     private QueryParam buildCcdQueryParam() {
         //C100 cases where fm5 reminders are not sent already
-        List<Should> shoulds = List.of(Should.builder()
-                                           .match(Match.builder()
-                                                      .caseTypeOfApplication("C100")
-                                                      .build())
-                                           .build(),
-                                       Should.builder()
-                                           .match(Match.builder()
-                                                      .caseTypeOfApplication("FL401")
-                                                      .build())
-                                           .build());
+        List<Should> shoulds = List.of(
+            Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
+            Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build()
+        );
 
         //Hearing state
-        StateFilter stateFilter = StateFilter.builder()
-            .should(List.of(Should.builder().match(Match.builder()
-                                                       .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
-                                                       .build())
-                                .build(),
-                            Should.builder().match(Match.builder()
-                                                       .state(State.DECISION_OUTCOME.getValue())
-                                                       .build())
-                                .build()))
-            .build();
+        StateFilter stateFilter = StateFilter.builder().should(List.of(
+            Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
+        )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder()
-            .should(shoulds)
-            .minimumShouldMatch(2)
-            .must(mustFilter)
-            .build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
 
-        return QueryParam.builder()
-            .query(Query.builder().bool(finalFilter).build())
-            .build();
+        return QueryParam.builder().query(Query.builder().bool(finalFilter).build()).build();
     }
 
 }
