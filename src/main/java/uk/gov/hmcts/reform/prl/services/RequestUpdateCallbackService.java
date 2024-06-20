@@ -112,9 +112,9 @@ public class RequestUpdateCallbackService {
             true
         );
 
-        partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
-
         if (isCasePayment) {
+            partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
+
             EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
                 CaseEvent.UPDATE_ALL_TABS,
                 systemUpdateUserId
