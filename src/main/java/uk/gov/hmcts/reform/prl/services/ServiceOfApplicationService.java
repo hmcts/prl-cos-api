@@ -78,6 +78,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
@@ -783,7 +784,8 @@ public class ServiceOfApplicationService {
         );
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packdDocs))
-            .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
+            .partyIds(wrapElements(isNull(caseData.getRespondentsFL401().getPartyId())?null
+                                       :caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
