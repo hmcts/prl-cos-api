@@ -117,6 +117,6 @@ public class ReviewDocumentsController {
                                                                      @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        return reviewDocumentService.getReviewResult(caseData);
+        return reviewDocumentService.getReviewResult(authorisation,caseData);
     }
 }
