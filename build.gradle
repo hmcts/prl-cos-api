@@ -105,6 +105,10 @@ allprojects {
     javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   }
 
+  tasks.withType(Test) {
+    systemProperties['spring.test.context.cache.maxSize'] = 5
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
@@ -387,8 +391,8 @@ dependencies {
 
 
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
-  testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+    testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: versions.springCloud
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
     exclude(module: 'commons-logging')
     exclude(module: 'android-json')
     exclude module: 'junit'
@@ -405,6 +409,7 @@ dependencies {
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
+  testImplementation group: 'com.github.mifmif', name: 'generex', version: '1.0.2'
 
 
 
@@ -594,20 +599,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
   "**uk/gov/hmcts/reform/prl/services.ManageOrderEmailService.java",
-  "**uk/gov/hmcts/reform/prl/services/SendgridService.java",
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
-  '**uk/gov/hmcts/reform/prl/controllers/SystemUserRoleAssingmentController.java',
-  '**uk/gov/hmcts/reform/prl/mapper/bundle/BundleCreateRequestMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenResponseController.java',
-  '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
-  '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenAllegationOfHarmElementsMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/EditReturnedOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java'
+  '**uk/gov/hmcts/reform/prl/services/SystemUserService.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java'
 ]
 
 sonarqube {

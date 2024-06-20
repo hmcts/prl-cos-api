@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -138,12 +137,6 @@ public class NoticeOfChangePartiesService {
             generateC100NocDetails(caseData, representing, strategy, data);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             generateFl401NocDetails(caseData, representing, strategy, data);
-        }
-        try {
-            log.info("noc data is::"
-                         + objectMapper.writeValueAsString(data));
-        } catch (JsonProcessingException e) {
-            log.info("error");
         }
         return data;
     }
