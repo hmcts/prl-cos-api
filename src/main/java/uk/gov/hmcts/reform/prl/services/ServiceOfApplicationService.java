@@ -788,7 +788,8 @@ public class ServiceOfApplicationService {
                                        : caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DATE_CREATED)
-            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
+            .personalServiceBy(isNull(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA()) ? null
+                                   : caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
