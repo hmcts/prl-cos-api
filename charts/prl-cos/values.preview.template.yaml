@@ -1,6 +1,14 @@
 java:
+  devmemoryRequests: 2048Mi
+  devcpuRequests: 2000m
+  devmemoryLimits: 4096Mi
+  devcpuLimits: 4000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  devmemoryRequests: 1024Mi
+  devcpuRequests: 1000m
+  devmemoryLimits: 2048Mi
+  devcpuLimits: 2000m
   keyVaults:
     prl:
       secrets:
