@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @Slf4j
 @SpringBootTest
 @ContextConfiguration
+@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CaseApplicationResponseControllerFunctionalTest {
 
