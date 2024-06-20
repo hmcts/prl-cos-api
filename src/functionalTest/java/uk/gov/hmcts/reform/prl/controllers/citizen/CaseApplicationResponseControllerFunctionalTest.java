@@ -82,48 +82,6 @@ public class CaseApplicationResponseControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Test
-    @Ignore
-    public void givenRequestBody_whenGenerate_c7document_then200Response() throws Exception {
-        //Element<PartyDetails> partyDetailsElement = element(PartyDetails.builder().firstName("test").build());
-        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
-
-        Long id = caseDetails.getId();
-        List<Map> respondents = (List) caseDetails.getData().get("respondents");
-
-        Document response1 = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body("")
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/" + id + "/" + respondents.stream().findFirst().get().get("id") + "/generate-c7document")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(Document.class);
-
-        Assert.assertNotNull(response1.getDocumentHash());
-        Assert.assertNotNull(response1.getDocumentBinaryUrl());
-        Assert.assertNotNull(response1.getDocumentUrl());
-    }
-
     public RequestSpecification getMultipleAuthHeaders() {
         return SerenityRest.with()
             .relaxedHTTPSValidation()
