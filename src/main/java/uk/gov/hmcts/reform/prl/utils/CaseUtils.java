@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Duration;
@@ -509,7 +510,7 @@ public class CaseUtils {
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue())
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
                 && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
-                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
+                && parties.get(index).getValue().getUser().getIdamId().equals(
                 partyId)))
             .findFirst()
             .orElse(-1);
@@ -773,7 +774,8 @@ public class CaseUtils {
                                                    UserDetails userDetails) {
         //This would check for user roles from AM for Judge/Legal advisor/Court admin
         //and then return the corresponding idam role base on that
-        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(role -> role.getRoleName()).toList();
+        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(
+            RoleAssignmentResponse::getRoleName).toList();
 
         String idamRole;
         if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {

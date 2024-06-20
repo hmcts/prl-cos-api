@@ -62,7 +62,6 @@ public class CitizenRespondentAohElementsMapper {
     private static final String NOT_ONGOING = "Behaviour is not ongoing";
 
     public RespondentAllegationsOfHarmData map(String aohData, List<Element<ChildDetailsRevised>> childDetails) {
-        log.info("inside RespondentAllegationsOfHarmData map()");
         if (isNotEmpty(aohData)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -84,7 +83,6 @@ public class CitizenRespondentAohElementsMapper {
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
         List<Element<ChildDetailsRevised>> newChildDetails) {
         RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = RespondentAllegationsOfHarmData.builder().build();
-        log.info("AOH data" + c100RebuildSafetyConcernsElements.getHaveSafetyConcerns());
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             respondentAllegationsOfHarmData = respondentAllegationsOfHarmData.toBuilder()
                 .respAohYesOrNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
@@ -97,7 +95,6 @@ public class CitizenRespondentAohElementsMapper {
                                                           newChildDetails, respondentAllegationsOfHarmData);
             respondentAllegationsOfHarmData = buildAohAbduction(c100RebuildSafetyConcernsElements, respondentAllegationsOfHarmData);
         }
-        log.info("allegation of harm data {}", respondentAllegationsOfHarmData);
         return respondentAllegationsOfHarmData;
     }
 
@@ -465,7 +462,6 @@ public class CitizenRespondentAohElementsMapper {
             List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
             newChildDetails.forEach(s -> {
                 boolean contains = Arrays.asList(abusedChildren).contains(String.valueOf(s.getId()));
-                log.info("abused children {}, {}, contains {}", abusedChildren, s.getId(), contains);
                 if (contains) {
                     valueElements.add(DynamicMultiselectListElement.builder()
                                           .code(s.getId().toString()).label(s.getValue().getFirstName()
