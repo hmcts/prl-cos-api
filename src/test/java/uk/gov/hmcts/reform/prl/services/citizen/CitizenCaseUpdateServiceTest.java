@@ -297,6 +297,59 @@ public class CitizenCaseUpdateServiceTest {
     }
 
     @Test
+    public void testSubmitApplicationWithAutoLinkApplicant() throws IOException {
+        C100RebuildData c100RebuildData = getC100RebuildData();
+        partyDetails = PartyDetails.builder()
+            .email("abc@test.com").build();
+        Long caseIdSubmit = 12345L;
+
+        CaseData caseData = CaseData.builder().id(caseIdSubmit)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .c100RebuildData(c100RebuildData)
+            .applicants(List.of(element(partyDetails)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
+                                      .applicationServedYesNo(YesOrNo.Yes)
+
+                                      .build())
+            .userInfo(List.of(element(UserInfo.builder().emailAddress("abc@test.com").build())))
+            .build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDetails,
+            caseData,
+            UserDetails.builder().build()
+        );
+        when(citizenPartyDetailsMapper.buildUpdatedCaseData(
+            any(),
+            any()
+        )).thenReturn(caseData);
+        when(allTabService.getStartUpdateForSpecificUserEvent(anyString(), anyString(), anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
+        when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseIdSubmit)))
+            .thenReturn(CaseDetails.builder().id(caseIdSubmit).build());
+        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+            authToken,
+            String.valueOf(caseId),
+            "citizenSaveC100DraftInternal",
+            caseData
+        ));
+    }
+
+    @Test
     public void testWithdrawCaseApplication() throws IOException {
         C100RebuildData c100RebuildData = getC100RebuildData();
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
