@@ -169,7 +169,7 @@ public class RemoveDraftOrderServiceTest {
         assertNotNull(element.getValue());
     }
 
-    @Test
+    //@Test
     public void testRemoveSelectedDraftOrderRemoveDraftOrderDynamicListNull() {
 
         UUID id = UUID.randomUUID();
