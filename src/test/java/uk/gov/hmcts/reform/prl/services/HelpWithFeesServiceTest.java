@@ -58,7 +58,7 @@ public class HelpWithFeesServiceTest {
     @Test
     public void testSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedResponse = helpWithFeesService.handleSubmitted();
-        assertEquals(CONFIRMATION_BODY, submittedResponse.getBody().getConfirmationHeader());
-        assertEquals(APPLICATION_UPDATED, submittedResponse.getBody().getConfirmationBody());
+        assertEquals(APPLICATION_UPDATED, submittedResponse.getBody().getConfirmationHeader());
+        assertEquals(CONFIRMATION_BODY, submittedResponse.getBody().getConfirmationBody());
     }
 }
