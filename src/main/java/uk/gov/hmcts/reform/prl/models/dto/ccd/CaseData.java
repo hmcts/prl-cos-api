@@ -803,10 +803,4 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String removeDraftOrderText;
 
     private Object removeDraftOrdersDynamicList;
-
-    /**
-     * Process urgent help with fees.
-     */
-    @JsonUnwrapped
-    private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
 }
