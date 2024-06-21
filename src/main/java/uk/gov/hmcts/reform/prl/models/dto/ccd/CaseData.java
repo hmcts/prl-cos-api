@@ -488,6 +488,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     Message messageReply;
     SendOrReply chooseSendOrReply;
 
+    @JsonUnwrapped
+    private SendAndReplyDto sendAndReplyDto;
+
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
@@ -799,8 +802,4 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
-    //Amend Draft order
-    private String removeDraftOrderText;
-
-    private Object removeDraftOrdersDynamicList;
 }
