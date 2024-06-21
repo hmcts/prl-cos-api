@@ -42,6 +42,7 @@ java:
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
     IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
+    
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2249-ccd-data-store-api
