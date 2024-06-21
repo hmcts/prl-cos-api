@@ -143,8 +143,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
 
-                if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-                    closedMessages.addAll(caseData.getClosedMessages());
+                if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+                    closedMessages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
                 }
 
                 messages.removeAll(closedMessages);
@@ -153,7 +153,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
                     caseData.getMessageReply(),
-                    caseData.getOpenMessages()
+                    caseData.getSendOrReplyDto().getOpenMessages()
                 );
             }
 
@@ -163,11 +163,17 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         // sort lists of messages with most recent first
-        if (ofNullable(caseData.getOpenMessages()).isPresent()) {
-            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getOpenMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getOpenMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            caseData.getSendOrReplyDto().getClosedMessages().sort(Comparator.comparing(
+                m -> m.getValue().getUpdatedTime(),
+                Comparator.reverseOrder()
+            ));
         }
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -184,9 +190,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        List<Element<Message>> messages = caseData.getOpenMessages();
-        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            messages.addAll(caseData.getClosedMessages());
+        List<Element<Message>> messages = caseData.getSendOrReplyDto().getOpenMessages();
+        if (ofNullable(caseData.getSendOrReplyDto().getClosedMessages()).isPresent()) {
+            messages.addAll(caseData.getSendOrReplyDto().getClosedMessages());
         }
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 

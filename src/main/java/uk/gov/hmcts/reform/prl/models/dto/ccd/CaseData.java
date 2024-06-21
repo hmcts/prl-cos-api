@@ -89,6 +89,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
@@ -98,9 +99,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
@@ -476,17 +475,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     /**
      * Send and reply to messages.
      */
-    @JsonProperty("openMessages")
-    private final List<Element<Message>> openMessages;
 
-    @JsonProperty("closedMessages")
-    private final List<Element<Message>> closedMessages;
+    @JsonUnwrapped
+    SendOrReplyDto sendOrReplyDto;
 
-    @JsonProperty("allocatedJudgeForSendAndReply")
-    private final List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
-
-    @JsonProperty("messageObject")
-    MessageMetaData messageMetaData;
     String messageContent;
     Object replyMessageDynamicList;
     Message messageReply;
