@@ -66,7 +66,7 @@ public class HelpWithFeesService {
                                                                        caseData.getCaseSubmittedTimeStamp()));
         caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
                                                                                       .code(UUID.fromString(TEST_UUID))
-                                                                                      .label( dynamicElement).build())).build());
+                                                                                      .label(dynamicElement).build())).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }

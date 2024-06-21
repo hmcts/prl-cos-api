@@ -8,13 +8,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -38,7 +39,7 @@ public class HelpWithFeesServiceTest {
         CaseData casedata = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseSubmittedTimeStamp("")
-            .id(123l)
+            .id(123L)
             .applicantCaseName("test")
             .helpWithFeesNumber("")
             .applicants(List.of(element(PartyDetails.builder()
@@ -47,7 +48,7 @@ public class HelpWithFeesServiceTest {
                                             .build())))
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = CaseDetails.builder()
-            .id(123l)
+            .id(123L)
             .state("")
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
