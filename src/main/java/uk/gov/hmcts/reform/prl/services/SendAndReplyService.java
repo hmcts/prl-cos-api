@@ -1234,7 +1234,8 @@ public class SendAndReplyService {
                 messageObject.getJudgeEmail()
             ).get(0).getId();
             if (!closeMessage) {
-                List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getAllocatedJudgeForSendAndReply();
+                List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData
+                    .getSendAndReplyDto().getAllocatedJudgeForSendAndReply();
 
                 List<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyList = null;
                 Optional<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyOptional = Optional.empty();
@@ -1342,7 +1343,8 @@ public class SendAndReplyService {
     private void removeRoleAssignmentBasedonJudgeEmail(CaseData caseData, UUID messageElement, Message messageObject) {
         // j1 -> how many rows(if multiple), j1 and m1 -> remove /// j1 -> if only single row -> call remove roleass
 
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReplyList = caseData.getAllocatedJudgeForSendAndReply();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReplyList = caseData
+            .getSendAndReplyDto().getAllocatedJudgeForSendAndReply();
 
         if (allocatedJudgeForSendAndReplyList.stream().map(Element::getValue).toList()
             .stream().filter(e -> messageObject.getJudgeEmail().equals(e.getJudgeEmailId()))
