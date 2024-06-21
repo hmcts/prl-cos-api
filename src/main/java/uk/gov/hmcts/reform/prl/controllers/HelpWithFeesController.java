@@ -35,7 +35,7 @@ public class HelpWithFeesController {
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "about to start callback for service of application event")
+    @Operation(description = "about to start callback for Process Urgent Help with Fees event.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
@@ -55,7 +55,7 @@ public class HelpWithFeesController {
 
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "submitted callback for service of application event.Serve Parties Email and Post Notification")
+    @Operation(description = "submitted callback for Process Urgent Help with Fees event.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
