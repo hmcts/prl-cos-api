@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -231,18 +230,37 @@ public class CaseService {
                 dateTimeFormatter
             )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
-            .caseManagementLocation(getCourtLocationByEpmsId(dssCaseData.getSelectedCourt(), authToken))
-            .courtName(getCourtLocationByEpmsId(dssCaseData.getSelectedCourt(), authToken).getBaseLocationName())
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
             .dssCaseDetails(
-            DssCaseDetails.builder()
+            caseData.getDssCaseDetails().toBuilder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
                 .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
-        System.out.println("updatedCaseData --" + updatedCaseData);
+        updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
+        log.info("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
+    }
+
+    private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
+        if (null != updatedCaseData.getDssCaseDetails()
+            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
+            && null != dssCaseData.getSelectedCourt()) {
+
+            CaseManagementLocation courtLocationByEpmsId = getCourtLocationByEpmsId(
+                dssCaseData.getSelectedCourt(),
+                authToken
+            );
+            updatedCaseData = updatedCaseData.toBuilder()
+                .caseManagementLocation(courtLocationByEpmsId)
+                .courtName(courtLocationByEpmsId.getBaseLocationName())
+                .build();
+        }
+        return updatedCaseData;
     }
 
     private CaseManagementLocation getCourtLocationByEpmsId(String epmsId, String authorisation) {
