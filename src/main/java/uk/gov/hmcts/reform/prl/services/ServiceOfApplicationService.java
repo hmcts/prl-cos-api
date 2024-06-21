@@ -524,7 +524,9 @@ public class ServiceOfApplicationService {
                                                Templates.PRL_LET_ENG_AP1
                     );
                 }
-                generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+                generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
+                                                     caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA()
+                                                         .toString());
             }
         }
         return whoIsResponsibleForServing;
@@ -776,11 +778,12 @@ public class ServiceOfApplicationService {
         if (null != emailNotification) {
             emailNotificationDetails.add(element(emailNotification));
         }
-        generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap);
+        generateUnservedRespondentPackDaCbCa(caseData, authorization, staticDocs, caseDataMap,
+                                             caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString());
     }
 
     private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
-                                                      Map<String, Object> caseDataMap) {
+                                                      Map<String, Object> caseDataMap, String personalServiceBy) {
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
             authorization,
@@ -791,7 +794,7 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DATE_CREATED)
-            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
+            .personalServiceBy(personalServiceBy)
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
@@ -2493,7 +2496,9 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
+            dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
+        }
         return dataMap;
     }
 
@@ -2566,8 +2571,7 @@ public class ServiceOfApplicationService {
             c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData,
                                                                         DATE_CREATED, c100StaticDocs);
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData,
-                                                    DATE_CREATED, c100StaticDocs);
+            buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, c100StaticDocs);
         }
         //serving other people in the case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -2604,7 +2608,7 @@ public class ServiceOfApplicationService {
 
     private void buildPacksConfidentialCheckC100Personal(String authorization,
                                                          Map<String, Object> caseDataUpdated,
-                                                         CaseData caseData, String dateCreated,
+                                                         CaseData caseData,
                                                          List<Document> c100StaticDocs) {
         if (SoaSolicitorServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
@@ -2632,7 +2636,7 @@ public class ServiceOfApplicationService {
                 .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
-                .packCreatedDate(dateCreated)
+                .packCreatedDate(DATE_CREATED)
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2640,19 +2644,19 @@ public class ServiceOfApplicationService {
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
-                .packCreatedDate(dateCreated)
+                .packCreatedDate(DATE_CREATED)
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
-                                                                                                  dateCreated, c100StaticDocs));
+                                                                                                  DATE_CREATED, c100StaticDocs));
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
                 .servedBy(UNREPRESENTED_APPLICANT)
                 .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(dateCreated)
+                .packCreatedDate(DATE_CREATED)
                 .build());
         } else if (SoaCitizenServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
