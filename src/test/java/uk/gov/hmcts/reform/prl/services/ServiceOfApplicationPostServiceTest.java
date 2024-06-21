@@ -98,6 +98,7 @@ public class ServiceOfApplicationPostServiceTest {
     private static final String randomAlphaNumeric = "Abc123EFGH";
     private static final String CONTENT_TYPE = "application/json";
     private DynamicMultiSelectList dynamicMultiSelectList;
+    CaseData caseData;
 
     @Before
     public void setup() {
@@ -107,6 +108,25 @@ public class ServiceOfApplicationPostServiceTest {
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
+            .build();
+        PartyDetails applicant = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@applicant.com")
+            .build();
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .applicantsFL401(applicant)
+            .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("test@gmail.com")
+                                  .representativeLastName("LastName")
+                                  .representativeFirstName("FirstName")
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .build())
             .build();
     }
 
@@ -159,7 +179,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -204,7 +224,7 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -266,7 +286,7 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -306,15 +326,6 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void testStaticDocsForC100Applicant() {
-        PartyDetails applicant = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("test@applicant.com")
-            .build();
-
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
 
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
@@ -325,45 +336,14 @@ public class ServiceOfApplicationPostServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
                                                                                     .isGenWelsh(true)
                                                                                     .isGenEng(true).build());
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(applicant)))
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
-            .build();
+
+        caseData.toBuilder().caseTypeOfApplication("C100").build();
+
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100", caseData));
     }
 
     @Test
     public void testStaticDocsForFL401() {
-
-        PartyDetails applicant = PartyDetails.builder()
-            .solicitorEmail("test@gmail.com")
-            .representativeLastName("LastName")
-            .representativeFirstName("FirstName")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("test@applicant.com")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
-            .respondentsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .build())
-            .build();
 
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
@@ -375,6 +355,8 @@ public class ServiceOfApplicationPostServiceTest {
                                                                                     .isGenWelsh(true)
                                                                                     .isGenEng(true).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        caseData.toBuilder().caseTypeOfApplication("FL401").build();
 
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
@@ -401,7 +383,7 @@ public class ServiceOfApplicationPostServiceTest {
     @Test
     public void testGetCoverLetterForEnglish() throws Exception {
 
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .build();
 
@@ -423,7 +405,7 @@ public class ServiceOfApplicationPostServiceTest {
     @Test
     public void testGetCoverLetterForWelsh() throws Exception {
 
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .build();
 
@@ -445,7 +427,7 @@ public class ServiceOfApplicationPostServiceTest {
     @Test
     public void testGetCoverLetterWithNoAddressLine1() throws Exception {
 
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .build();
 
@@ -482,7 +464,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void testUploadedDocumentsServiceOfApplication() {
-        final CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .pd36qLetter(Document.builder()
@@ -510,7 +492,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void testFinalDocumentEnglish() {
-        CaseData caseData =  CaseData.builder()
+        caseData =  CaseData.builder()
             .finalDocument(Document.builder()
                                .documentUrl("documentUrl")
                                .documentBinaryUrl("documentBinaryUrl")
@@ -526,7 +508,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void testFinalDocumentWelsh() {
-        CaseData caseData =  CaseData.builder()
+        caseData =  CaseData.builder()
             .finalDocument(Document.builder()
                                .documentUrl("documentUrl")
                                .documentBinaryUrl("documentBinaryUrl")
@@ -547,7 +529,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldReturnEmptyC1ADocumentIfNoAllegationOfHarm() {
-        CaseData caseData =  CaseData.builder()
+        caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(No)
                                   .build())
@@ -558,7 +540,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldReturnEnglishC1ADocumentIfAllegationOfHarmIsYes() {
-        CaseData caseData =  CaseData.builder()
+        caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .build())
@@ -582,7 +564,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldReturnWelshC1ADocumentIfAllegationOfHarmIsYes() {
-        CaseData caseData =  CaseData.builder()
+        caseData =  CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .build())
@@ -616,7 +598,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception {
-        CaseData caseData = CaseData.builder().build();
+        caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
         List<Document> coversheets = serviceOfApplicationPostService.getCoverSheets(caseData,AUTH,address,"test name",
                                                                                     DOCUMENT_COVER_SHEET_HINT);
