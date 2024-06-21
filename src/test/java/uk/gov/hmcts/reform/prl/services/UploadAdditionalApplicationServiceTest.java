@@ -134,10 +134,9 @@ class UploadAdditionalApplicationServiceTest {
     void testGetAdditionalApplicationElementsForBothC2AndOther() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(partyDynamicMultiSelectList)
-            .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
+            .additionalApplicationsApplyingFor(
                 AdditionalApplicationTypeEnum.otherOrder
-            ))
+            )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -174,7 +173,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testCalculateAdditionalApplicationsFeeSolicitorDetailsNotEmpty() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
                 .representedPartyType("test")
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
                 .build();
@@ -202,7 +201,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testCalculateAdditionalApplicationsFeeApplicantSolicitor() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .representedPartyType("test")
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
@@ -282,7 +281,7 @@ class UploadAdditionalApplicationServiceTest {
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
                 .additionalApplicantsList(partyDynamicMultiSelectList)
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+                .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
                 .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
                 .temporaryC2Document(c2DocumentBundle)
                 .representedPartyType(CA_RESPONDENT)
@@ -326,7 +325,7 @@ class UploadAdditionalApplicationServiceTest {
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(partyDynamicMultiSelectList)
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .representedPartyType("DUMMY_PARTY")
@@ -388,7 +387,7 @@ class UploadAdditionalApplicationServiceTest {
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
                 .additionalApplicantsList(partyDynamicMultiSelectList)
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+                .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
                 .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
                 .temporaryC2Document(c2DocumentBundle)
                 .representedPartyType(CA_RESPONDENT)
@@ -417,7 +416,7 @@ class UploadAdditionalApplicationServiceTest {
                                                                     .roles(List.of(Roles.CITIZEN.getValue()))
                                                                     .build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .additionalApplicantsList(partyDynamicMultiSelectList)
             .build();
@@ -442,7 +441,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testCalculateAdditionalApplicationsFee() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -482,7 +481,7 @@ class UploadAdditionalApplicationServiceTest {
         "TEST"})
     void testCalculateAdditionalApplicationsFeeForApplicantSolicitor(String roles) throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -517,7 +516,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testCalculateAdditionalApplicationsFeeIsEmpty() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
                 .build();
         CaseData caseData = CaseData.builder()
@@ -552,7 +551,7 @@ class UploadAdditionalApplicationServiceTest {
             .build();
 
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .additionalApplicationFeesToPay("£232.00")
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS).build())
@@ -582,7 +581,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testPrePopulateApplicantsForCaApplicant() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -622,7 +621,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testUploadAdditionalApplicationSubmitted() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -643,7 +642,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testUploadAdditionalApplicationSubmittedWithHwfYes() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -665,7 +664,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testUploadAdditionalApplicationSubmittedWithHwfNo() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -687,7 +686,7 @@ class UploadAdditionalApplicationServiceTest {
     @Test
     void testPopulateHearingList() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.c2Order)
             .temporaryC2Document(C2DocumentBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
