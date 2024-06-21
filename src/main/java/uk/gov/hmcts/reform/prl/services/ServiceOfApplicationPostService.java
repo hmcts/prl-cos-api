@@ -132,7 +132,6 @@ public class ServiceOfApplicationPostService {
     }
 
     private UploadResponse getFl401UploadResponse(String auth, DocumentLanguage documentLanguage) {
-        UploadResponse uploadResponse;
         List<MultipartFile> files = new ArrayList<>();
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(
@@ -158,18 +157,16 @@ public class ServiceOfApplicationPostService {
                 DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
             ));
         }
-        uploadResponse = caseDocumentClient.uploadDocuments(
+        return caseDocumentClient.uploadDocuments(
             auth,
             authTokenGenerator.generate(),
             PrlAppsConstants.CASE_TYPE,
             PrlAppsConstants.JURISDICTION,
             files
         );
-        return uploadResponse;
     }
 
     private UploadResponse getC100UploadResponse(String auth, DocumentLanguage documentLanguage) {
-        UploadResponse uploadResponse;
         List<MultipartFile> files = new ArrayList<>();
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(
@@ -239,14 +236,13 @@ public class ServiceOfApplicationPostService {
                 ));
         }
 
-        uploadResponse = caseDocumentClient.uploadDocuments(
+        return caseDocumentClient.uploadDocuments(
             auth,
             authTokenGenerator.generate(),
             PrlAppsConstants.CASE_TYPE,
             PrlAppsConstants.JURISDICTION,
             files
         );
-        return uploadResponse;
     }
 
     public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
