@@ -226,9 +226,15 @@ public class CaseService {
             DssCaseDetails.builder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
+                .dssCaseIsFree(checkIfDssCaseIsFree(dssCaseData.getCaseTypeOfApplication()))
                 .build()).build();
         System.out.println("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
+    }
+
+    private boolean checkIfDssCaseIsFree(String caseTypeOfApplication) {
+        return caseTypeOfApplication.equalsIgnoreCase("FGM")
+            || caseTypeOfApplication.equalsIgnoreCase("FMPO");
     }
 }
