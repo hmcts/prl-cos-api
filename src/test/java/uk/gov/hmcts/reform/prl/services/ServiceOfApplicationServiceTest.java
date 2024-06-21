@@ -81,6 +81,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -89,6 +90,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
@@ -110,11 +112,14 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_AD
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
+
+    public static final String COURT_COURT_ADMIN = "Court - court admin";
 
     @InjectMocks
     private ServiceOfApplicationService serviceOfApplicationService;
@@ -1175,7 +1180,7 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court - court admin", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
 
     }
 
@@ -2310,13 +2315,10 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
-                                      .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtBailiff)
+                                      .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
-                                      //.soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                                          .applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -2328,8 +2330,6 @@ public class ServiceOfApplicationServiceTest {
             .data(dataMap)
             .build();
         when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
-
-
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -2358,14 +2358,11 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(Yes)
-                                      .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                                      .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.courtAdmin)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
-                                      //.soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
-                                                                          .applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -2573,6 +2570,99 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         //assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+    }
+
+    @Test
+    public void testSendNotificationsWhenUnServedPackDaLipEmail() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorEmail("abc")
+            .user(User.builder()
+                      .idamId(TEST_UUID).build())
+            .contactPreferences(ContactPreferences.email)
+            .partyId(UUID.fromString(TEST_UUID))
+            .build();
+
+        CaseInvite caseInvite = CaseInvite.builder()
+            .partyId(UUID.fromString(TEST_UUID)).build();
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
+        List<Element<String>> partyIds = new ArrayList<>();
+        partyIds.add(element(UUID.fromString(TEST_UUID),TEST_UUID));
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .caseInvites(caseInviteList)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .partyIds(partyIds)
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                 .partyIds(partyIds)
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
+                                      .applicationServedYesNo(Yes)
+                                      .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        CaseData updatedcaseData = serviceOfApplicationService
+            .sendNotificationsForUnServedPacks(caseData, authorization);
+        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+    }
+
+    @Test
+    public void testSendNotificationsWhenUnServedPackDaLipPost() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorEmail("abc")
+            .user(User.builder()
+                      .idamId(TEST_UUID).build())
+            .contactPreferences(ContactPreferences.post)
+            .partyId(UUID.fromString(TEST_UUID))
+            .build();
+
+        CaseInvite caseInvite = CaseInvite.builder()
+            .partyId(UUID.fromString(TEST_UUID)).build();
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
+        List<Element<String>> partyIds = new ArrayList<>();
+        partyIds.add(element(UUID.fromString(TEST_UUID),TEST_UUID));
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .caseInvites(caseInviteList)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .build()))
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .partyIds(partyIds)
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIds)
+                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                  .build())
+                                      .applicationServedYesNo(Yes)
+                                      .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        CaseData updatedcaseData = serviceOfApplicationService
+            .sendNotificationsForUnServedPacks(caseData, authorization);
+        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
     }
 
     @Test
@@ -3553,6 +3643,48 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testHandleSoaSubmittedForConfidentialPersonalAppLip() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
+                                 .build())
+            .respondentsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID))
+                                  .build())
+            .c8Document(Document.builder().build())
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaCitizenServingRespondentsOptionsDA(unrepresentedApplicant)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
+        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        dataMap, caseData, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals("# The application will be reviewed for confidential details",
+                     Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+    }
+
+    @Test
     public void testHandleSoaSubmittedForC100ConfidentialPersonalCaCb() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4109,4 +4241,229 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
+    @Test
+    public void testSendNotificationDaPersonalApplicantLipSendGridEmail() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(unrepresentedApplicant)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
+                                                                                       Mockito.any(),Mockito.any(),
+                                                                                       Mockito.any(),Mockito.anyString());
+    }
+
+    @Test
+    public void testSendNotificationDaPersonalApplicantLipGovNotifyEmail() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(unrepresentedApplicant)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testSendNotificationDaPersonalApplicantLipPost() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.post)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(unrepresentedApplicant)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
+                                                                            Mockito.anyString());
+    }
+
+    @Test
+    public void testSendNotificationDaPersonalCourtAdminPost() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.post)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.courtAdmin)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
+                                                                            Mockito.anyString());
+    }
+
+    @Test
+    public void testSendNotificationDaPersonalCourtAdminSendGridEmail() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.courtAdmin)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
+                                                                                       Mockito.any(),Mockito.any(),
+                                                                                       Mockito.any(),Mockito.anyString());
+    }
+
+    @Test
+    public void testSendNotificationDaPersonalCourtAdminGovNotifyEmail() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.courtAdmin)
+                                      .build())
+            .finalDocument(Document.builder().build())
+            .finalWelshDocument(Document.builder().build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+    }
 }
