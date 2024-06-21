@@ -712,4 +712,27 @@ class UploadAdditionalApplicationServiceTest {
             TEMPORARY_C_2_DOCUMENT));
     }
 
+
+    @Test
+    void testPopulateHearingListOtherApplication() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .hwfRequestedForAdditionalApplications(YesOrNo.No)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        assertTrue(uploadAdditionalApplicationService.populateHearingList("testAuth", callbackRequest).containsKey(
+            TEMPORARY_C_2_DOCUMENT));
+    }
 }
