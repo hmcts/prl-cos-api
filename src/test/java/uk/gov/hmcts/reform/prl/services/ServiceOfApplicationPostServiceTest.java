@@ -351,20 +351,6 @@ public class ServiceOfApplicationPostServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@applicant.com")
             .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("test")
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(applicant)
-            .respondentsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .build())
-            .build();
-
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
@@ -375,7 +361,18 @@ public class ServiceOfApplicationPostServiceTest {
                                                                                     .isGenWelsh(true)
                                                                                     .isGenEng(true).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("test@gmail.com")
+                                  .representativeLastName("LastName")
+                                  .representativeFirstName("FirstName")
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .build())
+            .build();
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
 
 
