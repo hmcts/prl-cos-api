@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.filter.cafcaas;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,7 @@ public class CafCassFilterTest {
     @Test
     public void filterTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         CafCassResponse cafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),
             CafCassResponse.class
