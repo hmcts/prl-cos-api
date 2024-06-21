@@ -12,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -60,14 +62,12 @@ public class RestrictedCaseAccessController {
         @ApiResponse(responseCode = "200", description = "Callback processed", content = @Content),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public void restrictedCaseAccessSubmitted(
+    public ResponseEntity<SubmittedCallbackResponse> restrictedCaseAccessSubmitted(
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
             @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("** restrictedCaseAccess event started");
-            restrictedCaseAccessService.changeCaseAccessRequestSubmitted(callbackRequest);
-            log.info("** restrictedCaseAccess submitUpdate done");
+            return restrictedCaseAccessService.changeCaseAccessRequestSubmitted(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
