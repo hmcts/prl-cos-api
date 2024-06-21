@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -33,6 +34,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 @Slf4j
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
+
+    public static final String DATE_TIME_OF_SUBMISSION_FORMAT = "dd/MM/yyyy hh:mm:ss";
     public static final String ERROR_STRING = "Error while formatting the date from casedetails to casedata.. ";
 
     private CommonUtils() {
@@ -214,6 +217,19 @@ public class CommonUtils {
             log.error(ERROR_STRING + "in formatDateTime Method", e);
         }
         return "";
+    }
+
+    public static String formateLocalDateTime(String localDateTime) {
+        try {
+            if (StringUtils.isNotEmpty(localDateTime)) {
+                LocalDateTime localDateTime1 = LocalDateTime.parse(localDateTime);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_OF_SUBMISSION_FORMAT);
+                return localDateTime1.format(formatter);
+            }
+        } catch (Exception e) {
+            log.error(ERROR_STRING, e);
+        }
+        return " ";
     }
 
     public static boolean isEmpty(@Nullable String string) {

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class HelpWithFeesServiceTest {
 
         CaseData casedata = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .caseSubmittedTimeStamp("")
+            .caseSubmittedTimeStamp(LocalDateTime.now().toString())
             .id(123L)
             .applicantCaseName("test")
             .helpWithFeesNumber("")
