@@ -98,6 +98,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
@@ -480,6 +481,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
+
+    @JsonProperty("allocatedJudgeForSendAndReply")
+    private final List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply;
 
     @JsonProperty("messageObject")
     MessageMetaData messageMetaData;

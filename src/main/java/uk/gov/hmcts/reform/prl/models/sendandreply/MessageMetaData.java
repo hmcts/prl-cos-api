@@ -13,5 +13,6 @@ public class MessageMetaData {
     private  String recipientEmail;
     private  String messageSubject;
     private  String messageUrgency;
+    private  String messageIdentifier;
 
 }
