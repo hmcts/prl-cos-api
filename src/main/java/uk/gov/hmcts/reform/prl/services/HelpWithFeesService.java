@@ -56,29 +56,20 @@ public class HelpWithFeesService {
                       .confirmationBody(CONFIRMATION_BODY).build());
     }
 
-    public void cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        List<String> soaFields = new ArrayList<>(List.of(
-            "pd36qLetter",
-            "specialArrangementsLetter",
-            "additionalDocuments",
-            "sentDocumentPlaceHolder",
-            "soaApplicantsList"
-        ));
-
-        for (String field : soaFields) {
-            if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.put(field, null);
-            }
-        }
-    }
-
     public Map<String, Object> handleAboutToStart(String authorisation, CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,"test","test","test","test"));
+        String dynamicElement = String.format("Child arrangements application C100 - %s", caseData.getCaseSubmittedTimeStamp());
+        caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                                                                       String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                                                                       "test",
+                                                                       caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                                                                       caseData.getCaseSubmittedTimeStamp()
+        ));
         caseDataUpdated.put(
             "hwfAppList",
-            DynamicList.builder().listItems(List.of(DynamicListElement.builder().code(UUID.fromString(TEST_UUID)).label("test").build())).build()
+            DynamicList.builder().listItems(List.of(DynamicListElement.builder().code(UUID.fromString(TEST_UUID))
+                                                        .label( dynamicElement).build())).build()
         );
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
