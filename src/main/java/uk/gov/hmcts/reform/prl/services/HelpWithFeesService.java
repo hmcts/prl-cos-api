@@ -38,7 +38,8 @@ public class HelpWithFeesService {
     public static final String CONFIRMATION_BODY = """
        You’ve updated the applicant’s help with fees record. You can now process the family application.
 
-        If the applicant needs to make a payment. You or someone else at the court needs to contact the applicant or their legal representative. to arrange a payment.
+        If the applicant needs to make a payment. You or someone else at the court
+        needs to contact the applicant or their legal representative. to arrange a payment.
         """;
     public static final String HWF_APPLICATION_DYNAMIC_DATA = """
        Application: %s
