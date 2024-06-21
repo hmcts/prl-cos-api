@@ -226,12 +226,6 @@ public class EditAndApproveDraftOrderController {
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated, CaseData caseData, String loggedInUserType) {
-        if (Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId())) {
-            caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
-                .getDraftOrderNameForWA(caseData, true));
-        }
-
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -241,7 +235,7 @@ public class EditAndApproveDraftOrderController {
 
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
-            draftAnOrderService.getDraftOrderNameForWA(caseData, true)
+            draftAnOrderService.getApprovedDraftOrderNameForWA(caseData)
         );
         caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
             caseData,

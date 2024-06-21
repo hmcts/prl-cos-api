@@ -786,7 +786,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private StatementOfService statementOfService;
 
     @JsonUnwrapped
-    private final AllPartyFlags allPartyFlags;
+    private AllPartyFlags allPartyFlags;
     /**
      * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
      */
@@ -799,4 +799,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
+    //Amend Draft order
+    private String removeDraftOrderText;
+
+    private Object removeDraftOrdersDynamicList;
 }
