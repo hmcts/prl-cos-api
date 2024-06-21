@@ -276,7 +276,7 @@ public class CaseService {
         if (courtVenue.isPresent()) {
             return CaseManagementLocation.builder()
                 .baseLocation(courtVenue.get().getCourtEpimmsId())
-                .baseLocationName(courtVenue.get().getVenueName())
+                .baseLocationName(courtVenue.get().getCourtName())
                 .region(courtVenue.get().getRegionId())
                 .regionName(courtVenue.get().getRegion()).build();
         }
