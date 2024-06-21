@@ -1197,7 +1197,7 @@ public class SendAndReplyService {
         if ((null != newMessage.getInternalMessageWhoToSendTo() && newMessage.getInternalMessageWhoToSendTo().equals(
             InternalMessageWhoToSendToEnum.JUDICIARY))
             || (null != newMessage.getInternalMessageReplyTo() && newMessage.getInternalMessageReplyTo().equals(
-            InternalMessageWhoToSendToEnum.JUDICIARY))
+            InternalMessageReplyToEnum.JUDICIARY))
         ) {
             List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getSendOrReplyDto()
                 .getAllocatedJudgeForSendAndReply();
@@ -1273,7 +1273,7 @@ public class SendAndReplyService {
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
         String idamId) {
 
-        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).collect(Collectors.toList())
+        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).toList()
             .stream().filter(i -> i.getJudgeIdamId().equals(idamId)).findAny();
     }
 
@@ -1282,7 +1282,7 @@ public class SendAndReplyService {
         String idamId,
         String messageIdentifier) {
 
-        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).collect(Collectors.toList())
+        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).toList()
             .stream().anyMatch(i -> i.getJudgeIdamId().equals(idamId) && i.getMessageIdentifier().equals(
                 messageIdentifier));
     }
