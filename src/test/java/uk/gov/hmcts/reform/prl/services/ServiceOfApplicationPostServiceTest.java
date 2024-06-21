@@ -371,7 +371,9 @@ public class ServiceOfApplicationPostServiceTest {
 
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(caseDocumentClient.uploadDocuments(AUTH, s2sToken, CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
-
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401", caseData));
