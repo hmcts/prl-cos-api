@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -267,9 +268,10 @@ public class SendAndReplyServiceTest {
         messages.add(message2Element);
         caseData = CaseData.builder()
             .applicantCaseName("Test name")
-            .openMessages(messages)
-            .closedMessages(messages)
-            .messageMetaData(metaData)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages)
+                                .closedMessages(messages)
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -280,8 +282,9 @@ public class SendAndReplyServiceTest {
         listOfClosedMessages = Arrays.asList(element(message2));
 
         caseDataWithAddedMessage = CaseData.builder()
-            .openMessages(messagesWithOneAdded)
-            .messageMetaData(metaData)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messagesWithOneAdded)
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -307,7 +310,9 @@ public class SendAndReplyServiceTest {
             .senderEmail("sender@email.com")
             .build();
         CaseData caseDataWithPreFill = CaseData.builder()
-            .messageMetaData(preFillMetaData)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .messageMetaData(preFillMetaData)
+                                .build())
             .build();
         assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
         assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill, auth).get("messageObject"), preFillMetaData);
@@ -320,13 +325,15 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNewMessageIsAddedToListWhenNoOpenMessagesPresent() {
-        CaseData caseDataNoMessages = CaseData.builder().build();
+        CaseData caseDataNoMessages = CaseData.builder().sendOrReplyDto(SendOrReplyDto.builder().build()).build();
         CaseData caseDataWithMessageAdded = CaseData.builder()
-            .openMessages(Collections.singletonList(element(message3)))
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .openMessages(Collections.singletonList(element(message3)))
+                                .build())
             .build();
 
         sendAndReplyService.addNewMessage(caseDataNoMessages, message3);
-        assertThat(caseDataWithMessageAdded.getOpenMessages())
+        assertThat(caseDataWithMessageAdded.getSendOrReplyDto().getOpenMessages())
             .hasSize(1)
             .extracting(m -> m.getValue().getMessageContent())
             .containsExactly("This is message 3 body");
@@ -334,8 +341,8 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNumberOfClosedMessagesIncreasesAndOpenDecreases() {
-        UUID messageToClose = caseData.getOpenMessages().get(0).getId();
-        long countOpen = caseData.getOpenMessages().stream()
+        UUID messageToClose = caseData.getSendOrReplyDto().getOpenMessages().get(0).getId();
+        long countOpen = caseData.getSendOrReplyDto().getOpenMessages().stream()
             .filter(m -> m.getValue().getStatus().equals(OPEN))
             .count();
         countOpen -= 1; // we expect one less message to be open.
