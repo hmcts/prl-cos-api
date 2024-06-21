@@ -36,7 +36,7 @@ public class HelpWithFeesControllerTest {
     private CallbackRequest callbackRequest;
 
     @Before
-    public void setup(){
+    public void setup() {
         caseDetails = CaseDetails.builder()
             .id(123L)
             .build();
@@ -55,7 +55,7 @@ public class HelpWithFeesControllerTest {
     @Test(expected = RuntimeException.class)
     public void test_HelpWithFeesAboutToStartThrowsException() {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        helpWithFeesController.handleAboutToStart( authToken, s2sToken, callbackRequest);
+        helpWithFeesController.handleAboutToStart(authToken, s2sToken, callbackRequest);
         verifyNoInteractions(helpWithFeesService);
     }
 

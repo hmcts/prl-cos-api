@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,15 +61,12 @@ public class HelpWithFeesService {
         String dynamicElement = String.format("Child arrangements application C100 - %s", caseData.getCaseSubmittedTimeStamp());
         caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
                                                                        String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
-                                                                       "test",
+                                                                       caseData.getHelpWithFeesNumber(),
                                                                        caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       caseData.getCaseSubmittedTimeStamp()
-        ));
-        caseDataUpdated.put(
-            "hwfAppList",
-            DynamicList.builder().listItems(List.of(DynamicListElement.builder().code(UUID.fromString(TEST_UUID))
-                                                        .label( dynamicElement).build())).build()
-        );
+                                                                       caseData.getCaseSubmittedTimeStamp()));
+        caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
+                                                                                      .code(UUID.fromString(TEST_UUID))
+                                                                                      .label( dynamicElement).build())).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
