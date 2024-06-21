@@ -468,13 +468,13 @@ document:
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
-      fl401_draft_template: FL-PRL-GOR-ENG-FL401-draft.docx
+      fl401_draft_template: FL401-draft.docx
       fl401_draft_filename: Draft_DA_application.pdf
       fl401_c8_template: FL-PRL-APP-ENG-FL401-C8-Final.docx
       fl401_c8_filename: C8_Document.pdf
       fl401_final_welsh_template: FL-PRL-APP-WEL-FL401-Final.docx
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
-      fl401_draft_welsh_template: FL-PRL-GOR-WEL-FL401-draft.docx
+      fl401_draft_welsh_template: FL401-draft-Welsh.docx
       fl401_draft_welsh_filename: Draft_DA_Welsh_application.pdf
       fl401_c8_welsh_template: FL-PRL-APP-WEL-FL401-C8.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
