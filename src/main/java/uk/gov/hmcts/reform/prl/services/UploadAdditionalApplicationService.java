@@ -646,10 +646,6 @@ public class UploadAdditionalApplicationService {
     public Map<String, Object> populateHearingList(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("applying for {}",caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor());
-        log.info("c2 enum value {}",AdditionalApplicationTypeEnum.c2Order);
-        log.info("flag value is {}",AdditionalApplicationTypeEnum.c2Order.equals(
-            caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor()));
         if (AdditionalApplicationTypeEnum.c2Order.equals(
             caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
             String s2sToken = authTokenGenerator.generate();
