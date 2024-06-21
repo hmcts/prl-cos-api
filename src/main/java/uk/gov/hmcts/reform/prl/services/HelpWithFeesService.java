@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,8 @@ public class HelpWithFeesService {
     public Map<String, Object> handleAboutToStart(String authorisation, CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String dynamicElement = String.format("Child arrangements application C100 - %s", caseData.getCaseSubmittedTimeStamp());
+        LocalDateTime dateTime = LocalDateTime.parse(caseData.getCaseSubmittedTimeStamp());
+        String dynamicElement = String.format("Child arrangements application C100 - %s", CaseUtils.getFormattedDatAndTime(dateTime));
         caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
                                                                        String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                                                                        caseData.getHelpWithFeesNumber(),
