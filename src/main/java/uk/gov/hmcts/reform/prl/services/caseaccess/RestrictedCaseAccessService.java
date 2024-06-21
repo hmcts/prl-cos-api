@@ -38,6 +38,8 @@ public class RestrictedCaseAccessService {
 
     public static final String RESTRICTED_CASE = " (Restricted case)";
     public static final String PRIVATE_CASE = " (Private case)";
+    public static final String REASONS_TO_PRIVATE_TAB = "reasonsToPrivateTab";
+    public static final String REASONS_TO_RESTRICT_TAB = "reasonsToRestrictTab";
     private final AllTabServiceImpl allTabService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final ExtendedCaseDataService caseDataService;
@@ -68,14 +70,20 @@ public class RestrictedCaseAccessService {
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
             caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
             caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
+            caseDataUpdated.put(REASONS_TO_PRIVATE_TAB, null);
+            caseDataUpdated.put(REASONS_TO_RESTRICT_TAB, caseDataUpdated.get(MARK_AS_RESTRICTED_REASON));
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, RESTRICTED.getValue());
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
             caseDataUpdated.put(MARK_AS_RESTRICTED_REASON, null);
             caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
+            caseDataUpdated.put(REASONS_TO_RESTRICT_TAB, null);
+            caseDataUpdated.put(REASONS_TO_PRIVATE_TAB, caseDataUpdated.get(MARK_AS_PRIVATE_REASON));
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, PRIVATE.getValue());
         } else if (MARK_CASE_AS_PUBLIC.equals(caseEvent)) {
             caseDataUpdated.put(MARK_AS_RESTRICTED_REASON, null);
             caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
+            caseDataUpdated.put(REASONS_TO_RESTRICT_TAB, null);
+            caseDataUpdated.put(REASONS_TO_PRIVATE_TAB, null);
             caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
         }
         updateCaseName(caseDataUpdated, caseEvent);
