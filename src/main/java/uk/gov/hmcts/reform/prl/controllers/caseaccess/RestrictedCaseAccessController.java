@@ -46,6 +46,9 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_RESTRICTED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RestrictedCaseAccessController {
     public static final String CASE_SECURITY_CLASSIFICATION = "caseSecurityClassification";
+    public static final String MARK_AS_PRIVATE_REASON = "markAsPrivateReason";
+    public static final String MARK_AS_PUBLIC_REASON = "markAsPublicReason";
+    public static final String MARK_AS_RESTRICTED_REASON = "markAsRestrictedReason";
     private final AuthorisationService authorisationService;
     private final ExtendedCaseDataService caseDataService;
     private final AllTabServiceImpl allTabService;
@@ -67,10 +70,16 @@ public class RestrictedCaseAccessController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
             if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
+                caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
+                caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
                 caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.RESTRICTED.getValue());
             } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
+                caseDataUpdated.put(MARK_AS_RESTRICTED_REASON, null);
+                caseDataUpdated.put(MARK_AS_PUBLIC_REASON, null);
                 caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PRIVATE.getValue());
             } else if (MARK_CASE_AS_PUBLIC.equals(caseEvent)) {
+                caseDataUpdated.put(MARK_AS_RESTRICTED_REASON, null);
+                caseDataUpdated.put(MARK_AS_PRIVATE_REASON, null);
                 caseDataUpdated.put(CASE_SECURITY_CLASSIFICATION, CaseSecurityClassificationEnum.PUBLIC.getValue());
             }
             log.info("** restrictedCaseAccessAboutToSubmit abs done");
