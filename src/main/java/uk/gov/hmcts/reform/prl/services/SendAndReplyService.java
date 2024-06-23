@@ -1203,18 +1203,23 @@ public class SendAndReplyService {
             if (allocatedJudgeForSendAndReply == null) {
                 allocatedJudgeForSendAndReply = new ArrayList<>();
             }
+
+            String judgeIdamId = null != caseData.getSendOrReplyMessage().getSendMessageObject()
+                ? caseData.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId()
+                : caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
+
             Optional<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyOptional = retreiveExistingJudgeAllocationFromSendAndReply(
                 allocatedJudgeForSendAndReply,
-                newMessage.getSendReplyJudgeName().getIdamId()
+                judgeIdamId
             );
             if (allocatedJudgeForSendAndReplyOptional.isPresent()) {
                 if (!checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
                     allocatedJudgeForSendAndReply,
-                    newMessage.getSendReplyJudgeName().getIdamId(),
+                    judgeIdamId,
                     newMessage.getMessageIdentifier()
                 )) {
                     allocatedJudgeForSendAndReply.add(element(AllocatedJudgeForSendAndReply.builder()
-                                                                  .judgeIdamId(newMessage.getSendReplyJudgeName().getIdamId())
+                                                                  .judgeIdamId(judgeIdamId)
                                                                   .roleAssignmentId(
                                                                       allocatedJudgeForSendAndReplyOptional.get().getRoleAssignmentId())
                                                                   .messageIdentifier(newMessage.getMessageIdentifier())
@@ -1222,16 +1227,16 @@ public class SendAndReplyService {
                                                                   .build()));
                 }
 
-            } else if (!checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(caseData.getId()), newMessage)) {
+            } else if (!checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(caseData.getId()), judgeIdamId)) {
                 allocatedJudgeForSendAndReply
                     .add(element(AllocatedJudgeForSendAndReply
                                      .builder()
                                      .roleAssignmentId(createRoleAssignmentAndRetrieveId(
                                          authorisation,
                                          caseData.getId(),
-                                         newMessage.getSendReplyJudgeName().getIdamId()
+                                         judgeIdamId
                                      ))
-                                     .judgeIdamId(newMessage.getSendReplyJudgeName().getIdamId())
+                                     .judgeIdamId(judgeIdamId)
                                      .messageIdentifier(newMessage.getMessageIdentifier())
                                      .status("ALLOCATED_AS_PART_OF_SEND_AND_REPLY")
                                      .build()));
@@ -1287,9 +1292,9 @@ public class SendAndReplyService {
     }
 
 
-    private boolean checkIfCaseIsAlreadyAllocatedJudge(String caseId, Message newMessage) {
+    private boolean checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
         List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            newMessage.getSendReplyJudgeName().getIdamId()
+            judgeIdamId
         );
         Optional<RoleAssignmentResponse> filteredRoleAssignmentForThisCase = roleAssignmentResponseList.stream()
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
