@@ -31,8 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -142,10 +141,9 @@ public class UpdateHearingActualsService {
                 .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
                 .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().
                     anyMatch(
-                        hearingDaySchedule -> Duration.between(
-                            hearingDaySchedule.getHearingStartDateTime(),
-                            LocalDateTime.now()
-                        ).isZero())).map(CaseHearing::getHearingID).toList();
+                        hearingDaySchedule -> hearingDaySchedule.getHearingStartDateTime().toLocalDate().equals(
+                            LocalDate.now())
+                    )).map(CaseHearing::getHearingID).toList();
 
             caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
 
