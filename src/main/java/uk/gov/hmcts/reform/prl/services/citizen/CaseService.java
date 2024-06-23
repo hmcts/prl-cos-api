@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -70,6 +71,8 @@ public class CaseService {
     private final HearingService hearingService;
     private final LocationRefDataApi locationRefDataApi;
     private final AuthTokenGenerator authTokenGenerator;
+    @Value("${courts.edgeCaseCourtList}")
+    protected String edgeCaseCourtList;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -198,6 +201,10 @@ public class CaseService {
         return caseDataWithHearingResponse;
     }
 
+    public String getEdgeCasesCourtList() {
+        return edgeCaseCourtList;
+    }
+
     public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
 
         System.out.println("dssCaseDate recieved " + dssCaseData);
@@ -258,6 +265,7 @@ public class CaseService {
             updatedCaseData = updatedCaseData.toBuilder()
                 .caseManagementLocation(courtLocationByEpmsId)
                 .courtName(courtLocationByEpmsId.getBaseLocationName())
+                .courtId(courtLocationByEpmsId.getBaseLocation())
                 .build();
         }
         return updatedCaseData;

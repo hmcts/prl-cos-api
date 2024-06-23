@@ -221,4 +221,16 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @GetMapping(value = "/get-edge-case/court-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get edge case court-list.")
+    public String getEdgeCaseCourtList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (true) {
+            return caseService.getEdgeCasesCourtList();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }

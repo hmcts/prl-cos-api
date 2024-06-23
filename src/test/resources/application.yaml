@@ -537,6 +537,7 @@ courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
   caDefaultCourtEpimmsID: ${CA_DEFAULT_COURT_EPIMMS_ID:}
+  edgeCaseCourtList: ${EDGE_CASE_COURT_LIST:}
 
 fis_hearing:
   api:
