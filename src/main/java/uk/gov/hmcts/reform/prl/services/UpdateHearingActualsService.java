@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -61,7 +60,6 @@ public class UpdateHearingActualsService {
 
     public void updateHearingActuals() {
 
-        long startTime = System.currentTimeMillis();
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
         if (isNotEmpty(caseDetailsList)) {
@@ -86,17 +84,17 @@ public class UpdateHearingActualsService {
     private void createUpdateHearingActualWaTask(List<CaseDetails> caseDetailsList,
                                                  Map<String,
                                                      String> caseIds) {
-        caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> caseDetails.getId().equals(
+        caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).map(caseDetails -> {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-                    startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
-                    Map<String, Object> caseDataUpdated = new HashMap<>();
-                    caseDataUpdated.put("enableUpdateHearingActualTask", "true");
-                    allTabService.submitAllTabsUpdate(
-                        startAllTabsUpdateDataContent.authorisation(),
+            if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+                startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
+                Map<String, Object> caseDataUpdated = new HashMap<>();
+                caseDataUpdated.put("enableUpdateHearingActualTask", "true");
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
                         caseId,
                         startAllTabsUpdateDataContent.startEventResponse(),
                         startAllTabsUpdateDataContent.eventRequestData(),
@@ -119,23 +117,21 @@ public class UpdateHearingActualsService {
         return caseData.getDraftOrderCollection()
             .stream()
             .map(Element::getValue)
-            .filter(draftOrderElement -> draftOrderElement.getManageOrderHearingDetails()
+            .anyMatch(draftOrderElement -> draftOrderElement.getManageOrderHearingDetails()
                 .stream()
                 .map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)))
-            .findAny().isPresent();
+                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)));
     }
 
     private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, String hearingId) {
         return caseData.getOrderCollection()
             .stream()
             .map(Element::getValue)
-            .filter(orderElement -> orderElement.getManageOrderHearingDetails()
+            .anyMatch(orderElement -> orderElement.getManageOrderHearingDetails()
                 .stream().map(Element::getValue)
                 .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
-                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)))
-            .findAny().isPresent();
+                    && hearingData.getConfirmedHearingDates().getValue().getCode().equals(hearingId)));
     }
 
     private Map<String, String> filterCaseIdAndHearingsForTodaysDate(List<Hearings> hearingsForAllCaseIds) {
@@ -144,11 +140,12 @@ public class UpdateHearingActualsService {
         hearingsForAllCaseIds.stream().forEach(hearings -> {
             List<Long> filteredHearingIds = hearings.getCaseHearings()
                 .stream().filter(caseHearing -> caseHearing.getHmcStatus().equals(LISTED))
-                .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().filter(
-                    hearingDaySchedule -> Duration.between(
-                        hearingDaySchedule.getHearingStartDateTime(),
-                        LocalDateTime.now()
-                    ).isZero()).findAny().isPresent()).map(CaseHearing::getHearingID).collect(Collectors.toList());
+                .filter(caseHearing -> caseHearing.getHearingDaySchedule().stream().
+                    anyMatch(
+                        hearingDaySchedule -> Duration.between(
+                            hearingDaySchedule.getHearingStartDateTime(),
+                            LocalDateTime.now()
+                        ).isZero())).map(CaseHearing::getHearingID).toList();
 
             caseIdHearingIdMapping.put(hearings.getCaseRef(), String.valueOf(filteredHearingIds.get(0)));
 
