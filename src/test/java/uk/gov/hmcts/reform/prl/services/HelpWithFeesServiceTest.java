@@ -10,10 +10,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +39,10 @@ public class HelpWithFeesServiceTest {
 
         CaseData casedata = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .caseSubmittedTimeStamp(LocalDateTime.now().toString())
+            .caseSubmittedTimeStamp("2024-06-24T10:46:55.972994696+01:00")
             .id(123L)
             .applicantCaseName("test")
+            .state(State.SUBMITTED_NOT_PAID)
             .helpWithFeesNumber("123")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()

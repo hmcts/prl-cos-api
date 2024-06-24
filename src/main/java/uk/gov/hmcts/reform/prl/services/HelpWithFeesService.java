@@ -36,6 +36,7 @@ public class HelpWithFeesService {
 
     public static final String APPLICATION_UPDATED = "# Application updated";
     public static final String CONFIRMATION_BODY = """
+        \n
         You’ve updated the applicant’s help with fees record. You can now process the family application.
         \n
         If the applicant needs to make a payment. You or someone else at the court

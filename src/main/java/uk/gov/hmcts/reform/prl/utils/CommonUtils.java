@@ -222,9 +222,9 @@ public class CommonUtils {
     public static String formateLocalDateTime(String localDateTime) {
         try {
             if (StringUtils.isNotEmpty(localDateTime)) {
-                LocalDateTime localDateTime1 = LocalDateTime.parse(localDateTime);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_OF_SUBMISSION_FORMAT);
-                return localDateTime1.format(formatter);
+                LocalDateTime localDateTime1 = LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm:ss");
+                return localDateTime1.format(dateTimeFormat);
             }
         } catch (Exception e) {
             log.error(ERROR_STRING, e);
