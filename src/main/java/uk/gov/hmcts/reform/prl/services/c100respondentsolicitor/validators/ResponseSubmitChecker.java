@@ -57,6 +57,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(respondingParty, isC1aApplicable);
             if (!mandatoryFinished) {
+                log.info("returning false");
                 return false;
             }
         }
@@ -64,10 +65,11 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
             optionalFinished = e.getValue().isFinished(respondingParty, isC1aApplicable)
                 || !(e.getValue().isStarted(respondingParty, isC1aApplicable));
             if (!optionalFinished) {
+                log.info("returning false");
                 return false;
             }
         }
-
+        log.info("returning true");
         return true;
     }
 }
