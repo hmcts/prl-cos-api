@@ -793,6 +793,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
+    @JsonUnwrapped
+    private final DssCaseDetails dssCaseDetails;
     //For case documents tab
     private final List<Element<ProceedingDetails>> existingProceedingsWithDoc;
 
@@ -800,7 +802,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
     //Amend Draft order
-    private String removeDraftOrderText;
+    @JsonUnwrapped
+    private AmendDraftOrderDetails amendDraftOrderDetails;
 
-    private Object removeDraftOrdersDynamicList;
 }

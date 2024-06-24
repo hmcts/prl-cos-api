@@ -11,6 +11,8 @@ public enum CaseEvent {
     CITIZEN_CASE_UPDATE("citizen-case-update"),
     CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
+    CITIZEN_DSS_CASE_SUBMIT("citizen-dss-case-submit"),
+    DELETE_CASE("deleteApplication"),
     CITIZEN_SAVE_C100_DRAFT_INTERNAL("citizenSaveC100DraftInternal"),
     DELETE_APPLICATION("deleteApplication"),
     CITIZEN_INTERNAL_FLAG_UPDATES("citizenInternalFlagUpdates"),

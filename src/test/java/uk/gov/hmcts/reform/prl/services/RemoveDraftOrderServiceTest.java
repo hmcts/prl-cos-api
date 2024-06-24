@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AmendDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -155,7 +156,10 @@ public class RemoveDraftOrderServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .draftOrderCollection(draftOrderCollection)
-            .removeDraftOrdersDynamicList(dynamicList)
+            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
+                                        .removeDraftOrdersDynamicList(dynamicList)
+                                        .build())
+
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
@@ -192,6 +196,8 @@ public class RemoveDraftOrderServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .draftOrderCollection(draftOrderCollection)
+            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
+                                        .build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
@@ -220,7 +226,10 @@ public class RemoveDraftOrderServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
-            .removeDraftOrdersDynamicList(dynamicList)
+            .amendDraftOrderDetails(AmendDraftOrderDetails.builder()
+                                        .removeDraftOrdersDynamicList(dynamicList)
+                                        .build())
+
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
