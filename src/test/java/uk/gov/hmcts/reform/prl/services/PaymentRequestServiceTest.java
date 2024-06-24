@@ -558,7 +558,6 @@ public class PaymentRequestServiceTest {
             .build();
 
         createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID)
-            .applicantCaseName(APPLICANT_NAME)
             .returnUrl(null)
             .hwfRefNumber("HWF123")
             .feeType(FeeType.C100_SUBMISSION_FEE)
