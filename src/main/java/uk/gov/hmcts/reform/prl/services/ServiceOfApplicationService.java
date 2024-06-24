@@ -54,7 +54,6 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
-import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -285,7 +284,6 @@ public class ServiceOfApplicationService {
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
-    private final CaseInviteManager caseInviteManager;
     private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${citizen.url}")
