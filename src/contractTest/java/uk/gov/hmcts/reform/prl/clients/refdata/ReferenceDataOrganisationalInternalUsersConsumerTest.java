@@ -28,7 +28,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
-        "amRoleAssignment.api.url="
+        "amRoleAssignment.api.url=",
+        "core_case_data.api.url="
     }
 )
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {

@@ -46,7 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
-        "amRoleAssignment.api.url="
+        "amRoleAssignment.api.url=",
+        "core_case_data.api.url="
     }
 )
 @PactFolder("pacts")
