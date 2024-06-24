@@ -9,7 +9,7 @@ public class Templates {
     //Docmosis templates
     public static final String PRL_LET_ENG_AP1 = "PRL-LET-ENG-FL401-AP1.docx";
     public static final String PRL_LET_ENG_AP2 = "PRL-LET-ENG-FL401-AP2.docx";
-    public static final String AP6_LETTER = "PRL-LET-ENG-C100-AP6.docx";
+    public static final String PRL_LET_ENG_AP6 = "PRL-LET-ENG-C100-AP6.docx";
     public static final String PRL_LET_ENG_AP7 = "PRL-LET-ENG-C100-AP7.docx";
     public static final String PRL_LET_ENG_AP8 = "PRL-LET-ENG-C100-AP8.docx";
 

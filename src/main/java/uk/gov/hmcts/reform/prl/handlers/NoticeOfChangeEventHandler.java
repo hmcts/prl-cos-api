@@ -126,7 +126,6 @@ public class NoticeOfChangeEventHandler {
             caseData,
             null != partyElement ? partyElement.getId() : null
         ));
-        log.info("Applicants and respondents to notify {}", applicantsRespondentsToNotify);
         if (!applicantsRespondentsToNotify.isEmpty()) {
             applicantsRespondentsToNotify.forEach(
                 (key, value) -> emailService.send(
@@ -176,7 +175,6 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         if (null != event.getSolicitorEmailAddress()) {
-            log.info("Sending email to solicitor {}", event.getSolicitorEmailAddress());
             emailService.send(
                 event.getSolicitorEmailAddress(),
                 emailTemplateName,
@@ -231,7 +229,6 @@ public class NoticeOfChangeEventHandler {
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-            log.info("Litigant party element {} for event {}", partyElement, event);
             //PRL-5300 - send email/post to LiP based on contact pref
             sendNotificationToLitigant(caseData, event, partyElement);
 
@@ -262,7 +259,7 @@ public class NoticeOfChangeEventHandler {
                                     true,
                                     party);
             } else {
-                log.info("Send post to LiP via bulk print to party {}", party);
+                log.info("Send post to LiP via bulk print");
                 sendPostViaBulkprint(caseData,
                                      party,
                                      event);

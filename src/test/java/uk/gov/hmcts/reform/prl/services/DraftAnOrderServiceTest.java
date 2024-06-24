@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -5037,7 +5036,6 @@ public class DraftAnOrderServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testOrderNameForWaFieldInDraftOrderJourney() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
@@ -5079,7 +5077,6 @@ public class DraftAnOrderServiceTest {
         ))));
     }
 
-    @Ignore
     @Test
     public void testOrderNameForWaFieldInDraftUploadOrderJourney() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
@@ -5089,7 +5086,7 @@ public class DraftAnOrderServiceTest {
             .orderTypeId(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue())
             .manageOrderHearingDetails(List.of(element(HearingData.builder()
 
-            .confirmedHearingDates(DynamicList.builder().build()).build())))
+                                                           .confirmedHearingDates(DynamicList.builder().build()).build())))
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy("test title")
                               .dateCreated(nowTime)

@@ -64,8 +64,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,9 +98,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.L;
@@ -193,8 +189,8 @@ public class ServiceOfApplicationService {
     public static final String IS_ENGLISH = "isEnglish";
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
-    private static final String DATE_CREATED = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-        .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
+    private static final String DATE_CREATED = CaseUtils.getCurrentDate();
+
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
     @Value("${xui.url}")
@@ -496,16 +492,15 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())
                     ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
-                List<Document> docs = new ArrayList<>();
-                List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, staticDocs);
-                docs.addAll(packCdocs);
+                List<Document> packCdocs = new ArrayList<>();
                 Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+                packCdocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+                packCdocs.addAll(getNotificationPack(caseData, PrlAppsConstants.C, staticDocs));
                 if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                    sendEmailToApplicantLipPersonalC100(
+                    sendEmailToApplicantLipPersonalServiceCaDa(
                         caseData,
                         emailNotificationDetails,
                         element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
@@ -553,19 +548,22 @@ public class ServiceOfApplicationService {
         log.info("pack F docs {}", packFdocs);
         log.info("pack docs {}", docs);
         if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-            checkAndSendEmailToDaApplicantLip(
+            Map<String, String> fieldsMap = new HashMap<>();
+            fieldsMap.put(AUTHORIZATION, authorization);
+            fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
+            sendEmailToApplicantLipPersonalServiceCaDa(
                 caseData,
-                authorization,
                 emailNotificationDetails,
                 applicant,
                 docs,
-                packEdocs
+                SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
+                fieldsMap,
+                EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
             );
-
         } else {
             sendSoaPacksToPartyViaPost(authorization, caseData, docs,
                                        bulkPrintDetails,
-                                       element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                                       applicant,
                                        Templates.PRL_LET_ENG_AP1);
         }
 
@@ -577,48 +575,6 @@ public class ServiceOfApplicationService {
             .packCreatedDate(DATE_CREATED)
             .build());
         return UNREPRESENTED_APPLICANT;
-    }
-
-    private void checkAndSendEmailToDaApplicantLip(CaseData caseData, String authorization,
-                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                   Element<PartyDetails> applicant,
-                                                   List<Document> docs, List<Document> packEdocs) {
-        if (CaseUtils.isCitizenAccessEnabled(applicant.getValue())) {
-            serviceOfApplicationEmailService.sendGovNotifyEmail(
-                LanguagePreference.getPreferenceLanguage(caseData),
-                applicant.getValue().getEmail(),
-                EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV,
-                serviceOfApplicationEmailService.buildCitizenEmailVars(caseData,
-                                                                       applicant.getValue(),
-                                                                       YesOrNo.Yes.equals(doesC1aExists(caseData)) ? "Yes" : null
-                )
-            );
-            //Create email notification with packs
-            emailNotificationDetails.add(element(EmailNotificationDetails.builder()
-                .emailAddress(applicant.getValue().getEmail())
-                .servedParty(SERVED_PARTY_APPLICANT)
-                .docs(wrapElements(packEdocs))
-                .attachedDocs(CITIZEN_CAN_VIEW_ONLINE)
-                .timeStamp(DATE_CREATED)
-                .build()));
-        } else {
-            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-            dynamicData.put("name", caseData.getApplicantsFL401().getLabelForDynamicList());
-            dynamicData.put(DASH_BOARD_LINK, citizenUrl);
-            populateLanguageMap(caseData, dynamicData);
-            List<Document> docsToApplicant = new ArrayList<>();
-            docsToApplicant.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
-            docsToApplicant.addAll(docs);
-            log.info("*** Docs to applicant {}", docsToApplicant);
-            emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
-                authorization,
-                caseData.getApplicantsFL401().getEmail(),
-                docsToApplicant,
-                SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
-                dynamicData,
-                UNREPRESENTED_APPLICANT
-            )));
-        }
     }
 
     private String handleNotificationsCaSolicitorCreatedCase(CaseData caseData, String authorization,
@@ -1082,13 +1038,13 @@ public class ServiceOfApplicationService {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP7);
-                    sendEmailToApplicantLipPersonalC100(caseData,
-                                                        emailNotificationDetails,
-                                                        selectedApplicant,
-                                                        docs,
-                                                        SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
-                                                        fieldsMap,
-                                                        doesC1aExists(caseData).equals(Yes)
+                    sendEmailToApplicantLipPersonalServiceCaDa(caseData,
+                                                               emailNotificationDetails,
+                                                               selectedApplicant,
+                                                               docs,
+                                                               SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
+                                                               fieldsMap,
+                                                               doesC1aExists(caseData).equals(Yes)
                                                             ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
                                                             : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
@@ -1124,7 +1080,7 @@ public class ServiceOfApplicationService {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
                     fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP8);
-                    sendEmailToApplicantLipPersonalC100(
+                    sendEmailToApplicantLipPersonalServiceCaDa(
                         caseData,
                         emailNotificationDetails,
                         applicant,
@@ -1246,13 +1202,13 @@ public class ServiceOfApplicationService {
             .build();
     }
 
-    private void sendEmailToApplicantLipPersonalC100(CaseData caseData,
-                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                     Element<PartyDetails> selectedApplicant,
-                                                     List<Document> docs,
-                                                     SendgridEmailTemplateNames emailTemplate,
-                                                     Map<String, String> fieldMap,
-                                                     EmailTemplateNames notifyTemplate) {
+    private void sendEmailToApplicantLipPersonalServiceCaDa(CaseData caseData,
+                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                            Element<PartyDetails> selectedApplicant,
+                                                            List<Document> docs,
+                                                            SendgridEmailTemplateNames emailTemplate,
+                                                            Map<String, String> fieldMap,
+                                                            EmailTemplateNames notifyTemplate) {
         EmailNotificationDetails emailNotification;
         if (CaseUtils.isCitizenAccessEnabled(selectedApplicant.getValue())) {
             log.debug("Applicant has access to dashboard -> send gov notify email for {}", selectedApplicant.getId());
@@ -1625,20 +1581,20 @@ public class ServiceOfApplicationService {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
                     fieldsMap.put(AUTHORIZATION, authorization);
-                    fieldsMap.put(COVER_LETTER_TEMPLATE, Templates.AP6_LETTER);
-                    sendEmailToApplicantLipPersonalC100(caseData,
-                                                        emailNotificationDetails,
-                                                        selectedApplicant,
-                                                        packDocs,
-                                                        SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
-                                                        fieldsMap,
-                                                        doesC1aExists(caseData).equals(Yes)
+                    fieldsMap.put(COVER_LETTER_TEMPLATE, Templates.PRL_LET_ENG_AP6);
+                    sendEmailToApplicantLipPersonalServiceCaDa(caseData,
+                                                               emailNotificationDetails,
+                                                               selectedApplicant,
+                                                               packDocs,
+                                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
+                                                               fieldsMap,
+                                                               doesC1aExists(caseData).equals(Yes)
                                                             ? SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT
                                                             : SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A
                     );
                 } else {
                     Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData,
-                                                                                    selectedApplicant, Templates.AP6_LETTER);
+                                                                                    selectedApplicant, Templates.PRL_LET_ENG_AP6);
                     sendPostWithAccessCodeLetterToParty(caseData,
                                                         authorization,
                                                         packDocs,
@@ -2061,8 +2017,13 @@ public class ServiceOfApplicationService {
         }
         if (!CollectionUtils.isEmpty(caseData.getCourtNavUploadedDocs())) {
             caseData.getCourtNavUploadedDocs().stream()
-                .filter(e -> Optional.ofNullable(e.getValue().getCitizenDocument()).isPresent())
-                .forEach(e -> witnessStatements.add(e.getValue().getCitizenDocument()));
+                .map(Element::getValue)
+                .forEach(
+                    document -> {
+                        if ("WITNESS_STATEMENT".equalsIgnoreCase(document.getDocumentType())) {
+                            witnessStatements.add(document.getCitizenDocument());
+                        }
+                    });
         }
         return witnessStatements;
     }
@@ -2569,14 +2530,14 @@ public class ServiceOfApplicationService {
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData,
-                                                                        DATE_CREATED, c100StaticDocs);
+                                                                        c100StaticDocs);
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, c100StaticDocs);
         }
         //serving other people in the case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, DATE_CREATED, c100StaticDocs);
+            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, c100StaticDocs);
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
@@ -2650,7 +2611,7 @@ public class ServiceOfApplicationService {
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, generatePacksForApplicantLipC100Personal(authorization, caseData,
-                                                                                                  DATE_CREATED, c100StaticDocs));
+                                                                                                  c100StaticDocs));
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, SoaPack.builder()
                 .packDocument(wrapElements(getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs)))
                 .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -2714,7 +2675,7 @@ public class ServiceOfApplicationService {
         return packDocs;
     }
 
-    private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData, String dateCreated,
+    private SoaPack generatePacksForApplicantLipC100Personal(String authorization, CaseData caseData,
                                                              List<Document> c100StaticDocs) {
         List<Document> packLdocs = new ArrayList<>();
         caseData.getApplicants().forEach(applicant -> {
@@ -2729,7 +2690,7 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
             .servedBy(UNREPRESENTED_APPLICANT)
             .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .build();
     }
 
@@ -2748,7 +2709,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> buildPacksConfidentialCheckC100NonPersonal(String authorization,
                                                                       Map<String, Object> caseDataUpdated,
-                                                                      CaseData caseData, String dateCreated,
+                                                                      CaseData caseData,
                                                                       List<Document> c100StaticDocs) {
         c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             C9_DOCUMENT_FILENAME)).collect(
@@ -2764,7 +2725,6 @@ public class ServiceOfApplicationService {
                 authorization,
                 caseDataUpdated,
                 caseData,
-                dateCreated,
                 c100StaticDocs, selectedApplicants);
         } else {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, null);
@@ -2779,7 +2739,6 @@ public class ServiceOfApplicationService {
                 authorization,
                 caseDataUpdated,
                 caseData,
-                dateCreated,
                 c100StaticDocs, selectedRespondents);
         } else {
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
@@ -2797,7 +2756,6 @@ public class ServiceOfApplicationService {
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
             caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData,
-                                                                                    DATE_CREATED,
                                                                                     fl401StaticDocs));
         } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
@@ -2814,34 +2772,40 @@ public class ServiceOfApplicationService {
                                                                    .getSoaCitizenServingRespondentsOptionsDA().toString());
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-            List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
-            Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
-            Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
-            packEDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
-            List<Document> packFDocs = getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
-            if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2));
-            } else {
-                packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3));
-            }
-            final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packFDocs))
-                .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
-                .servedBy(UNREPRESENTED_APPLICANT)
-                .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(DATE_CREATED)
-                .build();
-            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
-            final SoaPack unServedApplicantPack = SoaPack.builder()
-                .packDocument(wrapElements(packEDocs))
-                .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
-                .servedBy(UNREPRESENTED_APPLICANT)
-                .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
-                .packCreatedDate(DATE_CREATED)
-                .build();
-            caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
+            generatePacksForConfidentialCheckDaApplicantLip(authorization, caseData, caseDataUpdated, fl401StaticDocs);
 
         }
         return caseDataUpdated;
+    }
+
+    private void generatePacksForConfidentialCheckDaApplicantLip(String authorization, CaseData caseData,
+                                                                 Map<String, Object> caseDataUpdated,
+                                                                 List<Document> fl401StaticDocs) {
+        List<Document> packEDocs = getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs);
+        Element<PartyDetails> applicant = element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401());
+        Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
+        packEDocs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicant, Templates.PRL_LET_ENG_AP1));
+        List<Document> packFDocs = getNotificationPack(caseData, PrlAppsConstants.F, fl401StaticDocs);
+        if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE2));
+        } else {
+            packFDocs.add(generateAccessCodeLetter(authorization, caseData, respondent, null, PRL_LET_ENG_FL401_RE3));
+        }
+        final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packFDocs))
+            .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
+            .servedBy(UNREPRESENTED_APPLICANT)
+            .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+            .packCreatedDate(DATE_CREATED)
+            .build();
+        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+        final SoaPack unServedApplicantPack = SoaPack.builder()
+            .packDocument(wrapElements(packEDocs))
+            .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
+            .servedBy(UNREPRESENTED_APPLICANT)
+            .personalServiceBy(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+            .packCreatedDate(DATE_CREATED)
+            .build();
+        caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
     private void getPacksForConfidentialCheckDaCourtAdminAndBailiff(CaseData caseData, Map<String, Object> caseDataUpdated,
@@ -2871,7 +2835,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
-    private Map<String, Object> getPacksForConfidentialCheckDaApplicantSolicitor(String authorization, CaseData caseData, String dateCreated,
+    private Map<String, Object> getPacksForConfidentialCheckDaApplicantSolicitor(String authorization, CaseData caseData,
                                                                                  List<Document> fl401StaticDocs) {
         log.info("serving Fl401 applicant legal representative with confidential check");
         // Applicants pack
@@ -2881,7 +2845,7 @@ public class ServiceOfApplicationService {
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(wrapElements(packADocs))
             .partyIds(wrapElements(partyId))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
@@ -2898,13 +2862,13 @@ public class ServiceOfApplicationService {
                 wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         return caseDataUpdated;
     }
 
-    private void buildUnservedOthersPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData, String dateCreated,
+    private void buildUnservedOthersPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData,
                                          List<Document> c100StaticDocs) {
         List<Element<PartyDetails>> otherPartiesToNotify = CaseUtils.getOthersToNotifyInCase(caseData);
         final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
@@ -2918,14 +2882,13 @@ public class ServiceOfApplicationService {
         final SoaPack unServedOthersPack = SoaPack.builder().packDocument(wrapElements(packNDocs))
             .partyIds(wrapElements(othersPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .build();
 
         caseDataUpdated.put(UNSERVED_OTHERS_PACK, unServedOthersPack);
     }
 
     private void buildUnservedRespondentPackC100NonPersonal(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData,
-                                                            String dateCreated,
                                                             List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedRespondents) {
         final List<String> selectedPartyIds = selectedRespondents.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
@@ -2942,13 +2905,12 @@ public class ServiceOfApplicationService {
             .packDocument(wrapElements(finalDocs))
             .partyIds(wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
     }
 
     private void buildUnservedApplicantPackC100NonPersonal(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData,
-                                                           String dateCreated,
                                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
@@ -2960,7 +2922,7 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData,
                     element,
-                    Templates.AP6_LETTER
+                    Templates.PRL_LET_ENG_AP6
                 ))));
             });
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
@@ -2970,12 +2932,12 @@ public class ServiceOfApplicationService {
         final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .packCreatedDate(dateCreated)
+            .packCreatedDate(DATE_CREATED)
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
-    public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
+    public CaseData sendNotificationsAfterConfidentialCheckSuccessful(CaseData caseData, String authorization) {
         //Suppressed java:S6541 , suppression will be removed after refactoring in the IP sprint.
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -2998,38 +2960,14 @@ public class ServiceOfApplicationService {
             } else if (unServedApplicantPack != null
                 && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString().equalsIgnoreCase(
                 unServedApplicantPack.getPersonalServiceBy())) {
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    notifyC100ApplicantsPersonalServiceUnRepApplicant(authorization,
-                                                                      caseData,
-                                                                      emailNotificationDetails,
-                                                                      bulkPrintDetails,
-                                                                      removeCoverLettersFromThePacks(
-                                                                          unwrapElements(unServedApplicantPack.getPackDocument())));
-                } else {
-                    List<Document> packEDocuments = removeCoverLettersFromThePacks(
-                        unwrapElements(unServedApplicantPack.getPackDocument()));
-                    assert unServedRespondentPack != null;
-                    List<Document> packFDocuments = unwrapElements(unServedRespondentPack.getPackDocument());
-                    List<Document> docs = new ArrayList<>();
-                    removeDuplicatesAndGetConsolidatedDocs(packEDocuments, packFDocuments, docs);
-                    if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
-                        checkAndSendEmailToDaApplicantLip(
-                            caseData,
-                            authorization,
-                            emailNotificationDetails,
-                            element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                            docs,
-                            packEDocuments
-                        );
-                    } else {
-                        sendSoaPacksToPartyViaPost(authorization, caseData, docs,
-                                                   bulkPrintDetails,
-                                                   element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
-                                                   Templates.PRL_LET_ENG_AP1);
-                    }
-                }
-
-                whoIsResponsible = UNREPRESENTED_APPLICANT;
+                whoIsResponsible = sendNotificationsAfterConfCheckPersonalServiceApplicantLip(
+                    caseData,
+                    authorization,
+                    emailNotificationDetails,
+                    bulkPrintDetails,
+                    unServedApplicantPack,
+                    unServedRespondentPack
+                );
             } else {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
@@ -3109,6 +3047,51 @@ public class ServiceOfApplicationService {
                                                           .bulkPrintDetails(bulkPrintDetails).build()));
         caseData.setFinalServedApplicationDetailsList(finalServedApplicationDetailsList);
         return caseData;
+    }
+
+    private String sendNotificationsAfterConfCheckPersonalServiceApplicantLip(CaseData caseData, String authorization,
+                                                                              List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                                              List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                                              SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
+        String whoIsResponsible;
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            notifyC100ApplicantsPersonalServiceUnRepApplicant(
+                authorization,
+                caseData,
+                emailNotificationDetails,
+                bulkPrintDetails,
+                removeCoverLettersFromThePacks(
+                                                                  unwrapElements(unServedApplicantPack.getPackDocument())));
+        } else {
+            List<Document> packEDocuments = removeCoverLettersFromThePacks(
+                unwrapElements(unServedApplicantPack.getPackDocument()));
+            assert unServedRespondentPack != null;
+            List<Document> packFDocuments = unwrapElements(unServedRespondentPack.getPackDocument());
+            List<Document> docs = new ArrayList<>();
+            removeDuplicatesAndGetConsolidatedDocs(packEDocuments, packFDocuments, docs);
+            if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                Map<String, String> fieldsMap = new HashMap<>();
+                fieldsMap.put(AUTHORIZATION, authorization);
+                fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
+                sendEmailToApplicantLipPersonalServiceCaDa(
+                    caseData,
+                    emailNotificationDetails,
+                    element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                    docs,
+                    SendgridEmailTemplateNames.SOA_DA_APPLICANT_LIP_PERSONAL,
+                    fieldsMap,
+                    EmailTemplateNames.SOA_UNREPRESENTED_APPLICANT_COURTNAV
+                );
+            } else {
+                sendSoaPacksToPartyViaPost(authorization, caseData, docs,
+                                           bulkPrintDetails,
+                                           element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
+                                           Templates.PRL_LET_ENG_AP1);
+            }
+        }
+
+        whoIsResponsible = UNREPRESENTED_APPLICANT;
+        return whoIsResponsible;
     }
 
     private EmailNotificationDetails sendNotificationForApplicantLegalRepPersonalService(CaseData caseData, String authorization,
@@ -3206,7 +3189,7 @@ public class ServiceOfApplicationService {
                         Map<String, String> fieldsMap = new HashMap<>();
                         fieldsMap.put(AUTHORIZATION, authorization);
                         fieldsMap.put(COVER_LETTER_TEMPLATE, PRL_LET_ENG_AP1);
-                        sendEmailToApplicantLipPersonalC100(
+                        sendEmailToApplicantLipPersonalServiceCaDa(
                             caseData,
                             emailNotificationDetails,
                             element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401()),
@@ -3268,7 +3251,7 @@ public class ServiceOfApplicationService {
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
-            response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
+            response = handleConfidentialCheckSuccessful(authorisation, caseData, caseDataMap);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
@@ -3320,12 +3303,12 @@ public class ServiceOfApplicationService {
         return response;
     }
 
-    private ResponseEntity<SubmittedCallbackResponse> servePacksWithConfidentialDetails(String authorisation, CaseData caseData,
+    private ResponseEntity<SubmittedCallbackResponse> handleConfidentialCheckSuccessful(String authorisation, CaseData caseData,
                                                                                         Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
         String confirmationHeader;
         String confirmationBody;
-        caseData = sendNotificationsForUnServedPacks(
+        caseData = sendNotificationsAfterConfidentialCheckSuccessful(
             caseData,
             authorisation
         );

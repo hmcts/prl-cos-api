@@ -553,7 +553,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Test
@@ -585,7 +585,7 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Test
@@ -609,7 +609,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Test
@@ -637,7 +637,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Test
@@ -2560,7 +2560,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
@@ -2609,7 +2609,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
@@ -2655,7 +2655,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
         assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2731,7 +2731,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         //assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2801,7 +2801,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -2881,7 +2881,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
@@ -3591,7 +3591,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Test
@@ -3750,7 +3750,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
     }
 
     @Ignore("Temporary, this will be fixed before releasing")
@@ -4181,7 +4181,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsForUnServedPacks(caseData, authorization);
+            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());

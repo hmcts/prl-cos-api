@@ -119,9 +119,9 @@ public class ServiceOfApplicationPostService {
         UploadResponse uploadResponse = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            uploadResponse = getC100UploadResponse(auth, documentLanguage);
+            uploadResponse = uploadAndReturnC100StaticDocs(auth, documentLanguage);
         } else {
-            uploadResponse = getFl401UploadResponse(auth, documentLanguage);
+            uploadResponse = uploadAndReturnFl401StaticDocs(auth, documentLanguage);
         }
         if (null != uploadResponse) {
             List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
@@ -131,7 +131,7 @@ public class ServiceOfApplicationPostService {
         return Collections.emptyList();
     }
 
-    private UploadResponse getFl401UploadResponse(String auth, DocumentLanguage documentLanguage) {
+    private UploadResponse uploadAndReturnFl401StaticDocs(String auth, DocumentLanguage documentLanguage) {
         List<MultipartFile> files = new ArrayList<>();
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(
@@ -166,7 +166,7 @@ public class ServiceOfApplicationPostService {
         );
     }
 
-    private UploadResponse getC100UploadResponse(String auth, DocumentLanguage documentLanguage) {
+    private UploadResponse uploadAndReturnC100StaticDocs(String auth, DocumentLanguage documentLanguage) {
         List<MultipartFile> files = new ArrayList<>();
         if (documentLanguage.isGenEng()) {
             files.add(new InMemoryMultipartFile(

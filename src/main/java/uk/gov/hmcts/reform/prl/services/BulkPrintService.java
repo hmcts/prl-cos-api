@@ -55,7 +55,6 @@ public class BulkPrintService {
 
         try {
             for (Document doc:documents) {
-                log.info("Looping doc {}", doc);
                 pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
             }
         } catch (NullPointerException e) {
