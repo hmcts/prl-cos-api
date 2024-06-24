@@ -42,7 +42,8 @@ public class HelpWithFeesServiceTest {
             .caseSubmittedTimeStamp(LocalDateTime.now().toString())
             .id(123L)
             .applicantCaseName("test")
-            .helpWithFeesNumber("")
+            .helpWithFeesNumber("123")
+            .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
                                             .firstName("")
                                             .lastName("")
@@ -55,6 +56,7 @@ public class HelpWithFeesServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService.handleAboutToStart("auth", caseDetails);
         assertNotNull(response);
+        assertEquals("C100",response.get("caseTypeOfApplication"));
     }
 
     @Test
