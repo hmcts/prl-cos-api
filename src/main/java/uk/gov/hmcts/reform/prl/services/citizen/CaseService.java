@@ -244,12 +244,18 @@ public class CaseService {
             caseData.getDssCaseDetails().toBuilder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
+                .dssCaseIsFree(checkIfDssCaseIsFree(dssCaseData.getCaseTypeOfApplication()))
                 .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
+    }
+
+    private boolean checkIfDssCaseIsFree(String caseTypeOfApplication) {
+        return caseTypeOfApplication.equalsIgnoreCase("FGM")
+            || caseTypeOfApplication.equalsIgnoreCase("FMPO");
     }
 
     private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
