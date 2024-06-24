@@ -21,6 +21,4 @@ public class C100RebuildHelpWithFeesElements {
     @JsonProperty("hwf_feesAppliedDetails")
     private YesOrNo feesAppliedDetails;
 
-    private String helpWithFeesReferenceNumber;
-
 }

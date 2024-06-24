@@ -22,11 +22,11 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.math.BigDecimal;
@@ -899,19 +899,19 @@ public class PaymentRequestServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
-        PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = PaymentGroupReferenceStatusResponse.builder()
-            .paymentGroupReference("2024-1750000072989")
+        ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse = ServiceRequestReferenceStatusResponse.builder()
+            .serviceRequestReference("2024-1750000072989")
             .serviceRequestStatus("Paid")
             .build();
         when(paymentApi.fetchPaymentGroupReferenceStatus(serviceAuthToken, serviceAuthToken, "2024-1750000072989"))
-            .thenReturn(paymentGroupReferenceStatusResponse);
+            .thenReturn(serviceRequestReferenceStatusResponse);
 
         //When
-        PaymentGroupReferenceStatusResponse actualPaymentGroupReferenceStatusResponse = paymentRequestService
-            .fetchPaymentGroupReferenceStatus(serviceAuthToken, "2024-1750000072989");
+        ServiceRequestReferenceStatusResponse actualServiceRequestReferenceStatusResponse = paymentRequestService
+            .fetchServiceRequestReferenceStatus(serviceAuthToken, "2024-1750000072989");
 
         //Then
-        assertEquals(paymentGroupReferenceStatusResponse, actualPaymentGroupReferenceStatusResponse);
+        assertEquals(serviceRequestReferenceStatusResponse, actualServiceRequestReferenceStatusResponse);
 
     }
 }

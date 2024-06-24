@@ -31,7 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
@@ -73,12 +73,13 @@ public class HwfProcessUpdateCaseStateService {
                 if (StringUtils.isNotEmpty(caseData.getHelpWithFeesNumber())
                     && StringUtils.isNotEmpty(caseData.getPaymentServiceRequestReferenceNumber())) {
                     log.info("Going to check service request payment status");
-                    PaymentGroupReferenceStatusResponse paymentGroupReferenceStatusResponse = paymentRequestService.fetchPaymentGroupReferenceStatus(
+                    ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse =
+                        paymentRequestService.fetchServiceRequestReferenceStatus(
                         systemUserService.getSysUserToken(),
                         caseData.getPaymentServiceRequestReferenceNumber()
                     );
-                    log.info("PaymentGroupReferenceStatusResponse - " + paymentGroupReferenceStatusResponse.getServiceRequestStatus());
-                    if (!PaymentStatus.PAID.getDisplayedValue().equals(paymentGroupReferenceStatusResponse.getServiceRequestStatus())) {
+                    log.info("PaymentGroupReferenceStatusResponse - " + serviceRequestReferenceStatusResponse.getServiceRequestStatus());
+                    if (PaymentStatus.PAID.getDisplayedValue().equals(serviceRequestReferenceStatusResponse.getServiceRequestStatus())) {
                         Map<String, Object> caseDataUpdated = new HashMap<>();
                         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                             = allTabService.getStartUpdateForSpecificEvent(

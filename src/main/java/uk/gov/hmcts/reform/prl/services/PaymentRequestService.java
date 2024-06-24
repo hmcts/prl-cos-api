@@ -22,11 +22,11 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
@@ -261,11 +261,11 @@ public class PaymentRequestService {
             );
     }
 
-    public PaymentGroupReferenceStatusResponse fetchPaymentGroupReferenceStatus(String authorization,
-                                                                                String paymentGroupReference) {
+    public ServiceRequestReferenceStatusResponse fetchServiceRequestReferenceStatus(String authorization,
+                                                                                    String serviceRequestReference) {
         return paymentApi
             .fetchPaymentGroupReferenceStatus(authorization, authTokenGenerator.generate(),
-                                              paymentGroupReference
+                                              serviceRequestReference
             );
     }
 }

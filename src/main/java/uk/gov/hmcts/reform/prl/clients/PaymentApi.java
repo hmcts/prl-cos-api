@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentGroupReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 
 @ConditionalOnProperty(prefix = "payments", name = "api.url")
 @FeignClient(name = "payments", url = "${payments.api.url}")
@@ -42,9 +42,9 @@ public interface PaymentApi {
     );
 
     @GetMapping(value = "/payment-groups/{payment-group-reference}", consumes = "application/json")
-    PaymentGroupReferenceStatusResponse fetchPaymentGroupReferenceStatus(
+    ServiceRequestReferenceStatusResponse fetchPaymentGroupReferenceStatus(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @PathVariable("payment-group-reference") String paymentGroupReference
+        @PathVariable("payment-group-reference") String serviceRequestReference
     );
 }

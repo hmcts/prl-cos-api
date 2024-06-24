@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentGroupReferenceStatusResponse {
+public class ServiceRequestReferenceStatusResponse {
 
     @JsonProperty(value = "service_request_status")
     private String serviceRequestStatus;
     @JsonProperty(value = "payment_group_reference")
-    private String paymentGroupReference;
+    private String serviceRequestReference;
 }
