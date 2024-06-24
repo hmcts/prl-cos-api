@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PRIVATE;
@@ -101,11 +102,15 @@ public class RestrictedCaseAccessService {
         }
 
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-            caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName + RESTRICTED_CASE);
+            applicantCaseName =  applicantCaseName + RESTRICTED_CASE;
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
-            caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName + PRIVATE_CASE);
-        } else if (MARK_CASE_AS_PUBLIC.equals(caseEvent)) {
-            caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName);
+            applicantCaseName = applicantCaseName + PRIVATE_CASE;
+        }
+
+        caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName);
+        caseDataUpdated.put("caseNameHmctsInternal", applicantCaseName);
+        if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
+            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, applicantCaseName);
         }
     }
 
