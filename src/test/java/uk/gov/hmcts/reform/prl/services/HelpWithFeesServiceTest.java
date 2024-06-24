@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -52,11 +53,13 @@ public class HelpWithFeesServiceTest {
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
-            .state("")
+            .state(State.SUBMITTED_NOT_PAID.getLabel())
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService.handleAboutToStart("auth", caseDetails);
         assertNotNull(response);
+        DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
+        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
         assertEquals("C100",response.get("caseTypeOfApplication"));
     }
 

@@ -223,7 +223,7 @@ public class CommonUtils {
         try {
             if (StringUtils.isNotEmpty(localDateTime)) {
                 LocalDateTime localDateTime1 = LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("dd/mm/yyyy HH:mm:ss");
+                DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern(DATE_TIME_OF_SUBMISSION_FORMAT);
                 return localDateTime1.format(dateTimeFormat);
             }
         } catch (Exception e) {
