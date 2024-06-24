@@ -142,8 +142,6 @@ public class CaseDataMapper {
                                                     c100RebuildChildDetailsElements);
         }
 
-        CitizenPartyDetailsMapper.checkForHelpWithFeesDetails(mapper, caseDataBuilder, c100RebuildData);
-
 
         return caseDataBuilder.build();
     }
