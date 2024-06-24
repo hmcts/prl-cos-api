@@ -106,7 +106,7 @@ public class CaseEventHandler {
             log.info("event errors is {}", eventErrors);
             if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
                 List<Event> events = taskListService.getC100Events(caseData);
-                log.info("events is {}", eventErrors);
+                log.info("events is {}", events);
                 eventErrors.removeIf(e -> !events.contains(e.getEvent()));
             }
 
