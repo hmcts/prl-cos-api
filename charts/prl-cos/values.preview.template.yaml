@@ -5,10 +5,6 @@ java:
   devcpuLimits: 4000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  devmemoryRequests: 1024Mi
-  devcpuRequests: 1000m
-  devmemoryLimits: 2048Mi
-  devcpuLimits: 2000m
   keyVaults:
     prl:
       secrets:
@@ -52,7 +48,6 @@ java:
     CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2279-cdam
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2279-aac-manage-case-assignment
     BUNDLE_URL: http://prl-ccd-definitions-pr-2279-em-ccdorc
-    AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
