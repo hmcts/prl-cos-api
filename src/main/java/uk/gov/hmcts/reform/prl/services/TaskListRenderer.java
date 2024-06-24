@@ -108,7 +108,6 @@ public class TaskListRenderer {
 
         lines.addAll(renderTasksErrors(tasksErrors));
 
-        log.info("lines is equal to {}", lines);
 
         return String.join("\n\n", lines);
     }
