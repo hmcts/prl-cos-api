@@ -20,4 +20,6 @@ public class DssCaseDetails {
     @JsonProperty("edgeCaseTypeOfApplication")
     private final String edgeCaseTypeOfApplication;
     private final boolean dssCaseIsFree;
+    @JsonProperty("selectedCourt")
+    private final String selectedCourt;
 }

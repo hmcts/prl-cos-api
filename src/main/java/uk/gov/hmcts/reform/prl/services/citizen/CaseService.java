@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -20,11 +23,13 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
@@ -37,11 +42,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -62,6 +69,10 @@ public class CaseService {
     private final RoleAssignmentService roleAssignmentService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
+    private final LocationRefDataApi locationRefDataApi;
+    private final AuthTokenGenerator authTokenGenerator;
+    @Value("${courts.edgeCaseCourtList}")
+    protected String edgeCaseCourtList;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -190,6 +201,10 @@ public class CaseService {
         return caseDataWithHearingResponse;
     }
 
+    public String getEdgeCasesCourtList() {
+        return edgeCaseCourtList;
+    }
+
     public CaseDetails updateCaseForDss(String authToken, String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
 
         System.out.println("dssCaseDate recieved " + dssCaseData);
@@ -222,13 +237,18 @@ public class CaseService {
                 dateTimeFormatter
             )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement)).dssCaseDetails(
-            DssCaseDetails.builder()
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
+            .dssCaseDetails(
+            caseData.getDssCaseDetails().toBuilder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
                 .dssCaseIsFree(checkIfDssCaseIsFree(dssCaseData.getCaseTypeOfApplication()))
+                .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
-        System.out.println("updatedCaseData --" + updatedCaseData);
+        updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
+        log.info("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
     }
@@ -236,5 +256,44 @@ public class CaseService {
     private boolean checkIfDssCaseIsFree(String caseTypeOfApplication) {
         return caseTypeOfApplication.equalsIgnoreCase("FGM")
             || caseTypeOfApplication.equalsIgnoreCase("FMPO");
+    }
+  
+    private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
+        if (null != updatedCaseData.getDssCaseDetails()
+            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))
+            && null != dssCaseData.getSelectedCourt()) {
+
+            CaseManagementLocation courtLocationByEpmsId = getCourtLocationByEpmsId(
+                dssCaseData.getSelectedCourt(),
+                authToken
+            );
+            updatedCaseData = updatedCaseData.toBuilder()
+                .caseManagementLocation(courtLocationByEpmsId)
+                .courtName(courtLocationByEpmsId.getBaseLocationName())
+                .courtId(courtLocationByEpmsId.getBaseLocation())
+                .build();
+        }
+        return updatedCaseData;
+    }
+
+    private CaseManagementLocation getCourtLocationByEpmsId(String epmsId, String authorisation) {
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authorisation,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+
+        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream()
+            .filter(location -> epmsId.equalsIgnoreCase(location.getCourtEpimmsId()))
+            .findFirst();
+        if (courtVenue.isPresent()) {
+            return CaseManagementLocation.builder()
+                .baseLocation(courtVenue.get().getCourtEpimmsId())
+                .baseLocationName(courtVenue.get().getCourtName())
+                .region(courtVenue.get().getRegionId())
+                .regionName(courtVenue.get().getRegion()).build();
+        }
+        return CaseManagementLocation.builder().build();
     }
 }
