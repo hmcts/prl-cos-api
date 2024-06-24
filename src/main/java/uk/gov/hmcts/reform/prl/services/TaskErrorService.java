@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -18,7 +17,6 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class TaskErrorService {
 
     Map<EventErrorsEnum, EventValidationErrors> eventErrors = new EnumMap<>(EventErrorsEnum.class);
@@ -29,12 +27,9 @@ public class TaskErrorService {
 
         for (Map.Entry<EventErrorsEnum, EventValidationErrors> entry : eventErrors.entrySet()) {
             eventErrorList.add(entry.getValue());
-            log.info("Error added to tasklist");
         }
-        log.info("eventErrorList is {}", eventErrorList);
         eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(caseData)
             .indexOf(x.getEvent())));
-        log.info("eventErrorList sorted is {}", eventErrorList);
         return eventErrorList;
     }
 
