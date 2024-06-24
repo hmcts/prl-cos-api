@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -60,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -121,6 +123,7 @@ public class CaseService {
     private final HearingService hearingService;
     private final LocationRefDataApi locationRefDataApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AllTabServiceImpl allTabService;
     @Value("${courts.edgeCaseCourtList}")
     protected String edgeCaseCourtList;
 
@@ -293,7 +296,16 @@ public class CaseService {
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificEvent(String.valueOf(caseId), eventId);
+
+        allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
+                                          String.valueOf(caseId),
+                                          startAllTabsUpdateDataContent.startEventResponse(),
+                                          startAllTabsUpdateDataContent.eventRequestData(),
+                                          updatedCaseData.toMap(objectMapper));
+
+        return null;
 
     }
 
