@@ -1481,8 +1481,19 @@ public class SendAndReplyService {
                                         PartyDetails partyDetails, List<Document> attachedDocs) {
 
         try {
-            return DocumentUtils.toDocument(
-                getMessageLetterGeneratedDocInfo(caseData, authorization, partyDetails, message, attachedDocs));
+            GeneratedDocumentInfo messageDocument = getMessageLetterGeneratedDocInfo(
+                caseData,
+                authorization,
+                partyDetails,
+                message,
+                attachedDocs
+            );
+            return Document.builder()
+                .documentUrl(messageDocument.getUrl())
+                .documentFileName(messageDocument.getDocName())
+                .documentBinaryUrl(messageDocument.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
         } catch (Exception e) {
             log.error("Failed to generate message document {}", e);
         }

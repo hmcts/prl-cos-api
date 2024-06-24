@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -20,6 +22,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -40,10 +45,12 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LTR_ENG_C100_FM5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -167,8 +174,69 @@ public class Fm5NotificationService {
                                                                   CaseData caseData,
                                                                   Element<PartyDetails> party,
                                                                   boolean isApplicant) {
-        log.info("Sending reminder to LiP via bulk print for party {}", party.getId());
-        return sendFm5ReminderToLipViaPost(authorization, caseData, party, isApplicant);
+        log.info("Contact pref is {} for party {}", party.getValue().getContactPreferences(), party.getId());
+        if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+            && isNotEmpty(party.getValue().getEmail())) {
+            return sendFm5ReminderToLipViaEmail(authorization, caseData, party, isApplicant);
+        } else {
+            return sendFm5ReminderToLipViaPost(authorization, caseData, party, isApplicant);
+        }
+    }
+
+    private Element<NotificationDetails> sendFm5ReminderToLipViaEmail(String authorization,
+                                                                      CaseData caseData,
+                                                                      Element<PartyDetails> party,
+                                                                      boolean isApplicant) {
+        //if party has access to dashboard then send gov notify email else send grid
+        if (hasDashboardAccess(party)) {
+            //Send a gov notify email
+            serviceOfApplicationEmailService.sendGovNotifyEmail(
+                LanguagePreference.getPreferenceLanguage(caseData),
+                party.getValue().getEmail(),
+                EmailTemplateNames.FM5_REMINDER_APPLICANT_RESPONDENT,
+                buildCitizenEmailVars(
+                    caseData,
+                    party.getValue()
+                )
+            );
+
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.GOV_NOTIFY_EMAIL,
+                                          null,
+                                          null
+            );
+        } else {
+            Map<String, Object> dynamicData = getEmailDynamicData(caseData,
+                                                                  party.getValue(),
+                                                                  true);
+            serviceOfApplicationEmailService
+                .sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    party.getValue().getEmail(),
+                    getBlankFm5Form(authorization),
+                    SendgridEmailTemplateNames.FM5_REMINDER_APPLICANT_RESPONDENT,
+                    dynamicData,
+                    SOA_CITIZEN
+            );
+
+            return getNotificationDetails(party.getId(),
+                                          isApplicant ? PartyType.APPLICANT : PartyType.RESPONDENT,
+                                          NotificationType.SENDGRID_EMAIL,
+                                          null,
+                                          null
+            );
+        }
+    }
+
+    private EmailTemplateVars buildCitizenEmailVars(CaseData caseData,
+                                                    PartyDetails party) {
+        return CitizenEmailVars.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .partyName(party.getLabelForDynamicList())
+            .caseLink(citizenUrl)
+            .build();
     }
 
     private Element<NotificationDetails> sendFm5ReminderToLipViaPost(String authorization,
@@ -287,11 +355,12 @@ public class Fm5NotificationService {
                                      PartyDetails party) {
         List<Document> coverSheets = null;
         try {
-            coverSheets = serviceOfApplicationPostService.getCoverLetterServeOrder(
+            coverSheets = serviceOfApplicationPostService.getCoverSheets(
                 caseData,
                 authorisation,
                 party.getAddress(),
-                party.getLabelForDynamicList()
+                party.getLabelForDynamicList(),
+                DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
             log.error("Error occurred in generating cover sheets", e);

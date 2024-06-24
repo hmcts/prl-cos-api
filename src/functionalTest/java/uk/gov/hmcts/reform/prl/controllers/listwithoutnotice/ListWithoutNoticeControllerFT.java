@@ -7,13 +7,11 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -24,7 +22,6 @@ import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutN
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 public class ListWithoutNoticeControllerFT {
 
@@ -68,7 +65,7 @@ public class ListWithoutNoticeControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    @Ignore
+    @Disabled
     public void testListWithoutNotice_200ResponseAndNoErrors() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY);
@@ -87,7 +84,6 @@ public class ListWithoutNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testDateConfirmedInHearingsTab_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateConfirmedInHearingsTab);
 
@@ -124,7 +120,6 @@ public class ListWithoutNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testDateReservedWithListAssit_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateReservedWithListAssit);
 
@@ -166,7 +161,6 @@ public class ListWithoutNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testdateToBeFixed_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateToBeFixed);
 
