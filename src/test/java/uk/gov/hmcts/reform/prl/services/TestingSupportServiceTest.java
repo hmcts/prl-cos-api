@@ -47,7 +47,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyoune
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
@@ -132,6 +135,8 @@ public class TestingSupportServiceTest {
 
     @Mock
     private TaskListService taskListService;
+
+    private CourtNavFl401 courtNavFl401;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -286,6 +291,12 @@ public class TestingSupportServiceTest {
                 .address(Address.builder().addressLine1("").build())
                 .organisations(Organisations.builder().contactInformation(contactInformation).build())
                 .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantHowOld(
+                           ApplicantAge.eighteenOrOlder).build()).build())
+            .build();
 
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.TRUE);
@@ -693,9 +704,7 @@ public class TestingSupportServiceTest {
             .caseDetails(caseDetails)
             .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(CourtNavFl401
-                                                                                   .builder()
-                                                                                   .build());
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
         when(systemUserService.getSysUserToken()).thenReturn(s2sAuth);
         when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
             .thenReturn(caseData);
@@ -710,6 +719,41 @@ public class TestingSupportServiceTest {
     public void testCreateDummyCourtNavCase_InvalidClientLD_disabled() throws Exception {
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
         testingSupportService.initiateCaseCreationForCourtNav(auth, CallbackRequest.builder().build());
+    }
+
+    @Test
+    public void testInitiateCaseCreationForCourtNav() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .fl401StmtOfTruth(StatementOfTruth.builder()
+                                  .fullname("test")
+                                  .signature("test sign")
+                                  .build())
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_CA_URGENT_CASE.getId())
+            .build();
+
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(courtNavFl401);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(COURT_ADMIN_ROLE))
+                                                                     .build());
+        when(fl401ApplicationMapper.mapCourtNavData(any(),any()))
+            .thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(caseDetails);
+
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
+        Assert.assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test(expected = RuntimeException.class)
@@ -728,5 +772,11 @@ public class TestingSupportServiceTest {
     public void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
         when(authorisationService.authoriseUser(anyString())).thenReturn(false);
         testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void invalidInitiateCaseCreationForCourtNav() throws Exception {
+        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        testingSupportService.initiateCaseCreationForCourtNav(auth, callbackRequest);
     }
 }
