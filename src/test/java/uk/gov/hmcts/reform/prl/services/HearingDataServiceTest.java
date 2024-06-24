@@ -63,6 +63,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -1205,6 +1206,77 @@ public class HearingDataServiceTest {
                                                                               .hearingSubChannel("TEL").build()))
                                                                       .build()))
                                       .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData,
+                                                                          CreateSelectOrderOptionsEnum.occupation
+        ));
+    }
+
+    @Test
+    public void testSetHearingDataForSelectedHearing_scenario2() {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("TestName")
+            .representativeFirstName("Ram")
+            .representativeLastName("Mer")
+            .build();
+        PartyDetails respondent1 = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent1).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(Element.<HearingData>builder()
+                                                                .id(UUID.fromString(TEST_UUID))
+                                                                .value(HearingData.builder()
+                                                                           .confirmedHearingDates(DynamicList.builder()
+                                                                                                      .value(
+                                                                                                          DynamicListElement.builder()
+                                                                                                              .code(
+                                                                                                                  "123")
+                                                                                                              .build())
+                                                                                                      .build())
+                                                                           .hearingDateConfirmOptionEnum(
+                                                                               HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                           .build())
+                                                                .build()))
+                              .build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build(),CaseHearing.caseHearingWith()
+                .hearingID(12345L)
+                .hearingDaySchedule(List.of(HearingDaySchedule
+                                                .hearingDayScheduleWith()
+                                                .hearingStartDateTime(LocalDateTime.now())
+                                                .hearingEndDateTime(LocalDateTime.now())
+                                                .hearingVenueAddress("abc")
+                                                .attendees(List.of(
+                                                    Attendee.attendeeWith().partyID(TEST_UUID)
+                                                        .hearingSubChannel("TEL").build()))
+                                                .build()))
+                .build())).build();
         when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
         assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData,
                                                                           CreateSelectOrderOptionsEnum.occupation
