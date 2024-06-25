@@ -1563,19 +1563,6 @@
     "otherProceedingEmptyTable": {
       "otherProceedingEmptyField": " "
     },
-    "otherChildNotInTheCaseTable": [
-      {
-        "id": "cd680885-afd5-4d63-b799-e9ca7068866d",
-        "value": {
-          "gender": null,
-          "lastName": null,
-          "firstName": null,
-          "dateOfBirth": null,
-          "otherGender": null,
-          "isDateOfBirthKnown": null
-        }
-      }
-    ],
     "respondentTaskListC": "",
     "respondentTaskListD": "",
     "respondentTaskListE": "",
@@ -2547,24 +2534,6 @@
       "roleOnCase": null,
       "visibility": null
     },
-    "otherProceedingsDetailsTable": [
-      {
-        "id": "f3f20e6e-8bc2-453b-a615-d45900b8cb50",
-        "value": {
-          "dateEnded": null,
-          "caseNumber": null,
-          "dateStarted": null,
-          "nameOfCourt": null,
-          "nameOfJudge": null,
-          "typeOfOrder": null,
-          "nameAndOffice": null,
-          "nameOfGuardian": null,
-          "otherTypeOfOrder": null,
-          "nameOfChildrenInvolved": null,
-          "previousOrOngoingProceedings": null
-        }
-      }
-    ],
     "caApplicantSolicitor3InternalFlags": {
       "details": [
 
@@ -6010,16 +5979,6 @@
     ],
     "newOrdersOtherInjunctiveCurrent": null,
     "newOrdersUndertakingInPlaceEndDate": "1978-09-01",
-    "otherProceedingsForSummaryTab": [
-      {
-        "id": "b1712c87-eb04-499d-870b-6d1c437b21fd",
-        "value": {
-          "caseNumber": null,
-          "nameOfCourt": null,
-          "typeOfOrder": null
-        }
-      }
-    ],
     "caseNameHmctsInternal": "John Doe Vs Mary Richards v3",
     "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
     "caRespondentSolicitor2ExternalFlags": {
