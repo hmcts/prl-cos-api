@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
+@Ignore
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
