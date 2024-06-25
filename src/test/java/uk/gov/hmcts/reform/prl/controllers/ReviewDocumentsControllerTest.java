@@ -119,7 +119,7 @@ public class ReviewDocumentsControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleSubmitted(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewResult(caseData);
+        verify(reviewDocumentService).getReviewResult(auth,caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 

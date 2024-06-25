@@ -123,6 +123,9 @@ public class ReviewDocumentServiceTest {
 
     QuarantineLegalDoc bulkScanQuarantineDoc;
 
+
+    String auth = "authorisation";
+
     @Before
     public void init() {
 
@@ -597,7 +600,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(auth,caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
@@ -625,7 +628,7 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(auth,caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NO, response.getBody().getConfirmationBody());
@@ -649,7 +652,7 @@ public class ReviewDocumentServiceTest {
             .thenReturn(startAllTabsUpdateDataContent);
 
 
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(auth,caseData);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
@@ -672,7 +675,7 @@ public class ReviewDocumentServiceTest {
                       EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(auth,caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());
@@ -693,7 +696,7 @@ public class ReviewDocumentServiceTest {
             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString()))
             .thenReturn(startAllTabsUpdateDataContent);
-        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(auth,caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());

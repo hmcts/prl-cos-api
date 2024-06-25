@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -14,24 +15,36 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmailVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,10 +61,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT;
+
 
 @Slf4j
 @Service
@@ -63,8 +80,12 @@ public class ReviewDocumentService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final ManageDocumentsService manageDocumentsService;
+    private final DocumentLanguageService documentLanguageService;
+    private final EmailService emailService;
+    private final SendgridService sendgridService;
 
-    private final ObjectMapper objectMapper;
+    @Value("${xui.url}")
+    private String manageCaseUrl;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -118,6 +139,9 @@ public class ReviewDocumentService {
         "<h3 class='govuk-heading-s'>Delivery date</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
+    public static final String THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION =
+        "There is a failure in sending email to solicitor on {} with exception {}";
+
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
@@ -133,8 +157,11 @@ public class ReviewDocumentService {
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
-
-    private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+    public static final String ENG = "eng";
+    public static final String WEL = "wel";
+    public static final String IS_WELSH = "isWelsh";
+    public static final String IS_ENGLISH = "isEnglish";
+    public static final String NAME = "name";
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -478,7 +505,7 @@ public class ReviewDocumentService {
             .uploaderRole(BULK_SCAN);
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(String authorization, CaseData caseData) {
+    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(String authorisation, CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList())
@@ -498,25 +525,20 @@ public class ReviewDocumentService {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
-
         }
+        // CONFIDENTIAL OR NON CONFIDENTIAL CHECK TO BE ADDED OR NOT 518
+        //ATTACHMENTS
+        //GOV NOTIFY ...ADD TEMPLATE ID IN THE APPLICATION.YAML
         if (YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && null != caseData.getReviewDocuments().getReviewDocsDynamicList()
                 && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
-                Map<String, Object> dynamicData = getEmailDynamicData(caseData);
-                Map<String,String> templateNames = Map.of("C7_Response.pdf","C7_NOTIFICATION_APPLICANT_RESPONDENT");
-            if(caseData.getReviewDocuments().getReviewDocsDynamicList().getValueLabel().equalsIgnoreCase("C7_Response.pdf")) {
-                serviceOfApplicationEmailService
-                    .sendEmailUsingTemplateWithAttachments(
-                        authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
-                        Collections.emptyList(),
-                        SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT,
-                        dynamicData,
-                        SERVED_PARTY_APPLICANT
-                    );
 
-            }
-
+                if ("C7_Response.pdf".equalsIgnoreCase(caseData.getReviewDocuments().getReviewDocsDynamicList().getValueLabel())) {
+                    sendEmailNotifications(authorisation, caseData, C7_NOTIFICATION_APPLICANT_RESPONDENT, null);
+                } else if ("C1A_Response.pdf".equalsIgnoreCase(caseData.getReviewDocuments().getReviewDocsDynamicList().getValueLabel())) {
+                    sendEmailNotifications(authorisation, caseData, C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_RESPONDENT);
+                }
             }
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                          .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
@@ -537,11 +559,94 @@ public class ReviewDocumentService {
         }
     }
 
+    private void sendEmailNotifications(String authorisation, CaseData caseData,
+                                        SendgridEmailTemplateNames partyEmailTemplate,
+                                        SendgridEmailTemplateNames solicitorEmailTemplate) {
+
+            List<PartyDetails> applicantToNotify = nullSafeCollection(caseData.getApplicants()).stream()
+                .map(Element::getValue)
+                .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant) && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+                .toList();
+            applicantToNotify.forEach(partyData -> {
+                // condition to be added either its for gov notify email or send grid
+                Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+                if (isSolicitorEmailExists(partyData) && solicitorEmailTemplate != null) {
+                    dynamicData.put(NAME, partyData.getRepresentativeFullName());
+                    sendEmailViaSendGrid(authorisation,
+                                         Collections.emptyList(),
+                                         dynamicData,
+                                         partyData.getSolicitorEmail(),
+                                         solicitorEmailTemplate);
+                } else if (isPartyProvidedWithEmail(partyData)) {
+                    sendPartyEmail(caseData, partyData);
+                } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
+                    && isPartyProvidedWithEmail(partyData)) {
+                    sendEmailViaSendGrid(authorisation,
+                                         Collections.emptyList(),
+                                         dynamicData,
+                                         partyData.getEmail(),
+                                         partyEmailTemplate);
+                }
+            }
+            );
+    }
+
+    private void sendEmailViaSendGrid(String authorisation,
+                                      List<Document> orderDocuments,
+                                      Map<String, Object> dynamicDataForEmail,
+                                      String emailAddress,
+                                      SendgridEmailTemplateNames sendgridEmailTemplateName) {
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                sendgridEmailTemplateName,
+                authorisation,
+                SendgridEmailConfig.builder()
+                    .toEmailAddress(emailAddress)
+                    .dynamicTemplateData(dynamicDataForEmail)
+                    .listOfAttachments(orderDocuments)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
+            );
+        } catch (IOException e) {
+            log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                      emailAddress, e.getMessage(), e);
+        }
+    }
+// Instead of writing here new method use in caseutils has legal representation method ...
+    private boolean isSolicitorEmailExists(PartyDetails party) {
+        return StringUtils.isNotEmpty(party.getSolicitorEmail());
+    }
+
+    private void sendPartyEmail(CaseData caseData, PartyDetails partyData) {
+        EmailTemplateVars templateData = CitizenEmailVars.builder()
+          .caseReference(String.valueOf(caseData.getId()))
+          .caseName(caseData.getApplicantCaseName())
+          .applicantName(partyData.getFirstName() + " " + partyData.getLastName())
+          .respondentName(caseData.getRespondentName())
+          .caseLink(manageCaseUrl + "/" + caseData.getId())
+          .build();
+        emailService.send(
+            partyData.getEmail(),
+            EmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT,//Add new template name
+            templateData,
+            LanguagePreference.getPreferenceLanguage(caseData)
+      );
+    }
+
+
+    private boolean isPartyProvidedWithEmail(PartyDetails party) {
+        return YesOrNo.Yes.equals(party.getCanYouProvideEmailAddress());
+    }
 
     private Map<String, Object> getEmailDynamicData(CaseData caseData) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("respondentName", caseData.getRespondentName());
         dynamicData.put("applicantName", caseData.getApplicantName());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put(ENG, documentLanguage.isGenEng());
+        dynamicData.put(WEL, documentLanguage.isGenWelsh());
+        dynamicData.put(IS_ENGLISH, documentLanguage.isGenEng());
+        dynamicData.put(IS_WELSH, documentLanguage.isGenWelsh());
         return dynamicData;
     }
 
