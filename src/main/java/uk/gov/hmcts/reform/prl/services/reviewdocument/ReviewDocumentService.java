@@ -313,7 +313,7 @@ public class ReviewDocumentService {
                 userRole
             );
 
-            sendNotifications(caseData, quarantineLegalDocElementOptional.get());
+            sendNotifications(caseData, quarantineLegalDocElementOptional.get(), quarantineDocsListToBeModified);
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
@@ -321,45 +321,71 @@ public class ReviewDocumentService {
         return isDocumentFound;
     }
 
-    private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
-        sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional);
+    private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
+                                   String quarantineDocsListToBeModified) {
+        sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
     }
 
-    private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
+    private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
+                                           String quarantineDocsListToBeModified) {
         String cafcassEmail = null;
-        if (Optional.ofNullable(caseData.getServiceOfApplication()).isPresent()) {
+        String respondantName = null;
+
+        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
+            && Optional.ofNullable(caseData.getServiceOfApplication()).isPresent()) {
             cafcassEmail = caseData.getServiceOfApplication().getSoaCafcassCymruEmail();
-            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
-                && Optional.ofNullable(cafcassEmail).isPresent()) {
+            respondantName = getNameOfRespondent(
+                quarantineLegalDocElementOptional,
+                quarantineDocsListToBeModified
+            );
+
+            if (Optional.ofNullable(cafcassEmail).isPresent()
+                && Optional.ofNullable(respondantName).isPresent()) {
                 if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
                     sendEmailToCafcassCymru(caseData, cafcassEmail,
-                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
-                                        EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS);
+                                            respondantName,
+                                            EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS
+                    );
                 }
                 if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
                     sendEmailToCafcassCymru(caseData, cafcassEmail,
-                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
-                                        EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS);
+                                            respondantName,
+                                            EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS
+                    );
 
                 }
                 if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
                     sendEmailToCafcassCymru(caseData, cafcassEmail,
-                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
-                                        EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS);
+                                            respondantName,
+                                            EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS
+                    );
                 }
             }
-
         }
+
     }
 
-    private void sendEmailToCafcassCymru(CaseData caseData, String cafcassCymruEmailId, String name, EmailTemplateNames template) {
+    private  String getNameOfRespondent(Element<QuarantineLegalDoc> quarantineLegalDocElementOptional, String quarantineDocsListToBeModified) {
+        if (LEGAL_PROF_QUARANTINE_DOCS_LIST.equalsIgnoreCase(quarantineDocsListToBeModified)) {
+            return quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName();
+        }
+        if (CITIZEN_QUARANTINE_DOCS_LIST.equalsIgnoreCase(quarantineDocsListToBeModified)) {
+            return quarantineLegalDocElementOptional.getValue().getUploadedBy();
+        }
+        return null;
+    }
+
+
+    private void sendEmailToCafcassCymru(CaseData caseData, String cafcassCymruEmailId, String respondantName,
+                                         EmailTemplateNames template) {
         String dashboardUrl = manageCaseUrl + "/" + caseData.getId() + "#Case%20documents";
         emailService.send(
-            cafcassCymruEmailId,
-            template,
-            buildUploadDocuemntEmail(caseData, name, dashboardUrl),
-            LanguagePreference.getPreferenceLanguage(caseData)
+                cafcassCymruEmailId,
+                template,
+                buildUploadDocuemntEmail(caseData, respondantName, dashboardUrl),
+                LanguagePreference.getPreferenceLanguage(caseData)
         );
+
     }
 
     private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {
