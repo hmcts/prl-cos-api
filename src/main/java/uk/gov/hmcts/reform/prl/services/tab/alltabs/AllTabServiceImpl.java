@@ -72,6 +72,7 @@ public class AllTabServiceImpl implements AllTabsService {
     public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
         if (StringUtils.isNotEmpty(caseId)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
+            log.info("all tab update triggered");
             return mapAndSubmitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     caseId,
