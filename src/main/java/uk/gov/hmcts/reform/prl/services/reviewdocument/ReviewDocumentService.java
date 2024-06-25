@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -20,16 +22,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
-import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +39,9 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -45,7 +50,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -59,6 +63,9 @@ public class ReviewDocumentService {
     public static final String CAFCASS_QUARANTINE_DOCS_LIST = "cafcassQuarantineDocsList";
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     private final AllTabServiceImpl allTabService;
     private final SystemUserService systemUserService;
@@ -124,7 +131,7 @@ public class ReviewDocumentService {
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
 
-    private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+    private final EmailService emailService;
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -306,11 +313,62 @@ public class ReviewDocumentService {
                 userRole
             );
 
+            sendNotifications(caseData, quarantineLegalDocElementOptional.get());
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
         return isDocumentFound;
+    }
+
+    private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
+        sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional);
+    }
+
+    private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
+        String cafcassEmail = null;
+        if (Optional.ofNullable(caseData.getServiceOfApplication()).isPresent()) {
+            cafcassEmail = caseData.getServiceOfApplication().getSoaCafcassCymruEmail();
+            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
+                && Optional.ofNullable(cafcassEmail).isPresent()) {
+                if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
+                    sendEmailToCafcassCymru(caseData, cafcassEmail,
+                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
+                                        EmailTemplateNames.RESPONDENT_RESPONDED_CAFCASS);
+                }
+                if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
+                    sendEmailToCafcassCymru(caseData, cafcassEmail,
+                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
+                                        EmailTemplateNames.RESPONDENT_ALLEGATIONS_OF_HARM_CAFCASS);
+
+                }
+                if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
+                    sendEmailToCafcassCymru(caseData, cafcassEmail,
+                                        quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName(),
+                                        EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_CAFCASS);
+                }
+            }
+
+        }
+    }
+
+    private void sendEmailToCafcassCymru(CaseData caseData, String cafcassCymruEmailId, String name, EmailTemplateNames template) {
+        String dashboardUrl = manageCaseUrl + "/" + caseData.getId() + "#Case%20documents";
+        emailService.send(
+            cafcassCymruEmailId,
+            template,
+            buildUploadDocuemntEmail(caseData, name, dashboardUrl),
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
+    }
+
+    private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {
+        return UploadDocumentEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .name(name)
+            .dashboardLink(link)
+            .build();
     }
 
     private void processDocumentsAfterReviewNew(CaseData caseData,
@@ -407,7 +465,7 @@ public class ReviewDocumentService {
             .uploaderRole(BULK_SCAN);
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(String authorization, CaseData caseData) {
+    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
@@ -430,23 +488,6 @@ public class ReviewDocumentService {
 
         }
         if (YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
-                && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
-                Map<String, Object> dynamicData = getEmailDynamicData(caseData);
-                Map<String,String> templateNames = Map.of("C7_Response.pdf","C7_NOTIFICATION_APPLICANT_RESPONDENT");
-            if(caseData.getReviewDocuments().getReviewDocsDynamicList().getValueLabel().equalsIgnoreCase("C7_Response.pdf")) {
-                serviceOfApplicationEmailService
-                    .sendEmailUsingTemplateWithAttachments(
-                        authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
-                        Collections.emptyList(),
-                        SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT,
-                        dynamicData,
-                        SERVED_PARTY_APPLICANT
-                    );
-
-            }
-
-            }
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                          .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
                                          .confirmationBody(REVIEW_YES).build());
@@ -465,15 +506,6 @@ public class ReviewDocumentService {
                                          .build());
         }
     }
-
-
-    private Map<String, Object> getEmailDynamicData(CaseData caseData) {
-        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-        dynamicData.put("respondentName", caseData.getRespondentName());
-        dynamicData.put("applicantName", caseData.getApplicantName());
-        return dynamicData;
-    }
-
 
     private Optional<Element<QuarantineLegalDoc>> getQuarantineDocumentById(
         List<Element<QuarantineLegalDoc>> quarantineDocsList, UUID uuid) {
