@@ -208,13 +208,11 @@ public class CcdCoreCaseDataServiceTest {
 
     @Test
     public void shouldCreateCaseDataContentOnlyWithSecurityClassification() {
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(CaseDetails.builder().build())
             .build();
         Classification classification = Classification.RESTRICTED;
         assertNotNull(coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(startEventResponse, classification));
-
-
     }
 
 }
