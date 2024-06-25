@@ -112,7 +112,7 @@ public class HwfProcessUpdateCaseStateService {
 
     public List<CaseDetails> retrieveCasesWithHelpWithFeesInPendingState() {
 
-        SearchResultResponse response = SearchResultResponse.builder()
+        SearchResultResponse searchResultResponse = SearchResultResponse.builder()
             .cases(new ArrayList<>()).build();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
@@ -123,26 +123,26 @@ public class HwfProcessUpdateCaseStateService {
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
             log.info("searchString " + searchString);
-            String userToken = systemUserService.getSysUserToken();
+            String sysUserToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
-            SearchResult searchResult = coreCaseDataApi.searchCases(
-                userToken,
+            SearchResult searchCases = coreCaseDataApi.searchCases(
+                sysUserToken,
                 s2sToken,
                 CASE_TYPE,
                 searchString
             );
 
-            response = objectMapper.convertValue(
-                searchResult,
+            searchResultResponse = objectMapper.convertValue(
+                searchCases,
                 SearchResultResponse.class
             );
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
         }
 
-        if (null != response) {
-            log.info("Total no. of cases retrieved {}", response.getTotal());
-            return response.getCases();
+        if (null != searchResultResponse) {
+            log.info("Total no. of cases retrieved {}", searchResultResponse.getTotal());
+            return searchResultResponse.getCases();
         }
         return Collections.emptyList();
     }
