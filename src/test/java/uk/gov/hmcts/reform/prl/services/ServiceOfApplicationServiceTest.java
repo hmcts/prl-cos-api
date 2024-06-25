@@ -403,12 +403,8 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             callbackRequest
         );
-
         assertNotNull(response);
-
-        final String confirmationBody = response.getBody().getConfirmationHeader();
-
-        assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, confirmationBody);
+        assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -2391,9 +2387,9 @@ public class ServiceOfApplicationServiceTest {
         List<Element<String>> partyIds = new ArrayList<>();
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInvite = CaseInvite.builder()
+        caseInvite = caseInvite.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-        CaseInvite caseInvite1 = CaseInvite.builder()
+        caseInvite1 = caseInvite1.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
         caseInviteList.add(element(UUID.randomUUID(),caseInvite));
@@ -2561,9 +2557,9 @@ public class ServiceOfApplicationServiceTest {
         List<Element<String>> partyIds = new ArrayList<>();
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInvite = CaseInvite.builder()
+        caseInvite = caseInvite.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-        CaseInvite caseInvite1 = CaseInvite.builder()
+        caseInvite1 = caseInvite1.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
         caseInviteList.add(element(UUID.randomUUID(),caseInvite));
@@ -4010,12 +4006,12 @@ public class ServiceOfApplicationServiceTest {
         List<Element<String>> partyIds = new ArrayList<>();
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
         partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
-        CaseInvite caseInviteLocal = CaseInvite.builder()
+        caseInvite = caseInvite.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-        CaseInvite caseInvite1 = CaseInvite.builder()
+        caseInvite1 = caseInvite1.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(), caseInviteLocal));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite));
         caseInviteList.add(element(UUID.randomUUID(), caseInvite1));
 
         CaseData caseData = CaseData.builder().id(12345L)
