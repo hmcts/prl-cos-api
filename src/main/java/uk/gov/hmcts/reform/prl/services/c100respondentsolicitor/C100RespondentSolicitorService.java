@@ -62,6 +62,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1137,6 +1138,20 @@ public class C100RespondentSolicitorService {
         dataMap.put("respondentsExistingProceedings", proceedingsList);
         populateAohDataMap(response, dataMap);
         populateRespondToAohDataMap(response, dataMap);
+        //citizen current or previous proceeding data
+        if (null != response.getCurrentOrPreviousProceedings()) {
+            dataMap.put(
+                "haveChildrenBeenInvolvedInCourtCase",
+                response.getCurrentOrPreviousProceedings().getHaveChildrenBeenInvolvedInCourtCase()
+            );
+            dataMap.put(
+                "courtOrderMadeForProtection",
+                response.getCurrentOrPreviousProceedings().getCourtOrderMadeForProtection()
+            );
+            dataMap.put("proceedingsList", response.getCurrentOrPreviousProceedings().getProceedingsList());
+        }
+        dataMap.put("signedBy", solicitorRepresentedRespondent.getValue().getLabelForDynamicList());
+        dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
         dataMap.put("consentToTheApplication", getValueForYesOrNoEnum(response.getConsent().getConsentToTheApplication()));
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", getValueForYesOrNoEnum(response.getConsent().getPermissionFromCourt()));
@@ -1185,9 +1200,9 @@ public class C100RespondentSolicitorService {
             );
         }
         dataMap.put(
-                "solicitorRepresented",
-                solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
-        );
+            "solicitorRepresented",
+            null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (null != response.getResponseToAllegationsOfHarm()

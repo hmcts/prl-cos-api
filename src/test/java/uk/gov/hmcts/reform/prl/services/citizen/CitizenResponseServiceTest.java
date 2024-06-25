@@ -138,10 +138,10 @@ public class CitizenResponseServiceTest {
     public void testGenerateDraftC7() throws Exception {
         when(ccdCoreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false))
+        when(documentGenService.generateSingleDocument(authToken, caseData,  DOCUMENT_C7_DRAFT_HINT, false, new HashMap<>()))
             .thenReturn(Document.builder().documentFileName("testDoc").build());
 
-        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken);
+        Document document = citizenResponseService.generateAndReturnDraftC7(caseId, uuid, authToken, false);
         Assert.assertNotNull(document);
         Assert.assertEquals("testDoc", document.getDocumentFileName());
     }
