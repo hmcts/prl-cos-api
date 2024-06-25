@@ -207,25 +207,31 @@ public class Fm5ReminderService {
         }
 
         List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList = new ArrayList<>();
 
         if (null != caseData.getDocumentManagementDetails()) {
             legalProfQuarantineDocsList = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+            citizenQuarantineDocsList = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
         }
 
         List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList = new ArrayList<>();
         List<Element<QuarantineLegalDoc>> courtStaffUploadedCaseDocsList = new ArrayList<>();
         List<Element<QuarantineLegalDoc>> restrictedDocumentsList = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
             legalProfUploadedCaseDocsList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
             courtStaffUploadedCaseDocsList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
             restrictedDocumentsList = caseData.getReviewDocuments().getRestrictedDocuments();
+            citizenUploadedCaseDocsList = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab();
         }
 
         //if respondent AOH is available, no need to remind
         if (isPartyAohAvailable(
             legalProfQuarantineDocsList,
             legalProfUploadedCaseDocsList,
+            citizenQuarantineDocsList,
+            citizenUploadedCaseDocsList,
             restrictedDocumentsList
         )) {
             caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), Fm5PendingParty.NOTIFICATION_NOT_REQUIRED);
@@ -236,7 +242,8 @@ public class Fm5ReminderService {
         caseIdPendingPartyMapping.put(String.valueOf(caseData.getId()), fetchFm5DocsSubmissionPendingParties(
             caseData,
             legalProfUploadedCaseDocsList,
-            courtStaffUploadedCaseDocsList
+            courtStaffUploadedCaseDocsList,
+            citizenUploadedCaseDocsList
         ));
         return caseIdPendingPartyMapping;
     }
@@ -340,6 +347,8 @@ public class Fm5ReminderService {
 
     private  boolean isPartyAohAvailable(List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList,
                                          List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                         List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList,
+                                         List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList,
                                          List<Element<QuarantineLegalDoc>> restrictedDocumentsList) {
         if (isNotEmpty(legalProfQuarantineDocsList)
             && checkByCategoryRespondentC1AApplication(legalProfQuarantineDocsList)) {
@@ -348,6 +357,16 @@ public class Fm5ReminderService {
 
         if (isNotEmpty(legalProfUploadedCaseDocsList)
             && checkByCategoryRespondentC1AApplication(legalProfUploadedCaseDocsList)) {
+            return true;
+        }
+
+        if (isNotEmpty(citizenQuarantineDocsList)
+            && checkByCategoryRespondentC1AApplication(citizenQuarantineDocsList)) {
+            return true;
+        }
+
+        if (isNotEmpty(citizenUploadedCaseDocsList)
+            && checkByCategoryRespondentC1AApplication(citizenUploadedCaseDocsList)) {
             return true;
         }
 
@@ -362,8 +381,9 @@ public class Fm5ReminderService {
     }
 
     private Fm5PendingParty fetchFm5DocsSubmissionPendingParties(CaseData caseData,
-                                                                 List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
-                                                                 List<Element<QuarantineLegalDoc>> courtStaffUploadedCaseDocsList) {
+                                                                List<Element<QuarantineLegalDoc>> legalProfUploadedCaseDocsList,
+                                                                List<Element<QuarantineLegalDoc>> courtStaffUploadedCaseDocsList,
+                                                                List<Element<QuarantineLegalDoc>> citizenUploadedCaseDocsList) {
 
         Map<String,Long> countMap = new HashMap<>();
         countMap.put(APPLICANT_FM5_COUNT,0L);
@@ -375,6 +395,10 @@ public class Fm5ReminderService {
 
         if (isNotEmpty(courtStaffUploadedCaseDocsList)) {
             checkByCategoryFm5StatementsAndParty(courtStaffUploadedCaseDocsList, countMap);
+        }
+
+        if (isNotEmpty(citizenUploadedCaseDocsList)) {
+            checkByCategoryFm5StatementsAndParty(citizenUploadedCaseDocsList, countMap);
         }
 
         if (countMap.get(APPLICANT_FM5_COUNT) < caseData.getApplicants().size()
