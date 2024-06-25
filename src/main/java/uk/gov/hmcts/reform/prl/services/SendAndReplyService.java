@@ -773,7 +773,7 @@ public class SendAndReplyService {
                                           ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
                 (REPLY.equals(caseData.getChooseSendOrReply())
                     ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
-                    : message.getInternalMessageWhoToSendTo())))
+                    : message.getInternalMessageWhoToSendTo().getDisplayedValue())))
             .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
