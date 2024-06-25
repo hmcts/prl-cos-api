@@ -290,19 +290,39 @@ public class CaseService {
             caseData.getDssCaseDetails().toBuilder()
                 .dssUploadedDocuments(uploadDssDocs)
                 .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
-                .dssCaseIsFree(checkIfDssCaseIsFree(dssCaseData.getCaseTypeOfApplication()))
                 .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
+        updatedCaseData = checkIfDssCaseIsFree(updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
     }
 
-    private boolean checkIfDssCaseIsFree(String caseTypeOfApplication) {
-        return caseTypeOfApplication.equalsIgnoreCase("FGM")
-            || caseTypeOfApplication.equalsIgnoreCase("FMPO");
+    private CaseData checkIfDssCaseIsFree(CaseData updatedCaseData) {
+        if (null != updatedCaseData.getDssCaseDetails()
+            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
+            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))) {
+            updatedCaseData = updatedCaseData
+                .toBuilder()
+                .dssCaseDetails(updatedCaseData
+                    .getDssCaseDetails()
+                    .toBuilder()
+                    .dssCaseIsFree(true)
+                    .build())
+                .build();
+        } else {
+            updatedCaseData = updatedCaseData
+                .toBuilder()
+                .dssCaseDetails(updatedCaseData
+                    .getDssCaseDetails()
+                    .toBuilder()
+                    .dssCaseIsFree(false)
+                    .build())
+                .build();
+        }
+        return  updatedCaseData;
     }
 
     private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {
