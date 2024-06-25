@@ -96,6 +96,7 @@ public class ChildDetailsRevisedChecker implements EventChecker {
         }
         fields.add(ofNullable(child.getOrderAppliedFor()));
         fields.add(ofNullable(child.getParentalResponsibilityDetails()));
+        fields.add(ofNullable(child.getWhoDoesTheChildLiveWith()));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 

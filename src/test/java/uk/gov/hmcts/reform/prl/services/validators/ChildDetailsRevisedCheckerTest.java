@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -92,6 +93,7 @@ public class ChildDetailsRevisedCheckerTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
+            .whoDoesTheChildLiveWith(DynamicList.builder().build())
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
@@ -143,6 +145,7 @@ public class ChildDetailsRevisedCheckerTest {
             .dateOfBirth(LocalDate.of(2000, 12, 22))
             .gender(other)
             .otherGender("unknow")
+            .whoDoesTheChildLiveWith(DynamicList.builder().build())
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
             .build();
