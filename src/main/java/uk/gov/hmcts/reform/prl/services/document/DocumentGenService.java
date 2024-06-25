@@ -83,6 +83,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A13_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A14_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A15_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
@@ -299,6 +302,19 @@ public class DocumentGenService {
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
+
+    @Value("${document.templates.common.doc_letter_ap_13_eng_template}")
+    protected String ap13EngTemplate;
+    @Value("${document.templates.common.doc_letter_ap_13_welsh_template}")
+    protected String ap13WelshTemplate;
+    @Value("${document.templates.common.doc_letter_ap_14_eng_template}")
+    protected String ap14EngTemplate;
+    @Value("${document.templates.common.doc_letter_ap_14_welsh_template}")
+    protected String ap14WelshTemplate;
+    @Value("${document.templates.common.doc_letter_ap_15_eng_template}")
+    protected String ap15EngTemplate;
+    @Value("${document.templates.common.doc_letter_ap_15_welsh_template}")
+    protected String ap15WelshTemplate;
 
     @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
     protected String citizenC1aFinalResponseTemplate;
@@ -1027,6 +1043,15 @@ public class DocumentGenService {
             case C1A_FINAL_RESPONSE_DOCUMENT:
                 template = getRespondentC1aResponseFinalTemplate(isWelsh);
                 break;
+            case DOCUMENT_A13_LETTER:
+                template = findAp13FileName(isWelsh);
+                break;
+            case DOCUMENT_A14_LETTER:
+                template = findAp14FileName(isWelsh);
+                break;
+            case DOCUMENT_A15_LETTER:
+                template = findAp15FileName(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -1110,6 +1135,18 @@ public class DocumentGenService {
 
     private String findDocCoverSheetC7FinalFileName(boolean isWelsh) {
         return !isWelsh ? solicitorC7FinalFilename : solicitorC7WelshFinalFilename;
+    }
+
+    private String findAp13FileName(boolean isWelsh) {
+        return !isWelsh ? ap13EngTemplate : ap13WelshTemplate;
+    }
+
+    private String findAp14FileName(boolean isWelsh) {
+        return !isWelsh ? ap14EngTemplate : ap14WelshTemplate;
+    }
+
+    private String findAp15FileName(boolean isWelsh) {
+        return !isWelsh ? ap15EngTemplate : ap15WelshTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {

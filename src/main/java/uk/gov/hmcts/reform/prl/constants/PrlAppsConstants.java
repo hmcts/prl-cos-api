@@ -1018,6 +1018,9 @@ public class PrlAppsConstants {
 
     public static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
 
+    public static final String DOCUMENT_A13_LETTER ="a13Letter";
+    public static final String DOCUMENT_A14_LETTER ="a14Letter";
+    public static final String DOCUMENT_A15_LETTER ="a15Letter";
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
