@@ -188,7 +188,6 @@ public class CitizenAwpMapper {
 
     private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
                                       CitizenAwpPayment citizenAwpPayment) {
-        log.info("Inside citizen awp payment mapping {}", citizenAwpPayment);
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)

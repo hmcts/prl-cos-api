@@ -102,6 +102,7 @@ public class PaymentRequestService {
                 CITIZEN_CASE_UPDATE.getValue()
             );
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
 
         if (null == caseData) {
             log.info(
@@ -119,45 +120,31 @@ public class PaymentRequestService {
             .applicantCaseName(caseData.getApplicantCaseName()).build();
 
         if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
-            log.info("Creating payment for C100");
-            return createPayment(
-                authorization,
-                createPaymentRequest,
-                caseData.getPaymentServiceRequestReferenceNumber(),
-                caseData.getPaymentReferenceNumber(),
-                feeResponse
-            );
+            log.info("*** Citizen C100 case payment ***");
+            paymentResponse = handleC100Payment(authorization,
+                                                caseData,
+                                                caseDataMap,
+                                                createPaymentRequest,
+                                                feeResponse);
         } else {
             log.info("*** Citizen awp payment ***");
-            Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
-                getCitizenAwpPaymentIfPresent(
-                    caseData.getCitizenAwpPayments(),
-                    createPaymentRequest
-                );
-            Element<CitizenAwpPayment> citizenAwpPaymentElement = optionalCitizenAwpPaymentElement.orElse(null);
-            log.info("Citizen awp payment retrieved from caseData {}", citizenAwpPaymentElement);
-
-            paymentResponse = createPayment(
-                authorization,
-                createPaymentRequest,
-                null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getServiceReqRef() : null,
-                null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getPaymentReqRef() : null,
-                feeResponse
-            );
-
-            //save service req & payment req ref into caseData
-            updateCaseDataWithCitizenAwpPayments(
-                caseData,
-                startAllTabsUpdateDataContent,
-                createPaymentRequest,
-                paymentResponse,
-                citizenAwpPaymentElement,
-                feeResponse
-            );
-
-            return paymentResponse;
+            paymentResponse = handleCitizenAwpPayment(authorization,
+                                                      caseData,
+                                                      caseDataMap,
+                                                      createPaymentRequest,
+                                                      feeResponse);
         }
 
+        //update case
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            createPaymentRequest.getCaseId(),
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+
+        return paymentResponse;
     }
 
     public PaymentResponse createPayment(String authorization,
@@ -284,12 +271,65 @@ public class PaymentRequestService {
             );
     }
 
-    private void updateCaseDataWithCitizenAwpPayments(CaseData caseData,
-                                                      StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
-                                                      CreatePaymentRequest createPaymentRequest,
-                                                      PaymentResponse paymentResponse,
-                                                      Element<CitizenAwpPayment> existingCitizenAwpPayment,
-                                                      FeeResponse feeResponse) {
+    private PaymentResponse handleC100Payment(String authorization,
+                                              CaseData caseData,
+                                              Map<String, Object> caseDataMap,
+                                              CreatePaymentRequest createPaymentRequest,
+                                              FeeResponse feeResponse) {
+        paymentResponse = createPayment(
+            authorization,
+            createPaymentRequest,
+            caseData.getPaymentServiceRequestReferenceNumber(),
+            caseData.getPaymentReferenceNumber(),
+            feeResponse
+        );
+
+        //update service request & payment request reference
+        caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+        caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+
+        return paymentResponse;
+    }
+
+    private PaymentResponse handleCitizenAwpPayment(String authorization,
+                                                    CaseData caseData,
+                                                    Map<String, Object> caseDataMap,
+                                                    CreatePaymentRequest createPaymentRequest,
+                                                    FeeResponse feeResponse) {
+        Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
+            getCitizenAwpPaymentIfPresent(
+                caseData.getCitizenAwpPayments(),
+                createPaymentRequest
+            );
+        Element<CitizenAwpPayment> citizenAwpPaymentElement = optionalCitizenAwpPaymentElement.orElse(null);
+
+        paymentResponse = createPayment(
+            authorization,
+            createPaymentRequest,
+            null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getServiceReqRef() : null,
+            null != citizenAwpPaymentElement ? citizenAwpPaymentElement.getValue().getPaymentReqRef() : null,
+            feeResponse
+        );
+
+        //save service req & payment req ref into caseData
+        updateCitizenAwpPayments(
+            caseData,
+            caseDataMap,
+            createPaymentRequest,
+            paymentResponse,
+            citizenAwpPaymentElement,
+            feeResponse
+        );
+
+        return paymentResponse;
+    }
+
+    private void updateCitizenAwpPayments(CaseData caseData,
+                                          Map<String, Object> caseDataMap,
+                                          CreatePaymentRequest createPaymentRequest,
+                                          PaymentResponse paymentResponse,
+                                          Element<CitizenAwpPayment> existingCitizenAwpPayment,
+                                          FeeResponse feeResponse) {
         //Remove existing citizen awp payment before adding/updating with new details
         if (null != existingCitizenAwpPayment) {
             log.info("Remove existing citizen awp payment from caseData");
@@ -299,19 +339,8 @@ public class PaymentRequestService {
         Element<CitizenAwpPayment> citizenAwpPayment = null != existingCitizenAwpPayment
             ? updateCitizenAwpPayment(existingCitizenAwpPayment, paymentResponse)
             : createCitizenAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
-        log.info("Citizen awp payment created/updated {}", citizenAwpPayment);
 
-        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-        updatedCaseDataMap.put("citizenAwpPayments", getCitizenAwpPayments(caseData, citizenAwpPayment));
-
-        //update case
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            createPaymentRequest.getCaseId(),
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            updatedCaseDataMap
-        );
+        caseDataMap.put("citizenAwpPayments", getCitizenAwpPayments(caseData, citizenAwpPayment));
     }
 
     private List<Element<CitizenAwpPayment>> getCitizenAwpPayments(CaseData caseData,

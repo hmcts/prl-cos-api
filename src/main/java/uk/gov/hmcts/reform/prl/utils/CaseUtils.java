@@ -843,7 +843,6 @@ public class CaseUtils {
 
     public static Optional<Element<CitizenAwpPayment>> getCitizenAwpPaymentIfPresent(List<Element<CitizenAwpPayment>> citizenAwpPayments,
                                                                                      CreatePaymentRequest createPaymentRequest) {
-        log.info("Existing citizen awp payments {}", citizenAwpPayments);
         if (isNotEmpty(citizenAwpPayments)) {
             return citizenAwpPayments.stream()
                 .filter(awpPaymentElement ->
