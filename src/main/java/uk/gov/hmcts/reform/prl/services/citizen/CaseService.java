@@ -309,7 +309,7 @@ public class CaseService {
                 .dssCaseDetails(updatedCaseData
                     .getDssCaseDetails()
                     .toBuilder()
-                    .dssCaseIsFree(true)
+                    .dssCaseIsFree("Yes")
                     .build())
                 .build();
         } else {
@@ -318,10 +318,11 @@ public class CaseService {
                 .dssCaseDetails(updatedCaseData
                     .getDssCaseDetails()
                     .toBuilder()
-                    .dssCaseIsFree(false)
+                    .dssCaseIsFree("No")
                     .build())
                 .build();
         }
+        log.info("is Dss case free? {}", updatedCaseData.getDssCaseDetails().getDssCaseIsFree());
         return  updatedCaseData;
     }
 
