@@ -310,6 +310,27 @@ fees-register:
       jurisdiction2: family court
       keyword: GeneralAppWithoutNotice
       service: other
+    PARENTAL_ORDER:
+      channel: default
+      event: issue
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: AppnParent
+      service: other
+    SPECIAL_GUARDIANSHIP_ORDER:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: SpecialGuardian
+      service: private law
+    DECLARATION_OF_PARENTAGE:
+      channel: default
+      event: issue
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: Private
+      service: other
 # NEW BELOW THIS LINE
 
 idam:
