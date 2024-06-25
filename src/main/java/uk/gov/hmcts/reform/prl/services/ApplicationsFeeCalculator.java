@@ -135,7 +135,7 @@ public class ApplicationsFeeCalculator {
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
-                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue().equalsIgnoreCase(otherApplicationType)
+                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getId().equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
                     feeTypes.add(FL403_EXTEND_AN_ORDER);
                 }
