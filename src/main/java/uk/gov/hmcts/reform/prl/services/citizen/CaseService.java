@@ -293,37 +293,10 @@ public class CaseService {
                 .selectedCourt(dssCaseData.getSelectedCourt())
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
-        updatedCaseData = checkIfDssCaseIsFree(updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
-    }
-
-    private CaseData checkIfDssCaseIsFree(CaseData updatedCaseData) {
-        if (null != updatedCaseData.getDssCaseDetails()
-            && ("FGM".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication())
-            || "FMPO".equalsIgnoreCase(updatedCaseData.getDssCaseDetails().getEdgeCaseTypeOfApplication()))) {
-            updatedCaseData = updatedCaseData
-                .toBuilder()
-                .dssCaseDetails(updatedCaseData
-                    .getDssCaseDetails()
-                    .toBuilder()
-                    .dssCaseIsFree("Yes")
-                    .build())
-                .build();
-        } else {
-            updatedCaseData = updatedCaseData
-                .toBuilder()
-                .dssCaseDetails(updatedCaseData
-                    .getDssCaseDetails()
-                    .toBuilder()
-                    .dssCaseIsFree("No")
-                    .build())
-                .build();
-        }
-        log.info("is Dss case free? {}", updatedCaseData.getDssCaseDetails().getDssCaseIsFree());
-        return  updatedCaseData;
     }
 
     private CaseData updateCourtDetails(String authToken, DssCaseData dssCaseData, CaseData updatedCaseData) {

@@ -19,8 +19,6 @@ public class DssCaseDetails {
     private final List<Element<Document>> dssUploadedAdditionalDocuments;
     @JsonProperty("edgeCaseTypeOfApplication")
     private final String edgeCaseTypeOfApplication;
-    @JsonProperty("dssCaseIsFree")
-    private final String dssCaseIsFree;
     @JsonProperty("selectedCourt")
     private final String selectedCourt;
 }
