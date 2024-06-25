@@ -547,7 +547,6 @@ public class DraftAnOrderServiceTest {
             .build();
         when(manageOrderService.getCurrentCreateDraftOrderDetails(any(), anyString(),any())).thenReturn(draftOrder);
         when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
-        Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> result = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         System.out.println(result);
         assertNotNull(result);
@@ -2832,7 +2831,6 @@ public class DraftAnOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        Map<String, Object> stringObjectMap = new HashMap<>();
         List<Element<DraftOrder>> result = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         assertNotNull(result);
     }

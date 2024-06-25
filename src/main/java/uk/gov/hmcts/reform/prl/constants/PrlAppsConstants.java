@@ -79,6 +79,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
     public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
     public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_EXTERNAL = "External";
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
@@ -131,6 +132,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
+    public static final String DOCUMENT_SEND_REPLY_MESSAGE = "SEND_REPLY_MESSAGE";
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
@@ -771,6 +773,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
     public static final String COMMA = ",";
@@ -1006,15 +1009,17 @@ public class PrlAppsConstants {
 
     public static final String RESP_CHILD_ABUSES_DOCMOSIS = "respChildAbuseBehavioursDocmosis";
 
+    public static final String SOA_CAFCASS_CYMRU_SERVED_OPTIONS = "soaCafcassCymruServedOptions";
+
     public static final String C100_DEFAULT_BASE_LOCATION_NAME = "CTSC Stoke";
     public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
     public static final String C100_DEFAULT_REGION_NAME = "Midlands";
     public static final String C100_DEFAULT_REGION_ID = "2";
 
     public static final String C1A_FINAL_RESPONSE_DOCUMENT = "C1A_FINAL_RESPONSE_DOCUMENT";
-    public  static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
+    public static final String APPLICANT_FM5_COUNT = "applicantFm5Count";
 
-    public  static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
+    public static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
 
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
