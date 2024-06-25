@@ -895,7 +895,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void shouldReturnPaymentGroupReferenceStatus() throws Exception {
+    public void shouldReturnPaymentGroupReferenceStatus() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
