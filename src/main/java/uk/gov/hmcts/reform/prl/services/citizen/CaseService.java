@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -763,7 +764,9 @@ public class CaseService {
 
     private boolean isPersonalService(OrderDetails order) {
         return null != order.getServeOrderDetails()
-            && YesOrNo.Yes.equals(order.getServeOrderDetails().getServeOnRespondent());
+            && YesOrNo.Yes.equals(order.getServeOrderDetails().getServeOnRespondent())
+            && SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
+            .equals(order.getServeOrderDetails().getWhoIsResponsibleToServe());
     }
 
     private boolean isPersonalService(ServedApplicationDetails servedAppPack) {
@@ -922,10 +925,10 @@ public class CaseService {
         List<CitizenDocuments> multipleOrdersServed = getMultipleOrdersServed(citizenOrders);
 
         if (citizenOrders.get(0).isPersonalService()) {
-            //CRNF3 - personal service
+            //CRNF3 - personal service by unrepresented applicant lip
             citizenNotification = CitizenNotification.builder().id(CRNF3_PERS_SERV_APPLICANT).show(true).isPersonalService(true).build();
         } else {
-            //CRNF2 - non personal service
+            //CRNF2 - personal service by Court admin/bailiff & non-personal service
             citizenNotification = CitizenNotification.builder().id(CRNF2_APPLICANT_RESPONDENT).show(true).isPersonalService(false).build();
         }
 
