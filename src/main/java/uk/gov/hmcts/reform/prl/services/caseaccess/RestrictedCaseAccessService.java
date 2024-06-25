@@ -109,7 +109,7 @@ public class RestrictedCaseAccessService {
 
         caseDataUpdated.put(APPLICANT_CASE_NAME, applicantCaseName);
         caseDataUpdated.put("caseNameHmctsInternal", applicantCaseName);
-        if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
+        if (caseDataUpdated.containsKey(APPLICANT_OR_RESPONDENT_CASE_NAME)) {
             caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, applicantCaseName);
         }
     }
