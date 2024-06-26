@@ -286,7 +286,7 @@ public class CaseService {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId))
-            .applicantCaseName(dssCaseData.getNamedApplicant())
+            .applicantCaseName(dssCaseData.getApplicantFirstName() + dssCaseData.getApplicantLastName())
             .applicants(List.of(partyDetailsElement))
             .dssCaseDetails(
             caseData.getDssCaseDetails().toBuilder()
@@ -296,7 +296,7 @@ public class CaseService {
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
-        log.info("cansename --" + updatedCaseData.getApplicantCaseName());
+        log.info("casename --" + updatedCaseData.getApplicantCaseName());
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
