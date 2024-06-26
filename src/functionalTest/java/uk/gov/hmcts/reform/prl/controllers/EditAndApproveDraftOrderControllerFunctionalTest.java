@@ -4,22 +4,16 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -28,15 +22,10 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest
@@ -45,79 +34,51 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class EditAndApproveDraftOrderControllerFunctionalTest {
 
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-manyhearing-jugappr-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-nohearing-judgeappr-request.json";
+    private static final String DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-judgereject-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
+    private static final String DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-sdo-1hearing-judge-appr-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-manyhearing-judgeappr-request.json";
+    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_WITH_2ND_OPTION_BODY
+        = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-with2nd-option-request.json";
+    private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
+        = "requests/court-admin-manage-order-noapproval-required-request.json";
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
+    private static CaseDetails caseDetails;
     private final String userToken = "Bearer testToken";
-    private MockMvc mockMvc;
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    protected IdamTokenGenerator idamTokenGenerator;
-
-    @Autowired
-    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
-    @MockBean
-    private DraftAnOrderService draftAnOrderService;
-
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
             "http://localhost:4044"
         );
-
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
-
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
-
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
-        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY
-        = "requests/draft-ordr-judge-edit-approve-soli-manyhearing-jugappr-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY
-        = "requests/draft-ordr-judge-edit-approve-soli-nohearing-judgeappr-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY
-        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-judgereject-request.json";
-
-
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
-        = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
-
-    private static final String DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
-        = "requests/judge-edit-approve-court-admin-sdo-1hearing-judge-appr-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY
-        = "requests/judge-edit-approve-court-admin-manyhearing-judgeappr-request.json";
-
-    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_WITH_2ND_OPTION_BODY
-        = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-with2nd-option-request.json";
-
-    private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
-        = "requests/court-admin-manage-order-noapproval-required-request.json";
-
-    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
-
-    private static CaseDetails caseDetails;
-
-
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+    @MockBean
+    private DraftAnOrderService draftAnOrderService;
 
-
-    @Before
-    public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
 
     @Test
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request1
+        caseDetails = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -135,139 +96,180 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> drafOrderMap = new HashMap<>();
-        drafOrderMap.put("draftOrder1", "SDO");
-        drafOrderMap.put("draftOrder2", "C21");
-        Mockito
-            .when(draftAnOrderService
-                      .getDraftOrderDynamicList(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(drafOrderMap);
+
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/populate-draft-order-dropdown")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.draftOrder1").value("SDO"))
-            .andExpect(jsonPath("data.draftOrder2").value("C21"))
-            .andReturn();
+
+        String requestBodyRevised = requestBody
+            .replace(
+                "\"event_id\": \"litigationCapacity\"",
+                "\"event_id\": \"editAndApproveAnOrder\""
+            )
+
+            .replace(
+                "\"isJudgeApprovalNeeded\": \"No\"",
+                "\"isJudgeApprovalNeeded\": \"Yes\""
+            );
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/populate-draft-order-dropdown")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.draftOrdersDynamicList", notNullValue(),
+                  "data.draftOrdersDynamicList.list_items", hasSize(2),
+                  "data.caseTypeOfApplication", equalTo("FL401")
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
     public void givenRequestBody_whenJudge_admin_populate_draft_order_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("orderName", "C21");
-        caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
-        Mockito.when(draftAnOrderService.populateDraftOrderDocument(ArgumentMatchers.any(), ArgumentMatchers.any()))
-                .thenReturn(caseDataMap);
+
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/judge-or-admin-populate-draft-order")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.orderName").value("C21"))
-            .andExpect(jsonPath("data.orderUploadedAsDraftFlag").value("Yes"))
-            .andReturn();
+
+        String requestBodyRevised = requestBody
+            .replace(
+                "\"event_id\": \"litigationCapacity\"",
+                "\"event_id\": \"editAndApproveAnOrder\""
+            )
+
+            .replace(
+                "\"isOrderUploadedByJudgeOrAdmin\": \"No\"",
+                "\"isOrderUploadedByJudgeOrAdmin\": \"Yes\""
+            );
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-populate-draft-order")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.uploadOrAmendDirectionsFromJudge", equalTo("asdasd"),
+                  "data.manageOrderOptionType", equalTo("createAnOrder"),
+                  "data.isHearingPageNeeded", equalTo("Yes"),
+                  "data.caseTypeOfApplication", equalTo("FL401")
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
     @Test
     public void givenRequestBody_whenJudge_or_admin_edit_approve_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.applicantCaseName").value("John Smith"))
-            .andExpect(jsonPath("data.caseTypeOfApplication").value("FL401"))
-            .andReturn();
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.applicantCaseName", equalTo("John Smith"),
+                  "data.caseTypeOfApplication", equalTo("FL401")
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     @Test
     public void givenRequestBody_whenJudge_or_admin_populate_draft_order_custom_fields_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("appointedGuardianName", "John");
-        caseDataMap.put("parentName", "Smith");
-        Mockito.when(draftAnOrderService.populateDraftOrderCustomFields(ArgumentMatchers.any(), ArgumentMatchers.any()))
-            .thenReturn(caseDataMap);
+
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/judge-or-admin-populate-draft-order-custom-fields")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.appointedGuardianName").value("John"))
-            .andExpect(jsonPath("data.parentName").value("Smith"))
-            .andReturn();
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-populate-draft-order-custom-fields")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.manageOrdersRespondent", equalTo("John Doe"),
+                  "data.manageOrdersApplicant", equalTo("test data"),
+                  "data.manageOrdersApplicant", equalTo("test data"),
+                  "data.isHearingPageNeeded", equalTo("Yes")
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
     @Test
     public void givenRequestBody_whenJudge_or_admin_populate_draft_order_common_fields_then200Response() throws Exception {
-        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("orderType", "C21");
-        caseDataMap.put("isTheOrderByConsent", "Yes");
-        Mockito.when(draftAnOrderService
-                         .populateCommonDraftOrderFields(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-            .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/judge-or-admin-populate-draft-order-common-fields")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("data.orderType").value("C21"))
-            .andExpect(jsonPath("data.isTheOrderByConsent").value("Yes"))
-            .andReturn();
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-populate-draft-order-common-fields")
+            .then()
+            .assertThat().statusCode(200)
+            .body("data.orderType", equalTo("noticeOfProceedingsNonParties"),
+                  "data.uploadOrAmendDirectionsFromJudge", equalTo("asdasd"),
+                  "data.isCafcassCymru", equalTo("Yes"),
+                  "data.isFL401RespondentSolicitorPresent", equalTo("Yes"),
+                  "data.instructionsFromJudge", equalTo("asdasd"),
+                  "data.draftOrdersDynamicList", equalTo("fa632e84-bc22-4d74-bd36-b37cd27095d3")
+            )
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
 
-        mockMvc.perform(post("/edit-and-approve/submitted")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content()
-                           .string(Matchers
-                                       .containsString(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)))
-            .andReturn();
+        String requestBodyRevised = requestBody
+            .replace("1711105989241323", caseDetails.getId().toString());
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/edit-and-approve/submitted")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
 
-        mockMvc.perform(post("/edit-and-approve/submitted")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content()
-                           .string(Matchers
-                                       .containsString(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)))
-            .andReturn();
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/edit-and-approve/submitted")
+            .then()
+            .body("data", contains(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)
+            )
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     /**
@@ -289,7 +291,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -314,7 +317,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -339,7 +343,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo(null),
                   "data.hearingOptionSelected", equalTo(null),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -364,7 +369,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo("No"),
-                  "data.whoApprovedTheOrder", equalTo(null))
+                  "data.whoApprovedTheOrder", equalTo(null)
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -391,7 +397,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateConfirmedByListingTeam"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -416,7 +423,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -444,7 +452,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateConfirmedInHearingsTab"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -469,7 +478,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo("Yes"),
-                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE")
+            )
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
