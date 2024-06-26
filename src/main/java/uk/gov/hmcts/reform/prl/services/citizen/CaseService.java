@@ -285,7 +285,9 @@ public class CaseService {
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement))
+        CaseData updatedCaseData = caseData.toBuilder().id(Long.parseLong(caseId))
+            .applicantCaseName(dssCaseData.getNamedApplicant())
+            .applicants(List.of(partyDetailsElement))
             .dssCaseDetails(
             caseData.getDssCaseDetails().toBuilder()
                 .dssUploadedDocuments(uploadDssDocs)
@@ -294,6 +296,7 @@ public class CaseService {
                 .build()).build();
         updatedCaseData = updateCourtDetails(authToken, dssCaseData, updatedCaseData);
         log.info("updatedCaseData --" + updatedCaseData);
+        log.info("cansename --" + updatedCaseData.getApplicantCaseName());
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
