@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-
+/**
+ * This is a generic citizen gov notify email template variables.
+ */
 @Data
 @Getter
 @EqualsAndHashCode(callSuper = true)
