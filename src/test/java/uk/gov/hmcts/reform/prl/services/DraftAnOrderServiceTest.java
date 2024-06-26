@@ -1672,9 +1672,6 @@ public class DraftAnOrderServiceTest {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
 
-        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-
         caseData = CaseData.builder()
             .id(12345L)
             .courtName(SWANSEA_COURT_NAME)
@@ -1698,6 +1695,8 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
@@ -2270,30 +2269,6 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateStandardDirectionOrderTest() throws JsonProcessingException {
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
-            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
-            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
-            .sdoHearingsAndNextStepsList(List.of(
-                SdoHearingsAndNextStepsEnum.miamAttendance
-            ))
-            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
-            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
-            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
-            .sdoUrgentHearingDetails(HearingData.builder().build())
-            .sdoPermissionHearingDetails(HearingData.builder().build())
-            .sdoSecondHearingDetails(HearingData.builder().build())
-            .sdoFhdraHearingDetails(HearingData.builder().build())
-            .sdoDraHearingDetails(HearingData.builder().build())
-            .sdoSettlementHearingDetails(HearingData.builder().build())
-            .sdoDirectionsForFactFindingHearingDetails(
-                HearingData.builder()
-                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
-                    .build())
-            .build();
-
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2328,6 +2303,30 @@ public class DraftAnOrderServiceTest {
         draftOrderCollection.add(draftOrderElement);
         draftOrderCollection.add(draftOrderElement1);
         draftOrderCollection.add(draftOrderElement2);
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
+            .sdoUrgentHearingDetails(HearingData.builder().build())
+            .sdoPermissionHearingDetails(HearingData.builder().build())
+            .sdoSecondHearingDetails(HearingData.builder().build())
+            .sdoFhdraHearingDetails(HearingData.builder().build())
+            .sdoDraHearingDetails(HearingData.builder().build())
+            .sdoSettlementHearingDetails(HearingData.builder().build())
+            .sdoDirectionsForFactFindingHearingDetails(
+                HearingData.builder()
+                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                    .build())
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -2373,31 +2372,6 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateStandardDirectionOrderTestScenario2() throws JsonProcessingException {
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
-            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
-            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
-            .sdoHearingsAndNextStepsList(List.of(
-                SdoHearingsAndNextStepsEnum.miamAttendance
-            ))
-            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
-            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
-            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
-            .sdoUrgentHearingDetails(HearingData.builder().build())
-            .sdoPermissionHearingDetails(HearingData.builder().build())
-            .sdoSecondHearingDetails(HearingData.builder().build())
-            .sdoFhdraHearingDetails(HearingData.builder().build())
-            .sdoDraHearingDetails(HearingData.builder().build())
-            .sdoSettlementHearingDetails(HearingData.builder().build())
-            .editedOrderHasDefaultCaseFields(Yes)
-            .sdoDirectionsForFactFindingHearingDetails(
-                HearingData.builder()
-                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
-                    .build())
-            .build();
-
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2432,6 +2406,31 @@ public class DraftAnOrderServiceTest {
         draftOrderCollection.add(draftOrderElement);
         draftOrderCollection.add(draftOrderElement1);
         draftOrderCollection.add(draftOrderElement2);
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
+            .sdoUrgentHearingDetails(HearingData.builder().build())
+            .sdoPermissionHearingDetails(HearingData.builder().build())
+            .sdoSecondHearingDetails(HearingData.builder().build())
+            .sdoFhdraHearingDetails(HearingData.builder().build())
+            .sdoDraHearingDetails(HearingData.builder().build())
+            .sdoSettlementHearingDetails(HearingData.builder().build())
+            .editedOrderHasDefaultCaseFields(Yes)
+            .sdoDirectionsForFactFindingHearingDetails(
+                HearingData.builder()
+                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                    .build())
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -2477,31 +2476,6 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateStandardDirectionOrderTestScenario3() throws JsonProcessingException {
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
-            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
-            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
-            .sdoHearingsAndNextStepsList(List.of(
-                SdoHearingsAndNextStepsEnum.miamAttendance
-            ))
-            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
-            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
-            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
-            .sdoUrgentHearingDetails(HearingData.builder().build())
-            .sdoPermissionHearingDetails(HearingData.builder().build())
-            .sdoSecondHearingDetails(HearingData.builder().build())
-            .sdoFhdraHearingDetails(HearingData.builder().build())
-            .sdoDraHearingDetails(HearingData.builder().build())
-            .sdoSettlementHearingDetails(HearingData.builder().build())
-            .editedOrderHasDefaultCaseFields(Yes)
-            .sdoDirectionsForFactFindingHearingDetails(
-                HearingData.builder()
-                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
-                    .build())
-            .build();
-
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2536,6 +2510,31 @@ public class DraftAnOrderServiceTest {
         draftOrderCollection.add(draftOrderElement);
         draftOrderCollection.add(draftOrderElement1);
         draftOrderCollection.add(draftOrderElement2);
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
+            .sdoUrgentHearingDetails(HearingData.builder().build())
+            .sdoPermissionHearingDetails(HearingData.builder().build())
+            .sdoSecondHearingDetails(HearingData.builder().build())
+            .sdoFhdraHearingDetails(HearingData.builder().build())
+            .sdoDraHearingDetails(HearingData.builder().build())
+            .sdoSettlementHearingDetails(HearingData.builder().build())
+            .editedOrderHasDefaultCaseFields(Yes)
+            .sdoDirectionsForFactFindingHearingDetails(
+                HearingData.builder()
+                    .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                    .build())
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -2580,18 +2579,6 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateStandardDirectionOrderTestWithExp() throws JsonProcessingException {
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
-            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
-            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
-            .sdoHearingsAndNextStepsList(List.of(
-                SdoHearingsAndNextStepsEnum.miamAttendance
-            ))
-            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
-            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .build();
-
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2626,6 +2613,18 @@ public class DraftAnOrderServiceTest {
         draftOrderCollection.add(draftOrderElement);
         draftOrderCollection.add(draftOrderElement1);
         draftOrderCollection.add(draftOrderElement2);
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -3333,10 +3332,6 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testExceptionForPopulateSdoFields() throws Exception {
-
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .build();
-
         DraftOrder draftOrder = DraftOrder.builder()
             .build();
 
@@ -3353,6 +3348,9 @@ public class DraftAnOrderServiceTest {
         draftOrderCollection.add(draftOrderElement);
         draftOrderCollection.add(draftOrderElement1);
         draftOrderCollection.add(draftOrderElement2);
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
