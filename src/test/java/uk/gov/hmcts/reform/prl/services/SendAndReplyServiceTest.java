@@ -615,6 +615,7 @@ public class SendAndReplyServiceTest {
             "High Court Judge")));
     }
 
+    @Test
     public void testPopulateDynamicListsForSendAndReply() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
@@ -709,6 +710,7 @@ public class SendAndReplyServiceTest {
             .getFutureHearingsList().getListItems().get(0).getCode());
     }
 
+    @Test
     public void testPopulateDynamicListsForSendAndReplyWithSubCategories() {
 
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());

@@ -427,15 +427,6 @@ public class SendAndReplyService {
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
-
-        List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList =  List.of(element(SendAndReplyDynamicDoc.builder()
-                            .submittedDocsRefList(
-                                getCategoriesAndDocuments(
-                                    authorization,
-                                    caseReference
-                                ))
-                            .build()));
-        externalMessageAttachDocsList.add(element(SendAndReplyDynamicDoc.builder().build()));
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
@@ -460,7 +451,13 @@ public class SendAndReplyService {
                                                caseReference
                                            ))
                                            .build())
-                    .externalMessageAttachDocsList(externalMessageAttachDocsList)
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                                                                       .submittedDocsRefList(
+                                                                           getCategoriesAndDocuments(
+                                                                               authorization,
+                                                                               caseReference
+                                                                           ))
+                                                                       .build())))
                     .build())
             .build();
     }
