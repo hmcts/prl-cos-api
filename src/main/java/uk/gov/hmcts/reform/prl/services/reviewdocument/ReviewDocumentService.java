@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -91,6 +92,8 @@ public class ReviewDocumentService {
     private final ManageDocumentsService manageDocumentsService;
     private final DocumentLanguageService documentLanguageService;
     private final SendgridService sendgridService;
+
+    private final AuthTokenGenerator authTokenGenerator;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -277,7 +280,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
     }
 
-    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, String authorisation) {
+    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
         boolean isDocumentFound = false;
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
@@ -286,7 +289,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
-                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST, authorisation);
+                                                        SOLICITOR, LEGAL_PROF_QUARANTINE_DOCS_LIST);
 
             }
             //cafcass uploaded docs
@@ -294,7 +297,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(CAFCASS)).build(),
-                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST, authorisation);
+                                                        CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST);
 
             }
             //court staff uploaded docs
@@ -302,7 +305,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
-                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST, authorisation);
+                                                        COURT_STAFF, COURT_STAFF_QUARANTINE_DOCS_LIST);
 
             }
             //citizen uploaded docs
@@ -310,7 +313,7 @@ public class ReviewDocumentService {
                 isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
                                                         caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
-                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST, authorisation);
+                                                        CITIZEN, CITIZEN_QUARANTINE_DOCS_LIST);
 
             }
             //Bulk scan
@@ -324,7 +327,7 @@ public class ReviewDocumentService {
                                           UUID uuid,
                                           UserDetails userDetails,
                                           String userRole,
-                                          String quarantineDocsListToBeModified, String authorisation) {
+                                          String quarantineDocsListToBeModified) {
         boolean isDocumentFound = false;
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = getQuarantineDocumentById(
             quarantineDocsList,
@@ -340,7 +343,7 @@ public class ReviewDocumentService {
                 userRole
             );
 
-            sendNotifications(caseData, quarantineLegalDocElementOptional.get(), quarantineDocsListToBeModified, authorisation);
+            sendNotifications(caseData, quarantineLegalDocElementOptional.get(), quarantineDocsListToBeModified);
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
@@ -349,15 +352,18 @@ public class ReviewDocumentService {
     }
 
     private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
-                                   String quarantineDocsListToBeModified, String authorisation) {
+                                   String quarantineDocsListToBeModified) {
         sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(APPLICANT_APPLICATION)) {
-                sendNotificationToApplicant(authorisation, caseData, EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
                                             C7_NOTIFICATION_APPLICANT_RESPONDENT, null);
             }
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(APPLICANT_C1A_APPLICATION)) {
-                sendNotificationToApplicant(authorisation, caseData, EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(APPLICANT_C1A_APPLICATION)
+            ) {
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
                                             C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_RESPONDENT
                 );
             }

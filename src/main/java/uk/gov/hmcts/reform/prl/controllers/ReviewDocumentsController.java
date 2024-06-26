@@ -101,7 +101,7 @@ public class ReviewDocumentsController {
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-        reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid, authorisation);
+        reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
         log.info("*************************** AFTER REVIEW ***************************");
 
         //clear fields
