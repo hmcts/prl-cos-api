@@ -45,10 +45,10 @@ java:
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
-    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2247-ccd-data-store-api
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2247-cdam
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2247-aac-manage-case-assignment
-    BUNDLE_URL: http://prl-ccd-definitions-pr-2247-em-ccdorc
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-2291-ccd-data-store-api
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-2291-cdam
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-2291-aac-manage-case-assignment
+    BUNDLE_URL: http://prl-ccd-definitions-pr-2291-em-ccdorc
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
