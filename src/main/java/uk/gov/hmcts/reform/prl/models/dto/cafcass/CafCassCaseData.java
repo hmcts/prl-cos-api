@@ -32,6 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuChildProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuOther;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuUrgency;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -208,8 +214,66 @@ public class CafCassCaseData {
     private YesOrNo mpuChildInvolvedInMiam;
     private YesOrNo mpuApplicantAttendedMiam;
     private YesOrNo mpuClaimingExemptionMiam;
+
+    @Getter(AccessLevel.NONE)
     private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
+
+
+    public void setMpuExemptionReasons(List<MiamExemptionsChecklistEnum> mpuExemptionReasons) {
+        final String[] childProtectionEvidence = {""};
+        final String[] domesticViolenceEvidence = {""};
+        final String[] reasonsForMiamExemption = {""};
+        final String[] otherGroundsEvidence = {""};
+        final String[] previousAttendenceEvidence = {""};
+        final String[] urgencyEvidence = {""};
+
+        mpuExemptionReasons.stream()
+            .forEach(
+                reasonEnum ->
+                {
+                    if (reasonEnum.equals(mpuDomesticAbuse)) {
+                        domesticViolenceEvidence[0] = mpuDomesticAbuse.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuChildProtectionConcern)) {
+                        childProtectionEvidence[0] = mpuChildProtectionConcern.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuUrgency)) {
+                        urgencyEvidence[0] = mpuUrgency.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuPreviousMiamAttendance)) {
+                        previousAttendenceEvidence[0] = mpuPreviousMiamAttendance.getDisplayedValue();
+                    } else if (reasonEnum.equals(mpuOther)) {
+                        otherGroundsEvidence[0] = mpuOther.getDisplayedValue();
+                    }
+                }
+
+            );
+
+
+        this.miamExemptionsTable = MiamExemptions.builder()
+            .childProtectionEvidence(childProtectionEvidence[0])
+            .domesticViolenceEvidence(domesticViolenceEvidence[0])
+            .reasonsForMiamExemption(reasonsForMiamExemption[0])
+            .otherGroundsEvidence(otherGroundsEvidence[0])
+            .previousAttendenceEvidence(previousAttendenceEvidence[0])
+            .urgencyEvidence(urgencyEvidence[0])
+            .build();
+    }
+
+
+    private List<String> miamDomesticAbuseEvidences;
+
+    @Getter(AccessLevel.NONE)
     private List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences;
+
+
+    public void setMpuDomesticAbuseEvidences(List<MiamDomesticAbuseChecklistEnum> mpuDomesticAbuseEvidences) {
+        List<String> updatedMiamDomesticAbuseTypes = new ArrayList<>();
+        mpuDomesticAbuseEvidences.stream()
+            .forEach(
+                miamDomesticAbuseChecklistEnum -> updatedMiamDomesticAbuseTypes.add(miamDomesticAbuseChecklistEnum.getDisplayedValue())
+            );
+        this.miamDomesticAbuseEvidences = updatedMiamDomesticAbuseTypes;
+    }
+
+
     private YesOrNo mpuIsDomesticAbuseEvidenceProvided;
     @Setter(AccessLevel.NONE)
     private List<Element<DomesticAbuseEvidenceDocument>> mpuDomesticAbuseEvidenceDocument;
@@ -244,20 +308,72 @@ public class CafCassCaseData {
     }
 
     private String mpuNoDomesticAbuseEvidenceReason;
+
+
+    @Getter(AccessLevel.NONE)
     private MiamUrgencyReasonChecklistEnum mpuUrgencyReason;
+    private String miamUrgencyReason;
+
+    public void setMpuUrgencyReason(MiamUrgencyReasonChecklistEnum mpuUrgencyReason) {
+        this.miamUrgencyReason = mpuUrgencyReason.getDisplayedValue();
+    }
+
+
+
+    @Getter(AccessLevel.NONE)
     private MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason;
+    private String miamPreviousAttendanceReason;
+
+    public void setMpuPreviousMiamAttendanceReason(MiamPreviousAttendanceChecklistEnum mpuPreviousMiamAttendanceReason) {
+        this.miamPreviousAttendanceReason = mpuPreviousMiamAttendanceReason.getDisplayedValue();
+    }
+
+
+
+
     @Setter(AccessLevel.NONE)
     private CafCassDocument mpuDocFromDisputeResolutionProvider;
+
+
+
+    @Getter(AccessLevel.NONE)
     private TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence;
+    private String miamTypeOfPreviousAttendanceEvidence;
+
+    public void setMpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum mpuTypeOfPreviousMiamAttendanceEvidence) {
+        this.miamTypeOfPreviousAttendanceEvidence = mpuTypeOfPreviousMiamAttendanceEvidence.getDisplayedValue();
+    }
+
+
     @Setter(AccessLevel.NONE)
     private CafCassDocument mpuCertificateByMediator;
     private String mpuMediatorDetails;
+
+
+
+    @Getter(AccessLevel.NONE)
     private MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons;
+    private String miamOtherExemptionReasons;
+
+    public void setMpuOtherExemptionReasons(MiamOtherGroundsChecklistEnum mpuOtherExemptionReasons) {
+        this.miamOtherExemptionReasons = mpuOtherExemptionReasons.getDisplayedValue();
+    }
+
+
     private String mpuApplicantUnableToAttendMiamReason1;
     private String mpuApplicantUnableToAttendMiamReason2;
     @Setter(AccessLevel.NONE)
     private CafCassDocument miamCertificationDocumentUpload;
+
+
+
+    @Getter(AccessLevel.NONE)
     private MiamPolicyUpgradeChildProtectionConcernEnum mpuChildProtectionConcernReason;
+    private String miamChildProtectionConcernReason;
+
+    public void setMpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum mpuChildProtectionConcernReason) {
+        this.miamChildProtectionConcernReason = mpuChildProtectionConcernReason.getDisplayedValue();
+    }
 
     public void setMiamCertificationDocumentUpload(CafCassDocument miamCertificationDocumentUpload) throws MalformedURLException {
         if (miamCertificationDocumentUpload != null
