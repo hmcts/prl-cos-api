@@ -212,8 +212,19 @@ public class CafCassCaseData {
     //MIAM policy upgrade changes start
 
     private YesOrNo mpuChildInvolvedInMiam;
+
+    @Getter(AccessLevel.NONE)
     private YesOrNo mpuApplicantAttendedMiam;
+
+    public void setMpuApplicantAttendedMiam(YesOrNo mpuApplicantAttendedMiam) {
+        this.applicantAttendedMiam = mpuApplicantAttendedMiam.getDisplayedValue();
+    }
+
+    @Getter(AccessLevel.NONE)
     private YesOrNo mpuClaimingExemptionMiam;
+    public void setMpuClaimingExemptionMiam(YesOrNo mpuClaimingExemptionMiam) {
+        this.claimingExemptionMiam = mpuClaimingExemptionMiam.getDisplayedValue();
+    }
 
     @Getter(AccessLevel.NONE)
     private List<MiamExemptionsChecklistEnum> mpuExemptionReasons;
@@ -383,6 +394,7 @@ public class CafCassCaseData {
             miamCertificationDocumentUpload.setDocumentUrl(null);
         }
         this.miamCertificationDocumentUpload = miamCertificationDocumentUpload;
+        this.miamCertificationDocumentUpload1 = miamCertificationDocumentUpload;
     }
 
     public void setMpuCertificateByMediator(CafCassDocument mpuCertificateByMediator) throws MalformedURLException {
