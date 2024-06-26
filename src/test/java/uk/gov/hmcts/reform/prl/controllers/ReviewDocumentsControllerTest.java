@@ -110,7 +110,7 @@ public class ReviewDocumentsControllerTest {
     public void testHandleAboutToSubmit() throws Exception {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
-        verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid,auth);
+        verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
