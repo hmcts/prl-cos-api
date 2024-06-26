@@ -1637,7 +1637,6 @@ public class SendAndReplyService {
         String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
         dynamicData.put("dashBoardLink", dashboardLink);
         dynamicData.put("subject", message.getMessageSubject());
-        log.info("Message Content {}",caseData.getMessageContent());
         dynamicData.put("messageContent", caseData.getMessageContent());
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
