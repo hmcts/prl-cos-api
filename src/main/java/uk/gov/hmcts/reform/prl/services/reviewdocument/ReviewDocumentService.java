@@ -324,6 +324,12 @@ public class ReviewDocumentService {
     private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
                                    String quarantineDocsListToBeModified) {
         sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
+        sendResponseSubmittedNotification(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
+    }
+
+    private void sendResponseSubmittedNotification(CaseData caseData, Element<QuarantineLegalDoc>
+        quarantineLegalDocElementOptional, String quarantineDocsListToBeModified) {
+
     }
 
     private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
