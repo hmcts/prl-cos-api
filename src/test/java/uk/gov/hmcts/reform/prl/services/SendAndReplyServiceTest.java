@@ -116,7 +116,7 @@ public class SendAndReplyServiceTest {
     @Mock
     EmailService emailService;
 
-    private static final String randomAlphaNumeric = "Abc123EFGH";
+    private static final String RANDOM_ALPHA_NUMERIC = "Abc123EFGH";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -180,10 +180,6 @@ public class SendAndReplyServiceTest {
 
     @Mock
     RoleAssignmentService roleAssignmentService;
-
-    public static final String caseId = "case id";
-
-
 
     @Before
     public void init() {
@@ -1756,9 +1752,9 @@ public class SendAndReplyServiceTest {
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        binaryLink.href = randomAlphaNumeric;
+        binaryLink.href = RANDOM_ALPHA_NUMERIC;
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        selfLink.href = randomAlphaNumeric;
+        selfLink.href = RANDOM_ALPHA_NUMERIC;
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
         links.binary = binaryLink;
@@ -1766,7 +1762,7 @@ public class SendAndReplyServiceTest {
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphaNumeric;
+        document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
     }
