@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +17,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -33,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -62,6 +67,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
+    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = "### What happens next \n\n The court will send this message in "
+        + "a notification to the external party or parties.";
     public static final String MESSAGES = "messages";
 
     @Autowired
@@ -264,6 +271,18 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
+            List<Element<BulkPrintDetails>> bulkPrintDetailsList = sendAndReplyService.sendNotificationToExternalParties(
+                caseData,
+                authorisation
+            );
+            if (CollectionUtils.isNotEmpty(bulkPrintDetailsList)) {
+                List<Element<Document>> messageDocs = ElementUtils.unwrapElements(bulkPrintDetailsList).stream().flatMap(
+                    item -> item.getPrintDocs().stream()).collect(
+                    Collectors.toList());
+                log.info("message documents {}",messageDocs);
+                caseDataMap.put("messageDocs", messageDocs);
+            }
+
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
@@ -299,6 +318,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
+
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
@@ -319,6 +339,13 @@ public class SendAndReplyController extends AbstractCallbackController {
             ).build());
         }
 
+        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
+            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                SEND_AND_CLOSE_EXTERNAL_MESSAGE
+            ).build());
+        }
+
         sendAndReplyService.closeAwPTask(caseData);
 
         return ok(SubmittedCallbackResponse.builder().build());
@@ -330,6 +357,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                   @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
 
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);

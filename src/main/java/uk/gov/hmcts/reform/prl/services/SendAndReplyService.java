@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +17,30 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -38,21 +49,35 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,6 +86,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -69,18 +95,24 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -111,9 +143,17 @@ public class SendAndReplyService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Value("${citizen.url}")
+    private String citizenDashboardUrl;
+
     private final HearingDataService hearingDataService;
 
     private final RefDataService refDataService;
+
+    private final BulkPrintService bulkPrintService;
+    private final DocumentGenService documentGenService;
+    private final DocumentLanguageService documentLanguageService;
+    private final DgsService dgsService;
 
     @Value("${sendandreply.category-id}")
     private String categoryId;
@@ -133,6 +173,10 @@ public class SendAndReplyService {
     private final HearingService hearingService;
 
     private final CaseDocumentClient caseDocumentClient;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private final SendgridService sendgridService;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -170,6 +214,9 @@ public class SendAndReplyService {
     public static final String OTHER_APPLICATION_ANCHOR_END = "'>Other application</a>";
     public static final String HEARINGS_ANCHOR_END = "'>Hearings</a>";
     public static final String ARROW_SEPARATOR = "->";
+
+    private static final String LETTER_TYPE = "MessagePack";
+    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -391,6 +438,10 @@ public class SendAndReplyService {
                                            ))
                                            .applicationsList(getOtherApplicationsList(caseData))
                                            .submittedDocumentsList(documentCategoryList)
+                                           .externalMessageWhoToSendTo(DynamicMultiSelectList.builder()
+                                                                           .listItems(
+                                                                               getExternalMessageRecipientEligibleList(caseData))
+                                                                           .build())
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
@@ -400,8 +451,33 @@ public class SendAndReplyService {
                                                caseReference
                                            ))
                                            .build())
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                                                                       .submittedDocsRefList(
+                                                                           getCategoriesAndDocuments(
+                                                                               authorization,
+                                                                               caseReference
+                                                                           ))
+                                                                       .build())))
                     .build())
             .build();
+    }
+
+    private List<DynamicMultiselectListElement> getExternalMessageRecipientEligibleList(CaseData caseData) {
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        if (CollectionUtils.isNotEmpty(applicantList)) {
+            applicantRespondentList.addAll(applicantList);
+        }
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        if (CollectionUtils.isNotEmpty(respondentList)) {
+            applicantRespondentList.addAll(respondentList);
+        }
+
+        return applicantRespondentList;
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
@@ -685,13 +761,20 @@ public class SendAndReplyService {
         return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
-                        .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
+                        .equals(message.getInternalMessageWhoToSendTo()) || InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? CLOSED : OPEN)
             .dateSent(formatDateTime(DATE_TIME_PATTERN, dateTime.now()))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
+            .internalOrExternalSentTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+                                          ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
+                (REPLY.equals(caseData.getChooseSendOrReply())
+                    ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
+                    : message.getInternalMessageWhoToSendTo().getDisplayedValue())))
+            .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -706,6 +789,8 @@ public class SendAndReplyService {
             .selectedFutureHearingValue(getValueLabel(message.getFutureHearingsList()))
             .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
+            .externalMessageWhoToSendTo(InternalExternalMessageEnum.EXTERNAL.equals(
+                message.getInternalOrExternalMessage()) ? message.getExternalMessageWhoToSendTo() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
@@ -717,8 +802,28 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
+            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
+                authorization,
+                caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
+            ))
             .build();
     }
+
+    private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
+                                                                      List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList) {
+        if (isNotEmpty(externalMessageAttachDocsList)) {
+            return externalMessageAttachDocsList.stream()
+                .map(Element::getValue)
+                .map(replyDocument -> element(getSelectedDocument(
+                    authorization,
+                    replyDocument.getSubmittedDocsRefList()
+                )))
+                .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
 
     private String getValueCode(DynamicList dynamicListObj) {
         if (dynamicListObj != null) {
@@ -1055,6 +1160,20 @@ public class SendAndReplyService {
             .build();
     }
 
+    private String getExternalSentTo(DynamicMultiSelectList externalMessageWhoToSendTo) {
+        log.info("external messages sent to {}",externalMessageWhoToSendTo);
+        Optional<DynamicMultiSelectList> externalMessageWhoToSendToList = ofNullable(externalMessageWhoToSendTo);
+        log.info("external message sent to string {}",externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+            .getValue().stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","))).orElse(""));
+        return externalMessageWhoToSendToList.map(dynamicMultiSelectList -> dynamicMultiSelectList
+            .getValue().stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","))).orElse("");
+    }
+
+
     public CaseData resetSendAndReplyDynamicLists(CaseData caseData) {
         Message sendMessageObject = null;
         Message replyMessageObject = null;
@@ -1181,6 +1300,356 @@ public class SendAndReplyService {
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
+    }
+
+    /*
+     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
+        //get the latest message
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        // Return if not external message
+        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            return;
+        }
+        //Get Selected Applicant Respondent
+        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
+
+        //Get list of Applicant & Respondent in Case
+        List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
+
+        //Hardcoded for testing
+        *//*
+        String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
+        selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
+        *//*
+        selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
+            Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                applicantOrRespondent.getCode(),
+                applicantAndRespondentInCase
+            );
+
+            if (party.isPresent()) {
+                PartyDetails partyDetails = party.get().getValue();
+                if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                    .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                    try {
+                        sendEmailNotification(caseData, partyDetails, authorisation);
+                    } catch (Exception e) {
+                        log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
+                    }
+                } else {
+                    log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
+                }
+            }
+        });
+    }*/
+
+    public  List<Element<BulkPrintDetails>> sendNotificationToExternalParties(CaseData caseData, String auth) {
+
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+
+        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
+            log.error("Send or reply is not external message.");
+            return null;
+        }
+
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<Element<BulkPrintDetails>>();
+        List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
+
+        if (caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
+
+            List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
+                .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
+
+            dynamicMultiselectListElementList.forEach(selectedElement -> {
+                Optional<Element<PartyDetails>> party = CaseUtils.getParty(
+                    selectedElement.getCode(),
+                    applicantsRespondentInCase
+                );
+
+                if (party.isPresent()) {
+
+                    PartyDetails partyDetails = party.get().getValue();
+
+                    if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
+                        .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                        try {
+                            sendEmailNotification(caseData, partyDetails, auth);
+                        } catch (Exception e) {
+                            log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
+                        }
+                    } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
+
+                        try {
+                            bulkPrintDetails.addAll(sendPostNotificationToExternalParties(caseData, partyDetails,
+                                                                  caseData.getSendOrReplyMessage().getSendMessageObject(), auth));
+
+
+                        } catch (Exception e) {
+                            log.error(e.getMessage());
+                        }
+
+                    } else {
+                        log.info("Error while sending post notification as not contact preferences set for party id {}",
+                                 partyDetails.getPartyId());
+                    }
+                }
+            }
+            );
+        }
+        return bulkPrintDetails;
+    }
+
+    private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
+        CaseData caseData, PartyDetails partyDetails, Message message, String authorization) throws Exception {
+
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+
+        try {
+            log.info("Sending the post message to external parties in case for caseId {}", caseData.getId());
+
+            List<Document> docs = new ArrayList<>();
+            if (null != partyDetails && null != partyDetails.getAddress()
+                && null != partyDetails.getAddress().getAddressLine1()) {
+
+                List<Document> attachedDocs = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+
+                docs.add(getCoverSheet(authorization, caseData, partyDetails.getAddress(),
+                                       partyDetails.getLabelForDynamicList()));
+                docs.add(getMessageDocument(authorization, caseData, message, partyDetails, attachedDocs));
+
+                docs.addAll(attachedDocs);
+
+                bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
+            } else {
+                log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
+                throw new Exception("External party does not have any postal address to send " + partyDetails.getPartyId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return bulkPrintDetails;
+    }
+
+    private static boolean isSolicitorRepresentative(PartyDetails partyDetails) {
+        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+    }
+
+
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) throws IOException {
+        String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
+
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
+        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
+
+        sendgridService.sendEmailUsingTemplateWithAttachments(
+            SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
+            authorization,
+            SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                .dynamicTemplateData(dynamicDataForEmail)
+                .listOfAttachments(allSelectedDocuments)
+                .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
+                .build());
+    }
+
+    private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
+        List<Document> selectedDocList = new ArrayList<>();
+
+        Document selectedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
+        if (null != selectedDoc) {
+            selectedDocList.add(selectedDoc);
+        }
+
+        List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
+            authorization,
+            caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
+        );
+        if (null != externalMessageDocList && !externalMessageDocList.isEmpty()) {
+            externalMessageDocList.forEach(element -> selectedDocList.add(element.getValue()));
+
+        }
+        return selectedDocList;
+    }
+
+    private Document getMessageDocument(String authorization, CaseData caseData, Message message,
+                                        PartyDetails partyDetails, List<Document> attachedDocs) {
+
+        try {
+            GeneratedDocumentInfo messageDocument = getMessageLetterGeneratedDocInfo(
+                caseData,
+                authorization,
+                partyDetails,
+                message,
+                attachedDocs
+            );
+            return Document.builder()
+                .documentUrl(messageDocument.getUrl())
+                .documentFileName(messageDocument.getDocName())
+                .documentBinaryUrl(messageDocument.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+        } catch (Exception e) {
+            log.error("Failed to generate message document {}", e);
+        }
+        return null;
+    }
+
+    private Document getCoverSheet(String authorization, CaseData caseData, Address address, String name) {
+
+        try {
+            return DocumentUtils.toCoverSheetDocument(
+                getCoverLetterGeneratedDocInfo(caseData, authorization, address, name));
+        } catch (Exception e) {
+            log.error("Failed to generate cover sheet {}", e);
+        }
+        return null;
+    }
+
+    private GeneratedDocumentInfo getMessageLetterGeneratedDocInfo(
+        CaseData caseData, String auth, PartyDetails partyDetails, Message message, List<Document> attachedDocs) throws Exception {
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("partyName", partyDetails.getLabelForDynamicList());
+        dataMap.put("partyAddress", partyDetails.getAddress());
+        dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+        dataMap.put("id", String.valueOf(caseData.getId()));
+        dataMap.put("messageContent", message.getMessageContent());
+        dataMap.put("documentSize", isNotEmpty(attachedDocs) ? attachedDocs.size() : 0);
+
+        String messageAbout = "";
+        if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
+            messageAbout = message.getMessageAbout().getDisplayedValue().toLowerCase();
+        }
+        dataMap.put("messageAbout", messageAbout);
+
+        String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
+        dataMap.put("urlLink", dashboardLink);
+
+        return getGeneratedDocumentInfo(caseData, auth, DOCUMENT_SEND_REPLY_MESSAGE, partyDetails.getAddress(), dataMap);
+    }
+
+    private GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(
+        CaseData caseData, String auth, Address address, String name) throws Exception {
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverPagePartyName", name);
+        dataMap.put("coverPageAddress", address);
+        dataMap.put("id", String.valueOf(caseData.getId()));
+
+        return getGeneratedDocumentInfo(caseData, auth, DOCUMENT_COVER_SHEET_HINT, address, dataMap);
+    }
+
+    private GeneratedDocumentInfo getGeneratedDocumentInfo(CaseData caseData, String auth, String templateName,
+                                                           Address address, Map<String, Object> dataMap)  throws Exception {
+
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (null != address && null != address.getAddressLine1()) {
+            generatedDocumentInfo = dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                documentGenService.getTemplate(
+                    caseData,
+                    templateName,
+                    documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
+                ), dataMap
+            );
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+        }
+        return generatedDocumentInfo;
+    }
+
+    private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
+                                           List<Document> docs, PartyDetails partyDetails, String servedParty) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        String bulkPrintedId = "";
+        try {
+            log.info("*** Initiating request to Bulk print service ***");
+            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+
+            UUID bulkPrintId = bulkPrintService.send(
+                String.valueOf(caseData.getId()),
+                authorisation,
+                LETTER_TYPE,
+                docs,
+                partyDetails.getLabelForDynamicList()
+            );
+            log.info("ID in the queue from bulk print service : {}", bulkPrintId);
+            bulkPrintedId = String.valueOf(bulkPrintId);
+
+        } catch (Exception e) {
+            log.error("The bulk print service has failed", e);
+        }
+        Address address = Yes.equals(partyDetails.getIsAddressConfidential())
+            ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+            : partyDetails.getAddress();
+
+        return BulkPrintDetails.builder()
+            .bulkPrintId(bulkPrintedId)
+            .servedParty(servedParty)
+            .printedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+            .recipientsName(partyDetails.getLabelForDynamicList())
+            .printDocs(docs.stream().map(ElementUtils::element).toList())
+            .postalAddress(address)
+            .timeStamp(currentDate).build();
+    }
+
+    private List<Element<PartyDetails>> getAllApplicantsRespondentInCase(CaseData caseData) {
+
+        List<Element<PartyDetails>> applicantsRespondentInCase = new ArrayList<Element<PartyDetails>>();
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            applicantsRespondentInCase.addAll(caseData.getApplicants());
+            applicantsRespondentInCase.addAll(caseData.getRespondents());
+        } else {
+            applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                          .id(caseData.getApplicantsFL401().getPartyId())
+                                                          .value(caseData.getApplicantsFL401()).build()));
+            applicantsRespondentInCase.addAll(List.of(Element.<PartyDetails>builder()
+                                                          .id(caseData.getRespondentsFL401().getPartyId())
+                                                          .value(caseData.getRespondentsFL401()).build()));
+        }
+
+        return applicantsRespondentInCase;
+    }
+
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        // get selected Document size
+        int documentSize = 0;
+        if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
+            documentSize = allSelectedDocuments.size();
+        }
+        String messageAbout = "";
+        // get Message About
+        if (null != message.getMessageAbout() && !message.getMessageAbout().equals(MessageAboutEnum.OTHER)) {
+            messageAbout = message.getMessageAbout().getDisplayedValue().toLowerCase();
+        }
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        String dashboardLink = isSolicitorRepresentative(partyDetails) ? manageCaseUrl + "/" + caseData.getId() : citizenDashboardUrl;
+        dynamicData.put("dashBoardLink", dashboardLink);
+        dynamicData.put("subject", message.getMessageSubject());
+        dynamicData.put("messageContent", caseData.getMessageContent());
+        dynamicData.put("attachmentType", "pdf");
+        dynamicData.put("disposition", "attachment");
+        String receiverFullName = getReceiverFullName(partyDetails);
+        dynamicData.put("name", receiverFullName);
+        dynamicData.put("documentSize", documentSize);
+        dynamicData.put("messageAbout", messageAbout);
+        return dynamicData;
+    }
+
+    private String getReceiverFullName(PartyDetails partyDetails) {
+        String receiverFullName = "";
+        if (isSolicitorRepresentative(partyDetails)) {
+            receiverFullName = partyDetails.getRepresentativeFirstName() + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName();
+        } else {
+            receiverFullName = partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName();
+        }
+        return receiverFullName;
     }
 
     public void closeAwPTask(CaseData caseData) {
