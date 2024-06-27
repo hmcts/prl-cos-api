@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -74,6 +75,9 @@ public class CitizenAwpMapper {
         additionalApplicationsBundles.add(element(additionalApplicationsBundle));
 
         return caseData.toBuilder()
+            .c100HwfRequestedForAdditionalApplications(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+                                                           && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())
+            ? YesOrNo.Yes : YesOrNo.No)
             .additionalApplicationsBundle(additionalApplicationsBundles)
             .build();
     }
@@ -83,11 +87,22 @@ public class CitizenAwpMapper {
                                                                     AdditionalApplicationsBundle additionalApplicationsBundle) {
         Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
             getCitizenAwpPaymentIfPresent(caseData.getCitizenAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
+        String applicationStatus = YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())
+            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+            : ApplicationStatus.SUBMITTED.getDisplayedValue();
         //update payment details
         if (optionalCitizenAwpPaymentElement.isPresent()) {
             additionalApplicationsBundle = additionalApplicationsBundle.toBuilder()
                 .payment(getPaymentDetails(citizenAwpRequest,
                                            optionalCitizenAwpPaymentElement.get().getValue()))
+                .otherApplicationsBundle(additionalApplicationsBundle.getOtherApplicationsBundle()
+                                             .toBuilder()
+                                             .applicationStatus(applicationStatus)
+                                             .build())
+                .c2DocumentBundle(additionalApplicationsBundle.getC2DocumentBundle().toBuilder()
+                                      .applicationStatus(applicationStatus)
+                                      .build())
                 .build();
             //Remove in progress citizen awp payment details
             caseData.getCitizenAwpPayments().remove(optionalCitizenAwpPaymentElement.get());
@@ -188,10 +203,22 @@ public class CitizenAwpMapper {
 
     private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
                                       CitizenAwpPayment citizenAwpPayment) {
+
+        String additionalApplicationPaymentStatus;
+
+        if (StringUtils.isEmpty(citizenAwpPayment.getFee())) {
+            additionalApplicationPaymentStatus = PaymentStatus.NOT_APPLICABLE.getDisplayedValue();
+        } else if (YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())) {
+            additionalApplicationPaymentStatus = PaymentStatus.HWF.getDisplayedValue();
+        } else {
+            additionalApplicationPaymentStatus = PaymentStatus.PAID.getDisplayedValue();
+        }
+
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
-            .status(PaymentStatus.PAID.getDisplayedValue())
+            .status(additionalApplicationPaymentStatus)
             .fee(citizenAwpPayment.getFee())
             .paymentServiceRequestReferenceNumber(citizenAwpPayment.getServiceReqRef())
             .paymentReferenceNumber(citizenAwpPayment.getPaymentReqRef())
