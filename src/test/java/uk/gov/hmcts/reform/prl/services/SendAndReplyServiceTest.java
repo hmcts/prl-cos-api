@@ -989,13 +989,6 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
         openMessagesList.add(element(message1));
-        DynamicList dynamicList1 = DynamicList.builder().build();
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
-        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
-                                           .builder()
-                                           .messageIdentifier("test")
-                                           .judgeIdamId("test")
-                                           .build()));
         RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
         roleAssignmentResponse.setRoleName("allocated-judge");
         roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234").build());
@@ -1003,6 +996,13 @@ public class SendAndReplyServiceTest {
         roleAssignmentResponses.add(roleAssignmentResponse);
         when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
             .thenReturn(roleAssignmentResponses);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
