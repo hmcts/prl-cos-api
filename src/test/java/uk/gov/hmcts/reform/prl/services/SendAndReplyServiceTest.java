@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.Attributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -90,6 +91,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -1028,6 +1030,38 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
 
         assertEquals(3,closeMessages.size());
+    }
+
+    @Test
+    public void testCloseMessageAndRemoveAllocatedJudgeIfadded() {
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        List<Element<Message>> closedMessages = new ArrayList<>();
+        closedMessages.add(element(UUID.fromString(TEST_UUID), Message.builder()
+            .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+            .sendReplyJudgeName(JudicialUser.builder().personalCode("123").idamId(TEST_UUID).build())
+            .messageIdentifier("test")
+            .build()));
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId(TEST_UUID)
+                                           .build()));
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(closedMessages)
+                    .build())
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
+            .build();
+
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
+
+        assertEquals(1,closeMessages.size());
     }
 
     @Test
