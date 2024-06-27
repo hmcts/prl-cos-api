@@ -40,8 +40,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.services.BulkPrintService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
@@ -114,6 +119,17 @@ public class ReviewDocumentServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+    @Mock
+    private BulkPrintService bulkPrintService;
+    @Mock
+    private DocumentGenService documentGenService;
+    @Mock
+    private DocumentLanguageService documentLanguageService;
+    @Mock
+    private DgsService dgsService;
 
     private final String authorization = "authToken";
     Element element;

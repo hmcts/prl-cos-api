@@ -799,8 +799,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
 
-    //Amend Draft order
-    private String removeDraftOrderText;
+    @JsonUnwrapped
+    private RespondentResponseNotificationDetails respondentResponseNotificationDetails;
 
-    private Object removeDraftOrdersDynamicList;
+    //Amend Draft order
+    @JsonUnwrapped
+    private AmendDraftOrderDetails amendDraftOrderDetails;
 }

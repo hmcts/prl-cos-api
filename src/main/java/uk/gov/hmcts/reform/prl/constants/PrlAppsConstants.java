@@ -1018,9 +1018,9 @@ public class PrlAppsConstants {
 
     public static final String RESPONDENT_FM5_COUNT = "respondentFm5Count";
 
-    public static final String DOCUMENT_A13_LETTER ="a13Letter";
-    public static final String DOCUMENT_A14_LETTER ="a14Letter";
-    public static final String DOCUMENT_A15_LETTER ="a15Letter";
+    public static final String DOCUMENT_A13_LETTER = "a13Letter";
+    public static final String DOCUMENT_A14_LETTER = "a14Letter";
+    public static final String DOCUMENT_A15_LETTER = "a15Letter";
     public static final String NAME = "name";
     public static final String IS_WELSH = "isWelsh";
     public static final String IS_ENGLISH = "isEnglish";
@@ -1032,4 +1032,7 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
+    public static final String CAN_6_AP_13 = "CAN_6";
+    public static final String CAN_6A_AP_14 = "CAN_6A";
+    public static final String CAN_6B_AP_15 = "CAN_6B";
 }
