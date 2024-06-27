@@ -255,8 +255,6 @@ public class ReviewDocumentService {
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
 
-            log.info("=>> Uploaded by user {} ", legalDocElement.getValue().getUploaderRole());
-
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
                 legalDocElement,
@@ -275,7 +273,7 @@ public class ReviewDocumentService {
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
         caseDataUpdated.put(DOC_LABEL, LABEL_WITH_HINT);
-
+        log.info("=>> Uploaded by user {} ", submittedBy);
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
