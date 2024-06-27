@@ -215,7 +215,7 @@ public class ReviewDocumentService {
         }
         //citizen
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
-            log.info("document list from case data ==>> ", caseData.getDocumentManagementDetails()
+            log.info("document list from case data ==>> {}", caseData.getDocumentManagementDetails()
                 .getCitizenQuarantineDocsList());
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
