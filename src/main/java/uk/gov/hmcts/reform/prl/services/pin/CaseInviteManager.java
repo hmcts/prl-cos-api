@@ -32,7 +32,7 @@ public class CaseInviteManager {
 
     public CaseData generatePinAndSendNotificationEmail(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
-            log.info("Generating and sending PIN to respondents");
+            log.info("sending PIN to respondents");
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
             } else {
