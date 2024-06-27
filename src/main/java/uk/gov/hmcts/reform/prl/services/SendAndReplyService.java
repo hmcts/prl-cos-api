@@ -1343,15 +1343,16 @@ public class SendAndReplyService {
         });
     }*/
 
-    public void sendNotificationToExternalParties(CaseData caseData, String auth) {
+    public  List<Element<BulkPrintDetails>> sendNotificationToExternalParties(CaseData caseData, String auth) {
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
             log.error("Send or reply is not external message.");
-            return;
+            return null;
         }
 
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<Element<BulkPrintDetails>>();
         List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
 
         if (caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
@@ -1379,17 +1380,10 @@ public class SendAndReplyService {
                     } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
 
                         try {
-                            List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
-                                                                  caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+                            bulkPrintDetails.addAll(sendPostNotificationToExternalParties(caseData, partyDetails,
+                                                                  caseData.getSendOrReplyMessage().getSendMessageObject(), auth));
 
-                            log.info("Messsage send as post to external parties and bulkPrintDetails {}", bulkPrintDetails);
-                            /*if (isNotEmpty(bulkPrintDetails)) {
-                                if (isNotEmpty(message.getMessageBulkPrintDetails())) {
-                                    message.getMessageBulkPrintDetails().addAll(bulkPrintDetails);
-                                } else {
-                                    message.setMessageBulkPrintDetails(bulkPrintDetails);
-                                }
-                            }*/
+
                         } catch (Exception e) {
                             log.error(e.getMessage());
                         }
@@ -1402,6 +1396,7 @@ public class SendAndReplyService {
             }
             );
         }
+        return bulkPrintDetails;
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
