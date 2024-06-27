@@ -1034,6 +1034,60 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testRoleAddNewOpenMessageWithoutCaseAlreadyAllocatedToJudge() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+        openMessagesList.add(element(message1));
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234567").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentResponse roleAssignmentResponse2 =  new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleName("allocated-judge");
+        roleAssignmentResponse2.setAttributes(Attributes.builder().caseId("1234").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses2 =  new ArrayList<>();
+        roleAssignmentResponses2.add(roleAssignmentResponse2);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses).thenReturn(roleAssignmentResponses2);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .sendReplyJudgeName(JudicialUser.builder().personalCode("test").idamId(TEST_UUID).build())
+                            .futureHearingsList(dynamicList1)
+                            .updatedTime(dateTime.now())
+                            .build()
+                    )
+                    .messages(openMessagesList)
+                    .build())
+            .id(1234L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .build();
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
+
+        assertEquals(2,updatedMessageList.size());
+    }
+
+    @Test
     public void testSetSenderAndGenerateMessageReplyList() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
