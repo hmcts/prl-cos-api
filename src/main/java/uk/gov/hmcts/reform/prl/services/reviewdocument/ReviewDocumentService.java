@@ -252,9 +252,11 @@ public class ReviewDocumentService {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
             log.info("** uuid ** {}", uuid);
             List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
+
+            log.info("** tempQuarantineDocumentList ** {}", tempQuarantineDocumentList);
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
-
+            log.info("** tempQuarantineDocument ** {}", quarantineLegalDocElement);
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
                 legalDocElement,
