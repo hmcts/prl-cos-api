@@ -451,7 +451,7 @@ public class ReviewDocumentService {
             );
             caseDataUpdated.put(notifications, responseNotification);
             caseDataUpdated.put(notificationSent, "YES");
-            caseDataUpdated.put("respondentName", respondentName);
+            caseDataUpdated.put("nameOfRespondent", respondentName);
         }
     }
 
