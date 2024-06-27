@@ -954,7 +954,7 @@ public class SendAndReplyServiceTest {
                                            .messageIdentifier("test")
                                            .judgeIdamId(TEST_UUID)
                                            .build()));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData3 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
                                 .allocatedJudgeForSendAndReply(allocatedJudgeList)
@@ -979,7 +979,7 @@ public class SendAndReplyServiceTest {
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
 
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1003,7 +1003,7 @@ public class SendAndReplyServiceTest {
                                            .messageIdentifier("test")
                                            .judgeIdamId("test")
                                            .build()));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData4 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
                                 .allocatedJudgeForSendAndReply(allocatedJudgeList)
@@ -1028,7 +1028,7 @@ public class SendAndReplyServiceTest {
             .id(1234L)
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1057,7 +1057,7 @@ public class SendAndReplyServiceTest {
                                            .messageIdentifier("test")
                                            .judgeIdamId("test")
                                            .build()));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData5 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
                                 .allocatedJudgeForSendAndReply(allocatedJudgeList)
@@ -1082,7 +1082,7 @@ public class SendAndReplyServiceTest {
             .id(1234L)
             .chooseSendOrReply(SendOrReply.SEND)
             .build();
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -1193,7 +1193,7 @@ public class SendAndReplyServiceTest {
                                            .messageIdentifier("test")
                                            .judgeIdamId(TEST_UUID)
                                            .build()));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData6 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -1204,7 +1204,7 @@ public class SendAndReplyServiceTest {
                                 .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
             .build();
 
-        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData6);
 
         assertEquals(1,closeMessages.size());
     }
@@ -1295,7 +1295,7 @@ public class SendAndReplyServiceTest {
             )
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData7 = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.REPLY)
@@ -1307,7 +1307,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
     }
