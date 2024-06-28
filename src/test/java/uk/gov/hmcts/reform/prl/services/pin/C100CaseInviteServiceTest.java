@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -207,21 +206,21 @@ public class C100CaseInviteServiceTest {
     public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = c100CaseInviteService
             .sendCaseInviteEmail(getCaseDataWithRespondentsNoEmails);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = c100CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
         CaseData actualCaseData = c100CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
@@ -230,7 +229,7 @@ public class C100CaseInviteServiceTest {
 
         CaseData actualCaseData = c100CaseInviteService
             .sendCaseInviteEmail(citizenCaseDataWithApplicantEmail);
-        assertTrue(actualCaseData.getCaseInvites().stream().noneMatch(t -> YesOrNo.Yes.equals(t.getValue().getIsApplicant())));
+        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
@@ -239,22 +238,15 @@ public class C100CaseInviteServiceTest {
 
         CaseData actualCaseData = c100CaseInviteService
             .sendCaseInviteEmail(solicitorCaseDataWithApplicantEmail);
-        assertTrue(actualCaseData.getCaseInvites().stream().noneMatch(t -> YesOrNo.Yes.equals(t.getValue().getIsApplicant())));
+        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void generateApplicantsInvitesAndSentForCaseCreatedByCitizen() {
         when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(true);
 
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(citizenCaseDataWithApplicantEmail);
-        List<Element<CaseInvite>> applicantCaseInvites = actualCaseData.getCaseInvites().stream()
-                .filter(t -> YesOrNo.Yes.equals(t.getValue().getIsApplicant())).toList();
+        c100CaseInviteService.sendCaseInviteEmail(citizenCaseDataWithApplicantEmail);
         verify(caseInviteEmailService,times(1)).sendCaseInviteEmail(any(),any(),any());
-        /*assertEquals(1, applicantCaseInvites.size());
-        assertEquals(YesOrNo.Yes, applicantCaseInvites.get(0).getValue().getIsApplicant());
-        assertEquals("applicant@email.com", applicantCaseInvites.get(0).getValue()
-            .getCaseInviteEmail());*/
     }
 
     @Test
