@@ -35,6 +35,8 @@ public class ServiceOfApplication {
     private final YesOrNo soaServeToRespondentOptions;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptions;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptions;
     private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
     private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
     @JsonProperty("soaRecipientsOptions")
