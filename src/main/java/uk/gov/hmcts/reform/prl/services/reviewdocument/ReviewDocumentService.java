@@ -408,7 +408,7 @@ public class ReviewDocumentService {
                 );
             }
 
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
                 responseNotification = generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
@@ -425,7 +425,7 @@ public class ReviewDocumentService {
                 );
             }
 
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
                 responseNotification = generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
