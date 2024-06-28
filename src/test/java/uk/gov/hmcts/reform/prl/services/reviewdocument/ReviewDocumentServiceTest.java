@@ -26,12 +26,15 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
@@ -40,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -67,6 +71,9 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -75,6 +82,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -94,6 +102,8 @@ public class ReviewDocumentServiceTest {
         + System.lineSeparator()
         + "If you are not sure, you can use <a href=\"/cases/case-details/123/trigger/sendOrReplyToMessages/sendOrReplyToMessages1\">Send and reply to messages</a> to get further information about whether"
         + " the document needs to be restricted.";
+
+    private final UUID testUuid = UUID.fromString(TEST_UUID);
 
     @InjectMocks
     ReviewDocumentService reviewDocumentService;
@@ -1369,4 +1379,178 @@ public class ReviewDocumentServiceTest {
         Assert.assertEquals("MIAMCertificate", cafcassUploadDocListDocTab.get(0).getValue().getCategoryId());
     }
 
+    @Test
+    public void testSendResponsePostSubmissionWhenC1AResponseSubmittedWhenDecisionNo() {
+        PartyDetails applicant = PartyDetails.builder().partyId(testUuid).build();
+        PartyDetails applicant2 = PartyDetails.builder()
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000001")).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        applicantList.add(wrappedApplicant2);
+        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId("respondentC1AResponse")
+            .courtStaffQuarantineDocument(document)
+            .isConfidential(YesOrNo.Yes)
+            .isRestricted(YesOrNo.No)
+            .restrictedDetails("test details")
+            .uploadedBy("name")
+            .build();
+        quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                       quarantineLegalDoc));
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .citizenQuarantineDocsList(quarantineDocsList)
+                    .build()
+            )
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .serviceOfApplication(ServiceOfApplication.builder().soaCafcassCymruEmail("testEmail@mail.com").build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
+                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        doNothing().when(emailService).send(anyString(),any(),any(),any());
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
+            .thenReturn(quarantineCaseDoc);
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+
+        Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
+
+        List<Element<QuarantineLegalDoc>>  citizenUploadedDocListDocTab =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("citizenUploadedDocListDocTab");
+
+        Assert.assertNotNull(caseDataMap.get("citizenUploadedDocListDocTab"));
+        Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
+        Assert.assertEquals("test.pdf", citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName());
+        Assert.assertEquals("respondentC1AResponse", citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+
+    }
+
+    @Test
+    public void testSendResponsePostSubmissionWhenC7ResponseSubmittedWhenDecisionNo() {
+        PartyDetails applicant = PartyDetails.builder().partyId(testUuid).build();
+        PartyDetails applicant2 = PartyDetails.builder()
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000001")).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        applicantList.add(wrappedApplicant2);
+        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId(RESPONDENT_APPLICATION)
+            .courtStaffQuarantineDocument(document)
+            .isConfidential(YesOrNo.Yes)
+            .isRestricted(YesOrNo.No)
+            .restrictedDetails("test details")
+            .uploadedBy("name")
+            .build();
+        quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                       quarantineLegalDoc));
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .citizenQuarantineDocsList(quarantineDocsList)
+                    .build()
+            )
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .serviceOfApplication(ServiceOfApplication.builder().soaCafcassCymruEmail("testEmail@mail.com").build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
+                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        doNothing().when(emailService).send(anyString(),any(),any(),any());
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
+            .thenReturn(quarantineCaseDoc);
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+
+        Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
+
+        List<Element<QuarantineLegalDoc>>  citizenUploadedDocListDocTab =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("citizenUploadedDocListDocTab");
+
+        Assert.assertNotNull(caseDataMap.get("citizenUploadedDocListDocTab"));
+        Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
+        Assert.assertEquals("test.pdf", citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName());
+        Assert.assertEquals(RESPONDENT_APPLICATION, citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+
+    }
+
+    @Test
+    public void testSendResponsePostSubmissionWhenRespondentC1ApplicationWithDecisionNo() throws Exception{
+        PartyDetails applicant = PartyDetails.builder().partyId(testUuid)
+            .contactPreferences(ContactPreferences.post)
+            .address(Address.builder()
+                         .addressLine1("test address")
+                         .build())
+            .build();
+        PartyDetails applicant2 = PartyDetails.builder()
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000001")).build();
+        PartyDetails applicant3 = PartyDetails.builder()
+            .partyId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+            .contactPreferences(ContactPreferences.email)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
+        Element<PartyDetails> wrappedApplicant3 = Element.<PartyDetails>builder().value(applicant3).build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant);
+        applicantList.add(wrappedApplicant2);
+        applicantList.add(wrappedApplicant3);
+        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .categoryId(RESPONDENT_C1A_APPLICATION)
+            .courtStaffQuarantineDocument(document)
+            .isConfidential(YesOrNo.Yes)
+            .isRestricted(YesOrNo.No)
+            .restrictedDetails("test details")
+            .uploadedBy("name")
+            .build();
+        quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                                       quarantineLegalDoc));
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .citizenQuarantineDocsList(quarantineDocsList)
+                    .build()
+            )
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .serviceOfApplication(ServiceOfApplication.builder().soaCafcassCymruEmail("testEmail@mail.com").build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
+                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        doNothing().when(emailService).send(anyString(),any(),any(),any());
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
+            .thenReturn(quarantineCaseDoc);
+        List<Document> coverLetterDocs = new ArrayList<>();
+        coverLetterDocs.add(Document.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(coverLetterDocs);
+        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder()
+                                                                            .isGenWelsh(true)
+                                                                            .isGenEng(true)
+                                                                            .build());
+
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+
+        Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
+
+        List<Element<QuarantineLegalDoc>>  citizenUploadedDocListDocTab =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("citizenUploadedDocListDocTab");
+
+        Assert.assertNotNull(caseDataMap.get("citizenUploadedDocListDocTab"));
+        Assert.assertEquals(1, citizenUploadedDocListDocTab.size());
+        Assert.assertEquals("test.pdf", citizenUploadedDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName());
+        Assert.assertEquals(RESPONDENT_C1A_APPLICATION, citizenUploadedDocListDocTab.get(0).getValue().getCategoryId());
+
+    }
 }

@@ -470,8 +470,7 @@ public class ReviewDocumentService {
             .forEach(applicant -> {
                 List<Document> responseDocuments = new ArrayList<>();
                 // Add reviewed response document
-                log.info("response document => {}", quarantineLegalDocElementOptional.getValue().getDocument());
-                //responseDocuments.add(quarantineLegalDocElementOptional.getValue().getDocument());
+                responseDocuments.add(quarantineLegalDocElementOptional.getValue().getDocument());
                 try {
                     // Add cover letter for respondent
                     responseDocuments.addAll(getCoverLetters(caseData,
