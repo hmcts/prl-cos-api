@@ -3142,8 +3142,9 @@ public class ManageOrderService {
         }
 
         //For Automated Hearing Check for Judge
-        log.info("isAutomatedHearingPresent: authorisation: {}", authorisation);
-        caseDataUpdated.put("isAutomatedHearingPresent", null != authorisation ? Yes : No);
+        String loggedInUserType = getLoggedInUserType(authorisation);
+        log.info("isAutomatedHearingPresent: loggedInUserType: {}", loggedInUserType);
+        caseDataUpdated.put("isAutomatedHearingPresent", UserRoles.JUDGE.name().equals(loggedInUserType) ? No : Yes);
     }
 
     public HearingData getHearingData(String authorization,
