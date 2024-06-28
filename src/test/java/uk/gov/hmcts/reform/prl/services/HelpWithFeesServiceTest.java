@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
@@ -35,10 +37,14 @@ public class HelpWithFeesServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @Test
-    public void testAboutToStart() {
+    CaseData casedata;
 
-        CaseData casedata = CaseData.builder()
+    CaseDetails caseDetails;
+
+    @Before
+    public void init() {
+
+        casedata = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseSubmittedTimeStamp("2024-06-24T10:46:55.972994696+01:00")
             .id(123L)
@@ -47,20 +53,42 @@ public class HelpWithFeesServiceTest {
             .helpWithFeesNumber("123")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
-                                            .firstName("")
-                                            .lastName("")
+                                            .firstName("firstName")
+                                            .lastName("LastName")
                                             .build())))
             .build();
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = CaseDetails.builder()
+        caseDetails = CaseDetails.builder()
             .id(123L)
             .state(State.SUBMITTED_NOT_PAID.getLabel())
             .build();
+    }
+
+    @Test
+    public void testAboutToStart() {
+
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService.handleAboutToStart("auth", caseDetails);
         assertNotNull(response);
         DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
         assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
         assertEquals("C100",response.get("caseTypeOfApplication"));
+    }
+
+    @Test
+    public void testAboutToSubmit() {
+        casedata = casedata.toBuilder()
+                .state(State.SUBMITTED_PAID)
+                    .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getLabel())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService.setCaseStatus();
+        assertNotNull(response);
+        CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
+        assertEquals("Submitted", caseStatus.getState());
     }
 
     @Test

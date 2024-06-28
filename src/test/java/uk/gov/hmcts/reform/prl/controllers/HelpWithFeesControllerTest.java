@@ -60,6 +60,20 @@ public class HelpWithFeesControllerTest {
     }
 
     @Test
+    public void test_HelpWithFeesAboutToSubmit() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        helpWithFeesController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+        verify(helpWithFeesService, times(1)).setCaseStatus();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void test_HelpWithFeesAboutToSubmitThrowsException() {
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        helpWithFeesController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+        verifyNoInteractions(helpWithFeesService);
+    }
+
+    @Test
     public void test_HelpWithFeesHandleSubmitted() throws Exception {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         helpWithFeesController.handleSubmitted(authToken, s2sToken, callbackRequest);

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 
 @Service
 @Slf4j
@@ -55,6 +57,14 @@ public class HelpWithFeesService {
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(APPLICATION_UPDATED)
                       .confirmationBody(CONFIRMATION_BODY).build());
+    }
+
+    public Map<String, Object> setCaseStatus() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("caseStatus", CaseStatus.builder()
+            .state(SUBMITTED_PAID.getLabel())
+            .build());
+        return caseDataUpdated;
     }
 
     public Map<String, Object> handleAboutToStart(String authorisation, CaseDetails caseDetails) {
