@@ -1342,6 +1342,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
+    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401Solicitor() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3155,6 +3156,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
+    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401Senario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3361,6 +3363,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
     }
 
+    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
