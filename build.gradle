@@ -52,7 +52,7 @@ def versions = [
   sendLetterClient             : '4.0.2',
   serenity                     : '4.0.28',
   serenityCucumber             : '1.9.50',
-  serviceTokenGenerator        : '3.1.1',
+  serviceTokenGenerator        : '3.1.4',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.7.12',
   springSecurityRsa            : '1.0.12.RELEASE',
