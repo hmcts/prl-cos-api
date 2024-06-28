@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -279,16 +278,6 @@ public class ServiceOfApplicationServiceTest {
             .build();
         Element<PartyDetails> respondent = element(partyDetails);
         Element<PartyDetails> applicant = element(partyDetails);
-
-        DynamicMultiselectListElement dynamicMultiselectListElementApplicant = DynamicMultiselectListElement.builder()
-            .code(applicant.getId().toString())
-            .label(applicant.getValue().getRepresentativeFirstName() + " "
-                       + applicant.getValue().getRepresentativeLastName())
-            .build();
-        DynamicMultiSelectList dynamicMultiSelectListApplicant = DynamicMultiSelectList.builder()
-            .listItems(List.of(dynamicMultiselectListElementApplicant))
-            .value(List.of(dynamicMultiselectListElementApplicant))
-            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -317,7 +306,7 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
-                                                  dynamicMultiSelectListApplicant.getValue(),
+                                                  Arrays.asList(applicant),
                                                   List.of(Document.builder().build()), "Applicant");
         assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
@@ -332,16 +321,6 @@ public class ServiceOfApplicationServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> applicant = element(partyDetails);
-
-        DynamicMultiselectListElement dynamicMultiselectListElementApplicant = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID)
-            .label(applicant.getValue().getRepresentativeFirstName() + " "
-                       + applicant.getValue().getRepresentativeLastName())
-            .build();
-        DynamicMultiSelectList dynamicMultiSelectListApplicant = DynamicMultiSelectList.builder()
-            .listItems(List.of(dynamicMultiselectListElementApplicant))
-            .value(List.of(dynamicMultiselectListElementApplicant))
-            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -370,7 +349,7 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
-                                                  dynamicMultiSelectListApplicant.getValue(),
+                                                  Arrays.asList(applicant),
                                                   List.of(Document.builder().build()), "Applicant");
         assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
