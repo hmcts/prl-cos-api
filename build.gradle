@@ -61,7 +61,7 @@ def versions = [
   tomcat                       : '10.1.23',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
-  pdfbox                       : '2.0.24',
+  pdfbox                       : '2.0.31',
   springFramework    : '6.0.14'
 ]
 
