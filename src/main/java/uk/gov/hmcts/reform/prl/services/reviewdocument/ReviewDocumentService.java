@@ -217,8 +217,6 @@ public class ReviewDocumentService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
             log.info("document list from case data ==>> {}", caseData.getDocumentManagementDetails()
                 .getCitizenQuarantineDocsList());
-            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
-            log.info("temporary list from case data ==>> {}", tempQuarantineDocumentList);
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
@@ -231,6 +229,8 @@ public class ReviewDocumentService {
                                                ))
                                                .build())
                                            .toList());
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
+            log.info("==> temp quarantine list {}", tempQuarantineDocumentList);
         }
         //bulkscan
         if (isNotEmpty(caseData.getScannedDocuments())) {
