@@ -41,7 +41,7 @@ public class C100CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendCaseInvite(CaseData caseData) {
+    public CaseData sendCaseInviteEmail(CaseData caseData) {
         log.info("Generating case invites and sending notification to applicants/respondents with email address present");
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {

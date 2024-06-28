@@ -1243,7 +1243,7 @@ public class ServiceOfApplicationService {
 
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
-            caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+            caseInviteManager.sendAccessCodeNotificationEmail(caseData);
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
