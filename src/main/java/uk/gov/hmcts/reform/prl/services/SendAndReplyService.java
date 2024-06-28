@@ -1514,7 +1514,7 @@ public class SendAndReplyService {
         dataMap.put("partyAddress", partyDetails.getAddress());
         dataMap.put("date", new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
         dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("messageContent", message.getMessageContent());
+        dataMap.put("messageContent", caseData.getMessageContent());
         dataMap.put("documentSize", isNotEmpty(attachedDocs) ? attachedDocs.size() : 0);
 
         String messageAbout = "";
