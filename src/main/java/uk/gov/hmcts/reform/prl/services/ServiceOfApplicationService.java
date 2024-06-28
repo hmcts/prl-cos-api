@@ -188,7 +188,6 @@ public class ServiceOfApplicationService {
     public static final String AUTHORIZATION = "authorization";
     public static final String COVER_LETTER_TEMPLATE = "coverLetterTemplate";
     private static final String DATE_CREATED = CaseUtils.getCurrentDate();
-
     public static final String ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER = "enable-citizen-access-code-in-cover-letter";
 
     @Value("${xui.url}")
