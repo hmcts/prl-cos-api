@@ -48,7 +48,10 @@ public class FL401CaseInviteService implements CaseInviteService {
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
             if (Yes.equals(caseData.getApplicantsFL401().getCanYouProvideEmailAddress())) {
-                sendCaseInvite(CaseUtils.getCaseInvite(caseData.getApplicantsFL401().getPartyId(), caseData.getCaseInvites()), caseData.getApplicantsFL401(), caseData);
+                sendCaseInvite(CaseUtils.getCaseInvite(
+                    caseData.getApplicantsFL401().getPartyId(),
+                    caseData.getCaseInvites()
+                ), caseData.getApplicantsFL401(), caseData);
             }
         }
         return caseData.toBuilder().caseInvites(caseInvites).build();

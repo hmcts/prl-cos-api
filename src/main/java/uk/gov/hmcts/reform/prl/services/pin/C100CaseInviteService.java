@@ -42,8 +42,6 @@ public class C100CaseInviteService implements CaseInviteService {
 
     @Override
     public CaseData generateAndSendCaseInvite(CaseData caseData) {
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
-
         log.info("Generating case invites and sending notification to applicants/respondents with email address present");
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
@@ -61,7 +59,7 @@ public class C100CaseInviteService implements CaseInviteService {
                 }
             }
         }
-        return caseData.toBuilder().caseInvites(caseInvites).build();
+        return caseData;
     }
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, Element<PartyDetails> partyDetails) {
