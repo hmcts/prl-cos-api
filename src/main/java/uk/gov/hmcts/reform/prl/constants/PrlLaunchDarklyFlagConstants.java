@@ -9,4 +9,7 @@ public class PrlLaunchDarklyFlagConstants {
     public static final String TASK_LIST_V3_FLAG = "task-list-v3";
     public static final String ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY = "role-assignment-api-in-orders-journey";
 
+    public static final String CREATE_URGENT_CASES_FLAG = "create-urgent-cases";
+    public static final String COURTNAV_SWANSEA_COURT_MAPPING = "courtnav-swansea-court-mapping";
+
 }

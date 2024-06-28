@@ -31,6 +31,7 @@ public enum ManageOrderFieldsEnum {
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
     childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
     childOption("childOption"),
+    daOrderForCaCase("daOrderForCaCase"),
     makeChangesToUploadedOrder("makeChangesToUploadedOrder"),
     editedUploadOrderDoc("editedUploadOrderDoc"),
     previewUploadedOrder("previewUploadedOrder"),
@@ -318,7 +319,8 @@ public enum ManageOrderFieldsEnum {
     sdoCourtTempList("sdoCourtTempList"),
     sdoDocumentationAndEvidenceTempList("sdoDocumentationAndEvidenceTempList"),
     sdoOtherTempList("sdoOtherTempList"),
-    listElementsSetToDefaultValue("listElementsSetToDefaultValue");
+    listElementsSetToDefaultValue("listElementsSetToDefaultValue"),
+    editedOrderHasDefaultCaseFields("editedOrderHasDefaultCaseFields");
 
     private final String value;
 

@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -34,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -63,6 +68,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    private static final String APPLICANTS = "applicants";
+    private static final String RESPONDENTS = "respondents";
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -276,7 +283,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
             }
-            caseDetails.put("applicants", applicantsWrapped);
+            caseDetails.put(APPLICANTS, applicantsWrapped);
         }
     }
 
@@ -291,7 +298,7 @@ public class UpdatePartyDetailsService {
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
             }
-            caseDetails.put("respondents", respondentsWrapped);
+            caseDetails.put(RESPONDENTS, respondentsWrapped);
         }
     }
 
@@ -339,7 +346,6 @@ public class UpdatePartyDetailsService {
             }
         }
         if (respondentList != null && !respondentList.isEmpty()) {
-            log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
             return true;
         }
         log.info("respondent data not changed");
@@ -470,5 +476,64 @@ public class UpdatePartyDetailsService {
             newC8Documents.add(newC8Document);
             return newC8Documents;
         }
+    }
+
+    public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+            applicants = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            applicants.add(partyDetails);
+            caseDataUpdated.put(APPLICANTS, applicants);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(APPLICANTS, caseData.getApplicants());
+        return caseDataUpdated;
+
+    }
+
+    public Map<String, Object> setDefaultEmptyRespondentForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+            respondents = new ArrayList<>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            respondents.add(partyDetails);
+            caseDataUpdated.put(RESPONDENTS, respondents);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put(RESPONDENTS, caseData.getRespondents());
+        return caseDataUpdated;
+
+    }
+
+    public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                children = new ArrayList<>();
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
+            }
+        } else {
+            List<Element<Child>> children = caseData.getChildren();
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                children = new ArrayList<>();
+                Element<Child> childDetails = element(Child.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
+            }
+        }
+        return caseDataUpdated;
+
     }
 }
