@@ -83,6 +83,7 @@ public enum ManageOrderFieldsEnum {
     isRespondent3SolicitorPresent("isRespondent3SolicitorPresent"),
     isRespondent4SolicitorPresent("isRespondent4SolicitorPresent"),
     isRespondent5SolicitorPresent("isRespondent5SolicitorPresent"),
+    isAutomatedHearingPresent("isAutomatedHearingPresent"),
 
     //clear all missing fields
     selectedOrder("selectedOrder"),
