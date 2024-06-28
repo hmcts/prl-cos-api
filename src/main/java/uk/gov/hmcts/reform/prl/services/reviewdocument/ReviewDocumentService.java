@@ -54,8 +54,6 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
@@ -75,6 +73,7 @@ import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -431,12 +430,13 @@ public class ReviewDocumentService {
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             List<PartyDetails> applicantToNotify = nullSafeCollection(caseData.getApplicants()).stream()
                 .map(Element::getValue)
-                .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant) && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+                .filter(applicant -> CaseUtils.hasLegalRepresentation(applicant) || Yes.equals(applicant.getCanYouProvideEmailAddress()))
                 .toList();
             applicantToNotify.forEach(partyData -> {
                 // condition to be added either its for gov notify email or send grid
                 Map<String, Object> dynamicData = getEmailDynamicData(caseData);
-                List<Document> respondentDocuments = List.of(caseData.getReviewDocuments().getReviewDoc());
+                List<Document> respondentDocuments = caseData.getReviewDocuments() != null && caseData.getReviewDocuments().getReviewDoc() != null ?
+                    List.of(caseData.getReviewDocuments().getReviewDoc()): Collections.emptyList();
 
                 if (isSolicitorEmailExists(partyData) && solicitorEmailTemplate != null) {
                   dynamicData.put(NAME, partyData.getRepresentativeFullName());
@@ -445,15 +445,19 @@ public class ReviewDocumentService {
                                        dynamicData,
                                        partyData.getSolicitorEmail(),
                                        solicitorEmailTemplate);
-                } else if (isPartyProvidedWithEmail(partyData)) {
-                  sendEmailToParty(caseData, partyData, emailTemplate);
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                   && isPartyProvidedWithEmail(partyData)) {
-                  sendEmailViaSendGrid(authorisation,
-                                       respondentDocuments,
-                                       dynamicData,
-                                       partyData.getEmail(),
-                                       partyEmailTemplate);
+                    if (hasDashboardAccess(element(partyData))) {
+                        sendEmailToParty(caseData, partyData, emailTemplate);
+                    } else {
+                        sendEmailViaSendGrid(
+                            authorisation,
+                            respondentDocuments,
+                            dynamicData,
+                            partyData.getEmail(),
+                            partyEmailTemplate
+                        );
+                    }
                 }
             });
         }
