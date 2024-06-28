@@ -538,8 +538,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
-            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
-        );
+            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         List<Element<UploadedDocuments>>  citizenUploadDocListConfTab =
             (List<Element<UploadedDocuments>>)caseDataMap.get("citizenUploadDocListConfTab");
