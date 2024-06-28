@@ -28,36 +28,45 @@ public class ResponseToAllegationsOfHarmChecker implements RespondentEventChecke
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
-        Optional<Response> response = findResponse(respondingParty);
-        if (response.isPresent()) {
-            return ofNullable(response.get().getResponseToAllegationsOfHarm())
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
+        if (isC1aApplicable) {
+            Optional<Response> response = findResponse(respondingParty);
+            if (response.isPresent()) {
+                return ofNullable(response.get().getResponseToAllegationsOfHarm())
                     .filter(responseToAllegationsOfHarm -> anyNonEmpty(
-                            responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse(),
-                            responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument()
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse(),
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument()
                     )).isPresent();
+            }
+            return false;
+        } else {
+            return true;
         }
-        return false;
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
-        Optional<Response> response = findResponse(respondingParty);
-        if (response.isPresent()) {
-            Optional<ResponseToAllegationsOfHarm> responseToAllegationsOfHarm = Optional.ofNullable(
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
+        if (isC1aApplicable) {
+            Optional<Response> response = findResponse(respondingParty);
+            if (response.isPresent()) {
+                Optional<ResponseToAllegationsOfHarm> responseToAllegationsOfHarm = Optional.ofNullable(
                     response.get()
-                            .getResponseToAllegationsOfHarm());
-            if (!responseToAllegationsOfHarm.isEmpty() && checkResponseToAllegationsOfHarmMandatoryCompleted(responseToAllegationsOfHarm)) {
-                respondentTaskErrorService.removeError(RESPONSE_TO_ALLEGATION_OF_HARM_ERROR);
-                return true;
+                        .getResponseToAllegationsOfHarm());
+                if (!responseToAllegationsOfHarm.isEmpty() && checkResponseToAllegationsOfHarmMandatoryCompleted(
+                    responseToAllegationsOfHarm)) {
+                    respondentTaskErrorService.removeError(RESPONSE_TO_ALLEGATION_OF_HARM_ERROR);
+                    return true;
+                }
             }
-        }
-        respondentTaskErrorService.addEventError(
+            respondentTaskErrorService.addEventError(
                 RESPOND_ALLEGATION_OF_HARM,
                 RESPONSE_TO_ALLEGATION_OF_HARM_ERROR,
                 RESPONSE_TO_ALLEGATION_OF_HARM_ERROR.getError()
-        );
-        return false;
+            );
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private boolean checkResponseToAllegationsOfHarmMandatoryCompleted(Optional<ResponseToAllegationsOfHarm> responseToAllegationsOfHarm) {
