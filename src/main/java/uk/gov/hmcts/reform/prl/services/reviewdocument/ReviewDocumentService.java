@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -68,8 +69,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -355,18 +360,28 @@ public class ReviewDocumentService {
                                    String quarantineDocsListToBeModified) {
         sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(APPLICANT_APPLICATION)) {
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
                 sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
-                                            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+                                            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,//idhemanna gov notify template ?
                                             C7_NOTIFICATION_APPLICANT_RESPONDENT, null);
             }
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(APPLICANT_C1A_APPLICATION)
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)
             ) {
                 sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
-                                            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
-                                            C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_RESPONDENT
+                                            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,// if gov notify template then why you did not add same name in application
+                                            C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_SOLICITOR
                 );
             }
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
+
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,// if gov notify template then why you did not add same name in application
+                                            RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM, RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR
+                );
+
+            }
+
+
         }
     }
 
@@ -457,6 +472,8 @@ public class ReviewDocumentService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("respondentName", caseData.getRespondentName());
         dynamicData.put("applicantName", caseData.getApplicantName());
+        dynamicData.put("solicitorName", caseData.getSolicitorName());
+        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         dynamicData.put(ENG, documentLanguage.isGenEng());
         dynamicData.put(WEL, documentLanguage.isGenWelsh());
