@@ -51,7 +51,7 @@ def versions = [
   reformsJavaLogging           : '5.1.7',
   sendLetterClient             : '4.0.2',
   serenity                     : '4.0.28',
-  serenityCucumber             : '1.9.50',
+  serenityCucumber             : '1.9.51',
   serviceTokenGenerator        : '3.1.1',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.7.12',
