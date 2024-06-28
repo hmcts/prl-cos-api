@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
@@ -115,6 +116,7 @@ public class TransferToAnotherCourtEventHandlerTest {
             .courtName("old court")
             .anotherCourt("new court")
             .transferredCourtFrom("old court")
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .build();
 
         Document document = Document.builder().build();
@@ -139,6 +141,7 @@ public class TransferToAnotherCourtEventHandlerTest {
                                                               .orderDocument(document)
                                                  .orderDocumentWelsh(document).build())))
             .otherDocumentsUploaded(List.of(document))
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .build();
 
         final CaseData caseDataWithDocsFl401 = CaseData.builder()
@@ -177,6 +180,7 @@ public class TransferToAnotherCourtEventHandlerTest {
                                                  .orderDocument(document)
                                                  .orderDocumentWelsh(document).build())))
             .otherDocumentsUploaded(List.of(document))
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .build();
 
         transferToAnotherCourtEvent = TransferToAnotherCourtEvent.builder()
