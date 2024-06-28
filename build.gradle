@@ -44,8 +44,7 @@ def versions = [
   junit                        : '4.13.2',
   junitPlatform                : '5.7.2',
   lombok                       : '1.18.30',
-  pact                         : '4.6.10',
-  pactJava8Version             : '4.1.42',
+  pact                         : '4.1.11',
   pitest                       : '1.7.3',
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
@@ -468,10 +467,10 @@ dependencies {
 
   contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pactJava8Version
+  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
   contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pactJava8Version
+  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
 
   contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
