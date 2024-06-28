@@ -107,7 +107,9 @@ public class StmtOfServImplService {
                     String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(null)
-                        .selectedPartyId("00000000-0000-0000-0000-000000000000")
+                        .selectedPartyId(getPartyIds(CaseUtils.getCaseTypeOfApplication(caseData),
+                                                     caseData.getRespondents(),
+                                                     caseData.getRespondentsFL401()))
                         .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                         .servedDateTimeOption(recipient.getServedDateTimeOption())
