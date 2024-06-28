@@ -1458,6 +1458,7 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Test
     public void testSendEmailNotificationToExternalPartiesC100Case() throws IOException {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -1526,6 +1527,7 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication("C100")
             .replyMessageDynamicList(DynamicList.builder().build())
             .applicants(applicantList)
+            .messageContent("some msg content")
             .respondents(respondentList)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -1556,6 +1558,7 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Test
     public void testSendEmailNotificationToExternalPartiesForFL401Case() throws IOException {
         PartyDetails applicant = PartyDetails.builder()
             .partyId(UUID.randomUUID())
@@ -1612,6 +1615,7 @@ public class SendAndReplyServiceTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .applicantsFL401(applicant)
             .respondentsFL401(respondent)
+            .messageContent("some msg content")
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
@@ -1646,7 +1650,7 @@ public class SendAndReplyServiceTest {
         dynamicData.put("caseReference", "12345");
         dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId());
         dynamicData.put("subject", "message subject");
-        dynamicData.put("content", "some msg content");
+        dynamicData.put("messageContent", "some msg content");
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("name", "Abc Xyz");

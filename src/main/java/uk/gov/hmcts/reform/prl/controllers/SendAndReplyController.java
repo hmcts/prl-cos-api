@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -270,18 +267,10 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
-            List<Element<BulkPrintDetails>> bulkPrintDetailsList = sendAndReplyService.sendNotificationToExternalParties(
+            sendAndReplyService.sendNotificationToExternalParties(
                 caseData,
                 authorisation
             );
-            if (CollectionUtils.isNotEmpty(bulkPrintDetailsList)) {
-                List<Element<Document>> messageDocs = ElementUtils.unwrapElements(bulkPrintDetailsList).stream().flatMap(
-                    item -> item.getPrintDocs().stream()).collect(
-                    Collectors.toList());
-                log.info("message documents {}",messageDocs);
-                caseDataMap.put("messageDocs", messageDocs);
-            }
-
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
