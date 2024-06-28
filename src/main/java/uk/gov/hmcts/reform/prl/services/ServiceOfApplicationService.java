@@ -871,7 +871,8 @@ public class ServiceOfApplicationService {
         String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            handleNotificationDaNonPersonalService(caseData, authorization, emailNotificationDetails, staticDocs);
             whoIsResponsibleForServing = COURT;
         } else {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
@@ -894,6 +895,24 @@ public class ServiceOfApplicationService {
         }
 
         return whoIsResponsibleForServing;
+    }
+
+    private void handleNotificationDaNonPersonalService(CaseData caseData, String authorization,
+                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                        List<Document> staticDocs) {
+        List<Element<PartyDetails>> selectedApplicants = getSelectedApplicantsOrRespondentsElements(
+            commonApplicantsList,
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+        );
+        List<Element<PartyDetails>> selectedRespondents = getSelectedApplicantsOrRespondentsElements(
+            commonRespondentsList,
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+        );
+        List<Document> packDocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
+        emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, selectedApplicants,
+            packDocs, "Applicant solicitor"));
+        emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, selectedRespondents,
+                                                                             packDocs, "Respondent solicitor"));
     }
 
     private void sendNotificationToOthers(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,
