@@ -73,7 +73,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -1484,7 +1483,7 @@ public class ReviewDocumentServiceTest {
     }
 
     @Test
-    public void testSendResponsePostSubmissionWhenRespondentC1ApplicationWithDecisionNo() throws Exception{
+    public void testSendResponsePostSubmissionWhenRespondentC1ApplicationWithDecisionNo() throws Exception {
         PartyDetails applicant = PartyDetails.builder().partyId(testUuid)
             .contactPreferences(ContactPreferences.post)
             .address(Address.builder()
@@ -1515,6 +1514,17 @@ public class ReviewDocumentServiceTest {
             .build();
         quarantineDocsList.add(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
                                        quarantineLegalDoc));
+
+        doNothing().when(emailService).send(anyString(),any(),any(),any());
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
+            .thenReturn(quarantineCaseDoc);
+        List<Document> coverLetterDocs = new ArrayList<>();
+        coverLetterDocs.add(Document.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(coverLetterDocs);
+        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder()
+                                                                            .isGenWelsh(true)
+                                                                            .isGenEng(true)
+                                                                            .build());
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
@@ -1528,18 +1538,6 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
         Map<String, Object> caseDataMap = new HashMap<>();
-
-        doNothing().when(emailService).send(anyString(),any(),any(),any());
-        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
-            .thenReturn(quarantineCaseDoc);
-        List<Document> coverLetterDocs = new ArrayList<>();
-        coverLetterDocs.add(Document.builder().build());
-        when(serviceOfApplicationPostService.getCoverSheets(any(), any(), any(), any(), any())).thenReturn(coverLetterDocs);
-        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder()
-                                                                            .isGenWelsh(true)
-                                                                            .isGenEng(true)
-                                                                            .build());
-
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());

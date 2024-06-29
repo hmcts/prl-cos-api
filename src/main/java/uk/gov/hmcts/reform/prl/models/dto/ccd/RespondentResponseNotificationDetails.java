@@ -20,6 +20,8 @@ public class RespondentResponseNotificationDetails {
     private String ap14NotificationSent;
     private List<Element<NotificationDetails>> ap15Notifications;
     private String ap15NotificationSent;
-    private String nameOfRespondent;
+    private String nameOfRespondentAp13;
+    private String nameOfRespondentAp14;
+    private String nameOfRespondentAp15;
 
 }

@@ -403,6 +403,7 @@ public class ReviewDocumentService {
                     caseData,
                     caseDataUpdated,
                     respondentName,
+                    "nameOfRespondentAp13",
                     "ap13Notifications",
                     "ap13NotificationSent"
                 );
@@ -420,6 +421,7 @@ public class ReviewDocumentService {
                     caseData,
                     caseDataUpdated,
                     respondentName,
+                    "nameOfRespondentAp14",
                     "ap14Notifications",
                     "ap14NotificationSent"
                 );
@@ -438,6 +440,7 @@ public class ReviewDocumentService {
                 caseData,
                 caseDataUpdated,
                 respondentName,
+                "nameOfRespondentAp15",
                 "ap15Notifications",
                 "ap15NotificationSent"
             );
@@ -448,6 +451,7 @@ public class ReviewDocumentService {
                                             CaseData caseData,
                                             Map<String, Object> caseDataUpdated,
                                             String respondentName,
+                                            String respondentNameField,
                                             String notifications, String notificationSent) {
         if (isNotEmpty(responseNotification)) {
             log.info(
@@ -456,7 +460,7 @@ public class ReviewDocumentService {
             );
             caseDataUpdated.put(notifications, responseNotification);
             caseDataUpdated.put(notificationSent, "YES");
-            caseDataUpdated.put("nameOfRespondent", respondentName);
+            caseDataUpdated.put(respondentNameField, respondentName);
         }
     }
 
