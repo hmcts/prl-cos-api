@@ -72,6 +72,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_10_FM5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_6A_AP_14;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_6B_AP_15;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_6_AP_13;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
@@ -829,8 +832,35 @@ public class CaseService {
         } else {
             citizenNotifications.add(CitizenNotification.builder().id(CAN_10_FM5).show(false).build());
         }
-
+        // CAN6,CAN6A,CAN6B
+        populateCitizenNotifications(
+            null != caseData.getRespondentResponseNotificationDetails()
+                && "YES".equalsIgnoreCase(caseData.getRespondentResponseNotificationDetails().getAp13NotificationSent()),
+            citizenNotifications,
+            CAN_6_AP_13
+        );
+        populateCitizenNotifications(
+            null != caseData.getRespondentResponseNotificationDetails()
+                && "YES".equalsIgnoreCase(caseData.getRespondentResponseNotificationDetails().getAp14NotificationSent()),
+            citizenNotifications,
+            CAN_6A_AP_14
+        );
+        populateCitizenNotifications(
+            null != caseData.getRespondentResponseNotificationDetails()
+                && "YES".equalsIgnoreCase(caseData.getRespondentResponseNotificationDetails().getAp15NotificationSent()),
+            citizenNotifications,
+            CAN_6B_AP_15
+        );
         return citizenNotifications;
+    }
+
+    private void populateCitizenNotifications(boolean caseData, List<CitizenNotification> citizenNotifications,
+                                              String notificationType) {
+        if (caseData) {
+            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(false).build());
+        }
     }
 
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,

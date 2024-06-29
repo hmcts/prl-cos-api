@@ -548,6 +548,12 @@ document:
       doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
+      doc_letter_ap_13_eng_template: PRL-LET-ENG-C100-AP13.docx
+      doc_letter_ap_13_welsh_template: PRL-LET-WEL-C100-AP13.docx
+      doc_letter_ap_14_eng_template: PRL-LET-ENG-C100-AP14.docx
+      doc_letter_ap_14_welsh_template: PRL-LET-WEL-C100-AP14.docx
+      doc_letter_ap_15_eng_template: PRL-LET-ENG-C100-AP15.docx
+      doc_letter_ap_15_welsh_template: PRL-LET-WEL-C100-AP15.docx
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
