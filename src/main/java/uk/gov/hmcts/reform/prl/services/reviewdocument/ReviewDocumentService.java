@@ -661,7 +661,8 @@ public class ReviewDocumentService {
         dataMap.put("applicantName", null != applicantName ? applicantName : " ");
         dataMap.put("applicantAddress", address);
         dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("respondentName", null != respondentName ? respondentName : "Respondent");
+        dataMap.put("respondentName", null != respondentName ? respondentName :
+            (isWelsh ? "Mae’r atebydd" : "Respondent"));
         dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
         GeneratedDocumentInfo generatedDocumentInfo;
         generatedDocumentInfo = dgsService.generateDocument(
