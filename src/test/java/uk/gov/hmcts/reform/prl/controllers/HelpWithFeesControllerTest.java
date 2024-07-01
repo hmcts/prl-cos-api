@@ -49,7 +49,7 @@ public class HelpWithFeesControllerTest {
     public void test_HelpWithFeesAboutToStart() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        verify(helpWithFeesService, times(1)).handleAboutToStart(AUTH_TOKEN, caseDetails);
+        verify(helpWithFeesService, times(1)).handleAboutToStart(caseDetails);
     }
 
     @Test(expected = RuntimeException.class)

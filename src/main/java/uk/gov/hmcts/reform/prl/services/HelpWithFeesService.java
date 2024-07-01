@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -67,20 +68,29 @@ public class HelpWithFeesService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> handleAboutToStart(String authorisation, CaseDetails caseDetails) {
+    public Map<String, Object> handleAboutToStart(CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String dynamicElement = String.format("Child arrangements application C100 - %s",
-                                              CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
-        caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                                                                       String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
-                                                                       caseData.getHelpWithFeesNumber(),
-                                                                       caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       caseData.getCaseSubmittedTimeStamp()));
-        caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
-                                                                                      .code(UUID.fromString(TEST_UUID))
-                                                                                      .label(dynamicElement).build())).build());
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+
+        if (null != caseData) {
+            if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getLabel())) {
+                log.info("Checking for c100 applications");
+                String dynamicElement = String.format("Child arrangements application C100 - %s",
+                    CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
+                caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                    String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                    caseData.getHelpWithFeesNumber(),
+                    caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                    caseData.getCaseSubmittedTimeStamp()));
+                caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
+                    .code(UUID.fromString(TEST_UUID))
+                    .label(dynamicElement).build())).build());
+                caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+            } else {
+                log.info("No longer checking for c100 applications");
+            }
+        }
+
         return caseDataUpdated;
     }
 }

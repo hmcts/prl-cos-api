@@ -47,8 +47,7 @@ public class HelpWithFeesController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(helpWithFeesService
-                                                                           .handleAboutToStart(authorisation,
+            return AboutToStartOrSubmitCallbackResponse.builder().data(helpWithFeesService.handleAboutToStart(
                 callbackRequest.getCaseDetails())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
