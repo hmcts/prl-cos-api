@@ -648,8 +648,8 @@ public class UploadAdditionalApplicationService {
     public Map<String, Object> populateHearingList(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-            AdditionalApplicationTypeEnum.c2Order)) {
+        if (AdditionalApplicationTypeEnum.c2Order.equals(
+            caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
             String s2sToken = authTokenGenerator.generate();
             DynamicList futureHearingList = sendAndReplyService.getFutureHearingDynamicList(
                 authorisation,
