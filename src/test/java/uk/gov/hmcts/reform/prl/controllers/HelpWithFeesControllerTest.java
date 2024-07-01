@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HelpWithFeesControllerTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @InjectMocks
     private HelpWithFeesController helpWithFeesController;
@@ -47,43 +47,43 @@ public class HelpWithFeesControllerTest {
 
     @Test
     public void test_HelpWithFeesAboutToStart() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        helpWithFeesController.handleAboutToStart(authToken, s2sToken, callbackRequest);
-        verify(helpWithFeesService, times(1)).handleAboutToStart(authToken,caseDetails);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        verify(helpWithFeesService, times(1)).handleAboutToStart(AUTH_TOKEN, caseDetails);
     }
 
     @Test(expected = RuntimeException.class)
     public void test_HelpWithFeesAboutToStartThrowsException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        helpWithFeesController.handleAboutToStart(authToken, s2sToken, callbackRequest);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        helpWithFeesController.handleAboutToStart(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verifyNoInteractions(helpWithFeesService);
     }
 
     @Test
     public void test_HelpWithFeesAboutToSubmit() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        helpWithFeesController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).setCaseStatus();
     }
 
     @Test(expected = RuntimeException.class)
     public void test_HelpWithFeesAboutToSubmitThrowsException() {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        helpWithFeesController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        helpWithFeesController.handleAboutToSubmit(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verifyNoInteractions(helpWithFeesService);
     }
 
     @Test
     public void test_HelpWithFeesHandleSubmitted() throws Exception {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        helpWithFeesController.handleSubmitted(authToken, s2sToken, callbackRequest);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verify(helpWithFeesService, times(1)).handleSubmitted();
     }
 
     @Test(expected = RuntimeException.class)
     public void test_HelpWithFeesHandleSubmittedThrowsException() throws Exception {
-        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        helpWithFeesController.handleSubmitted(authToken, s2sToken, callbackRequest);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        helpWithFeesController.handleSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         verifyNoInteractions(helpWithFeesService);
     }
 

@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HelpWithFeesService;
 
+import javax.ws.rs.NotFoundException;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -81,7 +83,7 @@ public class HelpWithFeesController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return helpWithFeesService
                 .handleSubmitted();
