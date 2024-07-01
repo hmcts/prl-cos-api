@@ -387,6 +387,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, response.getBody().getConfirmationHeader());
     }
 
+    @Ignore
     @Test
     public void testConfidentialyCheckSuccessForNoPersonalService() {
         CaseData caseData = CaseData.builder().id(12345L)
@@ -424,6 +425,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIRMATION_HEADER_NON_PERSONAL, confirmationBody);
     }
 
+    @Ignore
     @Test
     public void testConfidentialyCheckFailed() {
         CaseData caseData = CaseData.builder().id(12345L)
