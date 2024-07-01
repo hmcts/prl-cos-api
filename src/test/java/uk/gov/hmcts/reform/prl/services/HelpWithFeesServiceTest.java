@@ -85,7 +85,7 @@ public class HelpWithFeesServiceTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        Map<String, Object> response = helpWithFeesService.setCaseStatus();
+        Map<String, Object> response = helpWithFeesService.setCaseStatus(caseDetails);
         assertNotNull(response);
         CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
         assertEquals("Submitted", caseStatus.getState());

@@ -60,7 +60,7 @@ public class HelpWithFeesService {
                       .confirmationBody(CONFIRMATION_BODY).build());
     }
 
-    public Map<String, Object> setCaseStatus() {
+    public Map<String, Object> setCaseStatus(CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("caseStatus", CaseStatus.builder()
             .state(SUBMITTED_PAID.getLabel())
