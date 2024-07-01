@@ -52,6 +52,7 @@ public class CitizenAwpMapper {
                         CitizenAwpRequest citizenAwpRequest) {
         log.info("Mapping AWP citizen to solicitor");
 
+
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .author(citizenAwpRequest.getPartyName())
             .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
@@ -87,22 +88,11 @@ public class CitizenAwpMapper {
                                                                     AdditionalApplicationsBundle additionalApplicationsBundle) {
         Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
             getCitizenAwpPaymentIfPresent(caseData.getCitizenAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
-        String applicationStatus = YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
-            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())
-            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
-            : ApplicationStatus.SUBMITTED.getDisplayedValue();
         //update payment details
         if (optionalCitizenAwpPaymentElement.isPresent()) {
             additionalApplicationsBundle = additionalApplicationsBundle.toBuilder()
                 .payment(getPaymentDetails(citizenAwpRequest,
                                            optionalCitizenAwpPaymentElement.get().getValue()))
-                .otherApplicationsBundle(additionalApplicationsBundle.getOtherApplicationsBundle()
-                                             .toBuilder()
-                                             .applicationStatus(applicationStatus)
-                                             .build())
-                .c2DocumentBundle(additionalApplicationsBundle.getC2DocumentBundle().toBuilder()
-                                      .applicationStatus(applicationStatus)
-                                      .build())
                 .build();
             //Remove in progress citizen awp payment details
             caseData.getCitizenAwpPayments().remove(optionalCitizenAwpPaymentElement.get());
@@ -113,6 +103,7 @@ public class CitizenAwpMapper {
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
         if ("C2".equals(citizenAwpRequest.getAwpType())) {
+
             log.info("Inside mapping citizen awp C2");
             return C2DocumentBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
@@ -131,9 +122,17 @@ public class CitizenAwpMapper {
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
                 .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
+                .applicationStatus(getApplicationStatus(citizenAwpRequest))
                 .build();
         }
         return null;
+    }
+
+    private String getApplicationStatus(CitizenAwpRequest citizenAwpRequest) {
+        return YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())
+            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+            : ApplicationStatus.SUBMITTED.getDisplayedValue();
     }
 
     private OtherApplicationsBundle getOtherApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
@@ -151,7 +150,7 @@ public class CitizenAwpMapper {
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
-                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                .applicationStatus(getApplicationStatus(citizenAwpRequest))
                 .build();
         }
         return null;
