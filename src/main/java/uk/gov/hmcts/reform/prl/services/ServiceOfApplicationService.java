@@ -1352,9 +1352,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        Map<String,List<Element<PartyDetails>>> partiesMap = CaseUtils.getPartiesMap(caseData);
-        commonApplicantsList = partiesMap.get(APPLICANTS);
-        commonRespondentsList = partiesMap.get(RESPONDENTS);
+        setApplicantsAndRespondents(caseData);
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData, startAllTabsUpdateDataContent);
         }
@@ -1365,6 +1363,12 @@ public class ServiceOfApplicationService {
             startAllTabsUpdateDataContent,
             String.valueOf(callbackRequest.getCaseDetails().getId())
         );
+    }
+
+    private void setApplicantsAndRespondents(CaseData caseData) {
+        Map<String,List<Element<PartyDetails>>> partiesMap = CaseUtils.getPartiesMap(caseData);
+        commonApplicantsList = partiesMap.get(APPLICANTS);
+        commonRespondentsList = partiesMap.get(RESPONDENTS);
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -3277,7 +3281,7 @@ public class ServiceOfApplicationService {
             callbackRequest.getCaseDetails().getId()));
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData caseData = startAllTabsUpdateDataContent.caseData();
-
+        setApplicantsAndRespondents(caseData);
         final ResponseEntity<SubmittedCallbackResponse> response;
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
