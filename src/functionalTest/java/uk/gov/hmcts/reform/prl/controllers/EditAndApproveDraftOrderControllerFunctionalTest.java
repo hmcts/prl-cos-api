@@ -56,7 +56,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
         = "requests/court-admin-manage-order-noapproval-required-request.json";
     private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING = "requests/auto-hearing-case-data-request.json";
     private static CaseDetails caseDetails;
     private final String userToken = "Bearer testToken";
     private final String targetInstance =
