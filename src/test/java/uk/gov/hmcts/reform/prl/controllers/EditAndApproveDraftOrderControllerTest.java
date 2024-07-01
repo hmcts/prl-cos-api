@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -66,6 +67,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1297,6 +1299,73 @@ public class EditAndApproveDraftOrderControllerTest {
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
                                 .doYouWantToServeOrder(Yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateSdoOtherFields(authToken, s2sToken, callbackRequest);
+        Assert.assertNotNull(response);
+
+    }
+
+
+    @Test
+    public void testPopulateSdoOtherFields_scenario2() {
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("c100DraftFilename.pdf")
+                               .build())
+            .id(123L)
+            .draftOrderDocWelsh(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("c100DraftWelshFilename")
+                                    .build())
+            .draftOrderCollection(draftOrderCollection)
+            .serveOrderData(ServeOrderData.builder()
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
+                                .doYouWantToServeOrder(Yes).build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoPreamblesList(Arrays.asList(SdoPreamblesEnum.rightToAskCourt))
+                                        .editedOrderHasDefaultCaseFields(Yes).build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
