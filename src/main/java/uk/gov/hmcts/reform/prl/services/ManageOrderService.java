@@ -64,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -83,6 +84,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -1208,6 +1210,11 @@ public class ManageOrderService {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
             draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            // Check for Automated Hearing Management
+            if (isHearingPageNeeded(draftOrderElement.getValue().getOrderType(), draftOrderElement.getValue().getC21OrderOptions())) {
+                draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()
+                    .isAutoHearingReqPending(Yes).build());
+            }
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -2266,8 +2273,12 @@ public class ManageOrderService {
         }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
+        YesOrNo isAutoHearingReqPending = No;
+        if (isHearingPageNeeded(CreateSelectOrderOptionsEnum.valueOf(flagSelectedOrderId), orderDetails.getC21OrderOptions())) {
+            isAutoHearingReqPending = Yes;
+        }
         return element(orderDetails.toBuilder()
+                           .isAutoHearingReqPending(isAutoHearingReqPending)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedBy(
@@ -3435,5 +3446,37 @@ public class ManageOrderService {
     private boolean checkIfAddressIsPresent(Address address) {
         return null != address
             && null != address.getAddressLine1();
+    }
+
+    public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
+                                                                       List<Element<HearingData>> hearingsList) {
+        log.info("Automated Hearing Management: createAutomatedHearingManagement: Start");
+        try {
+            if (!hearingsList.isEmpty()) {
+                log.info("Automated Hearing Management: hearingsList: {}", hearingsList);
+                hearingsList.stream()
+                    .map(Element::getValue)
+                    .forEach(hearingData -> {
+                        if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearingData.getHearingDateConfirmOptionEnum())
+                            || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                            log.info(
+                                "Automated Hearing Request: Inside: Start - Option 3 OR 4:{}",
+                                hearingData.getHearingDateConfirmOptionEnum()
+                            );
+                            AutomatedHearingResponse automatedHearingResponse = hearingService.createAutomatedHearing(
+                                authorisation,
+                                AutomatedHearingTransactionRequestMapper.mappingAutomatedHearingTransactionRequest(caseData, hearingData)
+                            );
+                            hearingData.setHearingId(automatedHearingResponse.getHearingRequestID());
+                            log.info("Automated Hearing Response: {}", automatedHearingResponse);
+
+                        }
+                    });
+            }
+        } catch (Exception e) {
+            throw new ManageOrderRuntimeException("Invalid Json", e);
+        }
+        log.info("Automated Hearing Management: createAutomatedHearingManagement: End");
+        return hearingsList;
     }
 }
