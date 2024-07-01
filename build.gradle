@@ -47,7 +47,7 @@ def versions = [
   pact                         : '4.1.11',
   pitest                       : '1.7.3',
   puppyCrawl                   : '8.43',
-  reformPropertiesVolume       : '0.0.4',
+  reformPropertiesVolume       : '0.1.0',
   reformsJavaLogging           : '5.1.7',
   sendLetterClient             : '4.0.2',
   serenity                     : '4.0.28',
