@@ -201,7 +201,7 @@ public class CitizenCaseUpdateController {
         }
     }
 
-    @PostMapping(value = "/awp-process-hwf-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "/awp-process-hwf-payment")
     @Operation(description = "Save citizen awp application into case data")
     public void processAwpWithHwfPayment() {
         c100AwpProcessHwfPaymentService.checkHwfPaymentStatusAndUpdateApplicationStatus();
