@@ -2244,7 +2244,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testExceptionForPopulateHeaderFL401() throws Exception {
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataFL401 = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
@@ -2258,8 +2258,8 @@ public class ManageOrdersControllerTest {
             .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = caseDataFL401.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataFL401);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -2282,7 +2282,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testExceptionForPopulateHeaderC100() throws Exception {
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseDataC100 = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
@@ -2296,8 +2296,8 @@ public class ManageOrdersControllerTest {
             .manageOrders(ManageOrders.builder().ordersHearingDetails(List.of(element(HearingData.builder().applicantName("asd").build()))).build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = caseDataC100.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataC100);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -2313,7 +2313,7 @@ public class ManageOrdersControllerTest {
             authToken,
             s2sToken
         );
-        assertEquals(callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT), Yes);
+        assertEquals(Yes,callbackResponse.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
         assertNotNull(callbackResponse);
     }
 
