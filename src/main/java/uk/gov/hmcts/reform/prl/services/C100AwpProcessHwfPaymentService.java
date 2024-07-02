@@ -222,7 +222,7 @@ public class C100AwpProcessHwfPaymentService {
         List<Should> shoulds = List.of(
             Should.builder()
                 .match(Match.builder()
-                           .caseTypeOfApplication("FL401")
+                           .caseTypeOfApplication("C100")
                            .build())
                 .build(),
             Should.builder()
