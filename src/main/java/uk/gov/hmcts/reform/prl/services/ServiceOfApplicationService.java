@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,6 +80,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP1;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
@@ -431,6 +433,7 @@ public class ServiceOfApplicationService {
                     caseData,
                     authorization,
                     emailNotificationDetails,
+                    bulkPrintDetails,
                     caseDataMap
                 );
             }
@@ -844,30 +847,154 @@ public class ServiceOfApplicationService {
 
     private String handleNotificationsDaSolicitorCreatedCase(CaseData caseData, String authorization,
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                             List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                              Map<String, Object> caseDataMap) {
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                   CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                   caseData);
         String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
-        if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
-                                                                                       .getSoaServingRespondentsOptions())) {
-            List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
-            List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
-            emailNotificationDetails.add(element(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true)));
-            whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
-        } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
-            .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-            || SoaSolicitorServingRespondentsEnum.courtAdmin
-            .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-            sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(caseData, authorization, emailNotificationDetails,
-                                                                     staticDocs, caseDataMap
-            );
-            whoIsResponsibleForServing = SoaSolicitorServingRespondentsEnum.courtBailiff
+        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+            && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            handleNotificationDaNonPersonalService(caseData, authorization, emailNotificationDetails, bulkPrintDetails,
+                                                   staticDocs);
+            whoIsResponsibleForServing = COURT;
+        } else {
+            if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
+                                                                                           .getSoaServingRespondentsOptions())) {
+                List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
+                List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
+                emailNotificationDetails.add(element(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true)));
+                whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
+            } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+                || SoaSolicitorServingRespondentsEnum.courtAdmin
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(caseData, authorization, emailNotificationDetails,
+                                                                         staticDocs, caseDataMap
+                );
+                whoIsResponsibleForServing = SoaSolicitorServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                    ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+            }
         }
+
         return whoIsResponsibleForServing;
+    }
+
+    private void handleNotificationDaNonPersonalService(CaseData caseData, String authorization,
+                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                        List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                        List<Document> staticDocs) {
+        List<Element<PartyDetails>> applicantFl401 = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
+                                                                           caseData.getApplicantsFL401()));
+        List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
+                                                                            caseData.getRespondentsFL401()));
+
+        applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
+            .getSoaRecipientsOptions().getValue());
+        respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
+            .getSoaRecipientsOptions().getValue());
+        if (CollectionUtils.isNotEmpty(applicantFl401)) {
+            String emailAddress = applicantFl401.get(0).getValue().getEmail();
+            String servedParty = applicantFl401.get(0).getValue().getLabelForDynamicList();
+            List<Document> docs = new ArrayList<>();
+            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            boolean sendEmail = true;
+            if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
+            } else {
+                emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
+                servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
+                if (!ContactPreferences.email.equals(applicantFl401.get(0).getValue().getContactPreferences())) {
+                    sendEmail = false;
+                }
+            }
+            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
+            if (sendEmail) {
+                try {
+                    log.info(
+                        "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
+                        caseData.getId()
+                    );
+
+                    dynamicData.put("name", servedParty);
+                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                    populateLanguageMap(caseData, dynamicData);
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                             .sendEmailUsingTemplateWithAttachments(
+                                                                 authorization, emailAddress,
+                                                                 docs,
+                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                                 dynamicData,
+                                                                 servedParty
+                                                             )));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Document coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0),
+                                                                            PRL_LET_ENG_AP2);
+                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, applicantFl401.get(0),
+                                                    coverLetter, servedParty);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(respondentFl401)) {
+            String emailAddress = respondentFl401.get(0).getValue().getEmail();
+            String servedParty = respondentFl401.get(0).getValue().getLabelForDynamicList();
+            List<Document> docs = new ArrayList<>();
+            boolean sendEmail = true;
+            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
+                if (!ContactPreferences.email.equals(respondentFl401.get(0).getValue().getContactPreferences())) {
+                    sendEmail = false;
+                } else {
+                    if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                        docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
+                    } else {
+                        docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
+                    }
+                }
+            } else {
+                emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
+                servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
+
+            }
+            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
+            if (sendEmail) {
+                try {
+                    log.info(
+                        "Sending the email notification to applicant solicitor for fl401 Application for caseId {}",
+                        caseData.getId()
+                    );
+                    dynamicData.put("name", servedParty);
+                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                    populateLanguageMap(caseData, dynamicData);
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                             .sendEmailUsingTemplateWithAttachments(
+                                                                 authorization, emailAddress,
+                                                                 docs,
+                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                                 dynamicData,
+                                                                 servedParty
+                                                             )));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Document coverLetter;
+                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
+                                                                       PRL_LET_ENG_FL401_RE4);
+                } else {
+                    coverLetter = generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0),
+                                                                       PRL_LET_ENG_FL401_RE1);
+                }
+                sendPostWithAccessCodeLetterToParty(caseData, authorization, docs, bulkPrintDetails, applicantFl401.get(0),
+                                                    coverLetter, servedParty);
+            }
+
+        }
     }
 
     private void sendNotificationToOthers(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,
@@ -1718,6 +1845,12 @@ public class ServiceOfApplicationService {
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
             Collectors.toList());
+    }
+
+    private List<Element<PartyDetails>> getSelectedApplicantsOrRespondentsElements(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                   List<DynamicMultiselectListElement> value) {
+        return applicantsOrRespondents.stream().filter(element -> value.stream().anyMatch(party -> element.getId().toString().equals(
+            party.getCode()))).toList();
     }
 
     public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
@@ -2750,27 +2883,83 @@ public class ServiceOfApplicationService {
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                        CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                        caseData);
-        if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-            .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-            caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData,
+        if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
+            && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
+            caseDataUpdated.putAll(getPacksForConfidentialCheckDaNonPersonalService(authorization, caseData,
                                                                                     fl401StaticDocs));
-        } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
-            .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-            || SoaSolicitorServingRespondentsEnum.courtBailiff
+        } else {
+            if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
-            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization,
-                                                               caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString());
-        } else if (SoaCitizenServingRespondentsEnum.courtBailiff
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-            || SoaCitizenServingRespondentsEnum.courtAdmin
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-            getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization,
-                                                               caseData.getServiceOfApplication()
-                                                                   .getSoaCitizenServingRespondentsOptions().toString());
-        } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
-            generatePacksForConfidentialCheckDaApplicantLip(authorization, caseData, caseDataUpdated, fl401StaticDocs);
+                caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData,
+                                                                                        fl401StaticDocs));
+            } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
+                || SoaSolicitorServingRespondentsEnum.courtBailiff
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization,
+                                                                   caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString());
+            } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                || SoaCitizenServingRespondentsEnum.courtAdmin
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                getPacksForConfidentialCheckDaCourtAdminAndBailiff(caseData, caseDataUpdated, fl401StaticDocs, authorization,
+                                                                   caseData.getServiceOfApplication()
+                                                                       .getSoaCitizenServingRespondentsOptions().toString());
+            } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                generatePacksForConfidentialCheckDaApplicantLip(authorization, caseData, caseDataUpdated, fl401StaticDocs);
 
+            }
+        }
+
+        return caseDataUpdated;
+    }
+
+    private Map<String, Object> getPacksForConfidentialCheckDaNonPersonalService(String authorization, CaseData caseData,
+                                                                                 List<Document> fl401StaticDocs) {
+        log.info("serving Fl401 applicant legal representative with confidential check");
+        // Applicants pack
+        List<Element<PartyDetails>> applicantFl401 = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
+                                                                           caseData.getApplicantsFL401()));
+        List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
+                                                                            caseData.getRespondentsFL401()));
+
+        applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
+                                                                                                        .getSoaRecipientsOptions().getValue());
+        respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
+            .getSoaRecipientsOptions().getValue());
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(applicantFl401)) {
+            List<Document> docs = new ArrayList<>();
+            String partyId = String.valueOf(applicantFl401.get(0).getId());
+            if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
+                partyId = applicantFl401.get(0).getValue().getSolicitorEmail();
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
+            }
+            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, fl401StaticDocs));
+            final SoaPack unServedApplicantPack = SoaPack.builder()
+                .packDocument(wrapElements(docs))
+                .partyIds(wrapElements(partyId))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(DATE_CREATED)
+                .build();
+            caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
+        }
+        if (CollectionUtils.isNotEmpty(respondentFl401)) {
+            String partyId = String.valueOf(respondentFl401.get(0).getId());
+            List<Document> docs = new ArrayList<>();
+            if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
+                partyId = respondentFl401.get(0).getValue().getSolicitorEmail();
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_AP1));
+            }
+            final SoaPack unServedRespondentPack = SoaPack.builder()
+                .packDocument(wrapElements(docs))
+                .partyIds(wrapElements(partyId))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(DATE_CREATED)
+                .build();
+            caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
         }
         return caseDataUpdated;
     }
