@@ -50,6 +50,7 @@ spring:
       max-request-size: 30MB
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
 
 azure:
   application-insights:

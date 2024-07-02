@@ -48,6 +48,7 @@ spring:
     name: Prl cos api
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
