@@ -95,16 +95,24 @@ public class HelpWithFeesService {
                 List<Element<AdditionalApplicationsBundle>> additionalApplications
                     = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                     : new ArrayList<>();
-                List<DynamicListElement> listOfAdditionalApplications = new ArrayList<>();
+                List<DynamicListElement> additionalApplicationsWithHwf = new ArrayList<>();
 
-                additionalApplications.forEach(additionalApplication -> listOfAdditionalApplications
-                    .add(DynamicListElement
-                        .builder()
-                        .label(getApplicationWithinProceedingsType(additionalApplication))
-                        .build()));
+                additionalApplications.forEach(additionalApplication -> {
+                    if (null != additionalApplication.getValue().getPayment()
+                        && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()) {
+                        log.info("hwf reference exists");
+                        additionalApplicationsWithHwf
+                            .add(DynamicListElement
+                                .builder()
+                                .label(getApplicationWithinProceedingsType(additionalApplication))
+                                .build());
+                    }
+                });
 
-                DynamicList dynamicList = DynamicList.builder().listItems(listOfAdditionalApplications).build();
-                caseDataUpdated.put("hwfAppList", dynamicList);
+                if (!additionalApplicationsWithHwf.isEmpty()) {
+                    DynamicList dynamicList = DynamicList.builder().listItems(additionalApplicationsWithHwf).build();
+                    caseDataUpdated.put("hwfAppList", dynamicList);
+                }
             }
         }
 
