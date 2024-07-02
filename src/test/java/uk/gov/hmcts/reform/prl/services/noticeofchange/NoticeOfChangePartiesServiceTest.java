@@ -81,7 +81,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -354,7 +353,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -445,7 +443,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -520,7 +517,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -585,7 +581,6 @@ public class NoticeOfChangePartiesServiceTest {
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
 
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -662,7 +657,6 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),
@@ -738,7 +732,6 @@ public class NoticeOfChangePartiesServiceTest {
 
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            isNull(),
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(StartEventResponse.class),

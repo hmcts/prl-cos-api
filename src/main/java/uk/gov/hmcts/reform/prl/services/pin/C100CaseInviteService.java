@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +41,12 @@ public class C100CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendCaseInvite(CaseData caseData) {
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
-
+    public CaseData sendCaseInviteEmail(CaseData caseData) {
         log.info("Generating case invites and sending notification to applicants/respondents with email address present");
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!hasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                CaseInvite caseInvite = generateCaseInvite(respondent, No);
-                caseInvites.add(element(caseInvite));
-                sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+                sendCaseInvite(CaseUtils.getCaseInvite(respondent.getId(), caseData.getCaseInvites()), respondent.getValue(), caseData);
             }
         }
         //PRLC100-431 - Generate case invites & send notification to c100 applicants for case created/submitted by citizen
@@ -58,13 +55,11 @@ public class C100CaseInviteService implements CaseInviteService {
             log.info("Generating case invites and sending notification to citizen applicants with email");
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 if (!hasLegalRepresentation(applicant.getValue()) && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
-                    CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
-                    caseInvites.add(element(caseInvite));
-                    sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+                    sendCaseInvite(CaseUtils.getCaseInvite(applicant.getId(), caseData.getCaseInvites()), applicant.getValue(), caseData);
                 }
             }
         }
-        return caseData.toBuilder().caseInvites(caseInvites).build();
+        return caseData;
     }
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, Element<PartyDetails> partyDetails) {

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.handlers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -36,6 +35,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 
 @Slf4j
 @Component
@@ -60,7 +60,7 @@ public class NoticeOfChangeEventHandler {
         //Get LiP
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
         //PRL-3211 - notify LiP
-        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC, false, partyElement);
+        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC, false, partyElement, "");
 
         //PRL-3211 - notify applicants/respondents other parties except litigant
         sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false, partyElement);
@@ -148,7 +148,7 @@ public class NoticeOfChangeEventHandler {
                                      NoticeOfChangeEvent event,
                                      EmailTemplateNames emailTemplateName,
                                      boolean isRemoveLegalRep,
-                                     Element<PartyDetails> partyElement) {
+                                     Element<PartyDetails> partyElement, String accessCode) {
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
             if (null != partyDetails.getEmail()) {
@@ -159,7 +159,7 @@ public class NoticeOfChangeEventHandler {
                                                                        partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName(),
                                                                        false,
                                                                        isRemoveLegalRep,
-                                                                       event.getAccessCode()
+                                                                       accessCode
                     ),
                     LanguagePreference.getPreferenceLanguage(caseData)
                 );
@@ -225,14 +225,14 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
         //Access code will not generate if the case has not reached to Hearing state yet
-        if (StringUtils.isNotEmpty(event.getAccessCode())
-            && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
+        //Shashi to check with alok on what ocassions the accesscodes to be NOT SENT
+        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
             //PRL-5300 - send email/post to LiP based on contact pref
             sendNotificationToLitigant(caseData, event, partyElement);
 
-            //PRL-3215 - notify applicants/respondents other parties except litigant
+            //PRL-3215 - notify applicants/respondents other parties for the litigants in case
             sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true, partyElement);
         }
 
@@ -250,6 +250,7 @@ public class NoticeOfChangeEventHandler {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
             log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
+            String accessCode = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites()).getAccessCode();
             if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
@@ -257,12 +258,16 @@ public class NoticeOfChangeEventHandler {
                                     event,
                                     EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,
                                     true,
-                                    party);
+                                    party,
+                                    accessCode
+                );
             } else {
                 log.info("Send post to LiP via bulk print");
                 sendPostViaBulkprint(caseData,
                                      party,
-                                     event);
+                                     event,
+                                     accessCode
+                );
             }
 
         }
@@ -270,14 +275,14 @@ public class NoticeOfChangeEventHandler {
 
     private void sendPostViaBulkprint(CaseData caseData,
                                       Element<PartyDetails> party,
-                                      NoticeOfChangeEvent event) {
+                                      NoticeOfChangeEvent event, String accessCode) {
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
             List<Document> documents = new ArrayList<>();
             //generate cover sheets & add to documents
             generateCoverSheets(caseData, party.getValue(), documents);
             //generate cover letter with access code & add to documents
-            generateCoverLetter(caseData, party, event, documents);
+            generateCoverLetter(caseData, party, event, documents, accessCode);
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
@@ -316,12 +321,12 @@ public class NoticeOfChangeEventHandler {
     private void generateCoverLetter(CaseData caseData,
                                      Element<PartyDetails> party,
                                      NoticeOfChangeEvent event,
-                                     List<Document> documents) {
+                                     List<Document> documents, String accessCode) {
         Document coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
             systemUserService.getSysUserToken(),
             caseData,
             party,
-            CaseInvite.builder().accessCode(event.getAccessCode()).build(),
+            CaseInvite.builder().accessCode(accessCode).build(),
             PRL_LEGAL_REP_COVER_LETTER_TEMPLATE
             );
         if (isNotEmpty(coverLetterWithAccessCode)) {
