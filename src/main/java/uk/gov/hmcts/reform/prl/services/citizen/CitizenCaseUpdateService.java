@@ -43,7 +43,6 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -152,7 +151,6 @@ public class CitizenCaseUpdateService {
                 .firstName(userDetails.getForename())
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
-                .role(CITIZEN_ROLE)
                 .build();
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
@@ -162,7 +160,6 @@ public class CitizenCaseUpdateService {
 
         CaseData caseDataToSubmit = citizenPartyDetailsMapper
                 .buildUpdatedCaseData(dbCaseData, citizenUpdatedCaseData.getC100RebuildData());
-
         Map<String, Object> caseDataMapToBeUpdated = objectMapper.convertValue(caseDataToSubmit, Map.class);
         caseDataToSubmit = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseDataToSubmit, caseDataMapToBeUpdated);
 
