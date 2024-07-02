@@ -45,7 +45,7 @@ public class OrderDetails {
     private final String adminNotes;
     private final ServeOrderDetails serveOrderDetails;
     @JsonProperty("manageOrderHearingDetails")
-    private final List<Element<HearingData>> manageOrderHearingDetails;
+    private List<Element<HearingData>> manageOrderHearingDetails;
     //PRL-3254 - Added for storing selected hearing dropdown
     private String selectedHearingType;
 
@@ -65,6 +65,8 @@ public class OrderDetails {
     private final DynamicMultiSelectList childOption;
     @JsonProperty("isOrderUploaded")
     private final YesOrNo isOrderUploaded;
+
+    private YesOrNo isAutoHearingReqPending;
 
     //PRL-4225 - serve order & additional docs to other person
     @JsonProperty("bulkPrintOrderDetails")
