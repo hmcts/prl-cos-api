@@ -763,6 +763,7 @@ public class CaseServiceTest {
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
                 List.of(element(Document.builder().documentBinaryUrl(
                     "abc").documentFileName("ddd").build()))).build()).build())

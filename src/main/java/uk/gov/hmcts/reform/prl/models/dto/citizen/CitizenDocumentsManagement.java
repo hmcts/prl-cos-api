@@ -32,28 +32,18 @@ public class CitizenDocumentsManagement {
 
     public static final List<String> unReturnedCategoriesForUI =
         List.of(
-            "safeguardingLetter",
             "section37Report",
-            "section7Report",
             "16aRiskAssessment",
-            "guardianReport",
-            "specialGuardianshipReport",
-            "otherDocs",
             "sec37Report",
-            "localAuthorityOtherDoc",
-            "emailsToCourtToRequestHearingsAdjourned",
             "publicFundingCertificates",
             "noticesOfActingDischarge",
             "requestForFASFormsToBeChanged",
-            "witnessAvailability",
             "lettersOfComplaint",
             "SPIPReferralRequests",
             "homeOfficeDWPResponses",
             "internalCorrespondence",
             "importantInfoAboutAddressAndContact",
-            "privacyNotice",
             "specialMeasures",
-            "anyOtherDoc",
             "noticeOfHearing",
             "caseSummary"
         );
