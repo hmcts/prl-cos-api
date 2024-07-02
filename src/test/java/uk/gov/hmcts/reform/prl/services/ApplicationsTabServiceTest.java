@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPolicyUpgradeChildProtectionConcernEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -73,7 +73,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -101,6 +100,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -113,10 +113,12 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
@@ -135,6 +137,9 @@ public class ApplicationsTabServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Mock
+    MiamPolicyUpgradeService miamPolicyUpgradeService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -349,7 +354,6 @@ public class ApplicationsTabServiceTest {
             .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
@@ -374,7 +378,6 @@ public class ApplicationsTabServiceTest {
             .gender("Male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .email("test@test.com")
             .build();
         CaseData caseData = CaseData.builder()
@@ -415,7 +418,6 @@ public class ApplicationsTabServiceTest {
             .gender(Gender.male.getDisplayedValue())
             .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
             .isAddressConfidential(YesOrNo.Yes)
-            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .email(THIS_INFORMATION_IS_CONFIDENTIAL)
@@ -614,6 +616,144 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseData));
     }
 
+    @Test
+    public void testUpdateTabWithTaskListV3() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+            .isAddressConfidential(Yes)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .isPhoneNumberConfidential(Yes)
+            .build();
+
+        Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(applicantElement);
+
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+            .newOrdersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(orderRevised)
+            .newOrdersOccupation(YesOrNo.Yes)
+            .occupationOrder(orderRevised)
+            .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageProtectionOrder(orderRevised)
+            .newOrdersRestraining(YesOrNo.Yes)
+            .restrainingOrder(orderRevised)
+            .newOrdersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(orderRevised)
+            .newOrdersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(orderRevised)
+            .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+            .newAbductionChildHasPassport(Yes).build();
+
+        CaseData caseData = caseDataWithParties.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().build())
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
+            .othersToNotify(applicantList)
+            .applicants(applicantList)
+            .respondents(applicantList)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
+            .thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+            .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+            .thenReturn(revisedChildAbductionDetails);
+
+        assertNotNull(applicationsTabService.updateTab(caseData));
+    }
+
+    @Test
+    public void testUpdateTabWithTaskListV3WithDetails() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+            .isAddressConfidential(Yes)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .isPhoneNumberConfidential(Yes)
+            .build();
+
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+            .newOrdersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(orderRevised)
+            .newOrdersOccupation(YesOrNo.Yes)
+            .occupationOrder(orderRevised)
+            .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageProtectionOrder(orderRevised)
+            .newOrdersRestraining(YesOrNo.Yes)
+            .restrainingOrder(orderRevised)
+            .newOrdersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(orderRevised)
+            .newOrdersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(orderRevised)
+            .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+            .newAbductionChildHasPassport(Yes).build();
+
+        Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(applicantElement);
+
+        List<uk.gov.hmcts.reform.prl.enums
+            .miampolicyupgrade.MiamExemptionsChecklistEnum> miamExemptionsChecklistEnums = new ArrayList<>();
+        List<uk.gov.hmcts.reform.prl.enums
+            .miampolicyupgrade.MiamDomesticAbuseChecklistEnum> miamExemptionsDomesticChecklistEnums = new ArrayList<>();
+        CaseData caseData = caseDataWithParties.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails
+                .builder()
+                .mpuExemptionReasons(miamExemptionsChecklistEnums)
+                .mpuDomesticAbuseEvidences(miamExemptionsDomesticChecklistEnums)
+                .mpuUrgencyReason(uk.gov.hmcts.reform.prl.enums.miampolicyupgrade
+                    .MiamUrgencyReasonChecklistEnum.miamPolicyUpgradeUrgencyReason_Value_1)
+                .mpuPreviousMiamAttendanceReason(uk.gov.hmcts.reform.prl.enums
+                    .miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1)
+                .mpuOtherExemptionReasons(uk.gov.hmcts.reform.prl.enums
+                    .miampolicyupgrade.MiamOtherGroundsChecklistEnum.miamPolicyUpgradeOtherGrounds_Value_1)
+                .mpuChildProtectionConcernReason(MiamPolicyUpgradeChildProtectionConcernEnum.mpuChildProtectionConcern_value_1)
+                .build())
+            .othersToNotify(applicantList)
+            .applicants(applicantList)
+            .respondents(applicantList)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(CaseData.class), anyMap()))
+            .thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+            .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+            .thenReturn(revisedChildAbductionDetails);
+
+        assertNotNull(applicationsTabService.updateTab(caseData));
+
+    }
+
     private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {
         OtherPersonWhoLivesWithChild confidentilPerson1 = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
@@ -633,7 +773,6 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    @Ignore("Ignoring temporarily")
     public void testRespondentTableMapper() {
         Respondent respondent = Respondent.builder()
             .firstName("First name")
@@ -1190,7 +1329,6 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    //@Ignore("Ignoring temporarily")
     public void testGetFl401RespondentTable() {
 
         partyDetails = PartyDetails.builder()
@@ -1220,20 +1358,7 @@ public class ApplicationsTabServiceTest {
                                               "isAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL
         );
-
-
-        FL401Respondent expectedRespondent = FL401Respondent.builder()
-            .firstName("testUser")
-            .lastName("last test")
-            .solicitorEmail("testing@courtadmin.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(FL401Respondent.class))).thenReturn(expectedRespondent);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
-
-        //when(applicationsTabService.maskFl401ConfidentialDetails(caseDataWithParties.getRespondentsFL401())).thenReturn(partyDetails);
-        //when(objectMapper.convertValue(partyDetails, FL401Respondent.class)).thenReturn(expectedRespondent);
-
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);
     }
@@ -1667,30 +1792,6 @@ public class ApplicationsTabServiceTest {
             .thenReturn(Respondent.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocC100Respondent() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .build();
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocFL401Respondent() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("FL401")
-            .build();
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocNegativeScenario() {
-        CaseData caseData =  CaseData.builder()
-            .caseTypeOfApplication("FL400")
-            .build();
-        assertEquals(0,applicationsTabService.updateCitizenPartiesTab(caseData).size());
     }
 
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {

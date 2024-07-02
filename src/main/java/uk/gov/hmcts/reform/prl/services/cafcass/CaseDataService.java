@@ -3,24 +3,32 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -90,6 +98,7 @@ public class CaseDataService {
                 ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.registerModule(new ParameterNamesModule());
                 objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
@@ -132,53 +141,34 @@ public class CaseDataService {
 
     private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
         Map<String, Address> orgIdToAddressMap = new HashMap<>();
+        List<String> orgIdListForAllCases = new ArrayList<>();
         filteredCafcassData.getCases().stream().forEach(
             caseDetail -> {
                 CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
-                List<String> orgIdList = cafCassCaseData.getApplicants().stream()
+                orgIdListForAllCases.addAll(cafCassCaseData.getApplicants().stream()
                     .filter(party -> party.getValue().getSolicitorOrg() != null)
                     .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                    .collect(Collectors.toList());
-                orgIdList.addAll(cafCassCaseData.getRespondents().stream()
-                                     .filter(party -> party.getValue().getSolicitorOrg() != null)
-                                     .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                                     .toList());
-                orgIdList.stream().distinct()
-                    .forEach(orgId ->
-                                 orgIdToAddressMap.put(
-                                     orgId,
-                                     organisationService.getOrganisationDetails(
-                                             systemUserService.getSysUserToken(),
-                                             orgId
-                                         )
-                                         .getContactInformation().get(0).toAddress()
-                                 ));
-
-                cafCassCaseData = cafCassCaseData.toBuilder()
-                    .applicants(cafCassCaseData.getApplicants().stream()
-                                    .map(updatedParty -> {
-                                        if (updatedParty.getValue().getSolicitorOrg() == null) {
-                                            return updatedParty;
-                                        }
-                                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
-                                        return Element.<ApplicantDetails>builder().id(updatedParty.getId())
-                                            .value(updatedParty.getValue().toBuilder()
-                                                       .solicitorAddress(
-                                                           uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
-                                                               .addressLine1(address.getAddressLine1())
-                                                               .addressLine2(address.getAddressLine2())
-                                                               .addressLine3(address.getAddressLine3())
-                                                               .county(address.getCounty())
-                                                               .country(address.getCountry())
-                                                               .postTown(address.getPostTown())
-                                                               .postCode(address.getPostCode())
-                                                               .build()
-                                                       )
-                                                       .build()).build();
-                                    })
-                                    .toList()).build();
+                    .collect(Collectors.toList()));
+                orgIdListForAllCases.addAll(cafCassCaseData.getRespondents().stream()
+                                                   .filter(party -> party.getValue().getSolicitorOrg() != null)
+                                                   .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
+                                                   .toList());
+            });
+        orgIdListForAllCases.stream().distinct()
+            .forEach(orgId ->
+                         orgIdToAddressMap.put(
+                             orgId,
+                             organisationService.getOrganisationDetails(
+                                     systemUserService.getSysUserToken(),
+                                     orgId
+                                 )
+                                 .getContactInformation().get(0).toAddress()
+                         ));
 
 
+        filteredCafcassData.getCases().stream().forEach(
+            caseDetail -> {
+                CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
                 cafCassCaseData = cafCassCaseData.toBuilder()
                     .respondents(cafCassCaseData.getRespondents().stream()
                                      .map(updatedParty -> {
@@ -189,7 +179,8 @@ public class CaseDataService {
                                          return Element.<ApplicantDetails>builder().id(updatedParty.getId())
                                              .value(updatedParty.getValue().toBuilder()
                                                         .solicitorAddress(
-                                                            uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                                            address != null
+                                                                ? uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
                                                                 .addressLine1(address.getAddressLine1())
                                                                 .addressLine2(address.getAddressLine2())
                                                                 .addressLine3(address.getAddressLine3())
@@ -197,15 +188,14 @@ public class CaseDataService {
                                                                 .country(address.getCountry())
                                                                 .postTown(address.getPostTown())
                                                                 .postCode(address.getPostCode())
-                                                                .build()
+                                                                .build() : null
                                                         )
                                                         .build()).build();
                                      })
                                      .toList()).build();
                 caseDetail.setCaseData(cafCassCaseData);
-            }
+            });
 
-        );
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
@@ -269,6 +259,8 @@ public class CaseDataService {
                         caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                     );
                     caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
+                    caseDetails.getCaseData().setOtherDocuments(updateOtherDocuments(caseDetails.getCaseData()));
+                    caseDetails.getCaseData().setCafcassUploadedDocs(null);
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }
@@ -280,6 +272,29 @@ public class CaseDataService {
 
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
         return filteredCafcassResponse;
+    }
+
+    private List<Element<OtherDocuments>> updateOtherDocuments(CafCassCaseData caseData) {
+        List<Element<OtherDocuments>> otherDocsList = CollectionUtils.isNotEmpty(caseData.getOtherDocuments())
+            ? caseData.getOtherDocuments() : new ArrayList<>();
+        final @NotNull @Valid UploadedDocuments[] uploadedDocs = new UploadedDocuments[1];
+        if (caseData.getCafcassUploadedDocs() != null) {
+            caseData.getCafcassUploadedDocs().stream().forEach(
+                uploadedDocumentsElement -> {
+                    uploadedDocs[0] = uploadedDocumentsElement.getValue();
+                    otherDocsList.add(Element.<OtherDocuments>builder()
+                                          .id(uploadedDocumentsElement.getId())
+                                          .value(OtherDocuments.builder()
+                                                     .documentOther(Document.buildFromPrlDocument(uploadedDocs[0].getCafcassDocument()))
+                                                     .documentName(uploadedDocs[0].getCafcassDocument().getDocumentFileName())
+                                                     .documentTypeOther(DocTypeOtherDocumentsEnum.cafcassReports)
+                                                     .build())
+                                          .build());
+                }
+            );
+
+        }
+        return otherDocsList;
     }
 
     private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
