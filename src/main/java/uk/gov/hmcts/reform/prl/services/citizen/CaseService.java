@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenNotification;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -60,6 +62,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +72,14 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_FROM_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -88,10 +98,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
+import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.otherDocumentsCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.ENGLISH;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.WELSH;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -399,9 +413,14 @@ public class CaseService {
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
 
-        CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()
-            .citizenDocuments(getCitizenDocuments(userDetails, caseData))
-            .citizenOrders(getCitizenOrders(userDetails, caseData))
+        List<CitizenDocuments> otherDocuments = new ArrayList<>();
+        //Retrieve citizen documents with other docs segregated
+        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments);
+
+        CitizenDocumentsManagement citizenDocumentsManagement = getCitizenPartySpecificDocuments(citizenDocuments, otherDocuments);
+
+        citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
+            .citizenOrders(getCitizenOrders(userDetails, caseData, citizenDocuments))
             .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
             .build();
 
@@ -586,19 +605,53 @@ public class CaseService {
         return citizenDocuments[0];
     }
 
+    private CitizenDocumentsManagement getCitizenPartySpecificDocuments(List<CitizenDocuments> citizenDocuments,
+                                                                        List<CitizenDocuments> otherDocuments) {
+        List<CitizenDocuments> applicantDocuments = new ArrayList<>();
+        List<CitizenDocuments> respondentDocuments = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(citizenDocuments)) {
+            citizenDocuments.forEach(citizenDoc -> {
+                if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                    applicantDocuments.add(citizenDoc);
+                } else if (SERVED_PARTY_RESPONDENT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                    respondentDocuments.add(citizenDoc);
+                } else {
+                    otherDocuments.add(citizenDoc);
+                }
+            });
+        }
+
+        //Sort documents based on uploaded date
+        applicantDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+        respondentDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+
+        return CitizenDocumentsManagement.builder()
+            .applicantDocuments(applicantDocuments)
+            .respondentDocuments(respondentDocuments)
+            .otherDocuments(otherDocuments.stream()
+                                .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
+                                .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
+                                .toList())
+            .build();
+    }
+
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
-                                                       CaseData caseData) {
+                                                       CaseData caseData,
+                                                       List<CitizenDocuments> otherDocuments) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
             //add solicitor uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
-            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()));
+            //add bulk scan uploaded docs
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getBulkScannedDocListDocTab()));
 
             citizenDocuments = citizenDocuments.stream().filter(citizenDocuments1 -> !unReturnedCategoriesForUI.contains(
                     citizenDocuments1.getCategoryId()))
@@ -624,7 +677,22 @@ public class CaseService {
             ));
         }
 
-        citizenDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+        //C100 & FL401 application final document
+        citizenDocuments.addAll(getAllSystemGeneratedDocuments(caseData));
+
+        //Applicant & respondent orders from previous proceedings documents
+        citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
+
+        //Applications within proceedings
+        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
+
+        //C9/FL415 - Statement of service documents
+        otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
+
+
+        otherDocuments.addAll(citizenDocuments.stream()
+                                  .filter(citDoc -> otherDocumentsCategoriesForUI.contains(citDoc.getCategoryId()))
+                                  .toList());
 
         return citizenDocuments;
     }
@@ -674,15 +742,22 @@ public class CaseService {
             .build();
     }
 
-    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails, CaseData caseData) {
-        List<CitizenDocuments> citizenDocuments = new ArrayList<>();
+    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails,
+                                                    CaseData caseData,
+                                                    List<CitizenDocuments> citizenDocuments) {
+        List<CitizenDocuments> citizenOrders = new ArrayList<>();
         HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
         if (!partyIdAndType.isEmpty()) {
-            citizenDocuments.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
+            citizenOrders.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
-        return citizenDocuments;
+        //Transcripts of judgements
+        citizenOrders.addAll(citizenDocuments.stream()
+                                 .filter(citDoc -> TRANSCRIPTS_OF_JUDGEMENTS.equals(citDoc.getCategoryId()))
+                                 .toList());
+
+        return citizenOrders;
     }
 
     private List<CitizenDocuments> getCitizenOrdersForParty(CaseData caseData,
@@ -838,5 +913,223 @@ public class CaseService {
         return nullSafeCollection(citizenDocuments).stream()
             .anyMatch(citizenDocument -> FM5_STATEMENTS.equals(citizenDocument.getCategoryId())
                 && citizenDocument.getPartyId().equals(userDetails.getId()));
+    }
+
+    private List<CitizenDocuments> getAllSystemGeneratedDocuments(CaseData caseData) {
+        List<CitizenDocuments> systemGenDocuments = new ArrayList<>();
+        //C100/FL401 final English document
+        if (null != caseData.getFinalDocument()) {
+            CitizenDocuments finalDocumentEng = getSystemGeneratedDocument(caseData.getFinalDocument(),
+                                                                           APPLICANT_APPLICATION,
+                                                                           caseData.getDateSubmitted(),
+                                                                           false);
+            systemGenDocuments.add(finalDocumentEng);
+        }
+        //C100/FL401 final Welsh document
+        if (null != caseData.getFinalWelshDocument()) {
+            CitizenDocuments finalDocumentWel = getSystemGeneratedDocument(caseData.getFinalWelshDocument(),
+                                                                           APPLICANT_APPLICATION,
+                                                                           caseData.getDateSubmitted(),
+                                                                           true);
+            systemGenDocuments.add(finalDocumentWel);
+        }
+
+        //C1A English
+        if (null != caseData.getC1ADocument()) {
+            CitizenDocuments c1ADocumentEng = getSystemGeneratedDocument(caseData.getC1ADocument(),
+                                                                         APPLICANT_C1A_APPLICATION,
+                                                                         caseData.getDateSubmitted(),
+                                                                         false);
+            systemGenDocuments.add(c1ADocumentEng);
+        }
+        //C1A Welsh
+        if (null != caseData.getC1AWelshDocument()) {
+            CitizenDocuments c1ADocumentWel = getSystemGeneratedDocument(caseData.getC1AWelshDocument(),
+                                                                         APPLICANT_C1A_APPLICATION,
+                                                                         caseData.getDateSubmitted(),
+                                                                         true);
+            systemGenDocuments.add(c1ADocumentWel);
+        }
+
+        return systemGenDocuments;
+    }
+
+    private CitizenDocuments getSystemGeneratedDocument(Document document,
+                                                        String categoryId,
+                                                        String submittedDate,
+                                                        boolean isWelsh) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+        return CitizenDocuments.builder()
+            .partyId(TEST_UUID) //system generated docs
+            .partyType(SERVED_PARTY_APPLICANT)
+            .categoryId(categoryId)
+            .document(isWelsh ? null : document)
+            .documentWelsh(isWelsh ? document : null)
+            .uploadedDate(LocalDateTime.parse(submittedDate, formatter))
+            .documentLanguage(isWelsh ? WELSH : ENGLISH)
+            .build();
+    }
+
+    private List<CitizenDocuments> getAllOrdersFromPreviousProceedings(CaseData caseData) {
+        List<CitizenDocuments> ordersFromPreviousProceedings = new ArrayList<>();
+        //C100 case
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            //Applicant
+            if (CollectionUtils.isNotEmpty(caseData.getExistingProceedings())) {
+                ordersFromPreviousProceedings.addAll(caseData.getExistingProceedings().stream()
+                                                         .map(Element::getValue)
+                                                         .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
+                                                                                                         proceeding.getUploadRelevantOrder(),
+                                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                                         SERVED_PARTY_APPLICANT))
+                                                         .toList());
+            }
+
+            //Respondent
+            ordersFromPreviousProceedings.addAll(caseData.getRespondents().stream()
+                                                     .map(Element::getValue)
+                                                     .filter(party -> null != party.getResponse()
+                                                         && CollectionUtils.isNotEmpty(party.getResponse().getRespondentExistingProceedings()))
+                                                     .map(party -> party.getResponse().getRespondentExistingProceedings().stream()
+                                                         .map(Element::getValue)
+                                                         .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
+                                                                                                         proceeding.getUploadRelevantOrder(),
+                                                                                                         ORDERS_FROM_OTHER_PROCEEDINGS,
+                                                                                                         SERVED_PARTY_RESPONDENT))
+                                                         .toList()
+                                                     ).flatMap(Collection::stream)
+                                                     .toList());
+        }
+
+        //FL401 case
+        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            //Applicant
+            if (null != caseData.getFl401OtherProceedingDetails()
+                && CollectionUtils.isNotEmpty(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings())) {
+                ordersFromPreviousProceedings.addAll(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
+                                                         .map(Element::getValue)
+                                                         .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
+                                                                                                         proceeding.getUploadRelevantOrder(),
+                                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                                         SERVED_PARTY_APPLICANT))
+                                                         .toList());
+            }
+
+            //Respondent
+            if (null != caseData.getRespondentsFL401().getResponse()
+                && CollectionUtils.isNotEmpty(caseData.getRespondentsFL401().getResponse().getRespondentExistingProceedings())) {
+                ordersFromPreviousProceedings.addAll(caseData.getRespondentsFL401().getResponse().getRespondentExistingProceedings().stream()
+                                                         .map(Element::getValue)
+                                                         .filter(proceeding -> null != proceeding.getUploadRelevantOrder())
+                                                         .map(proceeding -> getOrdersFromPrevProceedings(caseData,
+                                                                                                         proceeding.getUploadRelevantOrder(),
+                                                                                                         ORDERS_FROM_OTHER_PROCEEDINGS,
+                                                                                                         SERVED_PARTY_RESPONDENT))
+                                                         .toList());
+            }
+        }
+
+        return ordersFromPreviousProceedings;
+    }
+
+    private CitizenDocuments getOrdersFromPrevProceedings(CaseData caseData,
+                                                          Document document,
+                                                          String categoryId,
+                                                          String partyType) {
+        String partyId = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            ? caseData.getApplicantsFL401().getPartyId().toString()
+            : caseData.getApplicants().get(0).getId().toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+        return CitizenDocuments.builder()
+            .partyId(partyId)
+            .partyType(partyType)
+            .categoryId(categoryId)
+            .document(document)
+            .uploadedDate(LocalDateTime.parse(caseData.getDateSubmitted(), formatter))
+            .build();
+    }
+
+    private List<CitizenDocuments> getAllApplicationWithinProceedingsDocuments(CaseData caseData) {
+        List<CitizenDocuments> applicationsWithinProceedings = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
+            caseData.getAdditionalApplicationsBundle().stream()
+                .map(Element::getValue)
+                .forEach(awp -> {
+                    //C2 bundle docs
+                    if (null != awp.getC2DocumentBundle()
+                        && CollectionUtils.isNotEmpty(awp.getC2DocumentBundle().getFinalDocument())) {
+                        applicationsWithinProceedings.addAll(getAwpDocuments(
+                            awp,
+                            awp.getC2DocumentBundle().getFinalDocument()
+                        ));
+                    }
+
+                    //Other bundle docs
+                    if (null != awp.getOtherApplicationsBundle()
+                        && CollectionUtils.isNotEmpty(awp.getOtherApplicationsBundle().getFinalDocument())) {
+                        applicationsWithinProceedings.addAll(getAwpDocuments(
+                            awp,
+                            awp.getOtherApplicationsBundle().getFinalDocument()
+                        ));
+                    }
+
+                    //NEED SUPPORTING DOCUMENTS ?
+                });
+        }
+        return applicationsWithinProceedings;
+    }
+
+    private List<CitizenDocuments> getAwpDocuments(AdditionalApplicationsBundle awp,
+                                                   List<Element<Document>> documents) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+
+        return documents.stream()
+            .map(Element::getValue)
+            .map(document ->
+                     CitizenDocuments.builder()
+                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
+                         .partyType(awp.getPartyType().getDisplayedValue())
+                         .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
+                                         ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
+                         .document(document)
+                         .uploadedDate(LocalDateTime.parse(awp.getUploadedDateTime(), formatter))
+                         .build()
+            ).toList();
+    }
+
+    private Collection<? extends CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
+        List<CitizenDocuments> statementOfServiceDocuments = new ArrayList<>();
+        if (null != caseData.getStatementOfService()) {
+            //SOS for SOA
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                statementOfServiceDocuments.addAll(
+                    getStatementOfServiceDocuments(caseData.getStatementOfService().getStmtOfServiceForApplication()));
+            }
+
+            //SOS for orders
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+                statementOfServiceDocuments.addAll(
+                    getStatementOfServiceDocuments(caseData.getStatementOfService().getStmtOfServiceForOrder()));
+            }
+            //ADD CITIZEN SOS
+        }
+        return statementOfServiceDocuments;
+    }
+
+    private List<CitizenDocuments> getStatementOfServiceDocuments(List<Element<StmtOfServiceAddRecipient>> sosDocuments) {
+        return sosDocuments.stream()
+            .map(Element::getValue)
+            .filter(sos -> null != sos.getStmtOfServiceDocument())
+            .map(sos ->
+                     CitizenDocuments.builder()
+                         //.categoryId() What should be category for these?
+                         .document(sos.getStmtOfServiceDocument())
+                         .uploadedDate(sos.getServedDateTimeOption())
+                         .build()
+            ).toList();
     }
 }
