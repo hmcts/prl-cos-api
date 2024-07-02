@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -59,8 +60,8 @@ public class HelpWithFeesService {
                       .confirmationBody(CONFIRMATION_BODY).build());
     }
 
-    public Map<String, Object> setCaseStatus() {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+    public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseStatus", CaseStatus.builder()
             .state(SUBMITTED_PAID.getLabel())
             .build());

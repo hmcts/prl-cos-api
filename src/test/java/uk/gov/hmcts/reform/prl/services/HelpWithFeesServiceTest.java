@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,10 +84,12 @@ public class HelpWithFeesServiceTest {
 
         caseDetails = caseDetails.toBuilder()
             .state(State.SUBMITTED_PAID.getLabel())
+            .data(new HashMap<>())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        Map<String, Object> response = helpWithFeesService.setCaseStatus();
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
         assertNotNull(response);
         CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
         assertEquals("Submitted", caseStatus.getState());
