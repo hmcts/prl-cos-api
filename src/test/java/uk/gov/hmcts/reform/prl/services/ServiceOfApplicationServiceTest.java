@@ -63,7 +63,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -4104,53 +4103,6 @@ public class ServiceOfApplicationServiceTest {
             authorization,
             callBackRequest
         );
-        assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
-    }
-
-    @Test
-    public void testHandleSoaSubmittedForNonConfidentialC100Case() {
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .applicantCaseName("Test Case 45678")
-            .applicants(List.of(element(PartyDetails.builder().isAccessCodeNeeded(No).build())))
-            .respondents(parties)
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.courtBailiff)
-                                      .build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .userInfo(List.of(element(UserInfo.builder().idamId("123").emailAddress("abc@test.com").build())))
-            .build();
-        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(dataMap)
-            .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
-
-
-        when(CaseUtils.getCaseData(
-            caseDetails,
-            objectMapper
-        )).thenReturn(caseData);
-        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        dataMap, caseData, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 

@@ -141,6 +141,7 @@ import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PER
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -1340,8 +1341,9 @@ public class ServiceOfApplicationService {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
 
             applicants.stream()
-                .filter(party -> No.equals(party.getValue().getIsAccessCodeNeeded())
-                    && !hasDashboardAccess(party))
+                .filter(party -> !hasLegalRepresentation(party.getValue())
+                    && !hasDashboardAccess(party)
+                    && isPartyEmailSameAsIdamEmail(caseData, party))
                 .findFirst()
                 .ifPresent(party -> {
                     log.info(
@@ -1363,6 +1365,14 @@ public class ServiceOfApplicationService {
                     caseDataMap.put(APPLICANTS, applicants);
                 });
         }
+    }
+
+    private boolean isPartyEmailSameAsIdamEmail(CaseData caseData,
+                                                Element<PartyDetails> party) {
+        return CollectionUtils.isNotEmpty(caseData.getUserInfo())
+            && isNotEmpty(party.getValue().getEmail())
+            && party.getValue().getEmail().equalsIgnoreCase(
+                caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, CallbackRequest callbackRequest,
@@ -2444,10 +2454,7 @@ public class ServiceOfApplicationService {
             caseInvites =  new ArrayList<>();
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Element<CaseInvite>> finalCaseInvites = caseInvites;
-                //PRL-3466
-                caseData.getApplicants().stream()
-                    .filter(party -> Yes.equals(party.getValue().getIsAccessCodeNeeded()))
-                    .forEach(party -> finalCaseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, Yes))));
+                caseData.getApplicants().forEach(party -> finalCaseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, Yes))));
                 caseData.getRespondents().forEach(party -> finalCaseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, No))));
                 return finalCaseInvites;
             } else {
