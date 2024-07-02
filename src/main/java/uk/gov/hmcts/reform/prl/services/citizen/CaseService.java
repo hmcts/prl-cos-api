@@ -1045,7 +1045,7 @@ public class CaseService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
         return CitizenDocuments.builder()
             .partyId(partyId)
-            .partyType(partyType) //CHECK & REMOVE IF NOT NEEDED
+            .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
             .uploadedDate(LocalDateTime.parse(caseData.getDateSubmitted(), formatter))
@@ -1104,7 +1104,6 @@ public class CaseService {
     private Collection<? extends CitizenDocuments> getAllStatementOfServiceDocuments(CaseData caseData) {
         List<CitizenDocuments> statementOfServiceDocuments = new ArrayList<>();
         if (null != caseData.getStatementOfService()) {
-            //TODO - PENDING TO ADD CITIZEN SOS
             //SOS for SOA
             if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
                 statementOfServiceDocuments.addAll(
@@ -1116,6 +1115,7 @@ public class CaseService {
                 statementOfServiceDocuments.addAll(
                     getStatementOfServiceDocuments(caseData.getStatementOfService().getStmtOfServiceForOrder()));
             }
+            //ADD CITIZEN SOS
         }
         return statementOfServiceDocuments;
     }
