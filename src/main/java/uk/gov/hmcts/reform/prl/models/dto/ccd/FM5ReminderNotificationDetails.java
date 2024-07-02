@@ -22,6 +22,5 @@ public class FM5ReminderNotificationDetails {
     /**
      * Process urgent help with fees.
      */
-    @JsonUnwrapped
     private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
 }

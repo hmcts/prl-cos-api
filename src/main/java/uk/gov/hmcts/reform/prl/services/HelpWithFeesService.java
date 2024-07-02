@@ -79,7 +79,6 @@ public class HelpWithFeesService {
 
         if (null != caseData) {
             if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
-                log.info("Checking for c100 applications");
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
                     CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
                 caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
@@ -92,7 +91,6 @@ public class HelpWithFeesService {
                     .label(dynamicElement).build())).build());
                 caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             } else {
-                log.info("No longer checking for c100 applications");
                 List<Element<AdditionalApplicationsBundle>> additionalApplications
                     = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                     : new ArrayList<>();
