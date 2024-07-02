@@ -202,11 +202,6 @@ public class C100AwpProcessHwfPaymentService {
                 .build(),
             Should.builder()
                 .match(Match.builder()
-                           .caseCreatedBy("CITIZEN")
-                           .build())
-                .build(),
-            Should.builder()
-                .match(Match.builder()
                            .c100HwfRequestedForAdditionalApplications("Yes")
                            .build())
                 .build()

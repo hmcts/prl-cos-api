@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -128,7 +127,6 @@ public class C100AwpProcessHwfPaymentServiceTest {
 
         caseData = CaseData.builder()
             .id(123L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
 
