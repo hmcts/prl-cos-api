@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
@@ -376,4 +377,13 @@ public class PaymentRequestService {
                            .paymentReqRef(paymentResponse.getPaymentReference())
                            .build());
     }
+
+    public ServiceRequestReferenceStatusResponse fetchServiceRequestReferenceStatus(String authorization,
+                                                                                    String serviceRequestReference) {
+        return paymentApi
+            .fetchPaymentGroupReferenceStatus(authorization, authTokenGenerator.generate(),
+                                              serviceRequestReference
+            );
+    }
+
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -51,6 +52,7 @@ public class CitizenAwpMapper {
                         CitizenAwpRequest citizenAwpRequest) {
         log.info("Mapping AWP citizen to solicitor");
 
+
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .author(citizenAwpRequest.getPartyName())
             .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
@@ -63,9 +65,11 @@ public class CitizenAwpMapper {
 
         log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
         //Map citizen awp payment details & then remove from in progress
-        additionalApplicationsBundle = mapPaymentDetailsAndRemove(caseData,
-                                                                  citizenAwpRequest,
-                                                                  additionalApplicationsBundle);
+        additionalApplicationsBundle = mapPaymentDetailsAndRemove(
+            caseData,
+            citizenAwpRequest,
+            additionalApplicationsBundle
+        );
         log.info("Mapped data with payment details {}", additionalApplicationsBundle);
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
@@ -74,20 +78,40 @@ public class CitizenAwpMapper {
         additionalApplicationsBundles.add(element(additionalApplicationsBundle));
 
         return caseData.toBuilder()
+            .c100HwfRequestedForAdditionalApplications(setC100HwfRequestedForAdditionalApplicationsFlag(
+                caseData,
+                citizenAwpRequest
+            ))
             .additionalApplicationsBundle(additionalApplicationsBundles)
             .build();
+    }
+
+    private YesOrNo setC100HwfRequestedForAdditionalApplicationsFlag(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
+        if (YesOrNo.Yes.equals(caseData.getC100HwfRequestedForAdditionalApplications())) {
+            return caseData.getC100HwfRequestedForAdditionalApplications();
+        } else if (YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())) {
+            return YesOrNo.Yes;
+        } else {
+            return YesOrNo.No;
+        }
     }
 
     private AdditionalApplicationsBundle mapPaymentDetailsAndRemove(CaseData caseData,
                                                                     CitizenAwpRequest citizenAwpRequest,
                                                                     AdditionalApplicationsBundle additionalApplicationsBundle) {
         Optional<Element<CitizenAwpPayment>> optionalCitizenAwpPaymentElement =
-            getCitizenAwpPaymentIfPresent(caseData.getCitizenAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
+            getCitizenAwpPaymentIfPresent(
+                caseData.getCitizenAwpPayments(),
+                getPaymentRequestToCompare(citizenAwpRequest)
+            );
         //update payment details
         if (optionalCitizenAwpPaymentElement.isPresent()) {
             additionalApplicationsBundle = additionalApplicationsBundle.toBuilder()
-                .payment(getPaymentDetails(citizenAwpRequest,
-                                           optionalCitizenAwpPaymentElement.get().getValue()))
+                .payment(getPaymentDetails(
+                    citizenAwpRequest,
+                    optionalCitizenAwpPaymentElement.get().getValue()
+                ))
                 .build();
             //Remove in progress citizen awp payment details
             caseData.getCitizenAwpPayments().remove(optionalCitizenAwpPaymentElement.get());
@@ -98,6 +122,7 @@ public class CitizenAwpMapper {
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
         if ("C2".equals(citizenAwpRequest.getAwpType())) {
+
             log.info("Inside mapping citizen awp C2");
             return C2DocumentBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
@@ -109,16 +134,24 @@ public class CitizenAwpMapper {
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)
                 .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
-                                                     .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
+                                                                   .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
                 //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
                 .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
+                .applicationStatus(getApplicationStatus(citizenAwpRequest))
                 .build();
         }
         return null;
+    }
+
+    private String getApplicationStatus(CitizenAwpRequest citizenAwpRequest) {
+        return YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())
+            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+            : ApplicationStatus.SUBMITTED.getDisplayedValue();
     }
 
     private OtherApplicationsBundle getOtherApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
@@ -136,7 +169,7 @@ public class CitizenAwpMapper {
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
-                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                .applicationStatus(getApplicationStatus(citizenAwpRequest))
                 .build();
         }
         return null;
@@ -145,10 +178,10 @@ public class CitizenAwpMapper {
     private List<Element<ServedParties>> getSelectedParties(CitizenAwpRequest citizenAwpRequest) {
         return Collections.singletonList(
             element(ServedParties.builder()
-                .partyId(citizenAwpRequest.getPartyId())
-                .partyName(citizenAwpRequest.getPartyName())
-                .build()
-        ));
+                        .partyId(citizenAwpRequest.getPartyId())
+                        .partyName(citizenAwpRequest.getPartyName())
+                        .build()
+            ));
     }
 
     private List<Element<Document>> getDocuments(List<Document> uploadedApplicationForms) {
@@ -188,10 +221,22 @@ public class CitizenAwpMapper {
 
     private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
                                       CitizenAwpPayment citizenAwpPayment) {
+
+        String additionalApplicationPaymentStatus;
+
+        if (StringUtils.isEmpty(citizenAwpPayment.getFee())) {
+            additionalApplicationPaymentStatus = PaymentStatus.NOT_APPLICABLE.getDisplayedValue();
+        } else if (YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
+            && StringUtils.isNotEmpty(citizenAwpRequest.getHwfReferenceNumber())) {
+            additionalApplicationPaymentStatus = PaymentStatus.HWF.getDisplayedValue();
+        } else {
+            additionalApplicationPaymentStatus = PaymentStatus.PAID.getDisplayedValue();
+        }
+
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
-            .status(PaymentStatus.PAID.getDisplayedValue())
+            .status(additionalApplicationPaymentStatus)
             .fee(citizenAwpPayment.getFee())
             .paymentServiceRequestReferenceNumber(citizenAwpPayment.getServiceReqRef())
             .paymentReferenceNumber(citizenAwpPayment.getPaymentReqRef())
@@ -207,8 +252,10 @@ public class CitizenAwpMapper {
     }
 
     private String getApplicationKey(CitizenAwpRequest citizenAwpRequest) {
-        return concat(concat(citizenAwpRequest.getAwpType(), "_"),
-                      citizenAwpRequest.getAwpReason().replace("-", "_"))
+        return concat(
+            concat(citizenAwpRequest.getAwpType(), "_"),
+            citizenAwpRequest.getAwpReason().replace("-", "_")
+        )
             .toUpperCase();
     }
 }

@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
@@ -869,6 +870,27 @@ public class PaymentRequestServiceTest {
         PaymentServiceResponse paymentServiceResponse = paymentRequestService
             .createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
         assertEquals("response", paymentServiceResponse.getServiceRequestReference());
+    }
+
+    @Test
+    public void shouldReturnPaymentGroupReferenceStatus() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        ServiceRequestReferenceStatusResponse serviceRequestReferenceStatusResponse = ServiceRequestReferenceStatusResponse.builder()
+            .serviceRequestReference("2024-1750000072989")
+            .serviceRequestStatus("Paid")
+            .build();
+        when(paymentApi.fetchPaymentGroupReferenceStatus(serviceAuthToken, serviceAuthToken, "2024-1750000072989"))
+            .thenReturn(serviceRequestReferenceStatusResponse);
+
+        //When
+        ServiceRequestReferenceStatusResponse actualServiceRequestReferenceStatusResponse = paymentRequestService
+            .fetchServiceRequestReferenceStatus(serviceAuthToken, "2024-1750000072989");
+
+        //Then
+        assertEquals(serviceRequestReferenceStatusResponse, actualServiceRequestReferenceStatusResponse);
+
     }
 
 }
