@@ -49,7 +49,6 @@ public class HelpWithFeesServiceTest {
             .caseSubmittedTimeStamp("2024-06-24T10:46:55.972994696+01:00")
             .id(123L)
             .applicantCaseName("test")
-            .state(State.SUBMITTED_NOT_PAID)
             .helpWithFeesNumber("123")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
@@ -59,7 +58,7 @@ public class HelpWithFeesServiceTest {
             .build();
         caseDetails = CaseDetails.builder()
             .id(123L)
-            .state(State.SUBMITTED_NOT_PAID.getLabel())
+            .state(State.SUBMITTED_NOT_PAID.getValue())
             .build();
     }
 
