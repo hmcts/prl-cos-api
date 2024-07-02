@@ -77,6 +77,7 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (null != caseData) {
+            log.info("case status is {}", caseDetails.getState());
             if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getLabel())) {
                 log.info("Checking for c100 applications");
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
