@@ -238,7 +238,7 @@ public class C100AwpProcessHwfPaymentService {
 
         Bool finalFilter = Bool.builder()
             .should(shoulds)
-            .minimumShouldMatch(3)
+            .minimumShouldMatch(2)
             .filter(filter)
             .build();
 
