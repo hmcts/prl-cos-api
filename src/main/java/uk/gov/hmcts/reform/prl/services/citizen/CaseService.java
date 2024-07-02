@@ -79,6 +79,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAN_10_FM5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -101,6 +102,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
+import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.otherDocumentsCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement.unReturnedCategoriesForUI;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.ENGLISH;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.WELSH;
@@ -411,9 +413,14 @@ public class CaseService {
                                                                    CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authToken);
 
-        CitizenDocumentsManagement citizenDocumentsManagement = CitizenDocumentsManagement.builder()
-            .citizenDocuments(getCitizenDocuments(userDetails, caseData))
-            .citizenOrders(getCitizenOrders(userDetails, caseData))
+        List<CitizenDocuments> otherDocuments = new ArrayList<>();
+        //Retrieve citizen documents with other docs segregated
+        List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments);
+
+        CitizenDocumentsManagement citizenDocumentsManagement = getCitizenPartySpecificDocuments(citizenDocuments, otherDocuments);
+
+        citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
+            .citizenOrders(getCitizenOrders(userDetails, caseData, citizenDocuments))
             .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
             .build();
 
@@ -598,21 +605,53 @@ public class CaseService {
         return citizenDocuments[0];
     }
 
+    private CitizenDocumentsManagement getCitizenPartySpecificDocuments(List<CitizenDocuments> citizenDocuments,
+                                                                        List<CitizenDocuments> otherDocuments) {
+        List<CitizenDocuments> applicantDocuments = new ArrayList<>();
+        List<CitizenDocuments> respondentDocuments = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(citizenDocuments)) {
+            citizenDocuments.forEach(citizenDoc -> {
+                if (SERVED_PARTY_APPLICANT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                    applicantDocuments.add(citizenDoc);
+                } else if (SERVED_PARTY_RESPONDENT.equalsIgnoreCase(citizenDoc.getPartyType())) {
+                    respondentDocuments.add(citizenDoc);
+                } else {
+                    otherDocuments.add(citizenDoc);
+                }
+            });
+        }
+
+        //Sort documents based on uploaded date
+        applicantDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+        respondentDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+
+        return CitizenDocumentsManagement.builder()
+            .applicantDocuments(applicantDocuments)
+            .respondentDocuments(respondentDocuments)
+            .otherDocuments(otherDocuments.stream()
+                                .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
+                                .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
+                                .toList())
+            .build();
+    }
+
     private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
-                                                       CaseData caseData) {
+                                                       CaseData caseData,
+                                                       List<CitizenDocuments> otherDocuments) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
 
         if (null != caseData.getReviewDocuments()) {
             //add solicitor uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
-            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()));
             //add bulk scan uploaded docs
-            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getBulkScannedDocListDocTab()));
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getBulkScannedDocListDocTab()));
 
             citizenDocuments = citizenDocuments.stream().filter(citizenDocuments1 -> !unReturnedCategoriesForUI.contains(
                     citizenDocuments1.getCategoryId()))
@@ -645,12 +684,15 @@ public class CaseService {
         citizenDocuments.addAll(getAllOrdersFromPreviousProceedings(caseData));
 
         //Applications within proceedings
-        citizenDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
+        otherDocuments.addAll(getAllApplicationWithinProceedingsDocuments(caseData));
 
         //C9/FL415 - Statement of service documents
-        citizenDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
+        otherDocuments.addAll(getAllStatementOfServiceDocuments(caseData));
 
-        citizenDocuments.sort(comparing(CitizenDocuments::getUploadedDate).reversed());
+
+        otherDocuments.addAll(citizenDocuments.stream()
+                                  .filter(citDoc -> otherDocumentsCategoriesForUI.contains(citDoc.getCategoryId()))
+                                  .toList());
 
         return citizenDocuments;
     }
@@ -700,15 +742,22 @@ public class CaseService {
             .build();
     }
 
-    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails, CaseData caseData) {
-        List<CitizenDocuments> citizenDocuments = new ArrayList<>();
+    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails,
+                                                    CaseData caseData,
+                                                    List<CitizenDocuments> citizenDocuments) {
+        List<CitizenDocuments> citizenOrders = new ArrayList<>();
         HashMap<String, String> partyIdAndType = findPartyIdAndType(caseData, userDetails);
 
         if (!partyIdAndType.isEmpty()) {
-            citizenDocuments.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
+            citizenOrders.addAll(getCitizenOrdersForParty(caseData, partyIdAndType, userDetails.getId()));
         }
 
-        return citizenDocuments;
+        //Transcripts of judgements
+        citizenOrders.addAll(citizenDocuments.stream()
+                                 .filter(citDoc -> TRANSCRIPTS_OF_JUDGEMENTS.equals(citDoc.getCategoryId()))
+                                 .toList());
+
+        return citizenOrders;
     }
 
     private List<CitizenDocuments> getCitizenOrdersForParty(CaseData caseData,
@@ -912,7 +961,7 @@ public class CaseService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
         return CitizenDocuments.builder()
             .partyId(TEST_UUID) //system generated docs
-            .partyType(SERVED_PARTY_APPLICANT) //CHECK & REMOVE IF NOT NEEDED
+            .partyType(SERVED_PARTY_APPLICANT)
             .categoryId(categoryId)
             .document(isWelsh ? null : document)
             .documentWelsh(isWelsh ? document : null)
@@ -1042,7 +1091,7 @@ public class CaseService {
             .map(Element::getValue)
             .map(document ->
                      CitizenDocuments.builder()
-                         //.partyId(partyId)
+                         .partyId(TEST_UUID) // NEED TO REVISIT IF THIS IS REQUIRED OR NOT
                          .partyType(awp.getPartyType().getDisplayedValue())
                          .categoryId(PartyEnum.applicant.equals(awp.getPartyType())
                                          ? APPLICATIONS_WITHIN_PROCEEDINGS : APPLICATIONS_FROM_OTHER_PROCEEDINGS)
