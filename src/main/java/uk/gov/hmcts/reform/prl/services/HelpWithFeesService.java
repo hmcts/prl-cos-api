@@ -9,13 +9,18 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,20 +73,70 @@ public class HelpWithFeesService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> handleAboutToStart(String authorisation, CaseDetails caseDetails) {
+    public Map<String, Object> handleAboutToStart(CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String dynamicElement = String.format("Child arrangements application C100 - %s",
-                                              CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
-        caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                                                                       String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
-                                                                       caseData.getHelpWithFeesNumber(),
-                                                                       caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
-                                                                       caseData.getCaseSubmittedTimeStamp()));
-        caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
-                                                                                      .code(UUID.fromString(TEST_UUID))
-                                                                                      .label(dynamicElement).build())).build());
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+
+        if (null != caseData) {
+            if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
+                String dynamicElement = String.format("Child arrangements application C100 - %s",
+                    CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
+                caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                    String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
+                    caseData.getHelpWithFeesNumber(),
+                    caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
+                    caseData.getCaseSubmittedTimeStamp()));
+                caseDataUpdated.put("hwfAppList", DynamicList.builder().listItems(List.of(DynamicListElement.builder()
+                    .code(UUID.fromString(TEST_UUID))
+                    .label(dynamicElement).build())).build());
+                caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+            } else {
+                List<Element<AdditionalApplicationsBundle>> additionalApplications
+                    = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
+                    : new ArrayList<>();
+                List<DynamicListElement> additionalApplicationsWithHwf = new ArrayList<>();
+
+                additionalApplications.forEach(additionalApplication -> {
+                    if (null != additionalApplication.getValue().getPayment()
+                        && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()) {
+                        log.info("hwf reference exists");
+                        additionalApplicationsWithHwf
+                            .add(DynamicListElement
+                                .builder()
+                                .label(getApplicationWithinProceedingsType(additionalApplication))
+                                .build());
+                    }
+                });
+
+                if (!additionalApplicationsWithHwf.isEmpty()) {
+                    DynamicList dynamicList = DynamicList.builder().listItems(additionalApplicationsWithHwf).build();
+                    caseDataUpdated.put("hwfAppList", dynamicList);
+                }
+            }
+        }
+
         return caseDataUpdated;
+    }
+
+    private String getApplicationWithinProceedingsType(Element<AdditionalApplicationsBundle> additionalApplication) {
+        String applicationWithinProceedingsType = null;
+        log.info("adding element");
+
+        if (null != additionalApplication.getValue().getC2DocumentBundle()) {
+            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue();
+            log.info("Element is c2");
+        } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()) {
+            if (null != additionalApplication.getValue().getOtherApplicationsBundle().getCaApplicantApplicationType()) {
+                log.info("Element is stored in caApplicantApplicationType");
+                applicationWithinProceedingsType = additionalApplication.getValue()
+                    .getOtherApplicationsBundle().getCaApplicantApplicationType().getDisplayedValue();
+            } else if ((null != additionalApplication.getValue().getOtherApplicationsBundle().getCaRespondentApplicationType())) {
+                log.info("Element is stored in caRespondentApplicationType");
+                applicationWithinProceedingsType = additionalApplication.getValue()
+                    .getOtherApplicationsBundle().getCaRespondentApplicationType().getDisplayedValue();
+            }
+        }
+
+        return applicationWithinProceedingsType;
     }
 }

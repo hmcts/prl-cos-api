@@ -51,7 +51,6 @@ public class HelpWithFeesServiceTest {
             .caseSubmittedTimeStamp("2024-06-24T10:46:55.972994696+01:00")
             .id(123L)
             .applicantCaseName("test")
-            .state(State.SUBMITTED_NOT_PAID)
             .helpWithFeesNumber("123")
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
@@ -61,7 +60,7 @@ public class HelpWithFeesServiceTest {
             .build();
         caseDetails = CaseDetails.builder()
             .id(123L)
-            .state(State.SUBMITTED_NOT_PAID.getLabel())
+            .state(State.SUBMITTED_NOT_PAID.getValue())
             .build();
     }
 
@@ -69,7 +68,7 @@ public class HelpWithFeesServiceTest {
     public void testAboutToStart() {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        Map<String, Object> response = helpWithFeesService.handleAboutToStart("auth", caseDetails);
+        Map<String, Object> response = helpWithFeesService.handleAboutToStart(caseDetails);
         assertNotNull(response);
         DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
         assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
