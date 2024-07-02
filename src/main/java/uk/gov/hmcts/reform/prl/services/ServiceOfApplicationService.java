@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -139,6 +141,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.SOA_CA_PERSONAL_UNREPRESENTED_APPLICANT_WITHOUT_C1A;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -1319,6 +1323,9 @@ public class ServiceOfApplicationService {
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
+        //PRL-3466 - Citizen case auto linking
+        autoLinkCitizenCase(caseData, caseDataMap);
+
         allTabService.submitAllTabsUpdate(
                 updatedCaseDataContent.authorisation(),
                 caseId,
@@ -1329,6 +1336,46 @@ public class ServiceOfApplicationService {
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationHeader)
                       .confirmationBody(confirmationBody).build());
+    }
+
+    private void autoLinkCitizenCase(CaseData caseData,
+                                     Map<String, Object> caseDataMap) {
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+
+            applicants.stream()
+                .filter(party -> !hasLegalRepresentation(party.getValue())
+                    && !hasDashboardAccess(party)
+                    && isPartyEmailSameAsIdamEmail(caseData, party))
+                .findFirst()
+                .ifPresent(party -> {
+                    log.info(
+                        "*** Auto linking citizen case for primary applicant, partyId: {} and partyIndex: {}",
+                        party.getId(),
+                        applicants.indexOf(party)
+                    );
+                    User user = null != party.getValue().getUser()
+                        ? party.getValue().getUser().toBuilder().build()
+                        : User.builder().build();
+                    user = user.toBuilder()
+                        .idamId(caseData.getUserInfo().get(0).getValue().getIdamId())
+                        .email(caseData.getUserInfo().get(0).getValue().getEmailAddress())
+                        .build();
+
+                    PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
+                    applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
+
+                    caseDataMap.put(APPLICANTS, applicants);
+                });
+        }
+    }
+
+    private boolean isPartyEmailSameAsIdamEmail(CaseData caseData,
+                                                Element<PartyDetails> party) {
+        return CollectionUtils.isNotEmpty(caseData.getUserInfo())
+            && isNotEmpty(party.getValue().getEmail())
+            && party.getValue().getEmail().equalsIgnoreCase(
+                caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, CallbackRequest callbackRequest,
@@ -3066,6 +3113,9 @@ public class ServiceOfApplicationService {
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
+
+            //PRL-3466 - Citizen case auto linking
+            autoLinkCitizenCase(caseData, caseDataMap);
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
