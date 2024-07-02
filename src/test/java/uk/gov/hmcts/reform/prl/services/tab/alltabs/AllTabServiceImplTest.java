@@ -160,8 +160,8 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocC100Applicant() {
         when(nocCaseData.getCaseTypeOfApplication()).thenReturn("C100");
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                 "caseId",
                 startEventResponse,
                 EventRequestData.builder().build(), nocCaseData);
@@ -172,8 +172,8 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocC100Respondent() {
         when(nocCaseData.getCaseTypeOfApplication()).thenReturn("C100");
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                 "caseId",
                 startEventResponse,
                 EventRequestData.builder().build(), nocCaseData);
@@ -183,8 +183,8 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocFL401Applicant() {
         when(nocCaseData.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                 "caseId",
                 startEventResponse,
                 EventRequestData.builder().build(), nocCaseData);
@@ -194,8 +194,8 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocFL401Respondent() {
         when(nocCaseData.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                 "caseId",
                 startEventResponse,
                 EventRequestData.builder().build(), nocCaseData);
@@ -260,8 +260,8 @@ public class AllTabServiceImplTest {
             .taskListVersion(TASK_LIST_VERSION_V3)
             .caseTypeOfApplication("C100")
             .build();
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                                               "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                                                "caseId",
                                                startEventResponse,
                                                EventRequestData.builder().build(), caseData);
@@ -295,8 +295,8 @@ public class AllTabServiceImplTest {
             .taskListVersion(TASK_LIST_VERSION_V3)
             .caseTypeOfApplication("C100")
             .build();
-        allTabService.updatePartyDetailsForNoc(caseInvites,
-                                               "auth",
+        allTabService.updatePartyDetailsForNoc(
+            "auth",
                                                "caseId",
                                                startEventResponse,
                                                EventRequestData.builder().build(), caseData);
