@@ -99,7 +99,6 @@ public class HelpWithFeesService {
                 additionalApplications.forEach(additionalApplication -> {
                     if (null != additionalApplication.getValue().getPayment()
                         && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()) {
-                        log.info("hwf reference exists");
                         additionalApplicationsWithHwf
                             .add(DynamicListElement
                                 .builder()
@@ -120,21 +119,16 @@ public class HelpWithFeesService {
 
     private String getApplicationWithinProceedingsType(Element<AdditionalApplicationsBundle> additionalApplication) {
         String applicationWithinProceedingsType = null;
-        log.info("adding element");
 
         if (null != additionalApplication.getValue().getC2DocumentBundle()) {
-            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue();
-            log.info("Element is c2");
-        } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()) {
-            if (null != additionalApplication.getValue().getOtherApplicationsBundle().getCaApplicantApplicationType()) {
-                log.info("Element is stored in caApplicantApplicationType");
-                applicationWithinProceedingsType = additionalApplication.getValue()
-                    .getOtherApplicationsBundle().getCaApplicantApplicationType().getDisplayedValue();
-            } else if ((null != additionalApplication.getValue().getOtherApplicationsBundle().getCaRespondentApplicationType())) {
-                log.info("Element is stored in caRespondentApplicationType");
-                applicationWithinProceedingsType = additionalApplication.getValue()
-                    .getOtherApplicationsBundle().getCaRespondentApplicationType().getDisplayedValue();
-            }
+            String time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
+            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " = " + time;
+        } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()
+            && null != additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType()) {
+            String time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
+            log.info("Element is stored in applicationType");
+            applicationWithinProceedingsType = additionalApplication.getValue()
+                .getOtherApplicationsBundle().getApplicationType().getDisplayedValue() + " = " + time;
         }
 
         return applicationWithinProceedingsType;
