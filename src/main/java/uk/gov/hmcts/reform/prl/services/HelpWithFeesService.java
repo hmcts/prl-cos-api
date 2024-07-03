@@ -56,7 +56,7 @@ public class HelpWithFeesService {
        Application: %s \n
        Help with fees reference number: %s \n
        Applicant: %s \n
-       Application submitted date: %s
+       Application submitted date: %s \n
         """;
 
     private final ObjectMapper objectMapper;
@@ -69,7 +69,6 @@ public class HelpWithFeesService {
 
     public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("caseData is {}", caseDataUpdated);
         if (callbackRequest.getCaseDetails().getState().equalsIgnoreCase((State.SUBMITTED_NOT_PAID.getValue()))) {
             caseDataUpdated.put("caseStatus", CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
@@ -126,7 +125,12 @@ public class HelpWithFeesService {
 
                 additionalApplications.forEach(additionalApplication -> {
                     if (null != additionalApplication.getValue().getPayment()
-                        && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()) {
+                        && null != additionalApplication.getValue().getPayment().getHwfReferenceNumber()
+                        && (null != additionalApplication.getValue().getC2DocumentBundle()
+                        && additionalApplication.getValue().getC2DocumentBundle().getApplicationStatus().equalsIgnoreCase("Pending on payment"))
+                        || (null != additionalApplication.getValue().getOtherApplicationsBundle()
+                        && additionalApplication.getValue().getOtherApplicationsBundle()
+                        .getApplicationStatus().equalsIgnoreCase("Pending on payment"))) {
                         additionalApplicationsWithHwf
                             .add(DynamicListElement
                                 .builder()
