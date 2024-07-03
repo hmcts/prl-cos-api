@@ -1439,10 +1439,12 @@ public class ServiceOfApplicationService {
                 }
             }
         } else {
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().getId();
-            } else {
-                responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptions().getId();
+            if (Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+                if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                    responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().getId();
+                } else {
+                    responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptions().getId();
+                }
             }
         }
         return responsibleForService;
