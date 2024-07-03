@@ -138,8 +138,13 @@ public class HelpWithFeesService {
     }
 
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (null != caseData.getFm5ReminderNotificationDetails()
+            && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees()
+            && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList()) {
+            DynamicList listOfAdditionalApplications1 = caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList();
+            log.info("dynamic list 1 is {}", listOfAdditionalApplications1);
+        }
         DynamicList listOfAdditionalApplications = objectMapper.convertValue(caseDetails.getData().get("hwfAppList"), DynamicList.class);
         log.info("dynamic list is {}", listOfAdditionalApplications);
 
@@ -147,6 +152,7 @@ public class HelpWithFeesService {
             log.info("inside if statement");
         }
 
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         return caseDataUpdated;
     }
 }

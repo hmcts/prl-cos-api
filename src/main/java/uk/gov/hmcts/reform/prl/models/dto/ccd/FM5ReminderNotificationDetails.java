@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,6 @@ public class FM5ReminderNotificationDetails {
     /**
      * Process urgent help with fees.
      */
+    @JsonUnwrapped
     private ProcessUrgentHelpWithFees processUrgentHelpWithFees;
 }
