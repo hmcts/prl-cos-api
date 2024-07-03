@@ -440,45 +440,6 @@ public class CaseService {
         return citizenDocumentsManagement;
     }
 
-    private void addOrderAdditionalDocumentsToOtherDocuments(CaseData caseData,
-                                                             List<CitizenDocuments> citizenOrders,
-                                                             List<CitizenDocuments> otherDocuments) {
-        if (null != caseData.getManageOrders()
-            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getAdditionalOrderDocuments())) {
-            otherDocuments.addAll(
-                citizenOrders.stream()
-                    .map(order -> getAdditionalDocuments(
-                        order,
-                        caseData.getManageOrders().getAdditionalOrderDocuments()
-                    ))
-                    .flatMap(Collection::stream)
-                    .toList());
-        }
-    }
-
-    private List<CitizenDocuments> getAdditionalDocuments(CitizenDocuments order,
-                                                          List<Element<AdditionalOrderDocument>> additionalOrderDocuments) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
-
-        return additionalOrderDocuments.stream()
-            .map(Element::getValue)
-            .filter(addDoc -> getStringsSplitByDelimiter(addDoc.getServedOrders(), COMMA)
-                .contains(getOrderLabelForDynamicList(order)))
-            .map(addDoc -> addDoc.getAdditionalDocuments().stream()
-                .map(Element::getValue)
-                .map(document -> CitizenDocuments.builder()
-                    .document(document)
-                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(), formatter))
-                    .build())
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
-    }
-
-    private String getOrderLabelForDynamicList(CitizenDocuments order) {
-        return String.format("%s - %s", order.getOrderType(), order.getCreatedDate());
-    }
-
     private List<CitizenDocuments> getCitizenApplicationPacks(UserDetails userDetails,
                                                               CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
@@ -1179,5 +1140,44 @@ public class CaseService {
                          .uploadedDate(sos.getServedDateTimeOption())
                          .build()
             ).toList();
+    }
+
+    private void addOrderAdditionalDocumentsToOtherDocuments(CaseData caseData,
+                                                             List<CitizenDocuments> citizenOrders,
+                                                             List<CitizenDocuments> otherDocuments) {
+        if (null != caseData.getManageOrders()
+            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getAdditionalOrderDocuments())) {
+            otherDocuments.addAll(
+                citizenOrders.stream()
+                    .map(order -> getAdditionalDocuments(
+                        order,
+                        caseData.getManageOrders().getAdditionalOrderDocuments()
+                    ))
+                    .flatMap(Collection::stream)
+                    .toList());
+        }
+    }
+
+    private List<CitizenDocuments> getAdditionalDocuments(CitizenDocuments order,
+                                                          List<Element<AdditionalOrderDocument>> additionalOrderDocuments) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+
+        return additionalOrderDocuments.stream()
+            .map(Element::getValue)
+            .filter(addDoc -> getStringsSplitByDelimiter(addDoc.getServedOrders(), COMMA)
+                .contains(getOrderLabelForDynamicList(order)))
+            .map(addDoc -> addDoc.getAdditionalDocuments().stream()
+                .map(Element::getValue)
+                .map(document -> CitizenDocuments.builder()
+                    .document(document)
+                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(), formatter))
+                    .build())
+                .toList())
+            .flatMap(Collection::stream)
+            .toList();
+    }
+
+    private String getOrderLabelForDynamicList(CitizenDocuments order) {
+        return String.format("%s - %s", order.getOrderType(), order.getCreatedDate());
     }
 }
