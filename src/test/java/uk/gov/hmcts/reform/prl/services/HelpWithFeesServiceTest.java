@@ -82,7 +82,7 @@ public class HelpWithFeesServiceTest {
                     .build();
 
         caseDetails = caseDetails.toBuilder()
-            .state(State.SUBMITTED_PAID.getLabel())
+            .state(State.SUBMITTED_NOT_PAID.getValue())
             .data(new HashMap<>())
             .build();
 
