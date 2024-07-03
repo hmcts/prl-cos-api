@@ -41,7 +41,6 @@ public class C100CaseInviteServiceTest {
 
     private CaseData caseDataWithRespondentsAndEmailsOnePartyNoRepresentation;
 
-    private CaseData getCaseDataWithRespondentsNoEmails;
 
     private CaseData caseDataWithRespondentsAllWithRepresentation;
     private CaseData caseDataWithApplicants;
@@ -50,7 +49,6 @@ public class C100CaseInviteServiceTest {
 
     private CaseData citizenCaseDataWithApplicantEmail;
 
-    private CaseData solicitorCaseDataWithApplicantEmail;
     PartyDetails respondentOneWithEmail;
     PartyDetails respondentTwoWithEmail;
     PartyDetails applicantWithOutEmail;
