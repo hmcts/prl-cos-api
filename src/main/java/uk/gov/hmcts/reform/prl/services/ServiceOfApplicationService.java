@@ -2937,25 +2937,23 @@ public class ServiceOfApplicationService {
         List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
                                                                             caseData.getRespondentsFL401()));
 
-        log.info("*** applicantfl401 selected {}", applicantFl401);
-        log.info("*** respondetnt fl401 selected {}", respondentFl401);
-
-        log.info("*** recipient options {}", caseData.getServiceOfApplication().getSoaRecipientsOptions());
         applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+            .toList();
         log.info("*** applicantfl401 selected {}", applicantFl401);
         log.info("*** respondetnt fl401 selected {}", respondentFl401);
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (CollectionUtils.isNotEmpty(applicantFl401)) {
             List<Document> docs = new ArrayList<>();
-            String partyId = String.valueOf(applicantFl401.get(0).getId());
+            String partyId = String.valueOf(applicantFl401.get(0).getValue().getSolicitorPartyId());
             if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 log.info("applicant lip");
-                partyId = applicantFl401.get(0).getValue().getSolicitorEmail();
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
+                partyId = String.valueOf(applicantFl401.get(0).getId());
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP2));
             }
             docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, fl401StaticDocs));
             final SoaPack unServedApplicantPack = SoaPack.builder()
@@ -2967,13 +2965,18 @@ public class ServiceOfApplicationService {
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
         }
         if (CollectionUtils.isNotEmpty(respondentFl401)) {
-            String partyId = String.valueOf(respondentFl401.get(0).getId());
+            String partyId = String.valueOf(respondentFl401.get(0).getValue().getSolicitorPartyId());
             List<Document> docs = new ArrayList<>();
             if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
                 log.info("respondent lip");
-                partyId = respondentFl401.get(0).getValue().getSolicitorEmail();
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_AP1));
+                partyId = String.valueOf(respondentFl401.get(0).getId());
+                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                    docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE4));
+                } else {
+                    docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
+                }
             }
+            docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, fl401StaticDocs));
             final SoaPack unServedRespondentPack = SoaPack.builder()
                 .packDocument(wrapElements(docs))
                 .partyIds(wrapElements(partyId))
