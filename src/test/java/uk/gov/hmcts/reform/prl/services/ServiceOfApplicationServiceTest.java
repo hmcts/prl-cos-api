@@ -3888,6 +3888,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(Yes)
             .isConfidential(Yes).soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
