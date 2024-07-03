@@ -82,16 +82,42 @@ public class HelpWithFeesService {
 
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
-                    chosenAdditionalApplication.getValue().getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
-
+                    chosenAdditionalApplication.getValue().getC2DocumentBundle().toBuilder().applicationStatus("Submitted").build();
                 } else {
-                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
+                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted").build();
                 }
 
-                additionalApplications.removeIf(additionalApplicationsBundleElement -> {
-                    additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId());
-                    return additionalApplications.add(chosenAdditionalApplication);
-                });
+                for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
+                    if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
+                        log.info("ids match");
+                        log.info("additioanlApplications is {}", additionalApplications);
+                        additionalApplications.remove(additionalApplicationsBundleElement);
+                        log.info(""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + "additioanlApplications is {}", additionalApplications);
+                        additionalApplications.add(chosenAdditionalApplication);
+                        log.info(""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + ""
+                            + "additioanlApplications is {}", additionalApplications);
+                        break;
+                    }
+                }
 
                 caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
             }
