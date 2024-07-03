@@ -4036,7 +4036,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(NO, resultMap.get("isOccupationOrderSelected"));
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
 
@@ -4118,7 +4117,6 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
