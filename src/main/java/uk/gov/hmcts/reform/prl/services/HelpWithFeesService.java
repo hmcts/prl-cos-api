@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formateLocalDateTime;
 
 @Service
 @Slf4j
@@ -80,7 +80,7 @@ public class HelpWithFeesService {
         if (null != caseData) {
             if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
-                    CommonUtils.formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
+                    formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
                 caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
                     String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                     caseData.getHelpWithFeesNumber(),
@@ -121,14 +121,13 @@ public class HelpWithFeesService {
         String applicationWithinProceedingsType = null;
 
         if (null != additionalApplication.getValue().getC2DocumentBundle()) {
-            String time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
-            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " = " + time;
+            String time = formateLocalDateTime(additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime());
+            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " - " + time;
         } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()
             && null != additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType()) {
-            String time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
-            log.info("Element is stored in applicationType");
+            String time = formateLocalDateTime(additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime());
             applicationWithinProceedingsType = additionalApplication.getValue()
-                .getOtherApplicationsBundle().getApplicationType().getDisplayedValue() + " = " + time;
+                .getOtherApplicationsBundle().getApplicationType().getDisplayedValue() + " - " + time;
         }
 
         return applicationWithinProceedingsType;
