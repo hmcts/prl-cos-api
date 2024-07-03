@@ -32,7 +32,6 @@ public class Applicant {
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final String contactPreferences;
-    private final String isAtAddressLessThan5YearsWithDontKnow;
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;

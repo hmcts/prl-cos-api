@@ -54,10 +54,6 @@ public class ApplicantsMapper {
             .add("placeOfBirth", applicant.getPlaceOfBirth())
             .add("address", addressMapper.mapAddress(applicant.getAddress()))
             .add("isAtAddressLessThan5Years", CommonUtils.getYesOrNoValue(applicant.getIsAtAddressLessThan5Years()))
-            .add(
-                "isAtAddressLessThan5YearsWithDontKnow",
-                CommonUtils.getYesOrNoDontKnowValue(applicant.getIsAtAddressLessThan5YearsWithDontKnow())
-            )
             .add("addressLivedLessThan5YearsDetails", applicant.getAddressLivedLessThan5YearsDetails())
             .add("isAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsAddressConfidential()))
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(applicant.getIsPhoneNumberConfidential()))
