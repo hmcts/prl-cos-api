@@ -98,6 +98,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
@@ -110,6 +111,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_AD
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -188,6 +190,17 @@ public class ServiceOfApplicationServiceTest {
     private static final String SOA_FL416_FILENAME = "FL416.pdf";
     public static final String TEST_AUTH = "test auth";
 
+    CaseData caseDataSoa;
+
+    Map<String, Object> caseDetailsSoa;
+
+    CallbackRequest callbackRequestSoa;
+
+    ServiceOfApplication serviceOfApplicationSoa;
+
+
+    List<Element<String>> partyIdsSoa;
+
     @Before
     public void setup() throws Exception {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder()
@@ -217,6 +230,38 @@ public class ServiceOfApplicationServiceTest {
                                                                                                   .isGenWelsh(true).build());
         when(authTokenGenerator.generate()).thenReturn("");
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.any())).thenReturn(DynamicList.builder().build());
+
+
+
+        partyIdsSoa = new ArrayList<>();
+        partyIdsSoa.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
+        partyIdsSoa.add(element(UUID.randomUUID(),TEST_UUID));
+        serviceOfApplicationSoa = ServiceOfApplication.builder()
+            .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                      .builder()
+                                                      .confidentialityCheckRejectReason(
+                                                          "pack contain confidential info")
+                                                      .build()))
+            .unServedApplicantPack(SoaPack.builder()
+                                       .partyIds(partyIdsSoa)
+                                       .packDocument(List.of(element(Document.builder()
+                                                                         .documentFileName("").build())))
+                                       .build())
+            .unServedRespondentPack(SoaPack.builder()
+                                        .partyIds(partyIdsSoa)
+                                        .packDocument(List.of(element(Document.builder()
+                                                                          .documentFileName("").build())))
+                                        .build())
+            .applicationServedYesNo(YesOrNo.Yes)
+            .soaServeToRespondentOptions(Yes)
+            .build();
+        caseDataSoa = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(parties)
+            .respondents(parties)
+            .serviceOfApplication(serviceOfApplicationSoa).build();
+
+        caseDetailsSoa = caseDataSoa.toMap(new ObjectMapper());
     }
 
     @Test
@@ -357,19 +402,22 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testConfidentialyCheckSuccess() {
+
+        serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
+            .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                      .builder()
+                                                      .confidentialityCheckRejectReason(
+                                                          "pack contain confidential info")
+                                                      .build()))
+            .unServedApplicantPack(SoaPack.builder().build())
+            .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
+            .applicationServedYesNo(YesOrNo.Yes)
+            .build();
+
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(parties)
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
-                                      .applicationServedYesNo(YesOrNo.Yes)
-                                      .build()).build();
+            .serviceOfApplication(serviceOfApplicationSoa).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -387,35 +435,23 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, response.getBody().getConfirmationHeader());
     }
 
-    @Ignore
     @Test
-    public void testConfidentialyCheckSuccessForNoPersonalService() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(parties)
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.Yes)
-                                      .soaServeToRespondentOptions(No)
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
+    public void testConfidentialyCheckSuccessForNonPersonalService() {
+
+        callbackRequestSoa = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
-                             .data(caseDetails).build()).build();
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+                             .data(caseDetailsSoa).build()).build();
+        when(objectMapper.convertValue(caseDetailsSoa, CaseData.class)).thenReturn(caseDataSoa);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(authorization,
+                                              EventRequestData.builder().build(), StartEventResponse.builder().build(),
+                                              caseDetailsSoa, caseDataSoa, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
-            callbackRequest
+            callbackRequestSoa
         );
 
         assertNotNull(response);
@@ -425,27 +461,39 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(CONFIRMATION_HEADER_NON_PERSONAL, confirmationBody);
     }
 
-    @Ignore
     @Test
     public void testConfidentialyCheckFailed() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+
+        serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
+            .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                      .builder()
+                                                      .confidentialityCheckRejectReason(
+                                                          "pack contain confidential info")
+                                                      .build()))
+            .unServedApplicantPack(SoaPack.builder()
+                                       .partyIds(partyIdsSoa)
+                                       .packDocument(List.of(element(Document.builder()
+                                                                         .documentFileName("").build())))
+                                       .build())
+            .unServedRespondentPack(SoaPack.builder()
+                                        .partyIds(partyIdsSoa)
+                                        .packDocument(List.of(element(Document.builder()
+                                                                          .documentFileName("").build())))
+                                        .build())
+            .applicationServedYesNo(YesOrNo.No)
+            .soaServeToRespondentOptions(Yes)
+            .build();
+
+        caseDataSoa = caseDataSoa.toBuilder()
+            .serviceOfApplication(serviceOfApplicationSoa).build();
+        Map<String, Object> caseDetails = caseDataSoa.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
                              .data(caseDetails).build()).build();
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
@@ -454,14 +502,22 @@ public class ServiceOfApplicationServiceTest {
         );
 
         assertNotNull(response);
+
+        final String confirmationHeader = response.getBody().getConfirmationHeader();
+
+        assertEquals(RETURNED_TO_ADMIN_HEADER, confirmationHeader);
+
+
     }
 
-    @Ignore
     @Test
     public void testsendNotificationsForUnServedPacks() {
-        CaseData caseData = CaseData.builder().id(12345L)
+        caseDataSoa = caseDataSoa.toBuilder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(parties)
+            .respondents(parties)
+            .otherPartyInTheCaseRevised(parties)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -481,13 +537,13 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruEmail("test@hmcts.net")
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        Map<String, Object> caseDetails = caseDataSoa.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
                              .data(caseDetails).build()).build();
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseDataSoa, authorization));
     }
 
     @Test
@@ -3417,10 +3473,10 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
     @Test
     public void testsendNotificationsForUnServedResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
             .firstName(testString).lastName(testString).representativeFirstName(testString)
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
@@ -3433,21 +3489,36 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .partyIds(partyIdsSoa)
+                                                                 .build())
                                       .unServedRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIdsSoa)
                                                                   .packDocument(List.of(element(Document.builder()
                                                                                                     .documentFileName("").build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtBailiff.toString()).build())
-                                      .unServedOthersPack(SoaPack.builder().build())
+                                      .unServedOthersPack(SoaPack.builder()
+                                                              .partyIds(partyIdsSoa)
+                                                              .build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(authorization,
+                                              EventRequestData.builder().build(),
+                                              StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        assertNotNull(serviceOfApplicationService.processConfidentialityCheck(authorization, callbackRequest));
     }
 
     @Test
