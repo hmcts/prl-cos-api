@@ -102,13 +102,17 @@ public class HelpWithFeesService {
                         additionalApplicationsWithHwf
                             .add(DynamicListElement
                                 .builder()
+                                .code(additionalApplication.getId())
                                 .label(getApplicationWithinProceedingsType(additionalApplication))
                                 .build());
                     }
                 });
 
                 if (!additionalApplicationsWithHwf.isEmpty()) {
-                    DynamicList dynamicList = DynamicList.builder().listItems(additionalApplicationsWithHwf).build();
+                    DynamicList dynamicList = DynamicList.builder()
+                        .value(DynamicListElement.EMPTY)
+                        .listItems(additionalApplicationsWithHwf)
+                        .build();
                     caseDataUpdated.put("hwfAppList", dynamicList);
                 }
             }
@@ -121,11 +125,11 @@ public class HelpWithFeesService {
         String applicationWithinProceedingsType = null;
 
         if (null != additionalApplication.getValue().getC2DocumentBundle()) {
-            String time = formateLocalDateTime(additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime());
+            String time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
             applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " - " + time;
         } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()
             && null != additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType()) {
-            String time = formateLocalDateTime(additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime());
+            String time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
             applicationWithinProceedingsType = additionalApplication.getValue()
                 .getOtherApplicationsBundle().getApplicationType().getDisplayedValue() + " - " + time;
         }
