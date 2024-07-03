@@ -101,8 +101,8 @@ public class HelpWithFeesController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("data passed in is {}", callbackRequest.getCaseDetails().getData());
-            return AboutToStartOrSubmitCallbackResponse.builder().build();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(helpWithFeesService
+                .populateHwfDynamicData(callbackRequest.getCaseDetails())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -136,4 +136,17 @@ public class HelpWithFeesService {
 
         return applicationWithinProceedingsType;
     }
+
+    public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        DynamicList listOfAdditionalApplications = objectMapper.convertValue(caseDetails.getData().get("hwfAppList"), DynamicList.class);
+        log.info("dynamic list is {}", listOfAdditionalApplications);
+
+        if (null != caseData && null != listOfAdditionalApplications) {
+            log.info("inside if statement");
+        }
+
+        return caseDataUpdated;
+    }
 }
