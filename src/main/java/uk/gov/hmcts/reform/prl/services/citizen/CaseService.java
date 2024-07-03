@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
@@ -61,7 +62,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
@@ -107,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagem
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.ENGLISH;
 import static uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseService.WELSH;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getStringsSplitByDelimiter;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -114,8 +116,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
-    public static final String YES = "Yes";
-    public static final String ERROR = "error";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -416,11 +416,15 @@ public class CaseService {
         List<CitizenDocuments> otherDocuments = new ArrayList<>();
         //Retrieve citizen documents with other docs segregated
         List<CitizenDocuments> citizenDocuments = getCitizenDocuments(userDetails, caseData, otherDocuments);
+        //Retrieve citizen orders for the party
+        List<CitizenDocuments> citizenOrders = getCitizenOrders(userDetails, caseData, citizenDocuments);
+        //Add additional documents served along with order
+        addOrderAdditionalDocumentsToOtherDocuments(caseData, citizenOrders, otherDocuments);
 
         CitizenDocumentsManagement citizenDocumentsManagement = getCitizenPartySpecificDocuments(citizenDocuments, otherDocuments);
 
         citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
-            .citizenOrders(getCitizenOrders(userDetails, caseData, citizenDocuments))
+            .citizenOrders(citizenOrders)
             .citizenApplicationPacks(getCitizenApplicationPacks(userDetails, caseData))
             .build();
 
@@ -518,7 +522,7 @@ public class CaseService {
         nullSafeCollection(emailNotificationDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(EmailNotificationDetails::getTimeStamp).reversed())
-            .filter(emailNotificationDetails -> getPartyIds(emailNotificationDetails.getPartyIds())
+            .filter(emailNotificationDetails -> getStringsSplitByDelimiter(emailNotificationDetails.getPartyIds(), COMMA)
                 .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
@@ -549,12 +553,6 @@ public class CaseService {
         return citizenDocuments[0];
     }
 
-    private List<String> getPartyIds(String partyIds) {
-        return null != partyIds
-            ? Arrays.stream(partyIds.trim().split(COMMA)).map(String::trim).toList()
-            : Collections.emptyList();
-    }
-
     private static List<Document> getUnservedRespondentDocumentList(ServiceOfApplication serviceOfApplication) {
         return null != serviceOfApplication.getUnServedRespondentPack()
             && null != serviceOfApplication.getUnServedRespondentPack().getPackDocument()
@@ -575,7 +573,7 @@ public class CaseService {
         nullSafeCollection(bulkPrintDetailsList).stream()
             .map(Element::getValue)
             .sorted(comparing(BulkPrintDetails::getTimeStamp).reversed())
-            .filter(bulkPrintDetails -> getPartyIds(bulkPrintDetails.getPartyIds())
+            .filter(bulkPrintDetails -> getStringsSplitByDelimiter(bulkPrintDetails.getPartyIds(), COMMA)
                 .contains(partyIdAndType.get(PARTY_ID)))
             .findFirst()
             .ifPresent(
@@ -781,7 +779,8 @@ public class CaseService {
             .partyName(partyIdAndType.get(PARTY_NAME))
             .orderType(order.getOrderTypeId())
             .uploadedBy(order.getOtherDetails().getCreatedBy())
-            .createdDate(getOrderMadeDate(order))
+            .createdDate(getOrderCreatedDate(order))
+            .madeDate(getOrderMadeDate(order))
             .servedDate(getServedDate(order))
             .document(order.getOrderDocument())
             .documentWelsh(order.getOrderDocumentWelsh())
@@ -791,12 +790,22 @@ public class CaseService {
             .build();
     }
 
+    private LocalDate getOrderCreatedDate(OrderDetails order) {
+        if (null != order.getOtherDetails()
+            && null != order.getOtherDetails().getOrderCreatedDate()) {
+            return LocalDate.parse(
+                order.getOtherDetails().getOrderCreatedDate(),
+                DateTimeFormatter.ofPattern(D_MMM_YYYY));
+        }
+        return null;
+    }
+
     private LocalDate getOrderMadeDate(OrderDetails order) {
         if (null != order.getOtherDetails()
             && null != order.getOtherDetails().getOrderMadeDate()) {
             return LocalDate.parse(
                 order.getOtherDetails().getOrderMadeDate(),
-                DateTimeFormatter.ofPattern("dd MMM yyyy")
+                DateTimeFormatter.ofPattern(D_MMM_YYYY)
             );
         } else if (null != order.getDateCreated()) {
             //If order made date is not available then fallback to order created date.
@@ -1131,5 +1140,44 @@ public class CaseService {
                          .uploadedDate(sos.getServedDateTimeOption())
                          .build()
             ).toList();
+    }
+
+    private void addOrderAdditionalDocumentsToOtherDocuments(CaseData caseData,
+                                                             List<CitizenDocuments> citizenOrders,
+                                                             List<CitizenDocuments> otherDocuments) {
+        if (null != caseData.getManageOrders()
+            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getAdditionalOrderDocuments())) {
+            otherDocuments.addAll(
+                citizenOrders.stream()
+                    .map(order -> getAdditionalDocuments(
+                        order,
+                        caseData.getManageOrders().getAdditionalOrderDocuments()
+                    ))
+                    .flatMap(Collection::stream)
+                    .toList());
+        }
+    }
+
+    private List<CitizenDocuments> getAdditionalDocuments(CitizenDocuments order,
+                                                          List<Element<AdditionalOrderDocument>> additionalOrderDocuments) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+
+        return additionalOrderDocuments.stream()
+            .map(Element::getValue)
+            .filter(addDoc -> getStringsSplitByDelimiter(addDoc.getServedOrders(), COMMA)
+                .contains(getOrderLabelForDynamicList(order)))
+            .map(addDoc -> addDoc.getAdditionalDocuments().stream()
+                .map(Element::getValue)
+                .map(document -> CitizenDocuments.builder()
+                    .document(document)
+                    .uploadedDate(LocalDateTime.parse(addDoc.getUploadedDateTime(), formatter))
+                    .build())
+                .toList())
+            .flatMap(Collection::stream)
+            .toList();
+    }
+
+    private String getOrderLabelForDynamicList(CitizenDocuments order) {
+        return String.format("%s - %s", order.getOrderType(), order.getCreatedDate());
     }
 }
