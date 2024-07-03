@@ -53,10 +53,10 @@ public class HelpWithFeesService {
         needs to contact the applicant or their legal representative. to arrange a payment.
         """;
     public static final String HWF_APPLICATION_DYNAMIC_DATA = """
-       Application: %s \n
-       Help with fees reference number: %s \n
-       Applicant: %s \n
-       Application submitted date: %s \n
+       Application: %s
+       Help with fees reference number: %s
+       Applicant: %s
+       Application submitted date: %s
         """;
 
     private final ObjectMapper objectMapper;
@@ -69,22 +69,24 @@ public class HelpWithFeesService {
 
     public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("caseData is {}", caseDataUpdated);
         if (callbackRequest.getCaseDetails().getState().equalsIgnoreCase((State.SUBMITTED_NOT_PAID.getValue()))) {
             caseDataUpdated.put("caseStatus", CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
-        } else {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
-            if (null != chosenAdditionalApplication) {
-                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
-                    chosenAdditionalApplication.getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
-                } else {
-                    chosenAdditionalApplication.getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
-                }
-            }
-            log.info("caseData is {}", caseDataUpdated);
         }
+//        } else {
+//            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+//            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
+//            if (null != chosenAdditionalApplication) {
+//                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
+//                    chosenAdditionalApplication.getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
+//                } else {
+//                    chosenAdditionalApplication.getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
+//                }
+//            }
+//            log.info("caseData is {}", caseDataUpdated);
+//        }
         return caseDataUpdated;
     }
 
