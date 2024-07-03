@@ -901,11 +901,11 @@ public class ServiceOfApplicationService {
             List<Document> docs = new ArrayList<>();
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             boolean sendEmail = true;
-            if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
-                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
-            } else {
+            if (CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
                 emailAddress = applicantFl401.get(0).getValue().getSolicitorEmail();
                 servedParty = applicantFl401.get(0).getValue().getRepresentativeFullName();
+            } else {
+                docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
                 if (!ContactPreferences.email.equals(applicantFl401.get(0).getValue().getContactPreferences())) {
                     sendEmail = false;
                 }
@@ -945,7 +945,10 @@ public class ServiceOfApplicationService {
             List<Document> docs = new ArrayList<>();
             boolean sendEmail = true;
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-            if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
+            if (CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
+                emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
+                servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
+            } else {
                 if (!ContactPreferences.email.equals(respondentFl401.get(0).getValue().getContactPreferences())) {
                     sendEmail = false;
                 } else {
@@ -955,10 +958,6 @@ public class ServiceOfApplicationService {
                         docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_FL401_RE1));
                     }
                 }
-            } else {
-                emailAddress = respondentFl401.get(0).getValue().getSolicitorEmail();
-                servedParty = respondentFl401.get(0).getValue().getRepresentativeFullName();
-
             }
             docs.addAll(getNotificationPack(caseData, PrlAppsConstants.A, staticDocs));
             if (sendEmail) {
