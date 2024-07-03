@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -55,6 +56,9 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private DocumentLanguageService documentLanguageService;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;
@@ -578,6 +582,7 @@ public class StmtOfServImplServiceTest {
     @Test
     public void testcheckAndServeRespondentPacksPersonalService() {
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(

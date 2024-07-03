@@ -247,9 +247,6 @@ public class StmtOfServImplService {
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
-        String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
-            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
-            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
@@ -355,6 +352,9 @@ public class StmtOfServImplService {
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
+            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
+            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
@@ -365,7 +365,7 @@ public class StmtOfServImplService {
 
     private void generateRe8LetterForDaRespondent(CaseData caseData, String authorization, List<Element<Document>> packDocs) {
         if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())
-         && (null == caseData.getRespondentsFL401().getContactPreferences()
+            && (null == caseData.getRespondentsFL401().getContactPreferences()
             || ContactPreferences.post.equals(caseData.getRespondentsFL401().getContactPreferences()))) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
