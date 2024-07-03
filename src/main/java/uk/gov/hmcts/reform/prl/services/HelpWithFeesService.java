@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -24,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -43,6 +43,7 @@ public class HelpWithFeesService {
     public static final String AUTHORIZATION = "authorization";
 
     public static final String APPLICATION_UPDATED = "# Application updated";
+    public static final String HWF_APPLICATION_DYNAMIC_DATA_LABEL = "hwfApplicationDynamicData";
     public static final String CONFIRMATION_BODY = """
         \n
         You’ve updated the applicant’s help with fees record. You can now process the family application.
@@ -81,7 +82,7 @@ public class HelpWithFeesService {
             if (caseDetails.getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())) {
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
                     formateLocalDateTime(caseData.getCaseSubmittedTimeStamp()));
-                caseDataUpdated.put("hwfApplicationDynamicData", String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
                     String.format("%s %s", caseData.getApplicantCaseName(), caseData.getId()),
                     caseData.getHelpWithFeesNumber(),
                     caseData.getApplicants().get(0).getValue().getLabelForDynamicList(),
@@ -126,7 +127,7 @@ public class HelpWithFeesService {
 
         if (null != additionalApplication.getValue().getC2DocumentBundle()) {
             String time = additionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime();
-            applicationWithinProceedingsType = AdditionalApplicationTypeEnum.c2Order.getDisplayedValue() + " - " + time;
+            applicationWithinProceedingsType = additionalApplication.getValue().getC2DocumentBundle().getType().getDisplayedValue() + " - " + time;
         } else if (null != additionalApplication.getValue().getOtherApplicationsBundle()
             && null != additionalApplication.getValue().getOtherApplicationsBundle().getApplicationType()) {
             String time = additionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime();
@@ -139,20 +140,52 @@ public class HelpWithFeesService {
 
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
         if (null != caseData.getFm5ReminderNotificationDetails()
             && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees()
             && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList()) {
-            DynamicList listOfAdditionalApplications1 = caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList();
-            log.info("dynamic list 1 is {}", listOfAdditionalApplications1);
-        }
-        DynamicList listOfAdditionalApplications = objectMapper.convertValue(caseDetails.getData().get("hwfAppList"), DynamicList.class);
-        log.info("dynamic list is {}", listOfAdditionalApplications);
+            DynamicList listOfAdditionalApplications = caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees().getHwfAppList();
+            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(listOfAdditionalApplications, caseData);
+            log.info("additionalApplication is {}", chosenAdditionalApplication);
 
-        if (null != caseData && null != listOfAdditionalApplications) {
-            log.info("inside if statement");
+            if (null != chosenAdditionalApplication) {
+                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
+                    caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                        chosenAdditionalApplication.getC2DocumentBundle().getType().getDisplayedValue(),
+                        chosenAdditionalApplication.getPayment().getHwfReferenceNumber(),
+                        chosenAdditionalApplication.getAuthor(),
+                        chosenAdditionalApplication.getC2DocumentBundle().getUploadedDateTime()));
+                } else {
+                    caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
+                        chosenAdditionalApplication.getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
+                        chosenAdditionalApplication.getPayment().getHwfReferenceNumber(),
+                        chosenAdditionalApplication.getAuthor(),
+                        chosenAdditionalApplication.getOtherApplicationsBundle().getUploadedDateTime()));
+                }
+                log.info("caseDataUpdated is {}", caseDataUpdated);
+            }
         }
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
         return caseDataUpdated;
+    }
+
+    private AdditionalApplicationsBundle getChosenAdditionalApplication(DynamicList listOfAdditionalApplications, CaseData caseData) {
+        AtomicReference<AdditionalApplicationsBundle> additionalApplicationsBundle = new AtomicReference<>();
+        if (null != listOfAdditionalApplications) {
+            List<Element<AdditionalApplicationsBundle>> additionalApplications
+                = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
+                : new ArrayList<>();
+            log.info("additionalApplication is {}", additionalApplications);
+            additionalApplications.forEach(additionalApplicationsBundleElement -> {
+                if (null != additionalApplicationsBundleElement.getId()
+                    && additionalApplicationsBundleElement.getId().equals(listOfAdditionalApplications.getValueCodeAsUuid())) {
+                    log.info("match found");
+                    additionalApplicationsBundle.set(additionalApplicationsBundleElement.getValue());
+                }
+            });
+        }
+
+        return additionalApplicationsBundle.get();
     }
 }
