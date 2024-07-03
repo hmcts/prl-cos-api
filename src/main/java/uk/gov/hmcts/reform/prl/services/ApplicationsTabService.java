@@ -487,7 +487,8 @@ public class ApplicationsTabService implements TabService {
                            .canYouProvideEmailAddress(StringUtils.isNotEmpty(applicant.getEmail()) ? YesOrNo
                                .Yes : YesOrNo.No)
                            .isAtAddressLessThan5Years(
-                               applicant.getIsAtAddressLessThan5Years() != null ? YesOrNo.getValue(applicant.getIsAtAddressLessThan5Years().getDisplayedValue()) : null)
+                               applicant.getIsAtAddressLessThan5Years() != null ? YesOrNo.getValue(applicant
+                               .getIsAtAddressLessThan5Years().getDisplayedValue()) : null)
                            .build())
                 .build();
             applicants.add(applicantElement);
