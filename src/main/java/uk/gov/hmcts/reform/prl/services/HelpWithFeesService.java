@@ -88,13 +88,10 @@ public class HelpWithFeesService {
                     chosenAdditionalApplication.getValue().getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
                 }
 
-                for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement: additionalApplications) {
-                    if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
-                        additionalApplications.remove(additionalApplicationsBundleElement);
-                        additionalApplications.add(chosenAdditionalApplication);
-                        break;
-                    }
-                }
+                additionalApplications.removeIf(additionalApplicationsBundleElement -> {
+                    additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId());
+                    return additionalApplications.add(chosenAdditionalApplication);
+                });
 
                 caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
             }
