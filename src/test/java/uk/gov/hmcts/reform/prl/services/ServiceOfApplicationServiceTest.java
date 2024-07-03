@@ -2572,7 +2572,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() throws IOException {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -2639,6 +2639,14 @@ public class ServiceOfApplicationServiceTest {
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
+        when(serviceOfApplicationEmailService
+                 .sendEmailNotificationToLocalAuthority(
+                     anyString(),
+                     Mockito.any(),
+                     anyString(),
+                     Mockito.any(),
+                     anyString())).thenReturn(emailNotificationDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
@@ -2647,7 +2655,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
@@ -2701,6 +2708,12 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
                                                                   .build())
+                                      .unServedLaPack(SoaPack.builder()
+                                                          .partyIds(List.of(element("test12345")))
+                                                          .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .partyIds(partyIds)
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -4039,7 +4052,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() {
+    public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsDigitalSendgrid() throws IOException {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -4106,19 +4119,27 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
                                                                   .build())
+                                      .unServedLaPack(SoaPack.builder()
+                                                          .partyIds(partyIds)
+                                                          .build())
                                       .applicationServedYesNo(No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
+        when(serviceOfApplicationEmailService
+                 .sendEmailNotificationToLocalAuthority(
+                     anyString(),
+                     Mockito.any(),
+                     anyString(),
+                     Mockito.any(),
+                     anyString())).thenReturn(emailNotificationDetails);
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
