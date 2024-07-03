@@ -90,6 +90,7 @@ public class AllTabServiceImplTest {
     private final String eventToken = "eventToken";
     private final String eventName = CaseEvent.UPDATE_ALL_TABS.getValue();
     private final String caseId = "1234567891011121";
+    private List<Element<CaseInvite>> caseInvites;
 
     @Before
     public void setUp() {
