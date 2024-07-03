@@ -72,24 +72,6 @@ public class HelpWithFeesController {
         }
     }
 
-    @PostMapping(path = "/populateHwfApplicationDynamicData", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "populate the dynamic data for HWF.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
-        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "submitted callback for Process Urgent Help with Fees event.")
     @ApiResponses(value = {
@@ -108,4 +90,21 @@ public class HelpWithFeesController {
         }
     }
 
+    @PostMapping(path = "/populate-hwf-dynamic-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "populate the dynamic data for HWF.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse populateHwfDynamicData(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("data passed in is {}", callbackRequest.getCaseDetails().getData());
+            return AboutToStartOrSubmitCallbackResponse.builder().build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
