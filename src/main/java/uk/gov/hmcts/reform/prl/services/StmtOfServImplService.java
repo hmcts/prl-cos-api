@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
@@ -61,6 +62,7 @@ public class StmtOfServImplService {
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final DocumentLanguageService documentLanguageService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -313,7 +315,7 @@ public class StmtOfServImplService {
                 //LTR-RE8 document generation when applicant need to be personally served by applicant-lip
                 generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
             }
-            packDocs.addAll(unServedRespondentPack.getPackDocument());
+            //packDocs.addAll(unServedRespondentPack.getPackDocument());
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty("Applicant Lip")
                                              .bulkPrintId("Respondent will be served personally by Applicant LIP")
@@ -333,8 +335,9 @@ public class StmtOfServImplService {
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             List<Element<Document>> packDocs = new ArrayList<>();
+
             generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
-            packDocs.addAll(unServedRespondentPack.getPackDocument());
+            //packDocs.addAll(unServedRespondentPack.getPackDocument());
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty("Applicant's legal representative")
                                              .bulkPrintId("Respondent will be served personally by Applicant legal representative")
@@ -367,22 +370,36 @@ public class StmtOfServImplService {
         if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())
             && (null == caseData.getRespondentsFL401().getContactPreferences()
             || ContactPreferences.post.equals(caseData.getRespondentsFL401().getContactPreferences()))) {
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
-                    authorization,
+            try {
+                serviceOfApplicationPostService.getCoverSheets(
                     caseData,
-                    element(caseData.getRespondentsFL401()),
-                    Templates.PRL_LET_ENG_RE8
-                )));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
                     authorization,
-                    caseData,
-                    element(caseData.getRespondentsFL401()),
-                    Templates.PRL_LET_WEL_RE8
-                )));
+                    caseData.getRespondentsFL401().getAddress(),
+                    caseData.getRespondentsFL401().getLabelForDynamicList(),
+                    DOCUMENT_COVER_SHEET_HINT
+                ).stream().forEach(document ->
+                    packDocs.add(element(document))
+                );
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                if (documentLanguage.isGenEng()) {
+                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData,
+                        element(caseData.getRespondentsFL401()),
+                        Templates.PRL_LET_ENG_RE8
+                    )));
+                }
+                if (documentLanguage.isGenWelsh()) {
+                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                        authorization,
+                        caseData,
+                        element(caseData.getRespondentsFL401()),
+                        Templates.PRL_LET_WEL_RE8
+                    )));
+                }
+            } catch (Exception e) {
+                log.info("error while generating coversheet {}", e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
