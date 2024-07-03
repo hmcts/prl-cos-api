@@ -53,9 +53,9 @@ public class HelpWithFeesService {
         needs to contact the applicant or their legal representative. to arrange a payment.
         """;
     public static final String HWF_APPLICATION_DYNAMIC_DATA = """
-       Application: %s
-       Help with fees reference number: %s
-       Applicant: %s
+       Application: %s \n
+       Help with fees reference number: %s \n
+       Applicant: %s \n
        Application submitted date: %s
         """;
 
@@ -156,7 +156,7 @@ public class HelpWithFeesService {
 
     public Map<String, Object> populateHwfDynamicData(CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
 
         AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
 
