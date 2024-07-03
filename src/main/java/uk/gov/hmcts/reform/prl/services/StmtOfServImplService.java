@@ -249,6 +249,7 @@ public class StmtOfServImplService {
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
         SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+        String whoIsResponsible = "";
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
@@ -268,6 +269,7 @@ public class StmtOfServImplService {
                 .build();
         }
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = PERSONAL_SERVICE_SERVED_BY_CA;
             emailNotificationDetails.add(element(EmailNotificationDetails.builder()
                                                      .emailAddress(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL)
                                                      .servedParty(PRL_COURT_ADMIN)
@@ -284,6 +286,7 @@ public class StmtOfServImplService {
                                                      .build()));
         } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = PERSONAL_SERVICE_SERVED_BY_BAILIFF;
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty(PRL_COURT_ADMIN)
                                              .bulkPrintId(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST)
@@ -300,6 +303,7 @@ public class StmtOfServImplService {
                                              .build()));
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString();
             List<Element<Document>> packDocs = new ArrayList<>();
             if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
                 caseData.getRespondents().forEach(respondent -> {
@@ -315,7 +319,6 @@ public class StmtOfServImplService {
                 //LTR-RE8 document generation when applicant need to be personally served by applicant-lip
                 generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
             }
-            //packDocs.addAll(unServedRespondentPack.getPackDocument());
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty("Applicant Lip")
                                              .bulkPrintId("Respondent will be served personally by Applicant LIP")
@@ -329,15 +332,12 @@ public class StmtOfServImplService {
                                                                    caseData.getRespondents(),
                                                                    caseData.getRespondentsFL401()))
                                              .build()));
-        }
-
-        // LTR-RE8 document generation when applicant need to be personally served by applicant-solicitor
-        if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
+        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            whoIsResponsible = SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString();
             List<Element<Document>> packDocs = new ArrayList<>();
 
             generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
-            //packDocs.addAll(unServedRespondentPack.getPackDocument());
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty("Applicant's legal representative")
                                              .bulkPrintId("Respondent will be served personally by Applicant legal representative")
@@ -355,9 +355,7 @@ public class StmtOfServImplService {
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        String whoIsResponsible = SoaCitizenServingRespondentsEnum.courtAdmin
-            .toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
-            ? PERSONAL_SERVICE_SERVED_BY_CA : PERSONAL_SERVICE_SERVED_BY_BAILIFF;
+
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
