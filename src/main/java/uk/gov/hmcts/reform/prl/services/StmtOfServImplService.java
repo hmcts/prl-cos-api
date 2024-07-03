@@ -377,7 +377,7 @@ public class StmtOfServImplService {
                     caseData.getRespondentsFL401().getAddress(),
                     caseData.getRespondentsFL401().getLabelForDynamicList(),
                     DOCUMENT_COVER_SHEET_HINT
-                ).stream().forEach(document ->
+                ).forEach(document ->
                     packDocs.add(element(document))
                 );
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);

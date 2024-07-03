@@ -60,6 +60,9 @@ public class StmtOfServImplServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
     private DynamicList dynamicList;
     private PartyDetails respondent;
     private Element<PartyDetails> wrappedRespondents;
