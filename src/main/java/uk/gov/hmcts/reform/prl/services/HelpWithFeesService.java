@@ -74,19 +74,30 @@ public class HelpWithFeesService {
             caseDataUpdated.put("caseStatus", CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
+        } else {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
+            List<Element<AdditionalApplicationsBundle>> additionalApplications
+                = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
+                : new ArrayList<>();
+
+            if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
+                if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
+                    chosenAdditionalApplication.getValue().getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
+
+                } else {
+                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
+                }
+
+                additionalApplications.forEach(additionalApplicationsBundleElement -> {
+                    if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
+                        additionalApplications.remove(additionalApplicationsBundleElement);
+                        additionalApplications.add(chosenAdditionalApplication);
+                    }
+                });
+                caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
+            }
         }
-        //        } else {
-        //            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        //            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
-        //            if (null != chosenAdditionalApplication) {
-        //                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
-        //                    chosenAdditionalApplication.getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
-        //                } else {
-        //                    chosenAdditionalApplication.getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
-        //                }
-        //            }
-        //            log.info("caseData is {}", caseDataUpdated);
-        //        }
         return caseDataUpdated;
     }
 
@@ -158,29 +169,29 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
 
-        AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
+        Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
 
-        if (null != chosenAdditionalApplication) {
-            if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
+        if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
+            if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
                 caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
                     AdditionalApplicationTypeEnum.c2Order.getDisplayedValue(),
-                    chosenAdditionalApplication.getPayment().getHwfReferenceNumber(),
-                    chosenAdditionalApplication.getAuthor(),
-                    chosenAdditionalApplication.getC2DocumentBundle().getUploadedDateTime()));
+                    chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
+                    chosenAdditionalApplication.getValue().getAuthor(),
+                    chosenAdditionalApplication.getValue().getC2DocumentBundle().getUploadedDateTime()));
             } else {
                 caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL, String.format(HWF_APPLICATION_DYNAMIC_DATA,
-                    chosenAdditionalApplication.getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
-                    chosenAdditionalApplication.getPayment().getHwfReferenceNumber(),
-                    chosenAdditionalApplication.getAuthor(),
-                    chosenAdditionalApplication.getOtherApplicationsBundle().getUploadedDateTime()));
+                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getApplicationType().getDisplayedValue(),
+                    chosenAdditionalApplication.getValue().getPayment().getHwfReferenceNumber(),
+                    chosenAdditionalApplication.getValue().getAuthor(),
+                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().getUploadedDateTime()));
             }
         }
 
         return caseDataUpdated;
     }
 
-    private AdditionalApplicationsBundle getChosenAdditionalApplication(CaseData caseData) {
-        AtomicReference<AdditionalApplicationsBundle> additionalApplicationsBundle = new AtomicReference<>();
+    private Element<AdditionalApplicationsBundle> getChosenAdditionalApplication(CaseData caseData) {
+        AtomicReference<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new AtomicReference<>();
 
         if (null != caseData.getFm5ReminderNotificationDetails()
             && null != caseData.getFm5ReminderNotificationDetails().getProcessUrgentHelpWithFees()
@@ -195,7 +206,7 @@ public class HelpWithFeesService {
                 additionalApplications.forEach(additionalApplicationsBundleElement -> {
                     if (null != additionalApplicationsBundleElement.getId()
                         && additionalApplicationsBundleElement.getId().equals(listOfAdditionalApplications.getValueCodeAsUuid())) {
-                        additionalApplicationsBundle.set(additionalApplicationsBundleElement.getValue());
+                        additionalApplicationsBundle.set(additionalApplicationsBundleElement);
                     }
                 });
             }
