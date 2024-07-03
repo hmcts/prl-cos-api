@@ -2937,6 +2937,10 @@ public class ServiceOfApplicationService {
         List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
                                                                             caseData.getRespondentsFL401()));
 
+        log.info("*** applicantfl401 selected {}", applicantFl401);
+        log.info("*** respondetnt fl401 selected {}", respondentFl401);
+
+        log.info("*** recipient options {}", caseData.getServiceOfApplication().getSoaRecipientsOptions());
         applicantFl401 = getSelectedApplicantsOrRespondentsElements(applicantFl401, caseData.getServiceOfApplication()
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
