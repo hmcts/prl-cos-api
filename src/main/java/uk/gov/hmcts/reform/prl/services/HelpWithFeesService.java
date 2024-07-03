@@ -75,18 +75,18 @@ public class HelpWithFeesService {
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
         }
-//        } else {
-//            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-//            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
-//            if (null != chosenAdditionalApplication) {
-//                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
-//                    chosenAdditionalApplication.getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
-//                } else {
-//                    chosenAdditionalApplication.getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
-//                }
-//            }
-//            log.info("caseData is {}", caseDataUpdated);
-//        }
+        //        } else {
+        //            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        //            AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
+        //            if (null != chosenAdditionalApplication) {
+        //                if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
+        //                    chosenAdditionalApplication.getC2DocumentBundle().toBuilder().applicationStatus("Submitted");
+        //                } else {
+        //                    chosenAdditionalApplication.getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted");
+        //                }
+        //            }
+        //            log.info("caseData is {}", caseDataUpdated);
+        //        }
         return caseDataUpdated;
     }
 
@@ -159,7 +159,6 @@ public class HelpWithFeesService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
         AdditionalApplicationsBundle chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
-        log.info("additionalApplication is {}", chosenAdditionalApplication);
 
         if (null != chosenAdditionalApplication) {
             if (null != chosenAdditionalApplication.getC2DocumentBundle()) {
@@ -175,7 +174,6 @@ public class HelpWithFeesService {
                     chosenAdditionalApplication.getAuthor(),
                     chosenAdditionalApplication.getOtherApplicationsBundle().getUploadedDateTime()));
             }
-            log.info("caseDataUpdated is {}", caseDataUpdated);
         }
 
         return caseDataUpdated;
@@ -193,12 +191,10 @@ public class HelpWithFeesService {
                 List<Element<AdditionalApplicationsBundle>> additionalApplications
                     = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                     : new ArrayList<>();
-                log.info("additionalApplication is {}", additionalApplications);
 
                 additionalApplications.forEach(additionalApplicationsBundleElement -> {
                     if (null != additionalApplicationsBundleElement.getId()
                         && additionalApplicationsBundleElement.getId().equals(listOfAdditionalApplications.getValueCodeAsUuid())) {
-                        log.info("match found");
                         additionalApplicationsBundle.set(additionalApplicationsBundleElement.getValue());
                     }
                 });
