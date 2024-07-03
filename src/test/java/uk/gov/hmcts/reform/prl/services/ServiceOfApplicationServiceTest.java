@@ -1400,7 +1400,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForSoaCitizenFL401Solicitor() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -1448,6 +1447,9 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
+        assertEquals("Applicant solicitor",servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("By email",servedApplicationDetails.getModeOfService());
+        assertEquals("first test",servedApplicationDetails.getServedBy());
     }
 
     @Test
