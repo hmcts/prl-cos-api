@@ -1464,21 +1464,21 @@ public class HearingDataServiceTest {
 
     @Test
     public void testSetHearingDataForSelectedHearingForDaOrderCaCase() {
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+        PartyDetails respondentParty = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicant).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicantParty).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondentParty).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         CaseData caseData = CaseData.builder()
             .id(123)
@@ -1524,21 +1524,21 @@ public class HearingDataServiceTest {
 
     @Test
     public void testSetHearingDataForSelectedHearingForCaOrderCaCase() {
-        PartyDetails applicant = PartyDetails.builder()
+        PartyDetails applicantParty = PartyDetails.builder()
             .firstName("TestName")
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+        PartyDetails respondentParty = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .partyId(UUID.fromString(TEST_UUID))
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicant).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(applicantParty).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID)).value(respondentParty).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         CaseData caseData = CaseData.builder()
             .id(123)
