@@ -31,12 +31,12 @@ public class UploadAdditionalApplicationUtils {
             boolean c2OrderListed = false;
             boolean otherOrderListed = false;
             String awpTaskNameForOtherOrder = null;
-            if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-                AdditionalApplicationTypeEnum.c2Order)) {
+            if (AdditionalApplicationTypeEnum.c2Order.equals(
+                caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor())) {
                 c2OrderListed = true;
             }
-            if (caseData.getUploadAdditionalApplicationData()
-                .getAdditionalApplicationsApplyingFor().contains(AdditionalApplicationTypeEnum.otherOrder)
+            if (AdditionalApplicationTypeEnum.otherOrder.equals(caseData.getUploadAdditionalApplicationData()
+                .getAdditionalApplicationsApplyingFor())
                 && caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
                 otherOrderListed = true;
                 OtherApplicationType applicationType = getOtherApplicationType(caseData.getUploadAdditionalApplicationData()
