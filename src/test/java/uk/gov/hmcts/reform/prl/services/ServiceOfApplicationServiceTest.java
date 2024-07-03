@@ -2656,7 +2656,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
+    public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() throws IOException {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -2719,10 +2719,14 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
+        when(serviceOfApplicationEmailService
+                 .sendEmailNotificationToLocalAuthority(
+                     anyString(),
+                     Mockito.any(),
+                     anyString(),
+                     Mockito.any(),
+                     anyString())).thenReturn(emailNotificationDetails);
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
