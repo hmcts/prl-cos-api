@@ -1562,6 +1562,7 @@ public class ServiceOfApplicationService {
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
 
         cleanUpSoaSelections(caseDataMap);
+        log.info("** Casedata map to tabs {}", caseDataMap);
 
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
@@ -2929,7 +2930,7 @@ public class ServiceOfApplicationService {
 
     private Map<String, Object> getPacksForConfidentialCheckDaNonPersonalService(String authorization, CaseData caseData,
                                                                                  List<Document> fl401StaticDocs) {
-        log.info("serving Fl401 applicant legal representative with confidential check");
+        log.info("serving Fl401 Non personal service with confidential check");
         // Applicants pack
         List<Element<PartyDetails>> applicantFl401 = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
                                                                            caseData.getApplicantsFL401()));
@@ -2940,11 +2941,15 @@ public class ServiceOfApplicationService {
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedApplicantsOrRespondentsElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
+        log.info("*** applicantfl401 selected {}", applicantFl401);
+        log.info("*** respondetnt fl401 selected {}", respondentFl401);
+
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (CollectionUtils.isNotEmpty(applicantFl401)) {
             List<Document> docs = new ArrayList<>();
             String partyId = String.valueOf(applicantFl401.get(0).getId());
             if (!CaseUtils.hasLegalRepresentation(applicantFl401.get(0).getValue())) {
+                log.info("applicant lip");
                 partyId = applicantFl401.get(0).getValue().getSolicitorEmail();
                 docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, applicantFl401.get(0), PRL_LET_ENG_AP1));
             }
@@ -2961,6 +2966,7 @@ public class ServiceOfApplicationService {
             String partyId = String.valueOf(respondentFl401.get(0).getId());
             List<Document> docs = new ArrayList<>();
             if (!CaseUtils.hasLegalRepresentation(respondentFl401.get(0).getValue())) {
+                log.info("respondent lip");
                 partyId = respondentFl401.get(0).getValue().getSolicitorEmail();
                 docs.add(generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondentFl401.get(0), PRL_LET_ENG_AP1));
             }
