@@ -204,40 +204,26 @@ public class C100CaseInviteServiceTest {
 
     @Test
     public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(getCaseDataWithRespondentsNoEmails);
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 
     @Test
     public void noCitizenApplicantsInvitesGeneratedAndSentWhenLdFlagIsTurnedOff() {
-        when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(false);
-
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(citizenCaseDataWithApplicantEmail);
-        verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
+        verify(caseInviteEmailService, times(0)).sendCaseInviteEmail(any(), any(), any());
     }
 
     @Test
     public void noCitizenApplicantsInvitesGeneratedAndSentForCaseCreatedBySolicitor() {
-        when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(true);
-
-        CaseData actualCaseData = c100CaseInviteService
-            .sendCaseInviteEmail(solicitorCaseDataWithApplicantEmail);
         verify(caseInviteEmailService,times(0)).sendCaseInviteEmail(any(),any(),any());
     }
 

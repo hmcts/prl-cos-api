@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.noticeofchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -732,25 +730,10 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
-        //List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
-                /*List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseId));
-                for (CaseEventDetail eventDetail : eventsForCase) {
-                    if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equalsIgnoreCase(eventDetail.getStateId())) {
-                        log.info("Case in hearing state, hence updating access code");
-                        caseInvites = updateAccessCode(
-                            allTabsUpdateCaseData,
-                            removeSolicitorRole,
-                            newPartyDetailsElement
-                        );
-                        break;
-                    }
-                }
-*/
-
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
                     .label(removeSolicitorRole.get().getCaseRoleLabel())
@@ -796,25 +779,6 @@ public class NoticeOfChangePartiesService {
             );
         }
     }
-
-    //SHASHI NOT NEEDED
-    /*private List<Element<CaseInvite>> updateAccessCode(CaseData allTabsUpdateCaseData,
-                                                       Optional<SolicitorRole> removeSolicitorRole,
-                                                       Element<PartyDetails> newPartyDetailsElement) {
-        List<Element<CaseInvite>> caseInvites = allTabsUpdateCaseData.getCaseInvites() != null
-            ? allTabsUpdateCaseData.getCaseInvites() : new ArrayList<>();
-        String accessCode = getAccessCode(allTabsUpdateCaseData, newPartyDetailsElement);
-        if (accessCode.equalsIgnoreCase(BLANK_STRING)) {
-            generateNewAccessCode(
-                allTabsUpdateCaseData,
-                newPartyDetailsElement,
-                removeSolicitorRole, caseInvites
-            );
-        } else {
-            log.info("Set existing pin citizen after removing legal representation");
-        }
-        return caseInvites;
-    }*/
 
     private void getSelectedPartyDetailsMap(CaseData newCaseData,
                                             DynamicMultiSelectList solStopRepChooseParties,
@@ -934,24 +898,6 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    ////SHASHI NOT NEEDED
-    //This should be refactored to get only get access codes from the available invites
-    private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
-        String accessCode = "";
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
-            for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if ((C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
-                    && partyDetails.getId().equals(caseInviteElement.getValue().getPartyId()))
-                    || (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
-                    && partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail()))) {
-                    accessCode = caseInviteElement.getValue().getAccessCode();
-                }
-            }
-        }
-        return accessCode;
-    }
-
     private void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
                                                          Element<PartyDetails> newPartyDetails,
                                                          Optional<SolicitorRole> solicitorRole,
@@ -961,19 +907,6 @@ public class NoticeOfChangePartiesService {
         String solicitorName = null != oldPartyDetails ? oldPartyDetails.getValue().getRepresentativeFirstName()
             + " " + oldPartyDetails.getValue().getRepresentativeLastName() : newPartyDetails.getValue().getRepresentativeFirstName()
             + " " + newPartyDetails.getValue().getRepresentativeLastName();
-        //SHASHI NOT NEEDED
-        /*String accessCode = getAccessCode(caseData, newPartyDetails);
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null
-            ? caseData.getCaseInvites() : new ArrayList<>();
-        if (accessCode.equalsIgnoreCase(BLANK_STRING)) {
-            generateNewAccessCode(
-                caseData,
-                newPartyDetails,
-                solicitorRole, caseInvites
-            );
-        } else {
-            log.info("Set existing pin citizen after removing legal representation");
-        }*/
 
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             caseData,
@@ -985,21 +918,6 @@ public class NoticeOfChangePartiesService {
         );
         eventPublisher.publishEvent(noticeOfChangeEvent);
 
-    }
-
-    //SHASHI NOT NEEDED
-    private void generateNewAccessCode(CaseData caseData, Element<PartyDetails> newPartyDetails,
-                                       Optional<SolicitorRole> solicitorRole,
-                                       List<Element<CaseInvite>> caseInvites) {
-        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
-            newPartyDetails,
-            solicitorRole.orElse(null)
-        );
-        if (null != caseInvite) {
-            log.info("New pin generated for citizen after removing legal representation");
-            caseInvites.add(element(caseInvite));
-            caseData.setCaseInvites(caseInvites);
-        }
     }
 
     private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {

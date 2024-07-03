@@ -235,8 +235,6 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
-            //SHASHI NOT NEEDED ??? not sure ont on this if this ever happen without casedata having caseinvites
-            /*setCaseInvitesIfNeeded(caseInvites, dataMap);*/
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
@@ -274,12 +272,6 @@ public class AllTabServiceImpl implements AllTabsService {
         return combinedFieldsMap;
     }
 
-    //SHASHI NOT NEEDED ??? not sure ont on this if this ever happen without casedata having caseinvites
-    /*private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
-        if (CollectionUtils.isNotEmpty(caseInvites)) {
-            caseDataUpdatedMap.put("caseInvites", caseInvites);
-        }
-    }*/
 
     @Override
     public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,

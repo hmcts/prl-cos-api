@@ -107,16 +107,16 @@ public class FL401CaseInviteServiceTest {
     public void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAndEmailsNoRepresentation);
-
-        verify(caseInviteEmailService,times(1)).sendCaseInviteEmail(any(),any(),any());
+        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        verify(caseInviteEmailService, times(1)).sendCaseInviteEmail(any(), any(), any());
     }
 
     @Test
     public void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
+        //two respondents but only one should have a case invite generated
         CaseData actualCaseData = fl401CaseInviteService
             .sendCaseInviteEmail(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
-
-        //two respondents but only one should have a case invite generated
+        assertTrue(actualCaseData.getCaseInvites().isEmpty());
         verify(caseInviteEmailService,times(1)).sendCaseInviteEmail(any(),any(),any());
     }
 

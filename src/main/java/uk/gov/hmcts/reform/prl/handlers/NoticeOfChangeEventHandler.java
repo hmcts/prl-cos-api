@@ -265,7 +265,6 @@ public class NoticeOfChangeEventHandler {
                 log.info("Send post to LiP via bulk print");
                 sendPostViaBulkprint(caseData,
                                      party,
-                                     event,
                                      accessCode
                 );
             }
@@ -275,14 +274,14 @@ public class NoticeOfChangeEventHandler {
 
     private void sendPostViaBulkprint(CaseData caseData,
                                       Element<PartyDetails> party,
-                                      NoticeOfChangeEvent event, String accessCode) {
+                                      String accessCode) {
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
             List<Document> documents = new ArrayList<>();
             //generate cover sheets & add to documents
             generateCoverSheets(caseData, party.getValue(), documents);
             //generate cover letter with access code & add to documents
-            generateCoverLetter(caseData, party, event, documents, accessCode);
+            generateCoverLetter(caseData, party, documents, accessCode);
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
@@ -320,7 +319,6 @@ public class NoticeOfChangeEventHandler {
 
     private void generateCoverLetter(CaseData caseData,
                                      Element<PartyDetails> party,
-                                     NoticeOfChangeEvent event,
                                      List<Document> documents, String accessCode) {
         Document coverLetterWithAccessCode = serviceOfApplicationService.generateAccessCodeLetter(
             systemUserService.getSysUserToken(),
