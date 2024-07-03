@@ -116,12 +116,9 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -226,7 +223,7 @@ public class ApplicationsTabService implements TabService {
         return caseData;
     }
 
-    public Map<String, Object> updateCitizenPartiesTab(CaseData caseData) {
+    /*  public Map<String, Object> updateCitizenPartiesTab(CaseData caseData) {
 
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -237,7 +234,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
         }
         return applicationTab;
-    }
+     }*/
 
     private List<Element<DomesticAbuseBehaviour>> getAllegationsOfHarmRevisedDaTable(CaseData caseData) {
 
