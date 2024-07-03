@@ -23,4 +23,7 @@ public class Templates {
     public static final String PRL_LTR_ENG_C100_FM5 = "PRL-LTR-ENG-C100-FM5.docx";
 
     public static final String PRL_LET_ENG_LIST_WITHOUT_NOTICE = "PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx";
+
+    public static final String PRL_LET_ENG_RE8 = "PRL-LET-ENG-FL401-RE8.docx";
+    public static final String PRL_LET_WEL_RE8 = "PRL-LET-WEL-FL401-RE8.docx";
 }

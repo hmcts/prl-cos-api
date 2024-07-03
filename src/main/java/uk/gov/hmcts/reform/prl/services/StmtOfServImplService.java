@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -58,6 +60,7 @@ public class StmtOfServImplService {
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final ServiceOfApplicationService serviceOfApplicationService;
+    private final DocumentLanguageService documentLanguageService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -299,13 +302,20 @@ public class StmtOfServImplService {
         } else if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             List<Element<Document>> packDocs = new ArrayList<>();
-            caseData.getRespondents().forEach(respondent -> {
-                if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization, caseData, respondent,
-                                                                                     Templates.PRL_LET_ENG_RE5
-                    )));
-                }
-            });
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                caseData.getRespondents().forEach(respondent -> {
+                    if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                        packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                              caseData,
+                                                                                                              respondent,
+                                                                                                              Templates.PRL_LET_ENG_RE5
+                        )));
+                    }
+                });
+            } else {
+                //LTR-RE8 document generation when applicant need to be personally served by applicant-lip
+                generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
+            }
             packDocs.addAll(unServedRespondentPack.getPackDocument());
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty("Applicant Lip")
@@ -321,6 +331,28 @@ public class StmtOfServImplService {
                                                                    caseData.getRespondentsFL401()))
                                              .build()));
         }
+
+        // LTR-RE8 document generation when applicant need to be personally served by applicant-solicitor
+        if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
+            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            List<Element<Document>> packDocs = new ArrayList<>();
+            generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
+            packDocs.addAll(unServedRespondentPack.getPackDocument());
+            bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                             .servedParty("Applicant's legal representative")
+                                             .bulkPrintId("Respondent will be served personally by Applicant legal representative")
+                                             .printedDocs(String.join(",", packDocs.stream()
+                                                 .map(Element::getValue)
+                                                 .map(Document::getDocumentFileName).toList()))
+                                             .printDocs(packDocs)
+                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                             .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                   caseData.getRespondents(),
+                                                                   caseData.getRespondentsFL401()))
+                                             .build()));
+
+        }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
@@ -329,6 +361,30 @@ public class StmtOfServImplService {
             .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsible)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private void generateRe8LetterForDaRespondent(CaseData caseData, String authorization, List<Element<Document>> packDocs) {
+        if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())
+         && (null == caseData.getRespondentsFL401().getContactPreferences()
+            || ContactPreferences.post.equals(caseData.getRespondentsFL401().getContactPreferences()))) {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    element(caseData.getRespondentsFL401()),
+                    Templates.PRL_LET_ENG_RE8
+                )));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                    authorization,
+                    caseData,
+                    element(caseData.getRespondentsFL401()),
+                    Templates.PRL_LET_WEL_RE8
+                )));
+            }
+        }
     }
 
     private String getPartyIds(String caseTypeOfApplication,
