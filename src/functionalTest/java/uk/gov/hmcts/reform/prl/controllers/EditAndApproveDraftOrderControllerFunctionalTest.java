@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -256,17 +257,19 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
 
-        mockMvc.perform(post("/edit-and-approve/submitted")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content()
-                           .string(Matchers
-                                       .containsString(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)))
-            .andReturn();
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/edit-and-approve/submitted")
+            .then()
+            .body("data", contains(EditAndApproveDraftOrderController.CONFIRMATION_HEADER)
+            )
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
     }
 
     /**
