@@ -40,7 +40,6 @@ public class C100CaseInviteServiceTest {
     private CaseData caseDataWithRespondentsAndEmailsNoRepresentation;
 
     private CaseData caseDataWithRespondentsAndEmailsOnePartyNoRepresentation;
-    private CaseData getCaseDataWithRespondentsNoEmails;
 
 
     private CaseData caseDataWithRespondentsAllWithRepresentation;
@@ -117,7 +116,7 @@ public class C100CaseInviteServiceTest {
         List<Element<PartyDetails>> respondentsNoEmailsNoRepresentation = List.of(element(respondentOneNoEmail),
                                                                                   element(respondentTwoNoEmail));
 
-        getCaseDataWithRespondentsNoEmails = CaseData.builder()
+        CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsNoEmailsNoRepresentation).build();
