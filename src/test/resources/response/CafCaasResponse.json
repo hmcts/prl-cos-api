@@ -84,7 +84,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "8d412aa9-2cac-4ea7-82de-31eec32a0c0d",
@@ -97,7 +102,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {
