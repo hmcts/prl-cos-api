@@ -654,6 +654,7 @@ public class ManageOrderService {
             }
         } else {
             setRecipientsOptions(caseData, headerMap);
+            setOtherParties(caseData, headerMap);
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
     }
