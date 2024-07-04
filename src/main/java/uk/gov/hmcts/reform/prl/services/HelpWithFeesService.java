@@ -75,14 +75,19 @@ public class HelpWithFeesService {
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
         } else {
+            log.info("inside if statement");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
                 = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                 : new ArrayList<>();
 
+            log.info("chosen application is {}", chosenAdditionalApplication);
+            log.info("additional application bundle is {}", additionalApplications);
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
+                log.info("inside if statement");
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
+                    log.info("inside if statement");
                     chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
                         .value(chosenAdditionalApplication
                             .getValue()
@@ -95,6 +100,7 @@ public class HelpWithFeesService {
                                 .build())
                             .build())
                         .build();
+                    log.info("chosen application is {}", chosenAdditionalApplication);
                 } else {
                     chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
                         .value(chosenAdditionalApplication
