@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
@@ -53,7 +54,8 @@ public class ApplicantsMapper {
             .add("phoneNumber", applicant.getPhoneNumber())
             .add("placeOfBirth", applicant.getPlaceOfBirth())
             .add("address", addressMapper.mapAddress(applicant.getAddress()))
-            .add("isAtAddressLessThan5Years", CommonUtils.getYesOrNoValue(applicant.getIsAtAddressLessThan5Years()))
+            .add("isAtAddressLessThan5Years", CommonUtils.getYesOrNoValue(applicant.getIsAtAddressLessThan5Years()
+                                                                         == YesOrNo.Yes ? YesOrNo.No : YesOrNo.Yes))
             .add("addressLivedLessThan5YearsDetails", applicant.getAddressLivedLessThan5YearsDetails())
             .add("isAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsAddressConfidential()))
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(applicant.getIsPhoneNumberConfidential()))
