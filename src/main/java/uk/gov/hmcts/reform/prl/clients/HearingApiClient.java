@@ -67,7 +67,7 @@ public interface HearingApiClient {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody List<String> caseIds
     );
-  
+
     @PostMapping(value = "/automated-hearing", consumes = "application/json")
     ResponseEntity<AutomatedHearingResponse> createAutomatedHearing(
         @RequestHeader("Authorization") String authorisation,

@@ -256,7 +256,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmittedForAutoHearing() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY_AUTO_HEARING);
-
         request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
