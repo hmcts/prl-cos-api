@@ -224,8 +224,6 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
-        //Access code will not generate if the case has not reached to Hearing state yet
-        //Shashi to check with alok on what ocassions the accesscodes to be NOT SENT
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             //Get LiP
             Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
@@ -250,7 +248,11 @@ public class NoticeOfChangeEventHandler {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
             log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
-            String accessCode = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites()).getAccessCode();
+            CaseInvite caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
+            String accessCode = null;
+            if (null != caseInvite) {
+                accessCode = caseInvite.getAccessCode();
+            }
             if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
