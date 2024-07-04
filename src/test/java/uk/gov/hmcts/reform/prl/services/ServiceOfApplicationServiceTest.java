@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2661,6 +2660,7 @@ public class ServiceOfApplicationServiceTest {
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .solicitorEmail("abc")
+            .contactPreferences(ContactPreferences.email)
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -2669,6 +2669,7 @@ public class ServiceOfApplicationServiceTest {
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .solicitorEmail("abc")
+            .contactPreferences(ContactPreferences.email)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
@@ -3234,7 +3235,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(servedApplicationDetails);
     }
 
-    @Ignore
+
     @Test
     public void testSendNotificationForSoaCitizenFL401Senario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3442,12 +3443,13 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
     }
 
-    @Ignore
+
     @Test
     public void testSendNotificationForSoaCitizenFL401SolicitorScenario2() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
+            .contactPreferences(ContactPreferences.post)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .canYouProvideEmailAddress(Yes)
@@ -3490,6 +3492,9 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
+        assertEquals("first test", servedApplicationDetails.getServedBy());
+        assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
+
     }
 
     @Test
@@ -3667,30 +3672,37 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
-    @Ignore
+
     @Test
     public void testsendNotificationsForUnServedApplicantResponsnetPacksFL401() {
         PartyDetails testParty = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
             .firstName(testString).lastName(testString).representativeFirstName(testString)
             .solicitorEmail(testString)
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element<PartyDetails> partyDetailsElement = element(testParty);
+        otherParities.add(partyDetailsElement);
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantsFL401(testParty)
             .respondentsFL401(testParty)
+            .othersToNotify(otherParities)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedApplicantPack(SoaPack.builder().partyIds(partyIdsSoa).build())
                                       .unServedRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIdsSoa)
                                                                   .packDocument(List.of(element(Document.builder()
                                                                                                     .documentFileName("").build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .applicantLegalRepresentative.toString()).build())
-                                      .unServedOthersPack(SoaPack.builder().build())
+                                      .unServedOthersPack(SoaPack.builder().partyIds(partyIdsSoa).build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
