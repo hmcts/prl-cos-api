@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -82,39 +83,39 @@ public class HelpWithFeesService {
 
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
-                    chosenAdditionalApplication.getValue().getC2DocumentBundle().toBuilder().applicationStatus("Submitted").build();
+                    chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
+                        .value(chosenAdditionalApplication
+                            .getValue()
+                            .toBuilder()
+                            .c2DocumentBundle(chosenAdditionalApplication
+                                .getValue()
+                                .getC2DocumentBundle()
+                                .toBuilder()
+                                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                                .build())
+                            .build())
+                        .build();
                 } else {
-                    chosenAdditionalApplication.getValue().getOtherApplicationsBundle().toBuilder().applicationStatus("Submitted").build();
+                    chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
+                        .value(chosenAdditionalApplication
+                            .getValue()
+                            .toBuilder()
+                            .otherApplicationsBundle(chosenAdditionalApplication
+                                .getValue()
+                                .getOtherApplicationsBundle()
+                                .toBuilder()
+                                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                                .build())
+                            .build())
+                        .build();
                 }
 
                 for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
                     if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
-                        log.info("ids match");
                         log.info("additioanlApplications is {}", additionalApplications);
                         additionalApplications.remove(additionalApplicationsBundleElement);
-                        log.info(""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + "additioanlApplications is {}", additionalApplications);
                         additionalApplications.add(chosenAdditionalApplication);
-                        log.info(""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + ""
-                            + "additioanlApplications is {}", additionalApplications);
+                        log.info("additioanlApplications is {}", additionalApplications);
                         break;
                     }
                 }
