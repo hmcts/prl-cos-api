@@ -611,7 +611,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForDaCase() throws Exception{
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForDaCase() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -647,7 +647,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForDaCase() throws Exception{
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForDaCase() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -684,7 +684,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForCACase() throws Exception{
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForCaCase() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -719,7 +719,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test
-    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForCACase() throws Exception{
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForCaCase() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -754,7 +754,7 @@ public class StmtOfServImplServiceTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void throwErrorWhenFailedToGenerateLetterForDaCase() throws Exception{
+    public void throwErrorWhenFailedToGenerateLetterForDaCase() throws Exception {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
