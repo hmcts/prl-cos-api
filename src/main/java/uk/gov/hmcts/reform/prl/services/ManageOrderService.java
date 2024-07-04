@@ -660,31 +660,19 @@ public class ManageOrderService {
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
-        log.info("setRecipientsOptions -method");
         List<DynamicMultiselectListElement> applicantRespondentList = getPartyDynamicMultiselectList(caseData);
-        applicantRespondentList.stream().filter(Objects::nonNull).forEach(a -> {
-            log.info(a.getCode());
-            log.info(a.getLabel());
-        });
         headerMap.put(
             RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
                 .listItems(applicantRespondentList)
                 .build());
-        log.info("setRecipientsOptions -end");
     }
 
     public List<DynamicMultiselectListElement> getPartyDynamicMultiselectList(CaseData caseData) {
-        log.info("getPartyDynamicMultiselectList");
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
         List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
         if (applicantList != null) {
-            log.info("getPartyDynamicMultiselectList -applicat lisst");
-            applicantList.stream().filter(Objects::nonNull).forEach(a -> {
-                log.info(a.getCode());
-                log.info(a.getLabel());
-            });
             applicantRespondentList.addAll(applicantList);
         }
         Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
@@ -693,7 +681,6 @@ public class ManageOrderService {
         if (respondentList != null) {
             applicantRespondentList.addAll(respondentList);
         }
-        log.info("getPartyDynamicMultiselectList end");
         return applicantRespondentList;
     }
 
