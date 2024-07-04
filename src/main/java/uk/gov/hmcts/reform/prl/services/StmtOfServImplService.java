@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_CA;
@@ -315,43 +316,70 @@ public class StmtOfServImplService {
                         )));
                     }
                 });
+                bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                                 .servedParty("Applicant Lip")
+                                                 .bulkPrintId("Respondent will be served personally by Applicant LIP")
+                                                 .printedDocs(String.join(",", packDocs.stream()
+                                                     .map(Element::getValue)
+                                                     .map(Document::getDocumentFileName).toList()))
+                                                 .printDocs(packDocs)
+                                                 .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                                 .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                       caseData.getRespondents(),
+                                                                       caseData.getRespondentsFL401()))
+                                                 .build()));
             } else {
-                //LTR-RE8 document generation when applicant need to be personally served by applicant-lip
-                generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
+                List<Document> docList = new ArrayList<>();
+                generateRe8LetterForDaRespondent(caseData, authorization, docList);
+                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
+                    caseData,
+                    authorization,
+                    element(caseData.getRespondentsFL401()),
+                    docList,
+                    SERVED_PARTY_RESPONDENT
+                )));
             }
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty("Applicant Lip")
-                                             .bulkPrintId("Respondent will be served personally by Applicant LIP")
-                                             .printedDocs(String.join(",", packDocs.stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                             .partyIds(getPartyIds(caseTypeOfApplication,
-                                                                   caseData.getRespondents(),
-                                                                   caseData.getRespondentsFL401()))
-                                             .build()));
         } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             whoIsResponsible = SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString();
             List<Element<Document>> packDocs = new ArrayList<>();
 
-            generateRe8LetterForDaRespondent(caseData, authorization, packDocs);
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty("Applicant's legal representative")
-                                             .bulkPrintId("Respondent will be served personally by Applicant legal representative")
-                                             .printedDocs(String.join(",", packDocs.stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(packDocs)
-                                             .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
-                                                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
-                                             .partyIds(getPartyIds(caseTypeOfApplication,
-                                                                   caseData.getRespondents(),
-                                                                   caseData.getRespondentsFL401()))
-                                             .build()));
-
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                caseData.getRespondents().forEach(respondent -> {
+                    if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+                        packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(authorization,
+                                                                                                              caseData,
+                                                                                                              respondent,
+                                                                                                              Templates.PRL_LET_ENG_RE5
+                        )));
+                    }
+                });
+                bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                                 .servedParty("Applicant's legal representative")
+                                                 .bulkPrintId("Respondent will be served personally by Applicant legal representative")
+                                                 .printedDocs(String.join(",", packDocs.stream()
+                                                     .map(Element::getValue)
+                                                     .map(Document::getDocumentFileName).toList()))
+                                                 .printDocs(packDocs)
+                                                 .timeStamp(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
+                                                                .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                                                 .partyIds(getPartyIds(caseTypeOfApplication,
+                                                                       caseData.getRespondents(),
+                                                                       caseData.getRespondentsFL401()))
+                                                 .build()));
+            } else {
+                //LTR-RE8 document generation when applicant need to be personally served by applicant-solicitor
+                List<Document> docList = new ArrayList<>();
+                generateRe8LetterForDaRespondent(caseData, authorization, docList);
+                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
+                    caseData,
+                    authorization,
+                    element(caseData.getRespondentsFL401()),
+                    docList,
+                    SERVED_PARTY_RESPONDENT
+                )));
+            }
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -364,7 +392,7 @@ public class StmtOfServImplService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private void generateRe8LetterForDaRespondent(CaseData caseData, String authorization, List<Element<Document>> packDocs) {
+    private void generateRe8LetterForDaRespondent(CaseData caseData, String authorization, List<Document> packDocs) {
         if (!CaseUtils.hasLegalRepresentation(caseData.getRespondentsFL401())
             && (null == caseData.getRespondentsFL401().getContactPreferences()
             || ContactPreferences.post.equals(caseData.getRespondentsFL401().getContactPreferences()))) {
@@ -376,24 +404,24 @@ public class StmtOfServImplService {
                     caseData.getRespondentsFL401().getLabelForDynamicList(),
                     DOCUMENT_COVER_SHEET_HINT
                 ).forEach(document ->
-                    packDocs.add(element(document))
+                    packDocs.add(document)
                 );
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 if (documentLanguage.isGenEng()) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                    packDocs.add(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
                         authorization,
                         caseData,
                         element(caseData.getRespondentsFL401()),
                         Templates.PRL_LET_ENG_RE8
-                    )));
+                    ));
                 }
                 if (documentLanguage.isGenWelsh()) {
-                    packDocs.add(element(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
+                    packDocs.add(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
                         authorization,
                         caseData,
                         element(caseData.getRespondentsFL401()),
                         Templates.PRL_LET_WEL_RE8
-                    )));
+                    ));
                 }
             } catch (Exception e) {
                 log.info("error while generating coversheet {}", e.getMessage());

@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -35,10 +37,12 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -604,5 +608,182 @@ public class StmtOfServImplServiceTest {
         assertNotNull(servedApplicationDetails);
         assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
         assertEquals("By post", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForDaCase() throws Exception{
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaCitizenServingRespondentsEnum.unrepresentedApplicant.toString())
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("test.pdf")
+                                                                                                    .build())))
+                                                                  .build())
+                                      .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .build())
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(),any(),any(),any(),any()))
+            .thenReturn(List.of(Document.builder().documentFileName("test.pdf").build()));
+        when(documentLanguageService.docGenerateLang(caseData))
+            .thenReturn(DocumentLanguage.builder()
+                            .isGenEng(true)
+                            .isGenWelsh(true)
+                            .build());
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(any(),any(),any(),any()))
+            .thenReturn(Document.builder().documentFileName("test.pdf").build());
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
+        assertNotNull(servedApplicationDetails);
+        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForDaCase() throws Exception{
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("test.pdf")
+                                                                                                    .build())))
+                                                                  .build())
+                                      .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .contactPreferences(ContactPreferences.post)
+                                  .build())
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(),any(),any(),any(),any()))
+            .thenReturn(List.of(Document.builder().documentFileName("test.pdf").build()));
+        when(documentLanguageService.docGenerateLang(caseData))
+            .thenReturn(DocumentLanguage.builder()
+                            .isGenEng(true)
+                            .isGenWelsh(true)
+                            .build());
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(any(),any(),any(),any()))
+            .thenReturn(Document.builder().documentFileName("test.pdf").build());
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
+        assertNotNull(servedApplicationDetails);
+        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantSolicitorForCACase() throws Exception{
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("test.pdf")
+                                                                                                    .build())))
+                                                                  .build())
+                                      .build())
+            .respondents(List.of(element(PartyDetails.builder().build())))
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(),any(),any(),any(),any()))
+            .thenReturn(List.of(Document.builder().documentFileName("test.pdf").build()));
+        when(documentLanguageService.docGenerateLang(caseData))
+            .thenReturn(DocumentLanguage.builder()
+                            .isGenEng(true)
+                            .isGenWelsh(true)
+                            .build());
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(any(),any(),any(),any()))
+            .thenReturn(Document.builder().documentFileName("test.pdf").build());
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
+        assertNotNull(servedApplicationDetails);
+        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test
+    public void testCheckAndServeRespondentPacksPersonalServiceForApplicantLipForCACase() throws Exception{
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("test.pdf")
+                                                                                                    .build())))
+                                                                  .build())
+                                      .build())
+            .respondents(List.of(element(PartyDetails.builder().build())))
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(),any(),any(),any(),any()))
+            .thenReturn(List.of(Document.builder().documentFileName("test.pdf").build()));
+        when(documentLanguageService.docGenerateLang(caseData))
+            .thenReturn(DocumentLanguage.builder()
+                            .isGenEng(true)
+                            .isGenWelsh(true)
+                            .build());
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(any(),any(),any(),any()))
+            .thenReturn(Document.builder().documentFileName("test.pdf").build());
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
+        assertNotNull(servedApplicationDetails);
+        assertEquals(1, servedApplicationDetails.getBulkPrintDetails().size());
+        assertEquals("By post", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void throwErrorWhenFailedToGenerateLetterForDaCase() throws Exception{
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(
+                                                                      SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("test.pdf")
+                                                                                                    .build())))
+                                                                  .build())
+                                      .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .contactPreferences(ContactPreferences.post)
+                                  .build())
+            .build();
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(Mockito.anyString(),Mockito.any(),
+                                                                              Mockito.any(),Mockito.anyString()))
+            .thenReturn(Document.builder().build());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(serviceOfApplicationPostService.getCoverSheets(any(),any(),any(),any(),any()))
+            .thenThrow(new RuntimeException());
+        when(documentLanguageService.docGenerateLang(caseData))
+            .thenReturn(DocumentLanguage.builder()
+                            .isGenEng(true)
+                            .isGenWelsh(true)
+                            .build());
+        when(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(any(),any(),any(),any()))
+            .thenReturn(Document.builder().documentFileName("test.pdf").build());
+        stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
     }
 }
