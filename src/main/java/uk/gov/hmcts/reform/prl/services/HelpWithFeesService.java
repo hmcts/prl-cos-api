@@ -84,9 +84,7 @@ public class HelpWithFeesService {
 
             AdditionalApplicationsBundle additionalApplicationsBundle;
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
-                log.info("inside if statement");
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
-                    log.info("inside if statement");
                     additionalApplicationsBundle = chosenAdditionalApplication
                         .getValue()
                         .toBuilder()
@@ -97,9 +95,7 @@ public class HelpWithFeesService {
                             .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                             .build())
                         .build();
-                    log.info("chosen application is {}", chosenAdditionalApplication);
                 } else {
-                    log.info("inside else statement");
                     additionalApplicationsBundle = chosenAdditionalApplication
                         .getValue()
                         .toBuilder()
@@ -110,8 +106,6 @@ public class HelpWithFeesService {
                             .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                             .build())
                         .build();
-
-                    log.info("chosen application is {}", additionalApplicationsBundle);
                 }
 
                 for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
