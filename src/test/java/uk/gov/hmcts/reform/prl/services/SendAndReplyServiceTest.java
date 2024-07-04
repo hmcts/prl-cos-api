@@ -51,7 +51,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -1793,7 +1792,6 @@ public class SendAndReplyServiceTest {
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
         assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList2().get(0).getValue());
     }
 
     @Test
@@ -1846,51 +1844,52 @@ public class SendAndReplyServiceTest {
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
         assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList2().get(0).getValue());
     }
 
-    @Test
-    public void testBuildSendMessageWithSendAndReplyDocuemnts() {
-        uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument = testDocument();
-        Document document = new Document(testDocument.links.self.href, testDocument.originalDocumentName, testDocument.links.binary.href, null, null);
-        List<Element<Document>> messageDocuments = new ArrayList<>();
-        messageDocuments.add(element(document));
-
-        DynamicList dynamicDocuments = ElementUtils.asDynamicList(messageDocuments, messageDocuments.get(0).getId(), Document::getDocumentFilename);
-        List<Element<SendAndReplyDynamicDoc>> sendAndReplyDynamicDocList = new ArrayList<>();
-        sendAndReplyDynamicDocList.add(element(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicDocuments).build()));
-
-        CaseData data = CaseData.builder()
-            .messageContent("some message while replying")
-            .chooseSendOrReply(SendOrReply.REPLY)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .sendMessageObject(
-                        Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
-                            .messageAbout(MessageAboutEnum.APPLICATION)
-                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
-                            .build()
-                    ).sendAndReplyDynamicDocs(sendAndReplyDynamicDocList).build())
-            .build();
-
-        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
-                                                              .roles(List.of(JUDGE_ROLE))
-                                                              .build());
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(caseDocumentClient
-                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
-            .thenReturn(testDocument);
-
-        Message message = sendAndReplyService.buildSendReplyMessage(data,
-                                                                    data.getSendOrReplyMessage().getSendMessageObject(), auth);
-
-        assertEquals(messageDocuments.get(0).getValue().getDocumentURL(), message.getInternalMessageAttachDocs().get(0).getValue().getDocumentUrl());
-        assertEquals(messageDocuments.get(0).getValue().getDocumentFilename(),
-                    message.getInternalMessageAttachDocs().get(0).getValue().getDocumentFileName());
-    }
+    //    @Test
+    //    public void testBuildSendMessageWithSendAndReplyDocuemnts() {
+    //        uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument = testDocument();
+    //        Document document = new Document(testDocument.links.self.href, testDocument.originalDocumentName, testDocument.links.binary.href, null, null);
+    //        List<Element<Document>> messageDocuments = new ArrayList<>();
+    //        messageDocuments.add(element(document));
+    //
+    //        DynamicList dynamicDocuments = ElementUtils.asDynamicList(messageDocuments,
+    //        messageDocuments.get(0).getId(), Document::getDocumentFilename);
+    //        List<Element<SendAndReplyDynamicDoc>> sendAndReplyDynamicDocList = new ArrayList<>();
+    //        sendAndReplyDynamicDocList.add(element(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicDocuments).build()));
+    //
+    //        CaseData data = CaseData.builder()
+    //            .messageContent("some message while replying")
+    //            .chooseSendOrReply(SendOrReply.REPLY)
+    //            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+    //            .sendOrReplyMessage(
+    //                SendOrReplyMessage.builder()
+    //                    .sendMessageObject(
+    //                        Message.builder()
+    //                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+    //                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
+    //                            .messageAbout(MessageAboutEnum.APPLICATION)
+    //                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+    //                            .build()
+    //                    ).sendAndReplyDynamicDocs(sendAndReplyDynamicDocList).build())
+    //            .build();
+    //
+    //        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+    //                                                              .roles(List.of(JUDGE_ROLE))
+    //                                                              .build());
+    //        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+    //        when(caseDocumentClient
+    //                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+    //            .thenReturn(testDocument);
+    //
+    //        Message message = sendAndReplyService.buildSendReplyMessage(data,
+    //                                                                    data.getSendOrReplyMessage().getSendMessageObject(), auth);
+    //
+    //        assertEquals(messageDocuments.get(0).getValue().getDocumentURL(),
+    //        message.getInternalMessageAttachDocs().get(0).getValue().getDocumentUrl());
+    //        assertEquals(messageDocuments.get(0).getValue().getDocumentFilename(),
+    //                    message.getInternalMessageAttachDocs().get(0).getValue().getDocumentFileName());
+    //    }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();

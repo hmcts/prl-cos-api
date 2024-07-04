@@ -28,26 +28,20 @@ public class SendOrReplyMessage {
     @JsonProperty("internalMessageAttachDocsList")
     private final List<Element<SendReplyTempDoc>> internalMessageAttachDocsList;
 
-    @JsonProperty("internalMessageAttachDocsList2")
-    private final List<Element<SendReplyTempDoc>> internalMessageAttachDocsList2;
-
-    @JsonProperty("sendAndReplyDynamicDocs")
-    private List<Element<SendAndReplyDynamicDoc>> sendAndReplyDynamicDocs;
-
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
-            "messageContent", "respondToMessage", "sendAndReplyDynamicDocs",
+            "messageContent", "respondToMessage",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
             "replyMessageObject", "messageReplyTable", "chooseSendOrReply",
-            "internalMessageAttachDocsList", "internalMessageAttachDocsList2"
+            "internalMessageAttachDocsList"
         };
     }
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
-            "messageContent", "sendAndReplyDynamicDocs",
-            "messageMetaData", "messageReplyDynamicList", "messageReplyTable",
-            "internalMessageAttachDocsList", "internalMessageAttachDocsList2"
+            "messageContent", "messageMetaData",
+            "messageReplyDynamicList", "messageReplyTable",
+            "internalMessageAttachDocsList"
         };
     }
 }
