@@ -155,6 +155,38 @@ public class FL401CaseInviteServiceTest {
     }
 
     @Test
+    public void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401() {
+        when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("test")
+            .email("testfl401@applicant.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .build();
+        caseDataWithRespondentsAllWithRepresentation = caseDataWithRespondentsAllWithRepresentation.toBuilder()
+            .applicantsFL401(applicant)
+            .build();
+        CaseData actualCaseData = fl401CaseInviteService
+            .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
+        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+    }
+
+    @Test
+    public void givenApplicants_whenCaseInvitesGenerated_thenSendInvite_Fl401noEmail() {
+        when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("test")
+            .email("testfl401@applicant.com")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .build();
+        caseDataWithRespondentsAllWithRepresentation = caseDataWithRespondentsAllWithRepresentation.toBuilder()
+            .applicantsFL401(applicant)
+            .build();
+        CaseData actualCaseData = fl401CaseInviteService
+            .sendCaseInviteEmail(caseDataWithRespondentsAllWithRepresentation);
+        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+    }
+
+    @Test
     public void testToGenerateCaseInviteAndSendToFl401Applicant() {
 
         PartyDetails respondent = PartyDetails.builder()
