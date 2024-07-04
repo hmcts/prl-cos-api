@@ -660,6 +660,7 @@ public class ManageOrderService {
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
+
         List<DynamicMultiselectListElement> applicantRespondentList = getPartyDynamicMultiselectList(caseData);
         headerMap.put(
             RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()

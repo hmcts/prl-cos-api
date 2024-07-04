@@ -121,14 +121,12 @@ public class DynamicMultiSelectListService {
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getApplicantsMultiSelectList(CaseData caseData) {
-        log.info("getApplicantsMultiSelectList");
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         List<DynamicMultiselectListElement> applicantSolicitorList = new ArrayList<>();
         IncrementalInteger i = new IncrementalInteger(1);
         IncrementalInteger j = new IncrementalInteger(1);
         if (applicants != null) {
-            log.info("getApplicantsMultiSelectList- applicants present");
             applicants.forEach(applicant -> {
                 listItems.add(DynamicMultiselectListElement.builder().code(applicant.getId().toString())
                                   .label(applicant.getValue().getFirstName() + " "
@@ -142,12 +140,9 @@ public class DynamicMultiSelectListService {
                                                .build());
             });
         } else if (caseData.getApplicantsFL401() != null) {
-            log.info("getApplicantsMultiSelectList- applicants fl401");
             String name = caseData.getApplicantsFL401().getFirstName() + " "
                 + caseData.getApplicantsFL401().getLastName()
                 + "(Applicant)";
-            log.info(name);
-            log.info(caseData.getApplicantsFL401().getFirstName());
             applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(name)
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
                                                       + caseData.getApplicantsFL401().getRepresentativeLastName()
@@ -157,7 +152,6 @@ public class DynamicMultiSelectListService {
         Map<String, List<DynamicMultiselectListElement>> applicantdetails = new HashMap<>();
         applicantdetails.put("applicants", listItems);
         applicantdetails.put("applicantSolicitors", applicantSolicitorList);
-        log.info("getApplicantsMultiSelectList- end");
         return applicantdetails;
     }
 
