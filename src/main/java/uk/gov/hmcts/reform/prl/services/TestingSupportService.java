@@ -116,8 +116,6 @@ public class TestingSupportService {
     private static final String VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails_v3.json";
 
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        Map<String, String> env = System.getenv();
-        log.info("varaible key {}",env.entrySet());
         if (isAuthorized(authorisation)) {
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
