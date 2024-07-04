@@ -82,26 +82,12 @@ public class HelpWithFeesService {
                 = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                 : new ArrayList<>();
 
+            AdditionalApplicationsBundle additionalApplicationsBundle;
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
                 log.info("inside if statement");
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
                     log.info("inside if statement");
-                    chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
-                        .value(chosenAdditionalApplication
-                            .getValue()
-                            .toBuilder()
-                            .c2DocumentBundle(chosenAdditionalApplication
-                                .getValue()
-                                .getC2DocumentBundle()
-                                .toBuilder()
-                                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
-                                .build())
-                            .build())
-                        .build();
-                    log.info("chosen application is {}", chosenAdditionalApplication);
-                } else {
-                    log.info("inside else statement");
-                    chosenAdditionalApplication = element(chosenAdditionalApplication
+                    additionalApplicationsBundle = chosenAdditionalApplication
                         .getValue()
                         .toBuilder()
                         .otherApplicationsBundle(chosenAdditionalApplication
@@ -110,16 +96,29 @@ public class HelpWithFeesService {
                             .toBuilder()
                             .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                             .build())
-                        .build());
-
+                        .build();
                     log.info("chosen application is {}", chosenAdditionalApplication);
+                } else {
+                    log.info("inside else statement");
+                    additionalApplicationsBundle = chosenAdditionalApplication
+                        .getValue()
+                        .toBuilder()
+                        .otherApplicationsBundle(chosenAdditionalApplication
+                            .getValue()
+                            .getOtherApplicationsBundle()
+                            .toBuilder()
+                            .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                            .build())
+                        .build();
+
+                    log.info("chosen application is {}", additionalApplicationsBundle);
                 }
 
                 for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
                     if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
                         log.info("additioanlApplications is {}", additionalApplications);
                         additionalApplications.remove(additionalApplicationsBundleElement);
-                        additionalApplications.add(chosenAdditionalApplication);
+                        additionalApplications.add(element(additionalApplicationsBundle));
                         log.info("additioanlApplications is {}", additionalApplications);
                         break;
                     }
