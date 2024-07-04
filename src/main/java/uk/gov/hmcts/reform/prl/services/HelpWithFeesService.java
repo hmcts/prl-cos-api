@@ -110,10 +110,8 @@ public class HelpWithFeesService {
 
                 for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
                     if (additionalApplicationsBundleElement.getId().equals(chosenAdditionalApplication.getId())) {
-                        log.info("additioanlApplications is {}", additionalApplications);
                         additionalApplications.remove(additionalApplicationsBundleElement);
                         additionalApplications.add(element(additionalApplicationsBundle));
-                        log.info("additioanlApplications is {}", additionalApplications);
                         break;
                     }
                 }

@@ -16,7 +16,10 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.FM5ReminderNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ProcessUrgentHelpWithFees;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +95,113 @@ public class HelpWithFeesServiceTest {
         assertNotNull(response);
         CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
         assertEquals("Submitted", caseStatus.getState());
+    }
+
+    @Test
+    public void testAboutToSubmitApplicationsWithinProceedings() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
+                .build())
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsNull() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
+                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
+                    .builder()
+                    .build())
+                .build())
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmpty() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
+                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
+                    .builder().hwfAppList(DynamicList
+                        .builder()
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testAboutToSubmitApplicationsWithinProceedingsDynamicListIsEmptyWithAdditionalApplications() {
+        casedata = casedata.toBuilder()
+            .state(State.SUBMITTED_PAID)
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder().build())))
+            .fm5ReminderNotificationDetails(FM5ReminderNotificationDetails.builder()
+                .processUrgentHelpWithFees(ProcessUrgentHelpWithFees
+                    .builder().hwfAppList(DynamicList
+                        .builder()
+                        .build())
+                    .build())
+                .build())
+            .build();
+
+        caseDetails = caseDetails.toBuilder()
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(caseDetails).build());
+        assertNotNull(response);
     }
 
     @Test
