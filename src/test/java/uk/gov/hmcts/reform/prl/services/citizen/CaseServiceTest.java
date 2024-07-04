@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenNotification;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -68,6 +70,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -81,6 +84,8 @@ import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF2_APPLICANT_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CRNF3_PERS_SERV_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -710,30 +715,33 @@ public class CaseServiceTest {
     @Test
     public void testGetCitizenRespondentOrdersC100() {
         //Given
+        UUID partyId = UUID.randomUUID();
         ServedParties servedParties = ServedParties.builder()
-            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyId(partyId.toString())
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
             .orderDocument(Document.builder().build())
             .orderDocumentWelsh(Document.builder().build())
             .serveOrderDetails(ServeOrderDetails.builder()
                                    .servedParties(List.of(element(servedParties)))
+                                   .serveOnRespondent(Yes)
+                                   .whoIsResponsibleToServe(SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId())
                                    .build())
             .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
             .build();
         partyDetails = partyDetails.toBuilder()
             .user(User.builder()
-                      .idamId("00000000-0000-0000-0000-000000000000").build())
+                      .idamId(partyId.toString()).build())
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
-            .respondents(List.of(element(testUuid, partyDetails)))
+            .respondents(List.of(element(partyId, partyDetails)))
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList1)
             .build();
         userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
+            .id(partyId.toString())
             .roles(List.of(Roles.CITIZEN.getValue())).build();
 
         //When
@@ -746,13 +754,26 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenOrders().stream().findFirst().get().getPartyId());
+        Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
+            Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
+        //assertEquals(false, notifications.get(CAN6_VIEW_RESPONSE_APPLICANT));
+        //assertEquals(false, notifications.get(CAN5_SOA_RESPONDENT));
+        //assertEquals(false, notifications.get(CAN10_FM5));
+        assertEquals(true, notifications.get(CRNF3_PERS_SERV_APPLICANT));
+        //assertEquals(false, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
+        //assertEquals(false, notifications.get(CAN7_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN9_SOA_PERSONAL_APPLICANT));
+        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
     @Test
     public void testGetCitizenApplicantOrdersFL401() {
+        UUID partyId = UUID.randomUUID();
+
         //Given
         ServedParties servedParties = ServedParties.builder()
-            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyId(partyId.toString())
             .build();
         OrderDetails orderDetails = OrderDetails.builder()
             .orderDocument(Document.builder().build())
@@ -763,10 +784,11 @@ public class CaseServiceTest {
             .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
             .build();
         partyDetails = partyDetails.toBuilder()
-            .partyId(testUuid)
+            .partyId(partyId)
             .user(User.builder()
-                      .idamId("00000000-0000-0000-0000-000000000000").build())
+                      .idamId(partyId.toString()).build())
             .build();
+        finalServedApplicationDetailsList.get(0).getValue().getBulkPrintDetails().get(0).getValue().setPartyIds(partyId.toString());
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("FL401")
             .state(State.DECISION_OUTCOME)
@@ -779,7 +801,7 @@ public class CaseServiceTest {
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
             .build();
         userDetails = UserDetails.builder()
-            .id("00000000-0000-0000-0000-000000000000")
+            .id(partyId.toString())
             .roles(List.of(Roles.CITIZEN.getValue())).build();
 
         //When
@@ -792,6 +814,15 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenOrders().stream().findFirst().get().getPartyId());
+        assertEquals(partyId.toString(), citizenDocumentsManagement.getCitizenApplicationPacks().stream().findFirst().get().getPartyId());
+        Map<String, Boolean> notifications = citizenDocumentsManagement.getCitizenNotifications().stream().collect(
+            Collectors.toMap(CitizenNotification::getId, CitizenNotification::isShow));
+        //assertEquals(true, notifications.get(CAN5_SOA_RESPONDENT));
+        //assertEquals(false, notifications.get(CAN10_FM5));
+        assertEquals(true, notifications.get(CRNF2_APPLICANT_RESPONDENT));
+        //assertEquals(true, notifications.get(CAN4_SOA_PERS_NONPERS_APPLICANT));
+        //assertEquals(false, notifications.get(CAN8_SOS_PERSONAL_APPLICANT));
     }
 
     @Test
