@@ -1,4 +1,8 @@
 java:
+  devmemoryRequests: 2048Mi
+  devcpuRequests: 2000m
+  devmemoryLimits: 4096Mi
+  devcpuLimits: 4000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
@@ -33,7 +37,7 @@ java:
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: https://prl-cos-pr-2107.preview.platform.hmcts.net/service-request-update
+    PAY_CALLBACK_URL: https://prl-cos-pr-2290.preview.platform.hmcts.net/service-request-update
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
