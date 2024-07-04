@@ -769,11 +769,7 @@ public class SendAndReplyService {
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
                                             ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                                             : message.getInternalMessageWhoToSendTo())
-            .internalOrExternalSentTo(InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-                                          ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
-                (REPLY.equals(caseData.getChooseSendOrReply())
-                    ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
-                    : message.getInternalMessageWhoToSendTo().getDisplayedValue())))
+            .internalOrExternalSentTo(getInternalOrExternalSentTo(caseData, message))
             .externalMessageWhoToSendTo(message.getExternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
@@ -807,6 +803,14 @@ public class SendAndReplyService {
                 caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
             ))
             .build();
+    }
+
+    private String getInternalOrExternalSentTo(CaseData caseData, Message message) {
+        return InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
+            ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
+            (REPLY.equals(caseData.getChooseSendOrReply())
+                ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
+                : message.getInternalMessageWhoToSendTo().getDisplayedValue()));
     }
 
     private List<Element<Document>> getAttachedDocsForExternalMessage(String authorization,
@@ -1302,46 +1306,6 @@ public class SendAndReplyService {
         }
     }
 
-    /*
-     public void sendNotificationToExternalParties(CaseData caseData, String authorisation) {
-        //get the latest message
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        // Return if not external message
-        if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
-            return;
-        }
-        //Get Selected Applicant Respondent
-        List<DynamicMultiselectListElement> selectedApplicantsOrRespondents = message.getExternalMessageWhoToSendTo().getValue();
-
-        //Get list of Applicant & Respondent in Case
-        List<Element<PartyDetails>> applicantAndRespondentInCase = getApplicantAndRespondentList(caseData);
-
-        //Hardcoded for testing
-        *//*
-        String a1 = String.valueOf(applicantAndRespondentInCase.get(0).getId());
-        selectedApplicantsOrRespondents.add(DynamicMultiselectListElement.builder().code(a1).build());
-        *//*
-        selectedApplicantsOrRespondents.forEach(applicantOrRespondent -> {
-            Optional<Element<PartyDetails>> party = CaseUtils.getParty(
-                applicantOrRespondent.getCode(),
-                applicantAndRespondentInCase
-            );
-
-            if (party.isPresent()) {
-                PartyDetails partyDetails = party.get().getValue();
-                if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
-                    .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
-                    try {
-                        sendEmailNotification(caseData, partyDetails, authorisation);
-                    } catch (Exception e) {
-                        log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
-                    }
-                } else {
-                    log.info("----> Else POST partyDetails.getContactPreferences() {}", partyDetails.getAddress());
-                }
-            }
-        });
-    }*/
 
     public void sendNotificationToExternalParties(CaseData caseData, String auth) {
 
@@ -1369,39 +1333,38 @@ public class SendAndReplyService {
 
                     PartyDetails partyDetails = party.get().getValue();
 
-                    if (isSolicitorRepresentative(partyDetails) || (null != partyDetails
-                        .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email))) {
+                    if (externalMessageToBeSentInEmail(partyDetails)) {
                         try {
                             sendEmailNotification(caseData, partyDetails, auth);
                         } catch (Exception e) {
                             log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
                         }
-                    } else if (null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(ContactPreferences.post)) {
+                    } else if (externalMessageToBeSentInPost(partyDetails)) {
 
                         try {
-                            List<Element<BulkPrintDetails>>  bulkPrintDetails = sendPostNotificationToExternalParties(caseData, partyDetails,
+                            sendPostNotificationToExternalParties(caseData, partyDetails,
                                                                   caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
-                            log.info("Messsage send as post to external parties and bulkPrintDetails {}", bulkPrintDetails);
-                            /*if (isNotEmpty(bulkPrintDetails)) {
-                                if (isNotEmpty(message.getMessageBulkPrintDetails())) {
-                                    message.getMessageBulkPrintDetails().addAll(bulkPrintDetails);
-                                } else {
-                                    message.setMessageBulkPrintDetails(bulkPrintDetails);
-                                }
-                            }*/
+                            log.info("Message sent as post to external parties");
                         } catch (Exception e) {
                             log.error(e.getMessage());
                         }
 
-                    } else {
-                        log.info("Error while sending post notification as not contact preferences set for party id {}",
-                                 partyDetails.getPartyId());
                     }
                 }
             }
             );
         }
+    }
+
+    private boolean externalMessageToBeSentInPost(PartyDetails partyDetails) {
+        return null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(
+            ContactPreferences.post);
+    }
+
+    private boolean externalMessageToBeSentInEmail(PartyDetails partyDetails) {
+        return isSolicitorRepresentative(partyDetails) || (null != partyDetails
+            .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email));
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
@@ -1425,11 +1388,9 @@ public class SendAndReplyService {
                 docs.addAll(attachedDocs);
 
                 bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
-            } else {
-                log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
-                throw new Exception("External party does not have any postal address to send " + partyDetails.getPartyId());
             }
         } catch (Exception e) {
+            log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
             throw new RuntimeException(e);
         }
 
@@ -1604,7 +1565,7 @@ public class SendAndReplyService {
 
     private List<Element<PartyDetails>> getAllApplicantsRespondentInCase(CaseData caseData) {
 
-        List<Element<PartyDetails>> applicantsRespondentInCase = new ArrayList<Element<PartyDetails>>();
+        List<Element<PartyDetails>> applicantsRespondentInCase = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             applicantsRespondentInCase.addAll(caseData.getApplicants());

@@ -867,7 +867,7 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
     @Test

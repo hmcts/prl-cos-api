@@ -63,8 +63,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
-    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = "### What happens next \n\n The court will send this message in "
-        + "a notification to the external party or parties.";
+    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = """
+        ### What happens next \n The court will send this message
+         in a notification to the external party or parties.
+        """;
     public static final String MESSAGES = "messages";
 
     @Autowired

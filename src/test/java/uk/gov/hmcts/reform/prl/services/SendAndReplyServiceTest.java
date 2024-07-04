@@ -1522,7 +1522,7 @@ public class SendAndReplyServiceTest {
             .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
 
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .caseTypeOfApplication("C100")
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -1544,13 +1544,13 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
             .build();
-        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
         verify(sendgridService).sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             "authorisation",
@@ -1608,7 +1608,7 @@ public class SendAndReplyServiceTest {
             .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
 
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataForFL401Message = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .applicantCaseName("case name a")
             .caseTypeOfApplication("FL401")
@@ -1630,13 +1630,13 @@ public class SendAndReplyServiceTest {
                     .messages(messages)
                     .build())
             .build();
-        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        Map<String, Object> dynamicData = getEmailDynamicData(caseDataForFL401Message);
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
             .build();
-        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        sendAndReplyService.sendNotificationToExternalParties(caseDataForFL401Message, "authorisation");
         verify(sendgridService).sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             "authorisation",
@@ -1662,7 +1662,7 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testSendEmailNotificationToExternalPartiesWhenMessageIsNotExternal() throws IOException {
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataC100V2 = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .caseTypeOfApplication("C100")
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -1680,23 +1680,23 @@ public class SendAndReplyServiceTest {
                     .messages(messages)
                     .build())
             .build();
-        Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+        Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100V2);
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
             .build();
-        sendAndReplyService.sendNotificationToExternalParties(caseData, "authorisation");
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100V2, "authorisation");
         verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             "authorisation",
             sendgridEmailConfig
-        );;
+        );
     }
 
     @Test
     public void testFetchAdditionalApplicationCodeIfExist() {
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataAdditionalApplication = CaseData.builder().id(12345L)
             .chooseSendOrReply(SendOrReply.SEND)
             .caseTypeOfApplication("C100")
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -1715,8 +1715,8 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
-        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataAdditionalApplication, SendOrReply.SEND));
+        assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataAdditionalApplication, SendOrReply.REPLY));
     }
 
     @Test
@@ -1898,17 +1898,17 @@ public class SendAndReplyServiceTest {
         DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
             .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
 
-        DynamicList dynamicList = DynamicList.builder()
+        DynamicList sendMessageDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
             .listItems(List.of(DynamicListElement.builder().code("test1").build()))
             .build();
 
         Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
             .id(UUID.randomUUID())
-            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicList).build())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(sendMessageDynamicList).build())
             .build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataForExternalMessage = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
             .caseTypeOfApplication("C100")
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -1941,12 +1941,13 @@ public class SendAndReplyServiceTest {
         when(documentGenService.getTemplate(
             any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
-            eq(auth), eq(String.valueOf(caseData.getId())), eq("abc_template"), anyMap()))
+            eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
         when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(UUID.randomUUID());
 
-        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
+        sendAndReplyService.sendNotificationToExternalParties(caseDataForExternalMessage, auth);
+        assertNotNull(caseDataForExternalMessage.getSendOrReplyMessage());
     }
 
     @Test
@@ -1981,17 +1982,17 @@ public class SendAndReplyServiceTest {
         DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
             .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
 
-        DynamicList dynamicList = DynamicList.builder()
+        DynamicList dynamicListForExternalMessage = DynamicList.builder()
             .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
             .listItems(List.of(DynamicListElement.builder().code("test1").build()))
             .build();
 
         Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
             .id(UUID.randomUUID())
-            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicList).build())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(dynamicListForExternalMessage).build())
             .build();
         // need to remove applicants and respondent once XUI bug fix.
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataExternalMessageFl401 = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
             .caseTypeOfApplication("FL401")
             .applicants(applicantList)
@@ -2026,17 +2027,18 @@ public class SendAndReplyServiceTest {
         when(documentGenService.getTemplate(
             any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
-            eq(auth), eq(String.valueOf(caseData.getId())), eq("abc_template"), anyMap()))
+            eq(auth), eq(String.valueOf(caseDataExternalMessageFl401.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
         when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(UUID.randomUUID());
 
-        sendAndReplyService.sendNotificationToExternalParties(caseData, auth);
+        sendAndReplyService.sendNotificationToExternalParties(caseDataExternalMessageFl401, auth);
+        assertNotNull(caseDataExternalMessageFl401.getSendOrReplyMessage());
     }
 
     private Message getMessage() {
 
-        DynamicList dynamicList = DynamicList.builder()
+        DynamicList dynamicListMessage = DynamicList.builder()
             .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
             .listItems(List.of(DynamicListElement.builder().code("test1").build()))
             .build();
@@ -2054,7 +2056,7 @@ public class SendAndReplyServiceTest {
             .messageHistory("")
             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
             .messageAbout(MessageAboutEnum.OTHER)
-            .submittedDocumentsList(dynamicList)
+            .submittedDocumentsList(dynamicListMessage)
             .build();
     }
 
@@ -2100,13 +2102,13 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testFetchAdditionalApplicationCodeIfExistForSend() {
-        DynamicList dynamicList = DynamicList.builder()
+        DynamicList dynamicListApplications = DynamicList.builder()
             .value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         Message newMessage = Message.builder()
             .messageSubject("testSubject1")
             .messageContent("This is message 1 body")
-            .applicationsList(dynamicList)
+            .applicationsList(dynamicListApplications)
             .build();
 
         CaseData caseData = CaseData.builder().id(12345L)
@@ -2121,7 +2123,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND);
-        assertEquals(dynamicList.getValueCode(), returnString);
+        assertEquals(dynamicListApplications.getValueCode(), returnString);
     }
 
     @Test
@@ -2129,7 +2131,7 @@ public class SendAndReplyServiceTest {
 
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
-        CaseData caseData = CaseData.builder().id(123451L)
+        CaseData caseDataMessage = CaseData.builder().id(123451L)
             .chooseSendOrReply(REPLY)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -2142,7 +2144,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
-        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, REPLY);
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataMessage, REPLY);
         assertEquals(dynamicList.getValueCode(), returnString);
     }
 
