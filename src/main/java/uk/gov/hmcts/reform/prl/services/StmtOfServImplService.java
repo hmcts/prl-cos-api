@@ -397,15 +397,13 @@ public class StmtOfServImplService {
             && (null == caseData.getRespondentsFL401().getContactPreferences()
             || ContactPreferences.post.equals(caseData.getRespondentsFL401().getContactPreferences()))) {
             try {
-                serviceOfApplicationPostService.getCoverSheets(
+                packDocs.addAll(serviceOfApplicationPostService.getCoverSheets(
                     caseData,
                     authorization,
                     caseData.getRespondentsFL401().getAddress(),
                     caseData.getRespondentsFL401().getLabelForDynamicList(),
                     DOCUMENT_COVER_SHEET_HINT
-                ).forEach(document ->
-                    packDocs.add(document)
-                );
+                ));
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 if (documentLanguage.isGenEng()) {
                     packDocs.add(serviceOfApplicationService.generateCoverLetterBasedOnCaseAccess(
