@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -196,6 +197,9 @@ public class ManageOrdersController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
+
+            // Check for Automated Hearing Management
+            AutomatedHearingUtils.automatedHearingManagementRequest(authorisation, caseData, caseDataUpdated, manageOrderService);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state

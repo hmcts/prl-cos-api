@@ -2,10 +2,13 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
@@ -57,11 +60,18 @@ public interface HearingApiClient {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody Map<String,String> caseIdWithRegionIdMap
     );
-
+  
     @PostMapping(path = "/hearings-by-list-of-caseids-without-venue")
     List<Hearings> getHearingsForAllCaseIdsWithCourtVenue(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody List<String> caseIds
+    );
+  
+    @PostMapping(value = "/automated-hearing", consumes = "application/json")
+    ResponseEntity<AutomatedHearingResponse> createAutomatedHearing(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody AutomatedHearingCaseData automatedHearingCaseData
     );
 }
