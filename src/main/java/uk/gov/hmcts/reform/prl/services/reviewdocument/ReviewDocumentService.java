@@ -358,30 +358,7 @@ public class ReviewDocumentService {
     private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
                                    String quarantineDocsListToBeModified) {
         sendNotificationToCafCass(caseData,quarantineLegalDocElementOptional,quarantineDocsListToBeModified);
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
-                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
-                                            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,//idhemanna gov notify template ?
-                                            C7_NOTIFICATION_APPLICANT_RESPONDENT, null);
-            }
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)
-            ) {
-                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
-                                            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,// if gov notify template then why you did not add same name in application
-                                            C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_SOLICITOR
-                );
-            }
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
-
-                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
-                                            EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,// if gov notify template then why you did not add same name in application
-                                            RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM, RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR
-                );
-
-            }
-
-
-        }
+        sendNotificationToApplicant(caseData,quarantineLegalDocElementOptional);
     }
 
     private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
@@ -422,6 +399,33 @@ public class ReviewDocumentService {
         }
 
     }
+
+    private void sendNotificationToApplicant(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
+                                            C7_NOTIFICATION_APPLICANT_RESPONDENT, null);
+            }
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)
+            ) {
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.C1A_NOTIFICATION_APPLICANT,
+                                            C1A_NOTIFICATION_APPLICANT_RESPONDENT, C1A_NOTIFICATION_APPLICANT_SOLICITOR
+                );
+            }
+            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
+
+                sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
+                                            EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,
+                                            RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM, RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR
+                );
+
+            }
+        }
+    }
+
 
     private void sendNotificationToApplicant(String authorisation, CaseData caseData,
                                              EmailTemplateNames emailTemplate,
