@@ -90,7 +90,6 @@ public class AllTabServiceImplTest {
     private final String eventToken = "eventToken";
     private final String eventName = CaseEvent.UPDATE_ALL_TABS.getValue();
     private final String caseId = "1234567891011121";
-    private List<Element<CaseInvite>> caseInvites;
 
     @Before
     public void setUp() {
@@ -100,7 +99,7 @@ public class AllTabServiceImplTest {
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "W5X6Y7Z8", "abc2",
                 UUID.randomUUID(), YesOrNo.No
         );
-        caseInvites = List.of(element(caseInvite1), element(caseInvite2));
+        List.of(element(caseInvite1), element(caseInvite2));
 
         EventRequestData eventRequestData = EventRequestData.builder().build();
         when(systemUserService.getSysUserToken()).thenReturn(systemAuthToken);

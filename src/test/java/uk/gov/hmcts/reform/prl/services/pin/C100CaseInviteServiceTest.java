@@ -49,7 +49,6 @@ public class C100CaseInviteServiceTest {
     private CaseData caseDataNoRespondents;
 
     private CaseData citizenCaseDataWithApplicantEmail;
-    private CaseData solicitorCaseDataWithApplicantEmail;
 
     PartyDetails respondentOneWithEmail;
     PartyDetails respondentTwoWithEmail;
@@ -176,13 +175,13 @@ public class C100CaseInviteServiceTest {
                                  element(secondRespondentWithEmailAndRepresentation)))
             .build();
 
-        solicitorCaseDataWithApplicantEmail = CaseData.builder()
+        CaseData.builder()
             .caseTypeOfApplication("C100")
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicants(List.of(element(applicantWithEmail),
-                                element(applicantWithOutEmail)))
+                element(applicantWithOutEmail)))
             .respondents(List.of(element(respondentOneWithEmailAndRepresentation),
-                                 element(secondRespondentWithEmailAndRepresentation)))
+                element(secondRespondentWithEmailAndRepresentation)))
             .build();
 
     }
