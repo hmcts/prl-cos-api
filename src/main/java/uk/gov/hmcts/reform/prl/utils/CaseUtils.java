@@ -45,12 +45,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -837,5 +839,12 @@ public class CaseUtils {
             return respondent1.getDateOfBirth();
         }
         return null;
+    }
+
+    public static Set<String> getStringsSplitByDelimiter(String partyIds,
+                                                         String delimiter) {
+        return null != partyIds
+            ? Arrays.stream(partyIds.trim().split(delimiter)).map(String::trim).collect(Collectors.toSet())
+            : Collections.emptySet();
     }
 }

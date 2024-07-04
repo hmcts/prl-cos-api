@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -105,6 +107,7 @@ public class CaseServiceTest {
     public static final String eventId = "1234567891234567";
 
     public static final String accessCode = "123456";
+    private static final Logger log = LoggerFactory.getLogger(CaseServiceTest.class);
 
     @InjectMocks
     private CaseService caseService;
@@ -600,8 +603,9 @@ public class CaseServiceTest {
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertFalse(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
-        assertEquals(7, citizenDocumentsManagement.getCitizenDocuments().size());
+        assertFalse(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertFalse(citizenDocumentsManagement.getOtherDocuments().isEmpty());
+        assertEquals(6, citizenDocumentsManagement.getApplicantDocuments().size());
     }
 
     @Test
@@ -620,7 +624,9 @@ public class CaseServiceTest {
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getOtherDocuments().isEmpty());
     }
 
     @Test
@@ -656,7 +662,10 @@ public class CaseServiceTest {
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
-        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+        log.info("{}", citizenDocumentsManagement);
+        assertTrue(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getOtherDocuments().isEmpty());
     }
 
     @Test
@@ -785,6 +794,7 @@ public class CaseServiceTest {
             .state(State.DECISION_OUTCOME)
             .orderCollection(List.of(element(orderDetails)))
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .serviceOfApplication(ServiceOfApplication.builder().unServedRespondentPack(SoaPack.builder().packDocument(
                 List.of(element(Document.builder().documentBinaryUrl(
                     "abc").documentFileName("ddd").build()))).build()).build())
