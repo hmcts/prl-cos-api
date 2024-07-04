@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formateLocalDateTime;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -75,15 +76,12 @@ public class HelpWithFeesService {
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
         } else {
-            log.info("inside if statement");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
             List<Element<AdditionalApplicationsBundle>> additionalApplications
                 = null != caseData.getAdditionalApplicationsBundle() ? caseData.getAdditionalApplicationsBundle()
                 : new ArrayList<>();
 
-            log.info("chosen application is {}", chosenAdditionalApplication);
-            log.info("additional application bundle is {}", additionalApplications);
             if (null != chosenAdditionalApplication && null != chosenAdditionalApplication.getValue()) {
                 log.info("inside if statement");
                 if (null != chosenAdditionalApplication.getValue().getC2DocumentBundle()) {
@@ -102,18 +100,19 @@ public class HelpWithFeesService {
                         .build();
                     log.info("chosen application is {}", chosenAdditionalApplication);
                 } else {
-                    chosenAdditionalApplication = Element.<AdditionalApplicationsBundle>builder()
-                        .value(chosenAdditionalApplication
+                    log.info("inside else statement");
+                    chosenAdditionalApplication = element(chosenAdditionalApplication
+                        .getValue()
+                        .toBuilder()
+                        .otherApplicationsBundle(chosenAdditionalApplication
                             .getValue()
+                            .getOtherApplicationsBundle()
                             .toBuilder()
-                            .otherApplicationsBundle(chosenAdditionalApplication
-                                .getValue()
-                                .getOtherApplicationsBundle()
-                                .toBuilder()
-                                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
-                                .build())
+                            .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                             .build())
-                        .build();
+                        .build());
+
+                    log.info("chosen application is {}", chosenAdditionalApplication);
                 }
 
                 for (Element<AdditionalApplicationsBundle> additionalApplicationsBundleElement : additionalApplications) {
