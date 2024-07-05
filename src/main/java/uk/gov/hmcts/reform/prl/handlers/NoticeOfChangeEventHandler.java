@@ -224,11 +224,17 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
-        if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
-            //Get LiP
-            Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
+        //Get LiP
+        Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
+        CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
+        String accessCode = null;
+        if (null != caseInvite) {
+            accessCode = caseInvite.getAccessCode();
+        }
+
+        if (null != accessCode && launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             //PRL-5300 - send email/post to LiP based on contact pref
-            sendNotificationToLitigant(caseData, event, partyElement);
+            sendNotificationToLitigant(caseData, event, partyElement, accessCode);
 
             //PRL-3215 - notify applicants/respondents other parties for the litigants in case
             sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true, partyElement);
@@ -244,15 +250,10 @@ public class NoticeOfChangeEventHandler {
 
     private void sendNotificationToLitigant(CaseData caseData,
                                             NoticeOfChangeEvent event,
-                                            Element<PartyDetails> party) {
+                                            Element<PartyDetails> party, String accessCode) {
         log.info("*** Send notifications to LiP after legal rep is removed ***");
         if (null != party && null != party.getValue()) {
             log.info("Contact pref of the party {} is {}", party.getId(), party.getValue().getContactPreferences());
-            CaseInvite caseInvite = CaseUtils.getCaseInvite(party.getId(), caseData.getCaseInvites());
-            String accessCode = null;
-            if (null != caseInvite) {
-                accessCode = caseInvite.getAccessCode();
-            }
             if (ContactPreferences.email.equals(party.getValue().getContactPreferences())) {
                 log.info("Send email to LiP");
                 //PRL-3215 - send email to LiP
