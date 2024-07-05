@@ -1405,7 +1405,7 @@ public class SendAndReplyService {
                 bulkPrintDetails.add(element(sendBulkPrint(caseData, authorization, docs, partyDetails, SERVED_PARTY_EXTERNAL)));
             }
         } catch (Exception e) {
-            log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
+            log.error("There is an issue while sending post to the party {}", partyDetails.getPartyId());
         }
 
         return bulkPrintDetails;

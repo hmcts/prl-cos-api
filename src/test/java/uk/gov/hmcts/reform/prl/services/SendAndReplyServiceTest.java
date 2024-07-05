@@ -1950,6 +1950,92 @@ public class SendAndReplyServiceTest {
         assertNotNull(caseDataForExternalMessage.getSendOrReplyMessage());
     }
 
+
+    @Test
+    public void testSendPostNotificationToExternalPartiesForC100WithAddress()  throws Exception {
+
+        Message newMessage = getMessage();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        PartyDetails applicant = getApplicant();
+        applicant.setAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build());
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = getRespondent();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+        DynamicList sendMessageDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement =  Element.<SendAndReplyDynamicDoc>builder()
+            .id(UUID.randomUUID())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(sendMessageDynamicList).build())
+            .build();
+
+        CaseData caseDataForExternalMessage = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
+                    .build())
+            .build();
+
+
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(
+                uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().originalDocumentName("doc1")
+                    .build());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.getTemplate(
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+        when(dgsService.generateDocument(
+            eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
+            .thenReturn(getGeneratedDocumentInfo());
+        when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(UUID.randomUUID());
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataForExternalMessage, auth);
+        assertNotNull(caseDataForExternalMessage.getSendOrReplyMessage());
+    }
+
     @Test
     public void testSendPostNotificationToExternalPartiesForFL401()  throws Exception {
 
@@ -1960,6 +2046,7 @@ public class SendAndReplyServiceTest {
         msgListWithNewMessage.add(element(newMessage));
 
         PartyDetails applicant = getApplicant();
+        applicant.setAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build());
 
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
