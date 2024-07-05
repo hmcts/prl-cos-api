@@ -1362,7 +1362,7 @@ public class SendAndReplyService {
     }
 
     private boolean externalMessageToBeSentInPost(PartyDetails partyDetails) {
-        return isContactPreferenceMatched(
+        return null == partyDetails.getContactPreferences() ||  isContactPreferenceMatched(
             partyDetails,
             ContactPreferences.post
         );
