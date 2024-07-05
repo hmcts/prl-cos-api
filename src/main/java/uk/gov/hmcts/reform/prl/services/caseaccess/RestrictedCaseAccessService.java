@@ -232,8 +232,6 @@ public class RestrictedCaseAccessService {
         log.info("** retrieveAssignedUserRoles event started");
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(Attributes.attributes()
-                            .jurisdiction(callbackRequest.getCaseDetails().getJurisdiction())
-                            .caseType(callbackRequest.getCaseDetails().getCaseTypeId())
                             .caseId(callbackRequest.getCaseDetails().getId().toString())
                             .build())
             .validAt(LocalDateTime.now())
