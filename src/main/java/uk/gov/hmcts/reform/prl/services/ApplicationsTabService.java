@@ -223,19 +223,6 @@ public class ApplicationsTabService implements TabService {
         return caseData;
     }
 
-    /*  public Map<String, Object> updateCitizenPartiesTab(CaseData caseData) {
-
-        Map<String, Object> applicationTab = new HashMap<>();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put(C100_APPLICANT_TABLE, getApplicantsTable(caseData));
-            applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put(FL401_APPLICANT_TABLE, getFl401ApplicantsTable(caseData));
-            applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
-        }
-        return applicationTab;
-     }*/
-
     private List<Element<DomesticAbuseBehaviour>> getAllegationsOfHarmRevisedDaTable(CaseData caseData) {
 
         List<Element<DomesticAbuseBehaviour>> domesticAbuseBehaviourList = new ArrayList<>();

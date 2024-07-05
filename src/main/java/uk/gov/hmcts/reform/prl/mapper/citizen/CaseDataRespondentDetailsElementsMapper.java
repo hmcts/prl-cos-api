@@ -83,11 +83,6 @@ public class CaseDataRespondentDetailsElementsMapper {
             c100Address.getPostTown()).county(c100Address.getCounty()).postCode(c100Address.getPostCode()).build();
     }
 
-    private static LocalDate buildDateOfBirth(RespondentDetails respondentDetails) {
-        LocalDate dateOfBirth = buildDateOfBirth(respondentDetails.getPersonalDetails().getDateOfBirth());
-        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
-    }
-
     private static LocalDate buildDateOfBirth(DateofBirth date) {
         if (isNotEmpty(date) && isNotEmpty(date.getYear()) && isNotEmpty(date.getMonth()) && isNotEmpty(date.getDay())) {
             return LocalDate.of(Integer.parseInt(date.getYear()),
