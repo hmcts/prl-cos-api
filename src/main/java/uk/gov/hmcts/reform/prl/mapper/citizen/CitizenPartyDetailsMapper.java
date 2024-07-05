@@ -176,6 +176,7 @@ public class CitizenPartyDetailsMapper {
                                                                                           party.getValue(),
                                                                                           caseEvent, childDetails);
 
+                    log.info("After update ------------------>" + updatedPartyDetails.getIsAtAddressLessThan5Years());
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
@@ -547,6 +548,8 @@ public class CitizenPartyDetailsMapper {
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
+        log.info("citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()--------------------->" + citizenProvidedPartyDetails.getIsAtAddressLessThan5Years());
+        log.info("citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()--------------------->" + citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails());
 
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
