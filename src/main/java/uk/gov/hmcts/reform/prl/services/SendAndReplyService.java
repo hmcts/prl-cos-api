@@ -719,7 +719,6 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .internalMessageAttachDocs(List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
             .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
