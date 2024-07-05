@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class RoleAssignmentQueryRequest {
 
-    private Attributes attributes;
+    private QueryAttributes attributes;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private LocalDateTime validAt;
