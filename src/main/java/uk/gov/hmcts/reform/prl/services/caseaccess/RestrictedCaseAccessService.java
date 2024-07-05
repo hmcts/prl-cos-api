@@ -6,18 +6,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccessmanagement.CaseSecurityClassificationEnum;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -63,6 +71,12 @@ public class RestrictedCaseAccessService {
         and any previous access restrictions will be removed""";
     public static final String PRIVATE_CONFIRMATION_HEADER = "# Case marked as private";
 
+    private final RoleAssignmentApi roleAssignmentApi;
+
+    private final SystemUserService systemUserService;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
 
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
         log.info("** restrictedCaseAccessAboutToSubmit event started");
@@ -102,7 +116,7 @@ public class RestrictedCaseAccessService {
         }
 
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent)) {
-            applicantCaseName =  applicantCaseName + RESTRICTED_CASE;
+            applicantCaseName = applicantCaseName + RESTRICTED_CASE;
         } else if (MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
             applicantCaseName = applicantCaseName + PRIVATE_CASE;
         }
@@ -212,6 +226,31 @@ public class RestrictedCaseAccessService {
             .build();
         log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
         return aboutToStartOrSubmitCallbackResponse;
+    }
+
+    public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
+        log.info("** retrieveAssignedUserRoles event started");
+        RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
+            .attributes(Attributes.attributes()
+                            .jurisdiction(callbackRequest.getCaseDetails().getJurisdiction())
+                            .caseType(callbackRequest.getCaseDetails().getCaseTypeId())
+                            .caseId(callbackRequest.getCaseDetails().getId().toString())
+                            .build())
+            .validAt(LocalDateTime.now())
+            .build();
+        log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
+
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            null,
+            roleAssignmentQueryRequest
+        );
+
+        log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
+
+        log.info("** retrieveAssignedUserRoles done");
+        return new HashMap<>();
     }
 
 }
