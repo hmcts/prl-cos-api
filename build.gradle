@@ -563,7 +563,7 @@ pitest {
     'uk.gov.hmcts.reform.prl.enums.*',
     'uk.gov.hmcts.reform.prl.Application.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
-    'uk.gov.hmcts.reform.prl.services.ApplicationsTabService.java'
+    'uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper'
   ]
   threads = 10
   outputFormats = ['XML', 'HTML']
