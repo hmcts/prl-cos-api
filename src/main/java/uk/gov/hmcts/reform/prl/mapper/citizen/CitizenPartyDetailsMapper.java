@@ -548,8 +548,10 @@ public class CitizenPartyDetailsMapper {
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
 
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
-        log.info("citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()--------------------->" + citizenProvidedPartyDetails.getIsAtAddressLessThan5Years());
-        log.info("citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()--------------------->" + citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails());
+        log.info("citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()--------------------->"
+                     + citizenProvidedPartyDetails.getIsAtAddressLessThan5Years());
+        log.info("citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()--------------------->"
+                     + citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails());
 
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
