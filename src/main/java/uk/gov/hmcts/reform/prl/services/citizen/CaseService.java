@@ -671,7 +671,7 @@ public class CaseService {
         return CitizenDocumentsManagement.builder()
             .applicantDocuments(applicantDocuments)
             .respondentDocuments(respondentDocuments)
-            .otherDocuments(otherDocuments.stream()
+            .citizenOtherDocuments(otherDocuments.stream()
                                 .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
                                 .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
                                 .toList())
