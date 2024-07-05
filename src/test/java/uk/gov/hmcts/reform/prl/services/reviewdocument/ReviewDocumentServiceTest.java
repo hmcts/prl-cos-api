@@ -1282,7 +1282,7 @@ public class ReviewDocumentServiceTest {
     }
 
     @Test
-    public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type(String category) throws IOException {
+    public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type() throws IOException {
         verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentApplication");
         verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentC1AResponse");
         verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentC1AResponse");
