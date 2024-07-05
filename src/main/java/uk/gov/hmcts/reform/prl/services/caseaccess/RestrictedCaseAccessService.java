@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccessmanagement.CaseSecurityClassificationEnum;
 import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -231,8 +232,8 @@ public class RestrictedCaseAccessService {
     public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
         log.info("** retrieveAssignedUserRoles event started");
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
-            .attributes(Attributes.attributes()
-                            .caseId(callbackRequest.getCaseDetails().getId().toString())
+            .attributes(QueryAttributes.builder()
+                            .caseId(List.of(callbackRequest.getCaseDetails().getId().toString()))
                             .build())
             .validAt(LocalDateTime.now())
             .build();
