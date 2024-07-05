@@ -693,7 +693,7 @@ public class SendAndReplyService {
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
         final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
-        Message newMessage = Message.builder()
+        return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
@@ -719,7 +719,6 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            //.selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .internalMessageAttachDocs(List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
@@ -730,17 +729,6 @@ public class SendAndReplyService {
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
-
-        //List<Element<Document>> sendAndReplyDocs = getSendAndReplyDocuments(authorization,
-        // caseData.getSendOrReplyMessage().getSendAndReplyDynamicDocs());
-        //uk.gov.hmcts.reform.prl.models.documents.Document sendAttachedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
-        //if (isNotEmpty(sendAndReplyDocs) || null != sendAttachedDoc) {
-        //newMessage = newMessage.toBuilder()
-        //.internalMessageAttachDocs(REPLY.equals(caseData.getChooseSendOrReply()) ? sendAndReplyDocs : List.of(element(sendAttachedDoc)))
-        //.build();
-        //}
-
-        return newMessage;
     }
 
     private String getValueCode(DynamicList dynamicListObj) {
