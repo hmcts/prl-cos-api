@@ -517,7 +517,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -538,7 +546,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -559,7 +575,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -582,7 +606,15 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         },
         {
@@ -604,7 +636,16 @@
             "cafcassOfficerPosition": null,
             "cafcassOfficerEmailAddress": null,
             "cafcassOfficerOtherPosition": null,
-            "parentalResponsibilityDetails": "Test text New Case"
+            "parentalResponsibilityDetails": "Test text New Case",
+
+            "whoDoesTheChildLiveWith": {
+              "id": "bed05abf-308b-47a8-becc-0490404cee75",
+              "value": {
+                "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+                "partyFullName": "David Carman",
+                "partyType": "applicant"
+              }
+            }
           }
         }
       ],
@@ -1906,7 +1947,12 @@
           "applicantsRelationshipToChild" : "father",
           "respondentsRelationshipToChild" : "father",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "lll"
+          "parentalResponsibilityDetails" : "lll",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "applicants" : [ {
@@ -2104,7 +2150,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "b118cf82-81de-45e4-ab05-d0a93597e953",
@@ -2117,7 +2168,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {
@@ -2278,7 +2334,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       }, {
         "id" : "23f8d903-e423-4bb7-84e4-0d5d455e4408",
@@ -2291,7 +2352,12 @@
           "applicantsRelationshipToChild" : "stepFather",
           "respondentsRelationshipToChild" : "mother",
           "childLiveWith" : [ "applicant" ],
-          "parentalResponsibilityDetails" : "Text area field Test"
+          "parentalResponsibilityDetails" : "Text area field Test",
+          "whoDoesTheChildLiveWith": {
+            "partyId": "46cc0086-405a-423c-81d9-1a835ee82246",
+            "partyFullName": "David Carman",
+            "partyType": "applicant"
+          }
         }
       } ],
       "miamCertificationDocumentUpload1" : {
