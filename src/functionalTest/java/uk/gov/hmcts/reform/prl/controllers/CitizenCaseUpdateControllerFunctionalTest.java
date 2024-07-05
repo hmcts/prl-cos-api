@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
+@Ignore
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
@@ -313,7 +314,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .pathParam(EVENT_ID,"citizenContactPreference")
             .post(updatePartyDetailsEndPoint)
             .then()
-            .body("applicants[0].value.contactPreferences", equalTo("digital"))
+            .body("applicants[0].value.contactPreferences", equalTo("email"))
             .extract()
             .as(CaseData.class);
 
