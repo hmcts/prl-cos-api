@@ -807,7 +807,11 @@ public class SendAndReplyService {
 
     private String getInternalOrExternalSentTo(CaseData caseData, Message message) {
         return InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
-            ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : String.valueOf(
+            ? getExternalSentTo(message.getExternalMessageWhoToSendTo()) : getMessageSentTO(caseData, message);
+    }
+
+    private String getMessageSentTO(CaseData caseData, Message message) {
+        return String.valueOf(
             (REPLY.equals(caseData.getChooseSendOrReply())
                 ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
                 : message.getInternalMessageWhoToSendTo().getDisplayedValue()));
@@ -1332,7 +1336,6 @@ public class SendAndReplyService {
                 if (party.isPresent()) {
 
                     PartyDetails partyDetails = party.get().getValue();
-
                     if (externalMessageToBeSentInEmail(partyDetails)) {
                         try {
                             sendEmailNotification(caseData, partyDetails, auth);
@@ -1347,7 +1350,8 @@ public class SendAndReplyService {
 
                             log.info("Message sent as post to external parties");
                         } catch (Exception e) {
-                            log.error(e.getMessage());
+                            log.error("Error while sending post for Case id {} ", caseData.getId(), e);
+
                         }
 
                     }
@@ -1358,17 +1362,28 @@ public class SendAndReplyService {
     }
 
     private boolean externalMessageToBeSentInPost(PartyDetails partyDetails) {
-        return null == partyDetails.getContactPreferences() || partyDetails.getContactPreferences().equals(
-            ContactPreferences.post);
+        return isContactPreferenceMatched(
+            partyDetails,
+            ContactPreferences.post
+        );
     }
 
     private boolean externalMessageToBeSentInEmail(PartyDetails partyDetails) {
-        return isSolicitorRepresentative(partyDetails) || (null != partyDetails
-            .getContactPreferences() && partyDetails.getContactPreferences().equals(ContactPreferences.email));
+        return isSolicitorRepresentative(partyDetails) || isContactPreferenceMatched(
+            partyDetails,
+            ContactPreferences.email
+        );
+    }
+
+    private boolean isContactPreferenceMatched(PartyDetails partyDetails, ContactPreferences contactPreferences) {
+        if (Objects.nonNull(partyDetails)) {
+            contactPreferences.equals(partyDetails.getContactPreferences());
+        }
+        return false;
     }
 
     private List<Element<BulkPrintDetails>> sendPostNotificationToExternalParties(
-        CaseData caseData, PartyDetails partyDetails, Message message, String authorization) throws Exception {
+        CaseData caseData, PartyDetails partyDetails, Message message, String authorization) {
 
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
 
@@ -1391,7 +1406,6 @@ public class SendAndReplyService {
             }
         } catch (Exception e) {
             log.error("External party does not have any postal address to send {}", partyDetails.getPartyId());
-            throw new RuntimeException(e);
         }
 
         return bulkPrintDetails;

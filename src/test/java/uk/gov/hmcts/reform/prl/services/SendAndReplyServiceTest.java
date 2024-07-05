@@ -2111,7 +2111,7 @@ public class SendAndReplyServiceTest {
             .applicationsList(dynamicListApplications)
             .build();
 
-        CaseData caseData = CaseData.builder().id(12345L)
+        CaseData caseDataAwp = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
             .replyMessageDynamicList(DynamicList.builder().build())
             .sendOrReplyMessage(
@@ -2122,7 +2122,7 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
 
-        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SEND);
+        String returnString = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseDataAwp, SEND);
         assertEquals(dynamicListApplications.getValueCode(), returnString);
     }
 
