@@ -75,6 +75,8 @@ public class TransferToAnotherCourtEventHandlerTest {
 
     private TransferToAnotherCourtEvent transferToAnotherCourtEventWithDocsFL401;
 
+    private TransferToAnotherCourtEvent noTransferToAnotherCourtEvent;
+
     @Before
     public void init() {
         PartyDetails applicant1 = PartyDetails.builder()
@@ -183,6 +185,19 @@ public class TransferToAnotherCourtEventHandlerTest {
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
             .build();
 
+        final CaseData caseDataForNoTransferToCourtEmail = CaseData.builder()
+            .id(nextLong())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(Arrays.asList(element(applicant1), element(applicant2)))
+            .respondents(Arrays.asList(element(respondent1), element(respondent2)))
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .courtEmailAddress("test@test.com")
+            .courtName("old court")
+            .anotherCourt("new court")
+            .transferredCourtFrom("old court")
+            .cantFindCourtCheck(null)
+            .build();
+
         transferToAnotherCourtEvent = TransferToAnotherCourtEvent.builder()
             .caseData(caseDataWithDocs)
             .typeOfEvent("transferCourt")
@@ -200,6 +215,13 @@ public class TransferToAnotherCourtEventHandlerTest {
             .typeOfEvent("transferCourt")
             .authorisation("test")
             .build();
+
+        noTransferToAnotherCourtEvent = TransferToAnotherCourtEvent.builder()
+            .caseData(caseDataForNoTransferToCourtEmail)
+            .typeOfEvent("transferCourt")
+            .authorisation("test")
+            .build();
+
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
@@ -278,6 +300,32 @@ public class TransferToAnotherCourtEventHandlerTest {
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
         verify(sendgridService,times(1))
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
+
+    }
+
+    //write a test case for transferCourtEmail method when CantFindCourtCheck is false
+
+    @Test
+    public void shouldNotNotifyCourtForTransferWhenCantFindCourtCheckIsFalse() throws Exception {
+
+        doNothing().when(emailService)
+            .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
+
+        doNothing().when(sendgridService)
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
+        transferToAnotherCourtEventHandler.transferCourtEmail(noTransferToAnotherCourtEvent);
+
+        verify(emailService,times(0)).send(Mockito.anyString(),
+                                           Mockito.any(),
+                                           Mockito.any(), Mockito.any());
+        verify(sendgridService,times(0))
             .sendTransferCourtEmailWithAttachments(Mockito.any(),
                                                    Mockito.any(),
                                                    Mockito.any(),

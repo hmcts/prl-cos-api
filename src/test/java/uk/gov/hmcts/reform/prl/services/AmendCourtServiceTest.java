@@ -100,7 +100,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Removed this test case since no emails are now triggered "
+        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
     public void testC100EmailNotificationWithEmail() throws Exception {
         caseData = caseData.toBuilder()
             .cantFindCourtCheck(List.of())
@@ -142,7 +143,8 @@ public class AmendCourtServiceTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Removed this test case since no emails are now triggered "
+        + "upon selecting court from the dropdown list when selecting Transfer to another court event")
     public void testFL401CourtAdminEmailEmail() throws Exception {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
