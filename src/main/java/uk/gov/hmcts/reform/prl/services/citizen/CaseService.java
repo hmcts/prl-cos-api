@@ -147,6 +147,8 @@ public class CaseService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final HearingService hearingService;
 
+    public static final String DATE_FORMATTER_YYYY_MM_DD = "yyyy-MM-dd";
+
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
@@ -1182,7 +1184,8 @@ public class CaseService {
                                                         String categoryId,
                                                         String submittedDate,
                                                         boolean isWelsh) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD);
         return CitizenDocuments.builder()
             .partyId(TEST_UUID) //system generated docs
             .partyType(SERVED_PARTY_APPLICANT)
@@ -1266,7 +1269,7 @@ public class CaseService {
         String partyId = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             ? caseData.getApplicantsFL401().getPartyId().toString()
             : caseData.getApplicants().get(0).getId().toString();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER_YYYY_MM_DD);
         return CitizenDocuments.builder()
             .partyId(partyId)
             .partyType(partyType)
