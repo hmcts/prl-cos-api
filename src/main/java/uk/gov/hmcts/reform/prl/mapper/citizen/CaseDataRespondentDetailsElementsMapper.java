@@ -62,7 +62,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .previousName(buildPreviousName(respondentDetails))
             .gender(Gender.getDisplayedValueFromEnumString(respondentDetails.getPersonalDetails().getGender()))
             .otherGender(respondentDetails.getPersonalDetails().getOtherGenderDetails())
-            .dateOfBirth(buildDateOfBirth(respondentDetails.getPersonalDetails().getDateOfBirth()))
+            .dateOfBirth(buildDateOfBirth(respondentDetails))
             .isDateOfBirthUnknown(buildDateOfBirthUnknown(respondentDetails.getPersonalDetails()))
             .placeOfBirth(respondentDetails.getPersonalDetails().getRespondentPlaceOfBirth())
             .isPlaceOfBirthKnown(buildRespondentPlaceOfBirthKnown(respondentDetails.getPersonalDetails()))
@@ -81,6 +81,11 @@ public class CaseDataRespondentDetailsElementsMapper {
     private static Address buildAddress(C100Address c100Address) {
         return Address.builder().addressLine1(c100Address.getAddressLine1()).addressLine2(c100Address.getAddressLine2()).postTown(
             c100Address.getPostTown()).county(c100Address.getCounty()).postCode(c100Address.getPostCode()).build();
+    }
+
+    private static LocalDate buildDateOfBirth(RespondentDetails respondentDetails) {
+        LocalDate dateOfBirth = buildDateOfBirth(respondentDetails.getPersonalDetails().getDateOfBirth());
+        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth date) {
