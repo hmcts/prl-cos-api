@@ -604,7 +604,7 @@ public class CaseServiceTest {
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertFalse(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
-        //assertFalse(citizenDocumentsManagement.getOtherDocuments().isEmpty());
+        assertFalse(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
         assertEquals(6, citizenDocumentsManagement.getApplicantDocuments().size());
     }
 
@@ -626,7 +626,7 @@ public class CaseServiceTest {
         assertNotNull(citizenDocumentsManagement);
         assertTrue(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
         assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
-        //assertTrue(citizenDocumentsManagement.getOtherDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
     }
 
     @Test
@@ -665,7 +665,7 @@ public class CaseServiceTest {
         log.info("{}", citizenDocumentsManagement);
         assertTrue(citizenDocumentsManagement.getApplicantDocuments().isEmpty());
         assertTrue(citizenDocumentsManagement.getRespondentDocuments().isEmpty());
-        //assertTrue(citizenDocumentsManagement.getOtherDocuments().isEmpty());
+        assertTrue(citizenDocumentsManagement.getCitizenOtherDocuments().isEmpty());
     }
 
     @Test
