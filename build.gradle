@@ -610,7 +610,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/PrePopulateFeeAndSolicitorNameController.java',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CaseDataApplicantElementsMapper.java',
-  '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java'
+  '**uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
   '**uk/gov/hmcts/reform/prl/services/SystemUserService.java',
   '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
