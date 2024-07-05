@@ -50,7 +50,21 @@ public enum ChildArrangementOrdersEnum {
     @JsonProperty("committalWarrantFC604")
     committalWarrantFC604("committalWarrantFC604", "Warrant of committal (FC604)"),
     @JsonProperty("directionOnIssue")
-    directionOnIssueOrder("directionOnIssue", "Directions on issue");
+    directionOnIssueOrder("directionOnIssue", "Directions on issue"),
+    @JsonProperty("parentalOrderC53")
+    parentalOrderC53("parentalOrderC53", "Parental Order (C53)"),
+    @JsonProperty("declarationOfParentageC63A")
+    declarationOfParentageC63A("declarationOfParentageC63A", "Declaration of Parentage (C63A)"),
+    @JsonProperty("refusalOfParentalOrderA64")
+    refusalOfParentalOrderA64("refusalOfParentalOrderA64", "Refusal of parental order (A64)"),
+    @JsonProperty("forcedMarriageFl402A")
+    forcedMarriageFl402A("forcedMarriageFl402A", "Notice of proceedings Forced Marriage (FL402A)"),
+    @JsonProperty("forcedMarriageFmpo")
+    forcedMarriageFmpo("forcedMarriageFmpo", "Forced Marriage Protection Order (FMPO)"),
+    @JsonProperty("noticeOfProceedingsFgm002")
+    noticeOfProceedingsFgm002("noticeOfProceedingsFgm002", "Notice of proceedings FGM (FGM002)"),
+    @JsonProperty("fgmProtectionOrderFgmpo")
+    fgmProtectionOrderFgmpo("fgmProtectionOrderFgmpo", "FGM Protection Order (FGMPO)");
 
 
     private final String id;
