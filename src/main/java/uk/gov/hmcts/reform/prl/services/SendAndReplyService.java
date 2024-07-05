@@ -693,7 +693,7 @@ public class SendAndReplyService {
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
         final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
-        return Message.builder()
+        Message newMessage = Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
@@ -729,6 +729,15 @@ public class SendAndReplyService {
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document sendAttachedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
+        if (null != sendAttachedDoc) {
+            newMessage = newMessage.toBuilder()
+                .internalMessageAttachDocs(List.of(element(sendAttachedDoc)))
+                .build();
+        }
+
+        return newMessage;
     }
 
     private String getValueCode(DynamicList dynamicListObj) {
