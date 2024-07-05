@@ -66,7 +66,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT;
@@ -76,7 +75,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -402,7 +400,8 @@ public class ReviewDocumentService {
 
     private void sendNotificationToApplicant(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional) {
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
                 sendNotificationToApplicant(authTokenGenerator.generate(), caseData,
                                             EmailTemplateNames.C7_NOTIFICATION_APPLICANT,
@@ -431,42 +430,36 @@ public class ReviewDocumentService {
                                              EmailTemplateNames emailTemplate,
                                              SendgridEmailTemplateNames partyEmailTemplate,
                                              SendgridEmailTemplateNames solicitorEmailTemplate) {
-        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            List<PartyDetails> applicantToNotify = nullSafeCollection(caseData.getApplicants()).stream()
-                .map(Element::getValue)
-                .filter(applicant -> CaseUtils.hasLegalRepresentation(applicant) || Yes.equals(applicant.getCanYouProvideEmailAddress()))
-                .toList();
-            applicantToNotify.forEach(partyData -> {
+        caseData.getApplicants().forEach(partyDataEle -> {
+            PartyDetails partyData = partyDataEle.getValue();
+            Map<String, Object> dynamicData = getEmailDynamicData(caseData);
+            List<Document> respondentDocuments = caseData.getReviewDocuments() != null
+                && caseData.getReviewDocuments().getReviewDoc() != null
+                ? List.of(caseData.getReviewDocuments().getReviewDoc()) : Collections.emptyList();
+
+            if (isSolicitorEmailExists(partyData) && solicitorEmailTemplate != null) {
+                dynamicData.put(NAME, partyData.getRepresentativeFullName());
+                sendEmailViaSendGrid(authorisation,
+                                   respondentDocuments,
+                                   dynamicData,
+                                   partyData.getSolicitorEmail(),
+                                   solicitorEmailTemplate);
+            } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
+                        && isPartyProvidedWithEmail(partyData)) {
                 // condition to be added either its for gov notify email or send grid
-                Map<String, Object> dynamicData = getEmailDynamicData(caseData);
-                List<Document> respondentDocuments = caseData.getReviewDocuments() != null
-                    && caseData.getReviewDocuments().getReviewDoc() != null
-                    ? List.of(caseData.getReviewDocuments().getReviewDoc()) : Collections.emptyList();
-
-                if (isSolicitorEmailExists(partyData) && solicitorEmailTemplate != null) {
-                    dynamicData.put(NAME, partyData.getRepresentativeFullName());
-                    sendEmailViaSendGrid(authorisation,
-                                       respondentDocuments,
-                                       dynamicData,
-                                       partyData.getSolicitorEmail(),
-                                       solicitorEmailTemplate);
-                } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
-                            && isPartyProvidedWithEmail(partyData)) {
-                    if (hasDashboardAccess(element(partyData))) {
-                        sendEmailToParty(caseData, partyData, emailTemplate);
-                    } else {
-                        sendEmailViaSendGrid(
-                            authorisation,
-                            respondentDocuments,
-                            dynamicData,
-                            partyData.getEmail(),
-                            partyEmailTemplate
-                        );
-                    }
+                if (hasDashboardAccess(element(partyData))) {
+                    sendEmailToParty(caseData, partyData, emailTemplate);
+                } else {
+                    sendEmailViaSendGrid(
+                        authorisation,
+                        respondentDocuments,
+                        dynamicData,
+                        partyData.getEmail(),
+                        partyEmailTemplate
+                    );
                 }
-            });
-        }
-
+            }
+        });
     }
 
     private boolean isSolicitorEmailExists(PartyDetails party) {
