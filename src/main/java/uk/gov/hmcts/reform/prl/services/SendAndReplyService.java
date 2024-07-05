@@ -1314,50 +1314,48 @@ public class SendAndReplyService {
     public void sendNotificationToExternalParties(CaseData caseData, String auth) {
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-
         if (!InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())) {
             log.error("Send or reply is not external message.");
             return;
         }
-
         List<Element<PartyDetails>> applicantsRespondentInCase = getAllApplicantsRespondentInCase(caseData);
 
-        if (caseData.getSendOrReplyMessage().getSendMessageObject().getExternalMessageWhoToSendTo() != null) {
-
-            List<DynamicMultiselectListElement> dynamicMultiselectListElementList = caseData.getSendOrReplyMessage()
-                .getSendMessageObject().getExternalMessageWhoToSendTo().getValue();
-
+        if (message.getExternalMessageWhoToSendTo() != null) {
+            List<DynamicMultiselectListElement> dynamicMultiselectListElementList = message.getExternalMessageWhoToSendTo().getValue();
             dynamicMultiselectListElementList.forEach(selectedElement -> {
                 Optional<Element<PartyDetails>> party = CaseUtils.getParty(
                     selectedElement.getCode(),
                     applicantsRespondentInCase
                 );
-
                 if (party.isPresent()) {
 
-                    PartyDetails partyDetails = party.get().getValue();
-                    if (externalMessageToBeSentInEmail(partyDetails)) {
-                        try {
-                            sendEmailNotification(caseData, partyDetails, auth);
-                        } catch (Exception e) {
-                            log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
-                        }
-                    } else if (externalMessageToBeSentInPost(partyDetails)) {
-
-                        try {
-                            sendPostNotificationToExternalParties(caseData, partyDetails,
-                                                                  caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
-
-                            log.info("Message sent as post to external parties");
-                        } catch (Exception e) {
-                            log.error("Error while sending post for Case id {} ", caseData.getId(), e);
-
-                        }
-
-                    }
+                    handleExternalMessageNotifications(caseData, auth, party);
                 }
             }
             );
+        }
+    }
+
+    private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party) {
+        PartyDetails partyDetails = party.get().getValue();
+        if (externalMessageToBeSentInEmail(partyDetails)) {
+            try {
+                sendEmailNotification(caseData, partyDetails, auth);
+            } catch (Exception e) {
+                log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
+            }
+        } else if (externalMessageToBeSentInPost(partyDetails)) {
+
+            try {
+                sendPostNotificationToExternalParties(caseData, partyDetails,
+                                                      caseData.getSendOrReplyMessage().getSendMessageObject(), auth
+                );
+
+                log.info("Message sent as post to external parties");
+            } catch (Exception e) {
+                log.error("Error while sending post for Case id {} ", caseData.getId(), e);
+
+            }
         }
     }
 

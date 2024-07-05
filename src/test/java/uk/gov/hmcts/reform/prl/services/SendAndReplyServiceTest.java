@@ -807,7 +807,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
@@ -839,7 +839,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
@@ -882,7 +882,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
@@ -924,7 +924,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
@@ -964,7 +964,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
@@ -1004,7 +1004,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
@@ -1140,7 +1140,7 @@ public class SendAndReplyServiceTest {
                     .messages(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                             .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
