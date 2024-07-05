@@ -547,6 +547,10 @@ public class CitizenPartyDetailsMapper {
 
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
 
+        String isAddressLivedLessThan5YearsDetails = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
+            ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
+            : existingPartyDetails.getAddressLivedLessThan5YearsDetails();
+
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
         log.info("citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()--------------------->"
                      + citizenProvidedPartyDetails.getIsAtAddressLessThan5Years());
@@ -563,9 +567,9 @@ public class CitizenPartyDetailsMapper {
             .isAtAddressLessThan5Years(YesOrNo.Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()) ? YesOrNo.No : YesOrNo.Yes)
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
-            .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
-                                                   ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
-                                                   : existingPartyDetails.getAddressLivedLessThan5YearsDetails())
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())
+                                                   ? isAddressLivedLessThan5YearsDetails
+                                                   : null)
             .firstName(citizenProvidedPartyDetails.getFirstName())
             .lastName(citizenProvidedPartyDetails.getLastName())
             .previousName(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPreviousName())
