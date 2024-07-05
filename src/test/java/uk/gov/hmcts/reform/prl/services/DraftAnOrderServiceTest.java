@@ -3640,7 +3640,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                 .isTheOrderAboutChildren(Yes)
                 .build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.forcedMarriageFmpo)
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.forcedMarriageFmpo)
             .selectedOrder("Test order")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3776,7 +3776,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                 .isTheOrderAboutChildren(Yes)
                 .build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.forcedMarriageFl402A)
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.forcedMarriageFl402A)
             .selectedOrder("Test order")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3810,7 +3810,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                 .isTheOrderAboutChildren(Yes)
                 .build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.noticeOfProceedingsFgm002)
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.noticeOfProceedingsFgm002)
             .selectedOrder("Test order")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3844,7 +3844,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                 .isTheOrderAboutChildren(Yes)
                 .build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.fgmProtectionOrderFgmpo)
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.fgmProtectionOrderFgmpo)
             .selectedOrder("Test order")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());

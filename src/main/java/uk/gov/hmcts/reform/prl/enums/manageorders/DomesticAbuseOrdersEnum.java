@@ -42,7 +42,15 @@ public enum DomesticAbuseOrdersEnum {
     @JsonProperty("blankOrderFL415")
     blankOrderFL415("blankOrderFL415", "Blank order (FL415)"),
     @JsonProperty("landlordOrMortgageNotice")
-    landlordOrMortgageNotice("landlordOrMortgageNotice", "Notice to landlord or mortgage company (FL416)");
+    landlordOrMortgageNotice("landlordOrMortgageNotice", "Notice to landlord or mortgage company (FL416)"),
+    @JsonProperty("forcedMarriageFl402A")
+    forcedMarriageFl402A("forcedMarriageFl402A", "Notice of proceedings Forced Marriage (FL402A)"),
+    @JsonProperty("forcedMarriageFmpo")
+    forcedMarriageFmpo("forcedMarriageFmpo", "Forced Marriage Protection Order (FMPO)"),
+    @JsonProperty("noticeOfProceedingsFgm002")
+    noticeOfProceedingsFgm002("noticeOfProceedingsFgm002", "Notice of proceedings FGM (FGM002)"),
+    @JsonProperty("fgmProtectionOrderFgmpo")
+    fgmProtectionOrderFgmpo("fgmProtectionOrderFgmpo", "FGM Protection Order (FGMPO)");
 
     private final String id;
     private final String displayedValue;

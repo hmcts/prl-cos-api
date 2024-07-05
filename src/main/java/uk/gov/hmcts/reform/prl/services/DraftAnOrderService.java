@@ -2302,9 +2302,12 @@ public class DraftAnOrderService {
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if (null != caseData.getChildArrangementOrders()
+            if ((null != caseData.getChildArrangementOrders()
                 && Arrays.stream(ManageOrdersUtils. PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString()))) {
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString())))
+                || ((null != caseData.getDomesticAbuseOrders())
+                && Arrays.stream(ManageOrdersUtils. PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getDomesticAbuseOrders().toString())))) {
                 return prohibitedOrdersForSolicitor(errorList);
             }
 
