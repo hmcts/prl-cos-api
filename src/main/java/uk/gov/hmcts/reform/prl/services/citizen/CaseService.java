@@ -65,6 +65,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1232,7 +1233,8 @@ public class CaseService {
             .categoryId(categoryId)
             .document(isWelsh ? null : document)
             .documentWelsh(isWelsh ? document : null)
-            .uploadedDate(LocalDateTime.parse(submittedDate, formatter))
+            .uploadedDate(LocalDateTime.of(LocalDate.parse(submittedDate, formatter),
+                                           LocalTime.of(0, 0)))
             .documentLanguage(isWelsh ? WELSH : ENGLISH)
             .build();
     }
@@ -1315,7 +1317,8 @@ public class CaseService {
             .partyType(partyType)
             .categoryId(categoryId)
             .document(document)
-            .uploadedDate(LocalDateTime.parse(caseData.getDateSubmitted(), formatter))
+            .uploadedDate(LocalDateTime.of(LocalDate.parse(caseData.getDateSubmitted(), formatter),
+                                           LocalTime.of(0, 0)))
             .build();
     }
 
