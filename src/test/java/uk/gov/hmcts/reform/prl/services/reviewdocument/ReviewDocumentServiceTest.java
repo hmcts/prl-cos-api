@@ -1183,14 +1183,14 @@ public class ReviewDocumentServiceTest {
     @Test
     public void testSendEmailProcessForApplicantsWhenRespondentSubmit_C1AResponse() throws IOException {
         testSendEmailProcessForApplicantsWhenRespondentSubmitApplication("respondentC1AResponse",
-                                                                         EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,
-                                                                         SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM,
-                                                                         SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR);
+                             EmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_APPLICANT,
+                             SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM,
+                             SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR);
     }
 
     public void testSendEmailProcessForApplicantsWhenRespondentSubmitApplication(String category, EmailTemplateNames emailTemplate,
-                                                                                 SendgridEmailTemplateNames sendGridEmailTemplate,
-                                                                                 SendgridEmailTemplateNames solicitorEmailTemplate) throws IOException {
+                                SendgridEmailTemplateNames sendGridEmailTemplate,
+                                SendgridEmailTemplateNames solicitorEmailTemplate) throws IOException {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
@@ -1255,8 +1255,7 @@ public class ReviewDocumentServiceTest {
 
         Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
 
-        List<Element<QuarantineLegalDoc>>  legalProfUploadDocListDocTab =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
+
         verify(emailService, times(1)).send(eq("afl11@test.com"),
                                             eq(emailTemplate), any(),
                                             eq(LanguagePreference.english));
@@ -1270,6 +1269,9 @@ public class ReviewDocumentServiceTest {
             eq(solicitorEmailTemplate),
             anyString(),
             any(SendgridEmailConfig.class));
+
+        List<Element<QuarantineLegalDoc>>  legalProfUploadDocListDocTab =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
 
         Assert.assertNotNull(caseDataMap.get("legalProfUploadDocListDocTab"));
         Assert.assertEquals(1, legalProfUploadDocListDocTab.size());
@@ -1286,6 +1288,7 @@ public class ReviewDocumentServiceTest {
         verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type("respondentC1AResponse");
 
     }
+
     public void verifySendEmailProcessForApplicantsWhenRespondentSubmitApplication_FL401Type(String category) throws IOException {
         List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
         quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -1351,17 +1354,16 @@ public class ReviewDocumentServiceTest {
 
         Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
 
-        List<Element<QuarantineLegalDoc>>  legalProfUploadDocListDocTab =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
-        verify(emailService, times(0)).send(any(),
-                                            any(), any(),
-                                            any());
-
         verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
             any(),
             anyString(),
             any());
 
+        List<Element<QuarantineLegalDoc>>  legalProfUploadDocListDocTab =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
+        verify(emailService, times(0)).send(any(),
+                                            any(), any(),
+                                            any());
 
         Assert.assertNotNull(caseDataMap.get("legalProfUploadDocListDocTab"));
         Assert.assertEquals(1, legalProfUploadDocListDocTab.size());

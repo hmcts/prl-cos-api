@@ -67,9 +67,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.RESPONDENT_RESPONDED_ALLEGATIONS_OF_HARM_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
@@ -439,18 +439,19 @@ public class ReviewDocumentService {
             applicantToNotify.forEach(partyData -> {
                 // condition to be added either its for gov notify email or send grid
                 Map<String, Object> dynamicData = getEmailDynamicData(caseData);
-                List<Document> respondentDocuments = caseData.getReviewDocuments() != null && caseData.getReviewDocuments().getReviewDoc() != null ?
-                    List.of(caseData.getReviewDocuments().getReviewDoc()): Collections.emptyList();
+                List<Document> respondentDocuments = caseData.getReviewDocuments() != null
+                    && caseData.getReviewDocuments().getReviewDoc() != null
+                    ? List.of(caseData.getReviewDocuments().getReviewDoc()) : Collections.emptyList();
 
                 if (isSolicitorEmailExists(partyData) && solicitorEmailTemplate != null) {
-                  dynamicData.put(NAME, partyData.getRepresentativeFullName());
-                  sendEmailViaSendGrid(authorisation,
+                    dynamicData.put(NAME, partyData.getRepresentativeFullName());
+                    sendEmailViaSendGrid(authorisation,
                                        respondentDocuments,
                                        dynamicData,
                                        partyData.getSolicitorEmail(),
                                        solicitorEmailTemplate);
                 } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
-                  && isPartyProvidedWithEmail(partyData)) {
+                            && isPartyProvidedWithEmail(partyData)) {
                     if (hasDashboardAccess(element(partyData))) {
                         sendEmailToParty(caseData, partyData, emailTemplate);
                     } else {
@@ -527,6 +528,7 @@ public class ReviewDocumentService {
                       emailAddress, e.getMessage(), e);
         }
     }
+
     private  String getNameOfRespondent(Element<QuarantineLegalDoc> quarantineLegalDocElementOptional, String quarantineDocsListToBeModified) {
         if (LEGAL_PROF_QUARANTINE_DOCS_LIST.equalsIgnoreCase(quarantineDocsListToBeModified)) {
             return quarantineLegalDocElementOptional.getValue().getSolicitorRepresentedPartyName();
