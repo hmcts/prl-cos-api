@@ -66,6 +66,10 @@ public class ManageOrdersUtils {
     public static final String[] PROHIBITED_ORDER_IDS_FOR_SOLICITORS = {"noticeOfProceedings","noticeOfProceedingsParties",
         "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue"};
 
+    public static final String[] PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS = {"standardDirectionsOrder", "parentalOrderC53",
+        "declarationOfParentageC63A", "refusalOfParentalOrderA64", "forcedMarriageFl402A", "forcedMarriageFmpo",
+        "noticeOfProceedingsFgm002", "fgmProtectionOrderFgmpo"};
+
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
                                                            boolean isSolicitorOrdersHearings) {

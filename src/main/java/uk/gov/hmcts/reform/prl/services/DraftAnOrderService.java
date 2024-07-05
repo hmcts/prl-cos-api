@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -2303,12 +2302,9 @@ public class DraftAnOrderService {
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if ((null != caseData.getChildArrangementOrders()
-                && ChildArrangementOrdersEnum.standardDirectionsOrder
-                .name()
-                .equalsIgnoreCase(caseData
-                                      .getChildArrangementOrders()
-                                      .toString()))) {
+            if (null != caseData.getChildArrangementOrders()
+                && Arrays.stream(ManageOrdersUtils. PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString()))) {
                 return prohibitedOrdersForSolicitor(errorList);
             }
 
