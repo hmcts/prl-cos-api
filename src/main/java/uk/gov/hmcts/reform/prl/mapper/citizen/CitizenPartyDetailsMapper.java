@@ -555,7 +555,7 @@ public class CitizenPartyDetailsMapper {
             .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
-            .isAtAddressLessThan5Years(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .isAtAddressLessThan5Years(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years() == YesOrNo.Yes ? YesOrNo.No : YesOrNo.Yes)
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
             .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
