@@ -27,8 +27,8 @@ public class CitizenDocumentsManagement {
     @JsonProperty("respondentDocuments")
     public List<CitizenDocuments> respondentDocuments;
 
-    @JsonProperty("otherDocuments")
-    public List<CitizenDocuments> otherDocuments;
+    @JsonProperty("citizenOtherDocuments")
+    public List<CitizenDocuments> citizenOtherDocuments;
 
     @JsonProperty("citizenOrders")
     public List<CitizenDocuments> citizenOrders;
