@@ -5,36 +5,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance;
 
 @Slf4j
 @Service
@@ -43,61 +54,121 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 public class AllTabServiceImpl implements AllTabsService {
 
     private final ApplicationsTabService applicationsTabService;
-    private final CoreCaseDataService coreCaseDataService;
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     private final ConfidentialityTabService confidentialityTabService;
     private final ObjectMapper objectMapper;
-    private final CcdCoreCaseDataService coreCaseDataServiceCcdClient;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final SystemUserService systemUserService;
+    private final IdamClient idamClient;
 
+    /**
+     * This method updates all tabs based on latest case data from DB.
+     * If additional params needs to be stored, then use getStartAllTabsUpdate
+     * followed by mapAndSubmitAllTabsUpdate.
+     * @param caseId it will be used to start the transaction
+     * @return CaseDetails will be returned
+     **/
     @Override
-    public void updateAllTabs(CaseData caseData) {
-        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
-        if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+    public CaseDetails updateAllTabsIncludingConfTab(String caseId) {
+        if (StringUtils.isNotEmpty(caseId)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = getStartAllTabsUpdate(caseId);
+            log.info("all tab update triggered");
+            return mapAndSubmitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseId,
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    startAllTabsUpdateDataContent.caseData()
+            );
+        } else {
+            log.error("All tabs update failed as no case found");
+            return null;
         }
-        if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
-        }
-        if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
-        }
-        // Calling event to refresh the page.
-        refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
 
-    private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-all-tabs",
-            combinedFieldsMap
+    @Override
+    public StartAllTabsUpdateDataContent getStartAllTabsUpdate(String caseId) {
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.UPDATE_ALL_TABS,
+            systemUpdateUserId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                systemAuthorisation,
+                allTabsUpdateEventRequestData,
+                caseId,
+                true
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            systemAuthorisation,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData,
+            null
         );
     }
 
-    public void updateAllTabsIncludingConfTab(CaseData caseData) {
-        Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
-        // Calling event to refresh the page.
-        refreshCcdUsingEvent(caseData, combinedFieldsMap);
+    @Override
+    public StartAllTabsUpdateDataContent getStartUpdateForSpecificEvent(String caseId, String eventId) {
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.fromValue(eventId),
+            systemUpdateUserId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                systemAuthorisation,
+                allTabsUpdateEventRequestData,
+                caseId,
+                true
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            systemAuthorisation,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData,
+            null
+        );
     }
 
-    public void updateAllTabsIncludingConfTabRefactored(String authorisation,
-                                                        String caseId,
-                                                        StartEventResponse startEventResponse,
-                                                        EventRequestData allTabsUpdateEventRequestData,
-                                                        CaseData caseData) {
+    public CaseDetails mapAndSubmitAllTabsUpdate(String systemAuthorisation,
+                                                 String caseId,
+                                                 StartEventResponse startEventResponse,
+                                                 EventRequestData eventRequestData,
+                                                 CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
 
-        coreCaseDataServiceCcdClient.submitUpdate(
-            authorisation,
-            allTabsUpdateEventRequestData,
-            coreCaseDataServiceCcdClient.createCaseDataContent(
-                startEventResponse,
-                combinedFieldsMap
-            ),
-            caseId,
-            true
+        return submitAllTabsUpdate(systemAuthorisation, caseId, startEventResponse, eventRequestData, combinedFieldsMap);
+    }
+
+    public CaseDetails submitAllTabsUpdate(String systemAuthorisation,
+                                           String caseId,
+                                           StartEventResponse startEventResponse,
+                                           EventRequestData eventRequestData,
+                                           Map<String, Object> combinedFieldsMap) {
+        return ccdCoreCaseDataService.submitUpdate(
+                systemAuthorisation,
+                eventRequestData,
+                ccdCoreCaseDataService.createCaseDataContent(
+                        startEventResponse,
+                        combinedFieldsMap
+                ),
+                caseId,
+                true
         );
     }
 
@@ -109,9 +180,32 @@ public class AllTabServiceImpl implements AllTabsService {
         documentMap.put("finalWelshDocument", caseData.getFinalWelshDocument());
         documentMap.put("c8Document", caseData.getC8Document());
         documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
-        documentMap.put("draftOrderDoc", caseData.getDraftOrderDoc());
-        documentMap.put("draftOrderDocWelsh", caseData.getDraftOrderDocWelsh());
+        documentMap.put("submitAndPayDownloadApplicationLink", caseData.getSubmitAndPayDownloadApplicationLink());
+        documentMap.put("submitAndPayDownloadApplicationWelshLink", caseData.getSubmitAndPayDownloadApplicationWelshLink());
 
+        return documentMap;
+    }
+
+    public Map<String, Object> getNewMiamPolicyUpgradeDocumentMap(CaseData caseData, Map<String, Object> documentMap) {
+        if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
+            && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())
+            && Yes.equals(caseData.getMiamPolicyUpgradeDetails().getMpuClaimingExemptionMiam())
+            && CollectionUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons())
+            && (caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuDomesticAbuse)
+            || caseData.getMiamPolicyUpgradeDetails().getMpuExemptionReasons().contains(mpuPreviousMiamAttendance))) {
+            documentMap.put(
+                "mpuDomesticAbuseEvidenceDocument",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDomesticAbuseEvidenceDocument()
+            );
+            documentMap.put(
+                "mpuDocFromDisputeResolutionProvider",
+                caseData.getMiamPolicyUpgradeDetails().getMpuDocFromDisputeResolutionProvider()
+            );
+            documentMap.put(
+                "mpuCertificateByMediator",
+                caseData.getMiamPolicyUpgradeDetails().getMpuCertificateByMediator()
+            );
+        }
         return documentMap;
     }
 
@@ -134,7 +228,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                          String authorisation,
                                          String caseId,
                                          StartEventResponse startEventResponse,
-                                         EventRequestData allTabsUpdateEventRequestData,
+                                         EventRequestData eventRequestData,
                                          CaseData caseData) {
         Map<String, Object> dataMap = new HashMap<>();
         Map<String, Object> combinedFieldsMap = new HashMap<>();
@@ -151,10 +245,10 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.putAll(dataMap);
         }
 
-        coreCaseDataServiceCcdClient.submitUpdate(
+        ccdCoreCaseDataService.submitUpdate(
             authorisation,
-            allTabsUpdateEventRequestData,
-            coreCaseDataServiceCcdClient.createCaseDataContent(
+            eventRequestData,
+            ccdCoreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 combinedFieldsMap
             ),
@@ -190,6 +284,7 @@ public class AllTabServiceImpl implements AllTabsService {
         } catch (JsonProcessingException e) {
             log.info("error");
         }
+        getNewMiamPolicyUpgradeDocumentMap(caseData, combinedFieldsMap);
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }
@@ -198,6 +293,57 @@ public class AllTabServiceImpl implements AllTabsService {
         if (CollectionUtils.isNotEmpty(caseInvites)) {
             caseDataUpdatedMap.put("caseInvites", caseInvites);
         }
+    }
+
+    @Override
+    public StartAllTabsUpdateDataContent getStartUpdateForSpecificUserEvent(String caseId,
+                                                                            String eventId,
+                                                                            String authorisation) {
+        log.info("event Id we got is:: {}", eventId);
+        log.info("event is now:: {}", CaseEvent.fromValue(eventId));
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
+            CaseEvent.fromValue(eventId),
+            userDetails.getId()
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                authorisation,
+                allTabsUpdateEventRequestData,
+                caseId,
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        return new StartAllTabsUpdateDataContent(
+            authorisation,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateStartEventResponse.getCaseDetails().getData(),
+            allTabsUpdateCaseData,
+            userDetails
+        );
+    }
+
+    @Override
+    public CaseDetails submitUpdateForSpecificUserEvent(String authorisation,
+                                                        String caseId,
+                                                        StartEventResponse startEventResponse,
+                                                        EventRequestData eventRequestData,
+                                                        Map<String, Object> combinedFieldsMap,
+                                                        UserDetails userDetails) {
+        return ccdCoreCaseDataService.submitUpdate(
+            authorisation,
+            eventRequestData,
+            ccdCoreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                combinedFieldsMap
+            ),
+            caseId,
+            !userDetails.getRoles().contains(CITIZEN_ROLE)
+        );
     }
 
 }

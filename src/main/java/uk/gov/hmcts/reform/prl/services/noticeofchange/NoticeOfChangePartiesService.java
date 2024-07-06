@@ -125,13 +125,14 @@ public class NoticeOfChangePartiesService {
         The court will consider your withdrawal request.""";
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
+        log.info("generating noc answers");
         return generate(caseData, representing, POPULATE);
     }
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy) {
         Map<String, Object> data = new HashMap<>();
-
+        log.info("generating noc answers" + caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             generateC100NocDetails(caseData, representing, strategy, data);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -143,7 +144,7 @@ public class NoticeOfChangePartiesService {
     public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
 
-
+        log.info("generating noc answers for C100");
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
         int numElements = null != caElements ? caElements.size() : 0;
         List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
@@ -741,7 +742,6 @@ public class NoticeOfChangePartiesService {
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
                 List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseId));
-                log.info("CaseEventDetail ===> " + eventsForCase);
                 for (CaseEventDetail eventDetail : eventsForCase) {
                     if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equalsIgnoreCase(eventDetail.getStateId())) {
                         log.info("Case in hearing state, hence updating access code");
