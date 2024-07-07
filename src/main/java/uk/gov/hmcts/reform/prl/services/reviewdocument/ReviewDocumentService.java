@@ -25,9 +25,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
-import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
-import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -46,7 +43,6 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -375,14 +371,11 @@ public class ReviewDocumentService {
         sendNotificationToCafCass(caseData, quarantineLegalDocElementOptional, quarantineDocsListToBeModified);
         sendResponseSubmittedPostNotification(caseData,
                                               quarantineLegalDocElementOptional,
-                                              quarantineDocsListToBeModified,
-                                              caseDataUpdated
-        );
+                                              quarantineDocsListToBeModified);
     }
 
     private void sendResponseSubmittedPostNotification(CaseData caseData, Element<QuarantineLegalDoc>
-        quarantineLegalDocElementOptional, String quarantineDocsListToBeModified,
-                                                       Map<String, Object> caseDataUpdated) {
+        quarantineLegalDocElementOptional, String quarantineDocsListToBeModified) {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo()))) {
@@ -390,84 +383,38 @@ public class ReviewDocumentService {
                 quarantineLegalDocElementOptional,
                 quarantineDocsListToBeModified
             );
-            List<Element<NotificationDetails>> responseNotification = new ArrayList<>();
             if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_APPLICATION)) {
-                responseNotification = generateAndSendPostNotification(
+                generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
                     DOCUMENT_A13_LETTER
                 );
-                updateResponseNotification(
-                    responseNotification,
-                    caseData,
-                    caseDataUpdated,
-                    respondentName,
-                    "nameOfRespondentAp13",
-                    "ap13Notifications",
-                    "ap13NotificationSent"
-                );
             }
 
             if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
-                responseNotification = generateAndSendPostNotification(
+                generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
                     DOCUMENT_A14_LETTER
                 );
-                updateResponseNotification(
-                    responseNotification,
-                    caseData,
-                    caseDataUpdated,
-                    respondentName,
-                    "nameOfRespondentAp14",
-                    "ap14Notifications",
-                    "ap14NotificationSent"
-                );
             }
 
             if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
-                responseNotification = generateAndSendPostNotification(
+                generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
                     DOCUMENT_A15_LETTER
                 );
             }
-            updateResponseNotification(
-                responseNotification,
-                caseData,
-                caseDataUpdated,
-                respondentName,
-                "nameOfRespondentAp15",
-                "ap15Notifications",
-                "ap15NotificationSent"
-            );
         }
     }
 
-    private void updateResponseNotification(List<Element<NotificationDetails>> responseNotification,
-                                            CaseData caseData,
-                                            Map<String, Object> caseDataUpdated,
-                                            String respondentName,
-                                            String respondentNameField,
-                                            String notifications, String notificationSent) {
-        if (isNotEmpty(responseNotification)) {
-            log.info(
-                "response notification sent for caseId {}, update the flag {} ->YES",
-                caseData.getId(), notificationSent
-            );
-            caseDataUpdated.put(notifications, responseNotification);
-            caseDataUpdated.put(notificationSent, "YES");
-            caseDataUpdated.put(respondentNameField, respondentName);
-        }
-    }
-
-    private List<Element<NotificationDetails>> generateAndSendPostNotification(CaseData caseData,
-                                                                               Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
-                                                                               String respondentName, String documentA13Letter) {
-        List<Element<NotificationDetails>> responseNotification = new ArrayList<>();
+    private void generateAndSendPostNotification(CaseData caseData,
+                                                 Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
+                                                 String respondentName, String documentLetter) {
         caseData.getApplicants().stream()
             .filter(applicant -> (applicant.getValue().getContactPreferences() == null
                 || ContactPreferences.post.equals(applicant.getValue().getContactPreferences())))
@@ -482,7 +429,7 @@ public class ReviewDocumentService {
                                                              applicant.getValue().getAddress(),
                                                              applicant.getValue().getLabelForDynamicList(),
                                                              respondentName,
-                                                             documentA13Letter
+                                                             documentLetter
                     ));
                     // Add coversheet and send it to bulk print
                     UUID bulkPrintId = sendResponseDocumentViaPost(caseData, applicant.getValue().getAddress(),
@@ -490,35 +437,11 @@ public class ReviewDocumentService {
                                                                    systemUserService.getSysUserToken(), responseDocuments
                     );
                     log.info("Response document sent successfully {}", bulkPrintId);
-                    responseNotification.add(getNotificationDetails(
-                        applicant.getId(),
-                        PartyType.APPLICANT,
-                        NotificationType.BULK_PRINT,
-                        bulkPrintId,
-                        null
-                    ));
                 } catch (Exception e) {
                     log.error("Failed to send response document {}", e.getMessage());
                 }
 
             });
-        return responseNotification;
-    }
-
-    private Element<NotificationDetails> getNotificationDetails(UUID partyId,
-                                                                PartyType partyType,
-                                                                NotificationType notificationType,
-                                                                UUID bulkPrintId,
-                                                                String remarks) {
-        return element(NotificationDetails.builder()
-                           .partyId(String.valueOf(partyId))
-                           .partyType(partyType)
-                           .notificationType(notificationType)
-                           .bulkPrintId(String.valueOf(bulkPrintId))
-                           .sentDateTime(LocalDateTime.now())
-                           .remarks(remarks)
-                           .build()
-        );
     }
 
     private void sendNotificationToCafCass(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
