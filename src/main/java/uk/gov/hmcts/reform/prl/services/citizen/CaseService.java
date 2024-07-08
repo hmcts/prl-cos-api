@@ -1516,6 +1516,7 @@ public class CaseService {
         List<String> respondentNames = citizenDocuments.stream()
             .filter(citizenDocument -> category.equals(citizenDocument.getCategoryId()))
             .map(CitizenDocuments::getPartyName)
+            .distinct()
             .toList();
         log.info("respondent names {}", respondentNames);
         return String.join(", ", respondentNames);
