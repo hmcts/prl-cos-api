@@ -55,8 +55,8 @@ public enum ChildArrangementOrdersEnum {
     parentalOrderC53("parentalOrderC53", "Parental Order (C53)"),
     @JsonProperty("declarationOfParentageC63A")
     declarationOfParentageC63A("declarationOfParentageC63A", "Declaration of Parentage (C63A)"),
-    @JsonProperty("refusalOfParentalOrderA64")
-    refusalOfParentalOrderA64("refusalOfParentalOrderA64", "Refusal of parental order (A64)");
+    @JsonProperty("refusalOfParentalOrderC64")
+    refusalOfParentalOrderC64("refusalOfParentalOrderC64", "Refusal of parental order (C64)");
 
 
     private final String id;

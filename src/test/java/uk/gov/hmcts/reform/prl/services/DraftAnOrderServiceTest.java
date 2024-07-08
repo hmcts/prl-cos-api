@@ -3730,7 +3730,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForUploadScenarioRefusalOfParentalOrderA64() throws Exception {
+    public void testSelectedOrderForUploadScenarioRefusalOfParentalOrderC64() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
             .value(Child.builder().build()).build());
         CaseData caseData = CaseData.builder()
@@ -3742,7 +3742,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                 .isTheOrderAboutChildren(Yes)
                 .build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.refusalOfParentalOrderA64)
+            .childArrangementOrders(ChildArrangementOrdersEnum.refusalOfParentalOrderC64)
             .selectedOrder("Test order")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
