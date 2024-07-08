@@ -455,6 +455,7 @@ public class CaseService {
 
         citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
             .citizenOrders(citizenOrders)
+            .citizenDocuments(citizenDocuments)
             .citizenApplicationPacks(getCitizenApplicationPacks(caseData, partyIdAndType))
             .build();
 
