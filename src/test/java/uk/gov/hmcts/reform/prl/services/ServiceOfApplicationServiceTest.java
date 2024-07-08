@@ -87,6 +87,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -857,7 +858,6 @@ public class ServiceOfApplicationServiceTest {
             CaseData caseData = CaseData.builder().id(12345L)
                 .applicants(parties)
                 .respondents(parties)
-                .caseInvites(caseInviteList)
                 .caseTypeOfApplication(caseType)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
                 .othersToNotify(parties)
@@ -2257,15 +2257,13 @@ public class ServiceOfApplicationServiceTest {
             .firstName("firstName")
             .lastName("lastName")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
             .contactPreferences(ContactPreferences.email)
             .build();
-        UUID uuid = UUID.randomUUID();
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder()
-                               .code(uuid.toString())
+                               .code(TEST_UUID)
                                .label("recipient1")
                                .build()))
             .build();
@@ -4494,6 +4492,59 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testSendNotificationDaCitizenNonPersonalService() {
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(No)
+            .soaOtherParties(dynamicMultiSelectList)
+            .soaRecipientsOptions(dynamicMultiSelectList)
+            .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
+            .unServedApplicantPack(SoaPack.builder()
+                                       .partyIds(partyIdsSoa)
+                                       .personalServiceBy(unrepresentedApplicant.toString())
+                                       .build())
+            .unServedRespondentPack(SoaPack.builder()
+                                        .partyIds(partyIdsSoa)
+                                        .personalServiceBy(unrepresentedApplicant.toString())
+                                        .build())
+            .build();
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .solicitorEmail("test")
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .serviceOfApplication(serviceOfApplication)
+            .finalDocument(Document.builder().build())
+            .finalWelshDocument(Document.builder().build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(),
+                                                                                       Mockito.anyString(), Mockito.any(),
+                                                                                       Mockito.any(),Mockito.any(), Mockito.anyString());
     }
 
     @Test
