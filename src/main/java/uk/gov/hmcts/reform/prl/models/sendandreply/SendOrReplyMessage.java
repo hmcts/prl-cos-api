@@ -24,8 +24,6 @@ public class SendOrReplyMessage {
     private String messageReplyTable;
     private Message sendMessageObject;
     private Message replyMessageObject;
-    @JsonProperty("externalMessageAttachDocsList")
-    private List<Element<SendAndReplyDynamicDoc>> externalMessageAttachDocsList;
 
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
@@ -38,7 +36,7 @@ public class SendOrReplyMessage {
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
             "messageContent",
-            "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList"
+            "messageMetaData", "messageReplyDynamicList", "messageReplyTable"
         };
     }
 }
