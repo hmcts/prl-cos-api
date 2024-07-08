@@ -239,9 +239,21 @@ public class RestrictedCaseAccessService {
 
     public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
         log.info("** retrieveAssignedUserRoles event started");
-        List<String> assignedUserDetailsText = new ArrayList<>();
-        Map<String, String> assignedUserDetails = new HashMap<>();
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        List<String> assignedUserDetailsHtml = fetchAssigneedUserDetails(callbackRequest);
+        if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
+            caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
+        }
+
+        log.info("** retrieveAssignedUserRoles done");
+        return caseDataUpdated;
+    }
+
+    private List<String> fetchAssigneedUserDetails(CallbackRequest callbackRequest) {
+        List<String> assignedUserDetailsHtml = new ArrayList<>();
+        Map<String, String> assignedUserDetails = new HashMap<>();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(QueryAttributes.builder()
                             .caseId(List.of(callbackRequest.getCaseDetails().getId().toString()))
@@ -278,24 +290,31 @@ public class RestrictedCaseAccessService {
         }
         log.info("** AssignedUserDetails " + assignedUserDetails);
         if (!assignedUserDetails.isEmpty()) {
-            assignedUserDetailsText.add(
-                "<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h4\">Users with access</span>");
-            assignedUserDetailsText.add("<table>");
-            assignedUserDetailsText.add("<th>Name</th><th>Case role</th><th>Email address</th>");
+            assignedUserDetailsHtml.add("<table class=\"govuk-table\">");
+            assignedUserDetailsHtml.add(
+                "<caption class=\"govuk-table__caption govuk-table__caption--m\">Users with access</caption>");
+            assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
+            assignedUserDetailsHtml.add(
+                "<tr class=\"govuk-table__row\"><th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-half\">Name</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Case role</th>"
+                    + "<th scope=\"col\" class=\"govuk-table__header govuk-!-width-one-quarter\">Email address</th></tr>");
+            assignedUserDetailsHtml.add("<thead class=\"govuk-table__head\">");
+            assignedUserDetailsHtml.add("<tbody class=\"govuk-table__body\">");
             for (Map.Entry<String, String> entry : assignedUserDetails.entrySet()) {
+                assignedUserDetailsHtml.add("<tr class=\"govuk-table__row\">");
                 String name = entry.getKey().split(HYPHEN_SEPARATOR)[0];
                 String email = entry.getKey().split(HYPHEN_SEPARATOR)[1];
-                assignedUserDetailsText.add("<tr><td>" + name + "</td><td>" + entry.getValue() + "</td><td>" + email + "</td></tr>");
+                assignedUserDetailsHtml.add("<td class=\"govuk-table__cell\">" + name + "</td>"
+                                                + "<td class=\"govuk-table__cell\">" + entry.getValue()
+                                                + "</td><td class=\"govuk-table__cell\">" + email + "</td>");
+                assignedUserDetailsHtml.add("</tr>");
             }
-            assignedUserDetailsText.add("</table>");
-            assignedUserDetailsText.add("</div>");
+            assignedUserDetailsHtml.add("</tbody>");
+            assignedUserDetailsHtml.add("</table>");
+            assignedUserDetailsHtml.add("</div>");
         }
-        log.info("** assignedUserDetailsText " + assignedUserDetailsText);
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsText));
-
-        log.info("** retrieveAssignedUserRoles done");
-        return caseDataUpdated;
+        log.info("** assignedUserDetailsText " + assignedUserDetailsHtml);
+        return assignedUserDetailsHtml;
     }
 
 }
