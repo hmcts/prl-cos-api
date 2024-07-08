@@ -779,7 +779,9 @@ public class CaseService {
         return CitizenDocuments.builder()
             .partyId(quarantineDoc.getUploadedByIdamId())//BETTER TO HAVE SEPARATE FIELD FOR IDAMID
             .partyType(quarantineDoc.getDocumentParty())
-            .partyName(quarantineDoc.getUploadedBy())//CAN NOT BE UPLOADEDBY, SHOULD BE PARTY NAME
+            .partyName(quarantineDoc.getSolicitorRepresentedPartyName() != null
+                           ? quarantineDoc.getSolicitorRepresentedPartyName()
+                           : quarantineDoc.getUploadedBy())//CAN NOT BE UPLOADEDBY, SHOULD BE PARTY NAME
             .categoryId(quarantineDoc.getCategoryId())
             .uploadedBy(quarantineDoc.getUploadedBy())
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
@@ -1523,7 +1525,9 @@ public class CaseService {
     }
 
     private String respondentNamesForProvidedResponseCategory(List<CitizenDocuments> citizenDocuments, String category) {
-        if (citizenDocuments.stream().map(CitizenDocuments::getPartyName)
+        if (citizenDocuments.stream()
+            .filter(citizenDocument -> category.equals(citizenDocument.getCategoryId()))
+            .map(CitizenDocuments::getPartyName)
             .anyMatch(Objects::isNull)) {
             return null;
         }
@@ -1531,6 +1535,7 @@ public class CaseService {
             .filter(citizenDocument -> category.equals(citizenDocument.getCategoryId()))
             .map(CitizenDocuments::getPartyName)
             .toList();
+        log.info("respondent names {}", respondentNames);
         return String.join(", ", respondentNames);
     }
 
