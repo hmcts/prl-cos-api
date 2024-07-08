@@ -138,14 +138,7 @@ public class CitizenResponseService {
                         )
                 )
                 .findFirst();
-            CaseData caseDataToGenerateC7 = dbCaseData;
-            caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(
-                citizenUpdatedCaseData,
-                caseDataToGenerateC7
-            );
 
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
-            generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7);
             if (optionalCurrentRespondent.isPresent()) {
                 Element<PartyDetails> partyDetailsElement = optionalCurrentRespondent.get();
 
