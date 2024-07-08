@@ -802,31 +802,43 @@ public class SendAndReplyService {
             return null;
         }
 
-        List<Element<Document>> otherApplicationDocuments = additionalApplicationElements.stream().filter(additionalApplicationsBundleElement -> {
-            OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
+        Optional<Element<AdditionalApplicationsBundle>> otherApplicationDocumentsElement = additionalApplicationElements
+            .stream().filter(additionalApplicationsBundleElement -> {
+                OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
 
-            if (null != otherApplicationsBundle.getApplicationStatus()
-                && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
-                && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
-                                                 .concat(UNDERSCORE)
-                                                 .concat(otherApplicationsBundle.getUploadedDateTime()))) {
-                return true;
-            }
-            return false;
-        }).findFirst().get().getValue().getOtherApplicationsBundle().getFinalDocument();
+                if (null != otherApplicationsBundle.getApplicationStatus()
+                    && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                    && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                                                     .concat(UNDERSCORE)
+                                                     .concat(otherApplicationsBundle.getUploadedDateTime()))) {
+                    return true;
+                }
+                return false;
+            }).findFirst();
 
-        List<Element<Document>> c2ApplicationDocuments = additionalApplicationElements.stream().filter(additionalApplicationsBundleElement -> {
-            C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
+        List<Element<Document>> otherApplicationDocuments = null;
+        if (otherApplicationDocumentsElement.isPresent()) {
+            otherApplicationDocuments = otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument();
+        }
 
-            if (null != c2ApplicationsBundle.getApplicationStatus()
-                && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
-                && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
-                                                      .concat(UNDERSCORE)
-                                                      .concat(c2ApplicationsBundle.getUploadedDateTime()))) {
-                return true;
-            }
-            return false;
-        }).findFirst().get().getValue().getC2DocumentBundle().getFinalDocument();
+        Optional<Element<AdditionalApplicationsBundle>> c2ApplicationDocumentsElement = additionalApplicationElements
+            .stream().filter(additionalApplicationsBundleElement -> {
+                C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
+
+                if (null != c2ApplicationsBundle.getApplicationStatus()
+                    && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                    && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                                                          .concat(UNDERSCORE)
+                                                          .concat(c2ApplicationsBundle.getUploadedDateTime()))) {
+                    return true;
+                }
+                return false;
+            }).findFirst();
+
+        List<Element<Document>> c2ApplicationDocuments = null;
+        if (c2ApplicationDocumentsElement.isPresent()) {
+            c2ApplicationDocuments = c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument();
+        }
 
         if (null != otherApplicationDocuments) {
             return otherApplicationDocuments;
