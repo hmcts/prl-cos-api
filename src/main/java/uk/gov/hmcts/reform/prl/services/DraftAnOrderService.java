@@ -166,6 +166,7 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.rightToAskCourt;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.checkIfOrderCanBeUploadedBySolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
@@ -2302,12 +2303,7 @@ public class DraftAnOrderService {
                                                                          caseData) ? Yes : No);
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if ((null != caseData.getChildArrangementOrders()
-                && Arrays.stream(ManageOrdersUtils. PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString())))
-                || ((null != caseData.getDomesticAbuseOrders())
-                && Arrays.stream(ManageOrdersUtils. PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getDomesticAbuseOrders().toString())))) {
+            if (checkIfOrderCanBeUploadedBySolicitor(caseData)) {
                 return prohibitedOrdersForSolicitor(errorList);
             }
 
