@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.UNREPRESENTED_APPLICANT;
@@ -2301,8 +2302,10 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(authorization,
+                                              EventRequestData.builder().build(),
+                                              StartEventResponse.builder().build(), dataMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
@@ -2770,7 +2773,6 @@ public class ServiceOfApplicationServiceTest {
                                                                   .partyIds(partyIds)
                                                                   .build())
                                       .unServedLaPack(SoaPack.builder()
-                                                          .partyIds(List.of(element("test12345")))
                                                           .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
                                                           .partyIds(partyIds)
                                                           .packDocument(List.of(element(Document.builder().build())))
@@ -4491,6 +4493,66 @@ public class ServiceOfApplicationServiceTest {
             new HashMap<>()
         );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testSendNotificationCaPersonalCourtAdminGovNotifyEmail() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .partyId(UUID.fromString(TEST_UUID))
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .contactPreferences(ContactPreferences.email)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .user(User.builder().idamId(TEST_UUID).build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        List<Element<PartyDetails>> partiesSoa = List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partiesSoa)
+            .respondents(partiesSoa)
+            .applicantCaseName("Test Case 45678")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .taskListVersion("v2")
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .otherPartyInTheCaseRevised(partiesSoa)
+            .othersToNotify(partiesSoa)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaOtherParties(dynamicMultiSelectList)
+                                      .soaRecipientsOptions(dynamicMultiSelectList)
+                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
+                                      .unServedApplicantPack(SoaPack.builder()
+                                                                 .partyIds(partyIdsSoa)
+                                                                 .personalServiceBy(unrepresentedApplicant.toString())
+                                                                 .build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .partyIds(partyIdsSoa)
+                                                                  .personalServiceBy(unrepresentedApplicant.toString())
+                                                                  .build())
+                                      .applicationServedYesNo(Yes)
+                                      .unServedLaPack(SoaPack.builder()
+                                                          .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .partyIds(partyIdsSoa)
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
+                                      .build())
+            .finalDocument(Document.builder().build())
+            .finalWelshDocument(Document.builder().build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
         verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
     }
 }
