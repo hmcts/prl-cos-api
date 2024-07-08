@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -27,6 +28,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataRespondentDetailsElementsMapper {
 
     private CaseDataRespondentDetailsElementsMapper() {
@@ -54,6 +56,11 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
+       log.info("****************** loggin in date of birth unknown value *****************"
+                    + respondentDetails.getPersonalDetails().getDateOfBirth());
+
+        log.info("****************** loggin in date of birth unknown value *****************"
+                     + respondentDetails.getPersonalDetails().getIsDateOfBirthUnknown());
 
         return PartyDetails
             .builder()
