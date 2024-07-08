@@ -48,19 +48,13 @@ public class CitizenResponseController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public Document generateC7DraftDocument(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken,
-        @PathVariable("caseId") String caseId,
-        @PathVariable("partyId") String partyId,
-        @RequestBody DocumentRequest documentRequest
-    ) throws Exception {
+            @PathVariable("caseId") String caseId,
+            @PathVariable("partyId") String partyId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader("serviceAuthorization") String s2sToken,
+            @RequestBody DocumentRequest documentRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return citizenResponseService.generateAndReturnDraftC7(
-                caseId,
-                partyId,
-                authorisation,
-                documentRequest.isWelsh()
-            );
+            return citizenResponseService.generateAndReturnDraftC7(caseId, partyId, authorisation, documentRequest.isWelsh());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

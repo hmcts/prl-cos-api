@@ -130,15 +130,22 @@ public class CitizenResponseService {
                     = allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authorisation);
             CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
             Optional<Element<PartyDetails>> optionalCurrentRespondent
-                    = dbCaseData.getRespondents()
-                    .stream()
-                    .filter(party -> Objects.equals(
-                                    party.getValue().getUser().getIdamId(),
-                                    citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
-                            )
-                    )
-                    .findFirst();
+                = dbCaseData.getRespondents()
+                .stream()
+                .filter(party -> Objects.equals(
+                            party.getValue().getUser().getIdamId(),
+                            citizenUpdatedCaseData.getPartyDetails().getUser().getIdamId()
+                        )
+                )
+                .findFirst();
+            CaseData caseDataToGenerateC7 = dbCaseData;
+            caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(
+                citizenUpdatedCaseData,
+                caseDataToGenerateC7
+            );
 
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
+            generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7);
             if (optionalCurrentRespondent.isPresent()) {
                 Element<PartyDetails> partyDetailsElement = optionalCurrentRespondent.get();
 
