@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -729,10 +730,14 @@ public class SendAndReplyService {
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
 
-        uk.gov.hmcts.reform.prl.models.documents.Document sendAttachedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
-        if (null != sendAttachedDoc) {
+        List<Element<Document>> sendAttachedDocs =
+            MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
+                ? getApplicationDocument(message.getApplicationsList(), caseData, message.getSelectedApplicationCode())
+                : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
+
+        if (null != sendAttachedDocs) {
             newMessage = newMessage.toBuilder()
-                .internalMessageAttachDocs(List.of(element(sendAttachedDoc)))
+                .internalMessageAttachDocs(sendAttachedDocs)
                 .build();
         }
 
@@ -785,6 +790,50 @@ public class SendAndReplyService {
                 return buildFromDocument(document);
             }
         }
+        return null;
+    }
+
+    private List<Element<Document>> getApplicationDocument(DynamicList applicationDocumentList,
+                                                           CaseData caseData,
+                                                           String selectedApplicationCode) {
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
+        if (null == applicationDocumentList || null == applicationDocumentList.getValueCode() || null == additionalApplicationElements) {
+            return null;
+        }
+
+        List<Element<Document>> otherApplicationDocuments = additionalApplicationElements.stream().filter(additionalApplicationsBundleElement -> {
+            OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
+
+            if (null != otherApplicationsBundle.getApplicationStatus()
+                && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                                                 .concat(UNDERSCORE)
+                                                 .concat(otherApplicationsBundle.getUploadedDateTime()))) {
+                return true;
+            }
+            return false;
+        }).findFirst().get().getValue().getOtherApplicationsBundle().getFinalDocument();
+
+        List<Element<Document>> c2ApplicationDocuments = additionalApplicationElements.stream().filter(additionalApplicationsBundleElement -> {
+            C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
+
+            if (null != c2ApplicationsBundle.getApplicationStatus()
+                && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
+                && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                                                      .concat(UNDERSCORE)
+                                                      .concat(c2ApplicationsBundle.getUploadedDateTime()))) {
+                return true;
+            }
+            return false;
+        }).findFirst().get().getValue().getC2DocumentBundle().getFinalDocument();
+
+        if (null != otherApplicationDocuments) {
+            return otherApplicationDocuments;
+        } else if (null != c2ApplicationDocuments) {
+            return c2ApplicationDocuments;
+        }
+
         return null;
     }
 
