@@ -19,4 +19,7 @@ public class Match {
     @JsonProperty("data.caseTypeOfApplication")
     private String caseTypeOfApplication;
 
+    @JsonProperty("data.fm5RemindersSent")
+    private String fm5RemindersSent;
+
 }

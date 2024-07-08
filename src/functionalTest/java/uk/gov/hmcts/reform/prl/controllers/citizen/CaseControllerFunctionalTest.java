@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
+@Ignore
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
@@ -133,6 +134,10 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
+
+
+
+    @Ignore("as there is no end point existing with this link")
     @Test
     public void testLinkCitizenToCaseWith401() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);

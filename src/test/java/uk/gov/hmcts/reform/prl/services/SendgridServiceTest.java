@@ -163,8 +163,8 @@ public class SendgridServiceTest {
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
             when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
-                                                      TEST_AUTH,
-                                                      s2sToken)).thenReturn(biteData);
+                                                     TEST_AUTH,
+                                                     s2sToken)).thenReturn(biteData);
         }
         final Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "test auth");
@@ -275,13 +275,13 @@ public class SendgridServiceTest {
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
         when(sendgridEmailTemplatesConfig.getTemplates())
             .thenReturn(
-                ImmutableMap.of(
-                    LanguagePreference.english, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
-                    LanguagePreference.welsh, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                Map.of(
+                    LanguagePreference.english, Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh, Map.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-                applicant.getSolicitorEmail())
+            applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
@@ -386,7 +386,7 @@ public class SendgridServiceTest {
                 )
             );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
-                applicant.getSolicitorEmail())
+            applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
             .dynamicTemplateData(dynamicTemplateData).build();
         sendgridService
@@ -482,7 +482,7 @@ public class SendgridServiceTest {
             IOException.class,
             () -> sendgridService
                 .sendTransferCourtEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
-                                          documentList));
+                                                       documentList));
 
 
     }

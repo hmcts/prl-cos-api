@@ -321,7 +321,6 @@ public class CaseDocumentController {
                 element.getId().toString()))
                 .toList();
         }
-        log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList)
             .documentManagementDetails(DocumentManagementDetails.builder()
@@ -412,7 +411,6 @@ public class CaseDocumentController {
     public ResponseEntity<Object> citizenGenerateDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
                                                         @RequestBody DocumentRequest documentRequest) {
-        log.info("Generating document from citizen statements, #request {}", documentRequest);
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -443,7 +441,6 @@ public class CaseDocumentController {
     public ResponseEntity<Object> citizenSubmitDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
                                                          @RequestBody DocumentRequest documentRequest) {
-        log.info("Submit citizen documents and update case, #request {}", documentRequest);
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }

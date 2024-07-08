@@ -66,12 +66,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
@@ -295,11 +295,16 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
-
     @Value("${document.templates.common.doc_cover_sheet_serve_order_template}")
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
+
+    @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
+    protected String citizenC1aFinalResponseTemplate;
+
+    @Value("${document.templates.common.prl_citizen_c1a_final_response_welsh_template}")
+    protected String citizenC1aFinalResponseWelshTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -1019,6 +1024,9 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
+            case C1A_FINAL_RESPONSE_DOCUMENT:
+                template = getRespondentC1aResponseFinalTemplate(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -1031,6 +1039,10 @@ public class DocumentGenService {
 
     private String getC7CitizenDraftTemplate(boolean isWelsh) {
         return !isWelsh ? docC7DraftTemplate : docC7DraftWelshTemplate;
+    }
+
+    private String getRespondentC1aResponseFinalTemplate(boolean isWelsh) {
+        return !isWelsh ? citizenC1aFinalResponseTemplate : citizenC1aFinalResponseWelshTemplate;
     }
 
     private String findDraftTemplate(boolean isWelsh, CaseData caseData) {
@@ -1119,8 +1131,7 @@ public class DocumentGenService {
             && Objects.nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
-                caseData.getHome().getChildren().stream().map(Element::getValue).collect(
-                    Collectors.toList());
+                caseData.getHome().getChildren().stream().map(Element::getValue).toList();
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
                 if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
@@ -1490,10 +1501,8 @@ public class DocumentGenService {
 
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
-
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
 
-            //move all documents to citizen quarantine
             List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
                 .map(document -> getCitizenQuarantineDocument(
                     document,
@@ -1503,18 +1512,32 @@ public class DocumentGenService {
                 ))
                 .toList();
 
-            manageDocumentsService.setFlagsForWaTask(
-                updatedCaseData,
-                updatedCaseDataMap,
-                CITIZEN,
-                quarantineLegalDocs.get(0)
-            );
+            if (category.equals(DocumentCategory.FM5_STATEMENTS)) {
+                for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+                    String userRole = CaseUtils.getUserRole(userDetails);
+                    manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                        quarantineLegalDoc,
+                        userDetails,
+                        updatedCaseData,
+                        updatedCaseDataMap,
+                        userRole
+                    );
+                }
+            } else {
+                //move all documents to citizen quarantine except fm5 documents
+                manageDocumentsService.setFlagsForWaTask(
+                    updatedCaseData,
+                    updatedCaseDataMap,
+                    CITIZEN,
+                    quarantineLegalDocs.get(0)
+                );
 
-            moveCitizenDocumentsToQuarantineTab(
-                quarantineLegalDocs,
-                updatedCaseData,
-                updatedCaseDataMap
-            );
+                moveCitizenDocumentsToQuarantineTab(
+                    quarantineLegalDocs,
+                    updatedCaseData,
+                    updatedCaseDataMap
+                );
+            }
 
             //update all tabs
             return allTabService.submitAllTabsUpdate(

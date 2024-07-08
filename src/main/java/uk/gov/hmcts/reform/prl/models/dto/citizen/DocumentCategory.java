@@ -34,7 +34,8 @@ public enum DocumentCategory {
     DRUG_AND_ALCOHOL_TESTS("DRUG_AND_ALCOHOL_TESTS",
                            "drugAndAlcoholTest(toxicology)", "Drug and alcohol test (toxicology)", "drug_and_alcohol_tests"),
     POLICE_REPORTS("POLICE_REPORTS", "policeReport", "Police report", "police_reports"),
-    OTHER_DOCUMENTS("OTHER_DOCUMENTS", "otherDocments", "Other Documents", "other_documents");
+    OTHER_DOCUMENTS("OTHER_DOCUMENTS", "otherDocments", "Other Documents", "other_documents"),
+    FM5_STATEMENTS("FM5_STATEMENTS", "fm5Statements", "FM5 Statements", "fm5_statements");
 
     private final String id;
     private final String categoryId;

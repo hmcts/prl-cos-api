@@ -32,6 +32,7 @@ public class QuarantineLegalDoc {
     private final Document applicationsWithinProceedingsDocument;
     private final Document miamCertificateDocument;
     private final Document previousOrdersSubmittedWithApplicationDocument;
+    private final Document fm5StatementsDocument;
     private final Document respondentApplicationDocument;
     private final Document ordersFromOtherProceedingsDocument;
     private final Document respondentC1AApplicationDocument;
@@ -109,6 +110,7 @@ public class QuarantineLegalDoc {
     // These fields are neeeded when Respondent solicitor uploads response on behalf of party
     private final String solicitorRepresentedPartyName;
     private final String solicitorRepresentedPartyId;
+    private final String documentLanguage;
 
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
