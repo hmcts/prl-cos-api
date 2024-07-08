@@ -1515,7 +1515,7 @@ public class CaseService {
     }
 
     private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments, String categoryId) {
-        log.info("checking response for documents  for documens {}", citizenDocuments);
+        log.info("checking response for documents  for {} documents {}", categoryId, citizenDocuments);
         return CollectionUtils.isNotEmpty(citizenDocuments)
             && citizenDocuments.stream()
             .anyMatch(citizenDocument -> categoryId.equals(citizenDocument.getCategoryId()));
