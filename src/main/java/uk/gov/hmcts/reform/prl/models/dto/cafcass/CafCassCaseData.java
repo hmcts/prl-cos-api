@@ -170,10 +170,11 @@ public class CafCassCaseData {
                                                 .otherGender(childDetailsRevised.getOtherGender())
                                                 .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
                                                 .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
-                                                .whoDoesTheChildLiveWith(
-                                                    childDetailsRevised.getWhoDoesTheChildLiveWith() != null ?
-                                                        partyIdAndPartyTypeMap.get(childDetailsRevised.getWhoDoesTheChildLiveWith().getValue().getCode())
-                                                        : null
+                                                .whoDoesTheChildLiveWith(childDetailsRevised.getWhoDoesTheChildLiveWith() != null
+                                                                             ? partyIdAndPartyTypeMap
+                                                    .get(childDetailsRevised.getWhoDoesTheChildLiveWith()
+                                                             .getValue().getCode())
+                                                                             : null
                                                 )
                                                 .build())
                                      .build());
