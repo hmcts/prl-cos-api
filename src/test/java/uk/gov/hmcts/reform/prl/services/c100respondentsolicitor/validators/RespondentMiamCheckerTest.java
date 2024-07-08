@@ -80,14 +80,14 @@ public class RespondentMiamCheckerTest {
     public void testMiamAttendedIsStarted() {
 
         boolean isStarted;
-        isStarted = respondentMiamChecker.isStarted(respondents);
+        isStarted = respondentMiamChecker.isStarted(respondents, true);
         assertTrue(isStarted);
 
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents, true);
 
         Assert.assertTrue(anyNonEmpty);
     }
@@ -118,7 +118,7 @@ public class RespondentMiamCheckerTest {
             .respondents(respondentsList)
             .build();
 
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents, true);
 
         Assert.assertTrue(anyNonEmpty);
     }

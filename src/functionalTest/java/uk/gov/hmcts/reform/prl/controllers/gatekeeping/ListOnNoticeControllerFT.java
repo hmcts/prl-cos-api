@@ -7,22 +7,17 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -32,9 +27,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIA
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ListOnNoticeControllerFT {
 
     @Autowired
@@ -72,13 +66,9 @@ public class ListOnNoticeControllerFT {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @MockBean
-    private AllTabServiceImpl allTabService;
-
-    @MockBean
-    private SystemUserService systemUserService;
 
     @Test
+    @Order(1)
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -137,7 +127,6 @@ public class ListOnNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testListOnNoticeSubmissionWhenAdditionalReasonsSelected() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
@@ -162,7 +151,6 @@ public class ListOnNoticeControllerFT {
     }
 
     @Test
-    @Ignore
     public void testListOnNoticeSubmissionWhenNoReasonsSelected() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);

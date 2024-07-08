@@ -2058,7 +2058,7 @@ public class DraftAnOrderService {
 
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
-                hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
+                hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData, orderType));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
@@ -2173,7 +2173,7 @@ public class DraftAnOrderService {
         caseDataUpdated.put(
             WA_ORDER_NAME_SOLICITOR_CREATED,
             getDraftOrderNameForWA(
-                null != draftOrderCollection && draftOrderCollection.size() > 0 ? draftOrderCollection.get(0).getValue() : null,
+                null != draftOrderCollection && !draftOrderCollection.isEmpty() ? draftOrderCollection.get(0).getValue() : null,
                 callbackRequest.getEventId()
             )
         );

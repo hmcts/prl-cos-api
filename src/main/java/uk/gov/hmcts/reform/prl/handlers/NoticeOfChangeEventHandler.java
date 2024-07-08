@@ -308,7 +308,6 @@ public class NoticeOfChangeEventHandler {
         } catch (Exception e) {
             log.error("Error occurred in generating cover sheets", e);
         }
-        log.info("Cover sheets generated {}", coverSheets);
         if (CollectionUtils.isNotEmpty(coverSheets)) {
             documents.addAll(coverSheets);
         }
