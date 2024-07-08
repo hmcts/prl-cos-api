@@ -832,15 +832,6 @@ public class CaseService {
         return citizenNotifications;
     }
 
-    private void populateCitizenNotifications(boolean caseData, List<CitizenNotification> citizenNotifications,
-                                              String notificationType) {
-        if (caseData) {
-            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(true).build());
-        } else {
-            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(false).build());
-        }
-    }
-
     private boolean isFm5UploadedByParty(List<CitizenDocuments> citizenDocuments,
                                          UserDetails userDetails) {
         return nullSafeCollection(citizenDocuments).stream()
