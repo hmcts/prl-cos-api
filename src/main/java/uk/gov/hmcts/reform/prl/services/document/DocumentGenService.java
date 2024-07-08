@@ -224,21 +224,21 @@ public class DocumentGenService {
     protected String docCoverSheetFilename;
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
-    @Value("${document.templates.common.prl_c7_draft_template}")
+    @Value("${document.templates.common.prl_lip_c7_draft_template}")
     protected String docC7DraftTemplate;
-    @Value("${document.templates.common.prl_c7_draft_template_wel}")
+    @Value("${document.templates.common.prl_lip_c7_draft_template_wel}")
     protected String docC7DraftWelshTemplate;
-    @Value("${document.templates.common.prl_c7_final_template_eng}")
+    @Value("${document.templates.common.prl_lip_c7_final_template_eng}")
     protected String docC7FinalEngTemplate;
-    @Value("${document.templates.common.prl_c7_final_template_wel}")
+    @Value("${document.templates.common.prl_lip_c7_final_template_wel}")
     protected String docC7FinalWelshTemplate;
-    @Value("${document.templates.common.prl_c7_draft_filename}")
+    @Value("${document.templates.common.prl_lip_c7_draft_filename}")
     protected String docC7DraftFilename;
-    @Value("${document.templates.common.prl_c7_draft_filename_wel}")
+    @Value("${document.templates.common.prl_lip_c7_draft_filename_wel}")
     protected String docC7DraftWelshFilename;
-    @Value("${document.templates.common.prl_c7_final_filename_eng}")
+    @Value("${document.templates.common.prl_lip_c7_final_filename_eng}")
     protected String docC7FinalEngFilename;
-    @Value("${document.templates.common.prl_c7_final_filename_wel}")
+    @Value("${document.templates.common.prl_lip_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftTemplate;

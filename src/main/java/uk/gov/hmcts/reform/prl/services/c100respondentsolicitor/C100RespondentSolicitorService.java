@@ -1051,7 +1051,7 @@ public class C100RespondentSolicitorService {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
-        dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
+        dataMap.put(ISSUE_DATE_FIELD, callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
         dataMap.put(COURT_SEAL_FIELD,
                     callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
                         : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
@@ -1064,9 +1064,8 @@ public class C100RespondentSolicitorService {
                 TASK_LIST_VERSION))))) {
             List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest
                 .getCaseDetails().getData().get(
-                    "newChildDetails");
+                    NEW_CHILDREN);
             dataMap.put(CHILDREN, listOfChildren);
-
         } else {
             List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
                 CHILDREN);
@@ -1228,11 +1227,11 @@ public class C100RespondentSolicitorService {
         if (null != response.getCitizenDetails().getFirstName() && null != response.getCitizenDetails()
                 .getLastName()) {
             dataMap.put("fullName", response.getCitizenDetails()
-                    .getFirstName() + " " + response.getCitizenDetails()
+                    .getFirstName() + EMPTY_SPACE_STRING + response.getCitizenDetails()
                     .getLastName());
         } else {
             dataMap.put("fullName", solicitorRepresentedRespondent.getValue()
-                    .getFirstName() + " " + solicitorRepresentedRespondent.getValue()
+                    .getFirstName() + EMPTY_SPACE_STRING + solicitorRepresentedRespondent.getValue()
                     .getLastName());
         }
         if (null != response.getCitizenDetails().getDateOfBirth()) {
