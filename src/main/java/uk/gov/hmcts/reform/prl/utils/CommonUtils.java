@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -214,6 +215,15 @@ public class CommonUtils {
             log.error(ERROR_STRING + "in formatDateTime Method", e);
         }
         return "";
+    }
+
+    public static boolean checkIfOrderCanBeUploadedBySolicitor(CaseData caseData) {
+        return (null != caseData.getChildArrangementOrders()
+            && Arrays.stream(ManageOrdersUtils.PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString())))
+            || ((null != caseData.getDomesticAbuseOrders())
+            && Arrays.stream(ManageOrdersUtils.PROHIBITED_UPLOAD_ORDER_IDS_FOR_SOLICITORS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getDomesticAbuseOrders().toString())));
     }
 
     public static boolean isEmpty(@Nullable String string) {
