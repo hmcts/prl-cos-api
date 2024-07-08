@@ -1316,15 +1316,16 @@ public class ServiceOfApplicationService {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
+        //PRL-3466 - Citizen case auto linking
+        caseData = autoLinkCitizenCase(caseData);
+        caseDataMap.put(APPLICANTS, caseData.getApplicants());
+
         finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap);
 
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
-
-        //PRL-3466 - Citizen case auto linking
-        autoLinkCitizenCase(caseData, caseDataMap);
 
         allTabService.submitAllTabsUpdate(
                 updatedCaseDataContent.authorisation(),
@@ -1338,10 +1339,10 @@ public class ServiceOfApplicationService {
                       .confirmationBody(confirmationBody).build());
     }
 
-    private void autoLinkCitizenCase(CaseData caseData,
-                                     Map<String, Object> caseDataMap) {
+    private CaseData autoLinkCitizenCase(CaseData caseData) {
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
+            AtomicBoolean isCaseAutoLinked = new AtomicBoolean(false);
 
             applicants.stream()
                 .filter(party -> !hasLegalRepresentation(party.getValue())
@@ -1364,10 +1365,15 @@ public class ServiceOfApplicationService {
 
                     PartyDetails updatedPartyDetails = party.getValue().toBuilder().user(user).build();
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
-
-                    caseDataMap.put(APPLICANTS, applicants);
+                    isCaseAutoLinked.set(true);
                 });
+            if (isCaseAutoLinked.get()) {
+                return caseData.toBuilder()
+                    .applicants(applicants)
+                    .build();
+            }
         }
+        return caseData;
     }
 
     private boolean isPartyEmailSameAsIdamEmail(CaseData caseData,
@@ -3111,11 +3117,12 @@ public class ServiceOfApplicationService {
 
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+            //PRL-3466 - Citizen case auto linking
+            caseData = autoLinkCitizenCase(caseData);
+            caseDataMap.put(APPLICANTS, caseData.getApplicants());
+
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
-
-            //PRL-3466 - Citizen case auto linking
-            autoLinkCitizenCase(caseData, caseDataMap);
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
