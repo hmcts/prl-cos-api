@@ -4132,17 +4132,15 @@ public class ServiceOfApplicationServiceTest {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .solicitorEmail("abc")
             .user(User.builder()
                       .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
             .contactPreferences(ContactPreferences.email)
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
         PartyDetails partyDetails2 = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .contactPreferences(ContactPreferences.email)
-            .solicitorEmail("abc")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .canYouProvideEmailAddress(Yes)
             .build();
@@ -4191,6 +4189,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
+                                                                 .personalServiceBy("courtAdmin")
                                                                  .partyIds(partyIds).build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
@@ -4216,7 +4215,7 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
         assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals("Court - court admin", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
     @Test
