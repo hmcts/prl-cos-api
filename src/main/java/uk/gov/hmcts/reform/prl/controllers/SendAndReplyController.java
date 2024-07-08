@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -63,8 +62,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
-    public static final String SEND_AND_CLOSE_EXTERNAL_MESSAGE = "### What happens next \n\n The court will send this message in "
-        + "a notification to the external party or parties.";
     public static final String MESSAGES = "messages";
 
     @Autowired
@@ -267,11 +264,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
             }
 
-            sendAndReplyService.sendNotificationToExternalParties(caseData, authorisation);
-
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
-            sendAndReplyService.sendNotificationToExternalParties(caseData, authorisation);
             //WA - clear reply field in case of SEND
             sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
@@ -305,7 +299,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             //WA - clear send field in case of REPLY
             sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
-
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
@@ -326,13 +319,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply()) && InternalExternalMessageEnum.EXTERNAL.equals(
-            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalOrExternalMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                SEND_AND_CLOSE_EXTERNAL_MESSAGE
-            ).build());
-        }
-
         sendAndReplyService.closeAwPTask(caseData);
 
         return ok(SubmittedCallbackResponse.builder().build());
@@ -344,7 +330,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                   @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
 
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
