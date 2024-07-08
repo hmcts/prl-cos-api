@@ -905,9 +905,7 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      List<Document> c100StaticDocs,
                                                      Map<String, Object> caseDataMap) {
-        String whoIsResponsibleForServing = SoaCitizenServingRespondentsEnum.courtBailiff
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
-            ? PERSONAL_SERVICE_SERVED_BY_BAILIFF : PERSONAL_SERVICE_SERVED_BY_CA;
+        String whoIsResponsibleForServing;
         //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
         log.info("Service of application, unrepresented applicant/citizen case");
         log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
@@ -922,7 +920,6 @@ public class ServiceOfApplicationService {
                                                               packLdocs);
             String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS)
                 .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
-            List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
             List<Document> packLdocsWithoutC9 = packLdocs.stream()
                 .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
             AtomicBoolean isNotFirstApplicant = new AtomicBoolean(false);
