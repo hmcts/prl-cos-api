@@ -56,7 +56,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static PartyDetails buildPartyDetails(RespondentDetails respondentDetails) {
-       log.info("****************** loggin in date of birth unknown value *****************"
+        log.info("****************** loggin in date of birth unknown value *****************"
                     + respondentDetails.getPersonalDetails().getDateOfBirth());
 
         log.info("****************** loggin in date of birth unknown value *****************"
