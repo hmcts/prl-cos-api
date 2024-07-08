@@ -171,7 +171,9 @@ public class CafCassCaseData {
                                                 .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
                                                 .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
                                                 .whoDoesTheChildLiveWith(
-                                                    partyIdAndPartyTypeMap.get(childDetailsRevised.getWhoDoesTheChildLiveWith().getValue().getCode())
+                                                    childDetailsRevised.getWhoDoesTheChildLiveWith() != null ?
+                                                        partyIdAndPartyTypeMap.get(childDetailsRevised.getWhoDoesTheChildLiveWith().getValue().getCode())
+                                                        : null
                                                 )
                                                 .build())
                                      .build());
