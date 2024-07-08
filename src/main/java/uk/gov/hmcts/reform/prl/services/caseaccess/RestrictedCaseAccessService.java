@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -11,6 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -25,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseData
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +82,8 @@ public class RestrictedCaseAccessService {
     private final SystemUserService systemUserService;
 
     private final AuthTokenGenerator authTokenGenerator;
+
+    private final IdamApi idamApi;
 
 
     public Map<String, Object> initiateUpdateCaseAccess(CallbackRequest callbackRequest) {
@@ -231,6 +238,7 @@ public class RestrictedCaseAccessService {
 
     public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
         log.info("** retrieveAssignedUserRoles event started");
+        List<UserDetails> userDetailsList = new ArrayList<>();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(QueryAttributes.builder()
                             .caseId(List.of(callbackRequest.getCaseDetails().getId().toString()))
@@ -238,15 +246,26 @@ public class RestrictedCaseAccessService {
             .validAt(LocalDateTime.now())
             .build();
         log.info("** RoleAssignmentQueryRequest " + roleAssignmentQueryRequest);
+        String systemAuthorisation = systemUserService.getSysUserToken();
 
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.queryRoleAssignments(
-            systemUserService.getSysUserToken(),
+            systemAuthorisation,
             authTokenGenerator.generate(),
             null,
             roleAssignmentQueryRequest
         );
-
         log.info("** RoleAssignmentServiceResponse " + roleAssignmentServiceResponse);
+
+        if (ObjectUtils.isNotEmpty(roleAssignmentServiceResponse)
+            && CollectionUtils.isNotEmpty(roleAssignmentServiceResponse.getRoleAssignmentResponse())) {
+            roleAssignmentServiceResponse.getRoleAssignmentResponse()
+                .stream().forEach(roleAssignmentResponse -> {
+                    log.info("** Fetching user details from idam for actorId {} " + roleAssignmentResponse.getActorId());
+                    userDetailsList.add(idamApi.getUserByUserId(systemAuthorisation, roleAssignmentResponse.getActorId()));
+                });
+        }
+
+        log.info("** UserDetailsList " + userDetailsList);
 
         log.info("** retrieveAssignedUserRoles done");
         return new HashMap<>();
