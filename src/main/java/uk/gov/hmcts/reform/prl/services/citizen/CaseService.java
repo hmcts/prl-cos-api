@@ -455,7 +455,6 @@ public class CaseService {
 
         citizenDocumentsManagement = citizenDocumentsManagement.toBuilder()
             .citizenOrders(citizenOrders)
-            .citizenDocuments(citizenDocuments)
             .citizenApplicationPacks(getCitizenApplicationPacks(caseData, partyIdAndType))
             .build();
 
@@ -675,6 +674,7 @@ public class CaseService {
         return CitizenDocumentsManagement.builder()
             .applicantDocuments(applicantDocuments)
             .respondentDocuments(respondentDocuments)
+            .citizenDocuments(citizenDocuments)
             .citizenOtherDocuments(otherDocuments.stream()
                                 .filter(citDoc -> !unReturnedCategoriesForUI.contains(citDoc.getCategoryId()))
                                 .sorted(comparing(CitizenDocuments::getUploadedDate).reversed())
