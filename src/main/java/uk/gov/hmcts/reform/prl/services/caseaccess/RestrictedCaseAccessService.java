@@ -38,6 +38,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PUBLIC;
@@ -238,7 +239,9 @@ public class RestrictedCaseAccessService {
 
     public Map<String, Object> retrieveAssignedUserRoles(CallbackRequest callbackRequest) {
         log.info("** retrieveAssignedUserRoles event started");
-        List<UserDetails> userDetailsList = new ArrayList<>();
+        List<String> assignedUserDetailsText = new ArrayList<>();
+        Map<String, String> assignedUserDetails = new HashMap<>();
+
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
             .attributes(QueryAttributes.builder()
                             .caseId(List.of(callbackRequest.getCaseDetails().getId().toString()))
@@ -261,14 +264,38 @@ public class RestrictedCaseAccessService {
             roleAssignmentServiceResponse.getRoleAssignmentResponse()
                 .stream().forEach(roleAssignmentResponse -> {
                     log.info("** Fetching user details from idam for actorId {} " + roleAssignmentResponse.getActorId());
-                    userDetailsList.add(idamApi.getUserByUserId(systemAuthorisation, roleAssignmentResponse.getActorId()));
+                    UserDetails userDetails = idamApi.getUserByUserId(
+                        systemAuthorisation,
+                        roleAssignmentResponse.getActorId()
+                    );
+                    if (ObjectUtils.isNotEmpty(userDetails)) {
+                        assignedUserDetails.put(
+                            userDetails.getFullName() + HYPHEN_SEPARATOR + userDetails.getEmail(),
+                            roleAssignmentResponse.getRoleCategory()
+                        );
+                    }
                 });
         }
-
-        log.info("** UserDetailsList " + userDetailsList);
+        log.info("** AssignedUserDetails " + assignedUserDetails);
+        if (!assignedUserDetails.isEmpty()) {
+            assignedUserDetailsText.add(
+                "<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h4\">Users with access</span>");
+            assignedUserDetailsText.add("<table>");
+            assignedUserDetailsText.add("<th>Name</th><th>Case role</th><th>Email address</th>");
+            for (Map.Entry<String, String> entry : assignedUserDetails.entrySet()) {
+                String name = entry.getKey().split(HYPHEN_SEPARATOR)[0];
+                String email = entry.getKey().split(HYPHEN_SEPARATOR)[1];
+                assignedUserDetailsText.add("<tr><td>" + name + "</td><td>" + entry.getValue() + "</td><td>" + email + "</td></tr>");
+            }
+            assignedUserDetailsText.add("</table>");
+            assignedUserDetailsText.add("</div>");
+        }
+        log.info("** assignedUserDetailsText " + assignedUserDetailsText);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsText));
 
         log.info("** retrieveAssignedUserRoles done");
-        return new HashMap<>();
+        return caseDataUpdated;
     }
 
 }
