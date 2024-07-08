@@ -13,12 +13,15 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -38,6 +41,9 @@ public class LinkCitizenCaseControllerTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    private CaseService caseService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -103,6 +109,8 @@ public class LinkCitizenCaseControllerTest {
             accessCodeRequest.getAccessCode())).thenReturn(Optional.ofNullable(caseDetails));
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         when(hearingService.getHearings(authToken, accessCodeRequestWithHearing.getCaseId())).thenReturn(hearings);
+        when(caseService.getAllCitizenDocumentsOrders(any(), any(CaseData.class)))
+            .thenReturn(CitizenDocumentsManagement.builder().build());
 
         CaseDataWithHearingResponse caseData = linkCitizenCaseController
             .linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequestWithHearing);
@@ -117,6 +125,8 @@ public class LinkCitizenCaseControllerTest {
             accessCodeRequest.getAccessCode())).thenReturn(Optional.ofNullable(caseDetails));
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         when(hearingService.getHearings(authToken, accessCodeRequest.getCaseId())).thenReturn(hearings);
+        when(caseService.getAllCitizenDocumentsOrders(any(), any(CaseData.class)))
+            .thenReturn(CitizenDocumentsManagement.builder().build());
 
         CaseDataWithHearingResponse caseData = linkCitizenCaseController
             .linkCitizenToCaseWithHearing(authToken, s2sToken, accessCodeRequest);

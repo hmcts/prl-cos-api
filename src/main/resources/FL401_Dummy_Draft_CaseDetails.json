@@ -78,17 +78,6 @@
       ],
       "otherReasonApplicantWantToStopFromRespondentDoing": "Requesting to stop harassing applicant's parent"
     },
-    "fl401OtherProceedingsDetailsTable": [
-      {
-        "id": "3e3d4ad3-02a0-4d8b-a5ea-2aca5b191c5b",
-        "value": {
-          "caseNumber": null,
-          "typeOfCase": null,
-          "nameOfCourt": null,
-          "anyOtherDetails": null
-        }
-      }
-    ],
     "respondentTaskList": "",
     "respondentTaskListA": "",
     "respondentTaskListB": "",
@@ -818,16 +807,6 @@
       "relationshipDateComplexEndDate": "2020-01-01",
       "relationshipDateComplexStartDate": null
     },
-    "otherProceedingsForSummaryTab": [
-      {
-        "id": "39d66158-0cb7-4431-9139-3e6780096194",
-        "value": {
-          "caseNumber": null,
-          "nameOfCourt": null,
-          "typeOfOrder": null
-        }
-      }
-    ],
     "allegationOfHarm": {
 
     },

@@ -24,7 +24,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
-    public boolean isStarted(PartyDetails respondingParty) {
+    public boolean isStarted(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
         boolean returnValue = false;
         if (response.isPresent()) {
@@ -44,7 +44,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(PartyDetails respondingParty) {
+    public boolean isFinished(PartyDetails respondingParty, boolean isC1aApplicable) {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
