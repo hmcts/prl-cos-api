@@ -954,7 +954,7 @@ public class SendAndReplyServiceTest {
                             .selectedApplicationCode("OT_" + dateSent)
                             .applicationsList(dynamicList.toBuilder()
                                                   .value(DynamicListElement.builder()
-                                                             .code(UUID.randomUUID())
+                                                             .code("OT_" + dateSent)
                                                              .label("test-document")
                                                              .build())
                                                   .build())

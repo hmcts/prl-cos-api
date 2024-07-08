@@ -732,7 +732,7 @@ public class SendAndReplyService {
 
         List<Element<Document>> sendAttachedDocs =
             MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
-                ? getApplicationDocument(message.getApplicationsList(), caseData, message.getSelectedApplicationCode())
+                ? getApplicationDocument(message.getApplicationsList(), caseData, getValueCode(message.getApplicationsList()))
                 : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
 
         if (null != sendAttachedDocs) {
