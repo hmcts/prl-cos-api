@@ -67,15 +67,19 @@ public class CitizenResponseController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public CaseDataWithHearingResponse submitAndGenerateC7(
-            @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
-            @PathVariable("caseId") String caseId,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = citizenResponseService.generateAndSubmitCitizenResponse(authorisation, caseId, citizenUpdatedCaseData);
+            CaseDetails caseDetails = citizenResponseService.generateAndSubmitCitizenResponse(
+                authorisation,
+                caseId,
+                citizenUpdatedCaseData
+            );
             if (caseDetails != null) {
                 return caseService
-                    .getCaseDataWithHearingResponse(authorisation,"Yes", caseDetails);
+                    .getCaseDataWithHearingResponse(authorisation, "Yes", caseDetails);
             } else {
                 log.error("{} event has failed for the case {}", CaseEvent.REVIEW_AND_SUBMIT, caseId);
                 throw new CoreCaseDataStoreException("Citizen party update failed for this transaction");

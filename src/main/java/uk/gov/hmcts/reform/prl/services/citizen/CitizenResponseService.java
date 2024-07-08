@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,25 +77,24 @@ public class CitizenResponseService {
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
-    public static final String C_1_ARESPONSE = "C1Aresponse";
+    public static final String C1A_RESPONSE = "C1Aresponse";
     public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
-
 
     public Document generateAndReturnDraftC7(String caseId, String partyId, String authorisation,boolean isWelsh) throws Exception {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(authorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        updateCurrentRespondent(caseData, partyId);
-
+        log.info("Inside generateAndReturnDraftC7");
         return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 DOCUMENT_C7_DRAFT_HINT,
-                false,
+                isWelsh,
                 updateCurrentRespondent(caseData, partyId)
         );
     }
 
     private Map<String, Object> updateCurrentRespondent(CaseData caseData, String partyId) {
+        log.info("data map creating");
         Map<String, Object> dataMap = new HashMap<>();
         for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
@@ -104,7 +104,13 @@ public class CitizenResponseService {
                     .data(caseData.toMap(objectMapper)).build();
                 CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
                 dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
-                                                                         partyElement);
+                                                               partyElement);
+                try {
+                    log.info("data map generated is ===>" + objectMapper.writeValueAsString(dataMap));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                log.info("data map processed");
             }
         }
         return dataMap;
@@ -123,13 +129,6 @@ public class CitizenResponseService {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                     = allTabService.getStartUpdateForSpecificUserEvent(caseId, CaseEvent.REVIEW_AND_SUBMIT.getValue(), authorisation);
             CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
-            // CaseData caseDataToGenerateC7 = dbCaseData;
-            // caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(citizenUpdatedCaseData, caseDataToGenerateC7);
-
-            // DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
-
-            // generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7);
-
             Optional<Element<PartyDetails>> optionalCurrentRespondent
                 = dbCaseData.getRespondents()
                 .stream()
@@ -157,6 +156,12 @@ public class CitizenResponseService {
                         callbackRequest,
                         partyDetailsElement
                 );
+                CaseData caseDataToGenerateC7 = dbCaseData;
+                caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(citizenUpdatedCaseData, caseDataToGenerateC7);
+
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseDataToGenerateC7);
+
+                generateC7Response(authorisation, documentLanguage, responseDocs, caseDataToGenerateC7, dataMap);
 
                 if (isNotEmpty(partyDetailsElement.getValue().getResponse())) {
                     Response response = partyDetailsElement.getValue().getResponse();
@@ -245,7 +250,7 @@ public class CitizenResponseService {
             && Yes.equals(updatedPartyDetails.getResponse().getResponseToAllegationsOfHarm()
                               .getResponseToAllegationsOfHarmYesOrNoResponse())) {
             String fileName = updatedPartyDetails.getLabelForDynamicList()
-                + UNDERSCORE + C_1_ARESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
+                + UNDERSCORE + C1A_RESPONSE + UNDERSCORE + LocalDateTime.now(ZoneId.of(
                 LONDON_TIME_ZONE)).format(dateTimeFormatter);
             log.info("generating respondent C1A response documents");
             try {
@@ -299,12 +304,13 @@ public class CitizenResponseService {
     private void generateC7Response(String authorisation,
                                     DocumentLanguage documentLanguage,
                                     Map<Element<Document>, String> responseDocs,
-                                    CaseData caseDataToGenerateC7) throws Exception {
+                                    CaseData caseDataToGenerateC7,
+                                    Map<String, Object> dataMap) throws Exception {
         if (documentLanguage.isGenEng()) {
-            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false)), "en");
+            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, false, dataMap)), "en");
         }
         if (documentLanguage.isGenWelsh()) {
-            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true)), "cy");
+            responseDocs.put(element(generateFinalC7(caseDataToGenerateC7, authorisation, true, dataMap)), "cy");
         }
     }
 
@@ -346,13 +352,14 @@ public class CitizenResponseService {
         return caseData;
     }
 
-    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh) throws Exception {
+    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh, Map<String, Object> dataMap) throws Exception {
 
         return documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 "c7FinalEng",
-                isWelsh
+                isWelsh,
+                dataMap
         );
     }
 

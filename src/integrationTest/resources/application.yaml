@@ -187,6 +187,7 @@ send-grid:
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
           FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
           FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
+          SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
@@ -201,6 +202,7 @@ send-grid:
           SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
+          SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -453,14 +455,14 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
-      prl_c7_draft_filename: C7_Draft_Document.pdf
-      prl_c7_draft_template_wel: FL-PRL-GOR-WEL-C7R.docx
-      prl_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
-      prl_c7_final_template_eng: FL-PRL-GOR-ENG-C7R-Final.docx
-      prl_c7_final_filename_eng: C7_Document.pdf
-      prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
-      prl_c7_final_filename_wel: Final_C7_response_Welsh.pdf
+      prl_lip_c7_draft_template: FL-PRL-GOR-ENG-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename: C7_Draft_Document.pdf
+      prl_lip_c7_draft_template_wel: FL-PRL-GOR-WEL-LIP-C7R-DRAFT.docx
+      prl_lip_c7_draft_filename_wel: Draft_C7_response_Welsh.pdf
+      prl_lip_c7_final_template_eng: FL-PRL-GOR-ENG-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_eng: C7_Document.pdf
+      prl_lip_c7_final_template_wel: FL-PRL-GOR-WEL-LIP-C7R-FINAL.docx
+      prl_lip_c7_final_filename_wel: Final_C7_response_Welsh.pdf
       prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
       prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
