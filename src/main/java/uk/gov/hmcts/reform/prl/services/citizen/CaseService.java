@@ -1006,7 +1006,6 @@ public class CaseService {
         }
 
         //Respondent response notification to applicant
-        log.info("Adding citizen notifications ");
         addRespondentResponseNotification(citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
         return citizenNotifications;
@@ -1132,53 +1131,38 @@ public class CaseService {
     private void addRespondentResponseNotification(CitizenDocumentsManagement citizenDocumentsManagement,
                                                    List<CitizenNotification> citizenNotifications,
                                                    String partyType) {
-        log.info("Adding notification for Party {}", partyType);
         if (SERVED_PARTY_APPLICANT.equals(partyType)) {
             //logged in party is applicant
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), RESPONDENT_APPLICATION)
-                && !isAnyOrderServedPostLatestResp(
-                citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders(),
-                RESPONDENT_APPLICATION
-            )) {
-                citizenNotifications.add(CitizenNotification.builder()
-                                             .respondentNames(
-                                                 respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
-                                                                                            RESPONDENT_APPLICATION))
-                                             .id(CAN6_VIEW_RESPONSE_APPLICANT).show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
-            }
+            populateCitizenResponseNotifications(citizenDocumentsManagement,
+                                                 citizenNotifications, RESPONDENT_APPLICATION,
+                                                 CAN6_VIEW_RESPONSE_APPLICANT);
             //CAN6 A
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(),RESPONDENT_C1A_APPLICATION)
-                && !isAnyOrderServedPostLatestResp(
-                citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders(),
-                RESPONDENT_C1A_APPLICATION
-            )) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6A_VIEW_RESPONSE_C1A_APPLICANT)
-                                             .respondentNames(
-                                                 respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
-                                                                                            RESPONDENT_C1A_APPLICATION))
-                                             .show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6A_VIEW_RESPONSE_C1A_APPLICANT).show(false).build());
-            }
+            populateCitizenResponseNotifications(citizenDocumentsManagement,
+                                                 citizenNotifications, RESPONDENT_C1A_APPLICATION,
+                                                 CAN6A_VIEW_RESPONSE_C1A_APPLICANT);
             //CAN6B
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), RESPONDENT_C1A_RESPONSE)
-                && !isAnyOrderServedPostLatestResp(
-                citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders(),
-                RESPONDENT_C1A_RESPONSE
-            )) {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6B_VIEW_RESPONSE_C1AR_APPLICANT)
-                                             .respondentNames(
-                                                 respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
-                                                                                            RESPONDENT_C1A_RESPONSE))
-                                             .show(true).build());
-            } else {
-                citizenNotifications.add(CitizenNotification.builder().id(CAN6B_VIEW_RESPONSE_C1AR_APPLICANT).show(false).build());
-            }
+            populateCitizenResponseNotifications(citizenDocumentsManagement,
+                                                 citizenNotifications, RESPONDENT_C1A_RESPONSE,
+                                                 CAN6B_VIEW_RESPONSE_C1AR_APPLICANT);
+        }
+    }
+
+    private void populateCitizenResponseNotifications(CitizenDocumentsManagement citizenDocumentsManagement,
+                                                      List<CitizenNotification> citizenNotifications,
+                                                      String categoryId, String notificationType) {
+        if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), categoryId)
+            && !isAnyOrderServedPostLatestResp(
+            citizenDocumentsManagement.getCitizenDocuments(),
+            citizenDocumentsManagement.getCitizenOrders(),
+            categoryId
+        )) {
+            citizenNotifications.add(CitizenNotification.builder()
+                                         .respondentNames(
+                                             respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
+                                                                                        categoryId))
+                                         .id(notificationType).show(true).build());
+        } else {
+            citizenNotifications.add(CitizenNotification.builder().id(notificationType).show(false).build());
         }
     }
 
@@ -1500,7 +1484,6 @@ public class CaseService {
 
     private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
                                             LocalDateTime postDateTime) {
-        log.info("latest document uploaded date {}", postDateTime);
         return CollectionUtils.isNotEmpty(citizenOrders)
             && citizenOrders.stream()
             .anyMatch(citizenOrder -> null != citizenOrder.getServedDateTime()
@@ -1518,7 +1501,6 @@ public class CaseService {
     }
 
     private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments, String categoryId) {
-        log.info("checking response for documents  for {} documents {}", categoryId, citizenDocuments);
         return CollectionUtils.isNotEmpty(citizenDocuments)
             && citizenDocuments.stream()
             .anyMatch(citizenDocument -> categoryId.equals(citizenDocument.getCategoryId()));
