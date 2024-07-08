@@ -13,6 +13,7 @@ import lombok.Getter;
 @EqualsAndHashCode(callSuper = true)
 public class CitizenEmailVars extends EmailTemplateVars {
     private final String caseName;
+    private final String partyName;
     private final String applicantName;
     private final String respondentName;
     private final String caseLink;
@@ -21,6 +22,7 @@ public class CitizenEmailVars extends EmailTemplateVars {
     @Builder
     public CitizenEmailVars(String caseReference,
                             String caseName,
+                            String partyName,
                             String applicantName,
                             String respondentName,
                             String caseLink,
@@ -28,6 +30,7 @@ public class CitizenEmailVars extends EmailTemplateVars {
 
         super(caseReference);
         this.caseName = caseName;
+        this.partyName = partyName;
         this.applicantName = applicantName;
         this.respondentName = respondentName;
         this.caseLink = caseLink;

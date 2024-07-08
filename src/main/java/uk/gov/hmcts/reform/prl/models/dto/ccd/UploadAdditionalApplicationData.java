@@ -11,15 +11,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 
-import java.util.List;
-
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UploadAdditionalApplicationData {
 
-    private final List<AdditionalApplicationTypeEnum> additionalApplicationsApplyingFor;
+    private final AdditionalApplicationTypeEnum additionalApplicationsApplyingFor;
     private final C2ApplicationTypeEnum typeOfC2Application;
     private final DynamicMultiSelectList additionalApplicantsList;
     private final C2DocumentBundle temporaryC2Document;

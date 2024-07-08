@@ -33,22 +33,15 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
@@ -58,11 +51,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FILE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -104,14 +95,12 @@ public class ServiceOfApplicationPostServiceTest {
     public static final String s2sToken = "s2s token";
     private static final String AUTH = "Auth";
 
-    private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
     private static final String randomAlphaNumeric = "Abc123EFGH";
-    private static final String LETTER_TYPE = "ApplicationPack";
     private static final String CONTENT_TYPE = "application/json";
     private DynamicMultiSelectList dynamicMultiSelectList;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().label("standardDirectionsOrder").build())).build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -122,7 +111,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testSendViaPostToOtherPeopleInCase() throws Exception {
+    public void testSendViaPostToOtherPeopleInCase() {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
@@ -215,8 +204,6 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        List<Document> packN = List.of(Document.builder().build());
-
         final CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -232,10 +219,6 @@ public class ServiceOfApplicationPostServiceTest {
                                       .build())
             .othersToNotify(otherParities)
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
             Mockito.any(),
             Mockito.any(),
@@ -243,22 +226,10 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(null);
-        Document finalDoc = Document.builder()
-            .documentUrl("finalDoc")
-            .documentBinaryUrl("finalDoc")
-            .documentHash("finalDoc")
-            .build();
-
-        Document coverSheet = Document.builder()
-            .documentUrl("coverSheet")
-            .documentBinaryUrl("coverSheet")
-            .documentHash("coverSheet")
-            .build();
 
         final Address address = Address.builder().addressLine1("157").addressLine2("London")
             .postCode("SE1 234").country("UK").build();
 
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -295,8 +266,6 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        List<Document> packN = List.of(Document.builder().build());
-
         final CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -314,8 +283,6 @@ public class ServiceOfApplicationPostServiceTest {
             .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
             Mockito.any(),
             Mockito.any(),
@@ -323,22 +290,10 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(null);
-        Document finalDoc = Document.builder()
-            .documentUrl("finalDoc")
-            .documentBinaryUrl("finalDoc")
-            .documentHash("finalDoc")
-            .build();
-
-        Document coverSheet = Document.builder()
-            .documentUrl("coverSheet")
-            .documentBinaryUrl("coverSheet")
-            .documentHash("coverSheet")
-            .build();
 
         final Address address = Address.builder().addressLine1("157").addressLine2("London")
             .postCode("SE1 234").country("UK").build();
 
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -350,8 +305,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void testStaticDocsForC100Applicant() throws Exception {
-
+    public void testStaticDocsForC100Applicant() {
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
             .representativeLastName("LastName")
@@ -361,20 +315,16 @@ public class ServiceOfApplicationPostServiceTest {
             .email("test@applicant.com")
             .build();
 
-        Document finalDoc = Document.builder()
-            .documentUrl("finalDoc")
-            .documentBinaryUrl("finalDoc")
-            .documentHash("finalDoc")
-            .build();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
 
-        Document coverSheet = Document.builder()
-            .documentUrl("coverSheet")
-            .documentBinaryUrl("coverSheet")
-            .documentHash("coverSheet")
-            .build();
-
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
-
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(caseDocumentClient.uploadDocuments(Mockito.anyString(), Mockito.anyString(),
+                                                Mockito.anyString(), Mockito.anyString(),
+                                                Mockito.anyList())).thenReturn(uploadResponse);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+                                                                                    .isGenWelsh(true)
+                                                                                    .isGenEng(true).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("test")
@@ -387,55 +337,11 @@ public class ServiceOfApplicationPostServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        String applicantName = "FirstName LastName";
-
-        final EmailTemplateVars emailTemplateVars = CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .applicantName(applicantName)
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .build();
-
-        Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("caseName", caseData.getApplicantCaseName());
-        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
-        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
-        combinedMap.put("subject", "Case documents for : ");
-        combinedMap.put("content", "Case details");
-        combinedMap.put("attachmentType", "pdf");
-        combinedMap.put("disposition", "attachment");
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .emailAddress("test@email.com")
-            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
-            .timeStamp(currentDate).build();
-
-        byte[] pdf = new byte[]{1,2,3,4,5};
-        MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
-        uk.gov.hmcts.reform.ccd.document.am.model.Document document = testDocument();
-
-        UploadResponse uploadResponse = new UploadResponse(List.of(document));
-        when(caseDocumentClient.uploadDocuments(Mockito.anyString(), Mockito.anyString(),
-                                                Mockito.anyString(), Mockito.anyString(),
-                                                Mockito.anyList())).thenReturn(uploadResponse);
-
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
-                                                                                    .isGenWelsh(true)
-                                                                                    .isGenEng(true).build());
         assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100", caseData));
-
-
     }
 
     @Test
-    public void testStaticDocsForFL401() throws Exception {
+    public void testStaticDocsForFL401() {
 
         PartyDetails applicant = PartyDetails.builder()
             .solicitorEmail("test@gmail.com")
@@ -445,20 +351,6 @@ public class ServiceOfApplicationPostServiceTest {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@applicant.com")
             .build();
-
-        Document finalDoc = Document.builder()
-            .documentUrl("finalDoc")
-            .documentBinaryUrl("finalDoc")
-            .documentHash("finalDoc")
-            .build();
-
-        Document coverSheet = Document.builder()
-            .documentUrl("coverSheet")
-            .documentBinaryUrl("coverSheet")
-            .documentHash("coverSheet")
-            .build();
-
-        final List<Document> documentList = List.of(coverSheet, finalDoc);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -472,36 +364,6 @@ public class ServiceOfApplicationPostServiceTest {
                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                  .build())
             .build();
-        String applicantName = "FirstName LastName";
-
-        final EmailTemplateVars emailTemplateVars = CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .applicantName(applicantName)
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .build();
-
-        Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("caseName", caseData.getApplicantCaseName());
-        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
-        combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
-        combinedMap.put("subject", "Case documents for : ");
-        combinedMap.put("content", "Case details");
-        combinedMap.put("attachmentType", "pdf");
-        combinedMap.put("disposition", "attachment");
-
-
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
-
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
-            .emailAddress("test@email.com")
-            .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
-            .timeStamp(currentDate).build();
 
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
