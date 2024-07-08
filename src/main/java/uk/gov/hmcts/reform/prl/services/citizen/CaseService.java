@@ -1003,6 +1003,7 @@ public class CaseService {
         }
 
         //Respondent response notification to applicant
+        log.info("Adding citizen notifications ");
         addRespondentResponseNotification(citizenDocumentsManagement,  citizenNotifications, partyIdAndType.get(PARTY_TYPE));
 
         return citizenNotifications;
@@ -1128,12 +1129,14 @@ public class CaseService {
     private void addRespondentResponseNotification(CitizenDocumentsManagement citizenDocumentsManagement,
                                                    List<CitizenNotification> citizenNotifications,
                                                    String partyType) {
+        log.info("Adding notification for Party {}", partyType);
         if (SERVED_PARTY_APPLICANT.equals(partyType)) {
             //logged in party is applicant
-            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
-                && !isAnyOrderServedPostLatestC7Resp(
+            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), RESPONDENT_APPLICATION)
+                && !isAnyOrderServedPostLatestResp(
                 citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders()
+                citizenDocumentsManagement.getCitizenOrders(),
+                RESPONDENT_APPLICATION
             )) {
                 citizenNotifications.add(CitizenNotification.builder()
                                              .respondentNames(
@@ -1144,24 +1147,26 @@ public class CaseService {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN6_VIEW_RESPONSE_APPLICANT).show(false).build());
             }
             //CAN6 A
-            if (isRespondentC1AResponseAvailable(citizenDocumentsManagement.getCitizenDocuments())
-                && !isAnyOrderServedPostLatestC1AResp(
+            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(),RESPONDENT_C1A_APPLICATION)
+                && !isAnyOrderServedPostLatestResp(
                 citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders()
+                citizenDocumentsManagement.getCitizenOrders(),
+                RESPONDENT_C1A_APPLICATION
             )) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN6A_VIEW_RESPONSE_C1A_APPLICANT)
                                              .respondentNames(
                                                  respondentNamesForProvidedResponseCategory(citizenDocumentsManagement.getCitizenDocuments(),
-                                                                                            RESPONDENT_C1A_RESPONSE))
+                                                                                            RESPONDENT_C1A_APPLICATION))
                                              .show(true).build());
             } else {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN6A_VIEW_RESPONSE_C1A_APPLICANT).show(false).build());
             }
             //CAN6B
-            if (isRespondentC1aApplicationAvailable(citizenDocumentsManagement.getCitizenDocuments())
-                && !isAnyOrderServedPostLatestC1ARespApplication(
+            if (isRespondentResponseAvailable(citizenDocumentsManagement.getCitizenDocuments(), RESPONDENT_C1A_RESPONSE)
+                && !isAnyOrderServedPostLatestResp(
                 citizenDocumentsManagement.getCitizenDocuments(),
-                citizenDocumentsManagement.getCitizenOrders()
+                citizenDocumentsManagement.getCitizenOrders(),
+                RESPONDENT_C1A_RESPONSE
             )) {
                 citizenNotifications.add(CitizenNotification.builder().id(CAN6B_VIEW_RESPONSE_C1AR_APPLICANT)
                                              .respondentNames(
@@ -1471,25 +1476,11 @@ public class CaseService {
                           isAnyOrderServedPostDate(citizenOrders, stmtOfSerParty.getValue().getServedDateTimeOption()));
     }
 
-    private boolean isAnyOrderServedPostLatestC7Resp(List<CitizenDocuments> citizenDocuments,
-                                                     List<CitizenDocuments> citizenOrders) {
+    private boolean isAnyOrderServedPostLatestResp(List<CitizenDocuments> citizenDocuments,
+                                                   List<CitizenDocuments> citizenOrders, String categoryId) {
         return CollectionUtils.isNotEmpty(citizenDocuments)
             && isAnyOrderServedPostDate(citizenOrders,
-                                        getLatestReviewedDocumentDate(citizenDocuments, RESPONDENT_APPLICATION));
-    }
-
-    private boolean isAnyOrderServedPostLatestC1AResp(List<CitizenDocuments> citizenDocuments,
-                                                     List<CitizenDocuments> citizenOrders) {
-        return CollectionUtils.isNotEmpty(citizenDocuments)
-            && isAnyOrderServedPostDate(citizenOrders,
-                                        getLatestReviewedDocumentDate(citizenDocuments, RESPONDENT_C1A_RESPONSE));
-    }
-
-    private boolean isAnyOrderServedPostLatestC1ARespApplication(List<CitizenDocuments> citizenDocuments,
-                                                     List<CitizenDocuments> citizenOrders) {
-        return CollectionUtils.isNotEmpty(citizenDocuments)
-            && isAnyOrderServedPostDate(citizenOrders,
-                                        getLatestReviewedDocumentDate(citizenDocuments, RESPONDENT_C1A_APPLICATION));
+                                        getLatestReviewedDocumentDate(citizenDocuments, categoryId));
     }
 
     private LocalDateTime getLatestReviewedDocumentDate(List<CitizenDocuments> citizenDocuments,
@@ -1506,6 +1497,7 @@ public class CaseService {
 
     private boolean isAnyOrderServedPostDate(List<CitizenDocuments> citizenOrders,
                                             LocalDateTime postDateTime) {
+        log.info("latest document uploaded date {}", postDateTime);
         return CollectionUtils.isNotEmpty(citizenOrders)
             && citizenOrders.stream()
             .anyMatch(citizenOrder -> null != citizenOrder.getServedDateTime()
@@ -1522,22 +1514,11 @@ public class CaseService {
             )).containsAll(partyIds));
     }
 
-    private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments) {
+    private boolean isRespondentResponseAvailable(List<CitizenDocuments> citizenDocuments, String categoryId) {
+        log.info("checking response for documents  for documens {}", citizenDocuments);
         return CollectionUtils.isNotEmpty(citizenDocuments)
             && citizenDocuments.stream()
-            .anyMatch(citizenDocument -> RESPONDENT_APPLICATION.equals(citizenDocument.getCategoryId()));
-    }
-
-    private boolean isRespondentC1AResponseAvailable(List<CitizenDocuments> citizenDocuments) {
-        return CollectionUtils.isNotEmpty(citizenDocuments)
-            && citizenDocuments.stream()
-            .anyMatch(citizenDocument -> RESPONDENT_C1A_RESPONSE.equals(citizenDocument.getCategoryId()));
-    }
-
-    private boolean isRespondentC1aApplicationAvailable(List<CitizenDocuments> citizenDocuments) {
-        return CollectionUtils.isNotEmpty(citizenDocuments)
-            && citizenDocuments.stream()
-            .anyMatch(citizenDocument -> RESPONDENT_C1A_APPLICATION.equals(citizenDocument.getCategoryId()));
+            .anyMatch(citizenDocument -> categoryId.equals(citizenDocument.getCategoryId()));
     }
 
     private String respondentNamesForProvidedResponseCategory(List<CitizenDocuments> citizenDocuments, String category) {
