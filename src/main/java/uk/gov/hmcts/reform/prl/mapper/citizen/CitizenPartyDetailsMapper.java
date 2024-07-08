@@ -176,6 +176,7 @@ public class CitizenPartyDetailsMapper {
                                                                                           party.getValue(),
                                                                                           caseEvent, childDetails);
 
+                    log.info("After update ------------------>" + updatedPartyDetails.getIsAtAddressLessThan5Years());
                     applicants.set(applicants.indexOf(party), element(party.getId(), updatedPartyDetails));
                 });
             caseData = caseData.toBuilder().applicants(applicants).build();
@@ -546,7 +547,15 @@ public class CitizenPartyDetailsMapper {
 
         boolean isDateOfBirthNeedsToUpdate = isNotEmpty(citizenProvidedPartyDetails.getDateOfBirth());
 
+        String isAddressLivedLessThan5YearsDetails = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
+            ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
+            : existingPartyDetails.getAddressLivedLessThan5YearsDetails();
+
         boolean isPlaceOfBirthNeedsToUpdate = StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPlaceOfBirth());
+        log.info("citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()--------------------->"
+                     + citizenProvidedPartyDetails.getIsAtAddressLessThan5Years());
+        log.info("citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()--------------------->"
+                     + citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails());
 
         return existingPartyDetails.toBuilder()
             .canYouProvideEmailAddress(isEmailNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvideEmailAddress())
@@ -555,12 +564,12 @@ public class CitizenPartyDetailsMapper {
             .canYouProvidePhoneNumber(isPhoneNoNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getCanYouProvidePhoneNumber())
             .phoneNumber(isPhoneNoNeedsToUpdate
                              ? citizenProvidedPartyDetails.getPhoneNumber() : existingPartyDetails.getPhoneNumber())
-            //.isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years() != null ? YesOrNo.Yes : YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.Yes.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years()) ? YesOrNo.No : YesOrNo.Yes)
             .isCurrentAddressKnown(isAddressNeedsToUpdate ? YesOrNo.Yes : existingPartyDetails.getIsCurrentAddressKnown())
             .address(isAddressNeedsToUpdate ? citizenProvidedPartyDetails.getAddress() : existingPartyDetails.getAddress())
-            .addressLivedLessThan5YearsDetails(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails())
-                                                   ? citizenProvidedPartyDetails.getAddressLivedLessThan5YearsDetails()
-                                                   : existingPartyDetails.getAddressLivedLessThan5YearsDetails())
+            .addressLivedLessThan5YearsDetails(YesOrNo.No.equals(citizenProvidedPartyDetails.getIsAtAddressLessThan5Years())
+                                                   ? isAddressLivedLessThan5YearsDetails
+                                                   : null)
             .firstName(citizenProvidedPartyDetails.getFirstName())
             .lastName(citizenProvidedPartyDetails.getLastName())
             .previousName(StringUtils.isNotEmpty(citizenProvidedPartyDetails.getPreviousName())

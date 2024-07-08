@@ -462,12 +462,12 @@ public class ApplicationsTabService implements TabService {
             applicants.add(Element.<Applicant>builder().value(Applicant.builder().build()).build());
             return applicants;
         }
-
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> currentApplicant : currentApplicants) {
             Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
             Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
-                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
+                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender())
+                                                        .getDisplayedValue()).build())
                 .build();
             applicants.add(applicantElement);
         }
@@ -491,7 +491,8 @@ public class ApplicationsTabService implements TabService {
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
                 party = Element.<PartyDetails>builder()
-                    .value(party.getValue().toBuilder().address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                    .value(party.getValue().toBuilder().address(Address.builder()
+                                                                    .addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
                                                                     .build()).build())
                     .id(party.getId())
                     .build();
@@ -539,6 +540,7 @@ public class ApplicationsTabService implements TabService {
                 .build()).build();
             respondents.add(respondentElement);
         }
+
         return respondents;
     }
 

@@ -32,15 +32,11 @@ public class Applicant {
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final ContactPreferences contactPreferences;
-
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;
     private final String solicitorReference;
     private final String dxNumber;
     private final Organisation solicitorOrg;
-
-
-
 }
 
