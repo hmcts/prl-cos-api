@@ -2370,6 +2370,9 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
+        }
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             dataMap.put("isCitizen", CaseUtils.isCaseCreatedByCitizen(caseData));
         }
