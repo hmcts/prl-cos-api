@@ -248,10 +248,8 @@ public class RestrictedCaseAccessService {
             if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
                 caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
             } else {
-                caseDataUpdated.put("errors", WARNING_TEXT_DIV
-                    + "</span><strong class='govuk-warning-text__text'>No one have access to this case right now, "
-                    + "Please provide access to the people with right permissions"
-                    + "case</strong></div>");
+                caseDataUpdated.put("errors", "No one have access to this case right now, "
+                    + "Please provide access to the people with right permissions");
             }
         }
         log.info("** retrieveAssignedUserRoles done");
