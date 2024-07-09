@@ -86,9 +86,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -934,6 +937,7 @@ public class SendAndReplyServiceTest {
         dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code(uuid).build()).build();
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+        String awpOtherCode = AWP_OTHER_APPLICATION_SNR_CODE + UNDERSCORE + dateSent;
 
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
@@ -951,10 +955,10 @@ public class SendAndReplyServiceTest {
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
-                            .selectedApplicationCode("OT_" + dateSent)
+                            .selectedApplicationCode(awpOtherCode)
                             .applicationsList(dynamicList.toBuilder()
                                                   .value(DynamicListElement.builder()
-                                                             .code("OT_" + dateSent)
+                                                             .code(awpOtherCode)
                                                              .label("test-document")
                                                              .build())
                                                   .build())
@@ -973,6 +977,71 @@ public class SendAndReplyServiceTest {
                                                      .c2DocumentBundle(C2DocumentBundle.builder()
                                                                            .applicationStatus(AWP_STATUS_SUBMITTED)
                                                                            .uploadedDateTime(dateSent).build())
+                                                     .build()));
+        caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
+        List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document1 = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+
+        when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(document1);
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals("some message while sending",message.getMessageContent());
+        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+    }
+
+    @Test
+    public void testBuildSendMessageWhenC2ApplicationDocumentSelected() {
+        UUID uuid = UUID.randomUUID();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code(uuid).build()).build();
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+        String awpC2Code = AWP_C2_APPLICATION_SNR_CODE + UNDERSCORE + dateSent;
+
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .selectedApplicationCode(awpC2Code)
+                            .applicationsList(dynamicList.toBuilder()
+                                                  .value(DynamicListElement.builder()
+                                                             .code(awpC2Code)
+                                                             .label("test-document")
+                                                             .build())
+                                                  .build())
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                                  .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
+                                                                                  .uploadedDateTime(dateSent)
+                                                                                  .build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                           .uploadedDateTime(dateSent)
+                                                                           .finalDocument(List.of(element(internalMessageDoc)))
+                                                                           .build())
                                                      .build()));
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());

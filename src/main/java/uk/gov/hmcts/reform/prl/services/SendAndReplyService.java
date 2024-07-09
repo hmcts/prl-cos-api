@@ -826,7 +826,7 @@ public class SendAndReplyService {
 
                 if (null != c2ApplicationsBundle && null != c2ApplicationsBundle.getApplicationStatus()
                     && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
-                    && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
+                    && selectedApplicationCode.equals(AWP_C2_APPLICATION_SNR_CODE
                                                           .concat(UNDERSCORE)
                                                           .concat(c2ApplicationsBundle.getUploadedDateTime()))) {
                     return true;
