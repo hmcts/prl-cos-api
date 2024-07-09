@@ -540,12 +540,6 @@ public class ManageOrderEmailService {
                                                     List<PostalInformation> otherOrganisationPostList) {
         ManageOrders manageOrders = caseData.getManageOrders();
         if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
-            log.info("** DA Personal service unrepresented serving option selected {}",
-                     dynamicDataForEmail);
-            dynamicDataForEmail.entrySet().stream().forEach(e -> {
-                log.info(e.getKey());
-                log.info(e.getValue().toString());
-            });
             handleFL401NonPersonalServiceNotifications(authorisation,
                                                         caseData,
                                                         manageOrders,
