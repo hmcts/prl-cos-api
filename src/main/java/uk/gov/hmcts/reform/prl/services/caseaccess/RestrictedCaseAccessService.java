@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CHANGE_CASE_ACCESS_AS_SYSUSER;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.MARK_CASE_AS_PUBLIC;
@@ -241,12 +242,18 @@ public class RestrictedCaseAccessService {
         log.info("** retrieveAssignedUserRoles event started");
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        List<String> assignedUserDetailsHtml = fetchAssigneedUserDetails(callbackRequest);
-        if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
-            caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
+        CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
+        if (MARK_CASE_AS_RESTRICTED.equals(caseEvent) || MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
+            List<String> assignedUserDetailsHtml = fetchAssigneedUserDetails(callbackRequest);
+            if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
+                caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
+            } else {
+                caseDataUpdated.put("errors", WARNING_TEXT_DIV
+                    + "</span><strong class='govuk-warning-text__text'>No one have access to this case right now, "
+                    + "Please provide access to the people with right permissions"
+                    + "case</strong></div>");
+            }
         }
-
         log.info("** retrieveAssignedUserRoles done");
         return caseDataUpdated;
     }
