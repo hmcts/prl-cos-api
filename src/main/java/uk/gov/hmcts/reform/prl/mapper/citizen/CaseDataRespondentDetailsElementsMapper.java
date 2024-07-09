@@ -117,7 +117,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-        return isNotEmpty(personalDetails.getDateOfBirth()) ? null : DontKnow.dontKnow;
+        return isNotEmpty(personalDetails.getDateOfBirth()) ? DontKnow.dontKnow : null;
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
