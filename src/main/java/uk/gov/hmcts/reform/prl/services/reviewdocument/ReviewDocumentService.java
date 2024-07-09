@@ -23,24 +23,20 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
-import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -68,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_A15_LE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -81,6 +78,14 @@ public class ReviewDocumentService {
     public static final String CAFCASS_QUARANTINE_DOCS_LIST = "cafcassQuarantineDocsList";
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
+    public static final String RESPONDENT_WELSH = "Mae’r atebydd";
+    public static final String RESPONDENT_NAME = "respondentName";
+    public static final String ID = "id";
+    public static final String APPLICANT_ADDRESS = "applicantAddress";
+    public static final String APPLICANT_NAME = "applicantName";
+    public static final String DATE = "date";
+    public static final String DAT_FORMAT = "dd MMM yyyy";
+    public static final String RESPONDENT = "Respondent";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -152,11 +157,10 @@ public class ReviewDocumentService {
     private static final String LETTER_TYPE = "responsePack";
 
     private final EmailService emailService;
-    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final ServiceOfApplicationService serviceOfApplicationService;
     private final BulkPrintService bulkPrintService;
-    private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
-    private final DgsService dgsService;
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -211,8 +215,6 @@ public class ReviewDocumentService {
         }
         //citizen
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
-            log.info("document list from case data ==>> {}", caseData.getDocumentManagementDetails()
-                .getCitizenQuarantineDocsList());
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
@@ -226,7 +228,6 @@ public class ReviewDocumentService {
                                                .build())
                                            .toList());
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
-            log.info("==> temp quarantine list {}", tempQuarantineDocumentList);
         }
         //bulkscan
         if (isNotEmpty(caseData.getScannedDocuments())) {
@@ -249,13 +250,10 @@ public class ReviewDocumentService {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-            log.info("** uuid ** {}", uuid);
             List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
 
-            log.info("** tempQuarantineDocumentList ** {}", tempQuarantineDocumentList);
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
-            log.info("** tempQuarantineDocument ** {}", quarantineLegalDocElement);
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
                 legalDocElement,
@@ -274,7 +272,6 @@ public class ReviewDocumentService {
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
         caseDataUpdated.put(DOC_LABEL, LABEL_WITH_HINT);
-        log.info("=>> Uploaded by user {} ", submittedBy);
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
@@ -357,8 +354,7 @@ public class ReviewDocumentService {
             );
 
             sendNotifications(caseData, quarantineLegalDocElementOptional.get(),
-                              quarantineDocsListToBeModified, caseDataUpdated
-            );
+                              quarantineDocsListToBeModified);
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
@@ -367,7 +363,7 @@ public class ReviewDocumentService {
     }
 
     private void sendNotifications(CaseData caseData, Element<QuarantineLegalDoc> quarantineLegalDocElementOptional,
-                                   String quarantineDocsListToBeModified, Map<String, Object> caseDataUpdated) {
+                                   String quarantineDocsListToBeModified) {
         sendNotificationToCafCass(caseData, quarantineLegalDocElementOptional, quarantineDocsListToBeModified);
         sendResponseSubmittedPostNotification(caseData,
                                               quarantineLegalDocElementOptional,
@@ -390,18 +386,14 @@ public class ReviewDocumentService {
                     respondentName,
                     DOCUMENT_A13_LETTER
                 );
-            }
-
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
+            } else if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_APPLICATION)) {
                 generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
                     respondentName,
                     DOCUMENT_A14_LETTER
                 );
-            }
-
-            if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
+            } else if (quarantineLegalDocElementOptional.getValue().getCategoryId().equalsIgnoreCase(RESPONDENT_C1A_RESPONSE)) {
                 generateAndSendPostNotification(
                     caseData,
                     quarantineLegalDocElementOptional,
@@ -424,13 +416,12 @@ public class ReviewDocumentService {
                 responseDocuments.add(quarantineLegalDocElementOptional.getValue().getDocument());
                 try {
                     // Add cover letter for respondent
-                    responseDocuments.addAll(getCoverLetters(caseData,
-                                                             systemUserService.getSysUserToken(),
-                                                             applicant.getValue().getAddress(),
-                                                             applicant.getValue().getLabelForDynamicList(),
-                                                             respondentName,
-                                                             documentLetter
-                    ));
+                    Map<String, Object> dataMap = fetchApplicantResponseDataMap(caseData, applicant.getValue().getAddress(),
+                                                                                applicant.getValue().getLabelForDynamicList(),
+                                                                                respondentName);
+                    responseDocuments.addAll(serviceOfApplicationService.getCoverLetters(systemUserService.getSysUserToken(),
+                                                                                         caseData, applicant, documentLetter,
+                                                                                         dataMap, false));
                     // Add coversheet and send it to bulk print
                     UUID bulkPrintId = sendResponseDocumentViaPost(caseData, applicant.getValue().getAddress(),
                                                                    applicant.getValue().getLabelForDynamicList(),
@@ -514,16 +505,16 @@ public class ReviewDocumentService {
                                              String authorisation,
                                              List<Document> responseDocument) throws Exception {
         List<Document> documents = new ArrayList<>();
-        //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(
+        //generate cover sheet
+        List<Document> coverSheets = serviceOfApplicationPostService.getCoverSheets(
             caseData,
             authorisation,
             address,
             name,
             DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
         );
-        if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
-            documents.addAll(coverLetterDocs);
+        if (CollectionUtils.isNotEmpty(coverSheets)) {
+            documents.addAll(coverSheets);
         }
 
         //cover should be the first doc in the list, append all order docs
@@ -538,64 +529,19 @@ public class ReviewDocumentService {
         );
     }
 
-    public List<Document> getCoverLetters(CaseData caseData, String auth, Address address, String name,
-                                          String respondentName, String coverSheetTemplate) throws Exception {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        List<Document> coversheets = new ArrayList<>();
-        if (null != address && null != address.getAddressLine1()) {
-            if (documentLanguage.isGenEng()) {
-                GeneratedDocumentInfo generatedDocumentInfo =
-                    fetchApplicantResponseDocument(
-                        caseData,
-                        auth,
-                        address,
-                        name,
-                        respondentName,
-                        false,
-                        coverSheetTemplate
-                    );
-                coversheets.add(DocumentUtils.toResponseCoveLetterDocument(generatedDocumentInfo));
-            }
-            if (documentLanguage.isGenWelsh()) {
-                GeneratedDocumentInfo generatedDocumentInfo =
-                    fetchApplicantResponseDocument(
-                        caseData,
-                        auth,
-                        address,
-                        name,
-                        respondentName,
-                        true,
-                        coverSheetTemplate
-                    );
-                coversheets.add(DocumentUtils.toResponseCoveLetterDocument(generatedDocumentInfo));
-            }
-        } else {
-            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
-        }
-        return coversheets;
-    }
-
-    private GeneratedDocumentInfo fetchApplicantResponseDocument(CaseData caseData, String auth,
-                                                                 Address address, String applicantName,
-                                                                 String respondentName,
-                                                                 boolean isWelsh, String responseDocumentTemplate)
-        throws Exception {
+    private Map<String, Object> fetchApplicantResponseDataMap(CaseData caseData,
+                                                              Address address, String applicantName,
+                                                              String respondentName) {
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("applicantName", null != applicantName ? applicantName : " ");
-        dataMap.put("applicantAddress", address);
-        dataMap.put("id", String.valueOf(caseData.getId()));
-        dataMap.put("respondentName", null != respondentName ? respondentName :
-            (isWelsh ? "Mae’r atebydd" : "Respondent"));
-        dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-        GeneratedDocumentInfo generatedDocumentInfo;
-        generatedDocumentInfo = dgsService.generateDocument(
-            auth, String.valueOf(caseData.getId()),
-            documentGenService.getTemplate(
-                caseData,
-                responseDocumentTemplate, isWelsh
-            ), dataMap
+        dataMap.put(APPLICANT_NAME, null != applicantName ? applicantName : " ");
+        dataMap.put(APPLICANT_ADDRESS, address);
+        dataMap.put(ID, String.valueOf(caseData.getId()));
+        dataMap.put(RESPONDENT_NAME,
+                    null == respondentName ? (documentLanguageService.docGenerateLang(caseData).isGenWelsh()
+                        ? RESPONDENT_WELSH : RESPONDENT) : respondentName
         );
-        return generatedDocumentInfo;
+        dataMap.put(DATE, LocalDate.now().format(DateTimeFormatter.ofPattern(DAT_FORMAT)));
+        return dataMap;
     }
 
     private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {

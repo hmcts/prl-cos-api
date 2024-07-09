@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -285,6 +286,7 @@ public class ServiceOfApplicationService {
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
+    private final DocumentGenService documentGenService;
     private final CaseInviteManager caseInviteManager;
     private final LaunchDarklyClient launchDarklyClient;
 
@@ -2332,6 +2334,40 @@ public class ServiceOfApplicationService {
 
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         return fetchCoverLetter(authorisation, template, dataMap);
+    }
+
+    public List<Document> getCoverLetters(String authorization,
+                                          CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String templateHint,
+                                          Map<String, Object> dataMapInput,
+                                          boolean isAccessCodeNeeded) {
+        List<Document> coverLetters = new ArrayList<>();
+        CaseInvite caseInvite = null;
+        if (isAccessCodeNeeded
+            && !isAccessEnabled(party)
+            && !CaseUtils.hasLegalRepresentation(party.getValue())) {
+            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+        }
+        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        dataMap.putAll(dataMapInput);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        //English
+        if (documentLanguage.isGenEng()) {
+            coverLetters.add(fetchCoverLetter(authorization, documentGenService.getTemplate(
+                caseData,
+                templateHint, false
+            ), dataMap));
+        }
+        //Welsh
+        if (documentLanguage.isGenWelsh) {
+            coverLetters.add(fetchCoverLetter(authorization, documentGenService.getTemplate(
+                caseData,
+                templateHint, true
+            ), dataMap));
+        }
+
+        return coverLetters;
     }
 
     private Document fetchCoverLetter(String authorisation, String template, Map<String, Object> dataMap) {
