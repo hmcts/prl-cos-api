@@ -138,7 +138,6 @@ public class StmtOfServImplService {
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                         .servedDateTimeOption(recipient.getServedDateTimeOption())
                         .build();
-
                 } else {
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(null)
@@ -570,7 +569,8 @@ public class StmtOfServImplService {
                                                                      CaseData caseData,
                                                                      Element<PartyDetails> respondent,
                                                                      boolean isC100Case) {
-        if (!CaseUtils.hasLegalRepresentation(respondent.getValue())) {
+        if (!CaseUtils.hasDashboardAccess(respondent)
+            && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
             List<Document> documents = null;
             try {
                 //cover sheets
@@ -622,14 +622,14 @@ public class StmtOfServImplService {
                 return null;
             }
         } else {
-            log.warn("Respondent {} is represented by a solicitor, no need to send access code", respondent.getId());
+            log.warn("Respondent {} is either represented or has got dashboard access, no need to send access code", respondent.getId());
             return element(DocumentsNotification.builder()
                                .notification(NotificationDetails.builder()
                                                  .partyId(String.valueOf(respondent.getId()))
                                                  .partyType(PartyType.RESPONDENT)
                                                  .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                                                  .remarks(
-                                                     "Respondent is represented by a solicitor, no need to send access code")
+                                                     "Respondent is either represented or has got dashboard access, no need to send access code")
                                                  .build())
                                .build());
         }
