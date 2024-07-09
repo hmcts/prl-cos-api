@@ -65,6 +65,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -735,7 +736,7 @@ public class SendAndReplyService {
                 ? getApplicationDocument(message.getApplicationsList(), caseData, getValueCode(message.getApplicationsList()))
                 : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
 
-        if (null != sendAttachedDocs) {
+        if (!sendAttachedDocs.isEmpty()) {
             newMessage = newMessage.toBuilder()
                 .internalMessageAttachDocs(sendAttachedDocs)
                 .build();
@@ -801,7 +802,7 @@ public class SendAndReplyService {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
         if (null == applicationDocumentList || null == applicationDocumentList.getValueCode() || null == additionalApplicationElements) {
-            return null;
+            return emptyList();
         }
 
         Optional<Element<AdditionalApplicationsBundle>> otherApplicationDocumentsElement = additionalApplicationElements
@@ -840,7 +841,7 @@ public class SendAndReplyService {
             return c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument();
         }
 
-        return null;
+        return emptyList();
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
