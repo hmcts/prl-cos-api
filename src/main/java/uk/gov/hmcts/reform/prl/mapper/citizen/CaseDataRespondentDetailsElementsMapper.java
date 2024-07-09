@@ -117,12 +117,8 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-        return (personalDetails.getDateOfBirth() != null) ? DontKnow.dontKnow : null;
+           return isNotEmpty(personalDetails.getDateOfBirth()) ? null : DontKnow.dontKnow;
     }
-
-    //    private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-    //        return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
-    //    }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
         return (!"Yes".equalsIgnoreCase(personalDetails.getRespondentPlaceOfBirthUnknown())) ? Yes : No;
