@@ -81,7 +81,6 @@ public class Message extends MessageMetaData {
     private String senderName;
     private String senderRole;
 
-    private String otherApplicationLink;
     private String hearingsLink;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
