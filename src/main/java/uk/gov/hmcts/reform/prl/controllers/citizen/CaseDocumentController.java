@@ -307,7 +307,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
                                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                 @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+                                                 @RequestHeader("serviceAuthorization") String s2sToken) throws JsonProcessingException {
         List<Element<UploadedDocuments>> tempUploadedDocumentsList;
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
         String caseId = deleteDocumentRequest.getValues().get("caseId");
