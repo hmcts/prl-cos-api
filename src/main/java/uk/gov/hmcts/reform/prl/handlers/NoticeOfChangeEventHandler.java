@@ -226,12 +226,13 @@ public class NoticeOfChangeEventHandler {
 
         //Get LiP
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-        CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
         String accessCode = null;
-        if (null != caseInvite) {
-            accessCode = caseInvite.getAccessCode();
+        if(null != partyElement && null != partyElement.getId()){
+            CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
+            if (null != caseInvite) {
+                accessCode = caseInvite.getAccessCode();
+            }
         }
-
         if (null != accessCode && launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             //PRL-5300 - send email/post to LiP based on contact pref
             sendNotificationToLitigant(caseData, event, partyElement, accessCode);
