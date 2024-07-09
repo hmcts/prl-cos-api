@@ -227,7 +227,7 @@ public class NoticeOfChangeEventHandler {
         //Get LiP
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
         String accessCode = null;
-        if(null != partyElement && null != partyElement.getId()){
+        if (null != partyElement && null != partyElement.getId()) {
             CaseInvite caseInvite = CaseUtils.getCaseInvite(partyElement.getId(), caseData.getCaseInvites());
             if (null != caseInvite) {
                 accessCode = caseInvite.getAccessCode();
