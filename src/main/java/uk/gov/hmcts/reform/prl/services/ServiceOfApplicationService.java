@@ -89,8 +89,10 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_RE7;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
@@ -3271,6 +3273,6 @@ public class ServiceOfApplicationService {
     }
 
     private String getRe8Template(boolean isWelsh) {
-        return isWelsh ? PRL_LET_WEL_C100_RE7 : PRL_LET_ENG_C100_RE7;
+        return isWelsh ? PRL_LET_WEL_FL401_RE8 : PRL_LET_ENG_FL401_RE8;
     }
 }
