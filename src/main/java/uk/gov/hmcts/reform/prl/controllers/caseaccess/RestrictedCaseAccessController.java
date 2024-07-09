@@ -25,6 +25,9 @@ import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService;
 
+import java.util.List;
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -47,10 +50,17 @@ public class RestrictedCaseAccessController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
-                .builder()
-                .data(restrictedCaseAccessService.retrieveAssignedUserRoles(callbackRequest))
-                .build();
+            Map<String, Object> caseDataUpdated = restrictedCaseAccessService.retrieveAssignedUserRoles(callbackRequest);
+            if (caseDataUpdated.containsKey("errors")) {
+                return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(List.of(caseDataUpdated.get("errors").toString()))
+                    .build();
+            } else {
+                return uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
+                    .builder()
+                    .data(caseDataUpdated)
+                    .build();
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
