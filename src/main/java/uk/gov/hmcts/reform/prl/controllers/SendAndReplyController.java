@@ -255,7 +255,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 objectMapper.writeValueAsString(callbackRequest)
             );
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.info("Json processing Exception as been thrown");
         }
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
