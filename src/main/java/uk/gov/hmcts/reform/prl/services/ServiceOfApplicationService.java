@@ -84,11 +84,15 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE6;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_RE7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE1;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE2;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_WEL_C100_RE7;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -3224,5 +3228,49 @@ public class ServiceOfApplicationService {
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
+    }
+
+    public List<Document> getCoverLetters(String authorization,
+                                          CaseData caseData,
+                                          Element<PartyDetails> party,
+                                          String templateHint,
+                                          boolean isAccessCodeNeeded) {
+        List<Document> coverLetters = new ArrayList<>();
+        CaseInvite caseInvite = null;
+        if (isAccessCodeNeeded
+            && !isAccessEnabled(party)
+            && !CaseUtils.hasLegalRepresentation(party.getValue())) {
+            caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+        }
+        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        //English
+        if (documentLanguage.isGenEng()) {
+            coverLetters.add(fetchCoverLetter(authorization, getCoverLetterTemplate(templateHint, false), dataMap));
+        }
+        //Welsh
+        if (documentLanguage.isGenWelsh) {
+            coverLetters.add(fetchCoverLetter(authorization, getCoverLetterTemplate(templateHint, true), dataMap));
+        }
+
+        return coverLetters;
+    }
+
+    private String getCoverLetterTemplate(String templateHint,
+                                          boolean isWelsh) {
+        return switch (templateHint) {
+            case RE7_HINT -> getRe7Template(isWelsh);
+            case RE8_HINT -> getRe8Template(isWelsh);
+
+            default -> null;
+        };
+    }
+
+    private String getRe7Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_WEL_C100_RE7 : PRL_LET_ENG_C100_RE7;
+    }
+
+    private String getRe8Template(boolean isWelsh) {
+        return isWelsh ? PRL_LET_WEL_C100_RE7 : PRL_LET_ENG_C100_RE7;
     }
 }

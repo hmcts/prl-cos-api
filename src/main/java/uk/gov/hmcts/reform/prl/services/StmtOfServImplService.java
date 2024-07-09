@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespo
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -50,6 +48,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
@@ -559,10 +558,12 @@ public class StmtOfServImplService {
                                                 ));
 
                 //cover letters
-                List<Document> coverLetters = getCoverLetters(
+                List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(
                     authorization,
                     caseData,
-                    respondent
+                    respondent,
+                    RE7_HINT,
+                    true
                 );
 
                 documents.addAll(coverLetters);
@@ -610,21 +611,4 @@ public class StmtOfServImplService {
         }
     }
 
-    public List<Document> getCoverLetters(String authorization,
-                                          CaseData caseData,
-                                          Element<PartyDetails> party) {
-        List<Document> coverLetters = new ArrayList<>();
-        CaseInvite caseInvite = serviceOfApplicationService.getCaseInvite(party.getId(), caseData.getCaseInvites());
-        Map<String, Object> dataMap = serviceOfApplicationService.populateAccessCodeMap(caseData, party, caseInvite);
-
-        coverLetters.add(serviceOfApplicationService.fetchCoverLetter(authorization, Templates.PRL_LET_ENG_C100_RE7, dataMap));
-
-        //Welsh cover letter if needed
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (documentLanguage.isGenWelsh) {
-            coverLetters.add(serviceOfApplicationService.fetchCoverLetter(authorization, Templates.PRL_LET_WEL_C100_RE7, dataMap));
-        }
-
-        return coverLetters;
-    }
 }
