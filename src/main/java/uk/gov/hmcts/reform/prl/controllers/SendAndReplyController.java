@@ -294,7 +294,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                 sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
