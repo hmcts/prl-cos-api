@@ -1032,7 +1032,4 @@ public class PrlAppsConstants {
 
     //Citizen dashboard notifications
     public static final String CAN_10_FM5 = "CAN_10";
-    public static final String CAN_6_AP_13 = "CAN_6";
-    public static final String CAN_6A_AP_14 = "CAN_6A";
-    public static final String CAN_6B_AP_15 = "CAN_6B";
 }
