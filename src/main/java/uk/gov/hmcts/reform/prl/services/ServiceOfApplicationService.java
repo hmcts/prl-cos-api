@@ -75,7 +75,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -955,16 +954,7 @@ public class ServiceOfApplicationService {
                                                                    List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                    List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                    List<Document> packLdocs) {
-
-        List<Document> packLDocsWithoutC9 = packLdocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
-        AtomicBoolean isNotFirstApplicant = new AtomicBoolean(false);
         caseData.getApplicants().forEach(selectedApplicant -> {
-            List<Document> docs = packLDocsWithoutC9;
-            if (!isNotFirstApplicant.get()) {
-                docs = packLdocs;
-            }
-            isNotFirstApplicant.set(true);
             if (!CaseUtils.hasLegalRepresentation(selectedApplicant.getValue())) {
                 if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                     Map<String, String> fieldsMap = new HashMap<>();
@@ -973,7 +963,7 @@ public class ServiceOfApplicationService {
                     sendEmailToApplicantLipPersonalC100(caseData,
                                                         emailNotificationDetails,
                                                         selectedApplicant,
-                                                        docs,
+                                                        packLdocs, //C9 to be sent for all applicants
                                                         SendgridEmailTemplateNames.SOA_CA_APPLICANT_LIP_PERSONAL,
                                                         fieldsMap,
                                                         doesC1aExists(caseData).equals(Yes)
@@ -985,7 +975,7 @@ public class ServiceOfApplicationService {
                     sendSoaPacksToPartyViaPost(
                         authorization,
                         caseData,
-                        docs,
+                        packLdocs, //C9 to be sent for all applicants
                         bulkPrintDetails,
                         selectedApplicant,
                         PRL_LET_ENG_AP7
