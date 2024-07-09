@@ -437,18 +437,18 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message newMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 10, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.OPEN)
             .build();
         Message oldMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.OPEN)
             .isReplying(YesOrNo.Yes).build();
 
         Message closedMessage = Message.builder()
             .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-                                          ZoneId.of("Europe/London")).toLocalDateTime())
+                ZoneId.of("Europe/London")).toLocalDateTime())
             .status(MessageStatus.CLOSED)
             .isReplying(YesOrNo.Yes).build();
 
@@ -500,11 +500,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
@@ -604,11 +604,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
@@ -629,11 +629,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.No)
                     .messages(openMessagesBefore)
@@ -670,11 +670,11 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .build()
                     )
                     .respondToMessage(YesOrNo.Yes)
                     .messages(messages)
@@ -780,12 +780,12 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
-                                           .messageContent("some msg content")
-                                           .build())
+                        .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
+                        .messageContent("some msg content")
+                        .build())
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
                     .build())
@@ -798,12 +798,12 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .sendReplyJudgeName(JudicialUser.builder().build())
-                                           .build())
+                        .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
+                        .messageContent("some msg content")
+                        .sendReplyJudgeName(JudicialUser.builder().build())
+                        .build())
                     .respondToMessage(YesOrNo.No)
                     .messages(messages)
                     .build())
@@ -832,8 +832,8 @@ public class SendAndReplyControllerTest {
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
             .sendOrReplyDto(SendOrReplyDto.builder()
-                                .closedMessages(Collections.singletonList(element(message)))
-                                .build())
+                .closedMessages(Collections.singletonList(element(message)))
+                .build())
 
             .build();
 
@@ -844,6 +844,6 @@ public class SendAndReplyControllerTest {
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
-                            response.getErrors().get(0));
+            response.getErrors().get(0));
     }
 }
