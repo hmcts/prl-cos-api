@@ -684,6 +684,7 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.populateMessageReplyFields(caseData, auth)).thenReturn(caseData);
         when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth)).thenReturn(messagesWithHistory);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
