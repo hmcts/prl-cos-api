@@ -806,7 +806,7 @@ public class SendAndReplyService {
             .stream().filter(additionalApplicationsBundleElement -> {
                 OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
 
-                if (null != otherApplicationsBundle.getApplicationStatus()
+                if (null != otherApplicationsBundle && null != otherApplicationsBundle.getApplicationStatus()
                     && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
                     && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
                                                      .concat(UNDERSCORE)
@@ -816,16 +816,15 @@ public class SendAndReplyService {
                 return false;
             }).findFirst();
 
-        List<Element<Document>> otherApplicationDocuments = null;
         if (otherApplicationDocumentsElement.isPresent()) {
-            otherApplicationDocuments = otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument();
+            return otherApplicationDocumentsElement.get().getValue().getOtherApplicationsBundle().getFinalDocument();
         }
 
         Optional<Element<AdditionalApplicationsBundle>> c2ApplicationDocumentsElement = additionalApplicationElements
             .stream().filter(additionalApplicationsBundleElement -> {
                 C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
 
-                if (null != c2ApplicationsBundle.getApplicationStatus()
+                if (null != c2ApplicationsBundle && null != c2ApplicationsBundle.getApplicationStatus()
                     && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
                     && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
                                                           .concat(UNDERSCORE)
@@ -835,15 +834,8 @@ public class SendAndReplyService {
                 return false;
             }).findFirst();
 
-        List<Element<Document>> c2ApplicationDocuments = null;
         if (c2ApplicationDocumentsElement.isPresent()) {
-            c2ApplicationDocuments = c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument();
-        }
-
-        if (null != otherApplicationDocuments) {
-            return otherApplicationDocuments;
-        } else if (null != c2ApplicationDocuments) {
-            return c2ApplicationDocuments;
+            return c2ApplicationDocumentsElement.get().getValue().getC2DocumentBundle().getFinalDocument();
         }
 
         return null;
