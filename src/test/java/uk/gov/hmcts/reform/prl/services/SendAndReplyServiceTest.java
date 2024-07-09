@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -48,6 +49,9 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -87,6 +91,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -111,7 +116,7 @@ public class SendAndReplyServiceTest {
     @Mock
     EmailService emailService;
 
-    private static final String randomAlphaNumeric = "Abc123EFGH";
+    private static final String RANDOM_ALPHA_NUMERIC = "Abc123EFGH";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -173,9 +178,8 @@ public class SendAndReplyServiceTest {
     @Mock
     AllTabServiceImpl allTabService;
 
-    public static final String caseId = "case id";
-
-
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Before
     public void init() {
@@ -267,9 +271,10 @@ public class SendAndReplyServiceTest {
         messages.add(message2Element);
         caseData = CaseData.builder()
             .applicantCaseName("Test name")
-            .openMessages(messages)
-            .closedMessages(messages)
-            .messageMetaData(metaData)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages)
+                                .closedMessages(messages)
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -280,8 +285,9 @@ public class SendAndReplyServiceTest {
         listOfClosedMessages = Arrays.asList(element(message2));
 
         caseDataWithAddedMessage = CaseData.builder()
-            .openMessages(messagesWithOneAdded)
-            .messageMetaData(metaData)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messagesWithOneAdded)
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -307,7 +313,9 @@ public class SendAndReplyServiceTest {
             .senderEmail("sender@email.com")
             .build();
         CaseData caseDataWithPreFill = CaseData.builder()
-            .messageMetaData(preFillMetaData)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .messageMetaData(preFillMetaData)
+                                .build())
             .build();
         assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
         assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill, auth).get("messageObject"), preFillMetaData);
@@ -320,13 +328,15 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNewMessageIsAddedToListWhenNoOpenMessagesPresent() {
-        CaseData caseDataNoMessages = CaseData.builder().build();
+        CaseData caseDataNoMessages = CaseData.builder().sendOrReplyDto(SendOrReplyDto.builder().build()).build();
         CaseData caseDataWithMessageAdded = CaseData.builder()
-            .openMessages(Collections.singletonList(element(message3)))
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .openMessages(Collections.singletonList(element(message3)))
+                                .build())
             .build();
 
         sendAndReplyService.addNewMessage(caseDataNoMessages, message3);
-        assertThat(caseDataWithMessageAdded.getOpenMessages())
+        assertThat(caseDataWithMessageAdded.getSendOrReplyDto().getOpenMessages())
             .hasSize(1)
             .extracting(m -> m.getValue().getMessageContent())
             .containsExactly("This is message 3 body");
@@ -334,8 +344,8 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNumberOfClosedMessagesIncreasesAndOpenDecreases() {
-        UUID messageToClose = caseData.getOpenMessages().get(0).getId();
-        long countOpen = caseData.getOpenMessages().stream()
+        UUID messageToClose = caseData.getSendOrReplyDto().getOpenMessages().get(0).getId();
+        long countOpen = caseData.getSendOrReplyDto().getOpenMessages().stream()
             .filter(m -> m.getValue().getStatus().equals(OPEN))
             .count();
         countOpen -= 1; // we expect one less message to be open.
@@ -929,6 +939,151 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testAddNewOpenMessageWithoutExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId(TEST_UUID)
+                                           .build()));
+        CaseData caseData3 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .sendReplyJudgeName(JudicialUser.builder().personalCode("test").idamId(TEST_UUID).build())
+                            .futureHearingsList(dynamicList1)
+                            .updatedTime(dateTime.now())
+                            .build()
+                    )
+                    .messages(openMessagesList)
+                    .build())
+            .chooseSendOrReply(SendOrReply.SEND)
+            .build();
+
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth);
+
+        assertEquals(2,updatedMessageList.size());
+    }
+
+    @Test
+    public void testAddNewOpenMessageWithoutCaseAlreadyAllocatedToJudge() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+        openMessagesList.add(element(message1));
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
+        CaseData caseData4 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .sendReplyJudgeName(JudicialUser.builder().personalCode("test").idamId(TEST_UUID).build())
+                            .futureHearingsList(dynamicList1)
+                            .updatedTime(dateTime.now())
+                            .build()
+                    )
+                    .messages(openMessagesList)
+                    .build())
+            .id(1234L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .build();
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth);
+
+        assertEquals(2,updatedMessageList.size());
+    }
+
+    @Test
+    public void testRoleAddNewOpenMessageWithoutCaseAlreadyAllocatedToJudge() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+        openMessagesList.add(element(message1));
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234567").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentResponse roleAssignmentResponse2 =  new RoleAssignmentResponse();
+        roleAssignmentResponse2.setRoleName("allocated-judge");
+        roleAssignmentResponse2.setAttributes(Attributes.builder().caseId("1234").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses2 =  new ArrayList<>();
+        roleAssignmentResponses2.add(roleAssignmentResponse2);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses).thenReturn(roleAssignmentResponses2);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
+        CaseData caseData5 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .sendReplyJudgeName(JudicialUser.builder().personalCode("test").idamId(TEST_UUID).build())
+                            .futureHearingsList(dynamicList1)
+                            .updatedTime(dateTime.now())
+                            .build()
+                    )
+                    .messages(openMessagesList)
+                    .build())
+            .id(1234L)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .build();
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth);
+
+        assertEquals(2,updatedMessageList.size());
+    }
+
+    @Test
     public void testSetSenderAndGenerateMessageReplyList() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1019,6 +1174,38 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testCloseMessageAndRemoveAllocatedJudgeIfadded() {
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(UUID.fromString(TEST_UUID));
+
+        List<Element<Message>> closedMessages = new ArrayList<>();
+        closedMessages.add(element(UUID.fromString(TEST_UUID), Message.builder()
+            .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+            .sendReplyJudgeName(JudicialUser.builder().personalCode("123").idamId(TEST_UUID).build())
+            .messageIdentifier("test")
+            .build()));
+        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
+        allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId(TEST_UUID)
+                                           .build()));
+        CaseData caseData6 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(closedMessages)
+                    .build())
+            .sendOrReplyDto(SendOrReplyDto.builder()
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
+            .build();
+
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData6);
+
+        assertEquals(1,closeMessages.size());
+    }
+
+    @Test
     public void testReplyAndAppendMessageHistoryForReply() {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
@@ -1048,6 +1235,75 @@ public class SendAndReplyServiceTest {
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
         List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
+
+        assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
+    }
+
+    @Test
+    public void testSendReplyAndAppendMessageHistoryForReply() {
+
+        RoleAssignmentResponse roleAssignmentResponse =  new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("1234").build());
+        roleAssignmentResponse.setRoleName("allocated-judge");
+        roleAssignmentResponse.setAttributes(Attributes.builder().caseId("12345").build());
+        List<RoleAssignmentResponse> roleAssignmentResponses =  new ArrayList<>();
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        roleAssignmentResponses.add(roleAssignmentResponse);
+        when(roleAssignmentService.getRoleAssignmentForActorId(anyString()))
+            .thenReturn(roleAssignmentResponses);
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        openMessagesList.add(element(message1));
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("testIdam")
+            .personalCode("123").build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+            .messageAbout(MessageAboutEnum.OTHER)
+            .ctscEmailList(dynamicList)
+            .judgeName("JudgeName")
+            .judgeEmail("judge@email.com")
+            .judicialOrMagistrateTierList(dynamicList)
+            .applicationsList(dynamicList)
+            .futureHearingsList(dynamicList)
+            .sendReplyJudgeName(judicialUser)
+            .submittedDocumentsList(dynamicList)
+            .build();
+
+
+        SendOrReplyMessage sendOrReplyMessage = SendOrReplyMessage.builder()
+            .messageReplyDynamicList(dynamicList)
+            .messages(openMessagesList)
+            .sendMessageObject(message)
+            .replyMessageObject(
+                Message.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                    .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .messageContent("Reply Message Content")
+                    .submittedDocumentsList(dynamicList)
+                    .build()
+            )
+            .build();
+
+        CaseData caseData7 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages)
+                                .closedMessages(messages)
+                                .messageMetaData(metaData)
+                                .build())
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData7, auth);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
     }
@@ -1496,9 +1752,9 @@ public class SendAndReplyServiceTest {
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        binaryLink.href = randomAlphaNumeric;
+        binaryLink.href = RANDOM_ALPHA_NUMERIC;
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        selfLink.href = randomAlphaNumeric;
+        selfLink.href = RANDOM_ALPHA_NUMERIC;
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
         links.binary = binaryLink;
@@ -1506,7 +1762,7 @@ public class SendAndReplyServiceTest {
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphaNumeric;
+        document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
     }

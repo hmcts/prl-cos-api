@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attribute
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
@@ -196,5 +197,16 @@ public class RoleAssignmentService {
         );
 
         return finalRoles;
+    }
+
+    public List<RoleAssignmentResponse> getRoleAssignmentForActorId(String actorId) {
+        String systemUserToken = systemUserService.getSysUserToken();
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+            systemUserToken,
+            authTokenGenerator.generate(),
+            null,
+            actorId
+        );
+        return roleAssignmentServiceResponse.getRoleAssignmentResponse();
     }
 }
