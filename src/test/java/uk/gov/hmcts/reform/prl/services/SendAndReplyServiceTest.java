@@ -113,6 +113,8 @@ public class SendAndReplyServiceTest {
 
     private static final String randomAlphaNumeric = "Abc123EFGH";
 
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
+
     @Value("${xui.url}")
     private String manageCaseUrl;
 
@@ -1382,7 +1384,16 @@ public class SendAndReplyServiceTest {
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
                             .judicialOrMagistrateTierList(dynamicList)
-                            .applicationsList(dynamicList)
+                            .applicationsList(DynamicList.builder()
+                                                  .listItems(Arrays.asList(DynamicListElement.builder()
+                                                                               .code(UUID.fromString(TEST_UUID))
+                                                                               .label("test")
+                                                                               .build()))
+                                                  .value(DynamicListElement.builder()
+                                                             .code(UUID.fromString(TEST_UUID))
+                                                             .label("test")
+                                                             .build())
+                                                  .build())
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
                             .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
