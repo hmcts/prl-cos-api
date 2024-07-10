@@ -1360,20 +1360,21 @@ public class C100RespondentSolicitorService {
     private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
         if (response.getSupportYouNeed() != null) {
             List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
-
-            AttendToCourt.builder()
-                .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
-                // .respondentWelshNeedsList()
-                // .isRespondentNeededInterpreter()
-                // .respondentInterpreterNeeds()
-                // .haveAnyDisability()
-                // .disabilityNeeds()
-                // .respondentSpecialArrangements()
-                // .respondentSpecialArrangementDetails()
-                // .respondentIntermediaryNeeds()
-                // .respondentIntermediaryNeedDetails()
-                .build();
-            dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
+                AttendToCourt.builder()
+                    .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
+                    // .respondentWelshNeedsList()
+                    // .isRespondentNeededInterpreter()
+                    // .respondentInterpreterNeeds()
+                    // .haveAnyDisability()
+                    // .disabilityNeeds()
+                    // .respondentSpecialArrangements()
+                    // .respondentSpecialArrangementDetails()
+                    // .respondentIntermediaryNeeds()
+                    // .respondentIntermediaryNeedDetails()
+                    .build();
+                dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            }
         }
     }
 
