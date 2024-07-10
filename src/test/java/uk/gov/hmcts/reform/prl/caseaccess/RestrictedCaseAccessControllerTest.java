@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.prl.controllers.caseaccess.RestrictedCaseAccessContro
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.RestrictedCaseAccessService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RestrictedCaseAccessControllerTest {
 
@@ -79,5 +82,39 @@ public class RestrictedCaseAccessControllerTest {
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
         restrictedCaseAccessController
             .changeCaseAccess(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+    }
+
+    @Test
+    public void testRestrictedCaseAccessAboutToStartWithNoAccess() {
+
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("errors", "errors");
+        Mockito.when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(caseDataUpdated);
+        restrictedCaseAccessController
+            .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+
+        Mockito.verify(restrictedCaseAccessService,Mockito.times(1))
+            .retrieveAssignedUserRoles(Mockito.any());
+    }
+
+    @Test
+    public void testRestrictedCaseAccessAboutToStartWithAccess() {
+
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
+        Mockito.when(restrictedCaseAccessService.retrieveAssignedUserRoles(Mockito.any())).thenReturn(new HashMap<>());
+        restrictedCaseAccessController
+            .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
+
+        Mockito.verify(restrictedCaseAccessService,Mockito.times(1))
+            .retrieveAssignedUserRoles(Mockito.any());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testRestrictedCaseAccessAboutToStartError() throws JsonProcessingException {
+
+        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(false);
+        restrictedCaseAccessController
+            .restrictedCaseAccessAboutToStart(AUTH_TOKEN, SERVICE_TOKEN, CallbackRequest.builder().build());
     }
 }

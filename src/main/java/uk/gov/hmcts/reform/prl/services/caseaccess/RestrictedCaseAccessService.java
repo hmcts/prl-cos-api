@@ -243,7 +243,7 @@ public class RestrictedCaseAccessService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseEvent caseEvent = CaseEvent.fromValue(callbackRequest.getEventId());
         if (MARK_CASE_AS_RESTRICTED.equals(caseEvent) || MARK_CASE_AS_PRIVATE.equals(caseEvent)) {
-            List<String> assignedUserDetailsHtml = fetchAssigneedUserDetails(callbackRequest);
+            List<String> assignedUserDetailsHtml = fetchAssignedUserDetails(callbackRequest);
             if (CollectionUtils.isNotEmpty(assignedUserDetailsHtml)) {
                 caseDataUpdated.put("assignedUserDetailsText", String.join("\n\n", assignedUserDetailsHtml));
             } else {
@@ -255,7 +255,7 @@ public class RestrictedCaseAccessService {
         return caseDataUpdated;
     }
 
-    private List<String> fetchAssigneedUserDetails(CallbackRequest callbackRequest) {
+    private List<String> fetchAssignedUserDetails(CallbackRequest callbackRequest) {
         List<String> assignedUserDetailsHtml = new ArrayList<>();
         Map<String, String> assignedUserDetails = new HashMap<>();
         RoleAssignmentQueryRequest roleAssignmentQueryRequest = RoleAssignmentQueryRequest.builder()
