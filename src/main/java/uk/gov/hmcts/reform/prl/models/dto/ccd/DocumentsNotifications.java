@@ -17,5 +17,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentsNotifications {
 
+    //PRL-5979 - RE7 access code cover letter
     private List<Element<DocumentsNotification>> respondentAccessCodeNotifications;
 }

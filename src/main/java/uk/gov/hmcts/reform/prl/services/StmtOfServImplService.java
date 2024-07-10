@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
+import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -600,12 +601,13 @@ public class StmtOfServImplService {
                 );
 
                 return element(DocumentsNotification.builder()
-                                   .bulkPrintId(bulkPrintDetails.getBulkPrintId())
-                                   .notificationType(NotificationType.BULK_PRINT)
-                                   .partyId(String.valueOf(respondent.getId()))
-                                   .partyType(PartyType.RESPONDENT)
-                                   .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                                   .documents(ElementUtils.wrapElements(coverLetters))
+                                   .notification(NotificationDetails.builder()
+                                                     .bulkPrintId(bulkPrintDetails.getBulkPrintId())
+                                                     .notificationType(NotificationType.BULK_PRINT)
+                                                     .partyId(String.valueOf(respondent.getId()))
+                                                     .partyType(PartyType.RESPONDENT)
+                                                     .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                     .build())
                                    .build());
             } catch (Exception e) {
                 log.error(
@@ -621,11 +623,13 @@ public class StmtOfServImplService {
                 respondent.getId()
             );
             return element(DocumentsNotification.builder()
-                               .partyId(String.valueOf(respondent.getId()))
-                               .partyType(PartyType.RESPONDENT)
-                               .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                               .remarks(
-                                   "Respondent is either represented or has got dashboard access, no need to send access code")
+                               .notification(NotificationDetails.builder()
+                                                 .partyId(String.valueOf(respondent.getId()))
+                                                 .partyType(PartyType.RESPONDENT)
+                                                 .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                                 .remarks(
+                                                     "Respondent is either represented or has got dashboard access, no need to send access code")
+                                                 .build())
                                .build());
         }
     }
@@ -636,11 +640,13 @@ public class StmtOfServImplService {
             ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER
         );
         return element(DocumentsNotification.builder()
-                           .partyType(PartyType.RESPONDENT)
-                           .sentDateTime(LocalDateTime.now(ZoneId.of(
-                               LONDON_TIME_ZONE)))
-                           .remarks(
-                               "Citizen journey is not enabled to send access code for respondents")
+                           .notification(NotificationDetails.builder()
+                                             .partyType(PartyType.RESPONDENT)
+                                             .sentDateTime(LocalDateTime.now(ZoneId.of(
+                                                 LONDON_TIME_ZONE)))
+                                             .remarks(
+                                                 "Citizen journey is not enabled to send access code for respondents")
+                                             .build())
                            .build());
     }
 
