@@ -101,7 +101,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -2053,7 +2052,7 @@ public class C100RespondentSolicitorServiceTest {
                 .eventId("c100ResSolViewResponseDraftDocumentB")
                 .build();
 
-        return respondentSolicitorService.populateDataMap(callbackRequest, null, CITIZEN);
+        return respondentSolicitorService.populateDataMap(callbackRequest, null, SOLICITOR);
 
 
     }
