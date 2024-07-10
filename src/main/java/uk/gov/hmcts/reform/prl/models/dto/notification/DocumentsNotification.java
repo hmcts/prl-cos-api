@@ -8,6 +8,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -17,7 +18,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentsNotification {
 
-    private NotificationDetails notification;
+    private String partyId;
+    private PartyType partyType;
+    private NotificationType notificationType;
+    private String bulkPrintId;
+    private LocalDateTime sentDateTime;
+    private String remarks;
     private final List<Element<Document>> documents;
 
 }

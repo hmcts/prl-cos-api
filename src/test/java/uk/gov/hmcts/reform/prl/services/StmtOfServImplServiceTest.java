@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
@@ -50,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -69,6 +71,9 @@ public class StmtOfServImplServiceTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     private DynamicList dynamicList;
     private PartyDetails respondent;
@@ -522,6 +527,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
@@ -583,6 +589,7 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
+        when(launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)).thenReturn(true);
 
         Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 

@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
-import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -132,7 +131,6 @@ public class StmtOfServImplService {
                         .toList();
                     String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(null)
                         .selectedPartyId("00000000-0000-0000-0000-000000000000")
                         .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -140,7 +138,6 @@ public class StmtOfServImplService {
                         .build();
                 } else {
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(null)
                         .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                         .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -150,7 +147,6 @@ public class StmtOfServImplService {
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
-                    .respondentDynamicList(null)
                     .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                     .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                     .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -185,7 +181,9 @@ public class StmtOfServImplService {
                     sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, recipient)
                 );
             }
-            elementList.add(element(recipient));
+            elementList.add(element(recipient.toBuilder()
+                                        .respondentDynamicList(null) //clear dynamic list after sending access code info
+                                        .build()));
         }
 
         caseDataUpdateMap.put(
@@ -602,17 +600,13 @@ public class StmtOfServImplService {
                 );
 
                 return element(DocumentsNotification.builder()
-                                   .notification(NotificationDetails.builder()
-                                                     .bulkPrintId(bulkPrintDetails.getBulkPrintId())
-                                                     .notificationType(NotificationType.BULK_PRINT)
-                                                     .partyId(String.valueOf(respondent.getId()))
-                                                     .partyType(PartyType.RESPONDENT)
-                                                     .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                                                     .build())
+                                   .bulkPrintId(bulkPrintDetails.getBulkPrintId())
+                                   .notificationType(NotificationType.BULK_PRINT)
+                                   .partyId(String.valueOf(respondent.getId()))
+                                   .partyType(PartyType.RESPONDENT)
+                                   .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                                    .documents(ElementUtils.wrapElements(coverLetters))
                                    .build());
-
-
             } catch (Exception e) {
                 log.error(
                     "SOS: Exception occurred in sending access code cover letter to respondent {} ",
@@ -622,15 +616,16 @@ public class StmtOfServImplService {
                 return null;
             }
         } else {
-            log.warn("Respondent {} is either represented or has got dashboard access, no need to send access code", respondent.getId());
+            log.warn(
+                "Respondent {} is either represented or has got dashboard access, no need to send access code",
+                respondent.getId()
+            );
             return element(DocumentsNotification.builder()
-                               .notification(NotificationDetails.builder()
-                                                 .partyId(String.valueOf(respondent.getId()))
-                                                 .partyType(PartyType.RESPONDENT)
-                                                 .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-                                                 .remarks(
-                                                     "Respondent is either represented or has got dashboard access, no need to send access code")
-                                                 .build())
+                               .partyId(String.valueOf(respondent.getId()))
+                               .partyType(PartyType.RESPONDENT)
+                               .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                               .remarks(
+                                   "Respondent is either represented or has got dashboard access, no need to send access code")
                                .build());
         }
     }
@@ -641,13 +636,11 @@ public class StmtOfServImplService {
             ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER
         );
         return element(DocumentsNotification.builder()
-                           .notification(NotificationDetails.builder()
-                                             .partyType(PartyType.RESPONDENT)
-                                             .sentDateTime(LocalDateTime.now(ZoneId.of(
-                                                 LONDON_TIME_ZONE)))
-                                             .remarks(
-                                                 "Citizen journey is not enabled to send access code for respondents")
-                                             .build())
+                           .partyType(PartyType.RESPONDENT)
+                           .sentDateTime(LocalDateTime.now(ZoneId.of(
+                               LONDON_TIME_ZONE)))
+                           .remarks(
+                               "Citizen journey is not enabled to send access code for respondents")
                            .build());
     }
 
