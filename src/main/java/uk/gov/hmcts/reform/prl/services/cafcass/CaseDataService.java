@@ -170,6 +170,29 @@ public class CaseDataService {
             caseDetail -> {
                 CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
                 cafCassCaseData = cafCassCaseData.toBuilder()
+                    .applicants(cafCassCaseData.getApplicants().stream()
+                                     .map(updatedParty -> {
+                                         if (updatedParty.getValue().getSolicitorOrg() == null) {
+                                             return updatedParty;
+                                         }
+                                         Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
+                                         return Element.<ApplicantDetails>builder().id(updatedParty.getId())
+                                             .value(updatedParty.getValue().toBuilder()
+                                                        .solicitorAddress(
+                                                            address != null
+                                                                ? uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                                                .addressLine1(address.getAddressLine1())
+                                                                .addressLine2(address.getAddressLine2())
+                                                                .addressLine3(address.getAddressLine3())
+                                                                .county(address.getCounty())
+                                                                .country(address.getCountry())
+                                                                .postTown(address.getPostTown())
+                                                                .postCode(address.getPostCode())
+                                                                .build() : null
+                                                        )
+                                                        .build()).build();
+                                     })
+                                     .toList())
                     .respondents(cafCassCaseData.getRespondents().stream()
                                      .map(updatedParty -> {
                                          if (updatedParty.getValue().getSolicitorOrg() == null) {
@@ -192,7 +215,8 @@ public class CaseDataService {
                                                         )
                                                         .build()).build();
                                      })
-                                     .toList()).build();
+                                     .toList())
+                    .build();
                 caseDetail.setCaseData(cafCassCaseData);
             });
 
