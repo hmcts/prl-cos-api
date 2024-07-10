@@ -404,16 +404,8 @@ public class SendAndReplyService {
                                                s2sToken,
                                                caseReference
                                            ))
-                                           .legalAdvisersList(getLegalAdvisersList())
                                            .build())
                     .build())
-            .build();
-    }
-
-    private DynamicList getLegalAdvisersList() {
-        return DynamicList.builder()
-            .value(DynamicListElement.EMPTY)
-            .listItems(refDataUserService.getLegalAdvisorList())
             .build();
     }
 
@@ -932,7 +924,6 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
-                            .legalAdvisersList(getLegalAdvisersList())
                             .build())
                     .internalMessageAttachDocsList(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .build())
@@ -1151,11 +1142,6 @@ public class SendAndReplyService {
                                                                        .value(DynamicListElement.EMPTY).build());
                 replyMessageObject.setSendReplyJudgeName(null);
             }
-            if (!InternalMessageReplyToEnum.LEGAL_ADVISER.equals(replyMessageObject.getInternalMessageReplyTo())
-                && isNotNull(replyMessageObject.getLegalAdvisersList())) {
-                replyMessageObject.setLegalAdvisersList(replyMessageObject.getLegalAdvisersList().toBuilder()
-                                                                       .value(DynamicListElement.EMPTY).build());
-            }
         }
 
         return caseData.toBuilder().sendOrReplyMessage(
@@ -1168,15 +1154,6 @@ public class SendAndReplyService {
 
     private Message resetSendMessageDynamicLists(CaseData caseData) {
         Message sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-
-        if (canClearInternalWhoToSendFields(
-            sendMessageObject.getInternalMessageWhoToSendTo(),
-            InternalMessageWhoToSendToEnum.LEGAL_ADVISER,
-            sendMessageObject.getLegalAdvisersList()
-        )) {
-            sendMessageObject.setLegalAdvisersList(sendMessageObject.getLegalAdvisersList().toBuilder()
-                                                       .value(DynamicListElement.EMPTY).build());
-        }
 
         if (canClearInternalWhoToSendFields(
             sendMessageObject.getInternalMessageWhoToSendTo(),

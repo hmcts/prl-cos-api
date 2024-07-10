@@ -1361,53 +1361,6 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testResetSendAndReplyDynamicListsForReplyAndResetLegalAdviserWhileJudiciarySelected() {
-
-        List<Element<Message>> openMessagesList = new ArrayList<>();
-
-        Message message = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
-
-        openMessagesList.add(element(message));
-
-        CaseData data = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .chooseSendOrReply(SendOrReply.REPLY)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .messageReplyDynamicList(dynamicList)
-                    .messages(openMessagesList)
-                    .replyMessageObject(
-                        Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
-                            .messageAbout(MessageAboutEnum.APPLICATION)
-                            .messageContent("Reply Message Content").legalAdvisersList(dynamicList)
-                            .ctscEmailList(dynamicList)
-                            .recipientEmailAddresses("recep")
-                            .build()
-                    )
-                    .build())
-            .build();
-
-        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(data);
-
-        assertEquals(DynamicListElement.EMPTY, caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getLegalAdvisersList().getValue());
-    }
-
-    @Test
     public void testResetSendAndReplyDynamicListsForSendWhenOtherSelected() {
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
@@ -1510,54 +1463,6 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testResetSendAndReplyDynamicListsForSendWhenLegalAdvisorSelected() {
-        List<Element<Message>> openMessagesList = new ArrayList<>();
-
-        Message message = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
-
-        openMessagesList.add(element(message));
-
-        CaseData data = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .chooseSendOrReply(SendOrReply.SEND)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .messageReplyDynamicList(dynamicList)
-                    .messages(openMessagesList)
-                    .sendMessageObject(
-                        Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
-                            .messageAbout(MessageAboutEnum.OTHER)
-                            .ctscEmailList(dynamicList)
-                            .legalAdvisersList(dynamicList)
-                            .applicationsList(dynamicList)
-                            .futureHearingsList(dynamicList)
-                            .submittedDocumentsList(dynamicList)
-                            .build()
-                    )
-                    .build())
-            .build();
-
-        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(data);
-
-        assertEquals(DynamicListElement.EMPTY, caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getLegalAdvisersList().getValue());
-    }
-
-    @Test
     public void testResetSendAndReplyDynamicListsForSendWhenApplicationSelected() {
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
@@ -1591,7 +1496,6 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList)
-                            .legalAdvisersList(dynamicList)
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
@@ -1639,7 +1543,6 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
                             .messageAbout(MessageAboutEnum.HEARING)
                             .ctscEmailList(dynamicList)
-                            .legalAdvisersList(dynamicList)
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
@@ -1687,7 +1590,6 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
                             .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
                             .ctscEmailList(dynamicList)
-                            .legalAdvisersList(dynamicList)
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
