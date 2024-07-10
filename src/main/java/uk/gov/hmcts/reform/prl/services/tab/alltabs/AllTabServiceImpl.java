@@ -90,6 +90,7 @@ public class AllTabServiceImpl implements AllTabsService {
     public StartAllTabsUpdateDataContent getStartAllTabsUpdate(String caseId) {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        log.info("ccdCoreCaseDataService<<<<<<<<<<<<>>>>>>>>>>>  " + ccdCoreCaseDataService.toString());
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
             systemUpdateUserId
