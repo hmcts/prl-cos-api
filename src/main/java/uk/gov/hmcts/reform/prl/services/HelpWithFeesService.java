@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -75,6 +76,7 @@ public class HelpWithFeesService {
             caseDataUpdated.put("caseStatus", CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
+            caseDataUpdated.put("isTheCaseInDraftState", YesOrNo.Yes);
         } else {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Element<AdditionalApplicationsBundle> chosenAdditionalApplication = getChosenAdditionalApplication(caseData);
@@ -117,6 +119,7 @@ public class HelpWithFeesService {
                 }
 
                 caseDataUpdated.put("additionalApplicationsBundle", additionalApplications);
+                caseDataUpdated.put("isTheCaseInDraftState", YesOrNo.No);
             }
         }
         return caseDataUpdated;
