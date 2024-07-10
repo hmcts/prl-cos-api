@@ -610,7 +610,6 @@ public class ManageOrderService {
         //PRL-4212 - populate fields only when it's needed
         headerMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (caseData.getOrderCollection() != null) {
-            log.info("inside caseData.getOrderCollection() != null");
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                 headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
             }
@@ -620,7 +619,6 @@ public class ManageOrderService {
         }
         //PRL-4854 - Set isSdoSelected=No default
         headerMap.put("isSdoSelected", No);
-        log.info("check headerMap  {} ", headerMap);
         return headerMap;
     }
 
