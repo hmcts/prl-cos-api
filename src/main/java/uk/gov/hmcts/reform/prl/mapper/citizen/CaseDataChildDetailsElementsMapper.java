@@ -69,22 +69,31 @@ public class CaseDataChildDetailsElementsMapper {
     }
 
     private static Element<ChildDetailsRevised> mapToChildDetails(ChildDetail childDetail) {
+        DynamicList whoDoesTheChildLiveWithDynamicList = null;
+        if (childDetail.getMainlyLiveWith() != null) {
+            whoDoesTheChildLiveWithDynamicList = DynamicList
+                .builder()
+                .value(DynamicListElement
+                           .builder()
+                           .code(UUID.fromString(childDetail.getMainlyLiveWith().getId()))
+                           .label(childDetail.getMainlyLiveWith().getFirstName()
+                                      + childDetail.getMainlyLiveWith().getLastName())
+                           .build()).build();
+        }
 
-        DynamicList whoDoesTheChildLiveWithDynamicList = DynamicList.builder().value(DynamicListElement
-            .builder()
-            .code(UUID.fromString(childDetail.getMainlyLiveWith().getId()))
-            .label(childDetail.getMainlyLiveWith().getFirstName() + childDetail.getMainlyLiveWith().getLastName())
-            .build()).build();
 
-        return Element.<ChildDetailsRevised>builder().value(ChildDetailsRevised.builder()
-            .firstName(childDetail.getFirstName())
-            .lastName(childDetail.getLastName())
-            .dateOfBirth(getDateOfBirth(childDetail))
-            .isDateOfBirthUnknown(buildDateOfBirthUnknown(childDetail.getPersonalDetails()))
-            .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
-            .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
-            .parentalResponsibilityDetails(buildParentalResponsibility(
-                childDetail.getParentialResponsibility()))
+        return Element.<ChildDetailsRevised>builder()
+            .value(ChildDetailsRevised.builder()
+                       .firstName(childDetail.getFirstName())
+                       .lastName(childDetail.getLastName())
+                       .dateOfBirth(getDateOfBirth(childDetail))
+                       .isDateOfBirthUnknown(buildDateOfBirthUnknown(
+                           childDetail.getPersonalDetails()))
+                       .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
+                       .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
+                       .parentalResponsibilityDetails(
+                           buildParentalResponsibility(
+                               childDetail.getParentialResponsibility()))
             .whoDoesTheChildLiveWith(whoDoesTheChildLiveWithDynamicList)
             .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
             .build()).build();
@@ -92,7 +101,8 @@ public class CaseDataChildDetailsElementsMapper {
 
     private static LocalDate getDateOfBirth(ChildDetail childDetail) {
         LocalDate dateOfBirth = buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth());
-        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth());
+        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails()
+                                                                        .getApproxDateOfBirth());
     }
 
     private static String buildParentalResponsibility(ParentialResponsibility parentalResponsibility) {
