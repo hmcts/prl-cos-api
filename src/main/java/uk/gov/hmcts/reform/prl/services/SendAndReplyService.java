@@ -692,7 +692,6 @@ public class SendAndReplyService {
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
-        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
         final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
         Message newMessage = Message.builder()
@@ -729,7 +728,6 @@ public class SendAndReplyService {
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
-            .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
 
@@ -961,8 +959,6 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
-            ? ANCHOR_HREF_START + message.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
@@ -995,8 +991,6 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
-                    addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
-                        ? ANCHOR_HREF_START + history.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
                         ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
