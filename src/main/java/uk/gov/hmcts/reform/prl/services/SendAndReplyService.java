@@ -723,8 +723,6 @@ public class SendAndReplyService {
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
 
-        log.info("Send message internalMessageAttachDocs: {}", newMessage.getInternalMessageAttachDocs());
-
         return newMessage;
     }
 
@@ -1090,7 +1088,6 @@ public class SendAndReplyService {
     }
 
     private MessageHistory buildReplyMessageHistory(Message message) {
-        log.info("Reply message internalMessageAttachDocs: {}", message.getInternalMessageAttachDocs());
         return MessageHistory.builder()
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getInternalMessageWhoToSendTo() != null
