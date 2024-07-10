@@ -1500,14 +1500,14 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
                                                                                                         stringObjectMap, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        sendAndReplyService.closeAwPTask(caseData);
+        sendAndReplyService.closeAwPTask(caseData1);
         Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
     }
 
