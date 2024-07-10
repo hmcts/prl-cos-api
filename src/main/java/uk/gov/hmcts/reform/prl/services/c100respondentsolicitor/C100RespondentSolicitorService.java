@@ -15,9 +15,11 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -1360,21 +1362,23 @@ public class C100RespondentSolicitorService {
 
     private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
         if (response.getSupportYouNeed() != null) {
+            AttendToCourt attendToCourt = AttendToCourt.builder().build();
             List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
             if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
-                AttendToCourt.builder()
+                attendToCourt = attendToCourt.toBuilder()
                     .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
-                    // .respondentWelshNeedsList()
-                    // .isRespondentNeededInterpreter()
-                    // .respondentInterpreterNeeds()
-                    // .haveAnyDisability()
-                    // .disabilityNeeds()
-                    // .respondentSpecialArrangements()
-                    // .respondentSpecialArrangementDetails()
-                    // .respondentIntermediaryNeeds()
-                    // .respondentIntermediaryNeedDetails()
+                    .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
                     .build();
-                dataMap.put("attendingTheCourt", response.getAttendToCourt());
+            }
+            dataMap.put("attendingTheCourt", attendToCourt);
+            List<AttendingToCourtEnum> attendingToCourtEnumList = response.getSupportYouNeed().getAttendingToCourt();
+            if (attendingToCourtEnumList != null && !attendingToCourtEnumList.isEmpty()) {
+                if (attendingToCourtEnumList.contains(AttendingToCourtEnum.videohearings)) {
+                    dataMap.put("hearingsByVideo", "Yes");
+                }
+                if (attendingToCourtEnumList.contains(AttendingToCourtEnum.phonehearings)) {
+                    dataMap.put("hearingsByPhone", "Yes");
+                }
             }
         }
     }
@@ -1385,6 +1389,18 @@ public class C100RespondentSolicitorService {
             return YesOrNo.Yes;
         }
         return YesOrNo.No;
+    }
+
+    private static List<RespondentWelshNeedsListEnum> buildRespondentWelshNeedsList(List<LanguageRequirementsEnum> languageRequirementsEnums) {
+        List<RespondentWelshNeedsListEnum> respondentWelshNeedsListEnums = null;
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.speakwelsh)) {
+            respondentWelshNeedsListEnums.add(RespondentWelshNeedsListEnum.speakWelsh);
+        }
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.readandwritewelsh)) {
+            respondentWelshNeedsListEnums.add(RespondentWelshNeedsListEnum.readAndWriteWelsh);
+        }
+
+        return respondentWelshNeedsListEnums;
     }
 
     private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
