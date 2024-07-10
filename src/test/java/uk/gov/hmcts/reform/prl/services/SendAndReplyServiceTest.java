@@ -1059,22 +1059,7 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
-        Message message1 = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
-            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
+        Message message1 = getMessageInformation();
 
         openMessagesList.add(element(message1));
 
@@ -1354,22 +1339,7 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
-        Message message1 = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
-            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
+        Message message1 = getMessageInformation();
 
         openMessagesList.add(element(message1));
         CaseData caseData = CaseData.builder()
@@ -1419,24 +1389,9 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
-        Message message1 = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
-            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
+        Message messageInformation = getMessageInformation();
 
-        openMessagesList.add(element(message1));
+        openMessagesList.add(element(messageInformation));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.SEND)
@@ -1475,6 +1430,104 @@ public class SendAndReplyServiceTest {
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         sendAndReplyService.closeAwPTask(caseData);
         Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
+    }
+
+
+    @Test
+    public void testDoNotCloseCloseAwPTaskScenario2() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message messageInformation = getMessageInformation();
+
+        openMessagesList.add(element(messageInformation));
+        CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData1, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        sendAndReplyService.closeAwPTask(caseData1);
+        Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
+    }
+
+    @Test
+    public void testDoNotCloseCloseAwPTaskScenario3() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message messageInformation = getMessageInformation();
+
+        openMessagesList.add(element(messageInformation));
+        CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
+                            .build()
+                    ).build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData, null);
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        sendAndReplyService.closeAwPTask(caseData);
+        Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
+    }
+
+    private Message getMessageInformation() {
+        return Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
+            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
     }
 
     @Test
