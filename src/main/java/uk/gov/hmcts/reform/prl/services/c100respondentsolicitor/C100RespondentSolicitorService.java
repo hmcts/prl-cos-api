@@ -1054,6 +1054,7 @@ public class C100RespondentSolicitorService {
     public Map<String, Object> populateDataMap(CallbackRequest callbackRequest,
                                                Element<PartyDetails> solicitorRepresentedRespondent,
                                                String requestOriginatedFrom) {
+        log.info("requestOriginatedFrom::" + requestOriginatedFrom);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
@@ -1105,7 +1106,7 @@ public class C100RespondentSolicitorService {
                 log.info("inside checkIfConfidentialDataPresent - 2");
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
-            if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
                 dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
             }
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
@@ -1221,7 +1222,7 @@ public class C100RespondentSolicitorService {
                 null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
                 ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
-        if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+        if (!CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
             populateCitizenAttendingTheHearingDataMap(response, dataMap);
         } else {
             dataMap.put("attendingTheCourt", response.getAttendToCourt());
