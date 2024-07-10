@@ -800,14 +800,11 @@ public class SendAndReplyService {
             .stream().filter(additionalApplicationsBundleElement -> {
                 OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle();
 
-                if (null != otherApplicationsBundle && null != otherApplicationsBundle.getApplicationStatus()
+                return null != otherApplicationsBundle && null != otherApplicationsBundle.getApplicationStatus()
                     && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
                     && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
                                                      .concat(UNDERSCORE)
-                                                     .concat(otherApplicationsBundle.getUploadedDateTime()))) {
-                    return true;
-                }
-                return false;
+                                                     .concat(otherApplicationsBundle.getUploadedDateTime()));
             }).findFirst();
 
         if (otherApplicationDocumentsElement.isPresent()) {
@@ -818,14 +815,11 @@ public class SendAndReplyService {
             .stream().filter(additionalApplicationsBundleElement -> {
                 C2DocumentBundle c2ApplicationsBundle = additionalApplicationsBundleElement.getValue().getC2DocumentBundle();
 
-                if (null != c2ApplicationsBundle && null != c2ApplicationsBundle.getApplicationStatus()
+                return null != c2ApplicationsBundle && null != c2ApplicationsBundle.getApplicationStatus()
                     && c2ApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
                     && selectedApplicationCode.equals(AWP_C2_APPLICATION_SNR_CODE
                                                           .concat(UNDERSCORE)
-                                                          .concat(c2ApplicationsBundle.getUploadedDateTime()))) {
-                    return true;
-                }
-                return false;
+                                                          .concat(c2ApplicationsBundle.getUploadedDateTime()));
             }).findFirst();
 
         if (c2ApplicationDocumentsElement.isPresent()) {
