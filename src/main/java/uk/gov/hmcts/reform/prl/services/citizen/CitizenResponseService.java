@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -104,7 +105,8 @@ public class CitizenResponseService {
                     .data(caseData.toMap(objectMapper)).build();
                 CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
                 dataMap = c100RespondentSolicitorService.populateDataMap(callbackRequest,
-                                                               partyElement);
+                                                               partyElement, CITIZEN
+                );
                 try {
                     log.info("data map generated is ===>" + objectMapper.writeValueAsString(dataMap));
                 } catch (JsonProcessingException e) {
@@ -147,7 +149,8 @@ public class CitizenResponseService {
 
                 Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                         callbackRequest,
-                        partyDetailsElement
+                        partyDetailsElement,
+                        CITIZEN
                 );
                 CaseData caseDataToGenerateC7 = dbCaseData;
                 caseDataToGenerateC7 = findAndSetCurrentRespondentForC7GenerationOnly(citizenUpdatedCaseData, caseDataToGenerateC7);

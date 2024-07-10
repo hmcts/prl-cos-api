@@ -188,7 +188,7 @@ public class CitizenResponseServiceTest {
 
         Map<String, Object> returnedMap = new HashMap<>();
         returnedMap.put("isConfidentialDataPresent", "yes");
-        when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(returnedMap);
+        when(c100RespondentSolicitorService.populateDataMap(any(), any(), anyString())).thenReturn(returnedMap);
         when(citizenPartyDetailsMapper.getUpdatedPartyDetailsBasedOnEvent(any(), any(), any(), any())).thenReturn(PartyDetails
             .builder()
             .response(Response

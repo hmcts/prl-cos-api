@@ -689,7 +689,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
@@ -883,7 +883,7 @@ public class UpdatePartyDetailsServiceTest {
             "field5", "value5"
         );
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any(), Mockito.anyString()))
             .thenReturn(dataMap);
         when(documentGenService
                  .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
@@ -1399,7 +1399,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData);
         assertNotNull(updatedCaseData.get("respondents"));
     }
-    
+
     @Test
     public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
         Child child1 = Child.builder()

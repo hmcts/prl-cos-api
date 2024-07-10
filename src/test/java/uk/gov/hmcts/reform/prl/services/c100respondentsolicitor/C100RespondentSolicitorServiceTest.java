@@ -101,8 +101,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -2051,7 +2053,7 @@ public class C100RespondentSolicitorServiceTest {
                 .eventId("c100ResSolViewResponseDraftDocumentB")
                 .build();
 
-        return respondentSolicitorService.populateDataMap(callbackRequest, null);
+        return respondentSolicitorService.populateDataMap(callbackRequest, null, CITIZEN);
 
 
     }
@@ -2285,7 +2287,7 @@ public class C100RespondentSolicitorServiceTest {
         Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
                 .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
                 .value(respondent2).build();
-        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest1, wrappedRespondents2));
+        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest1, wrappedRespondents2, SOLICITOR));
     }
 
     @Test
@@ -2444,6 +2446,6 @@ public class C100RespondentSolicitorServiceTest {
         Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent2).build();
-        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2));
+        assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest, wrappedRespondents2, SOLICITOR));
     }
 }

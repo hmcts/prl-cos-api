@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -75,6 +76,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -924,7 +926,7 @@ public class C100RespondentSolicitorService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent, SOLICITOR);
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (documentLanguage.isGenEng()) {
@@ -1049,7 +1051,9 @@ public class C100RespondentSolicitorService {
         return List.of(c8Key);
     }
 
-    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest, Element<PartyDetails> solicitorRepresentedRespondent) {
+    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest,
+                                               Element<PartyDetails> solicitorRepresentedRespondent,
+                                               String requestOriginatedFrom) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
@@ -1086,12 +1090,12 @@ public class C100RespondentSolicitorService {
                 );
             }
         }
-        checkIfConfidentialDataPresent(solicitorRepresentedRespondent, dataMap);
+        populateConfidentialAndMiscDataMap(solicitorRepresentedRespondent, dataMap, requestOriginatedFrom);
         return dataMap;
     }
 
-    public void checkIfConfidentialDataPresent(Element<PartyDetails> solicitorRepresentedRespondent,
-                                                Map<String, Object> dataMap) {
+    public void populateConfidentialAndMiscDataMap(Element<PartyDetails> solicitorRepresentedRespondent,
+                                                   Map<String, Object> dataMap, String requestOriginatedFrom) {
         boolean isConfidentialDataPresent = false;
         log.info("inside checkIfConfidentialDataPresent");
         if (null != solicitorRepresentedRespondent
@@ -1101,7 +1105,9 @@ public class C100RespondentSolicitorService {
                 log.info("inside checkIfConfidentialDataPresent - 2");
                 getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
             }
-            dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+            if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+                dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+            }
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
             log.info("response found");
             boolean isConfidentialSetByCitizen = isNotEmpty(solicitorRepresentedRespondent.getValue().getResponse())
@@ -1132,7 +1138,7 @@ public class C100RespondentSolicitorService {
             log.info("inside checkIfConfidentialDataPresent - 3");
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
-            populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
+            populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response, requestOriginatedFrom);
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
@@ -1140,7 +1146,10 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private void populateMiscellaneousDetails(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap, Response response) {
+    private void populateMiscellaneousDetails(Element<PartyDetails> solicitorRepresentedRespondent,
+                                              Map<String, Object> dataMap,
+                                              Response response,
+                                              String requestOriginatedFrom) {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
@@ -1212,7 +1221,11 @@ public class C100RespondentSolicitorService {
                 null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
                 ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No);
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
-        dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        if (CITIZEN.equalsIgnoreCase(requestOriginatedFrom)) {
+            populateCitizenAttendingTheHearingDataMap(response, dataMap);
+        } else {
+            dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        }
         if (null != response.getResponseToAllegationsOfHarm()
             && null != response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse()) {
             dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm()
@@ -1344,6 +1357,34 @@ public class C100RespondentSolicitorService {
         }
     }
 
+    private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
+        if (response.getSupportYouNeed() != null) {
+            List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
+
+            AttendToCourt.builder()
+                .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
+                // .respondentWelshNeedsList()
+                // .isRespondentNeededInterpreter()
+                // .respondentInterpreterNeeds()
+                // .haveAnyDisability()
+                // .disabilityNeeds()
+                // .respondentSpecialArrangements()
+                // .respondentSpecialArrangementDetails()
+                // .respondentIntermediaryNeeds()
+                // .respondentIntermediaryNeedDetails()
+                .build();
+            dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        }
+    }
+
+    private static YesOrNo buildIsWelshNeeded(List<LanguageRequirementsEnum> languageRequirementsEnums) {
+        if (languageRequirementsEnums.contains(LanguageRequirementsEnum.speakwelsh)
+            || (languageRequirementsEnums.contains(LanguageRequirementsEnum.readandwritewelsh))) {
+            return YesOrNo.Yes;
+        }
+        return YesOrNo.No;
+    }
+
     private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
         if (response.getResponseToAllegationsOfHarm() != null) {
             ResponseToAllegationsOfHarm responseToAllegationsOfHarm = response.getResponseToAllegationsOfHarm();
@@ -1398,7 +1439,7 @@ public class C100RespondentSolicitorService {
             }
 
         }
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent, SOLICITOR);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             Document document = documentGenService.generateSingleDocument(
