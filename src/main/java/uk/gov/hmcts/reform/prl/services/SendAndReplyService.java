@@ -721,6 +721,8 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
+            .internalMessageAttachDocs(SEND.equals(caseData.getChooseSendOrReply())
+                                           ? getSendAttachedDocs(caseData, message, authorization) : emptyList())
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
             .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
@@ -731,20 +733,19 @@ public class SendAndReplyService {
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
 
-        List<Element<Document>> sendAttachedDocs =
-            MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
-                ? getApplicationDocument(message.getApplicationsList(), caseData, getValueCode(message.getApplicationsList()))
-                : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
-
-        if (!sendAttachedDocs.isEmpty()) {
-            newMessage = newMessage.toBuilder()
-                .internalMessageAttachDocs(sendAttachedDocs)
-                .build();
-        }
-
         log.info("Send message internalMessageAttachDocs: {}", newMessage.getInternalMessageAttachDocs());
 
         return newMessage;
+    }
+
+    private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
+        return MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())
+            ? getApplicationDocument(
+            message.getApplicationsList(),
+            caseData,
+            getValueCode(message.getApplicationsList())
+        )
+            : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
     }
 
     private String getValueCode(DynamicList dynamicListObj) {
