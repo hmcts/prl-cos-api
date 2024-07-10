@@ -1059,9 +1059,9 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
-        Message message1 = getMessageInformation();
+        Message sendMessage1 = getMessageInformation();
 
-        openMessagesList.add(element(message1));
+        openMessagesList.add(element(sendMessage1));
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1339,9 +1339,9 @@ public class SendAndReplyServiceTest {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
 
-        Message message1 = getMessageInformation();
+        Message sendMessage1 = getMessageInformation();
 
-        openMessagesList.add(element(message1));
+        openMessagesList.add(element(sendMessage1));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.SEND)
@@ -1392,7 +1392,7 @@ public class SendAndReplyServiceTest {
         Message messageInformation = getMessageInformation();
 
         openMessagesList.add(element(messageInformation));
-        CaseData caseData = CaseData.builder()
+        CaseData caseData2 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.SEND)
             .sendOrReplyMessage(
@@ -1421,14 +1421,14 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
                                                                                                         EventRequestData.builder().build(),
                                                                                                         StartEventResponse.builder().build(),
-                                                                                                        stringObjectMap, caseData, null);
+                                                                                                        stringObjectMap, caseData2, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
-        sendAndReplyService.closeAwPTask(caseData);
+        sendAndReplyService.closeAwPTask(caseData2);
         Mockito.verify(allTabService,Mockito.times(0)).getStartUpdateForSpecificEvent(any(), any());
     }
 
