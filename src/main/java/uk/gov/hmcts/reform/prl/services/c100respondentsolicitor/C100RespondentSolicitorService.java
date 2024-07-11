@@ -17,11 +17,14 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
@@ -105,15 +108,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.communicationHelp;
-import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.documentsHelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.docsprint;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.largeprintdocs;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum.signlanguage;
 import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.commhelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.docsformat;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.hearingcomfort;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.hearingsupport;
 import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.nosupport;
+import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.travellinghelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -1499,104 +1503,99 @@ public class C100RespondentSolicitorService {
         }
         if (reasonableAdjustmentsEnums.contains(docsformat)) {
             documentInformation = buildDocumentInformation(supportYouNeed.getDocsSupport(), supportYouNeed);
-            adjustmentRequired.append(documentsHelp.getDisplayedValue()).append(COLON).append(documentInformation);
+            adjustmentRequired.append(docsformat.getDisplayedValue()).append(COLON).append(documentInformation);
         }
         if (reasonableAdjustmentsEnums.contains(commhelp)) {
             communicationHelpDetails = buildCommunicationHelp(supportYouNeed.getHelpCommunication(), supportYouNeed);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(communicationHelp.getDisplayedValue()).append(COLON)
+            adjustmentRequired.append(COMMA_SEPARATOR).append(commhelp.getDisplayedValue()).append(COLON)
                 .append(communicationHelpDetails);
         }
-        /*if (reasonableAdjustmentsEnums.contains(hearingsupport.name())) {
-            extraSupportDetails = buildExtraSupport(c100RebuildReasonableAdjustmentsElements
-                                                        .getSupportCourt(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(extraSupport.getDisplayedValue()).append(COLON)
+        if (reasonableAdjustmentsEnums.contains(hearingsupport)) {
+            extraSupportDetails = buildExtraSupport(supportYouNeed.getCourtHearing(), supportYouNeed);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(hearingsupport.getDisplayedValue()).append(COLON)
                 .append(extraSupportDetails);
         }
-        if (reasonableAdjustmentsEnums.contains(hearingcomfort.name())) {
-            feelComfortableSupportDetails = buildFeelComfortableSupport(c100RebuildReasonableAdjustmentsElements
-                                                                            .getFeelComfortable(), c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(feelComfortableSupport.getDisplayedValue()).append(COLON)
+        if (reasonableAdjustmentsEnums.contains(hearingcomfort)) {
+            feelComfortableSupportDetails = buildFeelComfortableSupport(supportYouNeed.getCourtComfort(), supportYouNeed);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(hearingcomfort.getDisplayedValue()).append(COLON)
                 .append(feelComfortableSupportDetails);
         }
-        if (reasonableAdjustmentsEnums.contains(travellinghelp.name())) {
-            helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(c100RebuildReasonableAdjustmentsElements
-                                                                                                      .getTravellingCourt(),
-                                                                                                       c100RebuildReasonableAdjustmentsElements);
-            adjustmentRequired.append(COMMA_SEPARATOR).append(helpTravellingMovingBuildingSupport.getDisplayedValue()).append(COLON)
+        if (reasonableAdjustmentsEnums.contains(travellinghelp)) {
+            helpTravellingMovingBuildingSupportDetails = buildHelpTravellingMovingBuildingSupport(supportYouNeed.getTravellingToCourt(),
+                                                                                                       supportYouNeed);
+            adjustmentRequired.append(COMMA_SEPARATOR).append(travellinghelp.getDisplayedValue()).append(COLON)
                 .append(helpTravellingMovingBuildingSupportDetails);
-        }*/
+        }
         return String.valueOf(adjustmentRequired);
     }
 
-    /*private static String buildHelpTravellingMovingBuildingSupport(String[] travellingCourt,
-                                                                   C100RebuildReasonableAdjustmentsElements c100RaElements) {
-        return Arrays.stream(travellingCourt).toList().stream()
+    private static String buildHelpTravellingMovingBuildingSupport(List<TravellingToCourtEnum> travellingToCourtEnums,
+                                                                   ReasonableAdjustmentsSupport support) {
+        return travellingToCourtEnums.stream()
             .map(element -> buildTravellingCourtElement(element,
-                                                        c100RaElements.getParkingSpaceSubField(),
-                                                        c100RaElements.getDifferentTypeChairSubField(),
-                                                        c100RaElements.getTravellingCourtOtherSubField()))
+                                                        support.getParkingDetails(),
+                                                        support.getDifferentChairDetails(),
+                                                        support.getTravellingOtherDetails()))
             .collect(Collectors.joining(COMMA_SEPARATOR));
-    }*/
+    }
 
-    /*private static String buildTravellingCourtElement(String element, String parkingSpaceSubField,
+    private static String buildTravellingCourtElement(TravellingToCourtEnum element, String parkingSpaceSubField,
                                                       String differentTypeChairSubField, String travellingCourtOtherSubField) {
-        if (parkingSpace.name().equalsIgnoreCase(element)) {
-            return parkingSpace.getDisplayedValue() + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
-        } else if (differentTypeChair.name().equalsIgnoreCase(element)) {
-            return differentTypeChair.getDisplayedValue() + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
-        } else if (travellingCourtOther.name().equalsIgnoreCase(element)) {
-            return travellingCourtOther.getDisplayedValue() + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
+        if (TravellingToCourtEnum.parkingspace.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.parkingspace.getDisplayedValue() + OPEN_BRACKET + parkingSpaceSubField + CLOSE_BRACKET;
+        } else if (TravellingToCourtEnum.differentchair.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.differentchair.getDisplayedValue() + OPEN_BRACKET + differentTypeChairSubField + CLOSE_BRACKET;
+        } else if (TravellingToCourtEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return TravellingToCourtEnum.other.getDisplayedValue() + OPEN_BRACKET + travellingCourtOtherSubField + CLOSE_BRACKET;
         } else {
-            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+            return element.getDisplayedValue();
         }
-    }*/
+    }
 
-    /*private static String buildFeelComfortableSupport(String[] feelComfortable,
-                                                      C100RebuildReasonableAdjustmentsElements c100RaElements) {
-        return Arrays.stream(feelComfortable).toList().stream()
+    private static String buildFeelComfortableSupport(List<CourtComfortEnum> courtComfortEnums, ReasonableAdjustmentsSupport support) {
+        return courtComfortEnums.stream()
             .map(element -> buildFeelComfortableElement(element,
-                                                        c100RaElements.getAppropriateLightingSubField(),
-                                                        c100RaElements.getFeelComfortableOtherSubField()))
+                                                        support.getLightingDetails(),
+                                                        support.getOtherProvideDetails()))
             .collect(Collectors.joining(COMMA_SEPARATOR));
-    }*/
+    }
 
-    /*private static String buildFeelComfortableElement(String element, String appropriateLightingSubField,
+    private static String buildFeelComfortableElement(CourtComfortEnum element, String appropriateLightingSubField,
                                                       String feelComfortableOtherSubField) {
-        if (appropriateLighting.name().equalsIgnoreCase(element)) {
-            return appropriateLighting.getDisplayedValue() + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
-        } else if (feelComportableOther.name().equalsIgnoreCase(element)) {
-            return feelComportableOther.getDisplayedValue() + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
+        if (CourtComfortEnum.appropriatelighting.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtComfortEnum.appropriatelighting.getDisplayedValue() + OPEN_BRACKET + appropriateLightingSubField + CLOSE_BRACKET;
+        } else if (CourtComfortEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtComfortEnum.other.getDisplayedValue() + OPEN_BRACKET + feelComfortableOtherSubField + CLOSE_BRACKET;
         } else {
-            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+            return element.getDisplayedValue();
         }
-    }*/
+    }
 
-    /*private static String buildExtraSupport(String[] supportCourt, C100RebuildReasonableAdjustmentsElements
-        c100RaElements) {
-        return Arrays.stream(supportCourt).toList().stream()
+    private static String buildExtraSupport(List<CourtHearingEnum> courtHearingEnums, ReasonableAdjustmentsSupport support) {
+        return courtHearingEnums.stream()
             .map(element -> buildSupportCourtElement(element,
-                                                     c100RaElements.getSupportWorkerCarerSubField(),
-                                                     c100RaElements.getFriendFamilyMemberSubField(),
-                                                     c100RaElements.getTherapyAnimalSubField(),
-                                                     c100RaElements.getSupportCourtOtherSubField()))
+                                                     support.getSupportWorkerDetails(),
+                                                     support.getFamilyProviderDetails(),
+                                                     support.getTherapyDetails(),
+                                                     support.getCommunicationSupportOther()))
             .collect(Collectors.joining(COMMA_SEPARATOR));
-    }*/
+    }
 
-    /*private static String buildSupportCourtElement(String element, String supportWorkerCarerSubField,
+    private static String buildSupportCourtElement(CourtHearingEnum element, String supportWorkerCarerSubField,
                                                    String friendFamilyMemberSubField, String therapyAnimalSubField,
                                                    String supportCourtOtherSubField) {
-        if (supportWorkerCarer.name().equalsIgnoreCase(element)) {
-            return supportWorkerCarer.getDisplayedValue() + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
-        } else if (friendFamilyMember.name().equalsIgnoreCase(element)) {
-            return friendFamilyMember.getDisplayedValue() + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
-        } else if (therapyAnimal.name().equalsIgnoreCase(element)) {
-            return therapyAnimal.getDisplayedValue() + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
-        } else if (supportCourtOther.name().equalsIgnoreCase(element)) {
-            return supportCourtOther.getDisplayedValue() + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
+        if (CourtHearingEnum.supportworker.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.supportworker.getDisplayedValue() + OPEN_BRACKET + supportWorkerCarerSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.familymember.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.familymember.getDisplayedValue() + OPEN_BRACKET + friendFamilyMemberSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.animal.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.animal.getDisplayedValue() + OPEN_BRACKET + therapyAnimalSubField + CLOSE_BRACKET;
+        } else if (CourtHearingEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
+            return CourtHearingEnum.other.getDisplayedValue() + OPEN_BRACKET + supportCourtOtherSubField + CLOSE_BRACKET;
         } else {
-            return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
+            return element.getDisplayedValue();
         }
-    }*/
+    }
 
     private static String buildCommunicationHelp(List<HelpCommunicationEnum> communicationHelp, ReasonableAdjustmentsSupport
         support) {
