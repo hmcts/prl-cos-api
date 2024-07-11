@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitor
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
@@ -71,6 +72,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -99,6 +101,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -135,6 +139,9 @@ public class C100RespondentSolicitorService {
 
 
         You can contact your local court at\s""";
+
+    private static final String OPEN_BRACKET = "(";
+    private static final String CLOSE_BRACKET = ")";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1370,7 +1377,7 @@ public class C100RespondentSolicitorService {
                     .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
                     .build();
             }
-            dataMap.put("attendingTheCourt", attendToCourt);
+
             List<AttendingToCourtEnum> attendingToCourtEnumList = response.getSupportYouNeed().getAttendingToCourt();
             if (attendingToCourtEnumList != null && !attendingToCourtEnumList.isEmpty()) {
                 if (attendingToCourtEnumList.contains(AttendingToCourtEnum.videohearings)) {
@@ -1380,6 +1387,20 @@ public class C100RespondentSolicitorService {
                     dataMap.put("hearingsByPhone", "Yes");
                 }
             }
+
+            List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
+            if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
+                attendToCourt = attendToCourt.toBuilder()
+                    .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
+                    .respondentSpecialArrangementDetails(
+                        buildSpecialArrangementList(
+                            safetyArrangementsEnumList,
+                            response.getSupportYouNeed().getSafetyArrangementsDetails()
+                        ))
+                    .build();
+            }
+
+            dataMap.put("attendingTheCourt", attendToCourt);
         }
     }
 
@@ -1392,7 +1413,7 @@ public class C100RespondentSolicitorService {
     }
 
     private static List<RespondentWelshNeedsListEnum> buildRespondentWelshNeedsList(List<LanguageRequirementsEnum> languageRequirementsEnums) {
-        List<RespondentWelshNeedsListEnum> respondentWelshNeedsListEnums = null;
+        List<RespondentWelshNeedsListEnum> respondentWelshNeedsListEnums = new ArrayList<>();
         if (languageRequirementsEnums.contains(LanguageRequirementsEnum.speakwelsh)) {
             respondentWelshNeedsListEnums.add(RespondentWelshNeedsListEnum.speakWelsh);
         }
@@ -1401,6 +1422,24 @@ public class C100RespondentSolicitorService {
         }
 
         return respondentWelshNeedsListEnums;
+    }
+
+    private static String buildSpecialArrangementList(List<SafetyArrangementsEnum> safetyArrangementsEnumList, String otherSubField) {
+        String specialArrangement = safetyArrangementsEnumList.stream().map(element -> SafetyArrangementsEnum.valueOf(element.getId())
+            .getDisplayedValue()).collect(Collectors.joining(COMMA_SEPARATOR));
+        if (StringUtils.isNotEmpty(otherSubField)) {
+            return specialArrangement + OPEN_BRACKET + otherSubField + CLOSE_BRACKET;
+        }
+        return specialArrangement;
+    }
+
+    private static YesOrNo buildSpecialArrangementRequired(List<SafetyArrangementsEnum> safetyArrangementsEnumList) {
+        Optional<SafetyArrangementsEnum> safetyArrangementsEnum
+            = safetyArrangementsEnumList
+            .stream()
+            .filter(x -> x.getId().equalsIgnoreCase(noSafetyrequirements.getId()))
+            .findFirst();
+        return safetyArrangementsEnum.isPresent() ? YesOrNo.No : YesOrNo.Yes;
     }
 
     private void populateRespondToAohDataMap(Response response, Map<String, Object> dataMap) {
