@@ -1601,20 +1601,20 @@ public class C100RespondentSolicitorService {
     private static String buildCommunicationHelp(List<HelpCommunicationEnum> communicationHelp, ReasonableAdjustmentsSupport
         support) {
         return communicationHelp.stream()
-            .map(element -> buildCommunicationHelpElement(element.getDisplayedValue(),
+            .map(element -> buildCommunicationHelpElement(element,
                                                           support.getSignLanguageDetails(),
                                                           support.getDescribeOtherNeed()))
             .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
-    private static String buildCommunicationHelpElement(String element, String signLanguageInterpreterDetails,
+    private static String buildCommunicationHelpElement(HelpCommunicationEnum element, String signLanguageInterpreterDetails,
                                                         String communicationHelpOtherDetails) {
-        if (signlanguage.name().equalsIgnoreCase(element)) {
+        if (signlanguage.name().equalsIgnoreCase(element.getDisplayedValue())) {
             return signlanguage.getDisplayedValue() + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
-        } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element)) {
+        } else if (HelpCommunicationEnum.other.name().equalsIgnoreCase(element.getDisplayedValue())) {
             return HelpCommunicationEnum.other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
         } else {
-            return HelpCommunicationEnum.valueOf(element).getDisplayedValue();
+            return element.getDisplayedValue();
         }
     }
 
@@ -1636,7 +1636,7 @@ public class C100RespondentSolicitorService {
         } else if (other.name().equalsIgnoreCase(element.getDisplayedValue())) {
             return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
         } else {
-            return DocsSupportEnum.valueOf(element.getDisplayedValue()).getDisplayedValue();
+            return element.getDisplayedValue();
         }
     }
 
