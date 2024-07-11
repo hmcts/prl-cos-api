@@ -3254,7 +3254,7 @@ public class ServiceOfApplicationService {
             case RE7_HINT -> getRe7Template(isWelsh);
             case RE8_HINT -> getRe8Template(isWelsh);
 
-            default -> null;
+            default -> "";
         };
     }
 

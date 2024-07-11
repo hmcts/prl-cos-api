@@ -91,6 +91,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE7_HINT;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RE8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -4104,6 +4106,101 @@ public class ServiceOfApplicationServiceTest {
             callBackRequest
         );
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
+    }
+
+    @Test
+    public void testGetRe7CoverLettersEnglishWelsh() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe7CoverLettersEnglishOnly() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(false).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(1, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe7CoverLettersWelshOnly() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(false)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(1, coverLetters.size());
+    }
+
+    @Test
+    public void testGetRe8CoverLettersEnglishWelsh() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE8_HINT, true);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
+    }
+
+    @Test
+    public void testGetCoverLettersEnglishWelshWithoutAccessCode() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseInvites(List.of(element(caseInvite)))
+            .build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
+                                                                                                  .isGenWelsh(true).build());
+
+        List<Document> coverLetters = serviceOfApplicationService.getCoverLetters(authorization, caseData,
+                                                                                  caseData.getRespondents().get(0), RE7_HINT, false);
+
+        assertNotNull(coverLetters);
+        assertFalse(coverLetters.isEmpty());
+        assertEquals(2, coverLetters.size());
     }
 
 }
