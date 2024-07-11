@@ -1368,7 +1368,9 @@ public class C100RespondentSolicitorService {
     }
 
     private void populateCitizenAttendingTheHearingDataMap(Response response, Map<String, Object> dataMap) {
+        log.info("Inside populateCitizenAttendingTheHearingDataMap");
         if (response.getSupportYouNeed() != null) {
+            log.info("response.getSupportYouNeed() is not null");
             AttendToCourt attendToCourt = AttendToCourt.builder().build();
             List<LanguageRequirementsEnum> languageRequirementsEnums = response.getSupportYouNeed().getLanguageRequirements();
             if (languageRequirementsEnums != null && !languageRequirementsEnums.isEmpty()) {
@@ -1376,20 +1378,25 @@ public class C100RespondentSolicitorService {
                     .respondentWelshNeeds(buildIsWelshNeeded(languageRequirementsEnums))
                     .respondentWelshNeedsList(buildRespondentWelshNeedsList(languageRequirementsEnums))
                     .build();
+                log.info("languageRequirementsEnums processed");
             }
 
             List<AttendingToCourtEnum> attendingToCourtEnumList = response.getSupportYouNeed().getAttendingToCourt();
             if (attendingToCourtEnumList != null && !attendingToCourtEnumList.isEmpty()) {
+                log.info("attendingToCourtEnumList processed");
                 if (attendingToCourtEnumList.contains(AttendingToCourtEnum.videohearings)) {
+                    log.info("hearingsByVideo processed");
                     dataMap.put("hearingsByVideo", "Yes");
                 }
                 if (attendingToCourtEnumList.contains(AttendingToCourtEnum.phonehearings)) {
+                    log.info("hearingsByPhone processed");
                     dataMap.put("hearingsByPhone", "Yes");
                 }
             }
 
             List<SafetyArrangementsEnum> safetyArrangementsEnumList = response.getSupportYouNeed().getSafetyArrangements();
             if (safetyArrangementsEnumList != null && !safetyArrangementsEnumList.isEmpty()) {
+                log.info("safetyArrangementsEnumList processed");
                 attendToCourt = attendToCourt.toBuilder()
                     .respondentSpecialArrangements(buildSpecialArrangementRequired(safetyArrangementsEnumList))
                     .respondentSpecialArrangementDetails(
