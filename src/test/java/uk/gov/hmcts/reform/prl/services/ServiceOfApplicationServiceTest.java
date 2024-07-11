@@ -818,6 +818,8 @@ public class ServiceOfApplicationServiceTest {
             CaseData caseData = CaseData.builder().id(12345L)
                 .applicants(parties)
                 .respondents(parties)
+                .applicantsFL401(parties.get(0).getValue())
+                .respondentsFL401(parties.get(0).getValue())
                 .caseInvites(caseInviteList)
                 .caseTypeOfApplication(caseType)
                 .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
